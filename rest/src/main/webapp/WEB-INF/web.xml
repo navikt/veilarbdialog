@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    <listener>
+        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+    </listener>
+
+    <context-param>
+        <param-name>contextClass</param-name>
+        <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+    </context-param>
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>no.nav.fo.veilarbdialog.ApplicationContext</param-value>
+    </context-param>
+
+    <servlet>
+        <servlet-name>selftest</servlet-name>
+        <servlet-class>no.nav.fo.veilarbdialog.internal.SelftestServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>selftest</servlet-name>
+        <url-pattern>/internal/selftest</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>isAlive</servlet-name>
+        <servlet-class>no.nav.fo.veilarbdialog.internal.IsAliveServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>isAlive</servlet-name>
+        <url-pattern>/internal/isAlive</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>restservlet</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>no.nav.fo.veilarbdialog.rest.RestConfig</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+        <async-supported>true</async-supported>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>restservlet</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Ubeskyttet</web-resource-name>
+            <url-pattern>/internal/*</url-pattern>
+        </web-resource-collection>
+    </security-constraint>
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Alt annet beskyttet</web-resource-name>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <!-- From Servlet spec 3.1 "**" means any authenticated user
+            ref: https://community.oracle.com/blogs/swchan2/2013/04/19/role-servlet-31-security-constraint -->
+            <role-name>**</role-name>
+        </auth-constraint>
+    </security-constraint>
+
+    <resource-ref>
+        <res-ref-name>jdbc/DialogDS</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
+</web-app>
