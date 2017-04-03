@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "overskrift": "Dialog 1",
+    "sisteTekst": "siste tekst 1",
+    "henvendelser": [
+      {
+        "dialogId": "11",
+        "sendt": 1491407149572,
+        "tekst": "siste tekst 1"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "overskrift": "Dialog 2",
+    "sisteTekst": "siste tekst 2",
+    "henvendelser": [
+      {
+        "dialogId": "22",
+        "sendt": 1491562694192,
+        "tekst": "siste tekst 2"
+      }
+    ]
+  }
+]

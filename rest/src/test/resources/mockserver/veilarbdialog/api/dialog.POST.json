@@ -1,0 +1,12 @@
+{
+  "id": "3",
+  "overskrift": "Dialog 3",
+  "sisteTekst": "siste tekst 3",
+  "henvendelser": [
+    {
+      "dialogId": "33",
+      "sendt": 1491407149572,
+      "tekst": "siste tekst 3"
+    }
+  ]
+}
