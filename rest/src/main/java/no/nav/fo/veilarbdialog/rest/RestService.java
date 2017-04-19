@@ -1,10 +1,8 @@
 package no.nav.fo.veilarbdialog.rest;
 
+import no.nav.brukerdialog.security.context.SubjectHandler;
 import no.nav.fo.veilarbdialog.api.DialogController;
-import no.nav.fo.veilarbdialog.domain.DialogDTO;
-import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.domain.NyDialogDTO;
+import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.AppService;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +11,11 @@ import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import static java.util.Optional.of;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
+import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
+import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
 
 @Component
@@ -31,27 +31,61 @@ public class RestService implements DialogController {
     private Provider<HttpServletRequest> requestProvider;
 
     @Override
-    public List<DialogDTO> hentDialogerForBruker() {
-        return appService.hentDialogerForBruker(getUserIdent())
+    public List<DialogDTO> hentDialoger() {
+        return appService.hentDialogerForBruker(getBrukerIdent())
                 .stream()
-                .map(restMapper::somAktivitetDTO)
-                .collect(Collectors.toList());
+                .map(restMapper::somDialogDTO)
+                .sorted(comparing(DialogDTO::getSisteDato).reversed()) // TODO frontend-oppgave?
+                .collect(toList());
     }
 
     @Override
-    public DialogDTO opprettDialogForAktivitetsplan(NyDialogDTO dialogDTO) {
-        return of(DialogData.builder().overskrift(dialogDTO.overskrift).build())
-                .map(dialogData -> appService.opprettDialogForAktivitetsplanPaIdent(dialogData, getUserIdent()))
-                .map(dialogData -> appService.opprettHenvendelseForDialog(HenvendelseData.builder()
-                        .dialogId(dialogData.id)
-                        .tekst(dialogDTO.tekst)
-                        .build())
-                )
-                .map(restMapper::somAktivitetDTO)
-                .get();
+    public DialogDTO nyHenvendelse(NyHenvendelseDTO nyHenvendelseDTO) {
+        long dialogId = finnDialogId(nyHenvendelseDTO);
+        appService.opprettHenvendelseForDialog(HenvendelseData.builder()
+                .dialogId(dialogId)
+                .avsenderId(getVeilederIdent())
+                .avsenderType(AvsenderType.VEILEDER)
+                .tekst(nyHenvendelseDTO.tekst)
+                .build()
+        );
+        return markerSomLest(dialogId);
     }
 
-    private String getUserIdent() {
+    private Long finnDialogId(NyHenvendelseDTO nyHenvendelseDTO) {
+        if (notNullOrEmpty(nyHenvendelseDTO.dialogId)) {
+            return Long.parseLong(nyHenvendelseDTO.dialogId);
+        } else {
+            return of(nyHenvendelseDTO.aktivitetId)
+                    .flatMap(appService::hentDialogForAktivitetId)
+                    .orElseGet(() -> opprettDialog(nyHenvendelseDTO))
+                    .id;
+        }
+    }
+
+    private DialogData opprettDialog(NyHenvendelseDTO nyHenvendelseDTO) {
+        DialogData dialogData = DialogData.builder()
+                .overskrift(nyHenvendelseDTO.overskrift)
+                .aktorId(appService.hentAktoerIdForIdent(getBrukerIdent()))
+                .aktivitetId(nyHenvendelseDTO.aktivitetId)
+                .build();
+        return appService.opprettDialogForAktivitetsplanPaIdent(dialogData);
+    }
+
+    @Override
+    public DialogDTO markerSomLest(String dialogIdString) {
+        return markerSomLest(Long.parseLong(dialogIdString));
+    }
+
+    private DialogDTO markerSomLest(long id) {
+        return restMapper.somDialogDTO(appService.markerDialogSomLestAvVeileder(id));
+    }
+
+    private String getVeilederIdent() {
+        return SubjectHandler.getSubjectHandler().getUid();
+    }
+
+    private String getBrukerIdent() {
         return Optional.ofNullable(requestProvider.get().getParameter("fnr"))
                 .orElseThrow(RuntimeException::new); // Hvordan håndere dette?
     }

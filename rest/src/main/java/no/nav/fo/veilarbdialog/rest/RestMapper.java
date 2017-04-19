@@ -1,29 +1,41 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import no.nav.fo.veilarbdialog.domain.DialogDTO;
-import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
-import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.domain.*;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
+import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 
 @Component
 class RestMapper {
 
-    public DialogDTO somAktivitetDTO(DialogData dialogData) {
+    public DialogDTO somDialogDTO(DialogData dialogData) {
+        List<HenvendelseData> henvendelser = dialogData.henvendelser;
+        Optional<HenvendelseData> sisteHenvendelse = henvendelser.stream()
+                .sorted(Comparator.comparing(HenvendelseData::getSendt))
+                .findFirst();
+
+        // TODO her gjøres endel masering av data som klienten kanskje burde gjøre selv. Eller?
         return new DialogDTO()
                 .setId(Long.toString(dialogData.getId()))
+                .setAktivitetId(dialogData.getAktivitetId())
                 .setOverskrift(dialogData.overskrift)
-                .setHenvendelser(dialogData.henvendelser.stream()
+                .setHenvendelser(henvendelser.stream()
                         .map(this::somHenvendelseDTO)
                         .collect(toList())
                 )
-                .setSisteTekst(dialogData.henvendelser.stream()
-                        .sorted(Comparator.comparing(HenvendelseData::getSendt))
-                        .findFirst()
+                .setLest(henvendelser.stream()
+                        .noneMatch(h -> h.sendt.after(dialogData.lestAvVeileder))
+                )
+                .setSisteDato(sisteHenvendelse
+                        .map(HenvendelseData::getSendt)
+                        .orElse(null)
+                )
+                .setSisteTekst(sisteHenvendelse
                         .map(HenvendelseData::getTekst)
                         .orElse(null))
                 ;
@@ -32,6 +44,7 @@ class RestMapper {
     private HenvendelseDTO somHenvendelseDTO(HenvendelseData henvendelseData) {
         return new HenvendelseDTO()
                 .setDialogId(Long.toString(henvendelseData.dialogId))
+                .setAvsender(henvendelseData.avsenderType == BRUKER ? Avsender.BRUKER : Avsender.VEILEDER)
                 .setSendt(henvendelseData.sendt)
                 .setTekst(henvendelseData.tekst);
     }

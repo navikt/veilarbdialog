@@ -10,7 +10,9 @@ import java.util.Date;
 public class HenvendelseDTO {
 
     public String dialogId;
+    public Avsender avsender;
     public Date sendt;
+    public Date lest;
     public String tekst;
 
 }
