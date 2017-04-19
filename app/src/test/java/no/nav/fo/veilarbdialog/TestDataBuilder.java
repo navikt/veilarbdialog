@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog;
 
+import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 
@@ -18,9 +19,11 @@ public class TestDataBuilder {
                 .build();
     }
 
-    public static HenvendelseData nyHenvendelse(long dialogId) {
+    public static HenvendelseData nyHenvendelse(DialogData dialogData) {
         return HenvendelseData.builder()
-                .dialogId(dialogId)
+                .dialogId(dialogData.id)
+                .avsenderId(dialogData.aktorId)
+                .avsenderType(AvsenderType.values()[0])
                 .build();
     }
 

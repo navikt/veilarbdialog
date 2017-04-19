@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class AppService {
@@ -22,11 +23,8 @@ public class AppService {
         return dialogDAO.hentDialogerForAktorId(hentAktoerIdForIdent(ident));
     }
 
-    public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData, String ident) {
-        return dialogDAO.opprettDialog(dialogData.toBuilder()
-                .aktorId(hentAktoerIdForIdent(ident))
-                .build()
-        );
+    public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
+        return dialogDAO.opprettDialog(dialogData);
     }
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
@@ -38,7 +36,21 @@ public class AppService {
         return dialogDAO.hentDialog(dialogId);
     }
 
-    private String hentAktoerIdForIdent(String ident) {
+    public DialogData markerDialogSomLestAvVeileder(long dialogId) {
+        dialogDAO.markerDialogSomLestAvVeileder(dialogId);
+        return hentDialog(dialogId);
+    }
+
+    public DialogData markerDialogSomLestAvBruker(long dialogId) {
+        dialogDAO.markerDialogSomLestAvBruker(dialogId);
+        return hentDialog(dialogId);
+    }
+
+    public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
+        return dialogDAO.hentDialogForAktivitetId(aktivitetId);
+    }
+
+    public String hentAktoerIdForIdent(String ident) {
         return aktoerConsumer.hentAktoerIdForIdent(ident)
                 .orElseThrow(RuntimeException::new); // Hvordan håndere dette?
     }

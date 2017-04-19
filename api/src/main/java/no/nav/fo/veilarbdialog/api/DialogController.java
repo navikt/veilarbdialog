@@ -1,11 +1,9 @@
 package no.nav.fo.veilarbdialog.api;
 
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
-import no.nav.fo.veilarbdialog.domain.NyDialogDTO;
+import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
 import java.util.List;
 
 
@@ -13,9 +11,13 @@ import java.util.List;
 public interface DialogController {
 
     @GET
-    List<DialogDTO> hentDialogerForBruker();
+    List<DialogDTO> hentDialoger();
 
     @POST
-    DialogDTO opprettDialogForAktivitetsplan(NyDialogDTO nyDialogDTO);
+    DialogDTO nyHenvendelse(NyHenvendelseDTO nyHenvendelseDTO);
+
+    @PUT
+    @Path("/{dialogId}/les")
+    DialogDTO markerSomLest(@PathParam("dialogId") String dialogId);
 
 }
