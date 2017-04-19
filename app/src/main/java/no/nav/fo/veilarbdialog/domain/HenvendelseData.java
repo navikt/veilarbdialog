@@ -14,8 +14,11 @@ import java.util.Date;
 public class HenvendelseData {
 
     public final long dialogId;
+    public final String aktivitetId;
     public final Date sendt;
     public final String tekst;
+    public final AvsenderType avsenderType;
+    public final String avsenderId;
 
 }
 

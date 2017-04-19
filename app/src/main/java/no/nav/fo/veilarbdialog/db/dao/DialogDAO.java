@@ -1,8 +1,10 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import no.nav.fo.veilarbdialog.db.Database;
+import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.util.EnumUtils;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static no.nav.fo.veilarbdialog.db.Database.hentDato;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -42,7 +45,10 @@ public class DialogDAO {
         return DialogData.builder()
                 .id(dialogId)
                 .aktorId(rs.getString("aktor_id"))
+                .aktivitetId(rs.getString("aktivitet_id"))
                 .overskrift(rs.getString("overskrift"))
+                .lestAvBruker(hentDato(rs, "lest_av_bruker"))
+                .lestAvVeileder(hentDato(rs, "lest_av_veileder"))
                 .henvendelser(hentHenvendelser(dialogId)) // TODO nøstet spørring, mulig at vi istede bør gjøre to spørringer og flette dataene
                 .build();
     }
@@ -57,32 +63,62 @@ public class DialogDAO {
     private HenvendelseData mapTilHenvendelse(ResultSet rs) throws SQLException {
         return HenvendelseData.builder()
                 .dialogId(rs.getLong("dialog_id"))
-                .sendt(hentDato(rs,"sendt"))
+                .sendt(hentDato(rs, "sendt"))
                 .tekst(rs.getString("tekst"))
+                .avsenderId(rs.getString("avsender_id"))
+                .avsenderType(EnumUtils.valueOf(AvsenderType.class, rs.getString("avsender_type")))
                 .build();
     }
 
     public DialogData opprettDialog(DialogData dialogData) {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
-        database.update("INSERT INTO DIALOG(dialog_id,aktor_id,overskrift) VALUES (?,?,?)",
+        Date date = new Date();
+        database.update("INSERT INTO DIALOG(dialog_id,aktor_id,aktivitet_id,overskrift,lest_av_veileder,lest_av_bruker) VALUES (?,?,?,?,?,?)",
                 dialogId,
                 dialogData.aktorId,
-                dialogData.overskrift
+                dialogData.aktivitetId,
+                dialogData.overskrift,
+                date,
+                date
         );
         LOG.info("opprettet {}", dialogData);
         return dialogData.toBuilder()
                 .id(dialogId)
+                .lestAvVeileder(date)
+                .lestAvBruker(date)
                 .build();
     }
 
     public void opprettHenvendelse(HenvendelseData henvendelseData) {
-        database.update("INSERT INTO HENVENDELSE(dialog_id,sendt,tekst) VALUES (?,?,?)",
+        database.update("INSERT INTO HENVENDELSE(dialog_id,sendt,tekst,avsender_id,avsender_type) VALUES (?,?,?,?,?)",
                 henvendelseData.dialogId,
                 new Date(),
-                henvendelseData.tekst
+                henvendelseData.tekst,
+                henvendelseData.avsenderId,
+                EnumUtils.getName(henvendelseData.avsenderType)
         );
         LOG.info("opprettet {}", henvendelseData);
     }
 
+    public void markerDialogSomLestAvVeileder(long dialogId) {
+        markerLest(dialogId, "lest_av_veileder");
+    }
+
+    public void markerDialogSomLestAvBruker(long dialogId) {
+        markerLest(dialogId, "lest_av_bruker");
+    }
+
+    private void markerLest(long dialogId, String feltNavn) {
+        database.update("UPDATE DIALOG SET " + feltNavn + " = ? WHERE dialog_id = ? ",
+                new Date(),
+                dialogId
+        );
+    }
+
+    public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
+        return database.query("SELECT * FROM DIALOG WHERE aktivitet_id = ?", this::mapTilDialog, aktivitetId)
+                .stream()
+                .findFirst();
+    }
 
 }

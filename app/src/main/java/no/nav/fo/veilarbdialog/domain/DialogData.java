@@ -20,6 +20,9 @@ public class DialogData {
     public final long id;
     public final String aktorId;
     public final String overskrift;
+    public final String aktivitetId;
+    public final Date lestAvBruker;
+    public final Date lestAvVeileder;
 
     public final List<HenvendelseData> henvendelser;
 
