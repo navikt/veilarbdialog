@@ -25,7 +25,7 @@ class RestMapper {
                 .setAktivitetId(dialogData.getAktivitetId())
                 .setOverskrift(dialogData.overskrift)
                 .setHenvendelser(henvendelser.stream()
-                        .map(this::somHenvendelseDTO)
+                        .map(henvendelseData -> somHenvendelseDTO(henvendelseData, dialogData))
                         .collect(toList())
                 )
                 .setLest(henvendelser.stream()
@@ -41,11 +41,12 @@ class RestMapper {
                 ;
     }
 
-    private HenvendelseDTO somHenvendelseDTO(HenvendelseData henvendelseData) {
+    private HenvendelseDTO somHenvendelseDTO(HenvendelseData henvendelseData, DialogData dialogData) {
         return new HenvendelseDTO()
                 .setDialogId(Long.toString(henvendelseData.dialogId))
                 .setAvsender(henvendelseData.avsenderType == BRUKER ? Avsender.BRUKER : Avsender.VEILEDER)
                 .setSendt(henvendelseData.sendt)
+                .setLest(henvendelseData.sendt.before(dialogData.lestAvVeileder))
                 .setTekst(henvendelseData.tekst);
     }
 
