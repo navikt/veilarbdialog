@@ -16,7 +16,7 @@ class RestMapper {
     public DialogDTO somDialogDTO(DialogData dialogData) {
         List<HenvendelseData> henvendelser = dialogData.henvendelser;
         Optional<HenvendelseData> sisteHenvendelse = henvendelser.stream()
-                .sorted(Comparator.comparing(HenvendelseData::getSendt))
+                .sorted(Comparator.comparing(HenvendelseData::getSendt).reversed())
                 .findFirst();
 
         // TODO her gjøres endel masering av data som klienten kanskje burde gjøre selv. Eller?

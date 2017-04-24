@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
@@ -35,7 +34,6 @@ public class RestService implements DialogController {
         return appService.hentDialogerForBruker(getBrukerIdent())
                 .stream()
                 .map(restMapper::somDialogDTO)
-                .sorted(comparing(DialogDTO::getSisteDato).reversed()) // TODO frontend-oppgave?
                 .collect(toList());
     }
 
