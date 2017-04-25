@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.rest;
 
 import no.nav.brukerdialog.security.context.SubjectHandler;
 import no.nav.fo.veilarbdialog.api.DialogController;
+import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.AppService;
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
 
 @Component
-public class RestService implements DialogController {
+public class RestService implements DialogController, VeilederDialogController {
 
     @Inject
     private AppService appService;
@@ -86,6 +87,11 @@ public class RestService implements DialogController {
     private String getBrukerIdent() {
         return Optional.ofNullable(requestProvider.get().getParameter("fnr"))
                 .orElseThrow(RuntimeException::new); // Hvordan håndere dette?
+    }
+
+    @Override
+    public DialogDTO oppdaterDialog(OppdaterDialogDTO dialogDTO) {
+        return markerSomLest(dialogDTO.id);
     }
 
 }
