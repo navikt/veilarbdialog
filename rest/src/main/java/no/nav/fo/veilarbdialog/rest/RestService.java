@@ -30,6 +30,9 @@ public class RestService implements DialogController, VeilederDialogController {
     @Inject
     private Provider<HttpServletRequest> requestProvider;
 
+    @Inject
+    private PepClient pepClient;
+
     @Override
     public List<DialogDTO> hentDialoger() {
         return appService.hentDialogerForBruker(getBrukerIdent())
@@ -86,6 +89,7 @@ public class RestService implements DialogController, VeilederDialogController {
 
     private String getBrukerIdent() {
         return Optional.ofNullable(requestProvider.get().getParameter("fnr"))
+                .map(pepClient::sjekkTilgangTilFnr)
                 .orElseThrow(RuntimeException::new); // Hvordan håndere dette?
     }
 
