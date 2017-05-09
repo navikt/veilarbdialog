@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.ws.provider;
 
+import no.nav.apiapp.soap.SoapTjeneste;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.service.AppService;
@@ -15,8 +16,8 @@ import java.util.List;
 
 import static java.util.Optional.of;
 
-@WebService
 @Service
+@SoapTjeneste("/Dialog")
 public class SoapService implements AktivitetDialogV1 {
 
     @Inject
