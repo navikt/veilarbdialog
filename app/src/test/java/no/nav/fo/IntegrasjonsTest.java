@@ -1,9 +1,15 @@
 package no.nav.fo;
 
+import no.nav.brukerdialog.security.context.SubjectHandlerUtils;
+import no.nav.brukerdialog.security.context.ThreadLocalSubjectHandler;
+import no.nav.brukerdialog.security.domain.IdentType;
+import no.nav.brukerdialog.security.domain.OidcCredential;
 import no.nav.dialogarena.config.DevelopmentSecurity;
 import no.nav.dialogarena.config.fasit.FasitUtils;
+import no.nav.dialogarena.config.fasit.LdapConfig;
+import no.nav.dialogarena.config.fasit.ServiceUser;
+import no.nav.dialogarena.config.security.ISSOProvider;
 import no.nav.fo.veilarbdialog.ApplicationContext;
-import no.nav.modig.testcertificates.TestCertificates;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.springframework.context.annotation.PropertySource;
@@ -14,8 +20,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.security.auth.Subject;
 import java.io.IOException;
 
+import static no.nav.brukerdialog.security.context.SubjectHandlerUtils.setSubject;
+import static no.nav.dialogarena.config.util.Util.setProperty;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
 
 @ContextConfiguration(classes = {
@@ -28,9 +37,23 @@ import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_J
 @Transactional
 public abstract class IntegrasjonsTest {
 
+
+    protected void setVeilederSubject(String ident) {
+        setProperty("no.nav.modig.core.context.subjectHandlerImplementationClass", ThreadLocalSubjectHandler.class.getName());
+        SubjectHandlerUtils.SubjectBuilder subjectBuilder = new SubjectHandlerUtils.SubjectBuilder(ident, IdentType.InternBruker);
+        Subject subject = subjectBuilder.getSubject();
+        subject.getPublicCredentials().add(new OidcCredential(ISSOProvider.getISSOToken()));
+        setSubject(subject);
+    }
+
     @BeforeClass
     public static void setupIntegrationTestSecurity() {
-        DevelopmentSecurity.setupIntegrationTestSecurity(FasitUtils.getServiceUser("srvveilarbdialog","veilarbdialog","t6"));
+        DevelopmentSecurity.setupIntegrationTestSecurity(FasitUtils.getServiceUser("srvveilarbdialog", "veilarbdialog", "t6"));
+    }
+
+    @BeforeClass
+    public static void setupLdap() {
+        DevelopmentSecurity.configureLdap(FasitUtils.getLdapConfig("ldap", "veilarbdialog", "t6"));
     }
 
     @BeforeClass
