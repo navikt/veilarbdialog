@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.ws.consumer;
 
-import no.nav.fo.veilarbdialog.Helsesjekk;
+import no.nav.apiapp.selftest.Helsesjekk;
 import no.nav.tjeneste.virksomhet.aktoer.v2.Aktoer_v2PortType;
 import org.springframework.stereotype.Component;
 
