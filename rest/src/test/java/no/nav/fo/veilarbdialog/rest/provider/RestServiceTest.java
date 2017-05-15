@@ -32,7 +32,7 @@ public class RestServiceTest extends IntegrasjonsTest {
 
     @Test
     public void opprettOgHentDialoger() throws Exception {
-        restService.nyHenvendelse(new NyHenvendelseDTO());
+        restService.nyHenvendelse(new NyHenvendelseDTO().setTekst("tekst"));
         val hentAktiviteterResponse = restService.hentDialoger();
         assertThat(hentAktiviteterResponse, hasSize(1));
 
