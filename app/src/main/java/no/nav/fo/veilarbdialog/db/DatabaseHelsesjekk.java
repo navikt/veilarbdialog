@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.db;
 
-import no.nav.fo.veilarbdialog.Helsesjekk;
+import no.nav.apiapp.selftest.Helsesjekk;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
