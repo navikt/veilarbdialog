@@ -14,6 +14,6 @@ public class DialogAktorDTO {
     public String aktorId;
     public Date sisteEndring;
     public boolean venterPaSvar;
-    public boolean ubehandler;
+    public boolean harUbehandlet;
 
 }

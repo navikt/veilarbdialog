@@ -24,6 +24,7 @@ public class TestDataBuilder {
                 .dialogId(dialogData.id)
                 .avsenderId(dialogData.aktorId)
                 .avsenderType(AvsenderType.values()[0])
+                .tekst("ny henvendelse!")
                 .build();
     }
 
