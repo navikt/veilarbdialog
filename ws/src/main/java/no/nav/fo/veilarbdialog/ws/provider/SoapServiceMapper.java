@@ -16,6 +16,8 @@ import java.util.Date;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
+import static no.nav.fo.veilarbdialog.domain.LestAv.erDialogLestAvBruker;
+import static no.nav.fo.veilarbdialog.domain.LestAv.erHenvendelseLestAvBruker;
 import static no.nav.fo.veilarbdialog.util.DateUtils.xmlCalendar;
 
 @Component
@@ -33,9 +35,7 @@ class SoapServiceMapper {
         Dialog dialog = new Dialog();
         dialog.setId(Long.toString(dialogData.id));
         dialog.setTittel(dialogData.overskrift);
-        dialog.setErLest(henvendelser.stream()
-                .noneMatch(h -> h.sendt.after(dialogData.lestAvBruker))
-        );
+        dialog.setErLest(erDialogLestAvBruker(dialogData));
         dialog.setGjelder(bruker);
         dialog.setKontekstId(ofNullable(dialogData.aktivitetId).orElse(""));
         dialog.setOpprettet(henvendelser
@@ -46,16 +46,17 @@ class SoapServiceMapper {
                 .findFirst()
                 .orElseGet(() -> xmlCalendar(new Date())) // TODO eller skal det inn timestamp på dialogen?
         );
-        henvendelser.stream().map(h -> somHenvendelse(h, personIdent)).forEach(dialog.getHenvendelseListe()::add);
+        henvendelser.stream().map(h -> somHenvendelse(h, dialogData, personIdent)).forEach(dialog.getHenvendelseListe()::add);
         return dialog;
     }
 
-    private Henvendelse somHenvendelse(HenvendelseData henvendelseData, String personIdent) {
+    private Henvendelse somHenvendelse(HenvendelseData henvendelseData, DialogData dialogData, String personIdent) {
         Henvendelse henvendelse = new Henvendelse();
         henvendelse.setId("");  // TODO midlertidig, tilfredstill wsdl-constraint
         henvendelse.setTekst(henvendelseData.tekst);
         henvendelse.setSendt(DateUtils.xmlCalendar(henvendelseData.sendt));
         henvendelse.setAvsender(finnAktor(henvendelseData, personIdent));
+        henvendelse.setLest(erHenvendelseLestAvBruker(henvendelseData, dialogData));
         return henvendelse;
     }
 

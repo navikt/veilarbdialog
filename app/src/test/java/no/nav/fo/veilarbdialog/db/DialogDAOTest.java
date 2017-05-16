@@ -4,21 +4,16 @@ import no.nav.fo.IntegrasjonsTest;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import javax.inject.Inject;
-
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
 public class DialogDAOTest extends IntegrasjonsTest {
@@ -34,8 +29,8 @@ public class DialogDAOTest extends IntegrasjonsTest {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(AKTOR_ID);
         assertThat(dialoger, hasSize(1));
         DialogData dialogData = dialoger.get(0);
-        assertThat(dialogData.lestAvBruker, notNullValue());
-        assertThat(dialogData.lestAvVeileder, notNullValue());
+        assertThat(dialogData.lestAvBruker, nullValue());
+        assertThat(dialogData.lestAvVeileder, nullValue());
     }
 
     @Test
@@ -46,22 +41,26 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
     @Test
     public void hentDialog() {
-        DialogData dialogData = opprettNyDialog();
-        assertThat(dialogDAO.hentDialog(dialogData.id), equalTo(dialogData));
+        DialogData dialogData = nyDialog(AKTOR_ID);
+        long dialogId = dialogDAO.opprettDialog(dialogData);
+        assertThat(dialogDAO.hentDialog(dialogId), equalTo(dialogData.toBuilder()
+                .id(dialogId)
+                .build()
+        ));
     }
 
     @Test
     public void opprettHenvendelse() {
-        DialogData dialogData = opprettNyDialog();
+        long dialogId = opprettNyDialog();
 
-        HenvendelseData henvendelseData = nyHenvendelse(dialogData);
+        HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID);
         dialogDAO.opprettHenvendelse(henvendelseData);
         DialogData dialogMedHenvendelse = dialogDAO.hentDialogerForAktorId(AKTOR_ID).get(0);
         HenvendelseData henvendelseUtenOpprettelsesDato = dialogMedHenvendelse.getHenvendelser().get(0).toBuilder().sendt(null).build();
         assertThat(henvendelseUtenOpprettelsesDato, equalTo(henvendelseData));
 
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData));
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID));
 
         DialogData dialogMedHenvendelser = dialogDAO.hentDialogerForAktorId(AKTOR_ID).get(0);
         assertThat(dialogMedHenvendelser.henvendelser, hasSize(3));
@@ -69,12 +68,12 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
     @Test
     public void markerDialogSomLest() {
-        DialogData dialogData = opprettNyDialog();
+        long dialogId = opprettNyDialog();
 
-        dialogDAO.markerDialogSomLestAvBruker(dialogData.id);
-        dialogDAO.markerDialogSomLestAvVeileder(dialogData.id);
+        dialogDAO.markerDialogSomLestAvBruker(dialogId);
+        dialogDAO.markerDialogSomLestAvVeileder(dialogId);
 
-        DialogData dialog = dialogDAO.hentDialog(dialogData.id);
+        DialogData dialog = dialogDAO.hentDialog(dialogId);
 
         Date snart = new Date(System.currentTimeMillis() + 1);
         assertThat(dialog.lestAvBruker.before(snart), is(true));
@@ -89,7 +88,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId).isPresent(), is(true));
     }
 
-    private DialogData opprettNyDialog() {
+    private long opprettNyDialog() {
         return dialogDAO.opprettDialog(nyDialog(AKTOR_ID));
     }
 

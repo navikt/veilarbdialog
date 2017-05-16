@@ -24,7 +24,7 @@ public class AppService {
     }
 
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
-        return dialogDAO.opprettDialog(dialogData);
+        return hentDialog(dialogDAO.opprettDialog(dialogData));
     }
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
