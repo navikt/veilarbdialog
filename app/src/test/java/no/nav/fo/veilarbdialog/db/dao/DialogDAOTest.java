@@ -1,17 +1,13 @@
-package no.nav.fo.veilarbdialog.db;
+package no.nav.fo.veilarbdialog.db.dao;
 
 import no.nav.fo.IntegrasjonsTest;
-import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import javax.inject.Inject;
-
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
