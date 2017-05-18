@@ -73,23 +73,18 @@ public class DialogDAO {
                 .build();
     }
 
-    public DialogData opprettDialog(DialogData dialogData) {
+    public long opprettDialog(DialogData dialogData) {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
-        Date date = new Date();
         database.update("INSERT INTO DIALOG(dialog_id,aktor_id,aktivitet_id,overskrift,lest_av_veileder,lest_av_bruker) VALUES (?,?,?,?,?,?)",
                 dialogId,
                 dialogData.aktorId,
                 dialogData.aktivitetId,
                 dialogData.overskrift,
-                date,
-                date
+                null,
+                null
         );
         LOG.info("opprettet {}", dialogData);
-        return dialogData.toBuilder()
-                .id(dialogId)
-                .lestAvVeileder(date)
-                .lestAvBruker(date)
-                .build();
+        return dialogId;
     }
 
     public void opprettHenvendelse(HenvendelseData henvendelseData) {

@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
+import static no.nav.fo.veilarbdialog.domain.LestAv.erDialogLestAvVeileder;
+import static no.nav.fo.veilarbdialog.domain.LestAv.erHenvendelseLestAvVeileder;
 
 @Component
 class RestMapper {
@@ -28,9 +30,7 @@ class RestMapper {
                         .map(henvendelseData -> somHenvendelseDTO(henvendelseData, dialogData))
                         .collect(toList())
                 )
-                .setLest(henvendelser.stream()
-                        .noneMatch(h -> h.sendt.after(dialogData.lestAvVeileder))
-                )
+                .setLest(erDialogLestAvVeileder(dialogData))
                 .setSisteDato(sisteHenvendelse
                         .map(HenvendelseData::getSendt)
                         .orElse(null)
@@ -46,7 +46,7 @@ class RestMapper {
                 .setDialogId(Long.toString(henvendelseData.dialogId))
                 .setAvsender(henvendelseData.avsenderType == BRUKER ? Avsender.BRUKER : Avsender.VEILEDER)
                 .setSendt(henvendelseData.sendt)
-                .setLest(henvendelseData.sendt.before(dialogData.lestAvVeileder))
+                .setLest(erHenvendelseLestAvVeileder(henvendelseData, dialogData))
                 .setTekst(henvendelseData.tekst);
     }
 

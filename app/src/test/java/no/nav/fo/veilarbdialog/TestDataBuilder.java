@@ -4,7 +4,6 @@ import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 
-import java.util.Collections;
 import java.util.Random;
 
 import static java.util.Collections.emptyList;
@@ -19,10 +18,10 @@ public class TestDataBuilder {
                 .build();
     }
 
-    public static HenvendelseData nyHenvendelse(DialogData dialogData) {
+    public static HenvendelseData nyHenvendelse(long dialogId, String aktorId) {
         return HenvendelseData.builder()
-                .dialogId(dialogData.id)
-                .avsenderId(dialogData.aktorId)
+                .dialogId(dialogId)
+                .avsenderId(aktorId)
                 .avsenderType(AvsenderType.values()[0])
                 .tekst("ny henvendelse!")
                 .build();
