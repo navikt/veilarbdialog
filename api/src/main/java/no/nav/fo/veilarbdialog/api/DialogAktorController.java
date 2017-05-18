@@ -9,11 +9,11 @@ import java.util.Date;
 import java.util.List;
 
 
-@Path("/aktor")
+@Path("/dialog")
 public interface DialogAktorController {
 
     @GET
-    @Path("/feed/{tidspunkt}")
+    @Path("/aktor/feed/{tidspunkt}")
     List<DialogAktorDTO> hentAktorerMedEndringerEtter(@PathParam("tidspunkt") Date tidspunkt);
 
 }
