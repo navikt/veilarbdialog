@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import no.nav.brukerdialog.security.context.SubjectHandler;
+import no.nav.fo.veilarbdialog.api.DialogAktorController;
 import no.nav.fo.veilarbdialog.api.DialogController;
 import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +21,7 @@ import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
 
 @Component
-public class RestService implements DialogController, VeilederDialogController {
+public class RestService implements DialogController, VeilederDialogController, DialogAktorController {
 
     @Inject
     private AppService appService;
@@ -94,7 +96,21 @@ public class RestService implements DialogController, VeilederDialogController {
     }
 
     @Override
+    public List<DialogAktorDTO> hentAktorerMedEndringerEtter(Date tidspunkt) {
+        return appService.hentAktorerMedEndringerEtter(tidspunkt)
+                .stream()
+                .map(restMapper::somDTO)
+                .collect(toList());
+    }
+
+    @Override
     public DialogDTO oppdaterDialog(OppdaterDialogDTO dialogDTO) {
+        appService.oppdaterDialogStatus(DialogStatus.builder()
+                .dialogId(Long.parseLong(dialogDTO.id))
+                .venterPaSvar(dialogDTO.venterPaSvar)
+                .ferdigbehandlet(dialogDTO.ferdigBehandlet)
+                .build()
+        );
         return markerSomLest(dialogDTO.id);
     }
 
