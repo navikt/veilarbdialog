@@ -9,8 +9,6 @@ import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
-import static no.nav.fo.veilarbdialog.domain.LestAv.erDialogLestAvVeileder;
-import static no.nav.fo.veilarbdialog.domain.LestAv.erHenvendelseLestAvVeileder;
 
 @Component
 class RestMapper {
@@ -27,10 +25,12 @@ class RestMapper {
                 .setAktivitetId(dialogData.getAktivitetId())
                 .setOverskrift(dialogData.overskrift)
                 .setHenvendelser(henvendelser.stream()
-                        .map(henvendelseData -> somHenvendelseDTO(henvendelseData, dialogData))
+                        .map(henvendelseData -> somHenvendelseDTO(henvendelseData))
                         .collect(toList())
                 )
-                .setLest(erDialogLestAvVeileder(dialogData))
+                .setLest(dialogData.lestAvVeileder)
+                .setFerdigBehandlet(dialogData.ferdigbehandlet)
+                .setVenterPaSvar(dialogData.venterPaSvar)
                 .setSisteDato(sisteHenvendelse
                         .map(HenvendelseData::getSendt)
                         .orElse(null)
@@ -41,14 +41,22 @@ class RestMapper {
                 ;
     }
 
-    private HenvendelseDTO somHenvendelseDTO(HenvendelseData henvendelseData, DialogData dialogData) {
+    private HenvendelseDTO somHenvendelseDTO(HenvendelseData henvendelseData) {
         return new HenvendelseDTO()
                 .setDialogId(Long.toString(henvendelseData.dialogId))
                 .setAvsender(henvendelseData.avsenderType == BRUKER ? Avsender.BRUKER : Avsender.VEILEDER)
                 .setSendt(henvendelseData.sendt)
-                .setLest(erHenvendelseLestAvVeileder(henvendelseData, dialogData))
+                .setLest(henvendelseData.lestAvVeileder)
                 .setTekst(henvendelseData.tekst);
     }
 
+    public DialogAktorDTO somDTO(DialogAktor dialogAktor) {
+        return new DialogAktorDTO()
+                .setAktorId(dialogAktor.aktorId)
+                .setHarUbehandlet(dialogAktor.ubehandlet)
+                .setVenterPaSvar(dialogAktor.venterPaSvar)
+                .setSisteEndring(dialogAktor.sisteEndring)
+                ;
+    }
 }
 
