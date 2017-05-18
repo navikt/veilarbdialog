@@ -21,8 +21,13 @@ public class DialogData {
     public final String aktorId;
     public final String overskrift;
     public final String aktivitetId;
-    public final Date lestAvBruker;
-    public final Date lestAvVeileder;
+
+    public final boolean lestAvBruker;
+    public final boolean lestAvVeileder;
+    public final boolean venterPaSvar;
+    public final boolean ferdigbehandlet;
+
+    public final Date sisteStatusEndring;
 
     public final List<HenvendelseData> henvendelser;
 

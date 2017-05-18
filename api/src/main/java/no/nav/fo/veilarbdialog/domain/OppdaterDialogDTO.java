@@ -8,7 +8,7 @@ import lombok.experimental.Accessors;
 public class OppdaterDialogDTO {
 
     public String id;
-    public boolean kreverSvar;
-    public boolean behandlet;
+    public boolean venterPaSvar;
+    public boolean ferdigBehandlet;
 
 }

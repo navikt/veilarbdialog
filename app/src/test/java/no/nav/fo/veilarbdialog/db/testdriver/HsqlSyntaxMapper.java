@@ -16,6 +16,15 @@ class HsqlSyntaxMapper {
                 "alter table HENVENDELSE alter column sendt SET not null"
         );
 
+        map(
+                "ALTER TABLE DIALOG RENAME COLUMN lest_av_bruker TO lest_av_bruker_tid",
+                "ALTER TABLE DIALOG ALTER COLUMN lest_av_bruker RENAME TO lest_av_bruker_tid"
+        );
+
+        map(
+                "ALTER TABLE DIALOG RENAME COLUMN lest_av_veileder TO lest_av_veileder_tid",
+                "ALTER TABLE DIALOG ALTER COLUMN lest_av_veileder RENAME TO lest_av_veileder_tid"
+        );
 
     }
 

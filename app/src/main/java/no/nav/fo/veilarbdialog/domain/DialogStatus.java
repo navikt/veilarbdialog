@@ -6,22 +6,17 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @Accessors(chain = true)
-public class HenvendelseData {
+public class DialogStatus {
 
     public final long dialogId;
-    public final String aktivitetId;
-    public final Date sendt;
-    public final String tekst;
-    public final AvsenderType avsenderType;
-    public final String avsenderId;
-
-    public final boolean lestAvBruker;
-    public final boolean lestAvVeileder;
+    public final boolean venterPaSvar;
+    public final boolean ferdigbehandlet;
 
 }
 

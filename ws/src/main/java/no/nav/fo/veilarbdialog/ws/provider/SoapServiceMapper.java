@@ -16,8 +16,6 @@ import java.util.Date;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
-import static no.nav.fo.veilarbdialog.domain.LestAv.erDialogLestAvBruker;
-import static no.nav.fo.veilarbdialog.domain.LestAv.erHenvendelseLestAvBruker;
 import static no.nav.fo.veilarbdialog.util.DateUtils.xmlCalendar;
 
 @Component
@@ -35,7 +33,7 @@ class SoapServiceMapper {
         Dialog dialog = new Dialog();
         dialog.setId(Long.toString(dialogData.id));
         dialog.setTittel(dialogData.overskrift);
-        dialog.setErLest(erDialogLestAvBruker(dialogData));
+        dialog.setErLest(dialogData.lestAvBruker);
         dialog.setGjelder(bruker);
         dialog.setKontekstId(ofNullable(dialogData.aktivitetId).orElse(""));
         dialog.setOpprettet(henvendelser
@@ -46,17 +44,19 @@ class SoapServiceMapper {
                 .findFirst()
                 .orElseGet(() -> xmlCalendar(new Date())) // TODO eller skal det inn timestamp på dialogen?
         );
-        henvendelser.stream().map(h -> somHenvendelse(h, dialogData, personIdent)).forEach(dialog.getHenvendelseListe()::add);
+        dialog.setErBehandlet(dialogData.ferdigbehandlet);
+        dialog.setErBesvart(!dialogData.venterPaSvar);
+        henvendelser.stream().map(h -> somHenvendelse(h, personIdent)).forEach(dialog.getHenvendelseListe()::add);
         return dialog;
     }
 
-    private Henvendelse somHenvendelse(HenvendelseData henvendelseData, DialogData dialogData, String personIdent) {
+    private Henvendelse somHenvendelse(HenvendelseData henvendelseData, String personIdent) {
         Henvendelse henvendelse = new Henvendelse();
         henvendelse.setId("");  // TODO midlertidig, tilfredstill wsdl-constraint
         henvendelse.setTekst(henvendelseData.tekst);
         henvendelse.setSendt(DateUtils.xmlCalendar(henvendelseData.sendt));
         henvendelse.setAvsender(finnAktor(henvendelseData, personIdent));
-        henvendelse.setLest(erHenvendelseLestAvBruker(henvendelseData, dialogData));
+        henvendelse.setLest(henvendelseData.lestAvBruker);
         return henvendelse;
     }
 
