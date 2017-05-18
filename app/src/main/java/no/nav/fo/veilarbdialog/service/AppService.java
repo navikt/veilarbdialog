@@ -1,12 +1,15 @@
 package no.nav.fo.veilarbdialog.service;
 
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
+import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.ws.consumer.AktoerConsumer;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,6 +49,11 @@ public class AppService {
         return hentDialog(dialogId);
     }
 
+    public DialogData oppdaterDialogStatus(DialogStatus dialogStatus) {
+        dialogDAO.oppdaterDialogStatus(dialogStatus);
+        return hentDialog(dialogStatus.dialogId);
+    }
+
     public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
         return dialogDAO.hentDialogForAktivitetId(aktivitetId);
     }
@@ -53,6 +61,10 @@ public class AppService {
     public String hentAktoerIdForIdent(String ident) {
         return aktoerConsumer.hentAktoerIdForIdent(ident)
                 .orElseThrow(RuntimeException::new); // Hvordan håndere dette?
+    }
+
+    public List<DialogAktor> hentAktorerMedEndringerEtter(Date tidspunkt) {
+        return dialogDAO.hentAktorerMedEndringerEtter(tidspunkt);
     }
 
 }
