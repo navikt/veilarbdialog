@@ -1,6 +1,7 @@
-package no.nav.fo;
+package no.nav.fo.veilarbdialog;
 
 import no.nav.dialogarena.config.DevelopmentSecurity.ISSOSecurityConfig;
+import no.nav.fo.DatabaseTestContext;
 import no.nav.sbl.dialogarena.common.jetty.Jetty;
 
 import static no.nav.dialogarena.config.DevelopmentSecurity.setupISSO;

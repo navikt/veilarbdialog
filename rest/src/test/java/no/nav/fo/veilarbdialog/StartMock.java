@@ -1,8 +1,8 @@
-package no.nav.fo;
+package no.nav.fo.veilarbdialog;
 
 import static no.nav.dialogarena.mock.MockServer.startMockServer;
-import static no.nav.fo.StartJetty.CONTEXT_NAME;
-import static no.nav.fo.StartJetty.PORT;
+import static no.nav.fo.veilarbdialog.StartJetty.CONTEXT_NAME;
+import static no.nav.fo.veilarbdialog.StartJetty.PORT;
 
 public class StartMock {
 
