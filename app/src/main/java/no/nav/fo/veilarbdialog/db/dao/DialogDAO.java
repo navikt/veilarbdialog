@@ -47,6 +47,7 @@ public class DialogDAO {
                 .aktorId(rs.getString("aktor_id"))
                 .aktivitetId(rs.getString("aktivitet_id"))
                 .overskrift(rs.getString("overskrift"))
+                .lestAvBrukerTidspunkt(hentDato(rs,"lest_av_bruker_tid"))
                 .lestAvBruker(rs.getBoolean("lest_av_bruker"))
                 .lestAvVeileder(rs.getBoolean("lest_av_veileder"))
                 .venterPaSvar(rs.getBoolean("venter_pa_svar"))

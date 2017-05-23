@@ -25,10 +25,12 @@ class RestMapper {
                 .setAktivitetId(dialogData.getAktivitetId())
                 .setOverskrift(dialogData.overskrift)
                 .setHenvendelser(henvendelser.stream()
-                        .map(henvendelseData -> somHenvendelseDTO(henvendelseData))
+                        .map(this::somHenvendelseDTO)
                         .collect(toList())
                 )
                 .setLest(dialogData.lestAvVeileder)
+                .setLestAvBrukerTidspunkt(dialogData.lestAvBrukerTidspunkt)
+                .setErLestAvBruker(dialogData.lestAvBruker)
                 .setFerdigBehandlet(dialogData.ferdigbehandlet)
                 .setVenterPaSvar(dialogData.venterPaSvar)
                 .setSisteDato(sisteHenvendelse

@@ -21,8 +21,11 @@ public class DialogDTO {
     public Date sisteDato;
     public boolean lest;
 
+    // veileder-felter
     public boolean venterPaSvar;
     public boolean ferdigBehandlet;
+    public Date lestAvBrukerTidspunkt;
+    public boolean erLestAvBruker;
 
     public List<HenvendelseDTO> henvendelser = new ArrayList<>();
 
