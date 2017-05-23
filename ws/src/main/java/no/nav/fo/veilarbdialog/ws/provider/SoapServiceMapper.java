@@ -33,9 +33,7 @@ class SoapServiceMapper {
         Dialog dialog = new Dialog();
         dialog.setId(Long.toString(dialogData.id));
         dialog.setTittel(dialogData.overskrift);
-        dialog.setErLest(henvendelser.stream()
-                .noneMatch(h -> h.sendt.after(dialogData.lestAvBruker))
-        );
+        dialog.setErLest(dialogData.lestAvBruker);
         dialog.setGjelder(bruker);
         dialog.setKontekstId(ofNullable(dialogData.aktivitetId).orElse(""));
         dialog.setOpprettet(henvendelser
@@ -46,6 +44,8 @@ class SoapServiceMapper {
                 .findFirst()
                 .orElseGet(() -> xmlCalendar(new Date())) // TODO eller skal det inn timestamp på dialogen?
         );
+        dialog.setErBehandlet(dialogData.ferdigbehandlet);
+        dialog.setErBesvart(!dialogData.venterPaSvar);
         henvendelser.stream().map(h -> somHenvendelse(h, personIdent)).forEach(dialog.getHenvendelseListe()::add);
         return dialog;
     }
@@ -56,6 +56,7 @@ class SoapServiceMapper {
         henvendelse.setTekst(henvendelseData.tekst);
         henvendelse.setSendt(DateUtils.xmlCalendar(henvendelseData.sendt));
         henvendelse.setAvsender(finnAktor(henvendelseData, personIdent));
+        henvendelse.setLest(henvendelseData.lestAvBruker);
         return henvendelse;
     }
 
