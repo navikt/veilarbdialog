@@ -43,10 +43,8 @@
 
         <ldap alias="ldap" mapToProperty="ldap"/>
 
-        <queueManager enableSSL="false" unifiedConnectionFactory="false" bindToMdb="false" xaEnabled="false" jndi="java:/jboss/mqConnectionFactory" alias="mqGateway02">
-            <pool/>
-            <sessionPool/>
-            <queue targetClient="JMS" jndi="java:/jboss/VARSELPRODUKSJON.VARSLINGER" alias="VARSELPRODUKSJON.VARSLINGER"/>
+        <queueManager xaEnabled="false" jndi="java:/jboss/mqConnectionFactory" alias="mqGateway02">
+            <queue jndi="java:/jboss/jms/VARSELPRODUKSJON.VARSLINGER" alias="VARSELPRODUKSJON.VARSLINGER"/>
         </queueManager>
     </resources>
 
