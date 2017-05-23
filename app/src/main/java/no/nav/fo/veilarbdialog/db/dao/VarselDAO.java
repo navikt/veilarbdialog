@@ -22,14 +22,14 @@ public class VarselDAO {
 
     public List<String> hentAktorerMedUlesteMeldinger(long graceMillis) {
         Date grense = new Date(System.currentTimeMillis() - graceMillis);
-        return database.query("SELECT aktor_id " +
+        return database.query("SELECT d.aktor_id " +
                         "FROM DIALOG d " +
                         "LEFT JOIN HENVENDELSE h on h.dialog_id = d.dialog_id " +
                         "LEFT JOIN VARSEL v on v.aktor_id = d.aktor_id " +
                         "WHERE (d.lest_av_bruker_tid IS NULL OR h.sendt > d.lest_av_bruker_tid) " +
                         "AND (v.sendt IS NULL OR h.sendt > v.sendt) " +
                         "AND h.sendt < ? " +
-                        "GROUP BY aktor_id",
+                        "GROUP BY d.aktor_id",
                 this::mapTilAktorIdListe,
                 grense);
     }
