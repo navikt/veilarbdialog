@@ -1,14 +1,11 @@
 package no.nav.fo;
 
-import lombok.SneakyThrows;
 import no.nav.brukerdialog.security.context.SubjectHandlerUtils;
 import no.nav.brukerdialog.security.context.ThreadLocalSubjectHandler;
 import no.nav.brukerdialog.security.domain.IdentType;
 import no.nav.brukerdialog.security.domain.OidcCredential;
 import no.nav.dialogarena.config.DevelopmentSecurity;
 import no.nav.dialogarena.config.fasit.FasitUtils;
-import no.nav.dialogarena.config.fasit.LdapConfig;
-import no.nav.dialogarena.config.fasit.ServiceUser;
 import no.nav.dialogarena.config.security.ISSOProvider;
 import no.nav.fo.veilarbdialog.ApplicationContext;
 import org.junit.Before;
@@ -23,6 +20,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+import javax.jms.Destination;
 import javax.naming.NamingException;
 import javax.security.auth.Subject;
 import java.io.IOException;
@@ -30,6 +28,7 @@ import java.io.IOException;
 import static no.nav.brukerdialog.security.context.SubjectHandlerUtils.setSubject;
 import static no.nav.dialogarena.config.util.Util.setProperty;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
+import static org.mockito.Mockito.mock;
 
 @ContextConfiguration(classes = {
         ApplicationContext.class,
@@ -73,6 +72,7 @@ public abstract class IntegrasjonsTest {
         private final SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
 
         public JndiBean() throws Exception {
+            builder.bind("java:/jboss/jms/VARSELPRODUKSJON.VARSLINGER", mock(Destination.class));
             builder.bind(AKTIVITET_DATA_SOURCE_JDNI_NAME, DatabaseTestContext.buildDataSource());
             builder.activate();
         }

@@ -36,6 +36,11 @@
             <artifactId>common-cxf</artifactId>
         </dependency>
         <dependency>
+            <groupId>no.nav.meldinger.virksomhet</groupId>
+            <artifactId>nav-virksomhet-varsel-v1-meldingsdefinisjon</artifactId>
+            <classifier>jaxb</classifier>
+        </dependency>
+        <dependency>
             <groupId>no.nav.modig</groupId>
             <artifactId>modig-security-ws</artifactId>
         </dependency>
@@ -56,6 +61,7 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- EXTERNAL DEPENDENCIES -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -67,6 +73,14 @@
         <dependency>
             <groupId>no.nav.sbl.dialogarena</groupId>
             <artifactId>common-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.jms</groupId>
+            <artifactId>javax.jms-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
         </dependency>
 
         <!-- LOGGING -->
@@ -91,6 +105,10 @@
         </dependency>
 
         <!-- test dependencies -->
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-core</artifactId>
+        </dependency>
         <dependency>
             <groupId>no.nav.sbl.dialogarena</groupId>
             <artifactId>common-jetty</artifactId>

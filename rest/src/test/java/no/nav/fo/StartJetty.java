@@ -1,10 +1,10 @@
 package no.nav.fo;
 
 import no.nav.dialogarena.config.DevelopmentSecurity.ISSOSecurityConfig;
+import no.nav.fo.veilarbdialog.util.VarselMock;
 import no.nav.sbl.dialogarena.common.jetty.Jetty;
 
 import static no.nav.dialogarena.config.DevelopmentSecurity.setupISSO;
-import static no.nav.dialogarena.config.util.Util.setProperty;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
 import static no.nav.sbl.dialogarena.common.jetty.Jetty.usingWar;
 import static no.nav.sbl.dialogarena.common.jetty.JettyStarterUtils.*;
@@ -23,6 +23,9 @@ public class StartJetty {
                         .port(PORT)
                         .sslPort(SSL_PORT)
                 , new ISSOSecurityConfig(CONTEXT_NAME, "t6")).buildJetty();
+
+        VarselMock.init();
+
         jetty.startAnd(first(waitFor(gotKeypress())).then(jetty.stop));
     }
 
