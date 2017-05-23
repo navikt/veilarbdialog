@@ -26,7 +26,7 @@ public class VarselDAO {
                         "FROM DIALOG d " +
                         "LEFT JOIN HENVENDELSE h on h.dialog_id = d.dialog_id " +
                         "LEFT JOIN VARSEL v on v.aktor_id = d.aktor_id " +
-                        "WHERE (d.lest_av_bruker IS NULL OR h.sendt > d.lest_av_bruker) " +
+                        "WHERE (d.lest_av_bruker_tid IS NULL OR h.sendt > d.lest_av_bruker_tid) " +
                         "AND (v.sendt IS NULL OR h.sendt > v.sendt) " +
                         "AND h.sendt < ? " +
                         "GROUP BY aktor_id",

@@ -2,7 +2,6 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.SneakyThrows;
 import no.nav.fo.IntegrasjonsTest;
-import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;

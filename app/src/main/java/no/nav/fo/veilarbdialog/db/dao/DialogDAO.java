@@ -95,7 +95,7 @@ public class DialogDAO {
                 dialogData.overskrift,
                 null,
                 null,
-                new Date(),
+                date,
                 false,
                 false
         );

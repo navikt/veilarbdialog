@@ -2,7 +2,6 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.val;
 import no.nav.fo.IntegrasjonsTest;
-import no.nav.fo.veilarbdialog.domain.DialogData;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.junit.Test;
 
@@ -30,19 +29,19 @@ public class VarselDAOTest extends IntegrasjonsTest {
     @Inject
     private VarselDAO varselDAO;
 
-    private DialogData opprettNyDialog(String aktorId, Date date) {
+    private long opprettNyDialog(String aktorId, Date date) {
         return dialogDAO.opprettDialog(nyDialog(aktorId), date);
     }
 
-    private DialogData opprettNyDialog(Date date) {
+    private long opprettNyDialog(Date date) {
         return dialogDAO.opprettDialog(nyDialog(AKTOR_ID), date);
     }
 
 
     @Test
     public void skalIkkeHenteBrukereSomHarBlittVarsletOmUlesteMeldinger() {
-        val dialogData = opprettNyDialog(EN_DAG_SIDEN);
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData), EN_TIME_SIDEN);
+        long dialogId = opprettNyDialog(EN_DAG_SIDEN);
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID), EN_TIME_SIDEN);
 
         varselDAO.oppdaterSisteVarselForBruker(AKTOR_ID, TI_MINUTT_SIDEN);
 
@@ -52,12 +51,12 @@ public class VarselDAOTest extends IntegrasjonsTest {
 
     @Test
     public void skalHenterukereSomHarUlesteMeldingerEtterTidligereVarsel() {
-        DialogData dialogData = opprettNyDialog(EN_DAG_SIDEN);
+        long dialogId = opprettNyDialog(EN_DAG_SIDEN);
 
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData), EN_TIME_SIDEN);
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID), EN_TIME_SIDEN);
         varselDAO.oppdaterSisteVarselForBruker(AKTOR_ID, TI_MINUTT_SIDEN);
 
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData), ET_MINUTT_SIDEN);
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID), ET_MINUTT_SIDEN);
 
         val aktor = varselDAO.hentAktorerMedUlesteMeldinger(0);
         assertThat(aktor.size(), equalTo(1));
@@ -65,8 +64,8 @@ public class VarselDAOTest extends IntegrasjonsTest {
 
     @Test
     public void skalIkkeHentBrukereMedUlesteMeldingerInnenforGracePerioden() {
-        DialogData dialogData = opprettNyDialog(EN_DAG_SIDEN);
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData), ET_MINUTT_SIDEN);
+        long dialogId = opprettNyDialog(EN_DAG_SIDEN);
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID), ET_MINUTT_SIDEN);
 
         val aktor1 = varselDAO.hentAktorerMedUlesteMeldinger(0); // Utenfor grace
         assertThat(aktor1.size(), equalTo(1));
@@ -77,17 +76,17 @@ public class VarselDAOTest extends IntegrasjonsTest {
 
     @Test
     public void skalHenteBrukereMedUlesteMeldinger() {
-        DialogData dialogData1 = opprettNyDialog("1111", EN_TIME_SIDEN);
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData1), ET_MINUTT_SIDEN);
+        long dialogId1 = opprettNyDialog("1111", EN_TIME_SIDEN);
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId1, AKTOR_ID), ET_MINUTT_SIDEN);
 
-        DialogData dialogData2 = opprettNyDialog("2222", EN_TIME_SIDEN);
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData2), ET_MINUTT_SIDEN);
+        long dialogId2 = opprettNyDialog("2222", EN_TIME_SIDEN);
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId2, AKTOR_ID), ET_MINUTT_SIDEN);
 
-        DialogData dialogData3 = opprettNyDialog("3333", EN_TIME_SIDEN);
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData3), ET_MINUTT_SIDEN);
+        long dialogId3 = opprettNyDialog("3333", EN_TIME_SIDEN);
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId3, AKTOR_ID), ET_MINUTT_SIDEN);
 
-        DialogData dialogData4 = opprettNyDialog("4444", EN_TIME_SIDEN);
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData4), ET_MINUTT_SIDEN);
+        long dialogId4 = opprettNyDialog("4444", EN_TIME_SIDEN);
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId4, AKTOR_ID), ET_MINUTT_SIDEN);
 
 
         val aktorer = varselDAO.hentAktorerMedUlesteMeldinger(0);
