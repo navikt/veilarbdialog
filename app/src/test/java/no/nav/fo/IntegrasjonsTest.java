@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.naming.NamingException;
 import javax.security.auth.Subject;
@@ -73,6 +74,7 @@ public abstract class IntegrasjonsTest {
 
         public JndiBean() throws Exception {
             builder.bind("java:/jboss/jms/VARSELPRODUKSJON.VARSLINGER", mock(Destination.class));
+            builder.bind("java:jboss/mqConnectionFactory", mock(ConnectionFactory.class));
             builder.bind(AKTIVITET_DATA_SOURCE_JDNI_NAME, DatabaseTestContext.buildDataSource());
             builder.activate();
         }
@@ -80,7 +82,7 @@ public abstract class IntegrasjonsTest {
     }
 
     @Before
-    public final void fiksJdniOgLdapKonflikt() throws NamingException {
+    public final void fiksJndiOgLdapKonflikt() throws NamingException {
         jndiBean.builder.deactivate();
     }
 
