@@ -43,7 +43,7 @@
 
         <ldap alias="ldap" mapToProperty="ldap"/>
 
-        <queueManager xaEnabled="false" jndi="java:/jboss/mqConnectionFactory" alias="mqGateway02">
+        <queueManager xaEnabled="false" jndi="java:/jboss/mqConnectionFactory" alias="mqGateway03">
             <queue jndi="java:/jboss/jms/VARSELPRODUKSJON.VARSLINGER" alias="VARSELPRODUKSJON.VARSLINGER"/>
         </queueManager>
     </resources>

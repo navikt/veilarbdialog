@@ -21,6 +21,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.UUID.randomUUID;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 import static javax.xml.bind.Marshaller.JAXB_FRAGMENT;
@@ -35,6 +36,7 @@ public class ScheduleService {
     private static final long GRACE_PERIODE = Long.parseLong(System.getProperty("grace.periode.millis"));
     private static final boolean IS_MASTER = Boolean.parseBoolean(System.getProperty("cluster.ismasternode", "false"));
     private static final String VARSEL_ID = "DittNAV_000007";
+    private static final String VARSEL_NAVN = "Aktivitetsplan_nye_henvendelser";
 
     private static final JAXBContext VARSEL_CONTEXT;
 
@@ -76,14 +78,14 @@ public class ScheduleService {
         varsel.setMottaker(aktor);
         varsel.setVarslingstype(varslingstype);
 
-        varselQueue.send(messageCreator(marshallVarsel(new ObjectFactory().createVarsel(varsel)), "VeilArbDialogVarsel"));
+        varselQueue.send(messageCreator(marshallVarsel(new ObjectFactory().createVarsel(varsel))));
         varselDAO.oppdaterSisteVarselForBruker(aktorId);
     }
 
-    public static MessageCreator messageCreator(final String hendelse, final String callId) {
+    public static MessageCreator messageCreator(final String hendelse) {
         return session -> {
             TextMessage msg = session.createTextMessage(hendelse);
-            msg.setStringProperty("callId", callId);
+            msg.setStringProperty("callId", randomUUID().toString() + VARSEL_NAVN);
             return msg;
         };
     }
