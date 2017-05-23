@@ -2,10 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import lombok.val;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
-import no.nav.melding.virksomhet.varsel.v1.varsel.AktoerId;
-import no.nav.melding.virksomhet.varsel.v1.varsel.ObjectFactory;
-import no.nav.melding.virksomhet.varsel.v1.varsel.Varsel;
-import no.nav.melding.virksomhet.varsel.v1.varsel.Varslingstyper;
+import no.nav.melding.virksomhet.varsel.v1.varsel.*;
 import org.slf4j.Logger;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
@@ -62,24 +59,20 @@ public class ScheduleService {
         if (IS_MASTER) {
             val aktorer = varselDAO.hentAktorerMedUlesteMeldinger(GRACE_PERIODE);
 
-            LOG.info("Varlser {} brukere", aktorer.size());
+            LOG.info("Varsler {} brukere", aktorer.size());
             aktorer.forEach(this::sendVarsel);
         }
     }
 
     private void sendVarsel(String aktorId) {
-        val aktor = new AktoerId();
-        aktor.setAktoerId(aktorId);
-
-        val varslingstype = new Varslingstyper();
-        varslingstype.setKodeverksRef(VARSEL_ID);
-
-        val varsel = new Varsel();
-        varsel.setMottaker(aktor);
-        varsel.setVarslingstype(varslingstype);
-
-        varselQueue.send(messageCreator(marshallVarsel(new ObjectFactory().createVarsel(varsel))));
+        varselQueue.send(messageCreator(marshallVarsel(lagNyttVarsel(aktorId))));
         varselDAO.oppdaterSisteVarselForBruker(aktorId);
+    }
+
+    private XMLVarsel lagNyttVarsel(String aktoerId) {
+        return new XMLVarsel()
+                .withMottaker(new XMLAktoerId().withAktoerId(aktoerId))
+                .withVarslingstype(new XMLVarslingstyper(VARSEL_ID, null, null));
     }
 
     public static MessageCreator messageCreator(final String hendelse) {
