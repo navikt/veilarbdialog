@@ -2,7 +2,9 @@ package no.nav.fo.veilarbdialog.service;
 
 import lombok.val;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
-import no.nav.melding.virksomhet.varsel.v1.varsel.*;
+import no.nav.melding.virksomhet.varsel.v1.varsel.XMLAktoerId;
+import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarsel;
+import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarslingstyper;
 import org.slf4j.Logger;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
@@ -40,8 +42,8 @@ public class ScheduleService {
     static {
         try {
             VARSEL_CONTEXT = newInstance(
-                    Varsel.class,
-                    Varslingstyper.class
+                    XMLVarsel.class,
+                    XMLVarslingstyper.class
             );
         } catch (JAXBException e) {
             throw new RuntimeException(e);
@@ -69,12 +71,6 @@ public class ScheduleService {
         varselDAO.oppdaterSisteVarselForBruker(aktorId);
     }
 
-    private XMLVarsel lagNyttVarsel(String aktoerId) {
-        return new XMLVarsel()
-                .withMottaker(new XMLAktoerId().withAktoerId(aktoerId))
-                .withVarslingstype(new XMLVarslingstyper(VARSEL_ID, null, null));
-    }
-
     public static MessageCreator messageCreator(final String hendelse) {
         return session -> {
             TextMessage msg = session.createTextMessage(hendelse);
@@ -94,5 +90,11 @@ public class ScheduleService {
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private XMLVarsel lagNyttVarsel(String aktoerId) {
+        return new XMLVarsel()
+                .withMottaker(new XMLAktoerId().withAktoerId(aktoerId))
+                .withVarslingstype(new XMLVarslingstyper(VARSEL_ID, null, null));
     }
 }
