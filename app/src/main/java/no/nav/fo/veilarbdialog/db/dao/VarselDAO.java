@@ -5,8 +5,6 @@ import no.nav.fo.veilarbdialog.db.Database;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
@@ -30,12 +28,8 @@ public class VarselDAO {
                         "AND (v.sendt IS NULL OR h.sendt > v.sendt) " +
                         "AND h.sendt < ? " +
                         "GROUP BY d.aktor_id",
-                this::mapTilAktorIdListe,
+                (rs) -> rs.getString("aktor_id"),
                 grense);
-    }
-
-    private String mapTilAktorIdListe(ResultSet rs) throws SQLException {
-        return rs.getString("aktor_id");
     }
 
     public void oppdaterSisteVarselForBruker(String aktorId) {
