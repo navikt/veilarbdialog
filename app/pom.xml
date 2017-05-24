@@ -36,11 +36,6 @@
             <artifactId>common-cxf</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.meldinger.virksomhet</groupId>
-            <artifactId>nav-virksomhet-varsel-v1-meldingsdefinisjon</artifactId>
-            <classifier>jaxb</classifier>
-        </dependency>
-        <dependency>
             <groupId>no.nav.modig</groupId>
             <artifactId>modig-security-ws</artifactId>
         </dependency>
