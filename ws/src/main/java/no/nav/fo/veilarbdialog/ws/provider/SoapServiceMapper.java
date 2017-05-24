@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog.ws.provider;
 
-import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.service.AppService;
@@ -16,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 import static java.util.Optional.ofNullable;
+import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 import static no.nav.fo.veilarbdialog.util.DateUtils.xmlCalendar;
 
 @Component
@@ -46,29 +46,32 @@ class SoapServiceMapper {
         );
         dialog.setErBehandlet(dialogData.ferdigbehandlet);
         dialog.setErBesvart(!dialogData.venterPaSvar);
-        henvendelser.stream().map(h -> somHenvendelse(h, personIdent)).forEach(dialog.getHenvendelseListe()::add);
+        henvendelser.stream().map(h -> somHenvendelse(h, dialogData, personIdent)).forEach(dialog.getHenvendelseListe()::add);
         return dialog;
     }
 
-    private Henvendelse somHenvendelse(HenvendelseData henvendelseData, String personIdent) {
+    private Henvendelse somHenvendelse(HenvendelseData henvendelseData, DialogData dialogData, String personIdent) {
         Henvendelse henvendelse = new Henvendelse();
         henvendelse.setId("");  // TODO midlertidig, tilfredstill wsdl-constraint
         henvendelse.setTekst(henvendelseData.tekst);
         henvendelse.setSendt(DateUtils.xmlCalendar(henvendelseData.sendt));
-        henvendelse.setAvsender(finnAktor(henvendelseData, personIdent));
+        henvendelse.setAvsender(finnAktor(henvendelseData, dialogData, personIdent));
         henvendelse.setLest(henvendelseData.lestAvBruker);
         return henvendelse;
     }
 
-    private Aktoer finnAktor(HenvendelseData henvendelseData, String personIdent) {
-        if (personIdent.equals(henvendelseData.avsenderId)) {
-            Bruker bruker = new Bruker();
-            bruker.setPersonIdent(personIdent);
-            return bruker;
-        } else {
-            Veileder veileder = new Veileder();
-            veileder.setPersonIdent(henvendelseData.avsenderId);
-            return veileder;
+    private Aktoer finnAktor(HenvendelseData henvendelseData, DialogData dialogData, String personIdent) {
+        switch (henvendelseData.avsenderType) {
+            case BRUKER:
+                Bruker bruker = new Bruker();
+                bruker.setPersonIdent(personIdent);
+                return bruker;
+            case VEILEDER:
+                Veileder veileder = new Veileder();
+                veileder.setPersonIdent(henvendelseData.avsenderId);
+                return veileder;
+            default:
+                throw new IllegalStateException();
         }
     }
 
@@ -92,7 +95,7 @@ class SoapServiceMapper {
                 .dialogId(Long.parseLong(opprettHenvendelseForDialogRequest.getDialogId()))
                 .tekst(opprettHenvendelseForDialogRequest.getTekst())
                 .avsenderId(appService.hentAktoerIdForIdent(personIdent))
-                .avsenderType(AvsenderType.BRUKER)
+                .avsenderType(BRUKER)
                 .build();
     }
 
