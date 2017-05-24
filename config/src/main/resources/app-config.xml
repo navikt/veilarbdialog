@@ -42,6 +42,10 @@
         <credential alias="isso-rp-user"/>
 
         <ldap alias="ldap" mapToProperty="ldap"/>
+
+        <queueManager alias="mqGateway03" xaEnabled="true" jndi="java:jboss/mqConnectionFactory" unifiedConnectionFactory="true">
+            <queue jndi="java:/jboss/jms/VARSELPRODUKSJON.VARSLINGER" alias="VARSELPRODUKSJON.VARSLINGER"/>
+        </queueManager>
     </resources>
 
     <exposed-services>

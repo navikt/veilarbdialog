@@ -82,6 +82,10 @@ public class DialogDAO {
     }
 
     public long opprettDialog(DialogData dialogData) {
+        return opprettDialog(dialogData, new Date());
+    }
+
+    long opprettDialog(DialogData dialogData, Date date) {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
         database.update("INSERT INTO " +
                         "DIALOG (dialog_id,aktor_id,aktivitet_id,overskrift,lest_av_veileder_tid,lest_av_bruker_tid,siste_status_endring,skal_vente_pa_svar,markert_som_ferdigbehandlet) " +
@@ -92,7 +96,7 @@ public class DialogDAO {
                 dialogData.overskrift,
                 null,
                 null,
-                new Date(),
+                date,
                 false,
                 false
         );
@@ -101,9 +105,13 @@ public class DialogDAO {
     }
 
     public void opprettHenvendelse(HenvendelseData henvendelseData) {
+        opprettHenvendelse(henvendelseData, new Date());
+    }
+
+    void opprettHenvendelse(HenvendelseData henvendelseData, Date date) {
         database.update("INSERT INTO HENVENDELSE(dialog_id,sendt,tekst,avsender_id,avsender_type) VALUES (?,?,?,?,?)",
                 henvendelseData.dialogId,
-                new Date(),
+                date,
                 henvendelseData.tekst,
                 henvendelseData.avsenderId,
                 EnumUtils.getName(henvendelseData.avsenderType)

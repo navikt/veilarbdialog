@@ -4,12 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
-import lombok.experimental.Wither;
 
 import java.util.Date;
 import java.util.List;
-
-import static java.util.Collections.emptyList;
 
 @Data
 @Builder(toBuilder = true)

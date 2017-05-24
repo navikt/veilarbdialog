@@ -69,6 +69,11 @@
                 <scope>test</scope>
                 <type>test-jar</type>
             </dependency>
+            <dependency>
+                <groupId>no.nav.sbl.dialogarena</groupId>
+                <artifactId>varsel-inn</artifactId>
+                <version>1.0.5</version>
+            </dependency>
 
 
             <!--Tjenester-->
