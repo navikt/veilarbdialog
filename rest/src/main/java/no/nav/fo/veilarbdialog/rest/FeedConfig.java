@@ -9,6 +9,8 @@ import no.nav.fo.veilarbdialog.util.DateUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Date;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Configuration
@@ -31,7 +33,11 @@ public class FeedConfig {
     }
 
     private Stream<FeedElement<DialogAktorDTO>> getFeedElementStream(String tidspunkt, AppService appService, RestMapper restMapper) {
-        return appService.hentAktorerMedEndringerEtter(DateUtils.toDate(tidspunkt))
+        Date date = Optional.ofNullable(tidspunkt)
+                .map(DateUtils::toDate)
+                .orElse(new Date(0));
+
+        return appService.hentAktorerMedEndringerFOM(date)
                 .stream()
                 .map(restMapper::somDTO)
                 .map((dto) -> new FeedElement<DialogAktorDTO>()
