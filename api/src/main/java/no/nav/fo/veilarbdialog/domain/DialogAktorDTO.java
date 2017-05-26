@@ -16,6 +16,6 @@ public class DialogAktorDTO implements Comparable<DialogAktorDTO> {
 
     @Override
     public int compareTo(DialogAktorDTO o) {
-        return this.sisteEndring.compareTo(o.sisteEndring);
+        return o.sisteEndring.compareTo(this.sisteEndring);
     }
 }
