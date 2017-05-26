@@ -125,17 +125,17 @@ public class DialogDAOTest extends IntegrasjonsTest {
         Date ettSekundSiden = new Date(System.currentTimeMillis() - 1000L);
         Date omEttSekund = new Date(System.currentTimeMillis() + 1000L);
 
-        assertThat(dialogDAO.hentAktorerMedEndringerEtter(ettSekundSiden)).isEmpty();
-        assertThat(dialogDAO.hentAktorerMedEndringerEtter(omEttSekund)).isEmpty();
+        assertThat(dialogDAO.hentAktorerMedEndringerFOM(ettSekundSiden)).isEmpty();
+        assertThat(dialogDAO.hentAktorerMedEndringerFOM(omEttSekund)).isEmpty();
 
         opprettNyDialog();
 
-        assertThat(dialogDAO.hentAktorerMedEndringerEtter(ettSekundSiden)).hasSize(1);
-        assertThat(dialogDAO.hentAktorerMedEndringerEtter(omEttSekund)).isEmpty();
+        assertThat(dialogDAO.hentAktorerMedEndringerFOM(ettSekundSiden)).hasSize(1);
+        assertThat(dialogDAO.hentAktorerMedEndringerFOM(omEttSekund)).isEmpty();
     }
 
     @Test
-    public void hentAktorerMedEndringerEtter_oppdaterDialogStatusOgNyHenvendelse_riktigStatus() {
+    public void hentAktorerMedEndringerFOM_oppdaterDialogStatusOgNyHenvendelse_riktigStatus() {
         long dialogId = opprettNyDialog();
 
         DialogStatus.DialogStatusBuilder dialogStatusBuilder = builder()
@@ -143,7 +143,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
                 .venterPaSvar(true);
 
         Date forForsteStatusOppdatering = uniktTidspunkt();
-        assertThat(dialogDAO.hentAktorerMedEndringerEtter(forForsteStatusOppdatering)).isEmpty();
+        assertThat(dialogDAO.hentAktorerMedEndringerFOM(forForsteStatusOppdatering)).isEmpty();
         dialogDAO.oppdaterDialogStatus(dialogStatusBuilder.build());
 
         DialogAktor etterForsteOppdatering = hentAktorMedEndringerEtter(forForsteStatusOppdatering);
@@ -152,7 +152,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(etterForsteOppdatering.ubehandlet).isTrue();
 
         Date forAndreStatusOppdatering = uniktTidspunkt();
-        assertThat(dialogDAO.hentAktorerMedEndringerEtter(forAndreStatusOppdatering)).isEmpty();
+        assertThat(dialogDAO.hentAktorerMedEndringerFOM(forAndreStatusOppdatering)).isEmpty();
         dialogDAO.oppdaterDialogStatus(dialogStatusBuilder
                 .ferdigbehandlet(true)
                 .build()
@@ -173,7 +173,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
     }
 
     private DialogAktor hentAktorMedEndringerEtter(Date tidspunkt) {
-        List<DialogAktor> endredeAktorer = dialogDAO.hentAktorerMedEndringerEtter(tidspunkt);
+        List<DialogAktor> endredeAktorer = dialogDAO.hentAktorerMedEndringerFOM(tidspunkt);
         assertThat(endredeAktorer).hasSize(1);
         return endredeAktorer.get(0);
     }
