@@ -9,6 +9,7 @@ import no.nav.fo.veilarbdialog.util.DateUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -42,7 +43,7 @@ public class FeedConfig {
                 .map(restMapper::somDTO)
                 .map((dto) -> new FeedElement<DialogAktorDTO>()
                         .setElement(dto)
-                        .setId(dto.getSisteEndring().toString())
+                        .setId(DateUtils.ISO8601FromDate(dto.getSisteEndring(), ZoneId.systemDefault()))
                 );
     }
 }
