@@ -6,9 +6,12 @@ import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
 
 import javax.inject.Inject;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -17,6 +20,8 @@ import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static no.nav.fo.veilarbdialog.domain.DialogStatus.builder;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class DialogDAOTest extends IntegrasjonsTest {
 
@@ -24,6 +29,12 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
     @Inject
     private DialogDAO dialogDAO;
+
+    @Before
+    public void setup(){
+        dialogDAO.dateProvider = mock(DateProvider.class);
+        when(dialogDAO.dateProvider.getNow()).thenAnswer(DialogDAOTest::timestampFromSystemTime);
+    }
 
     @Test
     public void opprettDialog() {
@@ -188,6 +199,11 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
     private long opprettNyDialog() {
         return dialogDAO.opprettDialog(nyDialog(AKTOR_ID));
+    }
+
+    @SuppressWarnings("unused")
+    static String timestampFromSystemTime(InvocationOnMock invocationOnMock) {
+        return String.format("\'%s\'", new Timestamp(System.currentTimeMillis()));
     }
 
 }

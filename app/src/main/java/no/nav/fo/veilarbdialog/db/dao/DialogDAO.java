@@ -26,6 +26,9 @@ public class DialogDAO {
     @Inject
     private Database database;
 
+    @Inject
+    DateProvider dateProvider;
+
     public List<DialogData> hentDialogerForAktorId(String aktorId) {
         return database.query(SELECT_DIALOG + "WHERE d.aktor_id = ?",
                 this::mapTilDialog,
@@ -82,21 +85,16 @@ public class DialogDAO {
     }
 
     public long opprettDialog(DialogData dialogData) {
-        return opprettDialog(dialogData, new Date());
-    }
-
-    long opprettDialog(DialogData dialogData, Date date) {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
         database.update("INSERT INTO " +
                         "DIALOG (dialog_id,aktor_id,aktivitet_id,overskrift,lest_av_veileder_tid,lest_av_bruker_tid,siste_status_endring,skal_vente_pa_svar,markert_som_ferdigbehandlet) " +
-                        "VALUES (?,?,?,?,?,?,?,?,?)",
+                        "VALUES (?,?,?,?,?,?," + dateProvider.getNow() + ",?,?)",
                 dialogId,
                 dialogData.aktorId,
                 dialogData.aktivitetId,
                 dialogData.overskrift,
                 null,
                 null,
-                date,
                 false,
                 false
         );
@@ -105,13 +103,8 @@ public class DialogDAO {
     }
 
     public void opprettHenvendelse(HenvendelseData henvendelseData) {
-        opprettHenvendelse(henvendelseData, new Date());
-    }
-
-    void opprettHenvendelse(HenvendelseData henvendelseData, Date date) {
-        database.update("INSERT INTO HENVENDELSE(dialog_id,sendt,tekst,avsender_id,avsender_type) VALUES (?,?,?,?,?)",
+        database.update("INSERT INTO HENVENDELSE(dialog_id,sendt,tekst,avsender_id,avsender_type) VALUES (?," + dateProvider.getNow() + ",?,?,?)",
                 henvendelseData.dialogId,
-                date,
                 henvendelseData.tekst,
                 henvendelseData.avsenderId,
                 EnumUtils.getName(henvendelseData.avsenderType)
