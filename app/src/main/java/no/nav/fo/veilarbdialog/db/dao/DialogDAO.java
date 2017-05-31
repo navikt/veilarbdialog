@@ -50,8 +50,8 @@ public class DialogDAO {
                 .lestAvBrukerTidspunkt(hentDato(rs,"lest_av_bruker_tid"))
                 .lestAvBruker(rs.getBoolean("lest_av_bruker"))
                 .lestAvVeileder(rs.getBoolean("lest_av_veileder"))
-                .venterPaSvar(rs.getBoolean("venter_pa_svar"))
-                .ferdigbehandlet(rs.getBoolean("ferdigbehandlet"))
+                .venterPaSvar(hentDato(rs, "vente_pa_svar_tid") != null)
+                .ferdigbehandlet(hentDato(rs, "eldste_ubehandlede_tid") == null)
                 .sisteStatusEndring(hentDato(rs, "siste_status_endring"))
                 .henvendelser(hentHenvendelser(dialogId))  // TODO nøstet spørring, mulig at vi istede bør gjøre to spørringer og flette dataene
                 .build();
@@ -88,17 +88,13 @@ public class DialogDAO {
     long opprettDialog(DialogData dialogData, Date date) {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
         database.update("INSERT INTO " +
-                        "DIALOG (dialog_id,aktor_id,aktivitet_id,overskrift,lest_av_veileder_tid,lest_av_bruker_tid,siste_status_endring,skal_vente_pa_svar,markert_som_ferdigbehandlet) " +
-                        "VALUES (?,?,?,?,?,?,?,?,?)",
+                        "DIALOG (dialog_id,aktor_id,aktivitet_id,overskrift,siste_status_endring) " +
+                        "VALUES (?,?,?,?,?)",
                 dialogId,
                 dialogData.aktorId,
                 dialogData.aktivitetId,
                 dialogData.overskrift,
-                null,
-                null,
-                date,
-                false,
-                false
+                date
         );
         LOG.info("opprettet {}", dialogData);
         return dialogId;
@@ -148,16 +144,17 @@ public class DialogDAO {
         return DialogAktor.builder()
                 .aktorId(resultSet.getString("aktor_id"))
                 .sisteEndring(hentDato(resultSet, "siste_endring"))
-                .venterPaSvar(resultSet.getBoolean("venter_pa_svar"))
-                .ubehandlet(!resultSet.getBoolean("ferdigbehandlet"))
+                .tidspunktEldsteUbehandlede(hentDato(resultSet,"tidspunkt_eldste_ubehandlede"))
+                .tidspunktEldsteVentende(hentDato(resultSet,"tidspunkt_eldste_ventende"))
                 .build();
     }
 
     public void oppdaterDialogStatus(DialogStatus dialogStatus) {
-        database.update("UPDATE DIALOG SET skal_vente_pa_svar = ?, markert_som_ferdigbehandlet = ?, siste_status_endring = ? WHERE dialog_id = ?",
-                dialogStatus.venterPaSvar,
-                dialogStatus.ferdigbehandlet,
-                new Date(),
+        Date na = new Date();
+        database.update("UPDATE DIALOG SET siste_vente_pa_svar_tid = ?, siste_ferdigbehandlet_tid = ?, siste_status_endring = ? WHERE dialog_id = ?",
+                dialogStatus.venterPaSvar ? na : null,
+                dialogStatus.ferdigbehandlet ? na : null,
+                na,
                 dialogStatus.dialogId
         );
     }

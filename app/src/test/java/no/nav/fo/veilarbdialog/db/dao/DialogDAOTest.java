@@ -36,6 +36,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(hentetDialogData).isEqualTo(dialogData.toBuilder()
                 .id(hentetDialogData.id)
                 .sisteStatusEndring(hentetDialogData.sisteStatusEndring)
+                .ferdigbehandlet(true)
                 .build()
         );
     }
@@ -55,6 +56,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(hentetDialog).isEqualTo(dialogData.toBuilder()
                 .id(dialogId)
                 .sisteStatusEndring(hentetDialog.sisteStatusEndring)
+                .ferdigbehandlet(true)
                 .build()
         );
     }
@@ -120,6 +122,28 @@ public class DialogDAOTest extends IntegrasjonsTest {
         );
     }
 
+
+    @Test
+    public void oppdaterDialogStatus_statusTilbakestillesVedNyHenvendelse() {
+        long dialogId = opprettNyDialog();
+        dialogDAO.oppdaterDialogStatus(builder()
+                .dialogId(dialogId)
+                .venterPaSvar(true)
+                .ferdigbehandlet(true)
+                .build()
+        );
+
+        uniktTidspunkt();
+
+        HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID);
+        dialogDAO.opprettHenvendelse(henvendelseData);
+
+        DialogData oppdatertDialog = dialogDAO.hentDialog(dialogId);
+        assertThat(oppdatertDialog.venterPaSvar).isFalse();
+        assertThat(oppdatertDialog.ferdigbehandlet).isFalse();
+    }
+
+
     @Test
     public void hentAktorerMedEndringerEtter_nyDialog_aktorEndret() {
         Date ettSekundSiden = new Date(System.currentTimeMillis() - 1000L);
@@ -138,38 +162,49 @@ public class DialogDAOTest extends IntegrasjonsTest {
     public void hentAktorerMedEndringerFOM_oppdaterDialogStatusOgNyHenvendelse_riktigStatus() {
         long dialogId = opprettNyDialog();
 
-        DialogStatus.DialogStatusBuilder dialogStatusBuilder = builder()
-                .dialogId(dialogId)
-                .venterPaSvar(true);
+//
+//        assertThat(etterForsteOppdatering.tidspunktEldsteUbehandlede).isNull();
+
+        HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID);
+        dialogDAO.opprettHenvendelse(henvendelseData);
+
+//        assertThat(etterForsteOppdatering.tidspunktEldsteUbehandlede).isBefore(forForsteStatusOppdatering);
 
         Date forForsteStatusOppdatering = uniktTidspunkt();
         assertThat(dialogDAO.hentAktorerMedEndringerFOM(forForsteStatusOppdatering)).isEmpty();
+
+        DialogStatus.DialogStatusBuilder dialogStatusBuilder = builder()
+                .dialogId(dialogId)
+                .venterPaSvar(true);
         dialogDAO.oppdaterDialogStatus(dialogStatusBuilder.build());
 
+        Date etterForsteStatusOppdatering = uniktTidspunkt();
         DialogAktor etterForsteOppdatering = hentAktorMedEndringerEtter(forForsteStatusOppdatering);
-        assertThat(etterForsteOppdatering.sisteEndring).isBetween(forForsteStatusOppdatering, uniktTidspunkt());
-        assertThat(etterForsteOppdatering.venterPaSvar).isTrue();
-        assertThat(etterForsteOppdatering.ubehandlet).isTrue();
+        assertThat(etterForsteOppdatering.sisteEndring).isBetween(forForsteStatusOppdatering, etterForsteStatusOppdatering);
+        assertThat(etterForsteOppdatering.tidspunktEldsteVentende).isBetween(forForsteStatusOppdatering, etterForsteStatusOppdatering);
+        assertThat(etterForsteOppdatering.tidspunktEldsteUbehandlede).isBefore(forForsteStatusOppdatering);
 
         Date forAndreStatusOppdatering = uniktTidspunkt();
         assertThat(dialogDAO.hentAktorerMedEndringerFOM(forAndreStatusOppdatering)).isEmpty();
         dialogDAO.oppdaterDialogStatus(dialogStatusBuilder
                 .ferdigbehandlet(true)
+                .venterPaSvar(false)
                 .build()
         );
+        uniktTidspunkt();
 
         DialogAktor etterAndreOppdatering = hentAktorMedEndringerEtter(forAndreStatusOppdatering);
         assertThat(etterAndreOppdatering.sisteEndring).isBetween(forAndreStatusOppdatering, uniktTidspunkt());
-        assertThat(etterAndreOppdatering.venterPaSvar).isTrue();
-        assertThat(etterAndreOppdatering.ubehandlet).isFalse();
+        assertThat(etterAndreOppdatering.tidspunktEldsteVentende).isNull();
+        assertThat(etterAndreOppdatering.tidspunktEldsteUbehandlede).isNull();
 
         Date forNyHenvendelse = uniktTidspunkt();
         dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID));
 
         DialogAktor etterNyHenvenselse = hentAktorMedEndringerEtter(forNyHenvendelse);
         assertThat(etterNyHenvenselse.sisteEndring).isBetween(forNyHenvendelse, uniktTidspunkt());
-        assertThat(etterNyHenvenselse.venterPaSvar).isFalse();
-        assertThat(etterNyHenvenselse.ubehandlet).isTrue();
+        assertThat(etterNyHenvenselse.tidspunktEldsteVentende).isNull();
+        assertThat(etterNyHenvenselse.tidspunktEldsteUbehandlede).isBetween(forNyHenvendelse, uniktTidspunkt());
     }
 
     private DialogAktor hentAktorMedEndringerEtter(Date tidspunkt) {

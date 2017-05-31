@@ -11,8 +11,8 @@ public class DialogAktorDTO implements Comparable<DialogAktorDTO> {
 
     public String aktorId;
     public Date sisteEndring;
-    public boolean venterPaSvar;
-    public boolean harUbehandlet;
+    public Date tidspunktEldsteVentende;
+    public Date tidspunktEldsteUbehandlede;
 
     @Override
     public int compareTo(DialogAktorDTO o) {

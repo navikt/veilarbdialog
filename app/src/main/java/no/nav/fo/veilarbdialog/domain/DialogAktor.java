@@ -15,7 +15,7 @@ public class DialogAktor {
 
     public final String aktorId;
     public final Date sisteEndring;
-    public final boolean venterPaSvar;
-    public final boolean ubehandlet;
+    public final Date tidspunktEldsteVentende;
+    public final Date tidspunktEldsteUbehandlede;
 
 }
