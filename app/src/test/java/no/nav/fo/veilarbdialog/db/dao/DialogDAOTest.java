@@ -173,13 +173,8 @@ public class DialogDAOTest extends IntegrasjonsTest {
     public void hentAktorerMedEndringerFOM_oppdaterDialogStatusOgNyHenvendelse_riktigStatus() {
         long dialogId = opprettNyDialog();
 
-//
-//        assertThat(etterForsteOppdatering.tidspunktEldsteUbehandlede).isNull();
-
         HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID);
         dialogDAO.opprettHenvendelse(henvendelseData);
-
-//        assertThat(etterForsteOppdatering.tidspunktEldsteUbehandlede).isBefore(forForsteStatusOppdatering);
 
         Date forForsteStatusOppdatering = uniktTidspunkt();
         assertThat(dialogDAO.hentAktorerMedEndringerFOM(forForsteStatusOppdatering)).isEmpty();
