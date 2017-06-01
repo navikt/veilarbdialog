@@ -16,7 +16,7 @@ public class VarselDAO {
     private Database database;
 
     @Inject
-    DialogDAO dialogDAO;
+    DateProvider dateProvider;
 
     public List<String> hentAktorerMedUlesteMeldinger(long graceMillis) {
         Date grense = new Date(System.currentTimeMillis() - graceMillis);
@@ -33,24 +33,18 @@ public class VarselDAO {
     }
 
     public void oppdaterSisteVarselForBruker(String aktorId) {
-        oppdaterSisteVarselForBruker(aktorId, new Date());
-    }
-
-    void oppdaterSisteVarselForBruker(String aktorId, Date date) {
-        val rader = database.update("UPDATE VARSEL SET sendt = ? WHERE aktor_id = ?",
-                date,
+        val rader = database.update("UPDATE VARSEL SET sendt = " + dateProvider.getNow() + " WHERE aktor_id = ?",
                 aktorId
         );
 
         if (rader == 0) {
-            opprettVarselForBruker(aktorId, date);
+            opprettVarselForBruker(aktorId);
         }
     }
 
-    private void opprettVarselForBruker(String aktorId, Date date) {
-        database.update("INSERT INTO VARSEL (aktor_id, sendt) VALUES (?,?)",
-                aktorId,
-                date
+    private void opprettVarselForBruker(String aktorId) {
+        database.update("INSERT INTO VARSEL (aktor_id, sendt) VALUES (?," + dateProvider.getNow() + ")",
+                aktorId
         );
     }
 }
