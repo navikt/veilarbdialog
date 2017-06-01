@@ -117,8 +117,7 @@ public class DialogDAO {
     }
 
     private void markerLest(long dialogId, String feltNavn) {
-        database.update("UPDATE DIALOG SET " + feltNavn + " = ? WHERE dialog_id = ? ",
-                new Date(),
+        database.update("UPDATE DIALOG SET " + feltNavn + " = " + dateProvider.getNow() + " WHERE dialog_id = ? ",
                 dialogId
         );
     }
@@ -143,13 +142,17 @@ public class DialogDAO {
     }
 
     public void oppdaterDialogStatus(DialogStatus dialogStatus) {
-        Date na = new Date();
-        database.update("UPDATE DIALOG SET siste_vente_pa_svar_tid = ?, siste_ferdigbehandlet_tid = ?, siste_status_endring = ? WHERE dialog_id = ?",
-                dialogStatus.venterPaSvar ? na : null,
-                dialogStatus.ferdigbehandlet ? na : null,
-                na,
+        database.update("UPDATE DIALOG SET " +
+                        "siste_vente_pa_svar_tid = " + nowOrNull(dialogStatus.venterPaSvar) + ", " +
+                        "siste_ferdigbehandlet_tid =  " + nowOrNull(dialogStatus.ferdigbehandlet) + ", " +
+                        "siste_status_endring = " + dateProvider.getNow() +
+                        "WHERE dialog_id = ?",
                 dialogStatus.dialogId
         );
+    }
+
+    private String nowOrNull(boolean venterPaSvar) {
+        return venterPaSvar ? dateProvider.getNow() : "NULL";
     }
 
 }
