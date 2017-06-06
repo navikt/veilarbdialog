@@ -35,10 +35,6 @@
             <groupId>no.nav.sbl.dialogarena</groupId>
             <artifactId>common-cxf</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.modig</groupId>
-            <artifactId>modig-security-ws</artifactId>
-        </dependency>
 
 
         <!-- DB -->
@@ -170,10 +166,6 @@
         <dependency>
             <groupId>no.nav.modig</groupId>
             <artifactId>modig-testcertificates</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-core</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.dialogarena</groupId>
