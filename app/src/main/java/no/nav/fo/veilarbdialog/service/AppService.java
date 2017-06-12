@@ -63,8 +63,8 @@ public class AppService {
                 .orElseThrow(RuntimeException::new); // Hvordan håndere dette?
     }
 
-    public List<DialogAktor> hentAktorerMedEndringerEtter(Date tidspunkt) {
-        return dialogDAO.hentAktorerMedEndringerEtter(tidspunkt);
+    public List<DialogAktor> hentAktorerMedEndringerFOM(Date tidspunkt) {
+        return dialogDAO.hentAktorerMedEndringerFOM(tidspunkt);
     }
 
 }

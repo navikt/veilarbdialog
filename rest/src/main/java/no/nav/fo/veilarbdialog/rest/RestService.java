@@ -1,7 +1,6 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import no.nav.brukerdialog.security.context.SubjectHandler;
-import no.nav.fo.veilarbdialog.api.DialogAktorController;
 import no.nav.fo.veilarbdialog.api.DialogController;
 import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +19,7 @@ import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
 
 @Component
-public class RestService implements DialogController, VeilederDialogController, DialogAktorController {
+public class RestService implements DialogController, VeilederDialogController {
 
     @Inject
     private AppService appService;
@@ -93,14 +91,6 @@ public class RestService implements DialogController, VeilederDialogController, 
         return Optional.ofNullable(requestProvider.get().getParameter("fnr"))
                 .map(pepClient::sjekkTilgangTilFnr)
                 .orElseThrow(RuntimeException::new); // Hvordan håndere dette?
-    }
-
-    @Override
-    public List<DialogAktorDTO> hentAktorerMedEndringerEtter(Date tidspunkt) {
-        return appService.hentAktorerMedEndringerEtter(tidspunkt)
-                .stream()
-                .map(restMapper::somDTO)
-                .collect(toList());
     }
 
     @Override

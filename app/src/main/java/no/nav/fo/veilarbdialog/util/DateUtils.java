@@ -4,6 +4,8 @@ import lombok.SneakyThrows;
 
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -27,4 +29,11 @@ public class DateUtils {
         }).orElse(null);
     }
 
+    public static Date toDate(String value) {
+        return Date.from(ZonedDateTime.parse(value).toInstant());
+    }
+
+    public static String ISO8601FromDate(Date date, ZoneId zoneId) {
+        return ZonedDateTime.ofInstant(date.toInstant(), zoneId).toString();
+    }
 }

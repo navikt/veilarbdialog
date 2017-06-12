@@ -55,8 +55,8 @@ class RestMapper {
     public DialogAktorDTO somDTO(DialogAktor dialogAktor) {
         return new DialogAktorDTO()
                 .setAktorId(dialogAktor.aktorId)
-                .setHarUbehandlet(dialogAktor.ubehandlet)
-                .setVenterPaSvar(dialogAktor.venterPaSvar)
+                .setTidspunktEldsteUbehandlede(dialogAktor.tidspunktEldsteUbehandlede)
+                .setTidspunktEldsteVentende(dialogAktor.tidspunktEldsteVentende)
                 .setSisteEndring(dialogAktor.sisteEndring)
                 ;
     }

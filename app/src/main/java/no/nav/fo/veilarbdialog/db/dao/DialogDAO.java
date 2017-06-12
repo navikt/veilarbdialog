@@ -53,8 +53,8 @@ public class DialogDAO {
                 .lestAvBrukerTidspunkt(hentDato(rs,"lest_av_bruker_tid"))
                 .lestAvBruker(rs.getBoolean("lest_av_bruker"))
                 .lestAvVeileder(rs.getBoolean("lest_av_veileder"))
-                .venterPaSvar(rs.getBoolean("venter_pa_svar"))
-                .ferdigbehandlet(rs.getBoolean("ferdigbehandlet"))
+                .venterPaSvar(hentDato(rs, "vente_pa_svar_tid") != null)
+                .ferdigbehandlet(hentDato(rs, "eldste_ubehandlede_tid") == null)
                 .sisteStatusEndring(hentDato(rs, "siste_status_endring"))
                 .henvendelser(hentHenvendelser(dialogId))  // TODO nøstet spørring, mulig at vi istede bør gjøre to spørringer og flette dataene
                 .build();
@@ -87,16 +87,12 @@ public class DialogDAO {
     public long opprettDialog(DialogData dialogData) {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
         database.update("INSERT INTO " +
-                        "DIALOG (dialog_id,aktor_id,aktivitet_id,overskrift,lest_av_veileder_tid,lest_av_bruker_tid,siste_status_endring,skal_vente_pa_svar,markert_som_ferdigbehandlet) " +
-                        "VALUES (?,?,?,?,?,?," + dateProvider.getNow() + ",?,?)",
+                        "DIALOG (dialog_id,aktor_id,aktivitet_id,overskrift,siste_status_endring) " +
+                        "VALUES (?,?,?,?," + dateProvider.getNow() + ")",
                 dialogId,
                 dialogData.aktorId,
                 dialogData.aktivitetId,
-                dialogData.overskrift,
-                null,
-                null,
-                false,
-                false
+                dialogData.overskrift
         );
         LOG.info("opprettet {}", dialogData);
         return dialogId;
@@ -121,8 +117,7 @@ public class DialogDAO {
     }
 
     private void markerLest(long dialogId, String feltNavn) {
-        database.update("UPDATE DIALOG SET " + feltNavn + " = ? WHERE dialog_id = ? ",
-                new Date(),
+        database.update("UPDATE DIALOG SET " + feltNavn + " = " + dateProvider.getNow() + " WHERE dialog_id = ? ",
                 dialogId
         );
     }
@@ -133,26 +128,31 @@ public class DialogDAO {
                 .findFirst();
     }
 
-    public List<DialogAktor> hentAktorerMedEndringerEtter(Date date) {
-        return database.query("SELECT * FROM AKTOR_STATUS WHERE SISTE_ENDRING > ?", this::mapTilAktor, date);
+    public List<DialogAktor> hentAktorerMedEndringerFOM(Date date) {
+        return database.query("SELECT * FROM AKTOR_STATUS WHERE SISTE_ENDRING >= ?   ", this::mapTilAktor, date);
     }
 
     private DialogAktor mapTilAktor(ResultSet resultSet) throws SQLException {
         return DialogAktor.builder()
                 .aktorId(resultSet.getString("aktor_id"))
                 .sisteEndring(hentDato(resultSet, "siste_endring"))
-                .venterPaSvar(resultSet.getBoolean("venter_pa_svar"))
-                .ubehandlet(!resultSet.getBoolean("ferdigbehandlet"))
+                .tidspunktEldsteUbehandlede(hentDato(resultSet,"tidspunkt_eldste_ubehandlede"))
+                .tidspunktEldsteVentende(hentDato(resultSet,"tidspunkt_eldste_ventende"))
                 .build();
     }
 
     public void oppdaterDialogStatus(DialogStatus dialogStatus) {
-        database.update("UPDATE DIALOG SET skal_vente_pa_svar = ?, markert_som_ferdigbehandlet = ?, siste_status_endring = ? WHERE dialog_id = ?",
-                dialogStatus.venterPaSvar,
-                dialogStatus.ferdigbehandlet,
-                new Date(),
+        database.update("UPDATE DIALOG SET " +
+                        "siste_vente_pa_svar_tid = " + nowOrNull(dialogStatus.venterPaSvar) + ", " +
+                        "siste_ferdigbehandlet_tid =  " + nowOrNull(dialogStatus.ferdigbehandlet) + ", " +
+                        "siste_status_endring = " + dateProvider.getNow() +
+                        "WHERE dialog_id = ?",
                 dialogStatus.dialogId
         );
+    }
+
+    private String nowOrNull(boolean venterPaSvar) {
+        return venterPaSvar ? dateProvider.getNow() : "NULL";
     }
 
 }
