@@ -1,5 +1,6 @@
 package no.nav.fo;
 
+import no.nav.brukerdialog.security.context.SubjectHandler;
 import no.nav.brukerdialog.security.context.SubjectHandlerUtils;
 import no.nav.brukerdialog.security.context.ThreadLocalSubjectHandler;
 import no.nav.brukerdialog.security.domain.IdentType;
@@ -26,6 +27,7 @@ import javax.naming.NamingException;
 import javax.security.auth.Subject;
 import java.io.IOException;
 
+import static no.nav.brukerdialog.security.context.SubjectHandler.SUBJECTHANDLER_KEY;
 import static no.nav.brukerdialog.security.context.SubjectHandlerUtils.setSubject;
 import static no.nav.dialogarena.config.util.Util.setProperty;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
@@ -45,7 +47,7 @@ public abstract class IntegrasjonsTest {
     private JndiBean jndiBean;
 
     protected void setVeilederSubject(String ident) {
-        setProperty("no.nav.modig.core.context.subjectHandlerImplementationClass", ThreadLocalSubjectHandler.class.getName());
+        setProperty(SUBJECTHANDLER_KEY, ThreadLocalSubjectHandler.class.getName());
         SubjectHandlerUtils.SubjectBuilder subjectBuilder = new SubjectHandlerUtils.SubjectBuilder(ident, IdentType.InternBruker);
         Subject subject = subjectBuilder.getSubject();
         subject.getPublicCredentials().add(new OidcCredential(ISSOProvider.getISSOToken()));
