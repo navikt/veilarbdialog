@@ -1,8 +1,8 @@
 DROP VIEW AKTOR_STATUS;
 DROP VIEW DIALOG_STATUS;
 
-ALTER TABLE DIALOG DROP skal_vente_pa_svar;
-ALTER TABLE DIALOG DROP markert_som_ferdigbehandlet;
+ALTER TABLE DIALOG DROP COLUMN skal_vente_pa_svar;
+ALTER TABLE DIALOG DROP COLUMN markert_som_ferdigbehandlet;
 
 ALTER TABLE DIALOG ADD siste_vente_pa_svar_tid TIMESTAMP;
 ALTER TABLE DIALOG ADD siste_ferdigbehandlet_tid TIMESTAMP;
