@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.rest;
 import lombok.SneakyThrows;
 import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.brukerdialog.security.context.SubjectHandler;
-import no.nav.brukerdialog.security.domain.OidcCredential;
+//import no.nav.brukerdialog.security.domain.OidcCredential;
 import no.nav.sbl.dialogarena.common.abac.pep.Pep;
 import no.nav.sbl.dialogarena.common.abac.pep.domain.response.Decision;
 import org.springframework.stereotype.Component;
@@ -26,14 +26,15 @@ public class PepClient {
     }
 
     private String getToken() {
-        return SubjectHandler.getSubjectHandler().getSubject()
-                .getPublicCredentials()
-                .stream()
-                .filter(o -> o instanceof OidcCredential)
-                .map(o -> (OidcCredential) o)
-                .findFirst()
-                .map(OidcCredential::getToken)
-                .orElseThrow(IngenTilgang::new);
+        throw new IngenTilgang();
+//        return SubjectHandler.getSubjectHandler().getSubject()
+//                .getPublicCredentials()
+//                .stream()
+////                .filter(o -> o instanceof OidcCredential)
+////                .map(o -> (OidcCredential) o)
+//                .findFirst()
+////                .map(OidcCredential::getToken)
+//                .orElseThrow(IngenTilgang::new);
     }
 
 }
