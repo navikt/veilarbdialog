@@ -145,7 +145,7 @@ public class DialogDAO {
         database.update("UPDATE DIALOG SET " +
                         "siste_vente_pa_svar_tid = " + nowOrNull(dialogStatus.venterPaSvar) + ", " +
                         "siste_ferdigbehandlet_tid =  " + nowOrNull(dialogStatus.ferdigbehandlet) + ", " +
-                        "siste_status_endring = " + dateProvider.getNow() +
+                        "siste_status_endring = " + dateProvider.getNow() + " " +
                         "WHERE dialog_id = ?",
                 dialogStatus.dialogId
         );
