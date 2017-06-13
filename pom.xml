@@ -46,6 +46,12 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>no.nav.dialogarena</groupId>
+                <artifactId>oidc-security</artifactId>
+                <version>0.6-test-logging-SNAPSHOT</version>
+            </dependency>
+
             <!--Project dependencies-->
             <dependency>
                 <groupId>no.nav.fo</groupId>
