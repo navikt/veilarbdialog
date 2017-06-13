@@ -8,6 +8,12 @@
         <param-name>springContekstKlasse</param-name>
         <param-value>no.nav.fo.veilarbdialog.ApplicationContext</param-value>
     </context-param>
+
+    <context-param>
+        <param-name>oidc.autoRegistration</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
     <listener>
         <listener-class>no.nav.apiapp.ApiAppServletContextListener</listener-class>
     </listener>
