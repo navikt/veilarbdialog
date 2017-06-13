@@ -20,6 +20,7 @@
     <security serviceUserResourceAlias="srvveilarbdialog">
         <logins>
             <saml/>
+            <openIdConnect moduleClass="no.nav.brukerdialog.security.jaspic.OidcAuthModule"/>
         </logins>
     </security>
 
