@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 
@@ -15,8 +16,11 @@ class RestMapper {
 
     public DialogDTO somDialogDTO(DialogData dialogData) {
         List<HenvendelseData> henvendelser = dialogData.henvendelser;
+        Optional<HenvendelseData> forsteHenvendelse = henvendelser.stream()
+                .sorted(comparing(HenvendelseData::getSendt))
+                .findFirst();
         Optional<HenvendelseData> sisteHenvendelse = henvendelser.stream()
-                .sorted(Comparator.comparing(HenvendelseData::getSendt).reversed())
+                .sorted(comparing(HenvendelseData::getSendt).reversed())
                 .findFirst();
 
         // TODO her gjøres endel masering av data som klienten kanskje burde gjøre selv. Eller?
@@ -34,6 +38,10 @@ class RestMapper {
                 .setFerdigBehandlet(dialogData.ferdigbehandlet)
                 .setVenterPaSvar(dialogData.venterPaSvar)
                 .setSisteDato(sisteHenvendelse
+                        .map(HenvendelseData::getSendt)
+                        .orElse(null)
+                )
+                .setOpprettetDato(forsteHenvendelse
                         .map(HenvendelseData::getSendt)
                         .orElse(null)
                 )
