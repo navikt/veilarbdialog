@@ -1,11 +1,13 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import no.nav.fo.feed.common.FeedElement;
+import no.nav.fo.feed.consumer.FeedConsumer;
 import no.nav.fo.feed.controller.FeedController;
 import no.nav.fo.feed.producer.FeedProducer;
 import no.nav.fo.veilarbdialog.domain.DialogAktorDTO;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.util.DateUtils;
+import no.nav.fo.veilarbsituasjon.rest.domain.AvsluttetOppfolgingFeedDTO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,11 +18,16 @@ import java.util.stream.Stream;
 
 @Configuration
 public class FeedConfig {
+
     @Bean
-    public FeedController feedController(FeedProducer<DialogAktorDTO> dialogaktorFeed) {
+    public FeedController feedController(
+            FeedProducer<DialogAktorDTO> dialogaktorFeed,
+            FeedConsumer<AvsluttetOppfolgingFeedDTO> avsluttetOppfolgingFeedDTOFeedConsumer
+    ) {
         FeedController feedController = new FeedController();
 
         feedController.addFeed("dialogaktor", dialogaktorFeed);
+        feedController.addFeed(AvsluttetOppfolgingFeedDTO.FEED_NAME, avsluttetOppfolgingFeedDTOFeedConsumer);
 
         return feedController;
     }

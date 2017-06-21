@@ -26,6 +26,7 @@ public class DialogData {
 
     public final Date lestAvBrukerTidspunkt;
     public final Date sisteStatusEndring;
+    public final Date historiskDato;
 
     public final List<HenvendelseData> henvendelser;
 

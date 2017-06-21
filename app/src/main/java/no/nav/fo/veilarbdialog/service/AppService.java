@@ -6,6 +6,7 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.ws.consumer.AktoerConsumer;
+import no.nav.fo.veilarbsituasjon.rest.domain.AvsluttetOppfolgingFeedDTO;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -67,6 +68,14 @@ public class AppService {
         return dialogDAO.hentAktorerMedEndringerFOM(tidspunkt);
     }
 
+    public void settDialogerTilHistoriske(AvsluttetOppfolgingFeedDTO element) {
+        hentDialogerForBruker(element.getAktoerid())
+                .stream()
+                .map(DialogData::toBuilder)
+                .map(dialog -> dialog.historiskDato(element.getSluttdato()))
+                .map(DialogData.DialogDataBuilder::build)
+                .forEach(dialog -> dialogDAO.settDialogTilHistorisk(dialog));
+    }
 }
 
 

@@ -57,6 +57,7 @@ public class DialogDAO {
                 .ferdigbehandlet(hentDato(rs, "eldste_ubehandlede_tid") == null)
                 .sisteStatusEndring(hentDato(rs, "siste_status_endring"))
                 .henvendelser(hentHenvendelser(dialogId))  // TODO nøstet spørring, mulig at vi istede bør gjøre to spørringer og flette dataene
+                .historiskDato(hentDato(rs, "historisk_dato"))
                 .build();
     }
 
@@ -87,12 +88,13 @@ public class DialogDAO {
     public long opprettDialog(DialogData dialogData) {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
         database.update("INSERT INTO " +
-                        "DIALOG (dialog_id,aktor_id,aktivitet_id,overskrift,siste_status_endring) " +
-                        "VALUES (?,?,?,?," + dateProvider.getNow() + ")",
+                        "DIALOG (dialog_id,aktor_id,aktivitet_id,overskrift,historisk_dato,siste_status_endring) " +
+                        "VALUES (?,?,?,?,?," + dateProvider.getNow() + ")",
                 dialogId,
                 dialogData.aktorId,
                 dialogData.aktivitetId,
-                dialogData.overskrift
+                dialogData.overskrift,
+                dialogData.historiskDato
         );
         LOG.info("opprettet {}", dialogData);
         return dialogId;
@@ -148,6 +150,15 @@ public class DialogDAO {
                         "siste_status_endring = " + dateProvider.getNow() + " " +
                         "WHERE dialog_id = ?",
                 dialogStatus.dialogId
+        );
+    }
+
+    public void settDialogTilHistorisk(DialogData dialog) {
+        database.update("UPDATE DIALOG SET " +
+                        "historisk_dato = ? "+
+                        "WHERE dialog_id = ?",
+                dialog.getHistoriskDato(),
+                dialog.id
         );
     }
 
