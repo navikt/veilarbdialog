@@ -5,6 +5,7 @@ import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.sql.ResultSet;
@@ -161,6 +162,7 @@ public class DialogDAO {
         );
     }
 
+    @Transactional
     public void settDialogTilHistoriskOgOppdaterFeed(DialogData dialog) {
         database.update("UPDATE DIALOG SET " +
                         "historisk = 1 "+
