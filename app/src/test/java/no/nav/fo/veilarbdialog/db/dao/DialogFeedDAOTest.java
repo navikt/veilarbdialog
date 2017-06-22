@@ -39,6 +39,6 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         val tidspunktEtterHistorisk = new Date();
 
         val sisteDialogTidspunkt = dialogFeedDAO.hentSisteHistoriskeTidspunkt();
-        assertThat(sisteDialogTidspunkt).isBefore(tidspunktEtterHistorisk);
+        assertThat(sisteDialogTidspunkt).isBeforeOrEqualsTo(tidspunktEtterHistorisk);
     }
 }
