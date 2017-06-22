@@ -36,12 +36,6 @@ public class VarselDAOTest extends IntegrasjonsTest {
         return dialogDAO.opprettDialog(nyDialog(AKTOR_ID));
     }
 
-    @Before
-    public void setup(){
-        varselDAO.dateProvider = dialogDAO.dateProvider = mock(DateProvider.class);
-        when(dialogDAO.dateProvider.getNow()).thenAnswer(DialogDAOTest::timestampFromSystemTime);
-    }
-
     @Test
     public void skalIkkeHenteBrukereSomHarBlittVarsletOmUlesteMeldinger() {
         long dialogId = opprettNyDialog();

@@ -140,7 +140,7 @@ public class DialogDAO {
     }
 
     public List<DialogAktor> hentAktorerMedEndringerFOM(Date date) {
-        return database.query("SELECT * FROM AKTOR_STATUS WHERE SISTE_ENDRING >= ?   ", this::mapTilAktor, date);
+        return database.query("SELECT * FROM AKTOR_STATUS WHERE SISTE_ENDRING >= ?", this::mapTilAktor, date);
     }
 
     private DialogAktor mapTilAktor(ResultSet resultSet) throws SQLException {

@@ -1,6 +1,6 @@
 package no.nav.fo;
 
-import no.nav.brukerdialog.security.context.SubjectHandler;
+import lombok.SneakyThrows;
 import no.nav.brukerdialog.security.context.SubjectHandlerUtils;
 import no.nav.brukerdialog.security.context.ThreadLocalSubjectHandler;
 import no.nav.brukerdialog.security.domain.IdentType;
@@ -9,6 +9,7 @@ import no.nav.dialogarena.config.DevelopmentSecurity;
 import no.nav.dialogarena.config.fasit.FasitUtils;
 import no.nav.dialogarena.config.security.ISSOProvider;
 import no.nav.fo.veilarbdialog.ApplicationContext;
+import no.nav.fo.veilarbdialog.db.dao.DateProvider;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -26,12 +27,16 @@ import javax.jms.Destination;
 import javax.naming.NamingException;
 import javax.security.auth.Subject;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.sql.Timestamp;
+import java.util.function.Supplier;
 
 import static no.nav.brukerdialog.security.context.SubjectHandler.SUBJECTHANDLER_KEY;
 import static no.nav.brukerdialog.security.context.SubjectHandlerUtils.setSubject;
 import static no.nav.dialogarena.config.util.Util.setProperty;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
 import static org.mockito.Mockito.mock;
+import static org.springframework.util.ReflectionUtils.setField;
 
 @ContextConfiguration(classes = {
         ApplicationContext.class,
@@ -45,6 +50,18 @@ public abstract class IntegrasjonsTest {
 
     @Inject
     private JndiBean jndiBean;
+
+    @Before
+    @SneakyThrows
+    public void setupDateProvider() {
+        Field providerField = DateProvider.class.getDeclaredField("provider");
+        providerField.setAccessible(true);
+        setField(providerField, null, (Supplier<String>) IntegrasjonsTest::timestampFromSystemTime);
+    }
+
+    static String timestampFromSystemTime() {
+        return String.format("\'%s\'", new Timestamp(System.currentTimeMillis()));
+    }
 
     protected void setVeilederSubject(String ident) {
         setProperty(SUBJECTHANDLER_KEY, ThreadLocalSubjectHandler.class.getName());
