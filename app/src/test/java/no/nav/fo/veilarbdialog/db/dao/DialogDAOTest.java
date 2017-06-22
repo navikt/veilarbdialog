@@ -48,6 +48,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
                 .id(hentetDialogData.id)
                 .sisteStatusEndring(hentetDialogData.sisteStatusEndring)
                 .ferdigbehandlet(true)
+                .opprettetDato(hentetDialogData.getOpprettetDato())
                 .build()
         );
     }
@@ -68,6 +69,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
                 .id(dialogId)
                 .sisteStatusEndring(hentetDialog.sisteStatusEndring)
                 .ferdigbehandlet(true)
+                .opprettetDato(hentetDialog.getOpprettetDato())
                 .build()
         );
     }
