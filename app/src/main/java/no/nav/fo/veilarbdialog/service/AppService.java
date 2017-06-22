@@ -69,12 +69,8 @@ public class AppService {
     }
 
     public void settDialogerTilHistoriske(AvsluttetOppfolgingFeedDTO element) {
-        hentDialogerForBruker(element.getAktoerid())
-                .stream()
-                .map(DialogData::toBuilder)
-                .map(dialog -> dialog.historiskDato(element.getSluttdato()))
-                .map(DialogData.DialogDataBuilder::build)
-                .forEach(dialog -> dialogDAO.settDialogTilHistorisk(dialog));
+        dialogDAO.hentGjeldendeDialogerForAktorId(element.getAktoerid())
+                .forEach(dialog -> dialogDAO.settDialogTilHistoriskOgOppdaterFeed(dialog));
     }
 }
 

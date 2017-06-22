@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.SneakyThrows;
+import lombok.val;
 import no.nav.fo.IntegrasjonsTest;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
@@ -24,7 +25,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class DialogDAOTest extends IntegrasjonsTest {
-
     private static final String AKTOR_ID = "1234";
 
     @Inject
@@ -211,6 +211,21 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(etterNyHenvenselse.sisteEndring).isBetween(forNyHenvendelse, uniktTidspunkt());
         assertThat(etterNyHenvenselse.tidspunktEldsteVentende).isNull();
         assertThat(etterNyHenvenselse.tidspunktEldsteUbehandlede).isBetween(forNyHenvendelse, uniktTidspunkt());
+    }
+
+    @Test
+    public void hentGjeldendeDialogerForAktorId() throws Exception {
+        val dialog = nyDialog(AKTOR_ID).toBuilder().overskrift("ny").build();
+        val historiskDialog = nyDialog(AKTOR_ID).toBuilder().historisk(true).overskrift("historisk").build();
+
+        dialogDAO.opprettDialog(dialog);
+        dialogDAO.opprettDialog(historiskDialog);
+
+        dialogDAO.settDialogTilHistoriskOgOppdaterFeed(historiskDialog);
+
+        val gjeldendeDialoger = dialogDAO.hentGjeldendeDialogerForAktorId(AKTOR_ID);
+        assertThat(gjeldendeDialoger).hasSize(1);
+        assertThat(gjeldendeDialoger.get(0).overskrift).isEqualTo("ny");
     }
 
     private DialogAktor hentAktorMedEndringerEtter(Date tidspunkt) {

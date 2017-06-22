@@ -16,7 +16,7 @@ public class DialogFeedDAO {
     }
 
     public Date hentSisteHistoriskeTidspunkt() {
-        return database.queryForObject("SELECT MAX(HISTORISK_DATO) AS SISTE_HISTORISKE_DATO FROM DIALOG",
+        return database.queryForObject("SELECT TIDSPUNKT_SISTE_ENDRING AS SISTE_HISTORISKE_DATO FROM FEED_METADATA",
                 (rs) -> Database.hentDato(rs, "SISTE_HISTORISKE_DATO")
         );
     }

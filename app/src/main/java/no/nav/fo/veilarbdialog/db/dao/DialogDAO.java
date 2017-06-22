@@ -36,6 +36,13 @@ public class DialogDAO {
         );
     }
 
+    public List<DialogData> hentGjeldendeDialogerForAktorId(String aktorId) {
+        return database.query(SELECT_DIALOG + "WHERE d.aktor_id = ? AND historisk = 0",
+                this::mapTilDialog,
+                aktorId
+        );
+    }
+
     public DialogData hentDialog(long dialogId) {
         return database.queryForObject(SELECT_DIALOG + "WHERE d.dialog_id = ?",
                 this::mapTilDialog,
@@ -57,7 +64,8 @@ public class DialogDAO {
                 .ferdigbehandlet(hentDato(rs, "eldste_ubehandlede_tid") == null)
                 .sisteStatusEndring(hentDato(rs, "siste_status_endring"))
                 .henvendelser(hentHenvendelser(dialogId))  // TODO nøstet spørring, mulig at vi istede bør gjøre to spørringer og flette dataene
-                .historiskDato(hentDato(rs, "historisk_dato"))
+                .historisk(rs.getBoolean("historisk"))
+                .opprettetDato(hentDato(rs, "opprettet_dato"))
                 .build();
     }
 
@@ -88,13 +96,13 @@ public class DialogDAO {
     public long opprettDialog(DialogData dialogData) {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
         database.update("INSERT INTO " +
-                        "DIALOG (dialog_id,aktor_id,aktivitet_id,overskrift,historisk_dato,siste_status_endring) " +
-                        "VALUES (?,?,?,?,?," + dateProvider.getNow() + ")",
+                        "DIALOG (dialog_id,aktor_id,opprettet_dato,aktivitet_id,overskrift,historisk,siste_status_endring) " +
+                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?," + dateProvider.getNow() + ")",
                 dialogId,
                 dialogData.aktorId,
                 dialogData.aktivitetId,
                 dialogData.overskrift,
-                dialogData.historiskDato
+                dialogData.historisk ? 1 : 0
         );
         LOG.info("opprettet {}", dialogData);
         return dialogId;
@@ -153,12 +161,20 @@ public class DialogDAO {
         );
     }
 
-    public void settDialogTilHistorisk(DialogData dialog) {
+    public void settDialogTilHistoriskOgOppdaterFeed(DialogData dialog) {
         database.update("UPDATE DIALOG SET " +
-                        "historisk_dato = ? "+
-                        "WHERE dialog_id = ?",
-                dialog.getHistoriskDato(),
-                dialog.id
+                        "historisk = 1 "+
+                        "WHERE dialog_id = ? AND " +
+                        "opprettet_dato < ?",
+                dialog.id,
+                dialog.getOpprettetDato()
+        );
+        oppdaterFeed();
+    }
+
+    private void oppdaterFeed() {
+        database.update("UPDATE FEED_METADATA SET " +
+                "tidspunkt_siste_endring = " + dateProvider.getNow()
         );
     }
 
