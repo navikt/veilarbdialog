@@ -8,7 +8,6 @@
 
     <selftest>
         <path>/veilarbdialog/internal/selftest</path>
-        <humanReadablePath>/veilarbdialog/internal/selftest</humanReadablePath>
     </selftest>
 
     <artifacts>
