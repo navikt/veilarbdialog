@@ -11,12 +11,8 @@ import javax.inject.Inject;
 
 @Component
 public class DatabaseHelsesjekk implements Helsesjekk {
-
-
     @Inject
     private JdbcTemplate jdbcTemplate;
-
-    Logger logger = LoggerFactory.getLogger(DatabaseHelsesjekk.class);
 
     @Override
     public void helsesjekk() {
@@ -25,10 +21,10 @@ public class DatabaseHelsesjekk implements Helsesjekk {
 
     @Override
     public HelsesjekkMetadata getMetadata() {
-        String dbUri = System.getProperty("veilarbdialogDataSource.url");
+        String dbUri = System.getProperty("veilarbdialogDataSource.url", "mock (inmemory)");
         return new HelsesjekkMetadata(
                 "Database: " + dbUri,
-                "Lokal database for VeilArbDialog",
+                "Database for VeilArbDialog",
                 true
         );
     }
