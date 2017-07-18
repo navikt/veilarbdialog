@@ -62,7 +62,9 @@ public class DialogDAO {
                 .lestAvBruker(rs.getBoolean("lest_av_bruker"))
                 .lestAvVeileder(rs.getBoolean("lest_av_veileder"))
                 .venterPaSvar(hentDato(rs, "vente_pa_svar_tid") != null)
-                .ferdigbehandlet(hentDato(rs, "eldste_ubehandlede_tid") == null)
+                .ferdigbehandlet(
+                        hentDato(rs, "siste_ferdigbehandlet_tid") != null && hentDato(rs, "eldste_ubehandlede_tid") == null
+                )
                 .sisteStatusEndring(hentDato(rs, "siste_status_endring"))
                 .henvendelser(hentHenvendelser(dialogId))  // TODO nøstet spørring, mulig at vi istede bør gjøre to spørringer og flette dataene
                 .historisk(rs.getBoolean("historisk"))
