@@ -65,10 +65,7 @@ public abstract class IntegrasjonsTest {
 
     protected void setVeilederSubject(String ident) {
         setProperty(SUBJECTHANDLER_KEY, ThreadLocalSubjectHandler.class.getName());
-        SubjectHandlerUtils.SubjectBuilder subjectBuilder = new SubjectHandlerUtils.SubjectBuilder(ident, IdentType.InternBruker);
-        Subject subject = subjectBuilder.getSubject();
-        subject.getPublicCredentials().add(new OidcCredential(ISSOProvider.getISSOToken()));
-        setSubject(subject);
+        setSubject(new SubjectHandlerUtils.SubjectBuilder(ident, IdentType.InternBruker, ISSOProvider.getISSOToken()).getSubject());
     }
 
     @BeforeClass
