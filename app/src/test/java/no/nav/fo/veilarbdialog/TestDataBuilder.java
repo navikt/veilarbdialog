@@ -10,6 +10,10 @@ import static java.util.Collections.emptyList;
 
 public class TestDataBuilder {
 
+    public static DialogData nyDialog() {
+        return nyDialog("aktorId");
+    }
+
     public static DialogData nyDialog(String aktorId) {
         return DialogData.builder()
                 .id(new Random().nextLong())

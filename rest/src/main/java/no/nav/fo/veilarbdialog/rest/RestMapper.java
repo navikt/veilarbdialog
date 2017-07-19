@@ -45,6 +45,7 @@ class RestMapper {
                         .map(HenvendelseData::getSendt)
                         .orElse(null)
                 )
+                .setHistorisk(dialogData.isHistorisk())
                 .setSisteTekst(sisteHenvendelse
                         .map(HenvendelseData::getTekst)
                         .orElse(null))

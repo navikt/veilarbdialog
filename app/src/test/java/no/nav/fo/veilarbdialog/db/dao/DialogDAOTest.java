@@ -226,6 +226,17 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(gjeldendeDialoger.get(0).overskrift).isEqualTo("ny");
     }
 
+    @Test
+    public void settDialogTilHistoriskOgOppdaterFeed_dialog_blir_historisk() {
+        long dialogId = dialogDAO.opprettDialog(nyDialog());
+        DialogData dialog = dialogDAO.hentDialog(dialogId);
+        assertThat(dialog.isHistorisk()).isFalse();
+
+        dialogDAO.settDialogTilHistoriskOgOppdaterFeed(dialog);
+
+        assertThat(dialogDAO.hentDialog(dialogId).isHistorisk()).isTrue();
+    }
+
     private DialogAktor hentAktorMedEndringerEtter(Date tidspunkt) {
         List<DialogAktor> endredeAktorer = dialogDAO.hentAktorerMedEndringerFOM(tidspunkt);
         assertThat(endredeAktorer).hasSize(1);

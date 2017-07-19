@@ -167,11 +167,9 @@ public class DialogDAO {
     @Transactional
     public void settDialogTilHistoriskOgOppdaterFeed(DialogData dialog) {
         database.update("UPDATE DIALOG SET " +
-                        "historisk = 1 "+
-                        "WHERE dialog_id = ? AND " +
-                        "opprettet_dato < ?",
-                dialog.id,
-                dialog.getOpprettetDato()
+                        "historisk = 1 " +
+                        "WHERE dialog_id = ?",
+                dialog.id
         );
         oppdaterFeed();
     }

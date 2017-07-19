@@ -46,6 +46,7 @@ class SoapServiceMapper {
         );
         dialog.setErBehandlet(dialogData.ferdigbehandlet);
         dialog.setErBesvart(!dialogData.venterPaSvar);
+        dialog.setErHistorisk(dialogData.historisk);
         henvendelser.stream().map(h -> somHenvendelse(h, dialogData, personIdent)).forEach(dialog.getHenvendelseListe()::add);
         return dialog;
     }

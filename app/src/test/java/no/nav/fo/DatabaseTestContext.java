@@ -1,5 +1,6 @@
 package no.nav.fo;
 
+import no.nav.dialogarena.config.fasit.DbCredentials;
 import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -13,12 +14,27 @@ import static org.hamcrest.Matchers.greaterThan;
 public class DatabaseTestContext {
 
     public static SingleConnectionDataSource buildDataSource() {
+        return doBuild(new DbCredentials()
+                        .setUrl("jdbc:h2:mem:veilarbdialog;DB_CLOSE_DELAY=-1;MODE=Oracle")
+                        .setUsername("sa")
+                        .setPassword(""),
+                true
+        );
+    }
+
+    public static SingleConnectionDataSource build(DbCredentials dbCredentials) {
+        return doBuild(dbCredentials,false);
+    }
+
+    private static SingleConnectionDataSource doBuild(DbCredentials dbCredentials, boolean migrate) {
         SingleConnectionDataSource dataSource = new SingleConnectionDataSource();
         dataSource.setSuppressClose(true);
-        dataSource.setUrl("jdbc:h2:mem:veilarbdialog;DB_CLOSE_DELAY=-1;MODE=Oracle");
-        dataSource.setUsername("sa");
-        dataSource.setPassword("");
-        createTables(dataSource);
+        dataSource.setUrl(dbCredentials.url);
+        dataSource.setUsername(dbCredentials.username);
+        dataSource.setPassword(dbCredentials.password);
+        if (migrate){
+            createTables(dataSource);
+        }
         return dataSource;
     }
 

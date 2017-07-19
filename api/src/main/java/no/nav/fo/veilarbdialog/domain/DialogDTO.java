@@ -20,6 +20,7 @@ public class DialogDTO {
     public String sisteTekst;
     public Date sisteDato;
     public Date opprettetDato;
+    public boolean historisk;
     public boolean lest;
 
     // veileder-felter
