@@ -3,10 +3,7 @@ package no.nav.fo.veilarbdialog.db.dao;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.fo.IntegrasjonsTest;
-import no.nav.fo.veilarbdialog.domain.DialogAktor;
-import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.DialogStatus;
-import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.domain.*;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -16,6 +13,8 @@ import java.util.List;
 import static java.lang.Thread.sleep;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
+import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
+import static no.nav.fo.veilarbdialog.domain.AvsenderType.VEILEDER;
 import static no.nav.fo.veilarbdialog.domain.DialogStatus.builder;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,7 +35,6 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(hentetDialogData).isEqualTo(dialogData.toBuilder()
                 .id(hentetDialogData.id)
                 .sisteStatusEndring(hentetDialogData.sisteStatusEndring)
-                .ferdigbehandlet(true)
                 .opprettetDato(hentetDialogData.getOpprettetDato())
                 .build()
         );
@@ -57,7 +55,6 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(hentetDialog).isEqualTo(dialogData.toBuilder()
                 .id(dialogId)
                 .sisteStatusEndring(hentetDialog.sisteStatusEndring)
-                .ferdigbehandlet(true)
                 .opprettetDato(hentetDialog.getOpprettetDato())
                 .build()
         );
@@ -70,7 +67,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID);
         dialogDAO.opprettHenvendelse(henvendelseData);
         DialogData dialogMedHenvendelse = dialogDAO.hentDialogerForAktorId(AKTOR_ID).get(0);
-        HenvendelseData henvendelseUtenOpprettelsesDato = dialogMedHenvendelse.getHenvendelser().get(0).toBuilder().sendt(null).build();
+        HenvendelseData henvendelseUtenOpprettelsesDato = dialogMedHenvendelse.getHenvendelser().get(0).withSendt(null);
         assertThat(henvendelseUtenOpprettelsesDato).isEqualTo(henvendelseData);
 
         dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID));
@@ -126,7 +123,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
 
     @Test
-    public void oppdaterDialogStatus_statusTilbakestillesVedNyHenvendelse() {
+    public void oppdaterDialogStatus_statusTilbakestillesVedNyBrukerHenvendelse() {
         long dialogId = opprettNyDialog();
         dialogDAO.oppdaterDialogStatus(builder()
                 .dialogId(dialogId)
@@ -134,11 +131,21 @@ public class DialogDAOTest extends IntegrasjonsTest {
                 .ferdigbehandlet(true)
                 .build()
         );
+        DialogData dialogForOppdatering = dialogDAO.hentDialog(dialogId);
+        assertThat(dialogForOppdatering.venterPaSvar).isTrue();
+        assertThat(dialogForOppdatering.ferdigbehandlet).isTrue();
 
         uniktTidspunkt();
+        HenvendelseData veilederHenvendelseData = nyHenvendelse(dialogId, AKTOR_ID).withAvsenderType(VEILEDER);
+        dialogDAO.opprettHenvendelse(veilederHenvendelseData);
 
-        HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID);
-        dialogDAO.opprettHenvendelse(henvendelseData);
+        DialogData dialogMedVeilederHenvendelse = dialogDAO.hentDialog(dialogId);
+        assertThat(dialogMedVeilederHenvendelse.venterPaSvar).isTrue();
+        assertThat(dialogMedVeilederHenvendelse.ferdigbehandlet).isTrue();
+
+        uniktTidspunkt();
+        HenvendelseData dialogMedBrukerHenvendelse = nyHenvendelse(dialogId, AKTOR_ID).withAvsenderType(BRUKER);
+        dialogDAO.opprettHenvendelse(dialogMedBrukerHenvendelse);
 
         DialogData oppdatertDialog = dialogDAO.hentDialog(dialogId);
         assertThat(oppdatertDialog.venterPaSvar).isFalse();
