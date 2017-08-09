@@ -12,6 +12,7 @@ import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
@@ -94,14 +95,18 @@ public class RestService implements DialogController, VeilederDialogController {
     }
 
     @Override
-    public DialogDTO oppdaterDialog(OppdaterDialogDTO dialogDTO) {
-        appService.oppdaterDialogStatus(DialogStatus.builder()
-                .dialogId(Long.parseLong(dialogDTO.id))
-                .venterPaSvar(dialogDTO.venterPaSvar)
-                .ferdigbehandlet(dialogDTO.ferdigBehandlet)
-                .build()
-        );
-        return markerSomLest(dialogDTO.id);
+    public DialogDTO oppdaterVenterPaSvar(String dialogId, boolean venter) {
+        return oppdaterStatus(dialogId, dialogStatusBuilder -> appService.oppdaterVentePaSvarTidspunkt(dialogStatusBuilder.venterPaSvar(venter).build()));
+    }
+
+    @Override
+    public DialogDTO oppdaterFerdigbehandlet(String dialogId, boolean ferdigbehandlet) {
+        return oppdaterStatus(dialogId, b -> appService.oppdaterFerdigbehandletTidspunkt(b.ferdigbehandlet(ferdigbehandlet).build()));
+    }
+
+    private DialogDTO oppdaterStatus(String dialogId, Consumer<DialogStatus.DialogStatusBuilder> dialogStatusBuilderConsumer) {
+        dialogStatusBuilderConsumer.accept(DialogStatus.builder().dialogId(Long.parseLong(dialogId)));
+        return markerSomLest(dialogId);
     }
 
 }

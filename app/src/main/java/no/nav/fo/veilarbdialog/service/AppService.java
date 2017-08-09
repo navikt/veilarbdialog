@@ -50,8 +50,13 @@ public class AppService {
         return hentDialog(dialogId);
     }
 
-    public DialogData oppdaterDialogStatus(DialogStatus dialogStatus) {
-        dialogDAO.oppdaterDialogStatus(dialogStatus);
+    public DialogData oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
+        dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
+        return hentDialog(dialogStatus.dialogId);
+    }
+
+    public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
+        dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
         return hentDialog(dialogStatus.dialogId);
     }
 

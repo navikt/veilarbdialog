@@ -11,7 +11,11 @@ import java.util.List;
 public interface VeilederDialogController {
 
     @PUT
-    @Path("/{id}")
-    DialogDTO oppdaterDialog(OppdaterDialogDTO dialogDTO);
+    @Path("/{id}/venter_pa_svar/{venter}")
+    DialogDTO oppdaterVenterPaSvar(@PathParam("id") String dialogId, @PathParam("venter") boolean venter);
+
+    @PUT
+    @Path("/{id}/ferdigbehandlet/{ferdigbehandlet}")
+    DialogDTO oppdaterFerdigbehandlet(@PathParam("id") String dialogId, @PathParam("ferdigbehandlet") boolean ferdigbehandlet);
 
 }

@@ -32,11 +32,11 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(dialoger).hasSize(1);
         DialogData hentetDialogData = dialoger.get(0);
         assertThat(hentetDialogData.sisteStatusEndring).isNotNull();
-        assertThat(hentetDialogData).isEqualTo(dialogData.toBuilder()
-                .id(hentetDialogData.id)
-                .sisteStatusEndring(hentetDialogData.sisteStatusEndring)
-                .opprettetDato(hentetDialogData.getOpprettetDato())
-                .build()
+        assertThat(hentetDialogData).isEqualTo(dialogData
+                .withId(hentetDialogData.id)
+                .withSisteStatusEndring(hentetDialogData.sisteStatusEndring)
+                .withOpprettetDato(hentetDialogData.getOpprettetDato())
+                .withFerdigbehandlet(true)
         );
     }
 
@@ -52,11 +52,11 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
         DialogData hentetDialog = dialogDAO.hentDialog(dialogId);
 
-        assertThat(hentetDialog).isEqualTo(dialogData.toBuilder()
-                .id(dialogId)
-                .sisteStatusEndring(hentetDialog.sisteStatusEndring)
-                .opprettetDato(hentetDialog.getOpprettetDato())
-                .build()
+        assertThat(hentetDialog).isEqualTo(dialogData
+                .withId(dialogId)
+                .withSisteStatusEndring(hentetDialog.sisteStatusEndring)
+                .withOpprettetDato(hentetDialog.getOpprettetDato())
+                .withFerdigbehandlet(true)
         );
     }
 
@@ -104,7 +104,30 @@ public class DialogDAOTest extends IntegrasjonsTest {
         DialogData dialogData = dialogDAO.hentDialog(dialogId);
 
         Date tidspunktForOppdatering = uniktTidspunkt();
-        dialogDAO.oppdaterDialogStatus(builder()
+        dialogDAO.oppdaterVentePaSvarTidspunkt(builder()
+                .dialogId(dialogId)
+                .venterPaSvar(true)
+                .build()
+        );
+
+        DialogData oppdatertDialog = dialogDAO.hentDialog(dialogId);
+        assertThat(oppdatertDialog.sisteStatusEndring).isAfter(tidspunktForOppdatering);
+        assertThat(oppdatertDialog.venterPaSvarTidspunkt).isAfter(tidspunktForOppdatering);
+        assertThat(oppdatertDialog).isEqualTo(dialogData
+                .withVenterPaSvar(true)
+                .withSisteStatusEndring(oppdatertDialog.sisteStatusEndring)
+                .withVenterPaSvarTidspunkt(oppdatertDialog.venterPaSvarTidspunkt)
+        );
+    }
+
+
+    @Test
+    public void oppdaterFerdigbehandletTidspunkt_oppdatererStatusFelter() {
+        long dialogId = opprettNyDialog();
+        DialogData dialogData = dialogDAO.hentDialog(dialogId);
+
+        Date tidspunktForOppdatering = uniktTidspunkt();
+        dialogDAO.oppdaterFerdigbehandletTidspunkt(builder()
                 .dialogId(dialogId)
                 .venterPaSvar(true)
                 .ferdigbehandlet(true)
@@ -113,19 +136,20 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
         DialogData oppdatertDialog = dialogDAO.hentDialog(dialogId);
         assertThat(oppdatertDialog.sisteStatusEndring).isAfter(tidspunktForOppdatering);
-        assertThat(oppdatertDialog).isEqualTo(dialogData.toBuilder()
-                .venterPaSvar(true)
-                .ferdigbehandlet(true)
-                .sisteStatusEndring(oppdatertDialog.sisteStatusEndring)
-                .build()
+        assertThat(oppdatertDialog.ferdigbehandletTidspunkt).isAfter(tidspunktForOppdatering);
+        assertThat(oppdatertDialog.ubehandletTidspunkt).isNull();
+        assertThat(oppdatertDialog).isEqualTo(dialogData
+                .withFerdigbehandlet(true)
+                .withSisteStatusEndring(oppdatertDialog.sisteStatusEndring)
+                .withFerdigbehandletTidspunkt(oppdatertDialog.ferdigbehandletTidspunkt)
+                .withUbehandletTidspunkt(oppdatertDialog.ubehandletTidspunkt)
         );
     }
-
 
     @Test
     public void oppdaterDialogStatus_statusTilbakestillesVedNyBrukerHenvendelse() {
         long dialogId = opprettNyDialog();
-        dialogDAO.oppdaterDialogStatus(builder()
+        dialogDAO.oppdaterVentePaSvarTidspunkt(builder()
                 .dialogId(dialogId)
                 .venterPaSvar(true)
                 .ferdigbehandlet(true)
@@ -152,7 +176,6 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(oppdatertDialog.ferdigbehandlet).isFalse();
     }
 
-
     @Test
     public void hentAktorerMedEndringerEtter_nyDialog_aktorEndret() {
         Date ettSekundSiden = new Date(System.currentTimeMillis() - 1000L);
@@ -177,10 +200,12 @@ public class DialogDAOTest extends IntegrasjonsTest {
         Date forForsteStatusOppdatering = uniktTidspunkt();
         assertThat(dialogDAO.hentAktorerMedEndringerFOM(forForsteStatusOppdatering)).isEmpty();
 
-        DialogStatus.DialogStatusBuilder dialogStatusBuilder = builder()
-                .dialogId(dialogId)
-                .venterPaSvar(true);
-        dialogDAO.oppdaterDialogStatus(dialogStatusBuilder.build());
+        DialogStatus.DialogStatusBuilder dialogStatusBuilder = builder().dialogId(dialogId);
+
+        dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatusBuilder
+                .venterPaSvar(true)
+                .build()
+        );
 
         Date etterForsteStatusOppdatering = uniktTidspunkt();
         DialogAktor etterForsteOppdatering = hentAktorMedEndringerEtter(forForsteStatusOppdatering);
@@ -190,16 +215,15 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
         Date forAndreStatusOppdatering = uniktTidspunkt();
         assertThat(dialogDAO.hentAktorerMedEndringerFOM(forAndreStatusOppdatering)).isEmpty();
-        dialogDAO.oppdaterDialogStatus(dialogStatusBuilder
+        dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatusBuilder
                 .ferdigbehandlet(true)
-                .venterPaSvar(false)
                 .build()
         );
         uniktTidspunkt();
 
         DialogAktor etterAndreOppdatering = hentAktorMedEndringerEtter(forAndreStatusOppdatering);
         assertThat(etterAndreOppdatering.sisteEndring).isBetween(forAndreStatusOppdatering, uniktTidspunkt());
-        assertThat(etterAndreOppdatering.tidspunktEldsteVentende).isNull();
+        assertThat(etterAndreOppdatering.tidspunktEldsteVentende).isBetween(forForsteStatusOppdatering, etterForsteStatusOppdatering);
         assertThat(etterAndreOppdatering.tidspunktEldsteUbehandlede).isNull();
 
         Date forNyHenvendelse = uniktTidspunkt();
