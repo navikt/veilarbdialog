@@ -16,11 +16,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Comparator.naturalOrder;
-import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.db.Database.hentDato;
-import static no.nav.fo.veilarbdialog.domain.Aggregator.*;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -60,11 +58,7 @@ public class DialogDAO {
 
     private DialogData mapTilDialog(ResultSet rs) throws SQLException {
         long dialogId = rs.getLong("dialog_id");
-        // TODO nøstet spørring, mulig at vi istede bør gjøre to spørringer og flette dataene
-        List<HenvendelseData> henvendelser = hentHenvendelser(dialogId);
-        Date sisteUbehandletTid = hentDato(rs, "siste_ubehandlet_tid");
-        Date sisteFerdigbehandletTid = hentDato(rs, "siste_ferdigbehandlet_tid");
-        DialogData dialogData = DialogData.builder()
+        return DialogData.builder()
                 .id(dialogId)
                 .aktorId(rs.getString("aktor_id"))
                 .aktivitetId(rs.getString("aktivitet_id"))
@@ -72,27 +66,12 @@ public class DialogDAO {
                 .lestAvBrukerTidspunkt(hentDato(rs, "lest_av_bruker_tid"))
                 .lestAvVeilederTidspunkt(hentDato(rs, "lest_av_veileder_tid"))
                 .venterPaSvarTidspunkt(hentDato(rs, "siste_vente_pa_svar_tid"))
-                .ferdigbehandletTidspunkt(sisteFerdigbehandletTid)
-                .ubehandletTidspunkt(ofNullable(sisteUbehandletTid).orElseGet(() -> henvendelser.stream()
-                                .filter(HenvendelseData::fraBruker)
-                                .map(HenvendelseData::getSendt)
-                                .filter(s -> sisteFerdigbehandletTid == null || s.after(sisteFerdigbehandletTid))
-                                .min(naturalOrder())
-                                .orElse(sisteUbehandletTid)
-                        )
-                )
+                .ferdigbehandletTidspunkt(hentDato(rs, "siste_ferdigbehandlet_tid"))
+                .ubehandletTidspunkt(hentDato(rs, "siste_ubehandlet_tid"))
                 .sisteStatusEndring(hentDato(rs, "siste_status_endring"))
-                .henvendelser(henvendelser)
+                .henvendelser(hentHenvendelser(dialogId))
                 .historisk(rs.getBoolean("historisk"))
                 .opprettetDato(hentDato(rs, "opprettet_dato"))
-                .build();
-
-        return dialogData.toBuilder()
-                // NB: disse aggreringene trenger henvendelsene!
-                .lestAvBruker(erDialogLestAvBruker(dialogData))
-                .lestAvVeileder(erDialogLestAvVeileder(dialogData))
-                .venterPaSvar(venterPaSvar(dialogData))
-                .ferdigbehandlet(erFerdigbehandlet(dialogData))
                 .build();
     }
 
@@ -126,10 +105,10 @@ public class DialogDAO {
                         "DIALOG (dialog_id,aktor_id,opprettet_dato,aktivitet_id,overskrift,historisk,siste_status_endring) " +
                         "VALUES (?,?," + dateProvider.getNow() + ",?,?,?," + dateProvider.getNow() + ")",
                 dialogId,
-                dialogData.aktorId,
-                dialogData.aktivitetId,
-                dialogData.overskrift,
-                dialogData.historisk ? 1 : 0
+                dialogData.getAktorId(),
+                dialogData.getAktivitetId(),
+                dialogData.getOverskrift(),
+                dialogData.isHistorisk() ? 1 : 0
         );
         LOG.info("opprettet {}", dialogData);
         return dialogId;
@@ -176,6 +155,7 @@ public class DialogDAO {
     }
 
     private List<DialogData> hentDialogerMedEndingerFOM(Date date) {
+        // TODO denne må limites til pageSize i FeedConfig
         return database.query("SELECT * FROM DIALOG d " +
                         "LEFT JOIN HENVENDELSE h ON h.dialog_id = d.dialog_id " +
                         "WHERE SISTE_STATUS_ENDRING >= ? OR (h.sendt >= ? AND h.avsender_type = '" + BRUKER.name() + "')",
@@ -190,12 +170,12 @@ public class DialogDAO {
         return DialogAktor.builder()
                 .aktorId(dialogerForAktorId.getKey())
                 .sisteEndring(dialogData.stream()
-                        .map(Aggregator::sisteEndring)
+                        .map(DialogData::getSisteEndring)
                         .max(naturalOrder())
                         .orElse(null)
                 )
                 .tidspunktEldsteVentende(dialogData.stream()
-                        .filter(DialogData::isVenterPaSvar)
+                        .filter(DialogData::venterPaSvar)
                         .map(DialogData::getVenterPaSvarTidspunkt)
                         .min(naturalOrder())
                         .orElse(null)
@@ -232,7 +212,7 @@ public class DialogDAO {
         database.update("UPDATE DIALOG SET " +
                         "historisk = 1 " +
                         "WHERE dialog_id = ?",
-                dialog.id
+                dialog.getId()
         );
         oppdaterFeed();
     }

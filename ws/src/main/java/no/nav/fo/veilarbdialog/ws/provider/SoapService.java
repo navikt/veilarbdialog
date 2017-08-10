@@ -68,7 +68,7 @@ public class SoapService implements AktivitetDialogV1 {
     }
 
     private DialogData markerDialogSomLest(DialogData dialogData) {
-        return appService.markerDialogSomLestAvBruker(dialogData.id);
+        return appService.markerDialogSomLestAvBruker(dialogData.getId());
     }
 
     @Override
@@ -85,7 +85,7 @@ public class SoapService implements AktivitetDialogV1 {
 
     private OpprettDialogForAktivitetResponse opprettDialogForAktivitetResponse(DialogData dialogData) {
         OpprettDialogForAktivitetResponse opprettDialogForAktivitetResponse = new OpprettDialogForAktivitetResponse();
-        opprettDialogForAktivitetResponse.setDialogId(Long.toString(dialogData.id));
+        opprettDialogForAktivitetResponse.setDialogId(Long.toString(dialogData.getId()));
         return opprettDialogForAktivitetResponse;
     }
 
@@ -102,7 +102,7 @@ public class SoapService implements AktivitetDialogV1 {
 
     private OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse(DialogData dialogData) {
         OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse = new OpprettDialogForAktivitetsplanResponse();
-        opprettDialogForAktivitetsplanResponse.setDialogId(Long.toString(dialogData.id));
+        opprettDialogForAktivitetsplanResponse.setDialogId(Long.toString(dialogData.getId()));
         return opprettDialogForAktivitetsplanResponse;
     }
 

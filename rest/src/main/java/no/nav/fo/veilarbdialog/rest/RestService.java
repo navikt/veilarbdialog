@@ -62,7 +62,7 @@ public class RestService implements DialogController, VeilederDialogController {
             return of(nyHenvendelseDTO.aktivitetId)
                     .flatMap(appService::hentDialogForAktivitetId)
                     .orElseGet(() -> opprettDialog(nyHenvendelseDTO))
-                    .id;
+                    .getId();
         }
     }
 

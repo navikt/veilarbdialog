@@ -3,7 +3,6 @@ package no.nav.fo.veilarbdialog.rest;
 import no.nav.fo.veilarbdialog.domain.*;
 import org.springframework.stereotype.Component;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,7 +14,7 @@ import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 class RestMapper {
 
     public DialogDTO somDialogDTO(DialogData dialogData) {
-        List<HenvendelseData> henvendelser = dialogData.henvendelser;
+        List<HenvendelseData> henvendelser = dialogData.getHenvendelser();
         Optional<HenvendelseData> forsteHenvendelse = henvendelser.stream()
                 .sorted(comparing(HenvendelseData::getSendt))
                 .findFirst();
@@ -27,16 +26,16 @@ class RestMapper {
         return new DialogDTO()
                 .setId(Long.toString(dialogData.getId()))
                 .setAktivitetId(dialogData.getAktivitetId())
-                .setOverskrift(dialogData.overskrift)
+                .setOverskrift(dialogData.getOverskrift())
                 .setHenvendelser(henvendelser.stream()
                         .map(this::somHenvendelseDTO)
                         .collect(toList())
                 )
-                .setLest(dialogData.lestAvVeileder)
-                .setLestAvBrukerTidspunkt(dialogData.lestAvBrukerTidspunkt)
-                .setErLestAvBruker(dialogData.lestAvBruker)
-                .setFerdigBehandlet(dialogData.ferdigbehandlet)
-                .setVenterPaSvar(dialogData.venterPaSvar)
+                .setLest(dialogData.erLestAvVeileder())
+                .setLestAvBrukerTidspunkt(dialogData.getLestAvBrukerTidspunkt())
+                .setErLestAvBruker(dialogData.erLestAvBruker())
+                .setFerdigBehandlet(dialogData.erFerdigbehandlet())
+                .setVenterPaSvar(dialogData.venterPaSvar())
                 .setSisteDato(sisteHenvendelse
                         .map(HenvendelseData::getSendt)
                         .orElse(null)

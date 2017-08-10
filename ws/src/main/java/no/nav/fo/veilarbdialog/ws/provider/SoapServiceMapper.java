@@ -25,17 +25,17 @@ class SoapServiceMapper {
     private AppService appService;
 
     public Dialog somWSDialog(DialogData dialogData, String personIdent) {
-        List<HenvendelseData> henvendelser = dialogData.henvendelser;
+        List<HenvendelseData> henvendelser = dialogData.getHenvendelser();
 
         Bruker bruker = new Bruker();
         bruker.setPersonIdent(personIdent);
 
         Dialog dialog = new Dialog();
-        dialog.setId(Long.toString(dialogData.id));
-        dialog.setTittel(dialogData.overskrift);
-        dialog.setErLest(dialogData.lestAvBruker);
+        dialog.setId(Long.toString(dialogData.getId()));
+        dialog.setTittel(dialogData.getOverskrift());
+        dialog.setErLest(dialogData.erLestAvBruker());
         dialog.setGjelder(bruker);
-        dialog.setKontekstId(ofNullable(dialogData.aktivitetId).orElse(""));
+        dialog.setKontekstId(ofNullable(dialogData.getAktivitetId()).orElse(""));
         dialog.setOpprettet(henvendelser
                 .stream()
                 .map(HenvendelseData::getSendt)
@@ -44,9 +44,9 @@ class SoapServiceMapper {
                 .findFirst()
                 .orElseGet(() -> xmlCalendar(new Date())) // TODO eller skal det inn timestamp på dialogen?
         );
-        dialog.setErBehandlet(dialogData.ferdigbehandlet);
-        dialog.setErBesvart(!dialogData.venterPaSvar);
-        dialog.setErHistorisk(dialogData.historisk);
+        dialog.setErBehandlet(dialogData.erFerdigbehandlet());
+        dialog.setErBesvart(!dialogData.venterPaSvar());
+        dialog.setErHistorisk(dialogData.isHistorisk());
         henvendelser.stream().map(h -> somHenvendelse(h, dialogData, personIdent)).forEach(dialog.getHenvendelseListe()::add);
         return dialog;
     }
