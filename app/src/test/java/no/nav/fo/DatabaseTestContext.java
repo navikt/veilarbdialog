@@ -13,9 +13,11 @@ import static org.hamcrest.Matchers.greaterThan;
 @EnableTransactionManagement
 public class DatabaseTestContext {
 
+    private static int counter;
+
     public static SingleConnectionDataSource buildDataSource() {
         return doBuild(new DbCredentials()
-                        .setUrl("jdbc:h2:mem:veilarbdialog;DB_CLOSE_DELAY=-1;MODE=Oracle")
+                        .setUrl("jdbc:h2:mem:veilarbdialog-" + (counter++) + ";DB_CLOSE_DELAY=-1;MODE=Oracle")
                         .setUsername("sa")
                         .setPassword(""),
                 true

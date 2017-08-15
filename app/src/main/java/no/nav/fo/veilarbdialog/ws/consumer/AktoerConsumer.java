@@ -38,4 +38,20 @@ public class AktoerConsumer {
         }
     }
 
+    public Optional<String> hentIdentForAktorId(String aktorId) {
+        if (isBlank(aktorId)) {
+            LOG.warn("Kan ikke hente fødselsnummer uten aktør-id");
+            return empty();
+        }
+        try {
+            return of(aktoerV2.hentIdentForAktoerId(
+                    new WSHentIdentForAktoerIdRequest()
+                            .withAktoerId(aktorId)
+            ).getIdent());
+        } catch (HentIdentForAktoerIdPersonIkkeFunnet e) {
+            LOG.warn("fødselsnummer ikke funnet for aktoerID!", e);
+            return empty();
+        }
+    }
+
 }

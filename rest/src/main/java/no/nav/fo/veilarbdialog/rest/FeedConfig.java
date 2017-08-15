@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.rest;
 
+import no.nav.brukerdialog.security.oidc.OidcFeedAuthorizationModule;
 import no.nav.fo.feed.common.FeedElement;
 import no.nav.fo.feed.consumer.FeedConsumer;
 import no.nav.fo.feed.controller.FeedController;
@@ -36,6 +37,7 @@ public class FeedConfig {
     public FeedProducer<DialogAktorDTO> dialogAktorDTOFeedProducer(AppService appService, RestMapper restMapper) {
         return FeedProducer.<DialogAktorDTO>builder()
                 .provider((tidspunkt, pageSize) -> getFeedElementStream(tidspunkt, appService, restMapper))
+                .authorizationModule(new OidcFeedAuthorizationModule())
                 .maxPageSize(1000)
                 .build();
     }
