@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import javax.inject.Inject;
 
-import static no.nav.fo.TestData.KJENT_IDENT;
+import static no.nav.fo.TestData.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 
@@ -21,6 +21,7 @@ public class SoapServiceTest extends IntegrasjonsTest {
 
     @Test
     public void opprettOgHentDialoger() throws Exception {
+        setVeilederSubject(KJENT_VEILEDER_IDENT);
         soapService.opprettDialogForAktivitetsplan(opprettDialogForAktivitetsplanRequest());
         val hentAktiviteterResponse = soapService.hentDialogerForBruker(hentDialogerForBrukerRequest());
         assertThat(hentAktiviteterResponse.getDialogListe(), hasSize(1));
@@ -29,13 +30,13 @@ public class SoapServiceTest extends IntegrasjonsTest {
     private OpprettDialogForAktivitetsplanRequest opprettDialogForAktivitetsplanRequest() {
         val opprettDialogForAktivitetsplanRequest = new OpprettDialogForAktivitetsplanRequest();
         opprettDialogForAktivitetsplanRequest.setTittel("tittel");
-        opprettDialogForAktivitetsplanRequest.setPersonIdent(KJENT_IDENT);
+        opprettDialogForAktivitetsplanRequest.setPersonIdent(KJENT_IDENT_FOR_KJENT_VEILEDER);
         return opprettDialogForAktivitetsplanRequest;
     }
 
     private HentDialogerForBrukerRequest hentDialogerForBrukerRequest() {
         val hentAktiviteterRequest = new HentDialogerForBrukerRequest();
-        hentAktiviteterRequest.setPersonIdent(KJENT_IDENT);
+        hentAktiviteterRequest.setPersonIdent(KJENT_IDENT_FOR_KJENT_VEILEDER);
         return hentAktiviteterRequest;
     }
 

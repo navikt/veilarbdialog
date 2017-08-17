@@ -27,4 +27,9 @@ public class AktoerConsumerTest extends IntegrasjonsTest {
         assertThat(aktoerConsumer.hentAktoerIdForIdent(TestData.KJENT_IDENT), hasValue(TestData.KJENT_AKTOR_ID));
     }
 
+    @Test
+    public void hentIdentForAktorId_kjentTestAktor_kjentTestIdent() {
+        assertThat(aktoerConsumer.hentIdentForAktorId(TestData.KJENT_AKTOR_ID), hasValue(TestData.KJENT_IDENT));
+    }
+
 }

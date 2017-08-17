@@ -1,9 +1,10 @@
 package no.nav.fo.veilarbdialog;
 
 import no.nav.apiapp.ApiApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import no.nav.apiapp.security.PepClient;
+import no.nav.sbl.dialogarena.common.abac.pep.Pep;
+import no.nav.sbl.dialogarena.common.abac.pep.context.AbacContext;
+import org.springframework.context.annotation.*;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -12,11 +13,17 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableScheduling
 @EnableAspectJAutoProxy
 @ComponentScan("no.nav.fo.veilarbdialog")
+@Import(AbacContext.class)
 public class ApplicationContext implements ApiApplication{
 
     @Override
     public Sone getSone() {
         return Sone.FSS;
+    }
+
+    @Bean
+    public PepClient pepClient(Pep pep) {
+        return new PepClient(pep, "veilarb");
     }
 
 }

@@ -4,29 +4,28 @@ import lombok.SneakyThrows;
 import no.nav.brukerdialog.security.context.SubjectHandlerUtils;
 import no.nav.brukerdialog.security.context.ThreadLocalSubjectHandler;
 import no.nav.brukerdialog.security.domain.IdentType;
-import no.nav.brukerdialog.security.domain.OidcCredential;
 import no.nav.dialogarena.config.DevelopmentSecurity;
 import no.nav.dialogarena.config.fasit.FasitUtils;
 import no.nav.dialogarena.config.security.ISSOProvider;
 import no.nav.fo.veilarbdialog.ApplicationContext;
 import no.nav.fo.veilarbdialog.db.dao.DateProvider;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.runner.RunWith;
-import org.springframework.context.annotation.PropertySource;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Component;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
-import javax.inject.Inject;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.naming.NamingException;
-import javax.security.auth.Subject;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.function.Supplier;
@@ -38,25 +37,37 @@ import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_J
 import static org.mockito.Mockito.mock;
 import static org.springframework.util.ReflectionUtils.setField;
 
-@ContextConfiguration(classes = {
-        ApplicationContext.class,
-        IntegrasjonsTest.JndiBean.class,
-        IntegrasjonsTest.Request.class
-})
-@RunWith(SpringJUnit4ClassRunner.class)
-@PropertySource("classpath:test.properties")
-@Transactional
 public abstract class IntegrasjonsTest {
 
-    @Inject
-    private JndiBean jndiBean;
+    private static final String APPLICATION_NAME = "veilarbdialog";
+    private static AnnotationConfigApplicationContext annotationConfigApplicationContext;
+    private static PlatformTransactionManager platformTransactionManager;
+    private TransactionStatus transactionStatus;
 
     @Before
+    @BeforeEach
     @SneakyThrows
     public void setupDateProvider() {
         Field providerField = DateProvider.class.getDeclaredField("provider");
         providerField.setAccessible(true);
         setField(providerField, null, (Supplier<String>) IntegrasjonsTest::timestampFromSystemTime);
+    }
+
+    @SneakyThrows
+    @BeforeAll
+    @BeforeClass
+    public static void setupContext() {
+        DevelopmentSecurity.setupIntegrationTestSecurity(FasitUtils.getServiceUser("srvveilarbdialog", APPLICATION_NAME, "t6"));
+        System.getProperties().load(IntegrasjonsTest.class.getResourceAsStream("/test.properties"));
+        DevelopmentSecurity.configureLdap(FasitUtils.getLdapConfig("ldap", APPLICATION_NAME, "t6"));
+
+        annotationConfigApplicationContext = new AnnotationConfigApplicationContext(
+                ApplicationContext.class,
+                IntegrasjonsTest.JndiBean.class,
+                IntegrasjonsTest.Request.class
+        );
+        annotationConfigApplicationContext.start();
+        platformTransactionManager = getBean(PlatformTransactionManager.class);
     }
 
     static String timestampFromSystemTime() {
@@ -66,21 +77,6 @@ public abstract class IntegrasjonsTest {
     protected void setVeilederSubject(String ident) {
         setProperty(SUBJECTHANDLER_KEY, ThreadLocalSubjectHandler.class.getName());
         setSubject(new SubjectHandlerUtils.SubjectBuilder(ident, IdentType.InternBruker, ISSOProvider.getISSOToken()).getSubject());
-    }
-
-    @BeforeClass
-    public static void setupIntegrationTestSecurity() {
-        DevelopmentSecurity.setupIntegrationTestSecurity(FasitUtils.getServiceUser("srvveilarbdialog", "veilarbdialog", "t6"));
-    }
-
-    @BeforeClass
-    public static void setupLdap() {
-        DevelopmentSecurity.configureLdap(FasitUtils.getLdapConfig("ldap", "veilarbdialog", "t6"));
-    }
-
-    @BeforeClass
-    public static void testProperties() throws IOException {
-        System.getProperties().load(IntegrasjonsTest.class.getResourceAsStream("/test.properties"));
     }
 
     @Component
@@ -97,12 +93,37 @@ public abstract class IntegrasjonsTest {
 
     }
 
+    @BeforeEach
     @Before
     public final void fiksJndiOgLdapKonflikt() throws NamingException {
-        jndiBean.builder.deactivate();
+        getBean(JndiBean.class).builder.deactivate();
+    }
+
+    @BeforeEach
+    @Before
+    public void injectAvhengigheter() {
+        annotationConfigApplicationContext.getAutowireCapableBeanFactory().autowireBean(this);
+    }
+
+    @BeforeEach
+    @Before
+    public void startTransaksjon() {
+        transactionStatus = platformTransactionManager.getTransaction(new DefaultTransactionDefinition());
+    }
+
+    @AfterEach
+    @After
+    public void rollbackTransaksjon() {
+        platformTransactionManager.rollback(transactionStatus);
     }
 
     @Component
-    public static class Request extends MockHttpServletRequest {}
+    public static class Request extends MockHttpServletRequest {
+    }
+
+    protected static <T> T getBean(Class<T> requiredType) {
+        return annotationConfigApplicationContext.getBean(requiredType);
+    }
+
 
 }
