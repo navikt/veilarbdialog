@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Wither;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Predicate;
@@ -35,8 +36,12 @@ public class DialogData {
 
     private List<HenvendelseData> henvendelser;
 
+    public List<HenvendelseData> getHenvendelser() {
+        return ofNullable(henvendelser).orElseGet(Collections::emptyList);
+    }
+
     public Date getUbehandletTidspunkt() {
-        return ofNullable(ubehandletTidspunkt).orElseGet(() -> henvendelser.stream()
+        return ofNullable(ubehandletTidspunkt).orElseGet(() -> getHenvendelser().stream()
                 .filter(HenvendelseData::fraBruker)
                 .map(HenvendelseData::getSendt)
                 .filter(s -> ferdigbehandletTidspunkt == null || s.after(ferdigbehandletTidspunkt))
@@ -46,7 +51,7 @@ public class DialogData {
     }
 
     public Date getSisteEndring() {
-        return max(sisteStatusEndring, henvendelser
+        return max(sisteStatusEndring, getHenvendelser()
                 .stream()
                 .map(HenvendelseData::getSendt)
                 .max(naturalOrder())
