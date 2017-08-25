@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
+import lombok.val;
 import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.security.PepClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
@@ -92,7 +93,20 @@ public class AppService {
     public void settDialogerTilHistoriske(AvsluttetOppfolgingFeedDTO element) {
         // NB: ingen tilgangskontroll, brukes av vår feed-consumer
         dialogDAO.hentGjeldendeDialogerForAktorId(element.getAktoerid())
-                .forEach(dialog -> dialogDAO.settDialogTilHistoriskOgOppdaterFeed(dialog));
+                .forEach(dialog -> {
+                    val dialogStatus = DialogStatus.builder()
+                            .dialogId(dialog.getId())
+                            .ferdigbehandlet(true)
+                            .venterPaSvar(false)
+                            .build();
+                    if (dialog.erUbehandlet()) {
+                        dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
+                    }
+                    if (dialog.venterPaSvar()) {
+                        dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
+                    }
+                    dialogDAO.settDialogTilHistoriskOgOppdaterFeed(dialog);
+                });
     }
 
     protected String sjekkTilgangTilFnr(String ident) {
@@ -113,6 +127,3 @@ public class AppService {
     }
 
 }
-
-
-
