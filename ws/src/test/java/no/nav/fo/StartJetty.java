@@ -18,7 +18,7 @@ public class StartJetty {
                         .addDatasource(DatabaseTestContext.buildDataSource(), AKTIVITET_DATA_SOURCE_JDNI_NAME)
                         .port(PORT)
                         .sslPort(PORT + 1)
-                , new DevelopmentSecurity.SamlSecurityConfig("veilarbdialog", "t6")
+                , new DevelopmentSecurity.SamlSecurityConfig("veilarbdialog")
         ).buildJetty();
 
         VarselMock.init();

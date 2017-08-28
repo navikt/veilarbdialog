@@ -30,7 +30,7 @@ public class StartJetty {
                                 .orElseGet(DatabaseTestContext::buildDataSource), AKTIVITET_DATA_SOURCE_JDNI_NAME)
                         .port(PORT)
                         .sslPort(SSL_PORT)
-                , new ISSOSecurityConfig(APPLICATION_NAME, "t6")).buildJetty();
+                , new ISSOSecurityConfig(APPLICATION_NAME)).buildJetty();
 
         VarselMock.init();
 
