@@ -57,9 +57,7 @@ public abstract class IntegrasjonsTest {
     @BeforeAll
     @BeforeClass
     public static void setupContext() {
-        DevelopmentSecurity.setupIntegrationTestSecurity(FasitUtils.getServiceUser("srvveilarbdialog", APPLICATION_NAME, "t6"));
-        System.getProperties().load(IntegrasjonsTest.class.getResourceAsStream("/test.properties"));
-        DevelopmentSecurity.configureLdap(FasitUtils.getLdapConfig("ldap", APPLICATION_NAME, "t6"));
+        DevelopmentSecurity.setupIntegrationTestSecurity(new DevelopmentSecurity.IntegrationTestConfig(APPLICATION_NAME));
 
         annotationConfigApplicationContext = new AnnotationConfigApplicationContext(
                 ApplicationContext.class,

@@ -14,7 +14,6 @@ public class StartJetty {
     public static void main(String[] args) throws Exception {
         Jetty jetty = DevelopmentSecurity.setupSamlLogin(usingWar()
                         .at("/veilarbdialog-ws")
-                        .loadProperties("/test.properties")
                         .addDatasource(DatabaseTestContext.buildDataSource(), AKTIVITET_DATA_SOURCE_JDNI_NAME)
                         .port(PORT)
                         .sslPort(PORT + 1)

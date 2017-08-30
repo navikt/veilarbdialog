@@ -22,7 +22,6 @@ public class StartJetty {
     public static void main(String[] args) throws Exception {
         Jetty jetty = setupISSO(usingWar()
                         .at(APPLICATION_NAME)
-                        .loadProperties("/test.properties")
                         .addDatasource(of(System.getProperty("database"))
                                 .map(TestEnvironment::valueOf)
                                 .map(testEnvironment -> FasitUtils.getDbCredentials(testEnvironment, APPLICATION_NAME))
