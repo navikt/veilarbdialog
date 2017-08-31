@@ -2,20 +2,18 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.val;
 import no.nav.fo.IntegrasjonsTest;
+import no.nav.fo.veilarbdialog.domain.AvsenderType;
+
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
-import org.junit.Before;
 import org.junit.Test;
 
 import javax.inject.Inject;
-import java.util.Date;
 
 import static java.lang.Thread.sleep;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class VarselDAOTest extends IntegrasjonsTest {
 
@@ -39,7 +37,7 @@ public class VarselDAOTest extends IntegrasjonsTest {
     @Test
     public void skalIkkeHenteBrukereSomHarBlittVarsletOmUlesteMeldinger() {
         long dialogId = opprettNyDialog();
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.VEILEDER));
 
         varselDAO.oppdaterSisteVarselForBruker(AKTOR_ID);
 
@@ -51,12 +49,12 @@ public class VarselDAOTest extends IntegrasjonsTest {
     public void skalHenterukereSomHarUlesteMeldingerEtterTidligereVarsel() throws Exception {
         long dialogId = opprettNyDialog();
 
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.VEILEDER));
         varselDAO.oppdaterSisteVarselForBruker(AKTOR_ID);
 
         sleep(1);
 
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.VEILEDER));
 
         sleep(1);
 
@@ -67,7 +65,7 @@ public class VarselDAOTest extends IntegrasjonsTest {
     @Test
     public void skalIkkeHentBrukereMedUlesteMeldingerInnenforGracePerioden() throws Exception {
         long dialogId = opprettNyDialog();
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.VEILEDER));
 
         sleep(1);
 
@@ -81,16 +79,16 @@ public class VarselDAOTest extends IntegrasjonsTest {
     @Test
     public void skalHenteBrukereMedUlesteMeldinger() throws Exception {
         long dialogId1 = opprettNyDialog("1111");
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId1, AKTOR_ID));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId1, AKTOR_ID, AvsenderType.VEILEDER));
 
         long dialogId2 = opprettNyDialog("2222");
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId2, AKTOR_ID));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId2, AKTOR_ID, AvsenderType.VEILEDER));
 
         long dialogId3 = opprettNyDialog("3333");
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId3, AKTOR_ID));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId3, AKTOR_ID, AvsenderType.VEILEDER));
 
         long dialogId4 = opprettNyDialog("4444");
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId4, AKTOR_ID));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId4, AKTOR_ID, AvsenderType.VEILEDER));
 
         sleep(1L);
 
@@ -99,4 +97,15 @@ public class VarselDAOTest extends IntegrasjonsTest {
         assertThat(aktorer, IsIterableContainingInAnyOrder.containsInAnyOrder("1111", "2222", "3333", "4444"));
     }
 
+    @Test
+    public void skalIkkeSendeVarselForHenvendelserSomerLagtInnAvBrukerenSelv() throws Exception {
+        long dialogId = opprettNyDialog();
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.BRUKER));
+
+        sleep(1);
+
+        val aktor1 = varselDAO.hentAktorerMedUlesteMeldinger(0); // Utenfor grace
+        assertThat(aktor1.size(), equalTo(0));
+
+    }
 }

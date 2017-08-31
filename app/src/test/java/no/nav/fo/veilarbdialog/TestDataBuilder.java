@@ -22,11 +22,11 @@ public class TestDataBuilder {
                 .build();
     }
 
-    public static HenvendelseData nyHenvendelse(long dialogId, String aktorId) {
+    public static HenvendelseData nyHenvendelse(long dialogId, String aktorId, AvsenderType avsenderType) {
         return HenvendelseData.builder()
                 .dialogId(dialogId)
                 .avsenderId(aktorId)
-                .avsenderType(AvsenderType.values()[0])
+                .avsenderType(avsenderType)
                 .tekst("ny henvendelse!")
                 .build();
     }

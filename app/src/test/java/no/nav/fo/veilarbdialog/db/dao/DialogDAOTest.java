@@ -64,14 +64,14 @@ public class DialogDAOTest extends IntegrasjonsTest {
     public void opprettHenvendelse() {
         long dialogId = opprettNyDialog();
 
-        HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID);
+        HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.values()[0]);
         dialogDAO.opprettHenvendelse(henvendelseData);
         DialogData dialogMedHenvendelse = dialogDAO.hentDialogerForAktorId(AKTOR_ID).get(0);
         HenvendelseData henvendelseUtenOpprettelsesDato = dialogMedHenvendelse.getHenvendelser().get(0).withSendt(null);
         assertThat(henvendelseUtenOpprettelsesDato).isEqualTo(henvendelseData);
 
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID));
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.values()[0]));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.values()[0]));
 
         DialogData dialogMedHenvendelser = dialogDAO.hentDialogerForAktorId(AKTOR_ID).get(0);
         assertThat(dialogMedHenvendelser.getHenvendelser()).hasSize(3);
@@ -160,7 +160,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(dialogForOppdatering.erFerdigbehandlet()).isTrue();
 
         uniktTidspunkt();
-        HenvendelseData veilederHenvendelseData = nyHenvendelse(dialogId, AKTOR_ID).withAvsenderType(VEILEDER);
+        HenvendelseData veilederHenvendelseData = nyHenvendelse(dialogId, AKTOR_ID, VEILEDER);
         dialogDAO.opprettHenvendelse(veilederHenvendelseData);
 
         DialogData dialogMedVeilederHenvendelse = dialogDAO.hentDialog(dialogId);
@@ -168,7 +168,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(dialogMedVeilederHenvendelse.erFerdigbehandlet()).isTrue();
 
         uniktTidspunkt();
-        HenvendelseData dialogMedBrukerHenvendelse = nyHenvendelse(dialogId, AKTOR_ID).withAvsenderType(BRUKER);
+        HenvendelseData dialogMedBrukerHenvendelse = nyHenvendelse(dialogId, AKTOR_ID, BRUKER);
         dialogDAO.opprettHenvendelse(dialogMedBrukerHenvendelse);
 
         DialogData oppdatertDialog = dialogDAO.hentDialog(dialogId);
@@ -194,7 +194,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
     public void hentAktorerMedEndringerFOM_oppdaterDialogStatusOgNyHenvendelse_riktigStatus() {
         long dialogId = opprettNyDialog();
 
-        HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID);
+        HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.values()[0]);
         dialogDAO.opprettHenvendelse(henvendelseData);
 
         Date forForsteStatusOppdatering = uniktTidspunkt();
@@ -227,7 +227,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(etterAndreOppdatering.tidspunktEldsteUbehandlede).isNull();
 
         Date forNyHenvendelse = uniktTidspunkt();
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.values()[0]));
 
         DialogAktor etterNyHenvenselse = hentAktorMedEndringerEtter(forNyHenvendelse);
         assertThat(etterNyHenvenselse.sisteEndring).isBetween(forNyHenvendelse, uniktTidspunkt());
