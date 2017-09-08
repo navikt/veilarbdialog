@@ -1,21 +1,19 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UgyldigRequest;
 import no.nav.brukerdialog.security.context.SubjectHandler;
 import no.nav.fo.veilarbdialog.api.DialogController;
 import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.AppService;
-import no.nav.fo.veilarbdialog.util.StringUtils;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
@@ -71,6 +69,10 @@ public class RestService implements DialogController, VeilederDialogController {
                 .overskrift(nyHenvendelseDTO.overskrift)
                 .aktorId(appService.hentAktoerIdForIdent(getBrukerIdent()))
                 .aktivitetId(nyHenvendelseDTO.aktivitetId)
+                .egenskaper(nyHenvendelseDTO.egenskaper
+                        .stream()
+                        .map(egenskap -> EgenskapType.ESKALERINGSVARSEL)
+                        .collect(Collectors.toList()))
                 .build();
         return appService.opprettDialogForAktivitetsplanPaIdent(dialogData);
     }

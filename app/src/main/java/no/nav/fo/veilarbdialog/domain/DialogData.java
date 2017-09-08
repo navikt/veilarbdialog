@@ -36,6 +36,12 @@ public class DialogData {
 
     private List<HenvendelseData> henvendelser;
 
+    private List<EgenskapType> egenskaper;
+
+    public List<EgenskapType> getEgenskaper() {
+        return ofNullable(egenskaper).orElseGet(Collections::emptyList);
+    }
+
     public List<HenvendelseData> getHenvendelser() {
         return ofNullable(henvendelser).orElseGet(Collections::emptyList);
     }

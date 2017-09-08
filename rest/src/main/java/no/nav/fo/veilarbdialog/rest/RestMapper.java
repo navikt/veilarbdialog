@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
@@ -44,6 +45,10 @@ class RestMapper {
                         .map(HenvendelseData::getSendt)
                         .orElse(null)
                 )
+                .setEgenskaper(dialogData.getEgenskaper()
+                        .stream()
+                        .map(tmp -> Egenskap.ESKALERINGSVARSEL)
+                        .collect(Collectors.toList()))
                 .setHistorisk(dialogData.isHistorisk())
                 .setSisteTekst(sisteHenvendelse
                         .map(HenvendelseData::getTekst)

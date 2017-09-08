@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
+import lombok.SneakyThrows;
 import no.nav.fo.veilarbdialog.db.Database;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
@@ -58,6 +59,12 @@ public class DialogDAO {
 
     private DialogData mapTilDialog(ResultSet rs) throws SQLException {
         long dialogId = rs.getLong("dialog_id");
+
+        List<EgenskapType> egenskaper =
+                database.query("SELECT * FROM DIALOG_EGENSKAP where dialog_id = ?",
+                        this::mapTilEgenskap,
+                        dialogId);
+
         return DialogData.builder()
                 .id(dialogId)
                 .aktorId(rs.getString("aktor_id"))
@@ -72,7 +79,13 @@ public class DialogDAO {
                 .henvendelser(hentHenvendelser(dialogId))
                 .historisk(rs.getBoolean("historisk"))
                 .opprettetDato(hentDato(rs, "opprettet_dato"))
+                .egenskaper(egenskaper)
                 .build();
+    }
+
+    @SneakyThrows
+    private EgenskapType mapTilEgenskap(ResultSet rs) {
+        return Optional.ofNullable(rs.getString("DIALOG_EGENSKAP_TYPE_KODE")).map(EgenskapType::valueOf).orElse(null);
     }
 
     private List<HenvendelseData> hentHenvendelser(long dialogId) {
@@ -110,6 +123,12 @@ public class DialogDAO {
                 dialogData.getOverskrift(),
                 dialogData.isHistorisk() ? 1 : 0
         );
+
+        dialogData.getEgenskaper().forEach(egenskapType ->
+                database.update("INSERT INTO DIALOG_EGENSKAP(DIALOG_ID, DIALOG_EGENSKAP_TYPE_KODE) VALUES (?, ?)",
+                        dialogId, egenskapType.toString())
+        );
+
         LOG.info("opprettet {}", dialogData);
         return dialogId;
     }
