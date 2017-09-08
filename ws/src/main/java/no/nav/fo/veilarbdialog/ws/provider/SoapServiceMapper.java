@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.ws.provider;
 
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.domain.EgenskapType;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.util.DateUtils;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
@@ -47,6 +49,7 @@ class SoapServiceMapper {
         dialog.setErBehandlet(dialogData.erFerdigbehandlet());
         dialog.setErBesvart(!dialogData.venterPaSvar());
         dialog.setErHistorisk(dialogData.isHistorisk());
+        dialogData.getEgenskaper().forEach(egenskap -> dialog.getEgenskaper().add(Egenskap.ESKALERINGSVARSEL) );
         henvendelser.stream().map(h -> somHenvendelse(h, dialogData, personIdent)).forEach(dialog.getHenvendelseListe()::add);
         return dialog;
     }
@@ -80,6 +83,11 @@ class SoapServiceMapper {
         return DialogData.builder()
                 .overskrift(opprettDialogForAktivitetsplanRequest.getTittel())
                 .aktorId(appService.hentAktoerIdForIdent(opprettDialogForAktivitetsplanRequest.getPersonIdent()))
+                .egenskaper(opprettDialogForAktivitetsplanRequest
+                        .getEgenskaper()
+                        .stream()
+                        .map(tmp -> EgenskapType.ESKALERINGSVARSEL)
+                        .collect(Collectors.toList()))
                 .build();
     }
 
@@ -88,6 +96,11 @@ class SoapServiceMapper {
                 .overskrift(opprettDialogForAktivitetRequest.getTittel())
                 .aktorId(appService.hentAktoerIdForIdent(personIdent))
                 .aktivitetId(opprettDialogForAktivitetRequest.getAktivitetId())
+                .egenskaper(opprettDialogForAktivitetRequest
+                        .getEgenskaper()
+                        .stream()
+                        .map(tmp -> EgenskapType.ESKALERINGSVARSEL)
+                        .collect(Collectors.toList()))
                 .build();
     }
 
