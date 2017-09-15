@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import lombok.val;
 import no.nav.apiapp.feil.IngenTilgang;
+import no.nav.apiapp.feil.UlovligHandling;
 import no.nav.apiapp.security.PepClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
@@ -40,43 +41,43 @@ public class AppService {
     }
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
-        sjekkTilgangTilDialog(henvendelseData.dialogId);
+        sjekkSkriveTilgangTilDialog(henvendelseData.dialogId);
         dialogDAO.opprettHenvendelse(henvendelseData);
         return hentDialog(henvendelseData.dialogId);
     }
 
     public DialogData hentDialog(long dialogId) {
         DialogData dialogData = dialogDAO.hentDialog(dialogId);
-        sjekkTilgangTilDialog(dialogData);
+        sjekkLeseTilgangTilDialog(dialogData);
         return dialogData;
     }
 
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
-        sjekkTilgangTilDialog(dialogId);
+        sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvVeileder(dialogId);
         return hentDialog(dialogId);
     }
 
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
-        sjekkTilgangTilDialog(dialogId);
+        sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvBruker(dialogId);
         return hentDialog(dialogId);
     }
 
     public DialogData oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
-        sjekkTilgangTilDialog(dialogStatus.dialogId);
+        sjekkSkriveTilgangTilDialog(dialogStatus.dialogId);
         dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
         return hentDialog(dialogStatus.dialogId);
     }
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
-        sjekkTilgangTilDialog(dialogStatus.dialogId);
+        sjekkSkriveTilgangTilDialog(dialogStatus.dialogId);
         dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
         return hentDialog(dialogStatus.dialogId);
     }
 
     public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
-        return dialogDAO.hentDialogForAktivitetId(aktivitetId).map(this::sjekkTilgangTilDialog);
+        return dialogDAO.hentDialogForAktivitetId(aktivitetId).map(this::sjekkLeseTilgangTilDialog);
     }
 
     public String hentAktoerIdForIdent(String ident) {
@@ -109,21 +110,24 @@ public class AppService {
                 });
     }
 
-    protected String sjekkTilgangTilFnr(String ident) {
+    private String sjekkTilgangTilFnr(String ident) {
         return pepClient.sjekkTilgangTilFnr(ident);
     }
 
-    protected void sjekkTilgangTilAktorId(String aktorId) {
+    private void sjekkTilgangTilAktorId(String aktorId) {
         sjekkTilgangTilFnr(aktoerConsumer.hentIdentForAktorId(aktorId).orElseThrow(IngenTilgang::new));
     }
 
-    protected DialogData sjekkTilgangTilDialog(DialogData dialogData) {
+    private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
         sjekkTilgangTilAktorId(dialogData.getAktorId());
         return dialogData;
     }
 
-    protected void sjekkTilgangTilDialog(long id) {
-        hentDialog(id);
+    private void sjekkSkriveTilgangTilDialog(long id) {
+        DialogData dialogData = hentDialog(id);
+        if (dialogData.isHistorisk()) {
+            throw new UlovligHandling();
+        }
     }
 
 }
