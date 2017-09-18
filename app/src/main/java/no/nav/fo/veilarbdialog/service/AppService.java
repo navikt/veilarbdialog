@@ -21,14 +21,15 @@ import java.util.Optional;
 @Component
 public class AppService {
 
-    @Inject
-    private AktoerConsumer aktoerConsumer;
+    private final AktoerConsumer aktoerConsumer;
+    private final DialogDAO dialogDAO;
+    private final PepClient pepClient;
 
-    @Inject
-    private DialogDAO dialogDAO;
-
-    @Inject
-    private PepClient pepClient;
+    public AppService(AktoerConsumer aktoerConsumer, DialogDAO dialogDAO, PepClient pepClient) {
+        this.aktoerConsumer = aktoerConsumer;
+        this.dialogDAO = dialogDAO;
+        this.pepClient = pepClient;
+    }
 
     public List<DialogData> hentDialogerForBruker(String ident) {
         sjekkTilgangTilFnr(ident);
@@ -53,13 +54,13 @@ public class AppService {
     }
 
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
-        sjekkSkriveTilgangTilDialog(dialogId);
+        sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvVeileder(dialogId);
         return hentDialog(dialogId);
     }
 
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
-        sjekkSkriveTilgangTilDialog(dialogId);
+        sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvBruker(dialogId);
         return hentDialog(dialogId);
     }
@@ -121,6 +122,10 @@ public class AppService {
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
         sjekkTilgangTilAktorId(dialogData.getAktorId());
         return dialogData;
+    }
+
+    private void sjekkLeseTilgangTilDialog(long id) {
+        hentDialog(id);
     }
 
     private void sjekkSkriveTilgangTilDialog(long id) {
