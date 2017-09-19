@@ -116,7 +116,7 @@ public class AppServiceTest {
     }
 
     private void mockAbac(Answer<?> okAnswer) {
-        when(pepClient.sjekkTilgangTilFnr(IDENT)).thenAnswer(okAnswer);
+        when(pepClient.sjekkLeseTilgangTilFnr(IDENT)).thenAnswer(okAnswer);
     }
 
     private void sjekkIngenTilgang(Class<? extends Exception> exceptionClass, Runnable... runnable) {

@@ -112,7 +112,7 @@ public class AppService {
     }
 
     private String sjekkTilgangTilFnr(String ident) {
-        return pepClient.sjekkTilgangTilFnr(ident);
+        return pepClient.sjekkLeseTilgangTilFnr(ident);
     }
 
     private void sjekkTilgangTilAktorId(String aktorId) {
