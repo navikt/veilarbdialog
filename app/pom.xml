@@ -69,10 +69,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.sbl.dialogarena</groupId>
-            <artifactId>varsel-inn</artifactId>
-        </dependency>
 
         <!-- LOGGING -->
         <dependency>
