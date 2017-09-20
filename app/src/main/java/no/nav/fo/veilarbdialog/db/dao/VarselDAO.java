@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import lombok.val;
 import no.nav.fo.veilarbdialog.db.Database;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 
@@ -37,7 +36,7 @@ public class VarselDAO {
     }
 
     public void oppdaterSisteVarselForBruker(String aktorId) {
-        val rader = database.update("UPDATE VARSEL SET sendt = " + dateProvider.getNow() + " WHERE aktor_id = ?",
+        int rader = database.update("UPDATE VARSEL SET sendt = " + dateProvider.getNow() + " WHERE aktor_id = ?",
                 aktorId
         );
 
