@@ -163,8 +163,8 @@ public class DialogDAO {
                 .findFirst();
     }
 
-    public List<DialogAktor> hentAktorerMedEndringerFOM(Date date) {
-        return hentDialogerMedEndingerFOM(date)
+    public List<DialogAktor> hentAktorerMedEndringerFOM(Date date, int pageSize) {
+        return hentDialogerMedEndingerFOM(date, pageSize)
                 .stream()
                 .collect(groupingBy(DialogData::getAktorId))
                 .entrySet()
@@ -173,14 +173,19 @@ public class DialogDAO {
                 .collect(toList());
     }
 
-    private List<DialogData> hentDialogerMedEndingerFOM(Date date) {
-        // TODO denne må limites til pageSize i FeedConfig
-        return database.query("SELECT * FROM DIALOG d " +
-                        "LEFT JOIN HENVENDELSE h ON h.dialog_id = d.dialog_id " +
-                        "WHERE SISTE_STATUS_ENDRING >= ? OR (h.sendt >= ? AND h.avsender_type = '" + BRUKER.name() + "')",
+    private List<DialogData> hentDialogerMedEndingerFOM(Date date, int pageSize) {
+        String sql = "SELECT GREATEST(d.siste_status_endring, h.sendt) as siste_endring, d.* " +
+                "FROM DIALOG d " +
+                "LEFT JOIN HENVENDELSE h ON h.dialog_id = d.dialog_id " +
+                "WHERE SISTE_STATUS_ENDRING >= ? OR (h.sendt >= ? AND h.avsender_type = '" + BRUKER.name() + "') ";
+
+        return database.query("SELECT * FROM (" + sql + ")" +
+                        "ORDER BY siste_endring " +
+                        "FETCH FIRST ? ROWS ONLY",
                 this::mapTilDialog,
                 date,
-                date
+                date,
+                pageSize
         );
     }
 

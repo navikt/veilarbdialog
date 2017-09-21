@@ -36,23 +36,27 @@ public class FeedConfig {
     @Bean
     public FeedProducer<DialogAktorDTO> dialogAktorDTOFeedProducer(AppService appService, RestMapper restMapper) {
         return FeedProducer.<DialogAktorDTO>builder()
-                .provider((tidspunkt, pageSize) -> getFeedElementStream(tidspunkt, appService, restMapper))
+                .provider((tidspunkt, pageSize) -> getFeedElementStream(tidspunkt, pageSize, appService, restMapper))
                 .authorizationModule(new OidcFeedAuthorizationModule())
                 .maxPageSize(1000)
                 .build();
     }
 
-    private Stream<FeedElement<DialogAktorDTO>> getFeedElementStream(String tidspunkt, AppService appService, RestMapper restMapper) {
+    private Stream<FeedElement<DialogAktorDTO>> getFeedElementStream(String tidspunkt, int pageSize, AppService appService, RestMapper restMapper) {
         Date date = Optional.ofNullable(tidspunkt)
                 .map(DateUtils::toDate)
                 .orElse(new Date(0));
 
-        return appService.hentAktorerMedEndringerFOM(date)
+        return appService.hentAktorerMedEndringerFOM(date, pageSize)
                 .stream()
                 .map(restMapper::somDTO)
-                .map((dto) -> new FeedElement<DialogAktorDTO>()
-                        .setElement(dto)
-                        .setId(DateUtils.ISO8601FromDate(dto.getSisteEndring(), ZoneId.systemDefault()))
-                );
+                .map(this::somFeedElement);
+    }
+
+    private FeedElement<DialogAktorDTO> somFeedElement(DialogAktorDTO dialogAktorDTO) {
+        String id = DateUtils.ISO8601FromDate(dialogAktorDTO.getSisteEndring(), ZoneId.systemDefault());
+        return new FeedElement<DialogAktorDTO>()
+                .setId(id)
+                .setElement(dialogAktorDTO);
     }
 }

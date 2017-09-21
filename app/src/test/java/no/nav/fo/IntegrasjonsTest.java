@@ -7,11 +7,14 @@ import no.nav.brukerdialog.security.domain.IdentType;
 import no.nav.dialogarena.config.DevelopmentSecurity;
 import no.nav.dialogarena.config.fasit.FasitUtils;
 import no.nav.dialogarena.config.security.ISSOProvider;
+import no.nav.fo.feed.consumer.FeedPoller;
 import no.nav.fo.veilarbdialog.ApplicationContext;
 import no.nav.fo.veilarbdialog.db.dao.DateProvider;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,11 +49,21 @@ public abstract class IntegrasjonsTest {
 
     @Before
     @BeforeEach
-    @SneakyThrows
     public void setupDateProvider() {
+        changeDateProvider(IntegrasjonsTest::timestampFromSystemTime);
+    }
+
+    @SneakyThrows
+    protected void changeDateProvider(Supplier<String> timestampProvider) {
         Field providerField = DateProvider.class.getDeclaredField("provider");
         providerField.setAccessible(true);
-        setField(providerField, null, (Supplier<String>) IntegrasjonsTest::timestampFromSystemTime);
+        setField(providerField, null, timestampProvider);
+    }
+
+    @AfterClass
+    @AfterAll
+    public static void shutdownPolling() {
+        FeedPoller.shutdown();
     }
 
     @SneakyThrows

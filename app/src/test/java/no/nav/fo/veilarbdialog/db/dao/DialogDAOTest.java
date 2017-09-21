@@ -181,13 +181,13 @@ public class DialogDAOTest extends IntegrasjonsTest {
         Date ettSekundSiden = new Date(System.currentTimeMillis() - 1000L);
         Date omEttSekund = new Date(System.currentTimeMillis() + 1000L);
 
-        assertThat(dialogDAO.hentAktorerMedEndringerFOM(ettSekundSiden)).isEmpty();
-        assertThat(dialogDAO.hentAktorerMedEndringerFOM(omEttSekund)).isEmpty();
+        assertThat(dialogDAO.hentAktorerMedEndringerFOM(ettSekundSiden, 500)).isEmpty();
+        assertThat(dialogDAO.hentAktorerMedEndringerFOM(omEttSekund, 500)).isEmpty();
 
         opprettNyDialog();
 
-        assertThat(dialogDAO.hentAktorerMedEndringerFOM(ettSekundSiden)).hasSize(1);
-        assertThat(dialogDAO.hentAktorerMedEndringerFOM(omEttSekund)).isEmpty();
+        assertThat(dialogDAO.hentAktorerMedEndringerFOM(ettSekundSiden, 500)).hasSize(1);
+        assertThat(dialogDAO.hentAktorerMedEndringerFOM(omEttSekund, 500)).isEmpty();
     }
 
     @Test
@@ -198,7 +198,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         dialogDAO.opprettHenvendelse(henvendelseData);
 
         Date forForsteStatusOppdatering = uniktTidspunkt();
-        assertThat(dialogDAO.hentAktorerMedEndringerFOM(forForsteStatusOppdatering)).isEmpty();
+        assertThat(dialogDAO.hentAktorerMedEndringerFOM(forForsteStatusOppdatering, 500)).isEmpty();
 
         DialogStatus.DialogStatusBuilder dialogStatusBuilder = builder().dialogId(dialogId);
 
@@ -214,7 +214,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(etterForsteOppdatering.tidspunktEldsteUbehandlede).isBefore(forForsteStatusOppdatering);
 
         Date forAndreStatusOppdatering = uniktTidspunkt();
-        assertThat(dialogDAO.hentAktorerMedEndringerFOM(forAndreStatusOppdatering)).isEmpty();
+        assertThat(dialogDAO.hentAktorerMedEndringerFOM(forAndreStatusOppdatering, 500)).isEmpty();
         dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatusBuilder
                 .ferdigbehandlet(true)
                 .build()
@@ -262,7 +262,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
     }
 
     private DialogAktor hentAktorMedEndringerEtter(Date tidspunkt) {
-        List<DialogAktor> endredeAktorer = dialogDAO.hentAktorerMedEndringerFOM(tidspunkt);
+        List<DialogAktor> endredeAktorer = dialogDAO.hentAktorerMedEndringerFOM(tidspunkt, 500);
         assertThat(endredeAktorer).hasSize(1);
         return endredeAktorer.get(0);
     }

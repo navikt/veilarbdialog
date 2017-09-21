@@ -13,7 +13,6 @@ import no.nav.fo.veilarbdialog.ws.consumer.AktoerConsumer;
 import no.nav.fo.veilarbsituasjon.rest.domain.AvsluttetOppfolgingFeedDTO;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -87,9 +86,9 @@ public class AppService {
                 .orElseThrow(RuntimeException::new); // Hvordan håndere dette?
     }
 
-    public List<DialogAktor> hentAktorerMedEndringerFOM(Date tidspunkt) {
+    public List<DialogAktor> hentAktorerMedEndringerFOM(Date tidspunkt, int pageSize) {
         // NB: ingen tilgangskontroll her siden feed har egen mekanisme for dette
-        return dialogDAO.hentAktorerMedEndringerFOM(tidspunkt);
+        return dialogDAO.hentAktorerMedEndringerFOM(tidspunkt, pageSize);
     }
 
     public void settDialogerTilHistoriske(AvsluttetOppfolgingFeedDTO element) {
