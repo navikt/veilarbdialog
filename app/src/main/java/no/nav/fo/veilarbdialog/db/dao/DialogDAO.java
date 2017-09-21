@@ -177,7 +177,7 @@ public class DialogDAO {
         String sql = "SELECT GREATEST(d.siste_status_endring, h.sendt) as siste_endring, d.* " +
                 "FROM DIALOG d " +
                 "LEFT JOIN HENVENDELSE h ON h.dialog_id = d.dialog_id " +
-                "WHERE SISTE_STATUS_ENDRING >= ? OR (h.sendt >= ? AND h.avsender_type = '" + BRUKER.name() + "') ";
+                "WHERE SISTE_STATUS_ENDRING >= ? OR h.sendt >= ? ";
 
         return database.query("SELECT * FROM (" + sql + ")" +
                         "ORDER BY siste_endring " +
