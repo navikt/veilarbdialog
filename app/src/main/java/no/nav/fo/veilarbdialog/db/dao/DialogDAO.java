@@ -164,7 +164,7 @@ public class DialogDAO {
     }
 
     public List<DialogAktor> hentAktorerMedEndringerFOM(Date date, int pageSize) {
-        return hentDialogerMedEndingerFOM(date, pageSize)
+        return hentDialogerMedEndringerFOM(date, pageSize)
                 .stream()
                 .collect(groupingBy(DialogData::getAktorId))
                 .entrySet()
@@ -173,7 +173,7 @@ public class DialogDAO {
                 .collect(toList());
     }
 
-    private List<DialogData> hentDialogerMedEndingerFOM(Date date, int pageSize) {
+    private List<DialogData> hentDialogerMedEndringerFOM(Date date, int pageSize) {
         String sql = "SELECT GREATEST(d.siste_status_endring, h.sendt) as siste_endring, d.* " +
                 "FROM DIALOG d " +
                 "LEFT JOIN HENVENDELSE h ON h.dialog_id = d.dialog_id " +
