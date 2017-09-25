@@ -98,6 +98,7 @@ public class DialogDAO {
     private HenvendelseData mapTilHenvendelse(ResultSet rs) throws SQLException {
         Date henvendelseDato = hentDato(rs, "sendt");
         return HenvendelseData.builder()
+                .id(rs.getLong("henvendelse_id"))
                 .dialogId(rs.getLong("dialog_id"))
                 .sendt(henvendelseDato)
                 .tekst(rs.getString("tekst"))
@@ -134,7 +135,9 @@ public class DialogDAO {
     }
 
     public void opprettHenvendelse(HenvendelseData henvendelseData) {
-        database.update("INSERT INTO HENVENDELSE(dialog_id,sendt,tekst,avsender_id,avsender_type) VALUES (?," + dateProvider.getNow() + ",?,?,?)",
+        long henvendeseId = database.nesteFraSekvens("HENVENDELSE_ID_SEQ");
+        database.update("INSERT INTO HENVENDELSE(henvendelse_id,dialog_id,sendt,tekst,avsender_id,avsender_type) VALUES (?,?," + dateProvider.getNow() + ",?,?,?)",
+                henvendeseId,
                 henvendelseData.dialogId,
                 henvendelseData.tekst,
                 henvendelseData.avsenderId,

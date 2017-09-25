@@ -9,6 +9,7 @@ import java.util.Date;
 @Accessors(chain = true)
 public class HenvendelseDTO {
 
+    public String id;
     public String dialogId;
     public Avsender avsender;
     public Date sendt;

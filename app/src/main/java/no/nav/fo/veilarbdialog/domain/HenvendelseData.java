@@ -17,6 +17,7 @@ import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 @Wither
 public class HenvendelseData {
 
+    public final long id;
     public final long dialogId;
     public final String aktivitetId;
     public final Date sendt;

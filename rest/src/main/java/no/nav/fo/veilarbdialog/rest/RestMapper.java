@@ -58,6 +58,7 @@ class RestMapper {
 
     private HenvendelseDTO somHenvendelseDTO(HenvendelseData henvendelseData) {
         return new HenvendelseDTO()
+                .setId(Long.toString(henvendelseData.id))
                 .setDialogId(Long.toString(henvendelseData.dialogId))
                 .setAvsender(henvendelseData.avsenderType == BRUKER ? Avsender.BRUKER : Avsender.VEILEDER)
                 .setSendt(henvendelseData.sendt)
