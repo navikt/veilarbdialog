@@ -24,8 +24,6 @@
 
     <abacSecurity serviceUserResourceAlias="srvveilarbdialog"/>
 
-    <logging serviceCalls="true"/>
-
     <resources>
         <applicationProperties alias="veilarbdialog.properties"/>
         <credential alias="srvveilarbdialog" mapToProperty="systembruker"/>
