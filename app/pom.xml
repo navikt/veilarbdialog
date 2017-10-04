@@ -54,10 +54,6 @@
 
         <!-- EXTERNAL DEPENDENCIES -->
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>no.nav.sbl.dialogarena</groupId>
             <artifactId>common-types</artifactId>
         </dependency>
