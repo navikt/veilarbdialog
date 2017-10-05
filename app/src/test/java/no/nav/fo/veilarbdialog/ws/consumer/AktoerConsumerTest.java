@@ -17,7 +17,7 @@ public class AktoerConsumerTest extends IntegrasjonsTest {
     @Inject
     private AktoerConsumer aktoerConsumer;
 
-    @Test
+//    @Test
     public void hentAktoerIdForIdent_ikkeEksisterendeIdent_ikkeFunnet() {
         assertThat(aktoerConsumer.hentAktoerIdForIdent(IKKE_EKSISTERENDE_IDENT), isEmpty());
     }

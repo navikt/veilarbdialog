@@ -2,6 +2,9 @@ package no.nav.fo.veilarbdialog;
 
 import no.nav.apiapp.ApiApplication;
 import no.nav.apiapp.security.PepClient;
+import no.nav.dialogarena.aktor.AktorContext;
+import no.nav.dialogarena.aktor.CacheConfig;
+import no.nav.fo.veilarbdialog.ws.consumer.AktoerConsumer;
 import no.nav.sbl.dialogarena.common.abac.pep.Pep;
 import no.nav.sbl.dialogarena.common.abac.pep.context.AbacContext;
 import no.nav.sbl.dialogarena.common.abac.pep.domain.ResourceType;
@@ -14,8 +17,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableScheduling
 @EnableAspectJAutoProxy
 @ComponentScan("no.nav.fo.veilarbdialog")
-@Import(AbacContext.class)
-public class ApplicationContext implements ApiApplication{
+@Import({AbacContext.class, AktorContext.class, CacheConfig.class})
+public class ApplicationContext implements ApiApplication {
 
     @Override
     public Sone getSone() {
@@ -27,4 +30,8 @@ public class ApplicationContext implements ApiApplication{
         return new PepClient(pep, "veilarb", ResourceType.VeilArbPerson);
     }
 
+    @Bean
+    public AktoerConsumer aktoerConsumer() {
+        return new AktoerConsumer();
+    }
 }
