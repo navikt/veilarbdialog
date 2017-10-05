@@ -59,4 +59,8 @@
         </exposedSoap>
         <exposedRest path="/veilarbdialog/api" name="veilarbdialogAPI"/>
     </exposed-services>
+
+    <serverOptions>
+        <memoryParameters resourceAlias="veilarb-memparams"/>
+    </serverOptions>
 </application>
