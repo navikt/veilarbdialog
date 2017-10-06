@@ -49,7 +49,7 @@
             <dependency>
                 <groupId>no.nav.sbl.dialogarena</groupId>
                 <artifactId>common-abac</artifactId>
-                <version>1-cache-SNAPSHOT</version>
+                <version>1-cache-3-SNAPSHOT</version>
             </dependency>
 
             <!--Project dependencies-->
