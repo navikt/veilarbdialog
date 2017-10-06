@@ -33,7 +33,6 @@
 
         <!--Tjenester-->
         <dialogOppfoelging.tjenestespesifikasjon.version>1.0.1.11.4</dialogOppfoelging.tjenestespesifikasjon.version>
-        <dial-nav-tjeneste-aktoer_v2.version>1.2</dial-nav-tjeneste-aktoer_v2.version>
     </properties>
 
     <dependencyManagement>
@@ -87,11 +86,6 @@
                 <version>${dialogOppfoelging.tjenestespesifikasjon.version}</version>
                 <classifier>jaxws</classifier>
             </dependency>
-            <!--<dependency>-->
-                <!--<groupId>no.nav.sbl.dialogarena</groupId>-->
-                <!--<artifactId>dial-nav-tjeneste-aktoer_v2</artifactId>-->
-                <!--<version>${dial-nav-tjeneste-aktoer_v2.version}</version>-->
-            <!--</dependency>-->
         </dependencies>
     </dependencyManagement>
 </project>
