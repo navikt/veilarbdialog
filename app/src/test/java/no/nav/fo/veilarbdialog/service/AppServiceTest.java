@@ -65,7 +65,6 @@ public class AppServiceTest {
                 IngenTilgang.class,
                 this::hentDialog,
                 this::hentDialogerForBruker,
-                this::hentAktoerIdForIdent,
                 this::oppdaterFerdigbehandletTidspunkt,
                 this::oppdaterVentePaSvarTidspunkt,
                 this::opprettHenvendelseForDialog,
