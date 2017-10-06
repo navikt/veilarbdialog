@@ -37,43 +37,51 @@ public class AppService {
 
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
         sjekkTilgangTilAktorId(dialogData.getAktorId());
-        return hentDialog(dialogDAO.opprettDialog(dialogData));
+        long dialogId = dialogDAO.opprettDialog(dialogData);
+        return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
-        sjekkSkriveTilgangTilDialog(henvendelseData.dialogId);
+        long dialogId = henvendelseData.dialogId;
+        sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.opprettHenvendelse(henvendelseData);
-        return hentDialog(henvendelseData.dialogId);
+        return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData hentDialog(long dialogId) {
-        DialogData dialogData = dialogDAO.hentDialog(dialogId);
+        DialogData dialogData = hentDialogUtenTilgangskontroll(dialogId);
         sjekkLeseTilgangTilDialog(dialogData);
         return dialogData;
+    }
+
+    private DialogData hentDialogUtenTilgangskontroll(long dialogId) {
+        return dialogDAO.hentDialog(dialogId);
     }
 
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
         sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvVeileder(dialogId);
-        return hentDialog(dialogId);
+        return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
         sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvBruker(dialogId);
-        return hentDialog(dialogId);
+        return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
-        sjekkSkriveTilgangTilDialog(dialogStatus.dialogId);
+        long dialogId = dialogStatus.dialogId;
+        sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
-        return hentDialog(dialogStatus.dialogId);
+        return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
-        sjekkSkriveTilgangTilDialog(dialogStatus.dialogId);
+        long dialogId = dialogStatus.dialogId;
+        sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
-        return hentDialog(dialogStatus.dialogId);
+        return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
@@ -81,7 +89,7 @@ public class AppService {
     }
 
     public String hentAktoerIdForIdent(String ident) {
-        sjekkTilgangTilFnr(ident);
+        // NB: ingen tilgangskontroll på dette oppslaget
         return aktoerConsumer.hentAktoerIdForIdent(ident)
                 .orElseThrow(RuntimeException::new); // Hvordan håndere dette?
     }
