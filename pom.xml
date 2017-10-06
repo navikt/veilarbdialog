@@ -87,11 +87,11 @@
                 <version>${dialogOppfoelging.tjenestespesifikasjon.version}</version>
                 <classifier>jaxws</classifier>
             </dependency>
-            <dependency>
-                <groupId>no.nav.sbl.dialogarena</groupId>
-                <artifactId>dial-nav-tjeneste-aktoer_v2</artifactId>
-                <version>${dial-nav-tjeneste-aktoer_v2.version}</version>
-            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>no.nav.sbl.dialogarena</groupId>-->
+                <!--<artifactId>dial-nav-tjeneste-aktoer_v2</artifactId>-->
+                <!--<version>${dial-nav-tjeneste-aktoer_v2.version}</version>-->
+            <!--</dependency>-->
         </dependencies>
     </dependencyManagement>
 </project>

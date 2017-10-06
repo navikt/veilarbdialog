@@ -2,8 +2,7 @@ package no.nav.fo.veilarbdialog;
 
 import no.nav.apiapp.ApiApplication;
 import no.nav.apiapp.security.PepClient;
-import no.nav.dialogarena.aktor.AktorContext;
-import no.nav.dialogarena.aktor.CacheConfig;
+import no.nav.dialogarena.aktor.config.AktorConfig;
 import no.nav.fo.veilarbdialog.ws.consumer.AktoerConsumer;
 import no.nav.sbl.dialogarena.common.abac.pep.Pep;
 import no.nav.sbl.dialogarena.common.abac.pep.context.AbacContext;
@@ -17,7 +16,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableScheduling
 @EnableAspectJAutoProxy
 @ComponentScan("no.nav.fo.veilarbdialog")
-@Import({AbacContext.class, AktorContext.class, CacheConfig.class})
+@Import({AbacContext.class, AktorConfig.class})
 public class ApplicationContext implements ApiApplication {
 
     @Override
