@@ -73,11 +73,6 @@
                 <artifactId>varsel-inn</artifactId>
                 <version>1.0.5</version>
             </dependency>
-            <dependency>
-                <groupId>no.nav.sbl.dialogarena</groupId>
-                <artifactId>aktor-klient</artifactId>
-                <version>1-SNAPSHOT</version>
-            </dependency>
 
             <!--Tjenester-->
             <dependency>
