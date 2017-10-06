@@ -2,8 +2,7 @@ package no.nav.fo.veilarbdialog;
 
 import no.nav.apiapp.ApiApplication;
 import no.nav.apiapp.security.PepClient;
-import no.nav.dialogarena.aktor.config.AktorConfig;
-import no.nav.fo.veilarbdialog.ws.consumer.AktoerConsumer;
+import no.nav.dialogarena.aktor.AktorConfig;
 import no.nav.sbl.dialogarena.common.abac.pep.Pep;
 import no.nav.sbl.dialogarena.common.abac.pep.context.AbacContext;
 import no.nav.sbl.dialogarena.common.abac.pep.domain.ResourceType;
@@ -29,8 +28,4 @@ public class ApplicationContext implements ApiApplication {
         return new PepClient(pep, "veilarb", ResourceType.VeilArbPerson);
     }
 
-    @Bean
-    public AktoerConsumer aktoerConsumer() {
-        return new AktoerConsumer();
-    }
 }

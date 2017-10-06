@@ -3,11 +3,11 @@ package no.nav.fo.veilarbdialog.service;
 import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UlovligHandling;
 import no.nav.apiapp.security.PepClient;
+import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.ws.consumer.AktoerConsumer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
@@ -33,10 +33,10 @@ public class AppServiceTest {
     private static final DialogData DIALOG_DATA = DialogData.builder().id(DIALOG_ID).aktorId(AKTOR_ID).build();
 
     private final DialogDAO dialogDAO = mock(DialogDAO.class);
-    private final AktoerConsumer aktoerConsumer = mock(AktoerConsumer.class);
+    private final AktorService aktorService = mock(AktorService.class);
     private final PepClient pepClient = mock(PepClient.class);
     private AppService appService = new AppService(
-            aktoerConsumer,
+            aktorService,
             dialogDAO,
             pepClient
     );
@@ -48,8 +48,8 @@ public class AppServiceTest {
     @Before
     public void setup() {
         mockDialog(DIALOG_DATA);
-        when(aktoerConsumer.hentIdentForAktorId(AKTOR_ID)).thenReturn(of(IDENT));
-        when(aktoerConsumer.hentAktoerIdForIdent(IDENT)).thenReturn(of(AKTOR_ID));
+        when(aktorService.getFnr(AKTOR_ID)).thenReturn(of(IDENT));
+        when(aktorService.getAktorId(IDENT)).thenReturn(of(AKTOR_ID));
     }
 
     private void mockDialog(DialogData dialogData) {

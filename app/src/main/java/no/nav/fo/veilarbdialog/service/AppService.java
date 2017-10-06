@@ -4,12 +4,12 @@ import lombok.val;
 import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UlovligHandling;
 import no.nav.apiapp.security.PepClient;
+import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.ws.consumer.AktoerConsumer;
 import no.nav.fo.veilarbsituasjon.rest.domain.AvsluttetOppfolgingFeedDTO;
 import org.springframework.stereotype.Component;
 
@@ -20,12 +20,12 @@ import java.util.Optional;
 @Component
 public class AppService {
 
-    private final AktoerConsumer aktoerConsumer;
+    private final AktorService aktorService;
     private final DialogDAO dialogDAO;
     private final PepClient pepClient;
 
-    public AppService(AktoerConsumer aktoerConsumer, DialogDAO dialogDAO, PepClient pepClient) {
-        this.aktoerConsumer = aktoerConsumer;
+    public AppService(AktorService aktorService, DialogDAO dialogDAO, PepClient pepClient) {
+        this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
         this.pepClient = pepClient;
     }
@@ -90,7 +90,7 @@ public class AppService {
 
     public String hentAktoerIdForIdent(String ident) {
         // NB: ingen tilgangskontroll på dette oppslaget
-        return aktoerConsumer.hentAktoerIdForIdent(ident)
+        return aktorService.getAktorId(ident)
                 .orElseThrow(RuntimeException::new); // Hvordan håndere dette?
     }
 
@@ -123,7 +123,7 @@ public class AppService {
     }
 
     private void sjekkTilgangTilAktorId(String aktorId) {
-        sjekkTilgangTilFnr(aktoerConsumer.hentIdentForAktorId(aktorId).orElseThrow(IngenTilgang::new));
+        sjekkTilgangTilFnr(aktorService.getFnr(aktorId).orElseThrow(IngenTilgang::new));
     }
 
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
