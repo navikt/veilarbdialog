@@ -191,6 +191,35 @@ public class DialogDAOTest extends IntegrasjonsTest {
     }
 
     @Test
+    public void hentAktorerMedEndringerEtter_statusPaaFeedskalTaHensynTilAlleAktorensDialoger() throws InterruptedException {
+        Date ettSekundSiden = new Date(System.currentTimeMillis() - 1000L);
+
+        DialogData nyDialog = nyDialog(AKTOR_ID);
+        long dialogId = dialogDAO.opprettDialog(nyDialog);
+        dialogDAO.oppdaterVentePaSvarTidspunkt(new DialogStatus(dialogId, true, false));
+        dialogDAO.oppdaterFerdigbehandletTidspunkt(new DialogStatus(dialogId, false, false));
+
+        List<DialogAktor> endringerForEttSekundSiden = dialogDAO.hentAktorerMedEndringerFOM(ettSekundSiden, 500);
+        assertThat(endringerForEttSekundSiden).hasSize(1);
+        Date tidspunktEldsteVentende = endringerForEttSekundSiden.get(0).getTidspunktEldsteVentende();
+        Date ubehandletTidspunkt = endringerForEttSekundSiden.get(0).getTidspunktEldsteUbehandlede();
+        assertThat(tidspunktEldsteVentende).isNotNull();
+        assertThat(ubehandletTidspunkt).isNotNull();
+
+        Thread.sleep(1);
+        Date forrigeLeseTidspunkt = new Date();
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID));
+
+        List<DialogAktor> endringerEtterForrigeLesetidspunkt = dialogDAO.hentAktorerMedEndringerFOM(forrigeLeseTidspunkt, 500);
+        assertThat(endringerEtterForrigeLesetidspunkt).hasSize(1);
+        Date nyttTidspunktEldsteVentende = endringerEtterForrigeLesetidspunkt.get(0).getTidspunktEldsteVentende();
+        Date nyttUbehandletTidspunkt = endringerEtterForrigeLesetidspunkt.get(0).getTidspunktEldsteUbehandlede();
+        assertThat(nyttTidspunktEldsteVentende).isEqualTo(tidspunktEldsteVentende);
+        assertThat(nyttUbehandletTidspunkt).isEqualTo(nyttUbehandletTidspunkt);
+
+    }
+
+    @Test
     public void hentAktorerMedEndringerFOM_oppdaterDialogStatusOgNyHenvendelse_riktigStatus() {
         long dialogId = opprettNyDialog();
 
