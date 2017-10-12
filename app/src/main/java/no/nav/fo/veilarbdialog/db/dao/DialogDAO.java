@@ -5,16 +5,16 @@ import no.nav.fo.veilarbdialog.db.Database;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -202,11 +202,11 @@ public class DialogDAO {
     }
     
     private List<DialogData> hentDialogerForAktorIder(Collection<String> aktorIder) {
-        return aktorIder == null || aktorIder.isEmpty() ? new ArrayList<DialogData>() : 
-            database.query(SELECT_DIALOG + "WHERE d.aktor_id in (?)",
-                this::mapTilDialog,
-                StringUtils.join(aktorIder, ",")
-        );
+        return (aktorIder == null || aktorIder.isEmpty()) ? Collections.emptyList() : 
+            database.queryWithNamedParam(SELECT_DIALOG + "WHERE d.aktor_id in ( :aktorer )",
+                    this::mapTilDialog,
+                    Collections.singletonMap("aktorer", aktorIder)
+      );
     }
 
 

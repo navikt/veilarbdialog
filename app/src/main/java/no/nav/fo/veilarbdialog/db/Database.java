@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import no.nav.metrics.MetodeTimer;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -12,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import static java.util.Optional.ofNullable;
@@ -22,10 +24,17 @@ public class Database {
     @Inject
     private JdbcTemplate jdbcTemplate;
 
+    @Inject
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
     public <T> List<T> query(String sql, Mapper<T> mapper, Object... args) {
         return time(sql, () -> jdbcTemplate.query(sql, mapper, args));
     }
 
+    public <T> List<T> queryWithNamedParam(String sql, Mapper<T> mapper, Map<String, Object> map) {
+        return namedParameterJdbcTemplate.query(sql, map, mapper);
+    }
+    
     public int update(String sql, Object... args) {
         return time(sql, () -> jdbcTemplate.update(sql, args));
     }
