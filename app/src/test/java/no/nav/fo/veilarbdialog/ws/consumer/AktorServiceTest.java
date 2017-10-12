@@ -20,7 +20,7 @@ public class AktorServiceTest extends IntegrasjonsTest {
     @Inject
     private AktorService aktorService;
 
-    @Test(expected = Exception.class)
+    @Test
     public void hentAktoerIdForIdent_ikkeEksisterendeIdent_ikkeFunnet() {
         assertThat(aktorService.getAktorId(IKKE_EKSISTERENDE_IDENT), isEmpty());
     }
