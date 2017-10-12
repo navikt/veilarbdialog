@@ -195,7 +195,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
     public void hentAktorerMedEndringerEtter_statusPaaFeedskalTaHensynTilAlleAktorensDialoger() throws InterruptedException {
         Date ettSekundSiden = new Date(System.currentTimeMillis() - 1000L);
 
-        DialogData nyDialog = nyDialog(AKTOR_ID);
+        DialogData nyDialog = nyDialog(AKTOR_ID_1234);
         long dialogId = dialogDAO.opprettDialog(nyDialog);
         dialogDAO.oppdaterVentePaSvarTidspunkt(new DialogStatus(dialogId, true, false));
         dialogDAO.oppdaterFerdigbehandletTidspunkt(new DialogStatus(dialogId, false, false));
@@ -209,7 +209,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
         Thread.sleep(1);
         Date forrigeLeseTidspunkt = new Date();
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID));
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234));
 
         List<DialogAktor> endringerEtterForrigeLesetidspunkt = dialogDAO.hentAktorerMedEndringerFOM(forrigeLeseTidspunkt, 500);
         assertThat(endringerEtterForrigeLesetidspunkt).hasSize(1);
