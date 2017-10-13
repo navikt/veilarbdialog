@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import no.nav.fo.veilarbdialog.db.Database;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
+import no.nav.sbl.jdbc.Database;
 
 import org.springframework.stereotype.Component;
 

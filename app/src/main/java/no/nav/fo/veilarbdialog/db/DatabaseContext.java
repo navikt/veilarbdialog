@@ -3,11 +3,12 @@ package no.nav.fo.veilarbdialog.db;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import no.nav.sbl.jdbc.Database;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -36,8 +37,7 @@ public class DatabaseContext {
     }
 
     @Bean
-    public NamedParameterJdbcTemplate npJdbcTemplate(DataSource ds) {
-        return new NamedParameterJdbcTemplate(ds);
+    public Database database(DataSource ds) {
+        return new Database(new JdbcTemplate(ds));
     }
-    
 }

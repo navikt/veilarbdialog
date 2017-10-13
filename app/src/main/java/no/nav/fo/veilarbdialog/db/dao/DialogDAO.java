@@ -1,9 +1,9 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.SneakyThrows;
-import no.nav.fo.veilarbdialog.db.Database;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
+import no.nav.sbl.jdbc.Database;
 
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -21,9 +22,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Comparator.naturalOrder;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-import static no.nav.fo.veilarbdialog.db.Database.hentDato;
+//import static no.nav.fo.veilarbdialog.db.Database.hentDato;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -86,6 +88,10 @@ public class DialogDAO {
                 .build();
     }
 
+    public static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
+        return ofNullable(rs.getTimestamp(kolonneNavn)).map(Timestamp::getTime).map(Date::new).orElse(null);
+    }
+    
     @SneakyThrows
     private EgenskapType mapTilEgenskap(ResultSet rs) {
         return Optional.ofNullable(rs.getString("DIALOG_EGENSKAP_TYPE_KODE")).map(EgenskapType::valueOf).orElse(null);
