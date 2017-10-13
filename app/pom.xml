@@ -35,6 +35,7 @@
             <artifactId>aktor-klient</artifactId>
         </dependency>
 
+
         <!-- DB -->
         <dependency>
             <groupId>org.springframework</groupId>

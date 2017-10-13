@@ -14,7 +14,6 @@ import javax.inject.Inject;
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.function.Supplier;
 
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;

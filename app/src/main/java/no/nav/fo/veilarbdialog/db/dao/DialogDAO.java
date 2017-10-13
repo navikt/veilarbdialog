@@ -4,13 +4,17 @@ import lombok.SneakyThrows;
 import no.nav.fo.veilarbdialog.db.Database;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
+
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +24,6 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.db.Database.hentDato;
-import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -176,21 +179,36 @@ public class DialogDAO {
                 .collect(toList());
     }
 
-    private List<DialogData> hentDialogerMedEndringerFOM(Date date, int pageSize) {
-        String sql = "SELECT GREATEST(d.siste_status_endring, h.sendt) as siste_endring, d.* " +
-                "FROM DIALOG d " +
-                "LEFT JOIN HENVENDELSE h ON h.dialog_id = d.dialog_id " +
-                "WHERE SISTE_STATUS_ENDRING >= ? OR h.sendt >= ? ";
+    private static final String DIALOGER_ENDRET_ETTER_DATO = "SELECT GREATEST(d.siste_status_endring, h.sendt) as siste_endring, d.* "
+            + "FROM DIALOG d "
+            + "LEFT JOIN HENVENDELSE h ON h.dialog_id = d.dialog_id "
+            + "WHERE SISTE_STATUS_ENDRING >= ? OR h.sendt >= ? "
+            + "ORDER BY siste_endring "
+            + "FETCH FIRST ? ROWS ONLY";
+    
+    private static final String AKTORID_FOR_AKTORER_SOM_HAR_ENDREDE_DIALOGER = "SELECT DISTINCT AKTOR_ID FROM (" + DIALOGER_ENDRET_ETTER_DATO + ")";
 
-        return database.query("SELECT * FROM (" + sql + ")" +
-                        "ORDER BY siste_endring " +
-                        "FETCH FIRST ? ROWS ONLY",
-                this::mapTilDialog,
+    private List<DialogData> hentDialogerMedEndringerFOM(Date date, int pageSize) {
+
+        List<String> aktorIder = database.query(
+                AKTORID_FOR_AKTORER_SOM_HAR_ENDREDE_DIALOGER,
+                resultSet -> resultSet.getString("AKTOR_ID"),
                 date,
                 date,
-                pageSize
-        );
+                pageSize);
+
+        return hentDialogerForAktorIder(aktorIder);
+
     }
+    
+    private List<DialogData> hentDialogerForAktorIder(Collection<String> aktorIder) {
+        return (aktorIder == null || aktorIder.isEmpty()) ? Collections.emptyList() : 
+            database.queryWithNamedParam(SELECT_DIALOG + "WHERE d.aktor_id in ( :aktorer )",
+                    this::mapTilDialog,
+                    Collections.singletonMap("aktorer", aktorIder)
+      );
+    }
+
 
     private DialogAktor mapTilAktor(Map.Entry<String, List<DialogData>> dialogerForAktorId) {
         List<DialogData> dialogData = dialogerForAktorId.getValue();
