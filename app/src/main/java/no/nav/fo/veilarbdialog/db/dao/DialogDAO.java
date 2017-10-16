@@ -25,7 +25,6 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
-//import static no.nav.fo.veilarbdialog.db.Database.hentDato;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
