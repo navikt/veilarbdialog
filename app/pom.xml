@@ -14,10 +14,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>no.nav</groupId>
-            <artifactId>metrics</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
@@ -40,7 +36,6 @@
         <dependency>
             <groupId>no.nav.sbl</groupId>
             <artifactId>jdbc</artifactId>
-            <version>1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
