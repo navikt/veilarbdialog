@@ -5,7 +5,6 @@ import no.nav.brukerdialog.security.context.SubjectHandlerUtils;
 import no.nav.brukerdialog.security.context.ThreadLocalSubjectHandler;
 import no.nav.brukerdialog.security.domain.IdentType;
 import no.nav.dialogarena.config.DevelopmentSecurity;
-import no.nav.dialogarena.config.fasit.FasitUtils;
 import no.nav.dialogarena.config.security.ISSOProvider;
 import no.nav.fo.feed.consumer.FeedPoller;
 import no.nav.fo.veilarbdialog.ApplicationContext;
