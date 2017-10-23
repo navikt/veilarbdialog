@@ -61,7 +61,7 @@ public class DialogFeedDAO {
                 .build();
     }
 
-    private DialogAktor mapTilDialogAktor(List<DialogData> dialoger) {
+    private static DialogAktor mapTilDialogAktor(List<DialogData> dialoger) {
         return DialogAktor.builder()
                 .sisteEndring(dialoger.stream()
                         .map(DialogData::getSisteEndring)
