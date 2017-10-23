@@ -30,19 +30,19 @@ public class DialogDAO {
     private final Database database;
     private final FeedConsumerDAO feedConsumerDAO;
     private final DialogFeedDAO dialogFeedDAO;
-    private final Transactor transactior;
+    private final Transactor transactor;
     private final DateProvider dateProvider;
 
     @Inject
     public DialogDAO(Database database,
                      FeedConsumerDAO feedConsumerDAO,
                      DialogFeedDAO dialogFeedDAO,
-                     Transactor transactior,
+                     Transactor transactor,
                      DateProvider dateProvider) {
         this.database = database;
         this.feedConsumerDAO = feedConsumerDAO;
         this.dialogFeedDAO = dialogFeedDAO;
-        this.transactior = transactior;
+        this.transactor = transactor;
         this.dateProvider = dateProvider;
     }
 
@@ -130,7 +130,7 @@ public class DialogDAO {
     public long opprettDialog(DialogData dialogData) {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
 
-        transactior.inTransaction(() -> {
+        transactor.inTransaction(() -> {
             database.update("INSERT INTO " +
                             "DIALOG (dialog_id,aktor_id,opprettet_dato,aktivitet_id,overskrift,historisk,siste_status_endring) " +
                             "VALUES (?,?," + dateProvider.getNow() + ",?,?,?," + dateProvider.getNow() + ")",
@@ -155,7 +155,7 @@ public class DialogDAO {
     public void opprettHenvendelse(String aktorId, HenvendelseData henvendelseData) {
         long henvendeseId = database.nesteFraSekvens("HENVENDELSE_ID_SEQ");
 
-        transactior.inTransaction(() -> {
+        transactor.inTransaction(() -> {
             database.update("INSERT INTO HENVENDELSE(henvendelse_id,dialog_id,sendt,tekst,avsender_id,avsender_type) VALUES (?,?," + dateProvider.getNow() + ",?,?,?)",
                     henvendeseId,
                     henvendelseData.dialogId,
@@ -172,14 +172,14 @@ public class DialogDAO {
     }
 
     public void markerDialogSomLestAvVeileder(String aktorId, long dialogId) {
-        transactior.inTransaction(() -> {
+        transactor.inTransaction(() -> {
             markerLest(dialogId, "lest_av_veileder_tid");
             updateDialogAktorFor(aktorId);
         });
     }
 
     public void markerDialogSomLestAvBruker(String aktorId, long dialogId) {
-        transactior.inTransaction(() -> {
+        transactor.inTransaction(() -> {
             markerLest(dialogId, "lest_av_bruker_tid");
             updateDialogAktorFor(aktorId);
         });
@@ -199,7 +199,7 @@ public class DialogDAO {
 
     public void oppdaterFerdigbehandletTidspunkt(String aktorId, DialogStatus dialogStatus) {
 
-        transactior.inTransaction(() -> {
+        transactor.inTransaction(() -> {
             database.update("UPDATE DIALOG SET " +
                             "siste_ferdigbehandlet_tid =  " + nowOrNull(dialogStatus.ferdigbehandlet) + ", " +
                             "siste_ubehandlet_tid =  " + nowOrNull(!dialogStatus.ferdigbehandlet) + ", " +
@@ -212,7 +212,7 @@ public class DialogDAO {
     }
 
     public void oppdaterVentePaSvarTidspunkt(String aktorId, DialogStatus dialogStatus) {
-        transactior.inTransaction(() -> {
+        transactor.inTransaction(() -> {
             database.update("UPDATE DIALOG SET " +
                             "siste_vente_pa_svar_tid = " + nowOrNull(dialogStatus.venterPaSvar) + ", " +
                             "siste_status_endring = " + dateProvider.getNow() + " " +
