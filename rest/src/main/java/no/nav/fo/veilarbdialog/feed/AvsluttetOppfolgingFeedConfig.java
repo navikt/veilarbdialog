@@ -20,17 +20,18 @@ public class AvsluttetOppfolgingFeedConfig {
     private String polling;
 
     @Bean
-    public FeedConsumer<AvsluttetOppfolgingFeedDTO> avsluttetOppfolgingFeedDTOFeedConsumer(AvsluttetOppfolgingFeedProvider avsluttetOppfolgingFeedProvider) {
+    public FeedConsumer<AvsluttetOppfolgingFeedDTO> avsluttetOppfolgingFeedDTOFeedConsumer(
+            AvsluttetOppfolgingFeedConsumer avsluttetOppfolgingFeedConsumer) {
         FeedConsumerConfig<AvsluttetOppfolgingFeedDTO> config = new FeedConsumerConfig<>(
                 new FeedConsumerConfig.BaseConfig<>(
                     AvsluttetOppfolgingFeedDTO.class,
-                    avsluttetOppfolgingFeedProvider::sisteEndring,
+                    avsluttetOppfolgingFeedConsumer::sisteEndring,
                     host,
                     AvsluttetOppfolgingFeedDTO.FEED_NAME
                 ),
                 new FeedConsumerConfig.PollingConfig(polling)
         )
-                .callback(avsluttetOppfolgingFeedProvider::lesAvsluttetOppfolgingFeed)
+                .callback(avsluttetOppfolgingFeedConsumer::lesAvsluttetOppfolgingFeed)
                 .interceptors(Collections.singletonList(new OidcFeedOutInterceptor()));
 
         return new FeedConsumer<>(config);
