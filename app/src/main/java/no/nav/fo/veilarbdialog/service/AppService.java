@@ -49,8 +49,8 @@ public class AppService {
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
         long dialogId = henvendelseData.dialogId;
-        val aktorId = sjekkSkriveTilgangTilDialog(dialogId);
-        dialogDAO.opprettHenvendelse(aktorId, henvendelseData);
+        val dialogData = sjekkSkriveTilgangTilDialog(dialogId);
+        dialogDAO.opprettHenvendelse(dialogData.getAktorId(), henvendelseData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -65,28 +65,28 @@ public class AppService {
     }
 
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
-        val aktorId = sjekkLeseTilgangTilDialog(dialogId);
-        dialogDAO.markerDialogSomLestAvVeileder(aktorId, dialogId);
+        val dialogData = sjekkLeseTilgangTilDialog(dialogId);
+        dialogDAO.markerDialogSomLestAvVeileder(dialogData.getAktorId(), dialogId);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
-        val aktorId = sjekkLeseTilgangTilDialog(dialogId);
-        dialogDAO.markerDialogSomLestAvBruker(aktorId, dialogId);
+        val dialogData = sjekkLeseTilgangTilDialog(dialogId);
+        dialogDAO.markerDialogSomLestAvBruker(dialogData.getAktorId(), dialogId);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        val aktorId = sjekkSkriveTilgangTilDialog(dialogId);
-        dialogDAO.oppdaterFerdigbehandletTidspunkt(aktorId, dialogStatus);
+        val dialogData = sjekkSkriveTilgangTilDialog(dialogId);
+        dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogData.getAktorId(), dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        val aktorId = sjekkSkriveTilgangTilDialog(dialogId);
-        dialogDAO.oppdaterVentePaSvarTidspunkt(aktorId, dialogStatus);
+        val dialogData = sjekkSkriveTilgangTilDialog(dialogId);
+        dialogDAO.oppdaterVentePaSvarTidspunkt(dialogData.getAktorId(), dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -137,16 +137,16 @@ public class AppService {
         return dialogData;
     }
 
-    private String sjekkLeseTilgangTilDialog(long id) {
-        return hentDialog(id).getAktorId();
+    private DialogData sjekkLeseTilgangTilDialog(long id) {
+        return hentDialog(id);
     }
 
-    private String sjekkSkriveTilgangTilDialog(long id) {
+    private DialogData sjekkSkriveTilgangTilDialog(long id) {
         DialogData dialogData = hentDialog(id);
         if (dialogData.isHistorisk()) {
             throw new UlovligHandling();
         }
-        return dialogData.getAktorId();
+        return dialogData;
     }
 
 }
