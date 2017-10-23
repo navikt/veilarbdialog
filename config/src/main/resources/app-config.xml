@@ -34,7 +34,7 @@
         <webservice alias="Aktoer_v2" mapToProperty="aktoer.endpoint"/>
         <rest alias="abac.pdp.endpoint" mapToProperty="abac.endpoint" />
         <rest alias="veilarblogin.redirect-url" mapToProperty="oidc-redirect" />
-        <rest alias="veilArbSituasjonAPI" mapToProperty="veilarbsituasjon.api" />
+        <rest alias="veilArbOppfolgingAPI" mapToProperty="veilarboppfolging.api" />
         <baseUrl alias="isso-host"/>
         <baseUrl alias="isso-jwks"/>
         <baseUrl alias="isso-issuer"/>
