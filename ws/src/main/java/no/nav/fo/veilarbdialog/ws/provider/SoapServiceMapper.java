@@ -56,7 +56,7 @@ class SoapServiceMapper {
 
     private Henvendelse somHenvendelse(HenvendelseData henvendelseData, DialogData dialogData, String personIdent) {
         Henvendelse henvendelse = new Henvendelse();
-        henvendelse.setId("");  // TODO midlertidig, tilfredstill wsdl-constraint
+        henvendelse.setId(Long.toString(henvendelseData.id));
         henvendelse.setTekst(henvendelseData.tekst);
         henvendelse.setSendt(DateUtils.xmlCalendar(henvendelseData.sendt));
         henvendelse.setAvsender(finnAktor(henvendelseData, dialogData, personIdent));
