@@ -197,18 +197,18 @@ public class DialogDAO {
     public void oppdaterDialogTilHistorisk(DialogData dialogData) {
         transactor.inTransaction(() -> {
             String sql = "UPDATE DIALOG SET " +
-                    "historisk = 1, ";
+                    "historisk = 1";
 
             if (dialogData.erUbehandlet()){
-                sql += "siste_ferdigbehandlet_tid =  " + dateProvider.getNow() + ", " +
-                        "siste_ubehandlet_tid = NULL, ";
+                sql += ", siste_ferdigbehandlet_tid = " + dateProvider.getNow() +
+                        ", siste_ubehandlet_tid = NULL";
             }
             if (dialogData.venterPaSvar()){
-                sql += "siste_vente_pa_svar_tid = NULL, ";
+                sql += ", siste_vente_pa_svar_tid = NULL";
             }
 
             if (dialogData.erUbehandlet() || dialogData.venterPaSvar()) {
-                sql += "siste_status_endring = " + dateProvider.getNow();
+                sql += ", siste_status_endring = " + dateProvider.getNow();
             }
 
             sql += " WHERE dialog_id = ?";

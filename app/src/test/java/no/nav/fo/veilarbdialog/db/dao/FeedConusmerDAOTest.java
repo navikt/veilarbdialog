@@ -34,8 +34,8 @@ public class FeedConusmerDAOTest extends IntegrasjonsTest {
         assertThat(dialoger).hasSize(2);
         assertThat(gjeldendeDialoger).isEmpty();
 
-        dialogDAO.settDialogTilHistoriskOgOppdaterFeed(dialog1);
-        dialogDAO.settDialogTilHistoriskOgOppdaterFeed(dialog2);
+        dialogDAO.oppdaterDialogTilHistorisk(dialog1);
+        dialogDAO.oppdaterDialogTilHistorisk(dialog2);
         val tidspunktEtterHistorisk = new Date();
 
         val sisteDialogTidspunkt = feedConsumerDAO.hentSisteHistoriskeTidspunkt();

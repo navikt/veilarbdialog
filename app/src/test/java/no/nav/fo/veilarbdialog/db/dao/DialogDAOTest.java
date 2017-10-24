@@ -186,7 +186,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         dialogDAO.opprettDialog(dialog);
         dialogDAO.opprettDialog(historiskDialog);
 
-        dialogDAO.settDialogTilHistoriskOgOppdaterFeed(historiskDialog);
+        dialogDAO.oppdaterDialogTilHistorisk(historiskDialog);
 
         val gjeldendeDialoger = dialogDAO.hentGjeldendeDialogerForAktorId(AKTOR_ID_1234);
         assertThat(gjeldendeDialoger).hasSize(1);
@@ -199,7 +199,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         DialogData dialog = dialogDAO.hentDialog(dialogId);
         assertThat(dialog.isHistorisk()).isFalse();
 
-        dialogDAO.settDialogTilHistoriskOgOppdaterFeed(dialog);
+        dialogDAO.oppdaterDialogTilHistorisk(dialog);
 
         assertThat(dialogDAO.hentDialog(dialogId).isHistorisk()).isTrue();
     }
