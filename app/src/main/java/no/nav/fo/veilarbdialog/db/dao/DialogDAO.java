@@ -28,19 +28,16 @@ public class DialogDAO {
     private static final String SELECT_DIALOG = "SELECT * FROM DIALOG d ";
 
     private final Database database;
-    private final FeedConsumerDAO feedConsumerDAO;
     private final DialogFeedDAO dialogFeedDAO;
     private final Transactor transactor;
     private final DateProvider dateProvider;
 
     @Inject
     public DialogDAO(Database database,
-                     FeedConsumerDAO feedConsumerDAO,
                      DialogFeedDAO dialogFeedDAO,
                      Transactor transactor,
                      DateProvider dateProvider) {
         this.database = database;
-        this.feedConsumerDAO = feedConsumerDAO;
         this.dialogFeedDAO = dialogFeedDAO;
         this.transactor = transactor;
         this.dateProvider = dateProvider;
@@ -197,8 +194,31 @@ public class DialogDAO {
                 .findFirst();
     }
 
-    public void oppdaterFerdigbehandletTidspunkt(String aktorId, DialogStatus dialogStatus) {
+    public void oppdaterDialogTilHistorisk(DialogData dialogData) {
+        transactor.inTransaction(() -> {
+            String sql = "UPDATE DIALOG SET " +
+                    "historisk = 1, ";
 
+            if (dialogData.erUbehandlet()){
+                sql += "siste_ferdigbehandlet_tid =  " + dateProvider.getNow() + ", " +
+                        "siste_ubehandlet_tid = NULL, ";
+            }
+            if (dialogData.venterPaSvar()){
+                sql += "siste_vente_pa_svar_tid = NULL, ";
+            }
+
+            if (dialogData.erUbehandlet() || dialogData.venterPaSvar()) {
+                sql += "siste_status_endring = " + dateProvider.getNow();
+            }
+
+            sql += " WHERE dialog_id = ?";
+
+            database.update(sql, dialogData.getId());
+            updateDialogAktorFor(dialogData.getAktorId());
+        });
+    }
+
+    public void oppdaterFerdigbehandletTidspunkt(String aktorId, DialogStatus dialogStatus) {
         transactor.inTransaction(() -> {
             database.update("UPDATE DIALOG SET " +
                             "siste_ferdigbehandlet_tid =  " + nowOrNull(dialogStatus.ferdigbehandlet) + ", " +
@@ -223,17 +243,8 @@ public class DialogDAO {
         });
     }
 
-    public void settDialogTilHistoriskOgOppdaterFeed(DialogData dialog) {
-        database.update("UPDATE DIALOG SET " +
-                        "historisk = 1 " +
-                        "WHERE dialog_id = ?",
-                dialog.getId()
-        );
-        feedConsumerDAO.oppdaterSisteHistoriskeTidspunkt();
-    }
-
-    private String nowOrNull(boolean venterPaSvar) {
-        return venterPaSvar ? dateProvider.getNow() : "NULL";
+    private String nowOrNull(boolean predicate) {
+        return predicate ? dateProvider.getNow() : "NULL";
     }
 
     private void updateDialogAktorFor(String aktorId){

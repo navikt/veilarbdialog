@@ -27,7 +27,7 @@ public class FeedConsumerDAO {
         );
     }
 
-    void oppdaterSisteHistoriskeTidspunkt() {
+    public void oppdaterSisteHistoriskeTidspunkt() {
         database.update("UPDATE FEED_METADATA SET " +
                 "tidspunkt_siste_endring = " + dateProvider.getNow()
         );
