@@ -31,6 +31,6 @@ public class AvsluttetOppfolgingFeedConsumer {
     }
 
     void lesAvsluttetOppfolgingFeed(String lastEntryId, List<AvsluttetOppfolgingFeedDTO> elements) {
-        elements.forEach(element -> appService.settDialogerTilHistoriske(element.getAktoerid()));
+        elements.forEach(element -> appService.settDialogerTilHistoriske(element.getAktoerid(), element.getSluttdato()));
     }
 }

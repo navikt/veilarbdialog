@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,8 @@ import static java.util.Optional.of;
 import static no.nav.apiapp.util.StringUtils.of;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class AppServiceTest {
@@ -118,6 +121,22 @@ public class AppServiceTest {
                 this::opprettDialogForAktivitetsplanPaIdent,
                 this::hentDialogForAktivitetId
         );
+    }
+
+    @Test
+    public void avsluttDialoger_oppdatererIkkeDialogerNyereEnnAvslutningstidspunkt() {
+        Date avslutningsDato = new Date(System.currentTimeMillis() - 1000);
+        Date gammelDialogDato = new Date(avslutningsDato.getTime() - 1000);
+        Date nyDialogDato = new Date(avslutningsDato.getTime() + 1000);
+
+        DialogData gammelDialog = DialogData.builder().id(10).aktorId(AKTOR_ID).opprettetDato(gammelDialogDato).build();
+        DialogData nyDialog = DialogData.builder().id(11).aktorId(AKTOR_ID).opprettetDato(nyDialogDato).build();
+
+        when(dialogDAO.hentGjeldendeDialogerForAktorId(AKTOR_ID)).thenReturn(Arrays.asList(gammelDialog, nyDialog));
+
+        appService.settDialogerTilHistoriske(AKTOR_ID, avslutningsDato);
+        verify(dialogDAO).oppdaterDialogTilHistorisk(gammelDialog);
+        verify(dialogDAO, never()).oppdaterDialogTilHistorisk(nyDialog);
     }
 
     private void mockAbac(Answer<?> okAnswer) {
