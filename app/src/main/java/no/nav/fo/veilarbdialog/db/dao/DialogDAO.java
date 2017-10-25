@@ -1,30 +1,23 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.SneakyThrows;
+import lombok.val;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
 import no.nav.sbl.jdbc.Database;
-
+import no.nav.sbl.jdbc.Transactor;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Comparator.naturalOrder;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -34,11 +27,21 @@ public class DialogDAO {
 
     private static final String SELECT_DIALOG = "SELECT * FROM DIALOG d ";
 
-    @Inject
-    private Database database;
+    private final Database database;
+    private final DialogFeedDAO dialogFeedDAO;
+    private final Transactor transactor;
+    private final DateProvider dateProvider;
 
     @Inject
-    DateProvider dateProvider;
+    public DialogDAO(Database database,
+                     DialogFeedDAO dialogFeedDAO,
+                     Transactor transactor,
+                     DateProvider dateProvider) {
+        this.database = database;
+        this.dialogFeedDAO = dialogFeedDAO;
+        this.transactor = transactor;
+        this.dateProvider = dateProvider;
+    }
 
     public List<DialogData> hentDialogerForAktorId(String aktorId) {
         return database.query(SELECT_DIALOG + "WHERE d.aktor_id = ?",
@@ -90,7 +93,7 @@ public class DialogDAO {
     public static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
         return ofNullable(rs.getTimestamp(kolonneNavn)).map(Timestamp::getTime).map(Date::new).orElse(null);
     }
-    
+
     @SneakyThrows
     private EgenskapType mapTilEgenskap(ResultSet rs) {
         return Optional.ofNullable(rs.getString("DIALOG_EGENSKAP_TYPE_KODE")).map(EgenskapType::valueOf).orElse(null);
@@ -123,43 +126,60 @@ public class DialogDAO {
 
     public long opprettDialog(DialogData dialogData) {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
-        database.update("INSERT INTO " +
-                        "DIALOG (dialog_id,aktor_id,opprettet_dato,aktivitet_id,overskrift,historisk,siste_status_endring) " +
-                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?," + dateProvider.getNow() + ")",
-                dialogId,
-                dialogData.getAktorId(),
-                dialogData.getAktivitetId(),
-                dialogData.getOverskrift(),
-                dialogData.isHistorisk() ? 1 : 0
-        );
 
-        dialogData.getEgenskaper().forEach(egenskapType ->
-                database.update("INSERT INTO DIALOG_EGENSKAP(DIALOG_ID, DIALOG_EGENSKAP_TYPE_KODE) VALUES (?, ?)",
-                        dialogId, egenskapType.toString())
-        );
+        transactor.inTransaction(() -> {
+            database.update("INSERT INTO " +
+                            "DIALOG (dialog_id,aktor_id,opprettet_dato,aktivitet_id,overskrift,historisk,siste_status_endring) " +
+                            "VALUES (?,?," + dateProvider.getNow() + ",?,?,?," + dateProvider.getNow() + ")",
+                    dialogId,
+                    dialogData.getAktorId(),
+                    dialogData.getAktivitetId(),
+                    dialogData.getOverskrift(),
+                    dialogData.isHistorisk() ? 1 : 0
+            );
+
+            dialogData.getEgenskaper().forEach(egenskapType ->
+                    database.update("INSERT INTO DIALOG_EGENSKAP(DIALOG_ID, DIALOG_EGENSKAP_TYPE_KODE) VALUES (?, ?)",
+                            dialogId, egenskapType.toString())
+            );
+            updateDialogAktorFor(dialogData.getAktorId());
+        });
 
         LOG.info("opprettet {}", dialogData);
         return dialogId;
     }
 
-    public void opprettHenvendelse(HenvendelseData henvendelseData) {
+    public void opprettHenvendelse(String aktorId, HenvendelseData henvendelseData) {
         long henvendeseId = database.nesteFraSekvens("HENVENDELSE_ID_SEQ");
-        database.update("INSERT INTO HENVENDELSE(henvendelse_id,dialog_id,sendt,tekst,avsender_id,avsender_type) VALUES (?,?," + dateProvider.getNow() + ",?,?,?)",
-                henvendeseId,
-                henvendelseData.dialogId,
-                henvendelseData.tekst,
-                henvendelseData.avsenderId,
-                EnumUtils.getName(henvendelseData.avsenderType)
-        );
+
+        transactor.inTransaction(() -> {
+            database.update("INSERT INTO HENVENDELSE(henvendelse_id,dialog_id,sendt,tekst,avsender_id,avsender_type) VALUES (?,?," + dateProvider.getNow() + ",?,?,?)",
+                    henvendeseId,
+                    henvendelseData.dialogId,
+                    henvendelseData.tekst,
+                    henvendelseData.avsenderId,
+                    EnumUtils.getName(henvendelseData.avsenderType)
+            );
+
+            updateDialogAktorFor(aktorId);
+        });
+
         LOG.info("opprettet {}", henvendelseData);
+
     }
 
-    public void markerDialogSomLestAvVeileder(long dialogId) {
-        markerLest(dialogId, "lest_av_veileder_tid");
+    public void markerDialogSomLestAvVeileder(String aktorId, long dialogId) {
+        transactor.inTransaction(() -> {
+            markerLest(dialogId, "lest_av_veileder_tid");
+            updateDialogAktorFor(aktorId);
+        });
     }
 
-    public void markerDialogSomLestAvBruker(long dialogId) {
-        markerLest(dialogId, "lest_av_bruker_tid");
+    public void markerDialogSomLestAvBruker(String aktorId, long dialogId) {
+        transactor.inTransaction(() -> {
+            markerLest(dialogId, "lest_av_bruker_tid");
+            updateDialogAktorFor(aktorId);
+        });
     }
 
     private void markerLest(long dialogId, String feltNavn) {
@@ -174,107 +194,61 @@ public class DialogDAO {
                 .findFirst();
     }
 
-    public List<DialogAktor> hentAktorerMedEndringerFOM(Date date, int pageSize) {
-        return hentDialogerMedEndringerFOM(date, pageSize)
-                .stream()
-                .collect(groupingBy(DialogData::getAktorId))
-                .entrySet()
-                .stream()
-                .map(this::mapTilAktor)
-                .collect(toList());
+    public void oppdaterDialogTilHistorisk(DialogData dialogData) {
+        transactor.inTransaction(() -> {
+            String sql = "UPDATE DIALOG SET " +
+                    "historisk = 1";
+
+            if (dialogData.erUbehandlet()){
+                sql += ", siste_ferdigbehandlet_tid = " + dateProvider.getNow() +
+                        ", siste_ubehandlet_tid = NULL";
+            }
+            if (dialogData.venterPaSvar()){
+                sql += ", siste_vente_pa_svar_tid = NULL";
+            }
+
+            if (dialogData.erUbehandlet() || dialogData.venterPaSvar()) {
+                sql += ", siste_status_endring = " + dateProvider.getNow();
+            }
+
+            sql += " WHERE dialog_id = ?";
+
+            database.update(sql, dialogData.getId());
+            updateDialogAktorFor(dialogData.getAktorId());
+        });
     }
 
-    private static final String DIALOGER_ENDRET_ETTER_DATO = "SELECT GREATEST(d.siste_status_endring, h.sendt) as siste_endring, d.* "
-            + "FROM DIALOG d "
-            + "LEFT JOIN HENVENDELSE h ON h.dialog_id = d.dialog_id "
-            + "WHERE SISTE_STATUS_ENDRING >= ? OR h.sendt >= ? "
-            + "ORDER BY siste_endring "
-            + "FETCH FIRST ? ROWS ONLY";
-    
-    private static final String AKTORID_FOR_AKTORER_SOM_HAR_ENDREDE_DIALOGER = "SELECT DISTINCT AKTOR_ID FROM (" + DIALOGER_ENDRET_ETTER_DATO + ")";
-
-    private List<DialogData> hentDialogerMedEndringerFOM(Date date, int pageSize) {
-
-        List<String> aktorIder = database.query(
-                AKTORID_FOR_AKTORER_SOM_HAR_ENDREDE_DIALOGER,
-                resultSet -> resultSet.getString("AKTOR_ID"),
-                date,
-                date,
-                pageSize);
-
-        return hentDialogerForAktorIder(aktorIder);
-
-    }
-    
-    private List<DialogData> hentDialogerForAktorIder(Collection<String> aktorIder) {
-        return (aktorIder == null || aktorIder.isEmpty()) ? Collections.emptyList() : 
-            database.queryWithNamedParam(SELECT_DIALOG + "WHERE d.aktor_id in ( :aktorer )",
-                    this::mapTilDialog,
-                    Collections.singletonMap("aktorer", aktorIder)
-      );
+    public void oppdaterFerdigbehandletTidspunkt(String aktorId, DialogStatus dialogStatus) {
+        transactor.inTransaction(() -> {
+            database.update("UPDATE DIALOG SET " +
+                            "siste_ferdigbehandlet_tid =  " + nowOrNull(dialogStatus.ferdigbehandlet) + ", " +
+                            "siste_ubehandlet_tid =  " + nowOrNull(!dialogStatus.ferdigbehandlet) + ", " +
+                            "siste_status_endring = " + dateProvider.getNow() + " " +
+                            "WHERE dialog_id = ?",
+                    dialogStatus.dialogId
+            );
+            updateDialogAktorFor(aktorId);
+        });
     }
 
-
-    private DialogAktor mapTilAktor(Map.Entry<String, List<DialogData>> dialogerForAktorId) {
-        List<DialogData> dialogData = dialogerForAktorId.getValue();
-        return DialogAktor.builder()
-                .aktorId(dialogerForAktorId.getKey())
-                .sisteEndring(dialogData.stream()
-                        .map(DialogData::getSisteEndring)
-                        .max(naturalOrder())
-                        .orElse(null)
-                )
-                .tidspunktEldsteVentende(dialogData.stream()
-                        .filter(DialogData::venterPaSvar)
-                        .map(DialogData::getVenterPaSvarTidspunkt)
-                        .min(naturalOrder())
-                        .orElse(null)
-                )
-                .tidspunktEldsteUbehandlede(dialogData.stream()
-                        .filter(DialogData::erUbehandlet)
-                        .map(DialogData::getUbehandletTidspunkt)
-                        .min(naturalOrder())
-                        .orElse(null)
-                ).build();
+    public void oppdaterVentePaSvarTidspunkt(String aktorId, DialogStatus dialogStatus) {
+        transactor.inTransaction(() -> {
+            database.update("UPDATE DIALOG SET " +
+                            "siste_vente_pa_svar_tid = " + nowOrNull(dialogStatus.venterPaSvar) + ", " +
+                            "siste_status_endring = " + dateProvider.getNow() + " " +
+                            "WHERE dialog_id = ?",
+                    dialogStatus.dialogId
+            );
+            updateDialogAktorFor(aktorId);
+        });
     }
 
-    public void oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
-        database.update("UPDATE DIALOG SET " +
-                        "siste_ferdigbehandlet_tid =  " + nowOrNull(dialogStatus.ferdigbehandlet) + ", " +
-                        "siste_ubehandlet_tid =  " + nowOrNull(!dialogStatus.ferdigbehandlet) + ", " +
-                        "siste_status_endring = " + dateProvider.getNow() + " " +
-                        "WHERE dialog_id = ?",
-                dialogStatus.dialogId
-        );
+    private String nowOrNull(boolean predicate) {
+        return predicate ? dateProvider.getNow() : "NULL";
     }
 
-    public void oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
-        database.update("UPDATE DIALOG SET " +
-                        "siste_vente_pa_svar_tid = " + nowOrNull(dialogStatus.venterPaSvar) + ", " +
-                        "siste_status_endring = " + dateProvider.getNow() + " " +
-                        "WHERE dialog_id = ?",
-                dialogStatus.dialogId
-        );
+    private void updateDialogAktorFor(String aktorId){
+        val dialoger = hentDialogerForAktorId(aktorId);
+        dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
     }
-
-    @Transactional
-    public void settDialogTilHistoriskOgOppdaterFeed(DialogData dialog) {
-        database.update("UPDATE DIALOG SET " +
-                        "historisk = 1 " +
-                        "WHERE dialog_id = ?",
-                dialog.getId()
-        );
-        oppdaterFeed();
-    }
-
-    private void oppdaterFeed() {
-        database.update("UPDATE FEED_METADATA SET " +
-                "tidspunkt_siste_endring = " + dateProvider.getNow()
-        );
-    }
-
-    private String nowOrNull(boolean venterPaSvar) {
-        return venterPaSvar ? dateProvider.getNow() : "NULL";
-    }
-
 }

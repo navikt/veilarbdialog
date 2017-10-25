@@ -6,6 +6,8 @@ import no.nav.apiapp.feil.UlovligHandling;
 import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
+import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
+import no.nav.fo.veilarbdialog.db.dao.FeedConsumerDAO;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
@@ -22,11 +24,19 @@ public class AppService {
 
     private final AktorService aktorService;
     private final DialogDAO dialogDAO;
+    private final DialogFeedDAO dialogFeedDAO;
+    private final FeedConsumerDAO feedConsumerDAO;
     private final PepClient pepClient;
 
-    public AppService(AktorService aktorService, DialogDAO dialogDAO, PepClient pepClient) {
+    public AppService(AktorService aktorService,
+                      DialogDAO dialogDAO,
+                      DialogFeedDAO dialogFeedDAO,
+                      FeedConsumerDAO feedConsumerDAO,
+                      PepClient pepClient) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
+        this.dialogFeedDAO = dialogFeedDAO;
+        this.feedConsumerDAO = feedConsumerDAO;
         this.pepClient = pepClient;
     }
 
@@ -43,8 +53,8 @@ public class AppService {
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
         long dialogId = henvendelseData.dialogId;
-        sjekkSkriveTilgangTilDialog(dialogId);
-        dialogDAO.opprettHenvendelse(henvendelseData);
+        val dialogData = sjekkSkriveTilgangTilDialog(dialogId);
+        dialogDAO.opprettHenvendelse(dialogData.getAktorId(), henvendelseData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -59,28 +69,28 @@ public class AppService {
     }
 
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
-        sjekkLeseTilgangTilDialog(dialogId);
-        dialogDAO.markerDialogSomLestAvVeileder(dialogId);
+        val dialogData = sjekkLeseTilgangTilDialog(dialogId);
+        dialogDAO.markerDialogSomLestAvVeileder(dialogData.getAktorId(), dialogId);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
-        sjekkLeseTilgangTilDialog(dialogId);
-        dialogDAO.markerDialogSomLestAvBruker(dialogId);
+        val dialogData = sjekkLeseTilgangTilDialog(dialogId);
+        dialogDAO.markerDialogSomLestAvBruker(dialogData.getAktorId(), dialogId);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        sjekkSkriveTilgangTilDialog(dialogId);
-        dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
+        val dialogData = sjekkSkriveTilgangTilDialog(dialogId);
+        dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogData.getAktorId(), dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        sjekkSkriveTilgangTilDialog(dialogId);
-        dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
+        val dialogData = sjekkSkriveTilgangTilDialog(dialogId);
+        dialogDAO.oppdaterVentePaSvarTidspunkt(dialogData.getAktorId(), dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -96,25 +106,15 @@ public class AppService {
 
     public List<DialogAktor> hentAktorerMedEndringerFOM(Date tidspunkt, int pageSize) {
         // NB: ingen tilgangskontroll her siden feed har egen mekanisme for dette
-        return dialogDAO.hentAktorerMedEndringerFOM(tidspunkt, pageSize);
+        return dialogFeedDAO.hentAktorerMedEndringerFOM(tidspunkt, pageSize);
     }
 
     public void settDialogerTilHistoriske(AvsluttetOppfolgingFeedDTO element) {
         // NB: ingen tilgangskontroll, brukes av vår feed-consumer
         dialogDAO.hentGjeldendeDialogerForAktorId(element.getAktoerid())
                 .forEach(dialog -> {
-                    val dialogStatus = DialogStatus.builder()
-                            .dialogId(dialog.getId())
-                            .ferdigbehandlet(true)
-                            .venterPaSvar(false)
-                            .build();
-                    if (dialog.erUbehandlet()) {
-                        dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
-                    }
-                    if (dialog.venterPaSvar()) {
-                        dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
-                    }
-                    dialogDAO.settDialogTilHistoriskOgOppdaterFeed(dialog);
+                    dialogDAO.oppdaterDialogTilHistorisk(dialog);
+                    feedConsumerDAO.oppdaterSisteHistoriskeTidspunkt();
                 });
     }
 
@@ -131,15 +131,16 @@ public class AppService {
         return dialogData;
     }
 
-    private void sjekkLeseTilgangTilDialog(long id) {
-        hentDialog(id);
+    private DialogData sjekkLeseTilgangTilDialog(long id) {
+        return hentDialog(id);
     }
 
-    private void sjekkSkriveTilgangTilDialog(long id) {
+    private DialogData sjekkSkriveTilgangTilDialog(long id) {
         DialogData dialogData = hentDialog(id);
         if (dialogData.isHistorisk()) {
             throw new UlovligHandling();
         }
+        return dialogData;
     }
 
 }
