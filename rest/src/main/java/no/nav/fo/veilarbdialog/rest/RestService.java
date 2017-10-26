@@ -83,7 +83,9 @@ public class RestService implements DialogController, VeilederDialogController {
     }
 
     private DialogDTO markerSomLest(long id) {
-        return restMapper.somDialogDTO(appService.markerDialogSomLestAvVeileder(id));
+        DialogData dialogData = appService.markerDialogSomLestAvVeileder(id);
+        appService.updateDialogAktorFor(dialogData.getAktorId());
+        return restMapper.somDialogDTO(dialogData);
     }
 
     private String getVeilederIdent() {

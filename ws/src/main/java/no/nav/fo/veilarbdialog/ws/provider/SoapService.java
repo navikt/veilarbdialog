@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.ws.provider;
 
+import lombok.val;
 import no.nav.apiapp.soap.SoapTjeneste;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
@@ -64,11 +65,14 @@ public class SoapService implements AktivitetDialogV1 {
     @Override
     public void markerDialogSomLest(MarkerDialogSomLestRequest markerDialogSomLestRequest)
             throws MarkerDialogSomLestSikkerhetsbegrensning, MarkerDialogSomLestUgyldigInput {
-        appService.markerDialogSomLestAvBruker(Long.parseLong(markerDialogSomLestRequest.getDialogId()));
+        val data = appService.markerDialogSomLestAvBruker(Long.parseLong(markerDialogSomLestRequest.getDialogId()));
+        appService.updateDialogAktorFor(data.getAktorId());
     }
 
     private DialogData markerDialogSomLest(DialogData dialogData) {
-        return appService.markerDialogSomLestAvBruker(dialogData.getId());
+        val data = appService.markerDialogSomLestAvBruker(dialogData.getId());
+        appService.updateDialogAktorFor(data.getAktorId());
+        return data;
     }
 
     @Override
