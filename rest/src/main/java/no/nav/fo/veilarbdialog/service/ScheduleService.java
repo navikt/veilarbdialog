@@ -56,7 +56,7 @@ public class ScheduleService {
     @Inject
     private JmsTemplate varselQueue;
 
-    @Scheduled(fixedRateString = "${varslingsrate.millis}")
+    @Scheduled(cron = "${varslingsrate.cron}")
     public void sjekkForSendVarsel() {
         if (IS_MASTER) {
             val aktorer = varselDAO.hentAktorerMedUlesteMeldinger(GRACE_PERIODE);

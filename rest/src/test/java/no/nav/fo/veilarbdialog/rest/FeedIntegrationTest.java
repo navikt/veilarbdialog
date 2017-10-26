@@ -4,6 +4,7 @@ import lombok.val;
 import no.nav.brukerdialog.security.context.SubjectHandler;
 import no.nav.fo.IntegrasjonsTest;
 import no.nav.fo.feed.FeedProducerTester;
+import no.nav.fo.feed.common.FeedElement;
 import no.nav.fo.feed.controller.FeedController;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.util.DateUtils;
@@ -14,10 +15,13 @@ import javax.inject.Inject;
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class FeedIntegrationTest {
 
@@ -25,14 +29,24 @@ public class FeedIntegrationTest {
     public class henvendelser extends Base {
 
         @Override
-        public void opprettElementForFeed(String feedName, String id) {
-            setCurrentTimestamp(0);
+        public void kanHenteElementerFraAlleProdusenter() {
+            String tilfeldigId = unikId(null);
+            opprettElementForFeed(null, tilfeldigId);
+            List<? extends FeedElement<?>> elements = getFeedController().get(null, forsteMuligeId(null), null).getElements();
+            assertThat(elements).hasSize(2);
+            assertThat(elements.get(0).getId()).isEqualTo(tilfeldigId);
+            assertThat(elements.get(1).getId()).isEqualTo(tilfeldigId);
+        }
+
+        @Override
+        public void opprettElementForFeed(String feedName, String aktorId) {
+            setCurrentTimestamp(DateUtils.toDate(aktorId).getTime());
             val dialogId = dialogDAO.opprettDialog(nyDialog()
-                    .withAktorId(id)
+                    .withAktorId(aktorId)
             );
 
-            setCurrentTimestamp(DateUtils.toDate(id).getTime());
-            dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, id, BRUKER));
+            setCurrentTimestamp(DateUtils.toDate(aktorId).getTime() + 1);
+            dialogDAO.opprettHenvendelse(aktorId, nyHenvendelse(dialogId, aktorId, BRUKER));
         }
 
     }
@@ -76,7 +90,7 @@ public class FeedIntegrationTest {
 
         @Override
         public String unikId(String feedName) {
-            return ISO8601FromDate(new Date(counter++));
+            return ISO8601FromDate(new Date(counter += 2));
         }
 
         @Override

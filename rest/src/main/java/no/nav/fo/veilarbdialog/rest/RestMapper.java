@@ -23,7 +23,6 @@ class RestMapper {
                 .sorted(comparing(HenvendelseData::getSendt).reversed())
                 .findFirst();
 
-        // TODO her gjøres endel masering av data som klienten kanskje burde gjøre selv. Eller?
         return new DialogDTO()
                 .setId(Long.toString(dialogData.getId()))
                 .setAktivitetId(dialogData.getAktivitetId())
@@ -64,15 +63,6 @@ class RestMapper {
                 .setSendt(henvendelseData.sendt)
                 .setLest(henvendelseData.lestAvVeileder)
                 .setTekst(henvendelseData.tekst);
-    }
-
-    public DialogAktorDTO somDTO(DialogAktor dialogAktor) {
-        return new DialogAktorDTO()
-                .setAktorId(dialogAktor.aktorId)
-                .setTidspunktEldsteUbehandlede(dialogAktor.tidspunktEldsteUbehandlede)
-                .setTidspunktEldsteVentende(dialogAktor.tidspunktEldsteVentende)
-                .setSisteEndring(dialogAktor.sisteEndring)
-                ;
     }
 }
 

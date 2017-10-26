@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.db;
 
+import no.nav.sbl.jdbc.Transactor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,5 +40,10 @@ public class DatabaseContext {
     @Bean
     public Database database(DataSource ds) {
         return new Database(new JdbcTemplate(ds));
+    }
+
+    @Bean
+    public Transactor transactor(PlatformTransactionManager platformTransactionManager) {
+        return new Transactor(platformTransactionManager);
     }
 }
