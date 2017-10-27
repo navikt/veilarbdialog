@@ -110,8 +110,7 @@ public class AppService {
 
     public void settDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
         // NB: ingen tilgangskontroll, brukes av vår feed-consumer
-        dialogDAO.hentGjeldendeDialogerForAktorId(aktoerId).stream()
-                .filter(d -> d.getOpprettetDato().before(avsluttetDato))
+        dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
                 .forEach(dialog -> {
                     dialogDAO.oppdaterDialogTilHistorisk(dialog);
                     feedConsumerDAO.oppdaterSisteHistoriskeTidspunkt();
