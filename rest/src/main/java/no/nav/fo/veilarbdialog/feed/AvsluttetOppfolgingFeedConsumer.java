@@ -31,6 +31,13 @@ public class AvsluttetOppfolgingFeedConsumer {
     }
 
     void lesAvsluttetOppfolgingFeed(String lastEntryId, List<AvsluttetOppfolgingFeedDTO> elements) {
-        elements.forEach(element -> appService.settDialogerTilHistoriske(element.getAktoerid(), element.getSluttdato()));
+        Date lastSuccessfulId = null;
+        for (AvsluttetOppfolgingFeedDTO element : elements) {
+            appService.settDialogerTilHistoriske(element.getAktoerid(), element.getSluttdato());
+            lastSuccessfulId = element.getOppdatert();
+        }
+        if(lastSuccessfulId != null) {
+            feedConsumerDAO.oppdaterSisteHistoriskeTidspunkt(lastSuccessfulId);
+        }
     }
 }

@@ -7,7 +7,6 @@ import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
-import no.nav.fo.veilarbdialog.db.dao.FeedConsumerDAO;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
@@ -24,18 +23,15 @@ public class AppService {
     private final AktorService aktorService;
     private final DialogDAO dialogDAO;
     private final DialogFeedDAO dialogFeedDAO;
-    private final FeedConsumerDAO feedConsumerDAO;
     private final PepClient pepClient;
 
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
                       DialogFeedDAO dialogFeedDAO,
-                      FeedConsumerDAO feedConsumerDAO,
                       PepClient pepClient) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
         this.dialogFeedDAO = dialogFeedDAO;
-        this.feedConsumerDAO = feedConsumerDAO;
         this.pepClient = pepClient;
     }
 
@@ -111,10 +107,7 @@ public class AppService {
     public void settDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
         // NB: ingen tilgangskontroll, brukes av vår feed-consumer
         dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
-                .forEach(dialog -> {
-                    dialogDAO.oppdaterDialogTilHistorisk(dialog);
-                    feedConsumerDAO.oppdaterSisteHistoriskeTidspunkt();
-                });
+                .forEach(dialog -> dialogDAO.oppdaterDialogTilHistorisk(dialog));
     }
 
     private String sjekkTilgangTilFnr(String ident) {

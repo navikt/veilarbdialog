@@ -11,12 +11,10 @@ import java.util.Date;
 @Component
 public class FeedConsumerDAO {
     private final Database database;
-    private final DateProvider dateProvider;
 
     @Inject
-    public FeedConsumerDAO(Database database, DateProvider dateProvider) {
+    public FeedConsumerDAO(Database database) {
         this.database = database;
-        this.dateProvider = dateProvider;
     }
 
     public Date hentSisteHistoriskeTidspunkt() {
@@ -27,9 +25,10 @@ public class FeedConsumerDAO {
         );
     }
 
-    public void oppdaterSisteHistoriskeTidspunkt() {
-        database.update("UPDATE FEED_METADATA SET " +
-                "tidspunkt_siste_endring = " + dateProvider.getNow()
+    public void oppdaterSisteHistoriskeTidspunkt(Date lastSuccessfulId) {
+        database.update(
+                "UPDATE FEED_METADATA SET tidspunkt_siste_endring = ?", 
+                lastSuccessfulId
         );
     }
 
