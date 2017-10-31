@@ -116,7 +116,7 @@ public class AppService {
                     feedConsumerDAO.oppdaterSisteHistoriskeTidspunkt();
                 });
 
-        updateDialogAktorFor(element.getAktoerid());
+        updateDialogAktorFor(aktoerId);
     }
 
     public void updateDialogAktorFor(String aktorId){
