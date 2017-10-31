@@ -1,9 +1,8 @@
 package no.nav.fo.veilarbdialog.feed;
 
-import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.db.dao.FeedConsumerDAO;
 import no.nav.fo.veilarbdialog.service.AppService;
-import no.nav.fo.veilarbsituasjon.rest.domain.AvsluttetOppfolgingFeedDTO;
+import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -32,6 +31,6 @@ public class AvsluttetOppfolgingFeedConsumer {
     }
 
     void lesAvsluttetOppfolgingFeed(String lastEntryId, List<AvsluttetOppfolgingFeedDTO> elements) {
-        elements.forEach(appService::settDialogerTilHistoriske);
+        elements.forEach(element -> appService.settDialogerTilHistoriske(element.getAktoerid(), element.getSluttdato()));
     }
 }

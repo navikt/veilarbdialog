@@ -30,7 +30,7 @@ public class FeedConusmerDAOTest extends IntegrasjonsTest {
         dialogDAO.opprettDialog(dialog2);
 
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
-        List<DialogData> gjeldendeDialoger = dialogDAO.hentGjeldendeDialogerForAktorId(aktorId);
+        List<DialogData> gjeldendeDialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktorId, null);
         assertThat(dialoger).hasSize(2);
         assertThat(gjeldendeDialoger).isEmpty();
 

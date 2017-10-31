@@ -42,10 +42,11 @@ public class DialogDAO {
         );
     }
 
-    public List<DialogData> hentGjeldendeDialogerForAktorId(String aktorId) {
-        return database.query(SELECT_DIALOG + "WHERE d.aktor_id = ? AND historisk = 0",
+    public List<DialogData> hentDialogerSomSkalAvsluttesForAktorId(String aktorId, Date avsluttetDato) {
+        return database.query(SELECT_DIALOG + "WHERE d.aktor_id = ? AND historisk = 0 AND d.OPPRETTET_DATO < ?",
                 this::mapTilDialog,
-                aktorId
+                aktorId,
+                avsluttetDato
         );
     }
 

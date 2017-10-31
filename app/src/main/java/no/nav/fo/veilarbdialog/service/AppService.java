@@ -12,7 +12,6 @@ import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbsituasjon.rest.domain.AvsluttetOppfolgingFeedDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -109,9 +108,9 @@ public class AppService {
         return dialogFeedDAO.hentAktorerMedEndringerFOM(tidspunkt, pageSize);
     }
 
-    public void settDialogerTilHistoriske(AvsluttetOppfolgingFeedDTO element) {
+    public void settDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
         // NB: ingen tilgangskontroll, brukes av vår feed-consumer
-        dialogDAO.hentGjeldendeDialogerForAktorId(element.getAktoerid())
+        dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
                 .forEach(dialog -> {
                     dialogDAO.oppdaterDialogTilHistorisk(dialog);
                     feedConsumerDAO.oppdaterSisteHistoriskeTidspunkt();

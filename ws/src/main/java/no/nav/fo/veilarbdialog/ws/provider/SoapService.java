@@ -3,7 +3,6 @@ package no.nav.fo.veilarbdialog.ws.provider;
 import lombok.val;
 import no.nav.apiapp.soap.SoapTjeneste;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.modig.core.context.SubjectHandler;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.binding.*;
@@ -11,8 +10,6 @@ import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.meldinger.*;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import javax.jws.WebService;
-
 import java.util.List;
 
 import static java.util.Optional.of;

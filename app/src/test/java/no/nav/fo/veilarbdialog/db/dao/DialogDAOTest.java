@@ -179,7 +179,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
 
     @Test
-    public void hentGjeldendeDialogerForAktorId() throws Exception {
+    public void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedAlleredeHistoriske() throws Exception {
         val dialog = nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").build();
         val historiskDialog = nyDialog(AKTOR_ID_1234).toBuilder().historisk(true).overskrift("historisk").build();
 
@@ -188,9 +188,23 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
         dialogDAO.oppdaterDialogTilHistorisk(historiskDialog);
 
-        val gjeldendeDialoger = dialogDAO.hentGjeldendeDialogerForAktorId(AKTOR_ID_1234);
-        assertThat(gjeldendeDialoger).hasSize(1);
-        assertThat(gjeldendeDialoger.get(0).getOverskrift()).isEqualTo("ny");
+        val dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, new Date(System.currentTimeMillis() + 1000));
+        assertThat(dialoger).hasSize(1);
+        assertThat(dialoger.get(0).getOverskrift()).isEqualTo("ny");
+    }
+
+    @Test
+    public void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() throws Exception {
+        val dialog = nyDialog(AKTOR_ID_1234).toBuilder().overskrift("gammel").build();
+        dialogDAO.opprettDialog(dialog);
+        Thread.sleep(10);
+        Date avslutningsdato = new Date();
+        
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").build());
+
+        val dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
+        assertThat(dialoger).hasSize(1);
+        assertThat(dialoger.get(0).getOverskrift()).isEqualTo("gammel");
     }
 
     @Test
