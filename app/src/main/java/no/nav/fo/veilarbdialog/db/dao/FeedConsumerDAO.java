@@ -25,10 +25,10 @@ public class FeedConsumerDAO {
         );
     }
 
-    public void oppdaterSisteHistoriskeTidspunkt(Date lastSuccessfulId) {
+    public void oppdaterSisteFeedId(Date id) {
         database.update(
                 "UPDATE FEED_METADATA SET tidspunkt_siste_endring = ?", 
-                lastSuccessfulId
+                id
         );
     }
 

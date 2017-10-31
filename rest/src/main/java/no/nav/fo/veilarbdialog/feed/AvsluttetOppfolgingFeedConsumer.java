@@ -36,8 +36,13 @@ public class AvsluttetOppfolgingFeedConsumer {
             appService.settDialogerTilHistoriske(element.getAktoerid(), element.getSluttdato());
             lastSuccessfulId = element.getOppdatert();
         }
+
+        // Håndterer ikke exceptions her. Dersom en exception oppstår i løkkeprosesseringen over, vil 
+        // vi altså IKKE få oppdatert siste id. Dermed vil vi lese feeden på nytt fra siste kjente id og potensielt
+        // prosessere noen elementer flere ganger. Dette skal gå bra, siden koden som setter dialoger til historisk
+        // er idempotent
         if(lastSuccessfulId != null) {
-            feedConsumerDAO.oppdaterSisteHistoriskeTidspunkt(lastSuccessfulId);
+            feedConsumerDAO.oppdaterSisteFeedId(lastSuccessfulId);
         }
     }
 }
