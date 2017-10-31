@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.ws.provider;
 
+import lombok.val;
 import no.nav.apiapp.soap.SoapTjeneste;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.service.AppService;
@@ -34,7 +35,7 @@ public class SoapService implements AktivitetDialogV1 {
         return of(personIdent)
                 .map(appService::hentDialogerForBruker)
                 .map(dialogData -> hentDialogerForBrukerResponse(dialogData, personIdent))
-                .get();
+                .orElseThrow(RuntimeException::new);
     }
 
     private HentDialogerForBrukerResponse hentDialogerForBrukerResponse(List<DialogData> dialogData, String personIdent) {
@@ -61,7 +62,13 @@ public class SoapService implements AktivitetDialogV1 {
     @Override
     public void markerDialogSomLest(MarkerDialogSomLestRequest markerDialogSomLestRequest)
             throws MarkerDialogSomLestSikkerhetsbegrensning, MarkerDialogSomLestUgyldigInput {
-        appService.markerDialogSomLestAvBruker(Long.parseLong(markerDialogSomLestRequest.getDialogId()));
+        val data = appService.markerDialogSomLestAvBruker(Long.parseLong(markerDialogSomLestRequest.getDialogId()));
+        updateDialogAktorFor(data);
+    }
+
+    private DialogData updateDialogAktorFor(DialogData dialogData) {
+        appService.updateDialogAktorFor(dialogData.getAktorId());
+        return dialogData;
     }
 
     private DialogData markerDialogSomLest(DialogData dialogData) {
@@ -76,8 +83,9 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(r -> soapServiceMapper.somDialogData(opprettDialogForAktivitetRequest, personIdent))
                 .map(appService::opprettDialogForAktivitetsplanPaIdent)
                 .map(this::markerDialogSomLest)
+                .map(this::updateDialogAktorFor)
                 .map(this::opprettDialogForAktivitetResponse)
-                .get();
+                .orElseThrow(RuntimeException::new);
     }
 
     private OpprettDialogForAktivitetResponse opprettDialogForAktivitetResponse(DialogData dialogData) {
@@ -93,8 +101,9 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(soapServiceMapper::somDialogData)
                 .map(dialogData -> appService.opprettDialogForAktivitetsplanPaIdent(dialogData))
                 .map(this::markerDialogSomLest)
+                .map(this::updateDialogAktorFor)
                 .map(this::opprettDialogForAktivitetsplanResponse)
-                .get();
+                .orElseThrow(RuntimeException::new);
     }
 
     private OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse(DialogData dialogData) {
@@ -110,7 +119,8 @@ public class SoapService implements AktivitetDialogV1 {
         of(opprettHenvendelseForDialogRequest)
                 .map(r -> soapServiceMapper.somHenvendelseData(r, personIdent))
                 .map(appService::opprettHenvendelseForDialog)
-                .ifPresent(this::markerDialogSomLest);
+                .map(this::markerDialogSomLest)
+                .ifPresent(this::updateDialogAktorFor);
     }
 
     private String getPersonIdent() {

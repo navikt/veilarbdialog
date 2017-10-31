@@ -4,9 +4,9 @@ import lombok.val;
 import no.nav.brukerdialog.security.context.SubjectHandler;
 import no.nav.fo.IntegrasjonsTest;
 import no.nav.fo.feed.FeedProducerTester;
-import no.nav.fo.feed.common.FeedElement;
 import no.nav.fo.feed.controller.FeedController;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
+import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.util.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -15,29 +15,15 @@ import javax.inject.Inject;
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.List;
 
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class FeedIntegrationTest {
 
     @Nested
     public class henvendelser extends Base {
-
-        @Override
-        public void kanHenteElementerFraAlleProdusenter() {
-            String tilfeldigId = unikId(null);
-            opprettElementForFeed(null, tilfeldigId);
-            List<? extends FeedElement<?>> elements = getFeedController().get(null, forsteMuligeId(null), null).getElements();
-            assertThat(elements).hasSize(2);
-            assertThat(elements.get(0).getId()).isEqualTo(tilfeldigId);
-            assertThat(elements.get(1).getId()).isEqualTo(tilfeldigId);
-        }
-
         @Override
         public void opprettElementForFeed(String feedName, String aktorId) {
             setCurrentTimestamp(DateUtils.toDate(aktorId).getTime());
@@ -45,8 +31,10 @@ public class FeedIntegrationTest {
                     .withAktorId(aktorId)
             );
 
-            setCurrentTimestamp(DateUtils.toDate(aktorId).getTime() + 1);
-            dialogDAO.opprettHenvendelse(aktorId, nyHenvendelse(dialogId, aktorId, BRUKER));
+            dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, aktorId, BRUKER));
+
+            val dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
+            dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
         }
 
     }
@@ -60,7 +48,10 @@ public class FeedIntegrationTest {
             dialogDAO.opprettDialog(nyDialog()
                     .withAktorId(id)
             );
+            val dialoger = dialogDAO.hentDialogerForAktorId(id);
+            dialogFeedDAO.updateDialogAktorFor(id, dialoger);
         }
+
 
     }
 
@@ -73,6 +64,9 @@ public class FeedIntegrationTest {
 
         @Inject
         protected DialogDAO dialogDAO;
+
+        @Inject
+        protected DialogFeedDAO dialogFeedDAO;
 
         @BeforeEach
         void setup() {
