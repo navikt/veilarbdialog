@@ -50,7 +50,9 @@ public class RestService implements DialogController, VeilederDialogController {
                 .tekst(nyHenvendelseDTO.tekst)
                 .build()
         );
-        return markerSomLest(dialogId);
+        DialogData dialogData = appService.markerDialogSomLestAvVeileder(dialogId);
+        appService.updateDialogAktorFor(dialogData.getAktorId());
+        return restMapper.somDialogDTO(dialogData);
     }
 
     private Long finnDialogId(NyHenvendelseDTO nyHenvendelseDTO) {
@@ -78,12 +80,8 @@ public class RestService implements DialogController, VeilederDialogController {
     }
 
     @Override
-    public DialogDTO markerSomLest(String dialogIdString) {
-        return markerSomLest(Long.parseLong(dialogIdString));
-    }
-
-    private DialogDTO markerSomLest(long id) {
-        DialogData dialogData = appService.markerDialogSomLestAvVeileder(id);
+    public DialogDTO markerSomLest(String dialogId) {
+        DialogData dialogData = appService.markerDialogSomLestAvVeileder(Long.parseLong(dialogId));
         appService.updateDialogAktorFor(dialogData.getAktorId());
         return restMapper.somDialogDTO(dialogData);
     }
