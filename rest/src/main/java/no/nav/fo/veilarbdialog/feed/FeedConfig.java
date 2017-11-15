@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.feed;
 
+import lombok.val;
 import no.nav.brukerdialog.security.oidc.OidcFeedAuthorizationModule;
 import no.nav.fo.feed.common.FeedElement;
 import no.nav.fo.feed.consumer.FeedConsumer;
@@ -49,8 +50,16 @@ public class FeedConfig {
 
         return appService.hentAktorerMedEndringerFOM(date, pageSize)
                 .stream()
-                .map(this::somDTO)
                 .map(this::somFeedElement);
+    }
+
+    private FeedElement<DialogAktorDTO> somFeedElement(DialogAktor dialogAktor) {
+        String id = DateUtils.ISO8601FromDate(dialogAktor.getOpprettetTidspunkt(), ZoneId.systemDefault());
+        val dto = somDTO(dialogAktor);
+
+        return new FeedElement<DialogAktorDTO>()
+                .setId(id)
+                .setElement(dto);
     }
 
     private DialogAktorDTO somDTO(DialogAktor dialogAktor) {
@@ -60,12 +69,5 @@ public class FeedConfig {
                 .setTidspunktEldsteVentende(dialogAktor.tidspunktEldsteVentende)
                 .setSisteEndring(dialogAktor.sisteEndring)
                 ;
-    }
-
-    private FeedElement<DialogAktorDTO> somFeedElement(DialogAktorDTO dialogAktorDTO) {
-        String id = DateUtils.ISO8601FromDate(dialogAktorDTO.getSisteEndring(), ZoneId.systemDefault());
-        return new FeedElement<DialogAktorDTO>()
-                .setId(id)
-                .setElement(dialogAktorDTO);
     }
 }
