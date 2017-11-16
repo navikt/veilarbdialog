@@ -9,6 +9,7 @@ import java.util.Date;
 @Accessors(chain = true)
 public class DialogAktorDTO implements Comparable<DialogAktorDTO> {
 
+    public String id;
     public String aktorId;
     public Date sisteEndring;
     public Date tidspunktEldsteVentende;
@@ -16,6 +17,6 @@ public class DialogAktorDTO implements Comparable<DialogAktorDTO> {
 
     @Override
     public int compareTo(DialogAktorDTO o) {
-        return this.sisteEndring.compareTo(o.sisteEndring);
+        return this.id.compareTo(o.id);
     }
 }

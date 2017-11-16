@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.rest;
 
+import lombok.val;
 import no.nav.apiapp.feil.UgyldigRequest;
 import no.nav.brukerdialog.security.context.SubjectHandler;
 import no.nav.fo.veilarbdialog.api.DialogController;
@@ -12,7 +13,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -82,7 +82,6 @@ public class RestService implements DialogController, VeilederDialogController {
     @Override
     public DialogDTO markerSomLest(String dialogId) {
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(Long.parseLong(dialogId));
-        appService.updateDialogAktorFor(dialogData.getAktorId());
         return restMapper.somDialogDTO(dialogData);
     }
 
@@ -96,17 +95,27 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public DialogDTO oppdaterVenterPaSvar(String dialogId, boolean venter) {
-        return oppdaterStatus(dialogId, dialogStatusBuilder -> appService.oppdaterVentePaSvarTidspunkt(dialogStatusBuilder.venterPaSvar(venter).build()));
+        val dialogStatus = DialogStatus.builder()
+                .dialogId(Long.parseLong(dialogId))
+                .venterPaSvar(venter)
+                .build();
+
+        val dialog = appService.oppdaterVentePaSvarTidspunkt(dialogStatus);
+        appService.updateDialogAktorFor(dialog.getAktorId());
+
+        return markerSomLest(dialogId);
     }
 
     @Override
     public DialogDTO oppdaterFerdigbehandlet(String dialogId, boolean ferdigbehandlet) {
-        return oppdaterStatus(dialogId, b -> appService.oppdaterFerdigbehandletTidspunkt(b.ferdigbehandlet(ferdigbehandlet).build()));
-    }
+        val dialogStatus = DialogStatus.builder()
+                .dialogId(Long.parseLong(dialogId))
+                .ferdigbehandlet(ferdigbehandlet)
+                .build();
 
-    private DialogDTO oppdaterStatus(String dialogId, Consumer<DialogStatus.DialogStatusBuilder> dialogStatusBuilderConsumer) {
-        dialogStatusBuilderConsumer.accept(DialogStatus.builder().dialogId(Long.parseLong(dialogId)));
+        val dialog = appService.oppdaterFerdigbehandletTidspunkt(dialogStatus);
+        appService.updateDialogAktorFor(dialog.getAktorId());
+
         return markerSomLest(dialogId);
     }
-
 }

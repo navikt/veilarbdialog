@@ -19,16 +19,18 @@ import static no.nav.sbl.jdbc.Database.hentDato;
 public class DialogFeedDAO {
     
     private final Database database;
+    private final DateProvider dateProvider;
 
     @Inject
-    public DialogFeedDAO(Database database) {
+    public DialogFeedDAO(Database database, DateProvider dateProvider) {
         this.database = database;
+        this.dateProvider = dateProvider;
     }
 
 
     public List<DialogAktor> hentAktorerMedEndringerFOM(Date date, int pageSize) {
         return database.query("SELECT * FROM " +
-                        "(SELECT * FROM DIALOG_AKTOR WHERE siste_endring >= ? ORDER BY siste_endring) " +
+                        "(SELECT * FROM DIALOG_AKTOR WHERE opprettet_tidspunkt >= ? ORDER BY opprettet_tidspunkt) " +
                         "WHERE rownum <= ?",
                 this::mapTilDialogAktor,
                 date,
@@ -42,8 +44,9 @@ public class DialogFeedDAO {
                         "aktor_id, " +
                         "siste_endring, " +
                         "tidspunkt_eldste_ventende, " +
-                        "tidspunkt_eldste_ubehandlede) " +
-                        "VALUES (?,?,?,?)",
+                        "tidspunkt_eldste_ubehandlede, " +
+                        "opprettet_tidspunkt) " +
+                        "VALUES (?,?,?,?, "+ dateProvider.getNow() +")",
                 aktorId,
                 dialogAktor.getSisteEndring(),
                 dialogAktor.getTidspunktEldsteVentende(),
@@ -58,6 +61,7 @@ public class DialogFeedDAO {
                 .sisteEndring(hentDato(rs, "siste_endring"))
                 .tidspunktEldsteVentende(hentDato(rs, "tidspunkt_eldste_ventende"))
                 .tidspunktEldsteUbehandlede(hentDato(rs, "tidspunkt_eldste_ubehandlede"))
+                .opprettetTidspunkt(hentDato(rs, "opprettet_tidspunkt"))
                 .build();
     }
 

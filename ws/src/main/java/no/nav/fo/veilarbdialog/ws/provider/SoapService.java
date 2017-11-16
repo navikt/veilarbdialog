@@ -62,8 +62,7 @@ public class SoapService implements AktivitetDialogV1 {
     @Override
     public void markerDialogSomLest(MarkerDialogSomLestRequest markerDialogSomLestRequest)
             throws MarkerDialogSomLestSikkerhetsbegrensning, MarkerDialogSomLestUgyldigInput {
-        val data = appService.markerDialogSomLestAvBruker(Long.parseLong(markerDialogSomLestRequest.getDialogId()));
-        updateDialogAktorFor(data);
+        appService.markerDialogSomLestAvBruker(Long.parseLong(markerDialogSomLestRequest.getDialogId()));
     }
 
     private DialogData updateDialogAktorFor(DialogData dialogData) {
