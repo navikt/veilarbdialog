@@ -25,16 +25,16 @@ public class FeedIntegrationTest {
     @Nested
     public class henvendelser extends Base {
         @Override
-        public void opprettElementForFeed(String feedName, String aktorId) {
-            setCurrentTimestamp(DateUtils.toDate(aktorId).getTime());
+        public void opprettElementForFeed(String feedName, String id) {
+            setCurrentTimestamp(DateUtils.toDate(id).getTime());
             val dialogId = dialogDAO.opprettDialog(nyDialog()
-                    .withAktorId(aktorId)
+                    .withAktorId("aktorId")
             );
 
-            dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, aktorId, BRUKER));
+            dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, "aktorId", BRUKER));
 
-            val dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
-            dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
+            val dialoger = dialogDAO.hentDialogerForAktorId("aktorId");
+            dialogFeedDAO.updateDialogAktorFor("aktorId", dialoger);
         }
 
     }
@@ -46,13 +46,11 @@ public class FeedIntegrationTest {
         public void opprettElementForFeed(String feedName, String id) {
             setCurrentTimestamp(DateUtils.toDate(id).getTime());
             dialogDAO.opprettDialog(nyDialog()
-                    .withAktorId(id)
+                    .withAktorId("aktorId")
             );
-            val dialoger = dialogDAO.hentDialogerForAktorId(id);
-            dialogFeedDAO.updateDialogAktorFor(id, dialoger);
+            val dialoger = dialogDAO.hentDialogerForAktorId("aktorId");
+            dialogFeedDAO.updateDialogAktorFor("aktorId", dialoger);
         }
-
-
     }
 
     public static abstract class Base extends IntegrasjonsTest implements FeedProducerTester {

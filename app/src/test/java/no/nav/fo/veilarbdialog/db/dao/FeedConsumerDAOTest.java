@@ -13,7 +13,7 @@ import java.util.List;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FeedConusmerDAOTest extends IntegrasjonsTest {
+public class FeedConsumerDAOTest extends IntegrasjonsTest {
     @Inject
     private DialogDAO dialogDAO;
 

@@ -55,15 +55,16 @@ public class FeedConfig {
 
     private FeedElement<DialogAktorDTO> somFeedElement(DialogAktor dialogAktor) {
         String id = DateUtils.ISO8601FromDate(dialogAktor.getOpprettetTidspunkt(), ZoneId.systemDefault());
-        val dto = somDTO(dialogAktor);
+        val dto = somDTO(id, dialogAktor);
 
         return new FeedElement<DialogAktorDTO>()
                 .setId(id)
                 .setElement(dto);
     }
 
-    private DialogAktorDTO somDTO(DialogAktor dialogAktor) {
+    private DialogAktorDTO somDTO(String id, DialogAktor dialogAktor) {
         return new DialogAktorDTO()
+                .setId(id)
                 .setAktorId(dialogAktor.aktorId)
                 .setTidspunktEldsteUbehandlede(dialogAktor.tidspunktEldsteUbehandlede)
                 .setTidspunktEldsteVentende(dialogAktor.tidspunktEldsteVentende)

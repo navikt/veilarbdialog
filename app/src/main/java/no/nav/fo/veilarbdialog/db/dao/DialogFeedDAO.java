@@ -30,7 +30,7 @@ public class DialogFeedDAO {
 
     public List<DialogAktor> hentAktorerMedEndringerFOM(Date date, int pageSize) {
         return database.query("SELECT * FROM " +
-                        "(SELECT * FROM DIALOG_AKTOR WHERE siste_endring >= ? ORDER BY opprettet_tidspunkt) " +
+                        "(SELECT * FROM DIALOG_AKTOR WHERE opprettet_tidspunkt >= ? ORDER BY opprettet_tidspunkt) " +
                         "WHERE rownum <= ?",
                 this::mapTilDialogAktor,
                 date,
