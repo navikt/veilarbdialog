@@ -141,7 +141,6 @@ public class SoapService implements AktivitetDialogV1 {
     public void opprettHenvendelseForDialog(OpprettHenvendelseForDialogRequest opprettHenvendelseForDialogRequest)
             throws OpprettHenvendelseForDialogSikkerhetsbegrensning, OpprettHenvendelseForDialogUgyldigInput {
         String personIdent = getPersonIdent();
-
         of(opprettHenvendelseForDialogRequest)
                 .map(r -> soapServiceMapper.somHenvendelseData(r, personIdent))
                 .map(appService::opprettHenvendelseForDialog)
