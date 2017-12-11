@@ -1,10 +1,11 @@
 package no.nav.fo.veilarbdialog.ws.provider;
 
-import no.nav.fo.veilarbdialog.domain.AvsenderType;
-import no.nav.metrics.*;
 import no.nav.apiapp.soap.SoapTjeneste;
+import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.service.AppService;
+import no.nav.metrics.Event;
+import no.nav.metrics.MetricsFactory;
 import no.nav.modig.core.context.SubjectHandler;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.binding.*;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.meldinger.*;
@@ -30,6 +31,7 @@ public class SoapService implements AktivitetDialogV1 {
 
     @Override
     public void ping() {
+        //tom pga Ping komentar lagt til pga sonar
     }
 
     @Override
@@ -66,18 +68,10 @@ public class SoapService implements AktivitetDialogV1 {
     @Override
     public void markerDialogSomLest(MarkerDialogSomLestRequest markerDialogSomLestRequest)
             throws MarkerDialogSomLestSikkerhetsbegrensning, MarkerDialogSomLestUgyldigInput {
-        DialogData dialogData = appService.markerDialogSomLestAvBruker(Long.parseLong(markerDialogSomLestRequest.getDialogId()));
-        createMetricsDialogLest(dialogData);
+        appService.markerDialogSomLestAvBruker(Long.parseLong(markerDialogSomLestRequest.getDialogId()));
     }
 
-    private void createMetricsDialogLest(DialogData dialogData) {
-        long msSidenMelding = new Date().getTime() - dialogData.getSisteEndring().getTime();
-        MetricsFactory
-                .createEvent("MarkerSomLestBruker")
-                .addFieldToReport("ms", msSidenMelding)
-                .setSuccess()
-                .report();
-    }
+
 
     private DialogData updateDialogAktorFor(DialogData dialogData) {
         appService.updateDialogAktorFor(dialogData.getAktorId());
@@ -153,8 +147,12 @@ public class SoapService implements AktivitetDialogV1 {
         Event event = MetricsFactory
                 .createEvent("NyMeldingBruker")
                 .addFieldToReport("paaAktivitet", notNullOrEmpty(dialogData.getAktivitetId()));
-        if (isSvartpaa(dialogData))
+
+        boolean svartpaa = isSvartpaa(dialogData);
+        event.addFieldToReport("erSvar", svartpaa);
+        if (svartpaa) {
             event.addFieldToReport("svartid", svartid(dialogData));
+        }
 
         event.report();
         return dialogData;

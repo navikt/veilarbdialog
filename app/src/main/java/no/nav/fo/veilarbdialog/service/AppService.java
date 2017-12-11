@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Comparator.naturalOrder;
+
 @Component
 public class AppService {
 
@@ -72,8 +74,9 @@ public class AppService {
     }
 
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
-        sjekkLeseTilgangTilDialog(dialogId);
+        DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvBruker(dialogId);
+        createMetricsDialogSomLestAvBruker(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -85,17 +88,7 @@ public class AppService {
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
-    private void createOppdaterFerdigbehandletTidspunktMetrikker(DialogData dialog, DialogStatus dialogStatus) {
-        Event event = MetricsFactory
-                .createEvent("oppdaterBehandlingsStatus")
-                .addFieldToReport("ferdigbehandlet", dialogStatus.ferdigbehandlet);
-        if(dialogStatus.ferdigbehandlet){
-            event.addFieldToReport(
-                    "behandlingsTid",
-                    new Date().getTime() - dialog.getUbehandletTidspunkt().getTime());
-        }
-        event.report();
-    }
+
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
@@ -155,6 +148,34 @@ public class AppService {
             throw new UlovligHandling();
         }
         return dialogData;
+    }
+
+    private void createMetricsDialogSomLestAvBruker(DialogData dialogData) {
+        Optional<Date> min = dialogData.getHenvendelser().stream()
+                .filter(HenvendelseData::fraVeileder)
+                .filter(h -> !h.lestAvBruker)
+                .map(HenvendelseData::getSendt)
+                .min(naturalOrder());
+        Event event = MetricsFactory
+                .createEvent("MarkerSomLestAvBruker")
+                .addFieldToReport("faktiskLest", min.isPresent());
+
+        min.ifPresent(date -> event.addFieldToReport("ReadTime", new Date().getTime() - date.getTime()));
+
+        event.report();
+    }
+
+    private void createOppdaterFerdigbehandletTidspunktMetrikker(DialogData dialog, DialogStatus dialogStatus) {
+        Event event = MetricsFactory
+                .createEvent("oppdaterBehandlingsStatus")
+                .addFieldToReport("ferdigbehandlet", dialogStatus.ferdigbehandlet);
+        Date ubehandletTidspunkt = dialog.getUbehandletTidspunkt();
+        if(dialogStatus.ferdigbehandlet && ubehandletTidspunkt != null){
+            event.addFieldToReport(
+                    "behandlingsTid",
+                    new Date().getTime() - ubehandletTidspunkt.getTime());
+        }
+        event.report();
     }
 
 }

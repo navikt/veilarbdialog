@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
-import static no.nav.fo.veilarbdialog.util.StringUtils.nullOrEmty;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
 
@@ -95,7 +94,7 @@ public class RestService implements DialogController, VeilederDialogController {
     private void nyDialogMetrik(NyHenvendelseDTO nyHenvendelseDTO) {
         MetricsFactory
                 .createEvent("NyDialogVeileder")
-                .addFieldToReport("paaAktivitet", nullOrEmty(nyHenvendelseDTO.aktivitetId))
+                .addFieldToReport("paaAktivitet", notNullOrEmpty(nyHenvendelseDTO.aktivitetId))
                 .setSuccess()
                 .report();
     }
