@@ -11,6 +11,8 @@ import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.metrics.Event;
+import no.nav.metrics.MetricsFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -77,9 +79,22 @@ public class AppService {
 
     public DialogData oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        sjekkSkriveTilgangTilDialog(dialogId);
+        DialogData dialog = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
+        createOppdaterFerdigbehandletTidspunktMetrikker(dialog, dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
+    }
+
+    private void createOppdaterFerdigbehandletTidspunktMetrikker(DialogData dialog, DialogStatus dialogStatus) {
+        Event event = MetricsFactory
+                .createEvent("oppdaterBehandlingsStatus")
+                .addFieldToReport("ferdigbehandlet", dialogStatus.ferdigbehandlet);
+        if(dialogStatus.ferdigbehandlet){
+            event.addFieldToReport(
+                    "behandlingsTid",
+                    new Date().getTime() - dialog.getUbehandletTidspunkt().getTime());
+        }
+        event.report();
     }
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
@@ -107,7 +122,7 @@ public class AppService {
     public void settDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
         // NB: ingen tilgangskontroll, brukes av vår feed-consumer
         dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
-                .forEach(dialog -> dialogDAO.oppdaterDialogTilHistorisk(dialog));
+                .forEach(dialogDAO::oppdaterDialogTilHistorisk);
 
         updateDialogAktorFor(aktoerId);
     }

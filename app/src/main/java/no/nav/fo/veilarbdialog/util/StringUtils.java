@@ -4,6 +4,10 @@ import java.util.Optional;
 
 public class StringUtils {
 
+    public static boolean nullOrEmty(String string){
+        return !notNullOrEmpty(string);
+    }
+
     public static boolean notNullOrEmpty(String string) {
         return string != null && string.trim().length() > 0;
     }
@@ -12,4 +16,6 @@ public class StringUtils {
         return Optional.ofNullable(string).filter(StringUtils::notNullOrEmpty);
     }
 
+    private StringUtils() {
+    }
 }

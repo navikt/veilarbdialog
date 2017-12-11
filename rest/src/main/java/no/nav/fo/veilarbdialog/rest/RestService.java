@@ -7,6 +7,7 @@ import no.nav.fo.veilarbdialog.api.DialogController;
 import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.AppService;
+import no.nav.metrics.MetricsFactory;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
+import static no.nav.fo.veilarbdialog.util.StringUtils.nullOrEmty;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
 
@@ -52,7 +54,16 @@ public class RestService implements DialogController, VeilederDialogController {
         );
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(dialogId);
         appService.updateDialogAktorFor(dialogData.getAktorId());
+        nyHenvedelseMetrikker(nyHenvendelseDTO);
         return restMapper.somDialogDTO(dialogData);
+    }
+
+    private void nyHenvedelseMetrikker(NyHenvendelseDTO nyHenvendelseDTO) {
+        MetricsFactory
+                .createEvent("NyMeldingVeileder")
+                .addFieldToReport("paaAktivitet", notNullOrEmpty(nyHenvendelseDTO.aktivitetId))
+                .setSuccess()
+                .report();
     }
 
     private Long finnDialogId(NyHenvendelseDTO nyHenvendelseDTO) {
@@ -76,11 +87,27 @@ public class RestService implements DialogController, VeilederDialogController {
                         .map(egenskap -> EgenskapType.ESKALERINGSVARSEL)
                         .collect(Collectors.toList()))
                 .build();
-        return appService.opprettDialogForAktivitetsplanPaIdent(dialogData);
+        DialogData opprettetDialog = appService.opprettDialogForAktivitetsplanPaIdent(dialogData);
+        nyDialogMetrik(nyHenvendelseDTO);
+        return opprettetDialog;
+    }
+
+    private void nyDialogMetrik(NyHenvendelseDTO nyHenvendelseDTO) {
+        MetricsFactory
+                .createEvent("NyDialogVeileder")
+                .addFieldToReport("paaAktivitet", nullOrEmty(nyHenvendelseDTO.aktivitetId))
+                .setSuccess()
+                .report();
     }
 
     @Override
     public DialogDTO markerSomLest(String dialogId) {
+        DialogDTO dialogDTO = markerSomLestUtenMetrikker(dialogId);
+        MetricsFactory.createEvent("MarkerSomLestVeileder").setSuccess().report();
+        return dialogDTO;
+    }
+
+    private DialogDTO markerSomLestUtenMetrikker(String dialogId) {
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(Long.parseLong(dialogId));
         return restMapper.somDialogDTO(dialogData);
     }
@@ -103,7 +130,13 @@ public class RestService implements DialogController, VeilederDialogController {
         val dialog = appService.oppdaterVentePaSvarTidspunkt(dialogStatus);
         appService.updateDialogAktorFor(dialog.getAktorId());
 
-        return markerSomLest(dialogId);
+        MetricsFactory
+                .createEvent("oppdaterVenterPaSvar")
+                .addFieldToReport("venter", venter)
+                .setSuccess()
+                .report();
+
+        return markerSomLestUtenMetrikker(dialogId);
     }
 
     @Override
@@ -116,6 +149,6 @@ public class RestService implements DialogController, VeilederDialogController {
         val dialog = appService.oppdaterFerdigbehandletTidspunkt(dialogStatus);
         appService.updateDialogAktorFor(dialog.getAktorId());
 
-        return markerSomLest(dialogId);
+        return markerSomLestUtenMetrikker(dialogId);
     }
 }
