@@ -11,6 +11,7 @@ import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.util.DateUtils;
 import no.nav.metrics.Event;
 import no.nav.metrics.MetricsFactory;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Comparator.naturalOrder;
+import static no.nav.fo.veilarbdialog.util.DateUtils.msSiden;
 
 @Component
 public class AppService {
@@ -68,15 +70,16 @@ public class AppService {
     }
 
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
-        sjekkLeseTilgangTilDialog(dialogId);
+        DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvVeileder(dialogId);
+        markerSomLestAvVeilederMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvBruker(dialogId);
-        createMetricsDialogSomLestAvBruker(dialogData);
+        merkDialogSomLestAvBrukerMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -84,11 +87,9 @@ public class AppService {
         long dialogId = dialogStatus.dialogId;
         DialogData dialog = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
-        createOppdaterFerdigbehandletTidspunktMetrikker(dialog, dialogStatus);
+        oppdaterFerdigbehandletTidspunktMetrikk(dialog, dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
-
-
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
@@ -120,7 +121,7 @@ public class AppService {
         updateDialogAktorFor(aktoerId);
     }
 
-    public void updateDialogAktorFor(String aktorId){
+    public void updateDialogAktorFor(String aktorId) {
         val dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
         dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
     }
@@ -150,32 +151,52 @@ public class AppService {
         return dialogData;
     }
 
-    private void createMetricsDialogSomLestAvBruker(DialogData dialogData) {
-        Optional<Date> min = dialogData.getHenvendelser().stream()
+    private void merkDialogSomLestAvBrukerMetrikk(DialogData dialogData) {
+        Optional<Long> readTime = dialogData.getHenvendelser().stream()
                 .filter(HenvendelseData::fraVeileder)
                 .filter(h -> !h.lestAvBruker)
                 .map(HenvendelseData::getSendt)
-                .min(naturalOrder());
+                .min(naturalOrder())
+                .map(DateUtils::msSiden);
+
         Event event = MetricsFactory
-                .createEvent("MarkerSomLestAvBruker")
-                .addFieldToReport("faktiskLest", min.isPresent());
-
-        min.ifPresent(date -> event.addFieldToReport("ReadTime", new Date().getTime() - date.getTime()));
-
+                .createEvent("dialog.bruker.lest")
+                .addFieldToReport("lest", readTime.isPresent());
+        readTime.ifPresent(time -> event.addFieldToReport("ReadTime", time));
         event.report();
     }
 
-    private void createOppdaterFerdigbehandletTidspunktMetrikker(DialogData dialog, DialogStatus dialogStatus) {
+    private void oppdaterFerdigbehandletTidspunktMetrikk(DialogData dialog, DialogStatus dialogStatus) {
         Event event = MetricsFactory
-                .createEvent("oppdaterBehandlingsStatus")
+                .createEvent("dialog.veileder.oppdater.ferdigbehandlet")
                 .addFieldToReport("ferdigbehandlet", dialogStatus.ferdigbehandlet);
+
         Date ubehandletTidspunkt = dialog.getUbehandletTidspunkt();
-        if(dialogStatus.ferdigbehandlet && ubehandletTidspunkt != null){
-            event.addFieldToReport(
-                    "behandlingsTid",
-                    new Date().getTime() - ubehandletTidspunkt.getTime());
+        if (dialogStatus.ferdigbehandlet && ubehandletTidspunkt != null) {
+            event.addFieldToReport("behandlingsTid", msSiden(ubehandletTidspunkt));
         }
         event.report();
     }
 
+    private void markerSomLestAvVeilederMetrikk(DialogData dialogData) {
+        Optional<Long> readTime = dialogData.getHenvendelser().stream()
+                .filter(HenvendelseData::fraBruker)
+                .filter(this::ikkeLestAvVeileder)
+                .map(HenvendelseData::getSendt)
+                .min(naturalOrder())
+                .map(DateUtils::msSiden);
+
+        readTime.ifPresent(this::sendMarkerSomLestAvVeilederMetrikk);
+    }
+
+    private Event sendMarkerSomLestAvVeilederMetrikk(Long time) {
+        return MetricsFactory
+                .createEvent("dialog.veileder.lest")
+                .addFieldToReport("ReadTime", time)
+                .report();
+    }
+
+    private boolean ikkeLestAvVeileder(HenvendelseData h) {
+        return !h.lestAvVeileder;
+    }
 }

@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import lombok.val;
 import no.nav.apiapp.feil.UgyldigRequest;
 import no.nav.brukerdialog.security.context.SubjectHandler;
 import no.nav.fo.veilarbdialog.api.DialogController;
@@ -53,13 +52,48 @@ public class RestService implements DialogController, VeilederDialogController {
         );
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(dialogId);
         appService.updateDialogAktorFor(dialogData.getAktorId());
-        nyHenvedelseMetrikker(nyHenvendelseDTO);
+        nyHenvedelseMetrikk(nyHenvendelseDTO);
         return restMapper.somDialogDTO(dialogData);
     }
 
-    private void nyHenvedelseMetrikker(NyHenvendelseDTO nyHenvendelseDTO) {
+    @Override
+    public DialogDTO markerSomLest(String dialogId) {
+
+        DialogData dialogData = appService.markerDialogSomLestAvVeileder(Long.parseLong(dialogId));
+        return restMapper.somDialogDTO(dialogData);
+    }
+
+    @Override
+    public DialogDTO oppdaterVenterPaSvar(String dialogId, boolean venter) {
+        DialogStatus dialogStatus = DialogStatus.builder()
+                .dialogId(Long.parseLong(dialogId))
+                .venterPaSvar(venter)
+                .build();
+
+        DialogData dialog = appService.oppdaterVentePaSvarTidspunkt(dialogStatus);
+        appService.updateDialogAktorFor(dialog.getAktorId());
+
+        oppdaterVenterSvarMetrikk(venter);
+
+        return markerSomLest(dialogId);
+    }
+
+    @Override
+    public DialogDTO oppdaterFerdigbehandlet(String dialogId, boolean ferdigbehandlet) {
+        DialogStatus dialogStatus = DialogStatus.builder()
+                .dialogId(Long.parseLong(dialogId))
+                .ferdigbehandlet(ferdigbehandlet)
+                .build();
+
+        DialogData dialog = appService.oppdaterFerdigbehandletTidspunkt(dialogStatus);
+        appService.updateDialogAktorFor(dialog.getAktorId());
+
+        return markerSomLest(dialogId);
+    }
+
+    private void nyHenvedelseMetrikk(NyHenvendelseDTO nyHenvendelseDTO) {
         MetricsFactory
-                .createEvent("NyMeldingVeileder")
+                .createEvent("henvendelse.veileder.ny")
                 .addFieldToReport("paaAktivitet", notNullOrEmpty(nyHenvendelseDTO.aktivitetId))
                 .setSuccess()
                 .report();
@@ -87,28 +121,16 @@ public class RestService implements DialogController, VeilederDialogController {
                         .collect(Collectors.toList()))
                 .build();
         DialogData opprettetDialog = appService.opprettDialogForAktivitetsplanPaIdent(dialogData);
-        nyDialogMetrik(nyHenvendelseDTO);
+        nyDialogMetrikk(nyHenvendelseDTO);
         return opprettetDialog;
     }
 
-    private void nyDialogMetrik(NyHenvendelseDTO nyHenvendelseDTO) {
+    private void nyDialogMetrikk(NyHenvendelseDTO nyHenvendelseDTO) {
         MetricsFactory
-                .createEvent("NyDialogVeileder")
+                .createEvent("dialog.veileder.ny")
                 .addFieldToReport("paaAktivitet", notNullOrEmpty(nyHenvendelseDTO.aktivitetId))
                 .setSuccess()
                 .report();
-    }
-
-    @Override
-    public DialogDTO markerSomLest(String dialogId) {
-        DialogDTO dialogDTO = markerSomLestUtenMetrikker(dialogId);
-        MetricsFactory.createEvent("MarkerSomLestVeileder").setSuccess().report();
-        return dialogDTO;
-    }
-
-    private DialogDTO markerSomLestUtenMetrikker(String dialogId) {
-        DialogData dialogData = appService.markerDialogSomLestAvVeileder(Long.parseLong(dialogId));
-        return restMapper.somDialogDTO(dialogData);
     }
 
     private String getVeilederIdent() {
@@ -119,35 +141,11 @@ public class RestService implements DialogController, VeilederDialogController {
         return of(requestProvider.get().getParameter("fnr")).orElseThrow(UgyldigRequest::new);
     }
 
-    @Override
-    public DialogDTO oppdaterVenterPaSvar(String dialogId, boolean venter) {
-        val dialogStatus = DialogStatus.builder()
-                .dialogId(Long.parseLong(dialogId))
-                .venterPaSvar(venter)
-                .build();
-
-        val dialog = appService.oppdaterVentePaSvarTidspunkt(dialogStatus);
-        appService.updateDialogAktorFor(dialog.getAktorId());
-
+    private void oppdaterVenterSvarMetrikk(boolean venter) {
         MetricsFactory
-                .createEvent("oppdaterVenterPaSvar")
+                .createEvent("dialog.veileder.oppdater.VenterSvarFraBruker")
                 .addFieldToReport("venter", venter)
                 .setSuccess()
                 .report();
-
-        return markerSomLestUtenMetrikker(dialogId);
-    }
-
-    @Override
-    public DialogDTO oppdaterFerdigbehandlet(String dialogId, boolean ferdigbehandlet) {
-        val dialogStatus = DialogStatus.builder()
-                .dialogId(Long.parseLong(dialogId))
-                .ferdigbehandlet(ferdigbehandlet)
-                .build();
-
-        val dialog = appService.oppdaterFerdigbehandletTidspunkt(dialogStatus);
-        appService.updateDialogAktorFor(dialog.getAktorId());
-
-        return markerSomLestUtenMetrikker(dialogId);
     }
 }

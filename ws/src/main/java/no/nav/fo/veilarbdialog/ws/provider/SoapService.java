@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.of;
+import static no.nav.fo.veilarbdialog.util.DateUtils.msSiden;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 
 @Service
@@ -71,17 +72,6 @@ public class SoapService implements AktivitetDialogV1 {
         appService.markerDialogSomLestAvBruker(Long.parseLong(markerDialogSomLestRequest.getDialogId()));
     }
 
-
-
-    private DialogData updateDialogAktorFor(DialogData dialogData) {
-        appService.updateDialogAktorFor(dialogData.getAktorId());
-        return dialogData;
-    }
-
-    private DialogData markerDialogSomLest(DialogData dialogData) {
-        return appService.markerDialogSomLestAvBruker(dialogData.getId());
-    }
-
     @Override
     public OpprettDialogForAktivitetResponse opprettDialogForAktivitet(OpprettDialogForAktivitetRequest opprettDialogForAktivitetRequest)
             throws OpprettDialogForAktivitetSikkerhetsbegrensning, OpprettDialogForAktivitetUgyldigInput {
@@ -92,7 +82,7 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(appService::opprettDialogForAktivitetsplanPaIdent)
                 .map(this::markerDialogSomLest)
                 .map(this::updateDialogAktorFor)
-                .map(this::createMetricsNyDialog)
+                .map(this::nyDialogMetrikk)
                 .map(this::opprettDialogForAktivitetResponse)
                 .orElseThrow(RuntimeException::new);
     }
@@ -111,24 +101,9 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(dialogData -> appService.opprettDialogForAktivitetsplanPaIdent(dialogData))
                 .map(this::markerDialogSomLest)
                 .map(this::updateDialogAktorFor)
-                .map(this::createMetricsNyDialog)
+                .map(this::nyDialogMetrikk)
                 .map(this::opprettDialogForAktivitetsplanResponse)
                 .orElseThrow(RuntimeException::new);
-    }
-
-    private DialogData createMetricsNyDialog(DialogData dialogData) {
-        MetricsFactory
-                .createEvent("NyDialogBruker")
-                .addFieldToReport("paaAktivitet", notNullOrEmpty(dialogData.getAktivitetId()))
-                .setSuccess()
-                .report();
-        return dialogData;
-    }
-
-    private OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse(DialogData dialogData) {
-        OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse = new OpprettDialogForAktivitetsplanResponse();
-        opprettDialogForAktivitetsplanResponse.setDialogId(Long.toString(dialogData.getId()));
-        return opprettDialogForAktivitetsplanResponse;
     }
 
     @Override
@@ -139,27 +114,23 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(r -> soapServiceMapper.somHenvendelseData(r, personIdent))
                 .map(appService::opprettHenvendelseForDialog)
                 .map(this::markerDialogSomLest)
-                .map(this::createNyMeldingMetrics)
+                .map(this::nyHenvendelseMetrikk)
                 .ifPresent(this::updateDialogAktorFor);
     }
 
-    private DialogData createNyMeldingMetrics(DialogData dialogData) {
+    private DialogData nyHenvendelseMetrikk(DialogData dialogData) {
         Event event = MetricsFactory
-                .createEvent("NyMeldingBruker")
+                .createEvent("henvendelse.bruker.ny")
                 .addFieldToReport("paaAktivitet", notNullOrEmpty(dialogData.getAktivitetId()));
 
-        boolean svartpaa = isSvartpaa(dialogData);
-        event.addFieldToReport("erSvar", svartpaa);
-        if (svartpaa) {
-            event.addFieldToReport("svartid", svartid(dialogData));
+        boolean svartPaa = isSvartpaa(dialogData);
+        event.addFieldToReport("erSvar", svartPaa);
+        if (svartPaa) {
+            event.addFieldToReport("svartid", msSiden(dialogData.getVenterPaSvarTidspunkt()));
         }
 
         event.report();
         return dialogData;
-    }
-
-    private long svartid(DialogData dialogData) {
-        return new Date().getTime() - dialogData.getVenterPaSvarTidspunkt().getTime();
     }
 
     private boolean isSvartpaa(DialogData dialogData) {
@@ -179,5 +150,28 @@ public class SoapService implements AktivitetDialogV1 {
         return SubjectHandler.getSubjectHandler().getUid();
     }
 
+    private DialogData nyDialogMetrikk(DialogData dialogData) {
+        MetricsFactory
+                .createEvent("dialog.bruker.ny")
+                .addFieldToReport("paaAktivitet", notNullOrEmpty(dialogData.getAktivitetId()))
+                .setSuccess()
+                .report();
+        return dialogData;
+    }
+
+    private OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse(DialogData dialogData) {
+        OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse = new OpprettDialogForAktivitetsplanResponse();
+        opprettDialogForAktivitetsplanResponse.setDialogId(Long.toString(dialogData.getId()));
+        return opprettDialogForAktivitetsplanResponse;
+    }
+
+    private DialogData updateDialogAktorFor(DialogData dialogData) {
+        appService.updateDialogAktorFor(dialogData.getAktorId());
+        return dialogData;
+    }
+
+    private DialogData markerDialogSomLest(DialogData dialogData) {
+        return appService.markerDialogSomLestAvBruker(dialogData.getId());
+    }
 }
 
