@@ -154,16 +154,23 @@ public class AppService {
     private void merkDialogSomLestAvBrukerMetrikk(DialogData dialogData) {
         Optional<Long> readTime = dialogData.getHenvendelser().stream()
                 .filter(HenvendelseData::fraVeileder)
-                .filter(h -> !h.lestAvBruker)
+                .filter(this::ikkeLestAvBruker)
                 .map(HenvendelseData::getSendt)
                 .min(naturalOrder())
                 .map(DateUtils::msSiden);
 
-        Event event = MetricsFactory
-                .createEvent("dialog.bruker.lest")
-                .addFieldToReport("lest", readTime.isPresent());
-        readTime.ifPresent(time -> event.addFieldToReport("ReadTime", time));
-        event.report();
+        readTime.ifPresent(this::sendMarkerSomLestAvBrukerMetrikk);
+    }
+
+    private void markerSomLestAvVeilederMetrikk(DialogData dialogData) {
+        Optional<Long> readTime = dialogData.getHenvendelser().stream()
+                .filter(HenvendelseData::fraBruker)
+                .filter(this::ikkeLestAvVeileder)
+                .map(HenvendelseData::getSendt)
+                .min(naturalOrder())
+                .map(DateUtils::msSiden);
+
+        readTime.ifPresent(this::sendMarkerSomLestAvVeilederMetrikk);
     }
 
     private void oppdaterFerdigbehandletTidspunktMetrikk(DialogData dialog, DialogStatus dialogStatus) {
@@ -178,19 +185,19 @@ public class AppService {
         event.report();
     }
 
-    private void markerSomLestAvVeilederMetrikk(DialogData dialogData) {
-        Optional<Long> readTime = dialogData.getHenvendelser().stream()
-                .filter(HenvendelseData::fraBruker)
-                .filter(this::ikkeLestAvVeileder)
-                .map(HenvendelseData::getSendt)
-                .min(naturalOrder())
-                .map(DateUtils::msSiden);
-
-        readTime.ifPresent(this::sendMarkerSomLestAvVeilederMetrikk);
+    private void sendMarkerSomLestAvBrukerMetrikk(Long time) {
+        MetricsFactory
+                .createEvent("dialog.bruker.lest")
+                .addFieldToReport("ReadTime", time)
+                .report();
     }
 
-    private Event sendMarkerSomLestAvVeilederMetrikk(Long time) {
-        return MetricsFactory
+    private boolean ikkeLestAvBruker(HenvendelseData h) {
+        return !h.lestAvBruker;
+    }
+
+    private void sendMarkerSomLestAvVeilederMetrikk(Long time) {
+        MetricsFactory
                 .createEvent("dialog.veileder.lest")
                 .addFieldToReport("ReadTime", time)
                 .report();
