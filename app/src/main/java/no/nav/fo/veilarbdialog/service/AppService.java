@@ -11,17 +11,12 @@ import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.util.DateUtils;
-import no.nav.metrics.Event;
-import no.nav.metrics.MetricsFactory;
+import no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.Comparator.naturalOrder;
-import static no.nav.fo.veilarbdialog.util.DateUtils.msSiden;
 
 @Component
 public class AppService {
@@ -72,14 +67,14 @@ public class AppService {
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvVeileder(dialogId);
-        markerSomLestAvVeilederMetrikk(dialogData);
+        FunkjsonelleMetrikker.markerSomLestAvVeilederMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvBruker(dialogId);
-        merkDialogSomLestAvBrukerMetrikk(dialogData);
+        FunkjsonelleMetrikker.merkDialogSomLestAvBrukerMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -87,7 +82,7 @@ public class AppService {
         long dialogId = dialogStatus.dialogId;
         DialogData dialog = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
-        oppdaterFerdigbehandletTidspunktMetrikk(dialog, dialogStatus);
+        FunkjsonelleMetrikker.oppdaterFerdigbehandletTidspunktMetrikk(dialog, dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -151,59 +146,5 @@ public class AppService {
         return dialogData;
     }
 
-    private void merkDialogSomLestAvBrukerMetrikk(DialogData dialogData) {
-        Optional<Long> readTime = dialogData.getHenvendelser().stream()
-                .filter(HenvendelseData::fraVeileder)
-                .filter(this::ikkeLestAvBruker)
-                .map(HenvendelseData::getSendt)
-                .min(naturalOrder())
-                .map(DateUtils::msSiden);
 
-        readTime.ifPresent(this::sendMarkerSomLestAvBrukerMetrikk);
-    }
-
-    private void markerSomLestAvVeilederMetrikk(DialogData dialogData) {
-        Optional<Long> readTime = dialogData.getHenvendelser().stream()
-                .filter(HenvendelseData::fraBruker)
-                .filter(this::ikkeLestAvVeileder)
-                .map(HenvendelseData::getSendt)
-                .min(naturalOrder())
-                .map(DateUtils::msSiden);
-
-        readTime.ifPresent(this::sendMarkerSomLestAvVeilederMetrikk);
-    }
-
-    private void oppdaterFerdigbehandletTidspunktMetrikk(DialogData dialog, DialogStatus dialogStatus) {
-        Event event = MetricsFactory
-                .createEvent("dialog.veileder.oppdater.ferdigbehandlet")
-                .addFieldToReport("ferdigbehandlet", dialogStatus.ferdigbehandlet);
-
-        Date ubehandletTidspunkt = dialog.getUbehandletTidspunkt();
-        if (dialogStatus.ferdigbehandlet && ubehandletTidspunkt != null) {
-            event.addFieldToReport("behandlingsTid", msSiden(ubehandletTidspunkt));
-        }
-        event.report();
-    }
-
-    private void sendMarkerSomLestAvBrukerMetrikk(Long time) {
-        MetricsFactory
-                .createEvent("dialog.bruker.lest")
-                .addFieldToReport("ReadTime", time)
-                .report();
-    }
-
-    private boolean ikkeLestAvBruker(HenvendelseData h) {
-        return !h.lestAvBruker;
-    }
-
-    private void sendMarkerSomLestAvVeilederMetrikk(Long time) {
-        MetricsFactory
-                .createEvent("dialog.veileder.lest")
-                .addFieldToReport("ReadTime", time)
-                .report();
-    }
-
-    private boolean ikkeLestAvVeileder(HenvendelseData h) {
-        return !h.lestAvVeileder;
-    }
 }

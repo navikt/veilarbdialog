@@ -1,24 +1,18 @@
 package no.nav.fo.veilarbdialog.ws.provider;
 
 import no.nav.apiapp.soap.SoapTjeneste;
-import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.service.AppService;
-import no.nav.metrics.Event;
-import no.nav.metrics.MetricsFactory;
+import no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker;
 import no.nav.modig.core.context.SubjectHandler;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.binding.*;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.meldinger.*;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.of;
-import static no.nav.fo.veilarbdialog.util.DateUtils.msSiden;
-import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 
 @Service
 @SoapTjeneste("/Dialog")
@@ -82,7 +76,7 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(appService::opprettDialogForAktivitetsplanPaIdent)
                 .map(this::markerDialogSomLest)
                 .map(this::updateDialogAktorFor)
-                .map(this::nyDialogMetrikk)
+                .map(FunkjsonelleMetrikker::nyDialogBrukerMetrikk)
                 .map(this::opprettDialogForAktivitetResponse)
                 .orElseThrow(RuntimeException::new);
     }
@@ -101,7 +95,7 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(dialogData -> appService.opprettDialogForAktivitetsplanPaIdent(dialogData))
                 .map(this::markerDialogSomLest)
                 .map(this::updateDialogAktorFor)
-                .map(this::nyDialogMetrikk)
+                .map(FunkjsonelleMetrikker::nyDialogBrukerMetrikk)
                 .map(this::opprettDialogForAktivitetsplanResponse)
                 .orElseThrow(RuntimeException::new);
     }
@@ -114,50 +108,17 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(r -> soapServiceMapper.somHenvendelseData(r, personIdent))
                 .map(appService::opprettHenvendelseForDialog)
                 .map(this::markerDialogSomLest)
-                .map(this::nyHenvendelseMetrikk)
+                .map(FunkjsonelleMetrikker::nyHenvendelseBrukerMetrikk)
                 .ifPresent(this::updateDialogAktorFor);
     }
 
-    private DialogData nyHenvendelseMetrikk(DialogData dialogData) {
-        Event event = MetricsFactory
-                .createEvent("henvendelse.bruker.ny")
-                .addFieldToReport("paaAktivitet", notNullOrEmpty(dialogData.getAktivitetId()));
 
-        boolean svartPaa = isSvartpaa(dialogData);
-        event.addFieldToReport("erSvar", svartPaa);
-        if (svartPaa) {
-            event.addFieldToReport("svartid", msSiden(dialogData.getVenterPaSvarTidspunkt()));
-        }
-
-        event.report();
-        return dialogData;
-    }
-
-    private boolean isSvartpaa(DialogData dialogData) {
-        Date venterPaSvarTidspunkt = dialogData.getVenterPaSvarTidspunkt();
-        if (venterPaSvarTidspunkt == null)
-            return false;
-
-        List collect = dialogData.getHenvendelser().stream()
-                .filter(h -> h.getAvsenderType() == AvsenderType.BRUKER)
-                .filter(h -> venterPaSvarTidspunkt.before(h.getSendt()))
-                .collect(Collectors.toList());
-
-        return collect.size() == 1;
-    }
 
     private String getPersonIdent() {
         return SubjectHandler.getSubjectHandler().getUid();
     }
 
-    private DialogData nyDialogMetrikk(DialogData dialogData) {
-        MetricsFactory
-                .createEvent("dialog.bruker.ny")
-                .addFieldToReport("paaAktivitet", notNullOrEmpty(dialogData.getAktivitetId()))
-                .setSuccess()
-                .report();
-        return dialogData;
-    }
+
 
     private OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse(DialogData dialogData) {
         OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse = new OpprettDialogForAktivitetsplanResponse();

@@ -6,7 +6,6 @@ import no.nav.fo.veilarbdialog.api.DialogController;
 import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.AppService;
-import no.nav.metrics.MetricsFactory;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -16,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
+import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.*;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
@@ -52,7 +52,7 @@ public class RestService implements DialogController, VeilederDialogController {
         );
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(dialogId);
         appService.updateDialogAktorFor(dialogData.getAktorId());
-        nyHenvedelseMetrikk(nyHenvendelseDTO);
+        nyHenvedelseVeilederMetrikk(dialogData);
         return restMapper.somDialogDTO(dialogData);
     }
 
@@ -91,14 +91,6 @@ public class RestService implements DialogController, VeilederDialogController {
         return markerSomLest(dialogId);
     }
 
-    private void nyHenvedelseMetrikk(NyHenvendelseDTO nyHenvendelseDTO) {
-        MetricsFactory
-                .createEvent("henvendelse.veileder.ny")
-                .addFieldToReport("paaAktivitet", notNullOrEmpty(nyHenvendelseDTO.aktivitetId))
-                .setSuccess()
-                .report();
-    }
-
     private Long finnDialogId(NyHenvendelseDTO nyHenvendelseDTO) {
         if (notNullOrEmpty(nyHenvendelseDTO.dialogId)) {
             return Long.parseLong(nyHenvendelseDTO.dialogId);
@@ -121,16 +113,8 @@ public class RestService implements DialogController, VeilederDialogController {
                         .collect(Collectors.toList()))
                 .build();
         DialogData opprettetDialog = appService.opprettDialogForAktivitetsplanPaIdent(dialogData);
-        nyDialogMetrikk(nyHenvendelseDTO);
+        nyDialogVeilederMetrikk(opprettetDialog);
         return opprettetDialog;
-    }
-
-    private void nyDialogMetrikk(NyHenvendelseDTO nyHenvendelseDTO) {
-        MetricsFactory
-                .createEvent("dialog.veileder.ny")
-                .addFieldToReport("paaAktivitet", notNullOrEmpty(nyHenvendelseDTO.aktivitetId))
-                .setSuccess()
-                .report();
     }
 
     private String getVeilederIdent() {
@@ -139,13 +123,5 @@ public class RestService implements DialogController, VeilederDialogController {
 
     private String getBrukerIdent() {
         return of(requestProvider.get().getParameter("fnr")).orElseThrow(UgyldigRequest::new);
-    }
-
-    private void oppdaterVenterSvarMetrikk(boolean venter) {
-        MetricsFactory
-                .createEvent("dialog.veileder.oppdater.VenterSvarFraBruker")
-                .addFieldToReport("venter", venter)
-                .setSuccess()
-                .report();
     }
 }
