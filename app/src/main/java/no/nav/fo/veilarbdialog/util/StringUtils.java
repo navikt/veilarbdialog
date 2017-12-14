@@ -12,4 +12,6 @@ public class StringUtils {
         return Optional.ofNullable(string).filter(StringUtils::notNullOrEmpty);
     }
 
+    private StringUtils() {
+    }
 }

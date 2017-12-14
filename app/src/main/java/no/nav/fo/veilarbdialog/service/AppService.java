@@ -11,6 +11,7 @@ import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -64,21 +65,24 @@ public class AppService {
     }
 
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
-        sjekkLeseTilgangTilDialog(dialogId);
+        DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvVeileder(dialogId);
+        FunkjsonelleMetrikker.markerSomLestAvVeilederMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
-        sjekkLeseTilgangTilDialog(dialogId);
+        DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvBruker(dialogId);
+        FunkjsonelleMetrikker.merkDialogSomLestAvBrukerMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        sjekkSkriveTilgangTilDialog(dialogId);
+        DialogData dialog = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
+        FunkjsonelleMetrikker.oppdaterFerdigbehandletTidspunktMetrikk(dialog, dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -107,12 +111,12 @@ public class AppService {
     public void settDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
         // NB: ingen tilgangskontroll, brukes av vår feed-consumer
         dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
-                .forEach(dialog -> dialogDAO.oppdaterDialogTilHistorisk(dialog));
+                .forEach(dialogDAO::oppdaterDialogTilHistorisk);
 
         updateDialogAktorFor(aktoerId);
     }
 
-    public void updateDialogAktorFor(String aktorId){
+    public void updateDialogAktorFor(String aktorId) {
         val dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
         dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
     }
@@ -141,5 +145,6 @@ public class AppService {
         }
         return dialogData;
     }
+
 
 }

@@ -1,9 +1,9 @@
 package no.nav.fo.veilarbdialog.ws.provider;
 
-import lombok.val;
 import no.nav.apiapp.soap.SoapTjeneste;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.service.AppService;
+import no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker;
 import no.nav.modig.core.context.SubjectHandler;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.binding.*;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.meldinger.*;
@@ -26,6 +26,7 @@ public class SoapService implements AktivitetDialogV1 {
 
     @Override
     public void ping() {
+        //tom pga Ping komentar lagt til pga sonar
     }
 
     @Override
@@ -47,7 +48,7 @@ public class SoapService implements AktivitetDialogV1 {
     @Override
     public HentDialogerForAktivitetResponse hentDialogerForAktivitet(HentDialogerForAktivitetRequest hentDialogerForAktivitetRequest)
             throws HentDialogerForAktivitetSikkerhetsbegrensning, HentDialogerForAktivitetUgyldigInput {
-        throw new RuntimeException("not implemented");
+        throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
@@ -65,24 +66,17 @@ public class SoapService implements AktivitetDialogV1 {
         appService.markerDialogSomLestAvBruker(Long.parseLong(markerDialogSomLestRequest.getDialogId()));
     }
 
-    private DialogData updateDialogAktorFor(DialogData dialogData) {
-        appService.updateDialogAktorFor(dialogData.getAktorId());
-        return dialogData;
-    }
-
-    private DialogData markerDialogSomLest(DialogData dialogData) {
-        return appService.markerDialogSomLestAvBruker(dialogData.getId());
-    }
-
     @Override
     public OpprettDialogForAktivitetResponse opprettDialogForAktivitet(OpprettDialogForAktivitetRequest opprettDialogForAktivitetRequest)
             throws OpprettDialogForAktivitetSikkerhetsbegrensning, OpprettDialogForAktivitetUgyldigInput {
         String personIdent = getPersonIdent();
+
         return of(opprettDialogForAktivitetRequest)
                 .map(r -> soapServiceMapper.somDialogData(opprettDialogForAktivitetRequest, personIdent))
                 .map(appService::opprettDialogForAktivitetsplanPaIdent)
                 .map(this::markerDialogSomLest)
                 .map(this::updateDialogAktorFor)
+                .map(FunkjsonelleMetrikker::nyDialogBrukerMetrikk)
                 .map(this::opprettDialogForAktivitetResponse)
                 .orElseThrow(RuntimeException::new);
     }
@@ -101,14 +95,9 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(dialogData -> appService.opprettDialogForAktivitetsplanPaIdent(dialogData))
                 .map(this::markerDialogSomLest)
                 .map(this::updateDialogAktorFor)
+                .map(FunkjsonelleMetrikker::nyDialogBrukerMetrikk)
                 .map(this::opprettDialogForAktivitetsplanResponse)
                 .orElseThrow(RuntimeException::new);
-    }
-
-    private OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse(DialogData dialogData) {
-        OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse = new OpprettDialogForAktivitetsplanResponse();
-        opprettDialogForAktivitetsplanResponse.setDialogId(Long.toString(dialogData.getId()));
-        return opprettDialogForAktivitetsplanResponse;
     }
 
     @Override
@@ -119,12 +108,31 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(r -> soapServiceMapper.somHenvendelseData(r, personIdent))
                 .map(appService::opprettHenvendelseForDialog)
                 .map(this::markerDialogSomLest)
+                .map(FunkjsonelleMetrikker::nyHenvendelseBrukerMetrikk)
                 .ifPresent(this::updateDialogAktorFor);
     }
+
+
 
     private String getPersonIdent() {
         return SubjectHandler.getSubjectHandler().getUid();
     }
 
+
+
+    private OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse(DialogData dialogData) {
+        OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse = new OpprettDialogForAktivitetsplanResponse();
+        opprettDialogForAktivitetsplanResponse.setDialogId(Long.toString(dialogData.getId()));
+        return opprettDialogForAktivitetsplanResponse;
+    }
+
+    private DialogData updateDialogAktorFor(DialogData dialogData) {
+        appService.updateDialogAktorFor(dialogData.getAktorId());
+        return dialogData;
+    }
+
+    private DialogData markerDialogSomLest(DialogData dialogData) {
+        return appService.markerDialogSomLestAvBruker(dialogData.getId());
+    }
 }
 

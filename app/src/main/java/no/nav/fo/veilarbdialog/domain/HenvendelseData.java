@@ -9,6 +9,7 @@ import lombok.experimental.Wither;
 import java.util.Date;
 
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
+import static no.nav.fo.veilarbdialog.domain.AvsenderType.VEILEDER;
 
 @Data
 @Builder(toBuilder = true)
@@ -30,6 +31,10 @@ public class HenvendelseData {
 
     public boolean fraBruker() {
         return avsenderType == BRUKER;
+    }
+
+    public boolean fraVeileder() {
+        return avsenderType == VEILEDER;
     }
 
 }

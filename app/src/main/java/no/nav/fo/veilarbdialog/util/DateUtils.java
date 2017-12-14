@@ -36,4 +36,11 @@ public class DateUtils {
     public static String ISO8601FromDate(Date date, ZoneId zoneId) {
         return ZonedDateTime.ofInstant(date.toInstant(), zoneId).toString();
     }
+
+    public static long msSiden(Date date) {
+        return new Date().getTime() - date.getTime();
+    }
+
+    private DateUtils() {
+    }
 }
