@@ -20,6 +20,9 @@ import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 public class FunkjsonelleMetrikker {
 
     public static void oppdaterFerdigbehandletTidspunktMetrikk(DialogData dialog, DialogStatus dialogStatus) {
+        if(dialog.erFerdigbehandlet() == dialogStatus.ferdigbehandlet)
+            return;
+
         Event event = MetricsFactory
                 .createEvent("dialog.veileder.oppdater.ferdigbehandlet")
                 .addFieldToReport("ferdigbehandlet", dialogStatus.ferdigbehandlet);
@@ -54,10 +57,13 @@ public class FunkjsonelleMetrikker {
         reportMetrikMedPaaAktivitet("dialog.veileder.ny", nyDialog);
     }
 
-    public static void oppdaterVenterSvarMetrikk(boolean venter) {
+    public static void oppdaterVenterSvarMetrikk(DialogStatus nyStatus, DialogData eksisterendeData) {
+        if(nyStatus.venterPaSvar == eksisterendeData.venterPaSvar())
+            return;
+
         MetricsFactory
                 .createEvent("dialog.veileder.oppdater.VenterSvarFraBruker")
-                .addFieldToReport("venter", venter)
+                .addFieldToReport("venter", nyStatus.venterPaSvar)
                 .setSuccess()
                 .report();
     }

@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
-import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.*;
+import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyDialogVeilederMetrikk;
+import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyHenvedelseVeilederMetrikk;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
@@ -72,8 +73,6 @@ public class RestService implements DialogController, VeilederDialogController {
 
         DialogData dialog = appService.oppdaterVentePaSvarTidspunkt(dialogStatus);
         appService.updateDialogAktorFor(dialog.getAktorId());
-
-        oppdaterVenterSvarMetrikk(venter);
 
         return markerSomLest(dialogId);
     }
