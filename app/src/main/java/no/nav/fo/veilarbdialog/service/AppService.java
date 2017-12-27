@@ -88,8 +88,9 @@ public class AppService {
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        sjekkSkriveTilgangTilDialog(dialogId);
+        DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
+        FunkjsonelleMetrikker.oppdaterVenterSvarMetrikk(dialogStatus, dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
