@@ -129,7 +129,7 @@ public class FunkjsonelleMetrikker {
 
     private static void sendMarkerSomLesMetrikk(Long time, String lestAv){
         MetricsFactory
-                .createEvent("dialog"+ lestAv + "lest")
+                .createEvent("dialog."+ lestAv + ".lest")
                 .addFieldToReport("ReadTime", time)
                 .report();
     }
