@@ -60,6 +60,7 @@ class RestMapper {
                 .setId(Long.toString(henvendelseData.id))
                 .setDialogId(Long.toString(henvendelseData.dialogId))
                 .setAvsender(henvendelseData.avsenderType == BRUKER ? Avsender.BRUKER : Avsender.VEILEDER)
+                .setAvsenderId(henvendelseData.avsenderId)
                 .setSendt(henvendelseData.sendt)
                 .setLest(henvendelseData.lestAvVeileder)
                 .setTekst(henvendelseData.tekst);
