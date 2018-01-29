@@ -105,7 +105,7 @@ public class StatusDAO {
                 "UPDATE DIALOG SET " +
                 feltnavn + " = " + dateProvider.getNow() + ", " +
                 OPPDATERT + " = " + dateProvider.getNow() +
-                "WHERE " + DIALOG_ID + " = ?  and " + feltnavn + " = null ", dialogId
+                " WHERE " + DIALOG_ID + " = ?  AND " + feltnavn + " = null ", dialogId
         );
         if (antallOppdaterte == 0) {
             oppdaterSisteEndring(dialogId);
@@ -116,7 +116,7 @@ public class StatusDAO {
         database.update("" +
                         "UPDATE DIALOG SET " + feltNavn + " = null, " +
                         OPPDATERT + " = " + dateProvider.getNow() +
-                        "WHERE " + DIALOG_ID + " = ?  and " + feltNavn + " = null",
+                        " WHERE " + DIALOG_ID + " = ?  AND " + feltNavn + " = null",
                 dialogId
         );
     }
@@ -124,7 +124,7 @@ public class StatusDAO {
     private void oppdaterSisteEndring(long dialogId) {
         database.update("" +
                 "UPDATE DIALOG SET " +
-                OPPDATERT + " = " + dateProvider.getNow() + " " +
-                "where " + DIALOG_ID + " = ?", dialogId);
+                OPPDATERT + " = " + dateProvider.getNow() +
+                " WHERE " + DIALOG_ID + " = ?", dialogId);
     }
 }
