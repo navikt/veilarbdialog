@@ -34,6 +34,12 @@ public class DialogData {
     private Date opprettetDato;
     private boolean historisk;
 
+    private Date oppdatert;
+    private Date venterPaSvarFraBruker;
+    private Date venterPaNav;
+    private Date ulesteMeldingerForVeileder;
+    private Date ulesteMeldingerForBruker;
+
     private List<HenvendelseData> henvendelser;
 
     private List<EgenskapType> egenskaper;

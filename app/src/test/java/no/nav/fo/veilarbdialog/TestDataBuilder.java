@@ -30,5 +30,4 @@ public class TestDataBuilder {
                 .tekst("ny henvendelse!")
                 .build();
     }
-
 }

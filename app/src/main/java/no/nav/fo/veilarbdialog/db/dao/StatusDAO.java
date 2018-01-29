@@ -10,26 +10,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 
+import static no.nav.fo.veilarbdialog.db.dao.DBKonstanter.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
 @Transactional
 public class StatusDAO {
     private static final Logger LOG = getLogger(StatusDAO.class);
-    private static final String ULESTE_MELDINGER_FOR_VEILEDER_SIDEN = "uleste_meldinger_for_veileder_siden";
-    private static final String VENTER_PA_NAV_SIDEN = "venter_pa_nav_siden";
-    private static final String ULESTE_MELDINGER_FOR_BRUKER_SIDEN = "uleste_meldinger_for_bruker_siden";
-    private static final String VENTER_PA_SVAR_FRA_BRUKER_SIDEN = "venter_pa_svar_fra_bruker_siden";
-    private static final String OPPDATERT = "oppdatert";
-    private static final String HISTORISK = "historisk";
-    private static final String DIALOG_ID = "dialog_id";
 
     private final Database database;
     private final DateProvider dateProvider;
 
     @Inject
     StatusDAO(Database database,
-                     DateProvider dateProvider) {
+              DateProvider dateProvider) {
         this.database = database;
         this.dateProvider = dateProvider;
     }
@@ -54,8 +48,12 @@ public class StatusDAO {
         oppdaterVenterPaa(dialogId, venter, VENTER_PA_NAV_SIDEN);
     }
 
-    public void oppdaterVenterPaSvarFraBruker(long dialogId, boolean venter) {
+    void oppdaterVenterPaSvarFraBruker(long dialogId, boolean venter) {
         oppdaterVenterPaa(dialogId, venter, VENTER_PA_SVAR_FRA_BRUKER_SIDEN);
+    }
+
+    void oppdaterDialogTilHistorisk(DialogData dialogData) {
+        database.update(settTilHistoriskSQL(), dialogData.getId());
     }
 
     private void nyMeldingFraBruker(long dialogId) {
@@ -87,36 +85,34 @@ public class StatusDAO {
         }
     }
 
-    public void oppdaterDialogTilHistorisk(DialogData dialogData) {
-        String sql = "UPDATE DIALOG SET " +
-                HISTORISK + " = 1, " +
-                OPPDATERT + " = " + dateProvider.getNow() + ", " +
-                ULESTE_MELDINGER_FOR_BRUKER_SIDEN + " = null, " +
-                ULESTE_MELDINGER_FOR_VEILEDER_SIDEN + " = null, " +
-                VENTER_PA_SVAR_FRA_BRUKER_SIDEN + " = null, " +
-                VENTER_PA_NAV_SIDEN + " = null";
-        sql += " WHERE " + DIALOG_ID + " = ?";
-
-        database.update(sql, dialogData.getId());
-    }
-
     private void setNowIfNull(String feltnavn, long dialogId) {
         long antallOppdaterte = database.update("" +
                 "UPDATE DIALOG SET " +
                 feltnavn + " = " + dateProvider.getNow() + ", " +
                 OPPDATERT + " = " + dateProvider.getNow() +
-                " WHERE " + DIALOG_ID + " = ?  AND " + feltnavn + " = null ", dialogId
+                " WHERE " + DIALOG_ID + " = ?  AND " + feltnavn + " IS NULL ", dialogId
         );
         if (antallOppdaterte == 0) {
             oppdaterSisteEndring(dialogId);
         }
     }
 
+    private String settTilHistoriskSQL() {
+        return "UPDATE DIALOG SET " +
+                HISTORISK + " = 1, " +
+                OPPDATERT + " = " + dateProvider.getNow() + ", " +
+                ULESTE_MELDINGER_FOR_BRUKER_SIDEN + " = null, " +
+                ULESTE_MELDINGER_FOR_VEILEDER_SIDEN + " = null, " +
+                VENTER_PA_SVAR_FRA_BRUKER_SIDEN + " = null, " +
+                VENTER_PA_NAV_SIDEN + " = null" +
+                " WHERE " + DIALOG_ID + " = ?";
+    }
+
     private void setFeltTilNull(String feltNavn, long dialogId) {
         database.update("" +
                         "UPDATE DIALOG SET " + feltNavn + " = null, " +
                         OPPDATERT + " = " + dateProvider.getNow() +
-                        " WHERE " + DIALOG_ID + " = ?  AND " + feltNavn + " = null",
+                        " WHERE " + DIALOG_ID + " = ?  AND " + feltNavn + " IS NOT NULL",
                 dialogId
         );
     }

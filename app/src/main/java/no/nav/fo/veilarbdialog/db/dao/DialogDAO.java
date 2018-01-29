@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static no.nav.fo.veilarbdialog.db.dao.DBKonstanter.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
@@ -81,6 +82,11 @@ public class DialogDAO {
                 .henvendelser(hentHenvendelser(dialogId))
                 .historisk(rs.getBoolean("historisk"))
                 .opprettetDato(hentDato(rs, "opprettet_dato"))
+                .venterPaNav(hentDato(rs, VENTER_PA_NAV_SIDEN))
+                .venterPaSvarFraBruker(hentDato(rs, VENTER_PA_SVAR_FRA_BRUKER_SIDEN))
+                .ulesteMeldingerForBruker(hentDato(rs, ULESTE_MELDINGER_FOR_BRUKER_SIDEN))
+                .ulesteMeldingerForVeileder(hentDato(rs, ULESTE_MELDINGER_FOR_VEILEDER_SIDEN))
+                .oppdatert(hentDato(rs, OPPDATERT))
                 .egenskaper(egenskaper)
                 .build();
     }

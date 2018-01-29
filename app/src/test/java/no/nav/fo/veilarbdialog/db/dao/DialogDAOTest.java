@@ -3,7 +3,9 @@ package no.nav.fo.veilarbdialog.db.dao;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.fo.IntegrasjonsTest;
-import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.domain.AvsenderType;
+import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -113,10 +115,12 @@ public class DialogDAOTest extends IntegrasjonsTest {
         DialogData oppdatertDialog = dialogDAO.hentDialog(dialogId);
         assertThat(oppdatertDialog.getSisteStatusEndring()).isAfter(tidspunktForOppdatering);
         assertThat(oppdatertDialog.getVenterPaSvarTidspunkt()).isAfter(tidspunktForOppdatering);
+        assertThat(oppdatertDialog.getOppdatert()).isAfter(tidspunktForOppdatering);
         assertThat(oppdatertDialog.venterPaSvar()).isTrue();
         assertThat(oppdatertDialog).isEqualTo(dialogData
                 .withSisteStatusEndring(oppdatertDialog.getSisteStatusEndring())
                 .withVenterPaSvarTidspunkt(oppdatertDialog.getVenterPaSvarTidspunkt())
+                .withOppdatert(oppdatertDialog.getOppdatert())
         );
     }
 
@@ -179,7 +183,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
 
     @Test
-    public void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedAlleredeHistoriske() throws Exception {
+    public void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedAlleredeHistoriske() {
         val dialog = nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").build();
         val historiskDialog = nyDialog(AKTOR_ID_1234).toBuilder().historisk(true).overskrift("historisk").build();
 
