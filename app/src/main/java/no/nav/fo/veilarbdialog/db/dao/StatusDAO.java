@@ -20,19 +20,21 @@ public class StatusDAO {
     private static final String VENTER_PA_NAV_SIDEN = "venter_pa_nav_siden";
     private static final String ULESTE_MELDINGER_FOR_BRUKER_SIDEN = "uleste_meldinger_for_bruker_siden";
     private static final String VENTER_PA_SVAR_FRA_BRUKER_SIDEN = "venter_pa_svar_fra_bruker_siden";
-    private static final String SISTE_ENDRING = "siste_endring";
+    private static final String OPPDATERT = "oppdatert";
+    private static final String HISTORISK = "historisk";
+    private static final String DIALOG_ID = "dialog_id";
 
     private final Database database;
     private final DateProvider dateProvider;
 
     @Inject
-    public StatusDAO(Database database,
+    StatusDAO(Database database,
                      DateProvider dateProvider) {
         this.database = database;
         this.dateProvider = dateProvider;
     }
 
-    public void oppdaterStatusForNyHenvendelse(HenvendelseData henvendelseData) {
+    void oppdaterStatusForNyHenvendelse(HenvendelseData henvendelseData) {
         if (henvendelseData.avsenderType == AvsenderType.BRUKER) {
             nyMeldingFraBruker(henvendelseData.getDialogId());
         } else {
@@ -40,15 +42,15 @@ public class StatusDAO {
         }
     }
 
-    public void markerSomLestAvBruker(long dialogId) {
+    void markerSomLestAvBruker(long dialogId) {
         oppdaterLestForBruker(dialogId, true);
     }
 
-    public void markerSomLestAvVeileder(long dialogId) {
+    void markerSomLestAvVeileder(long dialogId) {
         oppdaterLestForVeileder(dialogId, true);
     }
 
-    public void oppdaterVenterPaNav(long dialogId, boolean venter) {
+    void oppdaterVenterPaNav(long dialogId, boolean venter) {
         oppdaterVenterPaa(dialogId, venter, VENTER_PA_NAV_SIDEN);
     }
 
@@ -87,18 +89,13 @@ public class StatusDAO {
 
     public void oppdaterDialogTilHistorisk(DialogData dialogData) {
         String sql = "UPDATE DIALOG SET " +
-                "historisk = 1";
-
-        if (dialogData.erUbehandlet() || dialogData.venterPaSvar()) {
-            sql += ", " + SISTE_ENDRING + " = " + dateProvider.getNow();
-        }
-
-        sql += ", " +
+                HISTORISK + " = 1, " +
+                OPPDATERT + " = " + dateProvider.getNow() + ", " +
                 ULESTE_MELDINGER_FOR_BRUKER_SIDEN + " = null, " +
                 ULESTE_MELDINGER_FOR_VEILEDER_SIDEN + " = null, " +
                 VENTER_PA_SVAR_FRA_BRUKER_SIDEN + " = null, " +
                 VENTER_PA_NAV_SIDEN + " = null";
-        sql += " WHERE dialog_id = ?";
+        sql += " WHERE " + DIALOG_ID + " = ?";
 
         database.update(sql, dialogData.getId());
     }
@@ -107,8 +104,8 @@ public class StatusDAO {
         long antallOppdaterte = database.update("" +
                 "UPDATE DIALOG SET " +
                 feltnavn + " = " + dateProvider.getNow() + ", " +
-                SISTE_ENDRING + " = " + dateProvider.getNow() +
-                "WHERE dialog_id = ?  and " + feltnavn + " = null ", dialogId
+                OPPDATERT + " = " + dateProvider.getNow() +
+                "WHERE " + DIALOG_ID + " = ?  and " + feltnavn + " = null ", dialogId
         );
         if (antallOppdaterte == 0) {
             oppdaterSisteEndring(dialogId);
@@ -118,8 +115,8 @@ public class StatusDAO {
     private void setFeltTilNull(String feltNavn, long dialogId) {
         database.update("" +
                         "UPDATE DIALOG SET " + feltNavn + " = null, " +
-                        SISTE_ENDRING + " = " + dateProvider.getNow() +
-                        "WHERE dialog_id = ?  and " + feltNavn + " = null",
+                        OPPDATERT + " = " + dateProvider.getNow() +
+                        "WHERE " + DIALOG_ID + " = ?  and " + feltNavn + " = null",
                 dialogId
         );
     }
@@ -127,7 +124,7 @@ public class StatusDAO {
     private void oppdaterSisteEndring(long dialogId) {
         database.update("" +
                 "UPDATE DIALOG SET " +
-                SISTE_ENDRING + " = " + dateProvider.getNow() + " " +
-                "where dialog_id = ?", dialogId);
+                OPPDATERT + " = " + dateProvider.getNow() + " " +
+                "where " + DIALOG_ID + " = ?", dialogId);
     }
 }
