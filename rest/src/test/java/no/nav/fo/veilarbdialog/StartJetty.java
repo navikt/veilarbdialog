@@ -14,7 +14,7 @@ import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 import static no.nav.sbl.dialogarena.common.jetty.Jetty.usingWar;
 import static no.nav.sbl.dialogarena.common.jetty.JettyStarterUtils.*;
 
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import javax.sql.DataSource;
 
 public class StartJetty {
 
@@ -36,7 +36,7 @@ public class StartJetty {
         jetty.startAnd(first(waitFor(gotKeypress())).then(jetty.stop));
     }
 
-    private static SingleConnectionDataSource createDataSource() {
+    private static DataSource createDataSource() {
         return of(System.getProperty("database"))
                 .map(TestEnvironment::valueOf)          
                 .map(testEnvironment -> FasitUtils.getDbCredentials(testEnvironment, APPLICATION_NAME))
