@@ -121,6 +121,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
                 .withSisteStatusEndring(oppdatertDialog.getSisteStatusEndring())
                 .withVenterPaSvarTidspunkt(oppdatertDialog.getVenterPaSvarTidspunkt())
                 .withOppdatert(oppdatertDialog.getOppdatert())
+                .withVenterPaSvarFraBruker(oppdatertDialog.getVenterPaSvarFraBruker())
         );
     }
 
