@@ -141,7 +141,7 @@ public class DialogDAO {
                         dialogId, egenskapType.toString())
         );
 
-        LOG.info("opprettet {}", dialogData);
+        LOG.info("opprettet id:{}, data: {}", dialogId, dialogData);
         return dialogId;
     }
 
@@ -162,8 +162,7 @@ public class DialogDAO {
                 EnumUtils.getName(henvendelseData.avsenderType)
         );
 
-        LOG.info("opprettet {}", henvendelseData);
-
+        logNyHenvendelse(henvendelseData, henvendeseId);
     }
 
     public void markerDialogSomLestAvVeileder(long dialogId) {
@@ -228,5 +227,15 @@ public class DialogDAO {
 
     private String nowOrNull(boolean predicate) {
         return predicate ? dateProvider.getNow() : "NULL";
+    }
+
+
+    private void logNyHenvendelse(HenvendelseData henvendelseData, long henvendeseId) {
+        LOG.info("opprettet henvendelse ID: {}, dialogID: {}, avsenderType: {}, avsenderID: {}",
+                henvendeseId,
+                henvendelseData.dialogId,
+                henvendelseData.avsenderType,
+                henvendelseData.avsenderId
+        );
     }
 }
