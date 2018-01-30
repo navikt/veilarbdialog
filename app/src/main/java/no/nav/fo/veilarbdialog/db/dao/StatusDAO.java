@@ -49,7 +49,7 @@ public class StatusDAO {
     }
 
     void oppdaterVenterPaSvarFraBruker(long dialogId, boolean venter) {
-        oppdaterVenterPaa(dialogId, venter, VENTER_PA_SVAR_FRA_BRUKER_SIDEN);
+        oppdaterVenterPaa(dialogId, venter, VENTER_PA_SVAR_FRA_BRUKER);
     }
 
     void oppdaterDialogTilHistorisk(DialogData dialogData) {
@@ -62,11 +62,11 @@ public class StatusDAO {
     }
 
     private void oppdaterLestForVeileder(long dialogId, boolean erLest) {
-        oppdaterLestStatus(dialogId, erLest, ULESTE_MELDINGER_FOR_VEILEDER_SIDEN);
+        oppdaterLestStatus(dialogId, erLest, ELDSTE_ULESTE_FOR_VEILEDER);
     }
 
     private void oppdaterLestForBruker(long dialogId, boolean erLest) {
-        oppdaterLestStatus(dialogId, erLest, ULESTE_MELDINGER_FOR_BRUKER_SIDEN);
+        oppdaterLestStatus(dialogId, erLest, ELDSTE_ULESTE_FOR_BRUKER);
     }
 
     private void oppdaterLestStatus(long dialogId, boolean erLest, String feltnavn) {
@@ -101,9 +101,9 @@ public class StatusDAO {
         return "UPDATE DIALOG SET " +
                 HISTORISK + " = 1, " +
                 OPPDATERT + " = " + dateProvider.getNow() + ", " +
-                ULESTE_MELDINGER_FOR_BRUKER_SIDEN + " = null, " +
-                ULESTE_MELDINGER_FOR_VEILEDER_SIDEN + " = null, " +
-                VENTER_PA_SVAR_FRA_BRUKER_SIDEN + " = null, " +
+                ELDSTE_ULESTE_FOR_BRUKER + " = null, " +
+                ELDSTE_ULESTE_FOR_VEILEDER + " = null, " +
+                VENTER_PA_SVAR_FRA_BRUKER + " = null, " +
                 VENTER_PA_NAV_SIDEN + " = null" +
                 " WHERE " + DIALOG_ID + " = ?";
     }

@@ -83,9 +83,9 @@ public class DialogDAO {
                 .historisk(rs.getBoolean("historisk"))
                 .opprettetDato(hentDato(rs, "opprettet_dato"))
                 .venterPaNav(hentDato(rs, VENTER_PA_NAV_SIDEN))
-                .venterPaSvarFraBruker(hentDato(rs, VENTER_PA_SVAR_FRA_BRUKER_SIDEN))
-                .ulesteMeldingerForBruker(hentDato(rs, ULESTE_MELDINGER_FOR_BRUKER_SIDEN))
-                .ulesteMeldingerForVeileder(hentDato(rs, ULESTE_MELDINGER_FOR_VEILEDER_SIDEN))
+                .venterPaSvarFraBruker(hentDato(rs, VENTER_PA_SVAR_FRA_BRUKER))
+                .ulesteMeldingerForBruker(hentDato(rs, ELDSTE_ULESTE_FOR_BRUKER))
+                .ulesteMeldingerForVeileder(hentDato(rs, ELDSTE_ULESTE_FOR_VEILEDER))
                 .oppdatert(hentDato(rs, OPPDATERT))
                 .egenskaper(egenskaper)
                 .build();
