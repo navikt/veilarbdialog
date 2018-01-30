@@ -233,11 +233,12 @@ public class DialogDAOTest extends IntegrasjonsTest {
                 .henvendelser(henvendelser)
                 .build();
 
-        Map<String, Object> henvendelseData = DialogDAO.logData(henvendelser.get(0).getId(), henvendelser.get(0));
-        Map<String, Object> dialogData = DialogDAO.logData(dialog.getId(), dialog);
 
-        assertThat(henvendelseData.toString()).doesNotContain(sensitivtInnhold);
-        assertThat(dialogData.toString()).doesNotContain(sensitivtInnhold);
+        String henvendelseStr = henvendelser.get(0).toString();
+        String dialogStr = dialog.toString();
+
+        assertThat(henvendelseStr).doesNotContain(sensitivtInnhold);
+        assertThat(dialogStr).doesNotContain(sensitivtInnhold);
     }
 
     private long opprettNyDialog(String aktorId) {

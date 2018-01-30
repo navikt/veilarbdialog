@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.domain;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import lombok.experimental.Wither;
 
@@ -16,6 +17,7 @@ import static no.nav.fo.veilarbdialog.domain.AvsenderType.VEILEDER;
 @AllArgsConstructor
 @Accessors(chain = true)
 @Wither
+@ToString(exclude = "tekst")
 public class HenvendelseData {
 
     public final long id;

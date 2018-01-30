@@ -140,7 +140,7 @@ public class DialogDAO {
                         dialogId, egenskapType.toString())
         );
 
-        LOG.info("opprettet {}", logData(dialogId, dialogData));
+        LOG.info("opprettet dialog id:{} data:{}", dialogId, dialogData);
         return dialogId;
     }
 
@@ -161,7 +161,7 @@ public class DialogDAO {
                 EnumUtils.getName(henvendelseData.avsenderType)
         );
 
-        LOG.info("opprettet {}", logData(henvendeseId, henvendelseData));
+        LOG.info("opprettet henvendelse id:{} data:{}", henvendeseId, henvendelseData);
 
     }
 
@@ -227,42 +227,5 @@ public class DialogDAO {
 
     private String nowOrNull(boolean predicate) {
         return predicate ? dateProvider.getNow() : "NULL";
-    }
-
-    static Map<String, Object> logData(long dialogId, DialogData dialogData) {
-        Map<String, Object> logdata = new HashMap<>();
-        logdata.put("id", dialogId);
-        logdata.put("aktorId", dialogData.getAktorId());
-        logdata.put("aktivitetId", dialogData.getAktivitetId());
-
-        logdata.put("lestAvBrukerTidspunkt", dialogData.getLestAvBrukerTidspunkt());
-        logdata.put("lestAvVeilederTidspunkt", dialogData.getLestAvVeilederTidspunkt());
-        logdata.put("venterPaSvarTidspunkt", dialogData.getVenterPaSvarTidspunkt());
-        logdata.put("ferdigbehandletTidspunkt", dialogData.getFerdigbehandletTidspunkt());
-        logdata.put("ubehandletTidspunkt", dialogData.getUbehandletTidspunkt());
-
-        logdata.put("sisteStatusEndring", dialogData.getSisteStatusEndring());
-        logdata.put("opprettetDato", dialogData.getOpprettetDato());
-        logdata.put("historisk", dialogData.isHistorisk());
-
-        logdata.put("henvendelser", dialogData.getHenvendelser()
-                .stream()
-                .map((henvendelse) -> logData(henvendelse.getId(), henvendelse))
-                .collect(Collectors.toList())
-        );
-
-        logdata.put("egenskaper", dialogData.getEgenskaper());
-
-        return logdata;
-    }
-
-    static Map<String, Object> logData(long henvendeseId, HenvendelseData henvendelseData) {
-        Map<String, Object> logdata = new HashMap<>();
-        logdata.put("henvendelse_id", henvendeseId);
-        logdata.put("dialog_id", henvendelseData.dialogId);
-        logdata.put("sendt", henvendelseData.sendt);
-        logdata.put("avsender_id", henvendelseData.avsenderId);
-        logdata.put("avsender_type", henvendelseData.avsenderType);
-        return logdata;
     }
 }
