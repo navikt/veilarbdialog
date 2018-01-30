@@ -4,6 +4,7 @@ import no.nav.dialogarena.config.DevelopmentSecurity;
 import no.nav.fo.veilarbdialog.util.VarselMock;
 import no.nav.sbl.dialogarena.common.jetty.Jetty;
 
+import static no.nav.fo.veilarbdialog.ApplicationContext.APPLICATION_NAME;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
 import static no.nav.sbl.dialogarena.common.jetty.Jetty.usingWar;
 import static no.nav.sbl.dialogarena.common.jetty.JettyStarterUtils.*;
@@ -17,7 +18,7 @@ public class StartJetty {
                         .addDatasource(DatabaseTestContext.buildDataSource(), AKTIVITET_DATA_SOURCE_JDNI_NAME)
                         .port(PORT)
                         .sslPort(PORT + 1)
-                , new DevelopmentSecurity.SamlSecurityConfig("veilarbdialog")
+                , new DevelopmentSecurity.SamlSecurityConfig(APPLICATION_NAME)
         ).buildJetty();
 
         VarselMock.init();
