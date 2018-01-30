@@ -11,8 +11,9 @@ import javax.inject.Inject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.slf4j.LoggerFactory.getLogger;
