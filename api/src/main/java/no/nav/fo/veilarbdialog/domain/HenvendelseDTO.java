@@ -12,6 +12,7 @@ public class HenvendelseDTO {
     public String id;
     public String dialogId;
     public Avsender avsender;
+    public String avsenderId;
     public Date sendt;
     public boolean lest;
     public String tekst;
