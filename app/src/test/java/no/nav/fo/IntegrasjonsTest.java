@@ -35,13 +35,13 @@ import java.util.function.Supplier;
 import static no.nav.brukerdialog.security.context.SubjectHandler.SUBJECTHANDLER_KEY;
 import static no.nav.brukerdialog.security.context.SubjectHandlerUtils.setSubject;
 import static no.nav.dialogarena.config.util.Util.setProperty;
+import static no.nav.fo.veilarbdialog.ApplicationContext.APPLICATION_NAME;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
 import static org.mockito.Mockito.mock;
 import static org.springframework.util.ReflectionUtils.setField;
 
 public abstract class IntegrasjonsTest {
 
-    private static final String APPLICATION_NAME = "veilarbdialog";
     private static AnnotationConfigApplicationContext annotationConfigApplicationContext;
     private static PlatformTransactionManager platformTransactionManager;
     private TransactionStatus transactionStatus;
