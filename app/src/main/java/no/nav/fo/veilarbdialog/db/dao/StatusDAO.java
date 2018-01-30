@@ -28,20 +28,20 @@ public class StatusDAO {
         this.dateProvider = dateProvider;
     }
 
-    void oppdaterStatusForNyHenvendelse(HenvendelseData henvendelseData) {
-        if (henvendelseData.avsenderType == AvsenderType.BRUKER) {
-            nyMeldingFraBruker(henvendelseData.getDialogId());
+    void oppdaterStatusForNyHenvendelse(HenvendelseData henvendelseMedId) {
+        if (henvendelseMedId.avsenderType == AvsenderType.BRUKER) {
+            nyHenvendelseFraBruker(henvendelseMedId);
         } else {
-            oppdaterLestForBruker(henvendelseData.getDialogId(), false);
+            nyHenvendelseFraVeileder(henvendelseMedId);
         }
     }
 
     void markerSomLestAvBruker(long dialogId) {
-        oppdaterLestForBruker(dialogId, true);
+        settFeltTilNull(ELDSTE_ULESTE_FOR_BRUKER, dialogId);
     }
 
     void markerSomLestAvVeileder(long dialogId) {
-        oppdaterLestForVeileder(dialogId, true);
+        settFeltTilNull(ELDSTE_ULESTE_FOR_VEILEDER, dialogId);
     }
 
     void oppdaterVenterPaNav(long dialogId, boolean venter) {
@@ -56,45 +56,49 @@ public class StatusDAO {
         database.update(settTilHistoriskSQL(), dialogData.getId());
     }
 
-    private void nyMeldingFraBruker(long dialogId) {
-        oppdaterVenterPaNav(dialogId, true);
-        oppdaterLestForVeileder(dialogId, false);
+    private void nyHenvendelseFraVeileder(HenvendelseData henvendelesMedID) {
+        oppdaterUlestTidspunkt(henvendelesMedID, ELDSTE_ULESTE_FOR_BRUKER);
     }
 
-    private void oppdaterLestForVeileder(long dialogId, boolean erLest) {
-        oppdaterLestStatus(dialogId, erLest, ELDSTE_ULESTE_FOR_VEILEDER);
-    }
-
-    private void oppdaterLestForBruker(long dialogId, boolean erLest) {
-        oppdaterLestStatus(dialogId, erLest, ELDSTE_ULESTE_FOR_BRUKER);
-    }
-
-    private void oppdaterLestStatus(long dialogId, boolean erLest, String feltnavn) {
-        if (erLest) {
-            setFeltTilNull(feltnavn, dialogId);
-        } else {
-            setNowIfNull(feltnavn, dialogId);
-        }
+    private void nyHenvendelseFraBruker(HenvendelseData henvendelesMedID) {
+        oppdaterUlestTidspunkt(henvendelesMedID, ELDSTE_ULESTE_FOR_VEILEDER);
+        oppdaterVenterPaNav(henvendelesMedID.dialogId, true);
     }
 
     private void oppdaterVenterPaa(long dialogId, boolean venter, String feltnavn) {
         if (venter) {
             setNowIfNull(feltnavn, dialogId);
         } else {
-            setFeltTilNull(feltnavn, dialogId);
+            settFeltTilNull(feltnavn, dialogId);
+        }
+    }
+
+    private void oppdaterUlestTidspunkt(HenvendelseData henvendelseData, String feltnavn) {
+        int update = database.update("" +
+                        "UPDATE DIALOG SET " +
+                        "(" + feltnavn + ",  " + OPPDATERT + ")" +
+                        " = " +
+                        "(" +
+                        "(SELECT SENDT FROM HENVENDELSE WHERE HENVENDELSE_ID = ?), " +
+                        dateProvider.getNow() +
+                        ") " +
+                        "WHERE DIALOG_ID = ? " +
+                        "AND " +
+                        feltnavn + " IS NULL",
+                henvendelseData.id, henvendelseData.dialogId
+        );
+        if (update == 0) {
+            oppdaterSisteEndring(henvendelseData.dialogId);
         }
     }
 
     private void setNowIfNull(String feltnavn, long dialogId) {
-        long antallOppdaterte = database.update("" +
+        database.update("" +
                 "UPDATE DIALOG SET " +
                 feltnavn + " = " + dateProvider.getNow() + ", " +
                 OPPDATERT + " = " + dateProvider.getNow() +
                 " WHERE " + DIALOG_ID + " = ?  AND " + feltnavn + " IS NULL ", dialogId
         );
-        if (antallOppdaterte == 0) {
-            oppdaterSisteEndring(dialogId);
-        }
     }
 
     private String settTilHistoriskSQL() {
@@ -108,7 +112,7 @@ public class StatusDAO {
                 " WHERE " + DIALOG_ID + " = ?";
     }
 
-    private void setFeltTilNull(String feltNavn, long dialogId) {
+    private void settFeltTilNull(String feltNavn, long dialogId) {
         database.update("" +
                         "UPDATE DIALOG SET " + feltNavn + " = null, " +
                         OPPDATERT + " = " + dateProvider.getNow() +

@@ -55,12 +55,9 @@ class StatusDAOTest extends IntegrasjonsTest {
         statusDAO.oppdaterVenterPaNav(id, true);
         DialogData oppdatertDialog = dialogDAO.hentDialog(id);
 
-        assertThat(oppdatertDialog.getOppdatert()).isAfter(uniktTidspunkt);
         assertThat(oppdatertDialog.getVenterPaNav()).isBefore(uniktTidspunkt);
 
-        assertThat(oppdatertDialog).isEqualTo(originalDialog
-                .withOppdatert(oppdatertDialog.getOppdatert())
-        );
+        assertThat(oppdatertDialog).isEqualTo(originalDialog);
     }
 
     @Test
@@ -118,11 +115,8 @@ class StatusDAOTest extends IntegrasjonsTest {
         statusDAO.oppdaterVenterPaSvarFraBruker(id, true);
         DialogData oppdatertDialog = dialogDAO.hentDialog(id);
 
-        assertThat(oppdatertDialog.getOppdatert()).isAfter(uniktTidspunkt);
         assertThat(oppdatertDialog.getVenterPaSvarFraBruker()).isBefore(uniktTidspunkt);
-        assertThat(oppdatertDialog).isEqualTo(originalDialog
-                .withOppdatert(oppdatertDialog.getOppdatert())
-        );
+        assertThat(oppdatertDialog).isEqualTo(originalDialog);
     }
 
     @Test
@@ -148,7 +142,7 @@ class StatusDAOTest extends IntegrasjonsTest {
     }
 
     @Test
-    public void skalOppdaterStatusForHenvendelseFraBruker() {
+    public void skalOppdatereStatusForHenvendelseFraBruker() {
         DialogData dialogData = TestDataBuilder.nyDialog();
         long id = dialogDAO.opprettDialog(dialogData);
 
@@ -157,9 +151,10 @@ class StatusDAOTest extends IntegrasjonsTest {
         DialogData originalDialog = dialogDAO.hentDialog(id);
         Date uniktTidspunkt = uniktTidspunkt();
 
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData);
+        dialogDAO.opprettHenvendelse(henvendelseData);
 
         DialogData oppdatertDialog = dialogDAO.hentDialog(id);
+
         assertThat(oppdatertDialog.getVenterPaNav()).isAfter(uniktTidspunkt);
         assertThat(oppdatertDialog.getUlesteMeldingerForVeileder()).isAfter(uniktTidspunkt);
         assertThat(oppdatertDialog.getOppdatert()).isAfter(uniktTidspunkt);
@@ -168,21 +163,22 @@ class StatusDAOTest extends IntegrasjonsTest {
                 .withOppdatert(oppdatertDialog.getOppdatert())
                 .withVenterPaNav(oppdatertDialog.getVenterPaNav())
                 .withUlesteMeldingerForVeileder(oppdatertDialog.getUlesteMeldingerForVeileder())
+                .withHenvendelser(oppdatertDialog.getHenvendelser())
         );
     }
 
     @Test
-    public void skalOppdatereOppdatertMenIkkeVenterPaNavForAleredeSat() {
+    public void skalOppdatereOppdatertMenIkkeVenterPaNavForAleredeSatt() {
         DialogData dialogData = TestDataBuilder.nyDialog();
         long id = dialogDAO.opprettDialog(dialogData);
 
         HenvendelseData henvendelseData = TestDataBuilder.nyHenvendelse(id, dialogData.getAktorId(), AvsenderType.BRUKER);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData);
+        dialogDAO.opprettHenvendelse(henvendelseData);
 
         DialogData originalDialog = dialogDAO.hentDialog(id);
         Date uniktTidspunkt = uniktTidspunkt();
 
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData);
+        dialogDAO.opprettHenvendelse(henvendelseData);
         DialogData oppdatertDialog = dialogDAO.hentDialog(id);
 
         assertThat(oppdatertDialog.getUlesteMeldingerForVeileder()).isBefore(uniktTidspunkt);
@@ -191,6 +187,7 @@ class StatusDAOTest extends IntegrasjonsTest {
 
         assertThat(oppdatertDialog).isEqualTo(originalDialog
                 .withOppdatert(oppdatertDialog.getOppdatert())
+                .withHenvendelser(oppdatertDialog.getHenvendelser())
         );
     }
 
@@ -204,7 +201,7 @@ class StatusDAOTest extends IntegrasjonsTest {
         DialogData originalDialog = dialogDAO.hentDialog(id);
         Date uniktTidspunkt = uniktTidspunkt();
 
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData);
+        dialogDAO.opprettHenvendelse(henvendelseData);
         DialogData oppdatertDialog = dialogDAO.hentDialog(id);
 
         assertThat(oppdatertDialog.getUlesteMeldingerForBruker()).isAfter(uniktTidspunkt);
@@ -213,6 +210,7 @@ class StatusDAOTest extends IntegrasjonsTest {
         assertThat(oppdatertDialog).isEqualTo(originalDialog
                 .withOppdatert(oppdatertDialog.getOppdatert())
                 .withUlesteMeldingerForBruker(oppdatertDialog.getUlesteMeldingerForBruker())
+                .withHenvendelser(oppdatertDialog.getHenvendelser())
         );
     }
 
@@ -224,12 +222,12 @@ class StatusDAOTest extends IntegrasjonsTest {
         statusDAO.oppdaterVenterPaNav(id, true);
 
         HenvendelseData henvendelseData = TestDataBuilder.nyHenvendelse(id, dialogData.getAktorId(), AvsenderType.VEILEDER);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData);
+        dialogDAO.opprettHenvendelse(henvendelseData);
 
         DialogData originalDialog = dialogDAO.hentDialog(id);
         Date uniktTidspunkt = uniktTidspunkt();
 
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData);
+        dialogDAO.opprettHenvendelse(henvendelseData);
         DialogData oppdatertDialog = dialogDAO.hentDialog(id);
 
         assertThat(oppdatertDialog.getUlesteMeldingerForBruker()).isBefore(uniktTidspunkt);
@@ -237,6 +235,7 @@ class StatusDAOTest extends IntegrasjonsTest {
 
         assertThat(oppdatertDialog).isEqualTo(originalDialog
                 .withOppdatert(oppdatertDialog.getOppdatert())
+                .withHenvendelser(oppdatertDialog.getHenvendelser())
         );
     }
 
@@ -246,7 +245,7 @@ class StatusDAOTest extends IntegrasjonsTest {
         long id = dialogDAO.opprettDialog(dialogData);
 
         HenvendelseData henvendelseData = TestDataBuilder.nyHenvendelse(id, dialogData.getAktorId(), AvsenderType.VEILEDER);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData);
+        dialogDAO.opprettHenvendelse(henvendelseData);
 
         DialogData original = dialogDAO.hentDialog(id);
         Date uniktTidspunkt = uniktTidspunkt();
@@ -261,6 +260,7 @@ class StatusDAOTest extends IntegrasjonsTest {
         assertThat(oppdatert).isEqualTo(original
                 .withOppdatert(oppdatert.getOppdatert())
                 .withUlesteMeldingerForBruker(null)
+                .withHenvendelser(oppdatert.getHenvendelser())
         );
     }
 
@@ -270,7 +270,7 @@ class StatusDAOTest extends IntegrasjonsTest {
         long id = dialogDAO.opprettDialog(dialogData);
 
         HenvendelseData henvendelseData = TestDataBuilder.nyHenvendelse(id, dialogData.getAktorId(), AvsenderType.BRUKER);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData);
+        dialogDAO.opprettHenvendelse(henvendelseData);
 
         DialogData original = dialogDAO.hentDialog(id);
         Date uniktTidspunkt = uniktTidspunkt();
@@ -285,6 +285,7 @@ class StatusDAOTest extends IntegrasjonsTest {
         assertThat(oppdatert).isEqualTo(original
                 .withOppdatert(oppdatert.getOppdatert())
                 .withUlesteMeldingerForVeileder(null)
+                .withHenvendelser(oppdatert.getHenvendelser())
         );
     }
 

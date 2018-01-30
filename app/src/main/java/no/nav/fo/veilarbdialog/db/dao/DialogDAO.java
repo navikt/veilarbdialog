@@ -154,7 +154,7 @@ public class DialogDAO {
     }
 
     public void opprettHenvendelse(HenvendelseData henvendelseData) {
-        long henvendeseId = database.nesteFraSekvens("HENVENDELSE_ID_SEQ");
+        long henvendelseId = database.nesteFraSekvens("HENVENDELSE_ID_SEQ");
 
         database.update("INSERT INTO HENVENDELSE(" +
                         "henvendelse_id, " +
@@ -163,14 +163,14 @@ public class DialogDAO {
                         "avsender_id, " +
                         "avsender_type) " +
                         "VALUES (?,?," + dateProvider.getNow() + ",?,?,?)",
-                henvendeseId,
+                henvendelseId,
                 henvendelseData.dialogId,
                 henvendelseData.tekst,
                 henvendelseData.avsenderId,
                 EnumUtils.getName(henvendelseData.avsenderType)
         );
 
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData);
+        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData.withId(henvendelseId));
         LOG.info("opprettet {}", henvendelseData);
 
     }
