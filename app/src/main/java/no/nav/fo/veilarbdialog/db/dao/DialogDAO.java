@@ -79,6 +79,7 @@ public class DialogDAO {
                 .henvendelser(hentHenvendelser(dialogId))
                 .historisk(rs.getBoolean("historisk"))
                 .opprettetDato(hentDato(rs, "opprettet_dato"))
+                .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
                 .egenskaper(egenskaper)
                 .build();
     }
@@ -110,6 +111,7 @@ public class DialogDAO {
                 .avsenderType(EnumUtils.valueOf(AvsenderType.class, rs.getString("avsender_type")))
                 .lestAvBruker(erLest(hentDato(rs, "lest_av_bruker_tid"), henvendelseDato))
                 .lestAvVeileder(erLest(hentDato(rs, "lest_av_veileder_tid"), henvendelseDato))
+                .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
                 .build();
     }
 

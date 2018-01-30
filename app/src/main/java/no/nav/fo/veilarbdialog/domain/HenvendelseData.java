@@ -29,6 +29,8 @@ public class HenvendelseData {
     public final boolean lestAvBruker;
     public final boolean lestAvVeileder;
 
+    public final String kontorsperreEnhetId;
+    
     public boolean fraBruker() {
         return avsenderType == BRUKER;
     }
