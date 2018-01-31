@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog.service;
 
-import lombok.val;
 import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UlovligHandling;
 import no.nav.apiapp.security.PepClient;
@@ -127,7 +126,7 @@ public class AppService {
     }
 
     public void updateDialogAktorFor(String aktorId) {
-        val dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
+        List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
         dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
     }
 
