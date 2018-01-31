@@ -24,7 +24,7 @@ import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 class RestMapper {
 
     @Inject
-    private KontorsperreFilter kontorsperreFilter;
+    KontorsperreFilter kontorsperreFilter;
     
     public DialogDTO somDialogDTO(DialogData dialogData) {
 
