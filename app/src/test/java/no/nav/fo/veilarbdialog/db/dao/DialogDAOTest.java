@@ -12,8 +12,10 @@ import org.junit.Test;
 import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static java.lang.Thread.sleep;
+import static java.util.Arrays.asList;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
@@ -236,6 +238,27 @@ public class DialogDAOTest extends IntegrasjonsTest {
         Status oppdatert = StatusDAO.getStatus(dialogData);
 
         assertThat(oppdatert).isEqualTo(status);
+    }
+
+    @Test
+    public void skalIkkeLoggeTekstInnhold() {
+        String sensitivtInnhold = "Sensitivt innhold";
+
+        List<HenvendelseData> henvendelser = asList(
+                HenvendelseData.builder().id(1L).tekst(sensitivtInnhold).build(),
+                HenvendelseData.builder().id(2L).tekst(sensitivtInnhold).build()
+        );
+        DialogData dialog = DialogData.builder()
+                .id(1L)
+                .henvendelser(henvendelser)
+                .build();
+
+
+        String henvendelseStr = henvendelser.get(0).toString();
+        String dialogStr = dialog.toString();
+
+        assertThat(henvendelseStr).doesNotContain(sensitivtInnhold);
+        assertThat(dialogStr).doesNotContain(sensitivtInnhold);
     }
 
     private long opprettNyDialog(String aktorId) {
