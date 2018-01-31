@@ -5,6 +5,7 @@ import no.nav.brukerdialog.security.context.SubjectHandler;
 import no.nav.fo.veilarbdialog.api.DialogController;
 import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
 
 import org.springframework.stereotype.Component;
@@ -35,12 +36,15 @@ public class RestService implements DialogController, VeilederDialogController {
     @Inject
     private Provider<HttpServletRequest> requestProvider;
 
+    @Inject
+    private KontorsperreFilter kontorsperreFilter;
+
     @Override
     public List<DialogDTO> hentDialoger() {        
         return appService.hentDialogerForBruker(getBrukerIdent())
                 .stream()
+                .filter(dialog -> kontorsperreFilter.harTilgang(dialog.getKontorsperreEnhetId()))
                 .map(restMapper::somDialogDTO)
-                .filter(dto -> nonNull(dto))
                 .collect(toList());
     }
 
