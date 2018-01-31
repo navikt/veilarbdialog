@@ -6,6 +6,7 @@ import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
+import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
@@ -34,12 +35,14 @@ public class AppServiceTest {
     private static final DialogData DIALOG_DATA = DialogData.builder().id(DIALOG_ID).aktorId(AKTOR_ID).build();
 
     private final DialogDAO dialogDAO = mock(DialogDAO.class);
+    private final StatusDAO statusDao = mock(StatusDAO.class);
     private final DialogFeedDAO dialogFeedDAO = mock(DialogFeedDAO.class);
     private final AktorService aktorService = mock(AktorService.class);
     private final PepClient pepClient = mock(PepClient.class);
     private AppService appService = new AppService(
             aktorService,
             dialogDAO,
+            statusDao,
             dialogFeedDAO,
             pepClient
     );

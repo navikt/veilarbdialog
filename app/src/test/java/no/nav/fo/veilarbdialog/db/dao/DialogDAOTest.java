@@ -115,13 +115,10 @@ public class DialogDAOTest extends IntegrasjonsTest {
         DialogData oppdatertDialog = dialogDAO.hentDialog(dialogId);
         assertThat(oppdatertDialog.getSisteStatusEndring()).isAfter(tidspunktForOppdatering);
         assertThat(oppdatertDialog.getVenterPaSvarTidspunkt()).isAfter(tidspunktForOppdatering);
-        assertThat(oppdatertDialog.getOppdatert()).isAfter(tidspunktForOppdatering);
         assertThat(oppdatertDialog.venterPaSvar()).isTrue();
         assertThat(oppdatertDialog).isEqualTo(dialogData
                 .withSisteStatusEndring(oppdatertDialog.getSisteStatusEndring())
                 .withVenterPaSvarTidspunkt(oppdatertDialog.getVenterPaSvarTidspunkt())
-                .withOppdatert(oppdatertDialog.getOppdatert())
-                .withVenterPaSvarFraBruker(oppdatertDialog.getVenterPaSvarFraBruker())
         );
     }
 

@@ -28,14 +28,11 @@ public class DialogDAO {
 
     private final Database database;
     private final DateProvider dateProvider;
-    private final StatusDAO statusDAO;
 
     @Inject
-    public DialogDAO(Database database,
-                     DateProvider dateProvider, StatusDAO statusDAO) {
+    public DialogDAO(Database database, DateProvider dateProvider) {
         this.database = database;
         this.dateProvider = dateProvider;
-        this.statusDAO = statusDAO;
     }
 
     public List<DialogData> hentDialogerForAktorId(String aktorId) {
@@ -153,7 +150,7 @@ public class DialogDAO {
         return dialogId;
     }
 
-    public void opprettHenvendelse(HenvendelseData henvendelseData) {
+    public long opprettHenvendelse(HenvendelseData henvendelseData) {
         long henvendelseId = database.nesteFraSekvens("HENVENDELSE_ID_SEQ");
 
         database.update("INSERT INTO HENVENDELSE(" +
@@ -170,19 +167,16 @@ public class DialogDAO {
                 EnumUtils.getName(henvendelseData.avsenderType)
         );
 
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData.withId(henvendelseId));
         LOG.info("opprettet {}", henvendelseData);
-
+        return henvendelseId;
     }
 
     public void markerDialogSomLestAvVeileder(long dialogId) {
         markerLest(dialogId, "lest_av_veileder_tid");
-        statusDAO.markerSomLestAvVeileder(dialogId);
     }
 
     public void markerDialogSomLestAvBruker(long dialogId) {
         markerLest(dialogId, "lest_av_bruker_tid");
-        statusDAO.markerSomLestAvBruker(dialogId);
     }
 
     private void markerLest(long dialogId, String feltNavn) {
@@ -216,7 +210,6 @@ public class DialogDAO {
         sql += " WHERE dialog_id = ?";
 
         database.update(sql, dialogData.getId());
-        statusDAO.oppdaterDialogTilHistorisk(dialogData);
     }
 
     public void oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
@@ -227,7 +220,6 @@ public class DialogDAO {
                         "WHERE dialog_id = ?",
                 dialogStatus.dialogId
         );
-        statusDAO.oppdaterVenterPaNav(dialogStatus.getDialogId(), !dialogStatus.ferdigbehandlet);
     }
 
     public void oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
@@ -237,7 +229,6 @@ public class DialogDAO {
                         "WHERE dialog_id = ?",
                 dialogStatus.dialogId
         );
-        statusDAO.oppdaterVenterPaSvarFraBruker(dialogStatus.dialogId, dialogStatus.venterPaSvar);
     }
 
     private String nowOrNull(boolean predicate) {

@@ -7,6 +7,7 @@ import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
+import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
@@ -23,15 +24,18 @@ public class AppService {
 
     private final AktorService aktorService;
     private final DialogDAO dialogDAO;
+    private final StatusDAO statusDAO;
     private final DialogFeedDAO dialogFeedDAO;
     private final PepClient pepClient;
 
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
+                      StatusDAO statusDAO,
                       DialogFeedDAO dialogFeedDAO,
                       PepClient pepClient) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
+        this.statusDAO = statusDAO;
         this.dialogFeedDAO = dialogFeedDAO;
         this.pepClient = pepClient;
     }
@@ -50,7 +54,8 @@ public class AppService {
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
         long dialogId = henvendelseData.dialogId;
         sjekkSkriveTilgangTilDialog(dialogId);
-        dialogDAO.opprettHenvendelse(henvendelseData);
+        long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
+        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData.withId(henvendelseId));
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -67,6 +72,7 @@ public class AppService {
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvVeileder(dialogId);
+        statusDAO.markerSomLestAvVeileder(dialogId);
         FunkjsonelleMetrikker.markerSomLestAvVeilederMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
@@ -74,6 +80,7 @@ public class AppService {
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvBruker(dialogId);
+        statusDAO.markerSomLestAvBruker(dialogId);
         FunkjsonelleMetrikker.merkDialogSomLestAvBrukerMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
@@ -82,6 +89,7 @@ public class AppService {
         long dialogId = dialogStatus.dialogId;
         DialogData dialog = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
+        statusDAO.oppdaterVenterPaNav(dialogStatus.getDialogId(), !dialogStatus.ferdigbehandlet);
         FunkjsonelleMetrikker.oppdaterFerdigbehandletTidspunktMetrikk(dialog, dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
@@ -90,6 +98,7 @@ public class AppService {
         long dialogId = dialogStatus.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
+        statusDAO.oppdaterVenterPaSvarFraBruker(dialogStatus);
         FunkjsonelleMetrikker.oppdaterVenterSvarMetrikk(dialogStatus, dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
@@ -112,7 +121,7 @@ public class AppService {
     public void settDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
         // NB: ingen tilgangskontroll, brukes av vår feed-consumer
         dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
-                .forEach(dialogDAO::oppdaterDialogTilHistorisk);
+                .forEach(this::oppdaterDialogTilHistorisk);
 
         updateDialogAktorFor(aktoerId);
     }
@@ -120,6 +129,11 @@ public class AppService {
     public void updateDialogAktorFor(String aktorId) {
         val dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
         dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
+    }
+
+    private void oppdaterDialogTilHistorisk(DialogData dialogData) {
+        dialogDAO.oppdaterDialogTilHistorisk(dialogData);
+        statusDAO.oppdaterDialogTilHistorisk(dialogData);
     }
 
     private String sjekkTilgangTilFnr(String ident) {
