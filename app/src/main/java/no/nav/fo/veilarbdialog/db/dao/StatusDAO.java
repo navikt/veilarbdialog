@@ -1,127 +1,91 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import no.nav.fo.veilarbdialog.domain.AvsenderType;
-import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.DialogStatus;
-import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.sbl.jdbc.Database;
+import no.nav.fo.veilarbdialog.domain.*;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 
-import static no.nav.fo.veilarbdialog.db.dao.DBKonstanter.*;
-
 @Component
 @Transactional
 public class StatusDAO {
-    private final Database database;
-    private final DateProvider dateProvider;
+    private DialogDAO dialogDAO;
 
     @Inject
-    StatusDAO(Database database,
-              DateProvider dateProvider) {
-        this.database = database;
-        this.dateProvider = dateProvider;
+    StatusDAO(DialogDAO dialogDAO) {
+        this.dialogDAO = dialogDAO;
     }
 
-    public void oppdaterStatusForNyHenvendelse(HenvendelseData henvendelseMedId) {
-        if (henvendelseMedId.avsenderType == AvsenderType.BRUKER) {
-            nyHenvendelseFraBruker(henvendelseMedId);
+    public void nyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
+        Status status = oppdaterStatusForNyHenvendelse(dialogData, henvendelseData);
+        dialogDAO.oppdaterStatus(status);
+    }
+
+    public void markerSomLestAvVeileder(DialogData dialogData) {
+        Status status = getStatus(dialogData);
+        if (status.eldsteUlesteForVeileder == null) {
+            return;
+        }
+
+        status.eldsteUlesteForVeileder = null;
+        dialogDAO.oppdaterStatus(status);
+    }
+
+    public void markerSomLestAvBruker(DialogData dialogData) {
+        Status status = getStatus(dialogData);
+        if (status.eldsteUlesteForBruker == null) {
+            return;
+        }
+
+        status.eldsteUlesteForBruker = null;
+        dialogDAO.oppdaterStatus(status);
+    }
+
+    public void oppdaterVenterPaNavSiden(DialogData dialogData, DialogStatus dialogStatus) {
+        Status status = getStatus(dialogData);
+        if (dialogStatus.ferdigbehandlet) {
+            status.venterPaNavSiden = null;
         } else {
-            nyHenvendelseFraVeileder(henvendelseMedId);
+
+            status.setVenterPaNavSiden();
         }
+        dialogDAO.oppdaterStatus(status);
     }
 
-    public void markerSomLestAvBruker(long dialogId) {
-        settFeltTilNull(ELDSTE_ULESTE_FOR_BRUKER, dialogId);
-    }
-
-    public void markerSomLestAvVeileder(long dialogId) {
-        settFeltTilNull(ELDSTE_ULESTE_FOR_VEILEDER, dialogId);
-    }
-
-    public void oppdaterVenterPaNav(long dialogId, boolean venter) {
-        oppdaterVenterPaa(dialogId, venter, VENTER_PA_NAV_SIDEN);
-    }
-
-    public void oppdaterVenterPaSvarFraBruker(DialogStatus dialogStatus) {
-        oppdaterVenterPaa(dialogStatus.dialogId, dialogStatus.venterPaSvar, VENTER_PA_SVAR_FRA_BRUKER);
-    }
-
-    public void oppdaterDialogTilHistorisk(DialogData dialogData) {
-        database.update(settTilHistoriskSQL(), dialogData.getId());
-    }
-
-    private void nyHenvendelseFraVeileder(HenvendelseData henvendelseMedID) {
-        oppdaterUlestTidspunkt(henvendelseMedID, ELDSTE_ULESTE_FOR_BRUKER);
-    }
-
-    private void nyHenvendelseFraBruker(HenvendelseData henvendelseMedID) {
-        oppdaterUlestTidspunkt(henvendelseMedID, ELDSTE_ULESTE_FOR_VEILEDER);
-        oppdaterVenterPaNav(henvendelseMedID.dialogId, true);
-    }
-
-    private void oppdaterVenterPaa(long dialogId, boolean venter, String feltnavn) {
-        if (venter) {
-            setNowIfNull(feltnavn, dialogId);
+    public void oppdaterVenterPaSvarFraBrukerSiden(DialogData dialogData, DialogStatus dialogStatus) {
+        Status status = getStatus(dialogData);
+        if (dialogStatus.venterPaSvar) {
+            status.setVenterPaSvarFraBruker();
         } else {
-            settFeltTilNull(feltnavn, dialogId);
+            status.venterPaSvarFraBruker = null;
         }
+        dialogDAO.oppdaterStatus(status);
     }
 
-    private void oppdaterUlestTidspunkt(HenvendelseData henvendelseData, String feltnavn) {
-        int update = database.update("" +
-                        "UPDATE DIALOG SET " +
-                        "(" + feltnavn + ",  " + OPPDATERT + ")" +
-                        " = " +
-                        "(" +
-                        "(SELECT SENDT FROM HENVENDELSE WHERE HENVENDELSE_ID = ?), " +
-                        dateProvider.getNow() +
-                        ") " +
-                        "WHERE DIALOG_ID = ? " +
-                        "AND " +
-                        feltnavn + " IS NULL",
-                henvendelseData.id, henvendelseData.dialogId
-        );
-        if (update == 0) {
-            oppdaterSisteEndring(henvendelseData.dialogId);
+    public void settDialogTilHistorisk(DialogData dialogData) {
+        Status status = new Status(dialogData.getId());
+        status.setHistorisk(true);
+        dialogDAO.oppdaterStatus(status);
+    }
+
+    private Status oppdaterStatusForNyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
+        Status status = getStatus(dialogData);
+        if (henvendelseData.getAvsenderType() == AvsenderType.BRUKER) {
+            status.setVenterPaNavSiden();
+            status.setUlesteMeldingerForVeileder(henvendelseData.getSendt());
+        } else {
+            status.setUlesteMeldingerForBruker(henvendelseData.getSendt());
         }
+        return status;
     }
 
-    private void setNowIfNull(String feltnavn, long dialogId) {
-        database.update("" +
-                "UPDATE DIALOG SET " +
-                feltnavn + " = " + dateProvider.getNow() + ", " +
-                OPPDATERT + " = " + dateProvider.getNow() +
-                " WHERE " + DIALOG_ID + " = ?  AND " + feltnavn + " IS NULL ", dialogId
-        );
-    }
-
-    private String settTilHistoriskSQL() {
-        return "UPDATE DIALOG SET " +
-                HISTORISK + " = 1, " +
-                OPPDATERT + " = " + dateProvider.getNow() + ", " +
-                ELDSTE_ULESTE_FOR_BRUKER + " = null, " +
-                ELDSTE_ULESTE_FOR_VEILEDER + " = null, " +
-                VENTER_PA_SVAR_FRA_BRUKER + " = null, " +
-                VENTER_PA_NAV_SIDEN + " = null" +
-                " WHERE " + DIALOG_ID + " = ?";
-    }
-
-    private void settFeltTilNull(String feltNavn, long dialogId) {
-        database.update("" +
-                        "UPDATE DIALOG SET " + feltNavn + " = null, " +
-                        OPPDATERT + " = " + dateProvider.getNow() +
-                        " WHERE " + DIALOG_ID + " = ?  AND " + feltNavn + " IS NOT NULL",
-                dialogId
-        );
-    }
-
-    private void oppdaterSisteEndring(long dialogId) {
-        database.update("" +
-                "UPDATE DIALOG SET " +
-                OPPDATERT + " = " + dateProvider.getNow() +
-                " WHERE " + DIALOG_ID + " = ?", dialogId);
+    static Status getStatus(DialogData dialogData) {
+        Status status = new Status(dialogData.getId());
+        status.venterPaNavSiden = dialogData.getVenterPaNav();
+        status.venterPaSvarFraBruker = dialogData.getVenterPaSvarFraBruker();
+        status.eldsteUlesteForBruker = dialogData.getUlesteMeldingerForBruker();
+        status.eldsteUlesteForVeileder = dialogData.getUlesteMeldingerForVeileder();
+        status.setHistorisk(dialogData.isHistorisk());
+        return status;
     }
 }

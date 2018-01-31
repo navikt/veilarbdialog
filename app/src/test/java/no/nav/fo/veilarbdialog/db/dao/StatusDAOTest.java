@@ -1,306 +1,178 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.SneakyThrows;
-import no.nav.fo.IntegrasjonsTest;
 import no.nav.fo.veilarbdialog.TestDataBuilder;
-import no.nav.fo.veilarbdialog.domain.AvsenderType;
-import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.DialogStatus;
-import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.domain.*;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
-import javax.inject.Inject;
 import java.util.Date;
 
 import static java.lang.Thread.sleep;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.*;
 
-class StatusDAOTest extends IntegrasjonsTest {
-    @Inject
-    private DialogDAO dialogDAO;
+class StatusDAOTest {
 
-    @Inject
-    private StatusDAO statusDAO;
-
-    @Test
-    public void skalSetteVenterPaNavTilNyttTidspunkt() {
-        DialogData nyDialog = TestDataBuilder.nyDialog();
-        long id = dialogDAO.opprettDialog(nyDialog);
-
-        Date uniktTidspunkt = uniktTidspunkt();
-        DialogData originalDialog = dialogDAO.hentDialog(id);
-
-        assertThat(originalDialog.getVenterPaNav()).isNull();
-
-        statusDAO.oppdaterVenterPaNav(id, true);
-        DialogData oppdatertDialog = dialogDAO.hentDialog(id);
-
-        assertThat(oppdatertDialog.getOppdatert()).isAfter(uniktTidspunkt);
-        assertThat(oppdatertDialog.getVenterPaNav()).isAfter(uniktTidspunkt);
-
-        assertThat(oppdatertDialog).isEqualTo(originalDialog
-                .withOppdatert(oppdatertDialog.getOppdatert())
-                .withVenterPaNav(oppdatertDialog.getVenterPaNav())
-        );
-    }
+    private DialogDAO dialogDAO = mock(DialogDAO.class);
+    private StatusDAO statusDAO = new StatusDAO(dialogDAO);
 
     @Test
-    public void skalIkkeOppdatereAlleredeSattVenterPaNav() {
-        DialogData nyDialog = TestDataBuilder.nyDialog();
-        long id = dialogDAO.opprettDialog(nyDialog);
-
-        statusDAO.oppdaterVenterPaNav(id, true);
-        DialogData originalDialog = dialogDAO.hentDialog(id);
-        Date uniktTidspunkt = uniktTidspunkt();
-
-        statusDAO.oppdaterVenterPaNav(id, true);
-        DialogData oppdatertDialog = dialogDAO.hentDialog(id);
-
-        assertThat(oppdatertDialog.getVenterPaNav()).isBefore(uniktTidspunkt);
-
-        assertThat(oppdatertDialog).isEqualTo(originalDialog);
-    }
-
-    @Test
-    public void skalFjerneVenterPaNav() {
-        DialogData nyDialog = TestDataBuilder.nyDialog();
-        long id = dialogDAO.opprettDialog(nyDialog);
-
-        statusDAO.oppdaterVenterPaNav(id, true);
-        DialogData originalDialog = dialogDAO.hentDialog(id);
-        Date uniktTidspunkt = uniktTidspunkt();
-
-        statusDAO.oppdaterVenterPaNav(id, false);
-
-        DialogData oppdatertDialog = dialogDAO.hentDialog(id);
-
-        assertThat(oppdatertDialog.getOppdatert()).isAfter(uniktTidspunkt);
-        assertThat(oppdatertDialog.getVenterPaNav()).isNull();
-
-        assertThat(oppdatertDialog).isEqualTo(originalDialog
-                .withVenterPaNav(oppdatertDialog.getVenterPaNav())
-                .withOppdatert(oppdatertDialog.getOppdatert())
-        );
-    }
-
-    @Test
-    public void skalSetteVenterPaSvarFraBrukerTilNyttTidspunkt() {
-        DialogData nyDialog = TestDataBuilder.nyDialog();
-        long id = dialogDAO.opprettDialog(nyDialog);
-
-        DialogData originalDialog = dialogDAO.hentDialog(id);
-        Date uniktTidspunkt = uniktTidspunkt();
-
-        DialogStatus dialogStatus = new DialogStatus(id, true, false);
-        statusDAO.oppdaterVenterPaSvarFraBruker(dialogStatus);
-        DialogData oppdatertDialog = dialogDAO.hentDialog(id);
-
-        assertThat(oppdatertDialog.getOppdatert()).isAfter(uniktTidspunkt);
-        assertThat(oppdatertDialog.getVenterPaSvarFraBruker()).isAfter(uniktTidspunkt);
-
-        assertThat(oppdatertDialog).isEqualTo(originalDialog
-                .withOppdatert(oppdatertDialog.getOppdatert())
-                .withVenterPaSvarFraBruker(oppdatertDialog.getVenterPaSvarFraBruker())
-        );
-    }
-
-    @Test
-    public void skalIkkeOppdatereAlleredeSattVenterPaSvarFraBruker() {
-        DialogData nyDialog = TestDataBuilder.nyDialog();
-        long id = dialogDAO.opprettDialog(nyDialog);
-
-        DialogStatus dialogStatus = new DialogStatus(id, true, false);
-        statusDAO.oppdaterVenterPaSvarFraBruker(dialogStatus);
-
-        DialogData originalDialog = dialogDAO.hentDialog(id);
-        Date uniktTidspunkt = uniktTidspunkt();
-
-        statusDAO.oppdaterVenterPaSvarFraBruker(dialogStatus);
-        DialogData oppdatertDialog = dialogDAO.hentDialog(id);
-
-        assertThat(oppdatertDialog.getVenterPaSvarFraBruker()).isBefore(uniktTidspunkt);
-        assertThat(oppdatertDialog).isEqualTo(originalDialog);
-    }
-
-    @Test
-    public void skalFjerneVenterPaSvarFraBruker() {
-        DialogData nyDialog = TestDataBuilder.nyDialog();
-        long id = dialogDAO.opprettDialog(nyDialog);
-
-        DialogStatus dialogStatus = new DialogStatus(id, true, false);
-        statusDAO.oppdaterVenterPaSvarFraBruker(dialogStatus);
-
-        DialogData originalDialog = dialogDAO.hentDialog(id);
-        Date uniktTidspunkt = uniktTidspunkt();
-
-        DialogStatus venterIkke = new DialogStatus(id, false, false);
-        statusDAO.oppdaterVenterPaSvarFraBruker(venterIkke);
-
-        DialogData oppdatertDialog = dialogDAO.hentDialog(id);
-
-        assertThat(oppdatertDialog.getOppdatert()).isAfter(uniktTidspunkt);
-        assertThat(oppdatertDialog.getVenterPaSvarFraBruker()).isNull();
-        assertThat(oppdatertDialog).isEqualTo(originalDialog
-                .withOppdatert(oppdatertDialog.getOppdatert())
-                .withVenterPaSvarFraBruker(oppdatertDialog.getVenterPaSvarFraBruker())
-        );
-    }
-
-    @Test
-    public void skalOppdatereStatusForHenvendelseFraBruker() {
+    public void oppretterNyHenvendelse() {
         DialogData dialogData = TestDataBuilder.nyDialog();
-        long id = dialogDAO.opprettDialog(dialogData);
+        Date uniktTidspunkt = new Date();
+        HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
-        HenvendelseData henvendelseData = TestDataBuilder.nyHenvendelse(id, dialogData.getAktorId(), AvsenderType.BRUKER);
+        Status status = statusDAO.getStatus(dialogData);
+        status.eldsteUlesteForVeileder = uniktTidspunkt;
+        status.venterPaNavSiden = uniktTidspunkt;
 
-        DialogData originalDialog = dialogDAO.hentDialog(id);
-        Date uniktTidspunkt = uniktTidspunkt();
-
-        long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData.withId(henvendelseId));
-        DialogData oppdatertDialog = dialogDAO.hentDialog(id);
-
-        assertThat(oppdatertDialog.getVenterPaNav()).isAfter(uniktTidspunkt);
-        assertThat(oppdatertDialog.getUlesteMeldingerForVeileder()).isAfter(uniktTidspunkt);
-        assertThat(oppdatertDialog.getOppdatert()).isAfter(uniktTidspunkt);
-
-        assertThat(oppdatertDialog).isEqualTo(originalDialog
-                .withOppdatert(oppdatertDialog.getOppdatert())
-                .withVenterPaNav(oppdatertDialog.getVenterPaNav())
-                .withUlesteMeldingerForVeileder(oppdatertDialog.getUlesteMeldingerForVeileder())
-                .withHenvendelser(oppdatertDialog.getHenvendelser())
-        );
+        statusDAO.nyHenvendelse(dialogData, henvendelseData);
+        verify(dialogDAO).oppdaterStatus(status);
     }
 
     @Test
-    public void skalOppdatereOppdatertMenIkkeVenterPaNavForAleredeSatt() {
+    public void oppretterNyHenvendelseFraVeileder() {
         DialogData dialogData = TestDataBuilder.nyDialog();
-        long id = dialogDAO.opprettDialog(dialogData);
+        Date uniktTidspunkt = new Date();
+        HenvendelseData henvendelseData = nyHenvendelseFraVeileder(dialogData, uniktTidspunkt);
 
-        HenvendelseData henvendelseData = TestDataBuilder.nyHenvendelse(id, dialogData.getAktorId(), AvsenderType.BRUKER);
-        long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData.withId(henvendelseId));
+        Status status = statusDAO.getStatus(dialogData);
+        status.eldsteUlesteForBruker = uniktTidspunkt;
 
-        DialogData originalDialog = dialogDAO.hentDialog(id);
-        Date uniktTidspunkt = uniktTidspunkt();
-
-        long nyHenvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData.withId(nyHenvendelseId));
-
-        DialogData oppdatertDialog = dialogDAO.hentDialog(id);
-
-        assertThat(oppdatertDialog.getUlesteMeldingerForVeileder()).isBefore(uniktTidspunkt);
-        assertThat(oppdatertDialog.getVenterPaNav()).isBefore(uniktTidspunkt);
-        assertThat(oppdatertDialog.getOppdatert()).isAfter(uniktTidspunkt);
-
-        assertThat(oppdatertDialog).isEqualTo(originalDialog
-                .withOppdatert(oppdatertDialog.getOppdatert())
-                .withHenvendelser(oppdatertDialog.getHenvendelser())
-        );
+        statusDAO.nyHenvendelse(dialogData, henvendelseData);
+        verify(dialogDAO).oppdaterStatus(status);
     }
 
     @Test
-    public void skalOppdaterStatusForHenvendelseFraVeileder() {
-        DialogData dialogData = TestDataBuilder.nyDialog();
-        long id = dialogDAO.opprettDialog(dialogData);
+    public void oppretterNyHenvendelsePaEksisterendeDialog() {
+        DialogData dialogData = getDialogData();
 
-        HenvendelseData henvendelseData = TestDataBuilder.nyHenvendelse(id, dialogData.getAktorId(), AvsenderType.VEILEDER);
+        Date uniktTidspunkt = new Date();
+        HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
-        DialogData originalDialog = dialogDAO.hentDialog(id);
-        Date uniktTidspunkt = uniktTidspunkt();
+        Status status = statusDAO.getStatus(dialogData);
 
-        long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData.withId(henvendelseId));
-        DialogData oppdatertDialog = dialogDAO.hentDialog(id);
-
-        assertThat(oppdatertDialog.getUlesteMeldingerForBruker()).isAfter(uniktTidspunkt);
-        assertThat(oppdatertDialog.getOppdatert()).isAfter(uniktTidspunkt);
-
-        assertThat(oppdatertDialog).isEqualTo(originalDialog
-                .withOppdatert(oppdatertDialog.getOppdatert())
-                .withUlesteMeldingerForBruker(oppdatertDialog.getUlesteMeldingerForBruker())
-                .withHenvendelser(oppdatertDialog.getHenvendelser())
-        );
+        statusDAO.nyHenvendelse(dialogData, henvendelseData);
+        verify(dialogDAO).oppdaterStatus(status);
     }
 
     @Test
-    public void skalOppdatereOppdatertMenIkkeUlesteForBruker() {
-        DialogData dialogData = TestDataBuilder.nyDialog();
-        long id = dialogDAO.opprettDialog(dialogData);
+    public void markerSomLestAvVeileder() {
+        DialogData dialogData = getDialogData();
+        Status status = statusDAO.getStatus(dialogData);
+        status.eldsteUlesteForVeileder = null;
 
-        statusDAO.oppdaterVenterPaNav(id, true);
+        statusDAO.markerSomLestAvVeileder(dialogData);
 
-        HenvendelseData henvendelseData = TestDataBuilder.nyHenvendelse(id, dialogData.getAktorId(), AvsenderType.VEILEDER);
-        long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData.withId(henvendelseId));
-
-        DialogData originalDialog = dialogDAO.hentDialog(id);
-        Date uniktTidspunkt = uniktTidspunkt();
-
-        long nyHenvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData.withId(nyHenvendelseId));
-
-        DialogData oppdatertDialog = dialogDAO.hentDialog(id);
-
-        assertThat(oppdatertDialog.getUlesteMeldingerForBruker()).isBefore(uniktTidspunkt);
-        assertThat(oppdatertDialog.getOppdatert()).isAfter(uniktTidspunkt);
-
-        assertThat(oppdatertDialog).isEqualTo(originalDialog
-                .withOppdatert(oppdatertDialog.getOppdatert())
-                .withHenvendelser(oppdatertDialog.getHenvendelser())
-        );
+        verify(dialogDAO, Mockito.only()).oppdaterStatus(status);
     }
 
     @Test
-    public void skalMarkereSomLestAvBruker() {
-        DialogData dialogData = TestDataBuilder.nyDialog();
-        long id = dialogDAO.opprettDialog(dialogData);
+    public void markerSomLestAvBruker() {
+        DialogData dialogData = getDialogData();
+        Status status = statusDAO.getStatus(dialogData);
+        status.eldsteUlesteForBruker = null;
 
-        HenvendelseData henvendelseData = TestDataBuilder.nyHenvendelse(id, dialogData.getAktorId(), AvsenderType.VEILEDER);
-        long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData.withId(henvendelseId));
+        statusDAO.markerSomLestAvBruker(dialogData);
 
-        DialogData original = dialogDAO.hentDialog(id);
-        Date uniktTidspunkt = uniktTidspunkt();
-
-        statusDAO.markerSomLestAvBruker(id);
-        DialogData oppdatert = dialogDAO.hentDialog(id);
-
-        assertThat(original.getUlesteMeldingerForBruker()).isNotNull();
-        assertThat(oppdatert.getUlesteMeldingerForBruker()).isNull();
-        assertThat(oppdatert.getOppdatert()).isAfter(uniktTidspunkt);
-
-        assertThat(oppdatert).isEqualTo(original
-                .withOppdatert(oppdatert.getOppdatert())
-                .withUlesteMeldingerForBruker(null)
-                .withHenvendelser(oppdatert.getHenvendelser())
-        );
+        verify(dialogDAO, only()).oppdaterStatus(status);
     }
 
     @Test
-    public void skalMarkereSomLestAvVeileder() {
-        DialogData dialogData = TestDataBuilder.nyDialog();
-        long id = dialogDAO.opprettDialog(dialogData);
+    public void fjernVenterPaNavSiden() {
+        DialogData dialogData = getDialogData();
+        Status status = statusDAO.getStatus(dialogData);
+        DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, true);
+        status.venterPaNavSiden = null;
 
-        HenvendelseData henvendelseData = TestDataBuilder.nyHenvendelse(id, dialogData.getAktorId(), AvsenderType.BRUKER);
-        long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData.withId(henvendelseId));
+        statusDAO.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
 
-        DialogData original = dialogDAO.hentDialog(id);
+        verify(dialogDAO, only()).oppdaterStatus(status);
+    }
+
+    @Test
+    public void oppdaterVenterPaNavSiden() {
+        DialogData dialogData = getDialogData().withVenterPaNav(null);
+        Status original = statusDAO.getStatus(dialogData);
+        Date uniktTidspunkt = uniktTidspunkt();
+        DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
+        statusDAO.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
+
+        verify(dialogDAO, only()).oppdaterStatus(argThat(opppdatert -> verifyKunVenterPaNavEndret(original, uniktTidspunkt, opppdatert)));
+    }
+
+    private boolean verifyKunVenterPaNavEndret(Status original, Date uniktTidspunkt, Status opppdatert) {
+        original.venterPaNavSiden = opppdatert.venterPaNavSiden;
+        return opppdatert.venterPaNavSiden.after(uniktTidspunkt) && opppdatert.equals(original);
+    }
+
+    @Test
+    public void fjernVenterPaSvarFraBruker() {
+        DialogData dialogData = getDialogData();
+        Status original = statusDAO.getStatus(dialogData);
+
+        DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
+        statusDAO.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
+
+        verify(dialogDAO, only()).oppdaterStatus(argThat(oppdatert -> verifyKunVenterPaSvarFraBrukerFjernet(original, oppdatert)));
+    }
+
+    private boolean verifyKunVenterPaSvarFraBrukerFjernet(Status original, Status oppdatert) {
+        original.venterPaSvarFraBruker = null;
+        return oppdatert.equals(original);
+    }
+
+    @Test
+    public void settVenterPaSvarFraBruker() {
+        DialogData dialogData = getDialogData().withVenterPaSvarFraBruker(null);
+        Status original = statusDAO.getStatus(dialogData);
+
         Date uniktTidspunkt = uniktTidspunkt();
 
-        statusDAO.markerSomLestAvVeileder(id);
-        DialogData oppdatert = dialogDAO.hentDialog(id);
+        DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), true, true);
+        statusDAO.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
 
-        assertThat(original.getUlesteMeldingerForVeileder()).isNotNull();
-        assertThat(oppdatert.getUlesteMeldingerForVeileder()).isNull();
-        assertThat(oppdatert.getOppdatert()).isAfter(uniktTidspunkt);
+        verify(dialogDAO, only()).oppdaterStatus(argThat(oppdatert -> verifyKunVenterPaSvarFraBrukerFjernet(original, uniktTidspunkt, oppdatert)));
+    }
 
-        assertThat(oppdatert).isEqualTo(original
-                .withOppdatert(oppdatert.getOppdatert())
-                .withUlesteMeldingerForVeileder(null)
-                .withHenvendelser(oppdatert.getHenvendelser())
-        );
+    private boolean verifyKunVenterPaSvarFraBrukerFjernet(Status original, Date uniktTidspunkt, Status oppdatert) {
+        original.venterPaSvarFraBruker = oppdatert.venterPaSvarFraBruker;
+        return oppdatert.equals(original) && oppdatert.venterPaSvarFraBruker.after(uniktTidspunkt);
+    }
+
+    @Test
+    public void settDialogTilHistorisk() {
+        DialogData dialogData = getDialogData();
+
+        Status status = new Status(dialogData.getId());
+        status.setHistorisk(true);
+
+        statusDAO.settDialogTilHistorisk(dialogData);
+        verify(dialogDAO, only()).oppdaterStatus(status);
+
+    }
+
+    private DialogData getDialogData() {
+        return TestDataBuilder.nyDialog()
+                .withUlesteMeldingerForBruker(new Date())
+                .withUlesteMeldingerForVeileder(new Date())
+                .withVenterPaNav(new Date())
+                .withVenterPaSvarFraBruker(new Date())
+                .withHistorisk(false);
+    }
+
+    private HenvendelseData nyHenvendelseFraBruker(DialogData dialogData, Date uniktTidspunkt) {
+        return TestDataBuilder
+                .nyHenvendelse(dialogData.getId(), dialogData.getAktorId(), AvsenderType.BRUKER)
+                .withSendt(uniktTidspunkt);
+    }
+
+
+    private HenvendelseData nyHenvendelseFraVeileder(DialogData dialogData, Date uniktTidspunkt) {
+        return TestDataBuilder
+                .nyHenvendelse(dialogData.getId(), dialogData.getAktorId(), AvsenderType.VEILEDER)
+                .withSendt(uniktTidspunkt);
     }
 
     @SneakyThrows

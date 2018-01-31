@@ -6,6 +6,7 @@ import no.nav.fo.IntegrasjonsTest;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.domain.Status;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -218,6 +219,23 @@ public class DialogDAOTest extends IntegrasjonsTest {
         dialogDAO.oppdaterDialogTilHistorisk(dialog);
 
         assertThat(dialogDAO.hentDialog(dialogId).isHistorisk()).isTrue();
+    }
+
+    @Test
+    public void skalOppdatereStatus() {
+        long dialogId = dialogDAO.opprettDialog(nyDialog());
+        Status status = new Status(dialogId);
+        status.setHistorisk(false);
+        status.setVenterPaSvarFraBruker();
+        status.setVenterPaNavSiden();
+        status.setUlesteMeldingerForVeileder(new Date());
+        status.setUlesteMeldingerForBruker(new Date());
+
+        dialogDAO.oppdaterStatus(status);
+        DialogData dialogData = dialogDAO.hentDialog(dialogId);
+        Status oppdatert = StatusDAO.getStatus(dialogData);
+
+        assertThat(oppdatert).isEqualTo(status);
     }
 
     private long opprettNyDialog(String aktorId) {

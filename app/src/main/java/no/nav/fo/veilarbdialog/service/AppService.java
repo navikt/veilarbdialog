@@ -52,9 +52,10 @@ public class AppService {
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
         long dialogId = henvendelseData.dialogId;
-        sjekkSkriveTilgangTilDialog(dialogId);
+        DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
-        statusDAO.oppdaterStatusForNyHenvendelse(henvendelseData.withId(henvendelseId));
+        dialogDAO.hentHenvendelse(henvendelseId);
+        statusDAO.nyHenvendelse(dialogData, henvendelseData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -71,7 +72,7 @@ public class AppService {
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvVeileder(dialogId);
-        statusDAO.markerSomLestAvVeileder(dialogId);
+        statusDAO.markerSomLestAvVeileder(dialogData);
         FunkjsonelleMetrikker.markerSomLestAvVeilederMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
@@ -79,17 +80,17 @@ public class AppService {
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvBruker(dialogId);
-        statusDAO.markerSomLestAvBruker(dialogId);
+        statusDAO.markerSomLestAvBruker(dialogData);
         FunkjsonelleMetrikker.merkDialogSomLestAvBrukerMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        DialogData dialog = sjekkSkriveTilgangTilDialog(dialogId);
+        DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
-        statusDAO.oppdaterVenterPaNav(dialogStatus.getDialogId(), !dialogStatus.ferdigbehandlet);
-        FunkjsonelleMetrikker.oppdaterFerdigbehandletTidspunktMetrikk(dialog, dialogStatus);
+        statusDAO.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
+        FunkjsonelleMetrikker.oppdaterFerdigbehandletTidspunktMetrikk(dialogData, dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -97,7 +98,7 @@ public class AppService {
         long dialogId = dialogStatus.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
-        statusDAO.oppdaterVenterPaSvarFraBruker(dialogStatus);
+        statusDAO.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
         FunkjsonelleMetrikker.oppdaterVenterSvarMetrikk(dialogStatus, dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
@@ -132,7 +133,7 @@ public class AppService {
 
     private void oppdaterDialogTilHistorisk(DialogData dialogData) {
         dialogDAO.oppdaterDialogTilHistorisk(dialogData);
-        statusDAO.oppdaterDialogTilHistorisk(dialogData);
+        statusDAO.settDialogTilHistorisk(dialogData);
     }
 
     private String sjekkTilgangTilFnr(String ident) {

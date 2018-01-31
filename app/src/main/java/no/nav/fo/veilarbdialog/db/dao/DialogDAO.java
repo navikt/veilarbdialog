@@ -57,6 +57,15 @@ public class DialogDAO {
         );
     }
 
+    public HenvendelseData hentHenvendelse(long id) {
+        return database.query(
+                "SELECT * FROM HENVENDELSE WHERE HENVENDELSE_ID = ?",
+                this::mapTilHenvendelse,
+                id).stream()
+                .findFirst()
+                .orElse(null);
+    }
+
     private DialogData mapTilDialog(ResultSet rs) throws SQLException {
         long dialogId = rs.getLong("dialog_id");
 
@@ -229,6 +238,24 @@ public class DialogDAO {
                         "WHERE dialog_id = ?",
                 dialogStatus.dialogId
         );
+    }
+
+    public void oppdaterStatus(Status status) {
+        database.update("" +
+                        "UPDATE DIALOG SET " +
+                        VENTER_PA_NAV_SIDEN + " = ?, " +
+                        VENTER_PA_SVAR_FRA_BRUKER + " = ?, " +
+                        ELDSTE_ULESTE_FOR_BRUKER + " = ?, " +
+                        ELDSTE_ULESTE_FOR_VEILEDER + " = ?, " +
+                        HISTORISK + " = ?, " +
+                        OPPDATERT + " = " + dateProvider.getNow() + " " +
+                        "WHERE " + DIALOG_ID + " = ?",
+                status.venterPaNavSiden,
+                status.venterPaSvarFraBruker,
+                status.eldsteUlesteForBruker,
+                status.eldsteUlesteForVeileder,
+                status.historisk,
+                status.dialogId);
     }
 
     private String nowOrNull(boolean predicate) {
