@@ -6,8 +6,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import lombok.SneakyThrows;
 import no.nav.apiapp.security.PepClient;
-import no.nav.sbl.dialogarena.common.abac.pep.exception.PepException;
 
 @Component
 public class KontorsperreFilter {
@@ -15,12 +15,9 @@ public class KontorsperreFilter {
     @Inject
     PepClient pepClient;
     
+    @SneakyThrows
     public boolean harTilgang(String enhet) {
-        try {
-            return nullOrEmpty(enhet) || pepClient.harTilgangTilEnhet(enhet);
-        } catch (PepException e) {
-            return false;
-        }
+        return nullOrEmpty(enhet) || pepClient.harTilgangTilEnhet(enhet);
     }
 
 }
