@@ -1,24 +1,43 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import no.nav.fo.veilarbdialog.domain.*;
-import org.springframework.stereotype.Component;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
+import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
-import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
+import no.nav.fo.veilarbdialog.domain.Avsender;
+import no.nav.fo.veilarbdialog.domain.DialogDTO;
+import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.domain.Egenskap;
+import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 
 @Component
 class RestMapper {
 
+    @Inject
+    private KontorsperreFilter kontorsperreFilter;
+    
     public DialogDTO somDialogDTO(DialogData dialogData) {
-        List<HenvendelseData> henvendelser = dialogData.getHenvendelser();
-        Optional<HenvendelseData> forsteHenvendelse = henvendelser.stream()
-                .sorted(comparing(HenvendelseData::getSendt))
-                .findFirst();
+
+        if(!kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId())) {
+            return null;
+        }
+        
+        List<HenvendelseData> henvendelser = dialogData
+                .getHenvendelser()
+                .stream()
+                .filter((henvendelse) -> kontorsperreFilter.harTilgang(henvendelse.getKontorsperreEnhetId()))
+                .collect(toList());
+        
         Optional<HenvendelseData> sisteHenvendelse = henvendelser.stream()
                 .sorted(comparing(HenvendelseData::getSendt).reversed())
                 .findFirst();
@@ -40,10 +59,7 @@ class RestMapper {
                         .map(HenvendelseData::getSendt)
                         .orElse(null)
                 )
-                .setOpprettetDato(forsteHenvendelse
-                        .map(HenvendelseData::getSendt)
-                        .orElse(null)
-                )
+                .setOpprettetDato(dialogData.getOpprettetDato())
                 .setEgenskaper(dialogData.getEgenskaper()
                         .stream()
                         .map(tmp -> Egenskap.ESKALERINGSVARSEL)
