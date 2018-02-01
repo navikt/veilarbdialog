@@ -53,8 +53,6 @@ public class AppService {
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
         long dialogId = henvendelseData.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
-        long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
-        dialogDAO.hentHenvendelse(henvendelseId);
         statusDAO.nyHenvendelse(dialogData, henvendelseData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }

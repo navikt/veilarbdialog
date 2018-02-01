@@ -57,15 +57,6 @@ public class DialogDAO {
         );
     }
 
-    public HenvendelseData hentHenvendelse(long id) {
-        return database.query(
-                "SELECT * FROM HENVENDELSE WHERE HENVENDELSE_ID = ?",
-                this::mapTilHenvendelse,
-                id).stream()
-                .findFirst()
-                .orElse(null);
-    }
-
     private DialogData mapTilDialog(ResultSet rs) throws SQLException {
         long dialogId = rs.getLong("dialog_id");
 
