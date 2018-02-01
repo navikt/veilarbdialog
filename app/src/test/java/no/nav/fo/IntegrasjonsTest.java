@@ -42,7 +42,7 @@ import static org.springframework.util.ReflectionUtils.setField;
 
 public abstract class IntegrasjonsTest {
 
-    private static AnnotationConfigApplicationContext annotationConfigApplicationContext;
+    protected static AnnotationConfigApplicationContext annotationConfigApplicationContext;
     private static PlatformTransactionManager platformTransactionManager;
     private TransactionStatus transactionStatus;
 
