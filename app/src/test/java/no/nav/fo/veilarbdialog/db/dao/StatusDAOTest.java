@@ -9,6 +9,7 @@ import org.mockito.Mockito;
 import java.util.Date;
 
 import static java.lang.Thread.sleep;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
@@ -20,15 +21,23 @@ class StatusDAOTest {
     @Test
     public void oppretterNyHenvendelse() {
         DialogData dialogData = TestDataBuilder.nyDialog();
-        Date uniktTidspunkt = new Date();
+        Date uniktTidspunkt = uniktTidspunkt();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
-        Status status = StatusDAO.getStatus(dialogData);
-        status.eldsteUlesteForVeileder = uniktTidspunkt;
-        status.venterPaNavSiden = uniktTidspunkt;
+        Status original = StatusDAO.getStatus(dialogData);
 
         statusDAO.nyHenvendelse(dialogData, henvendelseData);
-        verify(dialogDAO).oppdaterStatus(status);
+        verify(dialogDAO, only()).oppdaterStatus(argThat(opdatert -> verifyEldsteUlesteOgVenterPaNavEndret(original, uniktTidspunkt, opdatert)));
+    }
+
+    private boolean verifyEldsteUlesteOgVenterPaNavEndret(Status original, Date tidspunkt, Status oppdatert) {
+        assertThat(oppdatert.eldsteUlesteForVeileder).isEqualTo(tidspunkt);
+        assertThat(oppdatert.venterPaNavSiden).isAfter(tidspunkt);
+
+        original.eldsteUlesteForVeileder = oppdatert.eldsteUlesteForVeileder;
+        original.venterPaNavSiden = oppdatert.venterPaNavSiden;
+        assertThat(oppdatert).isEqualTo(original);
+        return true;
     }
 
     @Test
