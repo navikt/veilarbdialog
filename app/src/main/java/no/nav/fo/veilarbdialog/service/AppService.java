@@ -50,7 +50,9 @@ public class AppService {
     }
 
     private HenvendelseData tagMedKontorsperre(HenvendelseData henvendelseData, DialogData dialogData) {
-        return henvendelseData.withKontorsperreEnhetId(dialogData.getKontorsperreEnhetId());
+        return Optional.ofNullable(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()))
+                .map(henvendelseData::withKontorsperreEnhetId)
+                .orElse(henvendelseData);
     }
 
     public List<DialogData> hentDialogerForBruker(String ident) {
