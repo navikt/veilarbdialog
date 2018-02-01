@@ -6,6 +6,7 @@ import no.nav.fo.veilarbdialog.api.DialogController;
 import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.AppService;
+
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyDialogVeilederMetrikk;
 import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyHenvedelseVeilederMetrikk;
@@ -34,10 +36,11 @@ public class RestService implements DialogController, VeilederDialogController {
     private Provider<HttpServletRequest> requestProvider;
 
     @Override
-    public List<DialogDTO> hentDialoger() {
+    public List<DialogDTO> hentDialoger() {        
         return appService.hentDialogerForBruker(getBrukerIdent())
                 .stream()
                 .map(restMapper::somDialogDTO)
+                .filter(dto -> nonNull(dto))
                 .collect(toList());
     }
 

@@ -33,6 +33,9 @@ public class DialogData {
     private Date sisteStatusEndring;
     private Date opprettetDato;
     private boolean historisk;
+    
+    private String kontorsperreEnhetId;
+
 
     private String kontorsperreEnhetId;
 
