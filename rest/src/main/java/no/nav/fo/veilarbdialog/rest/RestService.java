@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyDialogVeilederMetrikk;
 import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyHenvedelseVeilederMetrikk;
