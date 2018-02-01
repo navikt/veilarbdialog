@@ -143,7 +143,7 @@ public class DialogDAO {
                         dialogId, egenskapType.toString())
         );
 
-        LOG.info("opprettet {}", dialogData);
+        LOG.info("opprettet dialog id:{} data:{}", dialogId, dialogData);
         return dialogId;
     }
 
@@ -164,7 +164,7 @@ public class DialogDAO {
                 EnumUtils.getName(henvendelseData.avsenderType)
         );
 
-        LOG.info("opprettet {}", henvendelseData);
+        LOG.info("opprettet henvendelse id:{} data:{}", henvendeseId, henvendelseData);
 
     }
 
