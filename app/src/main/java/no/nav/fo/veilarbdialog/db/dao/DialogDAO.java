@@ -159,7 +159,7 @@ public class DialogDAO {
                         "kontorsperre_enhet_id, " +
                         "avsender_id, " +
                         "avsender_type) " +
-                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?)",
+                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?)",
                 henvendeseId,
                 henvendelseData.dialogId,
                 henvendelseData.tekst,
