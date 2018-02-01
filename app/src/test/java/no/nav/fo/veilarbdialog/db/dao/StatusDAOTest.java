@@ -23,7 +23,7 @@ class StatusDAOTest {
         Date uniktTidspunkt = new Date();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
-        Status status = statusDAO.getStatus(dialogData);
+        Status status = StatusDAO.getStatus(dialogData);
         status.eldsteUlesteForVeileder = uniktTidspunkt;
         status.venterPaNavSiden = uniktTidspunkt;
 
@@ -37,7 +37,7 @@ class StatusDAOTest {
         Date uniktTidspunkt = new Date();
         HenvendelseData henvendelseData = nyHenvendelseFraVeileder(dialogData, uniktTidspunkt);
 
-        Status status = statusDAO.getStatus(dialogData);
+        Status status = StatusDAO.getStatus(dialogData);
         status.eldsteUlesteForBruker = uniktTidspunkt;
 
         statusDAO.nyHenvendelse(dialogData, henvendelseData);
@@ -51,7 +51,7 @@ class StatusDAOTest {
         Date uniktTidspunkt = new Date();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
-        Status status = statusDAO.getStatus(dialogData);
+        Status status = StatusDAO.getStatus(dialogData);
 
         statusDAO.nyHenvendelse(dialogData, henvendelseData);
         verify(dialogDAO).oppdaterStatus(status);
@@ -60,7 +60,7 @@ class StatusDAOTest {
     @Test
     public void markerSomLestAvVeileder() {
         DialogData dialogData = getDialogData();
-        Status status = statusDAO.getStatus(dialogData);
+        Status status = StatusDAO.getStatus(dialogData);
         status.eldsteUlesteForVeileder = null;
 
         statusDAO.markerSomLestAvVeileder(dialogData);
@@ -71,7 +71,7 @@ class StatusDAOTest {
     @Test
     public void markerSomLestAvBruker() {
         DialogData dialogData = getDialogData();
-        Status status = statusDAO.getStatus(dialogData);
+        Status status = StatusDAO.getStatus(dialogData);
         status.eldsteUlesteForBruker = null;
 
         statusDAO.markerSomLestAvBruker(dialogData);
@@ -82,7 +82,7 @@ class StatusDAOTest {
     @Test
     public void fjernVenterPaNavSiden() {
         DialogData dialogData = getDialogData();
-        Status status = statusDAO.getStatus(dialogData);
+        Status status = StatusDAO.getStatus(dialogData);
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, true);
         status.venterPaNavSiden = null;
 
@@ -94,7 +94,7 @@ class StatusDAOTest {
     @Test
     public void oppdaterVenterPaNavSiden() {
         DialogData dialogData = getDialogData().withVenterPaNav(null);
-        Status original = statusDAO.getStatus(dialogData);
+        Status original = StatusDAO.getStatus(dialogData);
         Date uniktTidspunkt = uniktTidspunkt();
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
         statusDAO.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
@@ -110,23 +110,20 @@ class StatusDAOTest {
     @Test
     public void fjernVenterPaSvarFraBruker() {
         DialogData dialogData = getDialogData();
-        Status original = statusDAO.getStatus(dialogData);
+        Status status = StatusDAO.getStatus(dialogData);
 
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
         statusDAO.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
 
-        verify(dialogDAO, only()).oppdaterStatus(argThat(oppdatert -> verifyKunVenterPaSvarFraBrukerFjernet(original, oppdatert)));
+        status.venterPaSvarFraBruker = null;
+        verify(dialogDAO, only()).oppdaterStatus(status);
     }
 
-    private boolean verifyKunVenterPaSvarFraBrukerFjernet(Status original, Status oppdatert) {
-        original.venterPaSvarFraBruker = null;
-        return oppdatert.equals(original);
-    }
 
     @Test
     public void settVenterPaSvarFraBruker() {
         DialogData dialogData = getDialogData().withVenterPaSvarFraBruker(null);
-        Status original = statusDAO.getStatus(dialogData);
+        Status original = StatusDAO.getStatus(dialogData);
 
         Date uniktTidspunkt = uniktTidspunkt();
 
