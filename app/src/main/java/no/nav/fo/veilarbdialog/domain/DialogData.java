@@ -36,9 +36,6 @@ public class DialogData {
     
     private String kontorsperreEnhetId;
 
-
-    private String kontorsperreEnhetId;
-
     private List<HenvendelseData> henvendelser;
 
     private List<EgenskapType> egenskaper;
