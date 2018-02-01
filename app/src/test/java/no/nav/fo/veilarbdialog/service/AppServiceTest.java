@@ -4,6 +4,7 @@ import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UlovligHandling;
 import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
+import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
@@ -37,12 +38,13 @@ public class AppServiceTest {
     private final DialogFeedDAO dialogFeedDAO = mock(DialogFeedDAO.class);
     private final AktorService aktorService = mock(AktorService.class);
     private final PepClient pepClient = mock(PepClient.class);
+    private final KvpClient kvpClient = mock(KvpClient.class);
     private AppService appService = new AppService(
             aktorService,
             dialogDAO,
             dialogFeedDAO,
-            pepClient
-    );
+            pepClient,
+            kvpClient);
     private Answer<?> ingenAbacTilgang = (a) -> {
         throw new IngenTilgang();
     };

@@ -34,6 +34,8 @@ public class DialogData {
     private Date opprettetDato;
     private boolean historisk;
 
+    private String kontorsperreEnhetId;
+
     private List<HenvendelseData> henvendelser;
 
     private List<EgenskapType> egenskaper;
