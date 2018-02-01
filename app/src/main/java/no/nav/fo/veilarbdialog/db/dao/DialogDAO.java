@@ -84,6 +84,7 @@ public class DialogDAO {
                 .ulesteMeldingerForBruker(hentDato(rs, ELDSTE_ULESTE_FOR_BRUKER))
                 .ulesteMeldingerForVeileder(hentDato(rs, ELDSTE_ULESTE_FOR_VEILEDER))
                 .oppdatert(hentDato(rs, OPPDATERT))
+                .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
                 .egenskaper(egenskaper)
                 .build();
     }
@@ -115,6 +116,7 @@ public class DialogDAO {
                 .avsenderType(EnumUtils.valueOf(AvsenderType.class, rs.getString("avsender_type")))
                 .lestAvBruker(erLest(hentDato(rs, "lest_av_bruker_tid"), henvendelseDato))
                 .lestAvVeileder(erLest(hentDato(rs, "lest_av_veileder_tid"), henvendelseDato))
+                .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
                 .build();
     }
 
