@@ -6,6 +6,7 @@ import no.nav.fo.veilarbdialog.util.EnumUtils;
 import no.nav.sbl.jdbc.Database;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.sql.ResultSet;
@@ -20,6 +21,7 @@ import static no.nav.fo.veilarbdialog.db.dao.DBKonstanter.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
+@Transactional
 public class DialogDAO {
 
     private static final Logger LOG = getLogger(DialogDAO.class);
@@ -35,6 +37,7 @@ public class DialogDAO {
         this.dateProvider = dateProvider;
     }
 
+    @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForAktorId(String aktorId) {
         return database.query(SELECT_DIALOG + "WHERE d.aktor_id = ?",
                 this::mapTilDialog,
@@ -42,6 +45,7 @@ public class DialogDAO {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<DialogData> hentDialogerSomSkalAvsluttesForAktorId(String aktorId, Date avsluttetDato) {
         return database.query(SELECT_DIALOG + "WHERE d.aktor_id = ? AND historisk = 0 AND d.OPPRETTET_DATO < ?",
                 this::mapTilDialog,
@@ -50,11 +54,22 @@ public class DialogDAO {
         );
     }
 
+    @Transactional(readOnly = true)
     public DialogData hentDialog(long dialogId) {
         return database.queryForObject(SELECT_DIALOG + "WHERE d.dialog_id = ?",
                 this::mapTilDialog,
                 dialogId
         );
+    }
+
+    @Transactional(readOnly = true)
+    public HenvendelseData hentHenvendelse(long id) {
+        return database.query(
+                "SELECT * FROM HENVENDELSE h LEFT JOIN DIALOG d ON h.dialog_id = d.dialog_id WHERE h.henvendelse_id = ?",
+                this::mapTilHenvendelse,
+                id).stream()
+                .findFirst()
+                .orElse(null);
     }
 
     private DialogData mapTilDialog(ResultSet rs) throws SQLException {
@@ -89,7 +104,7 @@ public class DialogDAO {
                 .build();
     }
 
-    public static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
+    private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
         return ofNullable(rs.getTimestamp(kolonneNavn)).map(Timestamp::getTime).map(Date::new).orElse(null);
     }
 
@@ -187,6 +202,7 @@ public class DialogDAO {
         );
     }
 
+    @Transactional(readOnly = true)
     public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
         return database.query(SELECT_DIALOG + "WHERE aktivitet_id = ?", this::mapTilDialog, aktivitetId)
                 .stream()

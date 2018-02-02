@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.inject.Inject;
 
 @Component
-@Transactional
 public class StatusDAO {
     private DialogDAO dialogDAO;
 
@@ -17,6 +16,10 @@ public class StatusDAO {
     }
 
     public void nyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
+        if (henvendelseData.getSendt() == null) {
+            throw new NullPointerException();
+        }
+
         Status status = oppdaterStatusForNyHenvendelse(dialogData, henvendelseData);
         dialogDAO.oppdaterStatus(status);
     }

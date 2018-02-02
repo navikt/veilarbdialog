@@ -13,12 +13,14 @@ import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 @Component
+@Transactional
 public class AppService {
 
     private final AktorService aktorService;
@@ -39,6 +41,7 @@ public class AppService {
         this.pepClient = pepClient;
     }
 
+    @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(String ident) {
         sjekkTilgangTilFnr(ident);
         return dialogDAO.hentDialogerForAktorId(hentAktoerIdForIdent(ident));
@@ -53,10 +56,13 @@ public class AppService {
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
         long dialogId = henvendelseData.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
-        statusDAO.nyHenvendelse(dialogData, henvendelseData);
+        long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
+        HenvendelseData opprettetHenvendelse = dialogDAO.hentHenvendelse(henvendelseId);
+        statusDAO.nyHenvendelse(dialogData, opprettetHenvendelse);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
+    @Transactional(readOnly = true)
     public DialogData hentDialog(long dialogId) {
         DialogData dialogData = hentDialogUtenTilgangskontroll(dialogId);
         sjekkLeseTilgangTilDialog(dialogData);
@@ -101,6 +107,7 @@ public class AppService {
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
+    @Transactional(readOnly = true)
     public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
         return dialogDAO.hentDialogForAktivitetId(aktivitetId).map(this::sjekkLeseTilgangTilDialog);
     }
@@ -111,6 +118,7 @@ public class AppService {
                 .orElseThrow(RuntimeException::new); // Hvordan håndere dette?
     }
 
+    @Transactional(readOnly = true)
     public List<DialogAktor> hentAktorerMedEndringerFOM(Date tidspunkt, int pageSize) {
         // NB: ingen tilgangskontroll her siden feed har egen mekanisme for dette
         return dialogFeedDAO.hentAktorerMedEndringerFOM(tidspunkt, pageSize);
