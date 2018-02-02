@@ -17,7 +17,7 @@ public class StatusDAO {
 
     public void nyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
         if (henvendelseData.getSendt() == null) {
-            throw new NullPointerException();
+            throw new IllegalArgumentException("HenvendelseData må ha Sendt-tidspunkt");
         }
 
         Status status = oppdaterStatusForNyHenvendelse(dialogData, henvendelseData);
