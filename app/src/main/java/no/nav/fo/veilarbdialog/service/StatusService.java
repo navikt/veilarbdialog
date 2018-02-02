@@ -1,16 +1,17 @@
-package no.nav.fo.veilarbdialog.db.dao;
+package no.nav.fo.veilarbdialog.service;
 
+import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.*;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 
 @Component
-public class StatusDAO {
+public class StatusService {
     private DialogDAO dialogDAO;
 
     @Inject
-    StatusDAO(DialogDAO dialogDAO) {
+    StatusService(DialogDAO dialogDAO) {
         this.dialogDAO = dialogDAO;
     }
 

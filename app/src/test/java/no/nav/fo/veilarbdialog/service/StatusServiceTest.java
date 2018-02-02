@@ -1,8 +1,10 @@
-package no.nav.fo.veilarbdialog.db.dao;
+package no.nav.fo.veilarbdialog.service;
 
 import lombok.SneakyThrows;
 import no.nav.fo.veilarbdialog.TestDataBuilder;
+import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.service.StatusService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -13,10 +15,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
-class StatusDAOTest {
+class StatusServiceTest {
 
     private DialogDAO dialogDAO = mock(DialogDAO.class);
-    private StatusDAO statusDAO = new StatusDAO(dialogDAO);
+    private StatusService statusService = new StatusService(dialogDAO);
 
     @Test
     public void oppretterNyHenvendelse() {
@@ -24,9 +26,9 @@ class StatusDAOTest {
         Date uniktTidspunkt = uniktTidspunkt();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
-        Status original = StatusDAO.getStatus(dialogData);
+        Status original = StatusService.getStatus(dialogData);
 
-        statusDAO.nyHenvendelse(dialogData, henvendelseData);
+        statusService.nyHenvendelse(dialogData, henvendelseData);
         verify(dialogDAO, only()).oppdaterStatus(argThat(opdatert -> verifyEldsteUlesteOgVenterPaNavEndret(original, uniktTidspunkt, opdatert)));
     }
 
@@ -46,10 +48,10 @@ class StatusDAOTest {
         Date uniktTidspunkt = new Date();
         HenvendelseData henvendelseData = nyHenvendelseFraVeileder(dialogData, uniktTidspunkt);
 
-        Status status = StatusDAO.getStatus(dialogData);
+        Status status = StatusService.getStatus(dialogData);
         status.eldsteUlesteForBruker = uniktTidspunkt;
 
-        statusDAO.nyHenvendelse(dialogData, henvendelseData);
+        statusService.nyHenvendelse(dialogData, henvendelseData);
         verify(dialogDAO).oppdaterStatus(status);
     }
 
@@ -60,19 +62,19 @@ class StatusDAOTest {
         Date uniktTidspunkt = new Date();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
-        Status status = StatusDAO.getStatus(dialogData);
+        Status status = StatusService.getStatus(dialogData);
 
-        statusDAO.nyHenvendelse(dialogData, henvendelseData);
+        statusService.nyHenvendelse(dialogData, henvendelseData);
         verify(dialogDAO).oppdaterStatus(status);
     }
 
     @Test
     public void markerSomLestAvVeileder() {
         DialogData dialogData = getDialogData();
-        Status status = StatusDAO.getStatus(dialogData);
+        Status status = StatusService.getStatus(dialogData);
         status.eldsteUlesteForVeileder = null;
 
-        statusDAO.markerSomLestAvVeileder(dialogData);
+        statusService.markerSomLestAvVeileder(dialogData);
 
         verify(dialogDAO, Mockito.only()).oppdaterStatus(status);
     }
@@ -80,10 +82,10 @@ class StatusDAOTest {
     @Test
     public void markerSomLestAvBruker() {
         DialogData dialogData = getDialogData();
-        Status status = StatusDAO.getStatus(dialogData);
+        Status status = StatusService.getStatus(dialogData);
         status.eldsteUlesteForBruker = null;
 
-        statusDAO.markerSomLestAvBruker(dialogData);
+        statusService.markerSomLestAvBruker(dialogData);
 
         verify(dialogDAO, only()).oppdaterStatus(status);
     }
@@ -91,11 +93,11 @@ class StatusDAOTest {
     @Test
     public void fjernVenterPaNavSiden() {
         DialogData dialogData = getDialogData();
-        Status status = StatusDAO.getStatus(dialogData);
+        Status status = StatusService.getStatus(dialogData);
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, true);
         status.venterPaNavSiden = null;
 
-        statusDAO.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
+        statusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
 
         verify(dialogDAO, only()).oppdaterStatus(status);
     }
@@ -103,10 +105,10 @@ class StatusDAOTest {
     @Test
     public void oppdaterVenterPaNavSiden() {
         DialogData dialogData = getDialogData().withVenterPaNavSiden(null);
-        Status original = StatusDAO.getStatus(dialogData);
+        Status original = StatusService.getStatus(dialogData);
         Date uniktTidspunkt = uniktTidspunkt();
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
-        statusDAO.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
+        statusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
 
         verify(dialogDAO, only()).oppdaterStatus(argThat(opppdatert -> verifyKunVenterPaNavEndret(original, uniktTidspunkt, opppdatert)));
     }
@@ -119,10 +121,10 @@ class StatusDAOTest {
     @Test
     public void fjernVenterPaSvarFraBruker() {
         DialogData dialogData = getDialogData();
-        Status status = StatusDAO.getStatus(dialogData);
+        Status status = StatusService.getStatus(dialogData);
 
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
-        statusDAO.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
+        statusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
 
         status.venterPaSvarFraBruker = null;
         verify(dialogDAO, only()).oppdaterStatus(status);
@@ -132,12 +134,12 @@ class StatusDAOTest {
     @Test
     public void settVenterPaSvarFraBruker() {
         DialogData dialogData = getDialogData().withVenterPaSvarFraBrukerSiden(null);
-        Status original = StatusDAO.getStatus(dialogData);
+        Status original = StatusService.getStatus(dialogData);
 
         Date uniktTidspunkt = uniktTidspunkt();
 
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), true, true);
-        statusDAO.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
+        statusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
 
         verify(dialogDAO, only()).oppdaterStatus(argThat(oppdatert -> verifyKunVenterPaSvarFraBrukerFjernet(original, uniktTidspunkt, oppdatert)));
     }
@@ -154,7 +156,7 @@ class StatusDAOTest {
         Status status = new Status(dialogData.getId());
         status.setHistorisk(true);
 
-        statusDAO.settDialogTilHistorisk(dialogData);
+        statusService.settDialogTilHistorisk(dialogData);
         verify(dialogDAO, only()).oppdaterStatus(status);
 
     }

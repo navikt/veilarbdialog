@@ -7,7 +7,6 @@ import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
-import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
@@ -26,19 +25,19 @@ public class AppService {
 
     private final AktorService aktorService;
     private final DialogDAO dialogDAO;
-    private final StatusDAO statusDAO;
+    private final StatusService statusService;
     private final DialogFeedDAO dialogFeedDAO;
     private final PepClient pepClient;
     private final KvpClient kvpClient;
 
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
-                      StatusDAO statusDAO,
+                      StatusService statusService,
                       DialogFeedDAO dialogFeedDAO,
                       PepClient pepClient, KvpClient kvpClient) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
-        this.statusDAO = statusDAO;
+        this.statusService = statusService;
         this.dialogFeedDAO = dialogFeedDAO;
         this.pepClient = pepClient;
         this.kvpClient = kvpClient;
@@ -79,7 +78,7 @@ public class AppService {
         HenvendelseData kontorsperretHenvendelse = tagMedKontorsperre(henvendelseData, dialogData);
         long henvendelseId = dialogDAO.opprettHenvendelse(kontorsperretHenvendelse);
         HenvendelseData opprettetHenvendelse = dialogDAO.hentHenvendelse(henvendelseId);
-        statusDAO.nyHenvendelse(dialogData, opprettetHenvendelse);
+        statusService.nyHenvendelse(dialogData, opprettetHenvendelse);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -97,7 +96,7 @@ public class AppService {
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvVeileder(dialogId);
-        statusDAO.markerSomLestAvVeileder(dialogData);
+        statusService.markerSomLestAvVeileder(dialogData);
         FunkjsonelleMetrikker.markerSomLestAvVeilederMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
@@ -105,7 +104,7 @@ public class AppService {
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvBruker(dialogId);
-        statusDAO.markerSomLestAvBruker(dialogData);
+        statusService.markerSomLestAvBruker(dialogData);
         FunkjsonelleMetrikker.merkDialogSomLestAvBrukerMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
@@ -114,7 +113,7 @@ public class AppService {
         long dialogId = dialogStatus.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
-        statusDAO.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
+        statusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
         FunkjsonelleMetrikker.oppdaterFerdigbehandletTidspunktMetrikk(dialogData, dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
@@ -123,7 +122,7 @@ public class AppService {
         long dialogId = dialogStatus.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
-        statusDAO.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
+        statusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
         FunkjsonelleMetrikker.oppdaterVenterSvarMetrikk(dialogStatus, dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
@@ -160,7 +159,7 @@ public class AppService {
 
     private void oppdaterDialogTilHistorisk(DialogData dialogData) {
         dialogDAO.oppdaterDialogTilHistorisk(dialogData);
-        statusDAO.settDialogTilHistorisk(dialogData);
+        statusService.settDialogTilHistorisk(dialogData);
     }
 
     private String sjekkTilgangTilFnr(String ident) {
