@@ -129,13 +129,15 @@ public class DialogDAO {
                         "aktivitet_id, " +
                         "overskrift, " +
                         "historisk, " +
+                        "kontorsperre_enhet_id, " +
                         "siste_status_endring) " +
-                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?," + dateProvider.getNow() + ")",
+                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?," + dateProvider.getNow() + ")",
                 dialogId,
                 dialogData.getAktorId(),
                 dialogData.getAktivitetId(),
                 dialogData.getOverskrift(),
-                dialogData.isHistorisk() ? 1 : 0
+                dialogData.isHistorisk() ? 1 : 0,
+                dialogData.getKontorsperreEnhetId()
         );
 
         dialogData.getEgenskaper().forEach(egenskapType ->
@@ -154,18 +156,19 @@ public class DialogDAO {
                         "henvendelse_id, " +
                         "dialog_id,sendt, " +
                         "tekst, " +
+                        "kontorsperre_enhet_id, " +
                         "avsender_id, " +
                         "avsender_type) " +
-                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?)",
+                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?)",
                 henvendeseId,
                 henvendelseData.dialogId,
                 henvendelseData.tekst,
+                henvendelseData.kontorsperreEnhetId,
                 henvendelseData.avsenderId,
                 EnumUtils.getName(henvendelseData.avsenderType)
         );
 
         LOG.info("opprettet henvendelse id:{} data:{}", henvendeseId, henvendelseData);
-
     }
 
     public void markerDialogSomLestAvVeileder(long dialogId) {
