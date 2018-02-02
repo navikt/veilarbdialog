@@ -24,14 +24,10 @@ import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 class RestMapper {
 
     @Inject
-    private KontorsperreFilter kontorsperreFilter;
+    KontorsperreFilter kontorsperreFilter;
     
     public DialogDTO somDialogDTO(DialogData dialogData) {
 
-        if(!kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId())) {
-            return null;
-        }
-        
         List<HenvendelseData> henvendelser = dialogData
                 .getHenvendelser()
                 .stream()
