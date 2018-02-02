@@ -60,14 +60,18 @@ public class RestService implements DialogController, VeilederDialogController {
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(dialogId);
         appService.updateDialogAktorFor(dialogData.getAktorId());
         nyHenvedelseVeilederMetrikk(dialogData);
-        return restMapper.somDialogDTO(dialogData);
+        return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ? 
+                restMapper.somDialogDTO(dialogData) 
+                : null;
     }
 
     @Override
     public DialogDTO markerSomLest(String dialogId) {
 
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(Long.parseLong(dialogId));
-        return restMapper.somDialogDTO(dialogData);
+        return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ? 
+                restMapper.somDialogDTO(dialogData) 
+                : null;
     }
 
     @Override
