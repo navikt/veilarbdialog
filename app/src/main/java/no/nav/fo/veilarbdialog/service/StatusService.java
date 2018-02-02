@@ -82,7 +82,7 @@ public class StatusService {
         return status;
     }
 
-    static Status getStatus(DialogData dialogData) {
+    public static Status getStatus(DialogData dialogData) {
         Status status = new Status(dialogData.getId());
         status.venterPaNavSiden = dialogData.getVenterPaNavSiden();
         status.venterPaSvarFraBruker = dialogData.getVenterPaSvarFraBrukerSiden();

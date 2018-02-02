@@ -4,7 +4,6 @@ import lombok.SneakyThrows;
 import no.nav.fo.veilarbdialog.TestDataBuilder;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.*;
-import no.nav.fo.veilarbdialog.service.StatusService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -21,7 +20,7 @@ class StatusServiceTest {
     private StatusService statusService = new StatusService(dialogDAO);
 
     @Test
-    public void oppretterNyHenvendelse() {
+    public void nyHenvendelseFraBrukerEndrerEldsteUlesteForVeilederOgVenterPaNav() {
         DialogData dialogData = TestDataBuilder.nyDialog();
         Date uniktTidspunkt = uniktTidspunkt();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
@@ -43,7 +42,7 @@ class StatusServiceTest {
     }
 
     @Test
-    public void oppretterNyHenvendelseFraVeileder() {
+    public void nyHenvendelseFraVeilederEndrerEldsteUlesteForBruker() {
         DialogData dialogData = TestDataBuilder.nyDialog();
         Date uniktTidspunkt = new Date();
         HenvendelseData henvendelseData = nyHenvendelseFraVeileder(dialogData, uniktTidspunkt);
@@ -56,10 +55,9 @@ class StatusServiceTest {
     }
 
     @Test
-    public void oppretterNyHenvendelsePaEksisterendeDialog() {
+    public void nyHenvendelsePaEksisterendeDialogSkalKalleOppdatertStatusMedSammeStatus() {
         DialogData dialogData = getDialogData();
-
-        Date uniktTidspunkt = new Date();
+        Date uniktTidspunkt = uniktTidspunkt();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
         Status status = StatusService.getStatus(dialogData);
@@ -69,7 +67,7 @@ class StatusServiceTest {
     }
 
     @Test
-    public void markerSomLestAvVeileder() {
+    public void markerSomLestAvVeilederSkalSetteEldsteUlesteForVeilederTilNull() {
         DialogData dialogData = getDialogData();
         Status status = StatusService.getStatus(dialogData);
         status.eldsteUlesteForVeileder = null;
@@ -80,7 +78,7 @@ class StatusServiceTest {
     }
 
     @Test
-    public void markerSomLestAvBruker() {
+    public void markerSomLestAvBrukerSkalSetteEldsteUlesteForBrukerTilNull() {
         DialogData dialogData = getDialogData();
         Status status = StatusService.getStatus(dialogData);
         status.eldsteUlesteForBruker = null;
@@ -91,7 +89,7 @@ class StatusServiceTest {
     }
 
     @Test
-    public void fjernVenterPaNavSiden() {
+    public void oppdaterVenterPaNavSidenMedFerdigbehandletSkalSetteVenterPaNavSidenTilNull() {
         DialogData dialogData = getDialogData();
         Status status = StatusService.getStatus(dialogData);
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, true);
@@ -103,7 +101,7 @@ class StatusServiceTest {
     }
 
     @Test
-    public void oppdaterVenterPaNavSiden() {
+    public void narJegOppdatererVenterPaNavForventerJegAtVenterPaNavErOppdatert() {
         DialogData dialogData = getDialogData().withVenterPaNavSiden(null);
         Status original = StatusService.getStatus(dialogData);
         Date uniktTidspunkt = uniktTidspunkt();
@@ -119,7 +117,7 @@ class StatusServiceTest {
     }
 
     @Test
-    public void fjernVenterPaSvarFraBruker() {
+    public void narJegFjernerVenterPaSvarForventerJegAtVenterPaSvarFraBrukerErNull() {
         DialogData dialogData = getDialogData();
         Status status = StatusService.getStatus(dialogData);
 
@@ -132,7 +130,7 @@ class StatusServiceTest {
 
 
     @Test
-    public void settVenterPaSvarFraBruker() {
+    public void narJegVenterPaSvarForventerJegAtVenterPaSvarSettesBlirOppdatert() {
         DialogData dialogData = getDialogData().withVenterPaSvarFraBrukerSiden(null);
         Status original = StatusService.getStatus(dialogData);
 
@@ -150,7 +148,7 @@ class StatusServiceTest {
     }
 
     @Test
-    public void settDialogTilHistorisk() {
+    public void narJegSetterDialogTilHistoriskForventerJegAtDialogenBlirHistoriskOgAlleFelterBlirNullstilt() {
         DialogData dialogData = getDialogData();
 
         Status status = new Status(dialogData.getId());

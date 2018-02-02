@@ -226,6 +226,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
     @Test
     public void skalOppdatereStatus() {
         long dialogId = dialogDAO.opprettDialog(nyDialog());
+
         Status status = new Status(dialogId);
         status.setHistorisk(false);
         status.setVenterPaSvarFraBruker();
@@ -233,11 +234,14 @@ public class DialogDAOTest extends IntegrasjonsTest {
         status.setUlesteMeldingerForVeileder(new Date());
         status.setUlesteMeldingerForBruker(new Date());
 
+        Date uniktTidspunkt = uniktTidspunkt();
         dialogDAO.oppdaterStatus(status);
+
         DialogData dialogData = dialogDAO.hentDialog(dialogId);
         Status oppdatert = StatusService.getStatus(dialogData);
 
         assertThat(oppdatert).isEqualTo(status);
+        assertThat(dialogData.getOppdatert()).isAfter(uniktTidspunkt);
     }
 
     @Test
