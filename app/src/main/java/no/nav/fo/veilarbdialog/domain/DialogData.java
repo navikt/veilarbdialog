@@ -36,7 +36,6 @@ public class DialogData {
     
     private String kontorsperreEnhetId;
 
-
     private Date oppdatert;
     private Date venterPaSvarFraBrukerSiden;
     private Date venterPaNavSiden;

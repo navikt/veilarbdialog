@@ -4,6 +4,7 @@ import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UlovligHandling;
 import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
+import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
@@ -21,8 +22,7 @@ import java.util.Optional;
 import static java.util.Optional.of;
 import static no.nav.apiapp.util.StringUtils.of;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class AppServiceTest {
 
@@ -30,6 +30,7 @@ public class AppServiceTest {
     private static final String AKTOR_ID = "aktorId";
     private static final String IDENT = "ident";
     private static final String AKTIVITET_ID = "aktivitetId";
+    private static final String KONTORSPERRE_ENHET_ID = "1337";
     private static final DialogStatus DIALOG_STATUS = DialogStatus.builder().dialogId(DIALOG_ID).build();
     private static final HenvendelseData NY_HENVENDELSE = HenvendelseData.builder().aktivitetId(AKTIVITET_ID).dialogId(DIALOG_ID).build();
     private static final DialogData DIALOG_DATA = DialogData.builder().id(DIALOG_ID).aktorId(AKTOR_ID).build();
@@ -39,13 +40,14 @@ public class AppServiceTest {
     private final DialogFeedDAO dialogFeedDAO = mock(DialogFeedDAO.class);
     private final AktorService aktorService = mock(AktorService.class);
     private final PepClient pepClient = mock(PepClient.class);
+    private final KvpClient kvpClient = mock(KvpClient.class);
     private AppService appService = new AppService(
             aktorService,
             dialogDAO,
             statusDao,
             dialogFeedDAO,
-            pepClient
-    );
+            pepClient,
+            kvpClient);
     private Answer<?> ingenAbacTilgang = (a) -> {
         throw new IngenTilgang();
     };
@@ -62,6 +64,34 @@ public class AppServiceTest {
         when(dialogDAO.opprettDialog(DIALOG_DATA)).thenReturn(DIALOG_ID);
         when(dialogDAO.hentDialog(DIALOG_ID)).thenReturn(dialogData);
         when(dialogDAO.hentDialogForAktivitetId(AKTIVITET_ID)).thenReturn(of(DIALOG_DATA));
+    }
+
+    @Test
+    public void kontorsperre_tagger_dialog_med_enhet_id() {
+        when(kvpClient.kontorsperreEnhetId(AKTOR_ID)).thenReturn(KONTORSPERRE_ENHET_ID);
+        appService.opprettDialogForAktivitetsplanPaIdent(DIALOG_DATA);
+        verify(dialogDAO, times(1)).opprettDialog(DIALOG_DATA.withKontorsperreEnhetId(KONTORSPERRE_ENHET_ID));
+    }
+
+    @Test
+    public void kontorsperre_tagger_henvendelse_med_enhet_id() {
+        when(kvpClient.kontorsperreEnhetId(AKTOR_ID)).thenReturn(KONTORSPERRE_ENHET_ID);
+        appService.opprettHenvendelseForDialog(NY_HENVENDELSE);
+        verify(dialogDAO, times(1)).opprettHenvendelse(NY_HENVENDELSE.withKontorsperreEnhetId(KONTORSPERRE_ENHET_ID));
+    }
+
+    @Test
+    public void kontorsperre_tagger_dialog_med_null() {
+        when(kvpClient.kontorsperreEnhetId(AKTOR_ID)).thenReturn(null);
+        appService.opprettDialogForAktivitetsplanPaIdent(DIALOG_DATA);
+        verify(dialogDAO, times(1)).opprettDialog(DIALOG_DATA);
+    }
+
+    @Test
+    public void kontorsperre_tagger_henvendelse_med_null() {
+        when(kvpClient.kontorsperreEnhetId(AKTOR_ID)).thenReturn(null);
+        appService.opprettHenvendelseForDialog(NY_HENVENDELSE);
+        verify(dialogDAO, times(1)).opprettHenvendelse(NY_HENVENDELSE);
     }
 
     @Test

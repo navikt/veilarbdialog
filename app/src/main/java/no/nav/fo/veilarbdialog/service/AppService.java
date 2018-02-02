@@ -4,6 +4,7 @@ import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UlovligHandling;
 import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
+import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
@@ -28,17 +29,35 @@ public class AppService {
     private final StatusDAO statusDAO;
     private final DialogFeedDAO dialogFeedDAO;
     private final PepClient pepClient;
+    private final KvpClient kvpClient;
 
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
                       StatusDAO statusDAO,
                       DialogFeedDAO dialogFeedDAO,
-                      PepClient pepClient) {
+                      PepClient pepClient, KvpClient kvpClient) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
         this.statusDAO = statusDAO;
         this.dialogFeedDAO = dialogFeedDAO;
         this.pepClient = pepClient;
+        this.kvpClient = kvpClient;
+    }
+
+    /**
+     * Returnerer en kopi av AktivitetData-objektet hvor kontorsperreEnhetId
+     * er satt dersom brukeren er under KVP.
+     */
+    private DialogData tagMedKontorsperre(DialogData dialogData) {
+        return Optional.ofNullable(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()))
+                .map(dialogData::withKontorsperreEnhetId)
+                .orElse(dialogData);
+    }
+
+    private HenvendelseData tagMedKontorsperre(HenvendelseData henvendelseData, DialogData dialogData) {
+        return Optional.ofNullable(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()))
+                .map(henvendelseData::withKontorsperreEnhetId)
+                .orElse(henvendelseData);
     }
 
     @Transactional(readOnly = true)
@@ -49,14 +68,16 @@ public class AppService {
 
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
         sjekkTilgangTilAktorId(dialogData.getAktorId());
-        long dialogId = dialogDAO.opprettDialog(dialogData);
+        DialogData kontorsperretDialog = tagMedKontorsperre(dialogData);
+        long dialogId = dialogDAO.opprettDialog(kontorsperretDialog);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
         long dialogId = henvendelseData.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
-        long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
+        HenvendelseData kontorsperretHenvendelse = tagMedKontorsperre(henvendelseData, dialogData);
+        long henvendelseId = dialogDAO.opprettHenvendelse(kontorsperretHenvendelse);
         HenvendelseData opprettetHenvendelse = dialogDAO.hentHenvendelse(henvendelseId);
         statusDAO.nyHenvendelse(dialogData, opprettetHenvendelse);
         return hentDialogUtenTilgangskontroll(dialogId);
