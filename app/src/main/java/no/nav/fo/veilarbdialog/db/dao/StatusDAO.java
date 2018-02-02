@@ -2,7 +2,6 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import no.nav.fo.veilarbdialog.domain.*;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 
@@ -84,10 +83,10 @@ public class StatusDAO {
 
     static Status getStatus(DialogData dialogData) {
         Status status = new Status(dialogData.getId());
-        status.venterPaNavSiden = dialogData.getVenterPaNav();
-        status.venterPaSvarFraBruker = dialogData.getVenterPaSvarFraBruker();
-        status.eldsteUlesteForBruker = dialogData.getUlesteMeldingerForBruker();
-        status.eldsteUlesteForVeileder = dialogData.getUlesteMeldingerForVeileder();
+        status.venterPaNavSiden = dialogData.getVenterPaNavSiden();
+        status.venterPaSvarFraBruker = dialogData.getVenterPaSvarFraBrukerSiden();
+        status.eldsteUlesteForBruker = dialogData.getEldsteUlesteTidspunktForBruker();
+        status.eldsteUlesteForVeileder = dialogData.getEldsteUlesteTidspunktForVeileder();
         status.setHistorisk(dialogData.isHistorisk());
         return status;
     }

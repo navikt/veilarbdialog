@@ -102,7 +102,7 @@ class StatusDAOTest {
 
     @Test
     public void oppdaterVenterPaNavSiden() {
-        DialogData dialogData = getDialogData().withVenterPaNav(null);
+        DialogData dialogData = getDialogData().withVenterPaNavSiden(null);
         Status original = StatusDAO.getStatus(dialogData);
         Date uniktTidspunkt = uniktTidspunkt();
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
@@ -131,7 +131,7 @@ class StatusDAOTest {
 
     @Test
     public void settVenterPaSvarFraBruker() {
-        DialogData dialogData = getDialogData().withVenterPaSvarFraBruker(null);
+        DialogData dialogData = getDialogData().withVenterPaSvarFraBrukerSiden(null);
         Status original = StatusDAO.getStatus(dialogData);
 
         Date uniktTidspunkt = uniktTidspunkt();
@@ -161,10 +161,10 @@ class StatusDAOTest {
 
     private DialogData getDialogData() {
         return TestDataBuilder.nyDialog()
-                .withUlesteMeldingerForBruker(new Date())
-                .withUlesteMeldingerForVeileder(new Date())
-                .withVenterPaNav(new Date())
-                .withVenterPaSvarFraBruker(new Date())
+                .withEldsteUlesteTidspunktForBruker(new Date())
+                .withEldsteUlesteTidspunktForVeileder(new Date())
+                .withVenterPaNavSiden(new Date())
+                .withVenterPaSvarFraBrukerSiden(new Date())
                 .withHistorisk(false);
     }
 

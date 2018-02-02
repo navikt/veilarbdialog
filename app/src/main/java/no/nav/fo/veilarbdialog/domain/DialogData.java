@@ -38,10 +38,10 @@ public class DialogData {
 
 
     private Date oppdatert;
-    private Date venterPaSvarFraBruker;
-    private Date venterPaNav;
-    private Date ulesteMeldingerForVeileder;
-    private Date ulesteMeldingerForBruker;
+    private Date venterPaSvarFraBrukerSiden;
+    private Date venterPaNavSiden;
+    private Date eldsteUlesteTidspunktForVeileder;
+    private Date eldsteUlesteTidspunktForBruker;
 
     private List<HenvendelseData> henvendelser;
 
