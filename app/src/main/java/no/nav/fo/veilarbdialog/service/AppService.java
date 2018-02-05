@@ -76,8 +76,7 @@ public class AppService {
         long dialogId = henvendelseData.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         HenvendelseData kontorsperretHenvendelse = tagMedKontorsperre(henvendelseData, dialogData);
-        long henvendelseId = dialogDAO.opprettHenvendelse(kontorsperretHenvendelse);
-        HenvendelseData opprettetHenvendelse = dialogDAO.hentHenvendelse(henvendelseId);
+        HenvendelseData opprettetHenvendelse = dialogDAO.opprettHenvendelse(kontorsperretHenvendelse);
         statusService.nyHenvendelse(dialogData, opprettetHenvendelse);
         return hentDialogUtenTilgangskontroll(dialogId);
     }

@@ -169,7 +169,7 @@ public class DialogDAO {
         return dialogId;
     }
 
-    public long opprettHenvendelse(HenvendelseData henvendelseData) {
+    public HenvendelseData opprettHenvendelse(HenvendelseData henvendelseData) {
         long henvendelseId = database.nesteFraSekvens("HENVENDELSE_ID_SEQ");
 
         database.update("INSERT INTO HENVENDELSE(" +
@@ -189,7 +189,7 @@ public class DialogDAO {
         );
 
         LOG.info("opprettet henvendelse id:{} data:{}", henvendelseId, henvendelseData);
-        return henvendelseId;
+        return hentHenvendelse(henvendelseId);
     }
 
     public void markerDialogSomLestAvVeileder(long dialogId) {

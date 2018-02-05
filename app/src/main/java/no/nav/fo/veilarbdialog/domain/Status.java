@@ -19,11 +19,7 @@ public class Status {
     public Date eldsteUlesteForBruker;
 
     public void setHistorisk(boolean historisk) {
-        if (historisk) {
-            this.historisk = 1;
-        } else {
-            this.historisk = 0;
-        }
+        this.historisk = historisk ? 1 : 0;
     }
 
     public void setVenterPaSvarFraBruker() {
