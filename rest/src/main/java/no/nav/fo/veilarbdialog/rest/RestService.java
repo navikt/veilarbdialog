@@ -5,6 +5,7 @@ import no.nav.brukerdialog.security.context.SubjectHandler;
 import no.nav.fo.veilarbdialog.api.DialogController;
 import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
 
 import org.springframework.stereotype.Component;
@@ -15,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyDialogVeilederMetrikk;
 import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyHenvedelseVeilederMetrikk;
@@ -35,12 +35,15 @@ public class RestService implements DialogController, VeilederDialogController {
     @Inject
     private Provider<HttpServletRequest> requestProvider;
 
+    @Inject
+    private KontorsperreFilter kontorsperreFilter;
+
     @Override
     public List<DialogDTO> hentDialoger() {        
         return appService.hentDialogerForBruker(getBrukerIdent())
                 .stream()
+                .filter(dialog -> kontorsperreFilter.harTilgang(dialog.getKontorsperreEnhetId()))
                 .map(restMapper::somDialogDTO)
-                .filter(dto -> nonNull(dto))
                 .collect(toList());
     }
 
@@ -57,14 +60,18 @@ public class RestService implements DialogController, VeilederDialogController {
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(dialogId);
         appService.updateDialogAktorFor(dialogData.getAktorId());
         nyHenvedelseVeilederMetrikk(dialogData);
-        return restMapper.somDialogDTO(dialogData);
+        return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ? 
+                restMapper.somDialogDTO(dialogData) 
+                : null;
     }
 
     @Override
     public DialogDTO markerSomLest(String dialogId) {
 
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(Long.parseLong(dialogId));
-        return restMapper.somDialogDTO(dialogData);
+        return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ? 
+                restMapper.somDialogDTO(dialogData) 
+                : null;
     }
 
     @Override
