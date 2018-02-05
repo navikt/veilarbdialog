@@ -3,13 +3,16 @@ package no.nav.fo.veilarbdialog.db.dao;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.fo.IntegrasjonsTest;
-import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.domain.AvsenderType;
+import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.domain.Status;
+import no.nav.fo.veilarbdialog.service.StatusService;
 import org.junit.Test;
 
 import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
@@ -181,7 +184,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
 
     @Test
-    public void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedAlleredeHistoriske() throws Exception {
+    public void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedAlleredeHistoriske() {
         val dialog = nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").build();
         val historiskDialog = nyDialog(AKTOR_ID_1234).toBuilder().historisk(true).overskrift("historisk").build();
 
@@ -218,6 +221,27 @@ public class DialogDAOTest extends IntegrasjonsTest {
         dialogDAO.oppdaterDialogTilHistorisk(dialog);
 
         assertThat(dialogDAO.hentDialog(dialogId).isHistorisk()).isTrue();
+    }
+
+    @Test
+    public void skalOppdatereStatus() {
+        long dialogId = dialogDAO.opprettDialog(nyDialog());
+
+        Status status = new Status(dialogId);
+        status.setHistorisk(false);
+        status.setVenterPaSvarFraBruker();
+        status.setVenterPaNavSiden();
+        status.setUlesteMeldingerForVeileder(new Date());
+        status.setUlesteMeldingerForBruker(new Date());
+
+        Date uniktTidspunkt = uniktTidspunkt();
+        dialogDAO.oppdaterStatus(status);
+
+        DialogData dialogData = dialogDAO.hentDialog(dialogId);
+        Status oppdatert = StatusService.getStatus(dialogData);
+
+        assertThat(oppdatert).isEqualTo(status);
+        assertThat(dialogData.getOppdatert()).isAfter(uniktTidspunkt);
     }
 
     @Test

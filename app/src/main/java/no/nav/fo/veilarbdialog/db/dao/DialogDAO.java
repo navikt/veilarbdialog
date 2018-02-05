@@ -6,6 +6,7 @@ import no.nav.fo.veilarbdialog.util.EnumUtils;
 import no.nav.sbl.jdbc.Database;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.sql.ResultSet;
@@ -16,9 +17,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static no.nav.fo.veilarbdialog.db.dao.DBKonstanter.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
+@Transactional
 public class DialogDAO {
 
     private static final Logger LOG = getLogger(DialogDAO.class);
@@ -29,12 +32,12 @@ public class DialogDAO {
     private final DateProvider dateProvider;
 
     @Inject
-    public DialogDAO(Database database,
-                     DateProvider dateProvider) {
+    public DialogDAO(Database database, DateProvider dateProvider) {
         this.database = database;
         this.dateProvider = dateProvider;
     }
 
+    @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForAktorId(String aktorId) {
         return database.query(SELECT_DIALOG + "WHERE d.aktor_id = ?",
                 this::mapTilDialog,
@@ -42,6 +45,7 @@ public class DialogDAO {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<DialogData> hentDialogerSomSkalAvsluttesForAktorId(String aktorId, Date avsluttetDato) {
         return database.query(SELECT_DIALOG + "WHERE d.aktor_id = ? AND historisk = 0 AND d.OPPRETTET_DATO < ?",
                 this::mapTilDialog,
@@ -50,11 +54,22 @@ public class DialogDAO {
         );
     }
 
+    @Transactional(readOnly = true)
     public DialogData hentDialog(long dialogId) {
         return database.queryForObject(SELECT_DIALOG + "WHERE d.dialog_id = ?",
                 this::mapTilDialog,
                 dialogId
         );
+    }
+
+    @Transactional(readOnly = true)
+    public HenvendelseData hentHenvendelse(long id) {
+        return database.query(
+                "SELECT * FROM HENVENDELSE h LEFT JOIN DIALOG d ON h.dialog_id = d.dialog_id WHERE h.henvendelse_id = ?",
+                this::mapTilHenvendelse,
+                id).stream()
+                .findFirst()
+                .orElse(null);
     }
 
     private DialogData mapTilDialog(ResultSet rs) throws SQLException {
@@ -79,12 +94,17 @@ public class DialogDAO {
                 .henvendelser(hentHenvendelser(dialogId))
                 .historisk(rs.getBoolean("historisk"))
                 .opprettetDato(hentDato(rs, "opprettet_dato"))
+                .venterPaNavSiden(hentDato(rs, VENTER_PA_NAV_SIDEN))
+                .venterPaSvarFraBrukerSiden(hentDato(rs, VENTER_PA_SVAR_FRA_BRUKER))
+                .eldsteUlesteTidspunktForBruker(hentDato(rs, ELDSTE_ULESTE_FOR_BRUKER))
+                .eldsteUlesteTidspunktForVeileder(hentDato(rs, ELDSTE_ULESTE_FOR_VEILEDER))
+                .oppdatert(hentDato(rs, OPPDATERT))
                 .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
                 .egenskaper(egenskaper)
                 .build();
     }
 
-    public static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
+    private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
         return ofNullable(rs.getTimestamp(kolonneNavn)).map(Timestamp::getTime).map(Date::new).orElse(null);
     }
 
@@ -149,8 +169,8 @@ public class DialogDAO {
         return dialogId;
     }
 
-    public void opprettHenvendelse(HenvendelseData henvendelseData) {
-        long henvendeseId = database.nesteFraSekvens("HENVENDELSE_ID_SEQ");
+    public HenvendelseData opprettHenvendelse(HenvendelseData henvendelseData) {
+        long henvendelseId = database.nesteFraSekvens("HENVENDELSE_ID_SEQ");
 
         database.update("INSERT INTO HENVENDELSE(" +
                         "henvendelse_id, " +
@@ -160,7 +180,7 @@ public class DialogDAO {
                         "avsender_id, " +
                         "avsender_type) " +
                         "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?)",
-                henvendeseId,
+                henvendelseId,
                 henvendelseData.dialogId,
                 henvendelseData.tekst,
                 henvendelseData.kontorsperreEnhetId,
@@ -168,7 +188,8 @@ public class DialogDAO {
                 EnumUtils.getName(henvendelseData.avsenderType)
         );
 
-        LOG.info("opprettet henvendelse id:{} data:{}", henvendeseId, henvendelseData);
+        LOG.info("opprettet henvendelse id:{} data:{}", henvendelseId, henvendelseData);
+        return hentHenvendelse(henvendelseId);
     }
 
     public void markerDialogSomLestAvVeileder(long dialogId) {
@@ -185,6 +206,7 @@ public class DialogDAO {
         );
     }
 
+    @Transactional(readOnly = true)
     public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
         return database.query(SELECT_DIALOG + "WHERE aktivitet_id = ?", this::mapTilDialog, aktivitetId)
                 .stream()
@@ -229,6 +251,24 @@ public class DialogDAO {
                         "WHERE dialog_id = ?",
                 dialogStatus.dialogId
         );
+    }
+
+    public void oppdaterStatus(Status status) {
+        database.update("" +
+                        "UPDATE DIALOG SET " +
+                        VENTER_PA_NAV_SIDEN + " = ?, " +
+                        VENTER_PA_SVAR_FRA_BRUKER + " = ?, " +
+                        ELDSTE_ULESTE_FOR_BRUKER + " = ?, " +
+                        ELDSTE_ULESTE_FOR_VEILEDER + " = ?, " +
+                        HISTORISK + " = ?, " +
+                        OPPDATERT + " = " + dateProvider.getNow() + " " +
+                        "WHERE " + DIALOG_ID + " = ?",
+                status.venterPaNavSiden,
+                status.venterPaSvarFraBruker,
+                status.eldsteUlesteForBruker,
+                status.eldsteUlesteForVeileder,
+                status.historisk,
+                status.dialogId);
     }
 
     private String nowOrNull(boolean predicate) {
