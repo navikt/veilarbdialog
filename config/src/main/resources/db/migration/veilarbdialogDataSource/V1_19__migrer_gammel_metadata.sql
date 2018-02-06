@@ -19,7 +19,7 @@ UPDATE DIALOG d
 SET VENTER_PA_SVAR_FRA_BRUKER = NULL
 WHERE SISTE_VENTE_PA_SVAR_TID < (SELECT max(h.SENDT)
                                  FROM HENVENDELSE h
-                                 WHERE d.DIALOG_ID = h.DIALOG_ID);
+                                 WHERE d.DIALOG_ID = h.DIALOG_ID AND h.AVSENDER_TYPE = 'BRUKER');
 
 
 UPDATE DIALOG d
