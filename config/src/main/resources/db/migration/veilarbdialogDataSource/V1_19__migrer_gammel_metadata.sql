@@ -21,7 +21,6 @@ WHERE SISTE_VENTE_PA_SVAR_TID < (SELECT max(h.SENDT)
                                  FROM HENVENDELSE h
                                  WHERE d.DIALOG_ID = h.DIALOG_ID AND h.AVSENDER_TYPE = 'BRUKER');
 
-
 UPDATE DIALOG d
 SET OPPDATERT = (SELECT max(h.SENDT)
                  FROM HENVENDELSE h
