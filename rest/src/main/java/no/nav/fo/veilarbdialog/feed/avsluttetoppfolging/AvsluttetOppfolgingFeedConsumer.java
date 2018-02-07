@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.feed;
+package no.nav.fo.veilarbdialog.feed.avsluttetoppfolging;
 
 import no.nav.fo.veilarbdialog.db.dao.FeedConsumerDAO;
 import no.nav.fo.veilarbdialog.service.AppService;

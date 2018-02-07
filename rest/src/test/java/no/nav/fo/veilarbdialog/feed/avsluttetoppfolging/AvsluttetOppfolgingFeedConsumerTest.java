@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.feed;
+package no.nav.fo.veilarbdialog.feed.avsluttetoppfolging;
 
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,6 +14,7 @@ import java.util.List;
 import org.junit.Test;
 
 import no.nav.fo.veilarbdialog.db.dao.FeedConsumerDAO;
+import no.nav.fo.veilarbdialog.feed.avsluttetoppfolging.AvsluttetOppfolgingFeedConsumer;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
 

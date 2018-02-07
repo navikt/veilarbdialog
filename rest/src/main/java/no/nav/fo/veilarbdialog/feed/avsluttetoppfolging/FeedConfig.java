@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.feed;
+package no.nav.fo.veilarbdialog.feed.avsluttetoppfolging;
 
 import lombok.val;
 import no.nav.brukerdialog.security.oidc.OidcFeedAuthorizationModule;
