@@ -4,7 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import no.nav.fo.veilarbdialog.db.dao.KvpFeedConsumerDAO;
@@ -32,10 +31,10 @@ public class KvpFeedConsumer {
     void lesKvpFeed(String lastEntryId, List<KvpDTO> elements) {
         long lastSuccessfulId = -1;
         for (KvpDTO element : elements) {
-            LoggerFactory.getLogger(KvpFeedConsumer.class).debug("Prosesserer " + element);
-//            
-//            appService.settDialogerTilHistoriske(element.getAktorId(), element.getAvsluttetDato());
-//            lastSuccessfulId = element.getSerial();
+            if(element.getAvsluttetDato() != null) {
+                appService.settKontorsperredeDialogerTilHistoriske(element.getAktorId(), element.getAvsluttetDato());
+            }
+            lastSuccessfulId = element.getSerial();
         }
 
         // Håndterer ikke exceptions her. Dersom en exception oppstår i løkkeprosesseringen over, vil 
