@@ -200,8 +200,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
     @Test
     public void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() throws Exception {
-        val dialog = nyDialog(AKTOR_ID_1234).toBuilder().overskrift("gammel").build();
-        dialogDAO.opprettDialog(dialog);
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("gammel").build());
         Thread.sleep(10);
         Date avslutningsdato = new Date();
         
@@ -210,6 +209,32 @@ public class DialogDAOTest extends IntegrasjonsTest {
         val dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
         assertThat(dialoger).hasSize(1);
         assertThat(dialoger.get(0).getOverskrift()).isEqualTo("gammel");
+    }
+
+    @Test
+    public void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() throws Exception {
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("gammel").kontorsperreEnhetId("123").build());
+        Thread.sleep(10);
+        Date avslutningsdato = new Date();
+        
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").kontorsperreEnhetId("123").build());
+
+        val dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
+        assertThat(dialoger).hasSize(1);
+        assertThat(dialoger.get(0).getOverskrift()).isEqualTo("gammel");
+
+    }
+
+    @Test
+    public void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerSomIkkeErKontorsperret() throws Exception {
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("med_sperre").kontorsperreEnhetId("123").build());
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("uten_sperre").build());
+        Thread.sleep(10);
+        Date avslutningsdato = new Date();       
+
+        val dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
+        assertThat(dialoger).hasSize(1);
+        assertThat(dialoger.get(0).getOverskrift()).isEqualTo("med_sperre");
     }
 
     @Test
