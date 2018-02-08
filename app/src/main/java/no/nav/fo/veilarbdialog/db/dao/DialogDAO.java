@@ -83,8 +83,9 @@ public class DialogDAO {
                         "overskrift, " +
                         "historisk, " +
                         "kontorsperre_enhet_id, " +
-                        OPPDATERT + ") " +
-                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?," + dateProvider.getNow() + ")",
+                        OPPDATERT + ", " +
+                        "siste_status_endring) " + //TODO ved neste migrering slett denne
+                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?," + dateProvider.getNow() + ","+ dateProvider.getNow() + ")",
                 dialogId,
                 dialogData.getAktorId(),
                 dialogData.getAktivitetId(),

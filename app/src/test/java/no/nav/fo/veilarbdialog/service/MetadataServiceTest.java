@@ -10,8 +10,6 @@ import org.mockito.Mockito;
 import java.util.Date;
 
 import static java.lang.Thread.sleep;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 class MetadataServiceTest {
@@ -25,20 +23,14 @@ class MetadataServiceTest {
         Date uniktTidspunkt = uniktTidspunkt();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
+        when(dialogDAO.getTimestampFromDB()).thenReturn(uniktTidspunkt);
+
         Status original = MetadataService.getStatus(dialogData);
+        original.settVenterPaNavSiden(uniktTidspunkt);
+        original.setUlesteMeldingerForVeileder(uniktTidspunkt);
 
         metadataService.nyHenvendelse(dialogData, henvendelseData);
-        verify(dialogDAO, only()).oppdaterStatus(argThat(opdatert -> verifyEldsteUlesteOgVenterPaNavEndret(original, uniktTidspunkt, opdatert)));
-    }
-
-    private boolean verifyEldsteUlesteOgVenterPaNavEndret(Status original, Date tidspunkt, Status oppdatert) {
-        assertThat(oppdatert.eldsteUlesteForVeileder).isEqualTo(tidspunkt);
-        assertThat(oppdatert.venterPaNavSiden).isAfter(tidspunkt);
-
-        original.eldsteUlesteForVeileder = oppdatert.eldsteUlesteForVeileder;
-        original.venterPaNavSiden = oppdatert.venterPaNavSiden;
-        assertThat(oppdatert).isEqualTo(original);
-        return true;
+        verify(dialogDAO, only()).oppdaterStatus(original);
     }
 
     @Test
@@ -101,14 +93,18 @@ class MetadataServiceTest {
     }
 
     @Test
-    public void narJegOppdatererVenterPaNavForventerJegAtVenterPaNavErOppdatert() {
+    public void narJegSetterVenterPaNavForventerJegAtVenterPaNavBlirSatt() {
         DialogData dialogData = getDialogData().withVenterPaNavSiden(null);
         Status original = MetadataService.getStatus(dialogData);
         Date uniktTidspunkt = uniktTidspunkt();
+        original.settVenterPaNavSiden(uniktTidspunkt);
+
+        when(dialogDAO.getTimestampFromDB()).thenReturn(uniktTidspunkt);
+
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
         metadataService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
 
-        verify(dialogDAO, only()).oppdaterStatus(argThat(opppdatert -> verifyKunVenterPaNavEndret(original, uniktTidspunkt, opppdatert)));
+        verify(dialogDAO).oppdaterStatus(original);
     }
 
     private boolean verifyKunVenterPaNavEndret(Status original, Date uniktTidspunkt, Status opppdatert) {
@@ -135,16 +131,14 @@ class MetadataServiceTest {
         Status original = MetadataService.getStatus(dialogData);
 
         Date uniktTidspunkt = uniktTidspunkt();
+        original.settVenterPaSvarFraBruker(uniktTidspunkt);
+
+        when(dialogDAO.getTimestampFromDB()).thenReturn(uniktTidspunkt);
 
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), true, true);
         metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
 
-        verify(dialogDAO, only()).oppdaterStatus(argThat(oppdatert -> verifyKunVenterPaSvarFraBrukerFjernet(original, uniktTidspunkt, oppdatert)));
-    }
-
-    private boolean verifyKunVenterPaSvarFraBrukerFjernet(Status original, Date uniktTidspunkt, Status oppdatert) {
-        original.venterPaSvarFraBruker = oppdatert.venterPaSvarFraBruker;
-        return oppdatert.equals(original) && oppdatert.venterPaSvarFraBruker.after(uniktTidspunkt);
+        verify(dialogDAO).oppdaterStatus(original);
     }
 
     @Test

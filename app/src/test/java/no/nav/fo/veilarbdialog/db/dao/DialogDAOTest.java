@@ -7,7 +7,7 @@
 //import no.nav.fo.veilarbdialog.domain.DialogData;
 //import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 //import no.nav.fo.veilarbdialog.domain.Status;
-//import no.nav.fo.veilarbdialog.service.StatusService;
+//import no.nav.fo.veilarbdialog.service.MetadataService;
 //import org.junit.Test;
 //
 //import javax.inject.Inject;
@@ -238,7 +238,7 @@
 //        dialogDAO.oppdaterStatus(status);
 //
 //        DialogData dialogData = dialogDAO.hentDialog(dialogId);
-//        Status oppdatert = StatusService.getStatus(dialogData);
+//        Status oppdatert = MetadataService.getStatus(dialogData);
 //
 //        assertThat(oppdatert).isEqualTo(status);
 //        assertThat(dialogData.getOppdatert()).isAfter(uniktTidspunkt);

@@ -1,12 +1,11 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import lombok.val;
 import no.nav.fo.IntegrasjonsTest;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.service.MetadataService;
 import org.junit.Test;
 
 import javax.inject.Inject;
-
 import java.util.Date;
 import java.util.List;
 
@@ -18,13 +17,16 @@ public class FeedConsumerDAOTest extends IntegrasjonsTest {
     private DialogDAO dialogDAO;
 
     @Inject
+    private MetadataService metadataService;
+
+    @Inject
     private FeedConsumerDAO feedConsumerDAO;
 
     @Test
     public void skal_ha_siste_dato_tidligere_enn_now‍() {
         String aktorId = "123";
-        val dialog1 = nyDialog(aktorId).toBuilder().historisk(true).build();
-        val dialog2 = nyDialog(aktorId).toBuilder().historisk(true).build();
+        DialogData dialog1 = nyDialog(aktorId).toBuilder().historisk(true).build();
+        DialogData dialog2 = nyDialog(aktorId).toBuilder().historisk(true).build();
 
         dialogDAO.opprettDialog(dialog1);
         dialogDAO.opprettDialog(dialog2);
@@ -34,11 +36,9 @@ public class FeedConsumerDAOTest extends IntegrasjonsTest {
         assertThat(dialoger).hasSize(2);
         assertThat(gjeldendeDialoger).isEmpty();
 
-        dialogDAO.oppdaterDialogTilHistorisk(dialog1);
-        dialogDAO.oppdaterDialogTilHistorisk(dialog2);
-        val tidspunktEtterHistorisk = new Date();
+        Date tidspunktEtterHistorisk = new Date();
 
-        val sisteDialogTidspunkt = feedConsumerDAO.hentSisteHistoriskeTidspunkt();
+        Date sisteDialogTidspunkt = feedConsumerDAO.hentSisteHistoriskeTidspunkt();
         assertThat(sisteDialogTidspunkt).isBeforeOrEqualsTo(tidspunktEtterHistorisk);
     }
 }
