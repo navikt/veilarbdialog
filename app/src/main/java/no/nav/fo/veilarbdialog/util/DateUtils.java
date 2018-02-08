@@ -16,13 +16,8 @@ public class DateUtils {
 
     private static final DatatypeFactory datatypeFactory = getDatatypeFactory();
 
-    @SneakyThrows
-    private static DatatypeFactory getDatatypeFactory() {
-        return DatatypeFactory.newInstance();
-    }
-
     public static XMLGregorianCalendar xmlCalendar(Date date) {
-        return ofNullable(date).map(d->{
+        return ofNullable(date).map(d -> {
             GregorianCalendar cal = new GregorianCalendar();
             cal.setTime(date);
             return datatypeFactory.newXMLGregorianCalendar(cal);
@@ -41,6 +36,17 @@ public class DateUtils {
         return new Date().getTime() - date.getTime();
     }
 
+    public static Long nullSafeMsSiden(Date date) {
+        if (date == null)
+            return null;
+        return msSiden(date);
+    }
+
     private DateUtils() {
+    }
+
+    @SneakyThrows
+    private static DatatypeFactory getDatatypeFactory() {
+        return DatatypeFactory.newInstance();
     }
 }

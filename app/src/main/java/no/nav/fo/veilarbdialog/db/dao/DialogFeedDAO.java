@@ -17,7 +17,7 @@ import static no.nav.sbl.jdbc.Database.hentDato;
 
 @Component
 public class DialogFeedDAO {
-    
+
     private final Database database;
     private final DateProvider dateProvider;
 
@@ -38,7 +38,7 @@ public class DialogFeedDAO {
         );
     }
 
-    public void updateDialogAktorFor(String aktorId, List<DialogData> dialoger){
+    public void updateDialogAktorFor(String aktorId, List<DialogData> dialoger) {
         val dialogAktor = mapTilDialogAktor(dialoger);
         database.update("INSERT INTO DIALOG_AKTOR (" +
                         "aktor_id, " +
@@ -46,7 +46,7 @@ public class DialogFeedDAO {
                         "tidspunkt_eldste_ventende, " +
                         "tidspunkt_eldste_ubehandlede, " +
                         "opprettet_tidspunkt) " +
-                        "VALUES (?,?,?,?, "+ dateProvider.getNow() +")",
+                        "VALUES (?,?,?,?, " + dateProvider.getNow() + ")",
                 aktorId,
                 dialogAktor.getSisteEndring(),
                 dialogAktor.getTidspunktEldsteVentende(),
@@ -55,7 +55,28 @@ public class DialogFeedDAO {
 
     }
 
-    private DialogAktor mapTilDialogAktor(ResultSet rs) throws SQLException{
+    private static DialogAktor mapTilDialogAktor(List<DialogData> dialoger) {
+        return DialogAktor.builder()
+                .sisteEndring(dialoger.stream()
+                        .map(DialogData::getOppdatert)
+                        .max(naturalOrder())
+                        .orElse(null)
+                )
+                .tidspunktEldsteVentende(dialoger.stream()
+                        .filter(DialogData::venterPaSvar)
+                        .map(DialogData::getVenterPaSvarFraBrukerSiden)
+                        .min(naturalOrder())
+                        .orElse(null)
+                )
+                .tidspunktEldsteUbehandlede(dialoger.stream()
+                        .filter(DialogData::erUbehandlet)
+                        .map(DialogData::getVenterPaNavSiden)
+                        .min(naturalOrder())
+                        .orElse(null)
+                ).build();
+    }
+
+    private DialogAktor mapTilDialogAktor(ResultSet rs) throws SQLException {
         return DialogAktor.builder()
                 .aktorId(rs.getString("aktor_id"))
                 .sisteEndring(hentDato(rs, "siste_endring"))
@@ -63,26 +84,5 @@ public class DialogFeedDAO {
                 .tidspunktEldsteUbehandlede(hentDato(rs, "tidspunkt_eldste_ubehandlede"))
                 .opprettetTidspunkt(hentDato(rs, "opprettet_tidspunkt"))
                 .build();
-    }
-
-    private static DialogAktor mapTilDialogAktor(List<DialogData> dialoger) {
-        return DialogAktor.builder()
-                .sisteEndring(dialoger.stream()
-                        .map(DialogData::getSisteEndring)
-                        .max(naturalOrder())
-                        .orElse(null)
-                )
-                .tidspunktEldsteVentende(dialoger.stream()
-                        .filter(DialogData::venterPaSvar)
-                        .map(DialogData::getVenterPaSvarTidspunkt)
-                        .min(naturalOrder())
-                        .orElse(null)
-                )
-                .tidspunktEldsteUbehandlede(dialoger.stream()
-                        .filter(DialogData::erUbehandlet)
-                        .map(DialogData::getUbehandletTidspunkt)
-                        .min(naturalOrder())
-                        .orElse(null)
-                ).build();
     }
 }

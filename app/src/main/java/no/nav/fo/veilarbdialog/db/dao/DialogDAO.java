@@ -72,6 +72,108 @@ public class DialogDAO {
                 .orElse(null);
     }
 
+    public long opprettDialog(DialogData dialogData) {
+        long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
+
+        database.update("INSERT INTO " +
+                        "DIALOG (dialog_id, " +
+                        "aktor_id, " +
+                        "opprettet_dato, " +
+                        "aktivitet_id, " +
+                        "overskrift, " +
+                        "historisk, " +
+                        "kontorsperre_enhet_id, " +
+                        OPPDATERT + ") " +
+                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?," + dateProvider.getNow() + ")",
+                dialogId,
+                dialogData.getAktorId(),
+                dialogData.getAktivitetId(),
+                dialogData.getOverskrift(),
+                dialogData.isHistorisk() ? 1 : 0,
+                dialogData.getKontorsperreEnhetId()
+        );
+
+        dialogData.getEgenskaper().forEach(egenskapType ->
+                database.update("INSERT INTO DIALOG_EGENSKAP(DIALOG_ID, DIALOG_EGENSKAP_TYPE_KODE) VALUES (?, ?)",
+                        dialogId, egenskapType.toString())
+        );
+
+        LOG.info("opprettet dialog id:{} data:{}", dialogId, dialogData);
+        return dialogId;
+    }
+
+    public long opprettHenvendelse(HenvendelseData henvendelseData) {
+        long henvendelseId = database.nesteFraSekvens("HENVENDELSE_ID_SEQ");
+
+        database.update("INSERT INTO HENVENDELSE(" +
+                        "henvendelse_id, " +
+                        "dialog_id, " +
+                        "sendt, " +
+                        "tekst, " +
+                        "kontorsperre_enhet_id, " +
+                        "avsender_id, " +
+                        "avsender_type) " +
+                        "VALUES (?,?,?,?,?,?,?)",
+                henvendelseId,
+                henvendelseData.dialogId,
+                henvendelseData.sendt,
+                henvendelseData.tekst,
+                henvendelseData.kontorsperreEnhetId,
+                henvendelseData.avsenderId,
+                EnumUtils.getName(henvendelseData.avsenderType)
+        );
+
+        LOG.info("opprettet henvendelse id:{} data:{}", henvendelseId, henvendelseData);
+        return henvendelseId;
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
+        return database.query(SELECT_DIALOG + "WHERE aktivitet_id = ?", this::mapTilDialog, aktivitetId)
+                .stream()
+                .findFirst();
+    }
+
+
+    public DialogData oppdaterStatus(Status status) {
+        database.update("" +
+                        "UPDATE DIALOG SET " +
+                        VENTER_PA_NAV_SIDEN + " = ?, " +
+                        VENTER_PA_SVAR_FRA_BRUKER + " = ?, " +
+                        ELDSTE_ULESTE_FOR_BRUKER + " = ?, " +
+                        ELDSTE_ULESTE_FOR_VEILEDER + " = ?, " +
+                        HISTORISK + " = ?, " +
+                        OPPDATERT + " = " + dateProvider.getNow() + " " +
+                        "WHERE " + DIALOG_ID + " = ?",
+                status.venterPaNavSiden,
+                status.venterPaSvarFraBruker,
+                status.eldsteUlesteForBruker,
+                status.eldsteUlesteForVeileder,
+                status.historisk,
+                status.dialogId);
+
+        return hentDialog(status.dialogId);
+    }
+
+    public Date getTimestampFromDB() {
+        return database.queryForObject("SELECT SYSTIMESTAMP FROM DUAL", DialogDAO::getSystimestamp);
+    }
+
+    private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
+        return ofNullable(rs.getTimestamp(kolonneNavn))
+                .map(Timestamp::getTime)
+                .map(Date::new)
+                .orElse(null);
+    }
+
+    private static boolean erLest(Date leseTidspunkt, Date henvendelseTidspunkt) {
+        return leseTidspunkt != null && henvendelseTidspunkt.before(leseTidspunkt);
+    }
+
+    private static Date getSystimestamp(ResultSet rs) throws SQLException {
+        return hentDato(rs, "SYSTIMESTAMP");
+    }
+
     private DialogData mapTilDialog(ResultSet rs) throws SQLException {
         long dialogId = rs.getLong("dialog_id");
 
@@ -87,10 +189,6 @@ public class DialogDAO {
                 .overskrift(rs.getString("overskrift"))
                 .lestAvBrukerTidspunkt(hentDato(rs, "lest_av_bruker_tid"))
                 .lestAvVeilederTidspunkt(hentDato(rs, "lest_av_veileder_tid"))
-                .venterPaSvarTidspunkt(hentDato(rs, "siste_vente_pa_svar_tid"))
-                .ferdigbehandletTidspunkt(hentDato(rs, "siste_ferdigbehandlet_tid"))
-                .ubehandletTidspunkt(hentDato(rs, "siste_ubehandlet_tid"))
-                .sisteStatusEndring(hentDato(rs, "siste_status_endring"))
                 .henvendelser(hentHenvendelser(dialogId))
                 .historisk(rs.getBoolean("historisk"))
                 .opprettetDato(hentDato(rs, "opprettet_dato"))
@@ -102,10 +200,6 @@ public class DialogDAO {
                 .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
                 .egenskaper(egenskaper)
                 .build();
-    }
-
-    private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
-        return ofNullable(rs.getTimestamp(kolonneNavn)).map(Timestamp::getTime).map(Date::new).orElse(null);
     }
 
     @SneakyThrows
@@ -133,145 +227,5 @@ public class DialogDAO {
                 .lestAvVeileder(erLest(hentDato(rs, "lest_av_veileder_tid"), henvendelseDato))
                 .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
                 .build();
-    }
-
-    private static boolean erLest(Date leseTidspunkt, Date henvendelseTidspunkt) {
-        return leseTidspunkt != null && henvendelseTidspunkt.before(leseTidspunkt);
-    }
-
-    public long opprettDialog(DialogData dialogData) {
-        long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
-
-        database.update("INSERT INTO " +
-                        "DIALOG (dialog_id, " +
-                        "aktor_id, " +
-                        "opprettet_dato, " +
-                        "aktivitet_id, " +
-                        "overskrift, " +
-                        "historisk, " +
-                        "kontorsperre_enhet_id, " +
-                        "siste_status_endring) " +
-                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?," + dateProvider.getNow() + ")",
-                dialogId,
-                dialogData.getAktorId(),
-                dialogData.getAktivitetId(),
-                dialogData.getOverskrift(),
-                dialogData.isHistorisk() ? 1 : 0,
-                dialogData.getKontorsperreEnhetId()
-        );
-
-        dialogData.getEgenskaper().forEach(egenskapType ->
-                database.update("INSERT INTO DIALOG_EGENSKAP(DIALOG_ID, DIALOG_EGENSKAP_TYPE_KODE) VALUES (?, ?)",
-                        dialogId, egenskapType.toString())
-        );
-
-        LOG.info("opprettet dialog id:{} data:{}", dialogId, dialogData);
-        return dialogId;
-    }
-
-    public HenvendelseData opprettHenvendelse(HenvendelseData henvendelseData) {
-        long henvendelseId = database.nesteFraSekvens("HENVENDELSE_ID_SEQ");
-
-        database.update("INSERT INTO HENVENDELSE(" +
-                        "henvendelse_id, " +
-                        "dialog_id,sendt, " +
-                        "tekst, " +
-                        "kontorsperre_enhet_id, " +
-                        "avsender_id, " +
-                        "avsender_type) " +
-                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?)",
-                henvendelseId,
-                henvendelseData.dialogId,
-                henvendelseData.tekst,
-                henvendelseData.kontorsperreEnhetId,
-                henvendelseData.avsenderId,
-                EnumUtils.getName(henvendelseData.avsenderType)
-        );
-
-        LOG.info("opprettet henvendelse id:{} data:{}", henvendelseId, henvendelseData);
-        return hentHenvendelse(henvendelseId);
-    }
-
-    public void markerDialogSomLestAvVeileder(long dialogId) {
-        markerLest(dialogId, "lest_av_veileder_tid");
-    }
-
-    public void markerDialogSomLestAvBruker(long dialogId) {
-        markerLest(dialogId, "lest_av_bruker_tid");
-    }
-
-    private void markerLest(long dialogId, String feltNavn) {
-        database.update("UPDATE DIALOG SET " + feltNavn + " = " + dateProvider.getNow() + " WHERE dialog_id = ? ",
-                dialogId
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
-        return database.query(SELECT_DIALOG + "WHERE aktivitet_id = ?", this::mapTilDialog, aktivitetId)
-                .stream()
-                .findFirst();
-    }
-
-    public void oppdaterDialogTilHistorisk(DialogData dialogData) {
-        String sql = "UPDATE DIALOG SET " +
-                "historisk = 1";
-
-        if (dialogData.erUbehandlet()) {
-            sql += ", siste_ferdigbehandlet_tid = " + dateProvider.getNow() +
-                    ", siste_ubehandlet_tid = NULL";
-        }
-        if (dialogData.venterPaSvar()) {
-            sql += ", siste_vente_pa_svar_tid = NULL";
-        }
-
-        if (dialogData.erUbehandlet() || dialogData.venterPaSvar()) {
-            sql += ", siste_status_endring = " + dateProvider.getNow();
-        }
-
-        sql += " WHERE dialog_id = ?";
-
-        database.update(sql, dialogData.getId());
-    }
-
-    public void oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
-        database.update("UPDATE DIALOG SET " +
-                        "siste_ferdigbehandlet_tid =  " + nowOrNull(dialogStatus.ferdigbehandlet) + ", " +
-                        "siste_ubehandlet_tid =  " + nowOrNull(!dialogStatus.ferdigbehandlet) + ", " +
-                        "siste_status_endring = " + dateProvider.getNow() + " " +
-                        "WHERE dialog_id = ?",
-                dialogStatus.dialogId
-        );
-    }
-
-    public void oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
-        database.update("UPDATE DIALOG SET " +
-                        "siste_vente_pa_svar_tid = " + nowOrNull(dialogStatus.venterPaSvar) + ", " +
-                        "siste_status_endring = " + dateProvider.getNow() + " " +
-                        "WHERE dialog_id = ?",
-                dialogStatus.dialogId
-        );
-    }
-
-    public void oppdaterStatus(Status status) {
-        database.update("" +
-                        "UPDATE DIALOG SET " +
-                        VENTER_PA_NAV_SIDEN + " = ?, " +
-                        VENTER_PA_SVAR_FRA_BRUKER + " = ?, " +
-                        ELDSTE_ULESTE_FOR_BRUKER + " = ?, " +
-                        ELDSTE_ULESTE_FOR_VEILEDER + " = ?, " +
-                        HISTORISK + " = ?, " +
-                        OPPDATERT + " = " + dateProvider.getNow() + " " +
-                        "WHERE " + DIALOG_ID + " = ?",
-                status.venterPaNavSiden,
-                status.venterPaSvarFraBruker,
-                status.eldsteUlesteForBruker,
-                status.eldsteUlesteForVeileder,
-                status.historisk,
-                status.dialogId);
-    }
-
-    private String nowOrNull(boolean predicate) {
-        return predicate ? dateProvider.getNow() : "NULL";
     }
 }

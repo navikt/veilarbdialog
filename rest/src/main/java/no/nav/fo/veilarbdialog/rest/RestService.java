@@ -7,7 +7,6 @@ import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
-
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyDialogVeilederMetrikk;
-import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyHenvedelseVeilederMetrikk;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
@@ -69,7 +67,6 @@ public class RestService implements DialogController, VeilederDialogController {
         );
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(dialogId);
         appService.updateDialogAktorFor(dialogData.getAktorId());
-        nyHenvedelseVeilederMetrikk(dialogData);
         return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ? 
                 restMapper.somDialogDTO(dialogData) 
                 : null;

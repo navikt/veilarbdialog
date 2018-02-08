@@ -35,7 +35,7 @@ public class AppServiceTest {
     private static final DialogData DIALOG_DATA = DialogData.builder().id(DIALOG_ID).aktorId(AKTOR_ID).build();
 
     private final DialogDAO dialogDAO = mock(DialogDAO.class);
-    private final StatusService statusService = mock(StatusService.class);
+    private final MetadataService metadataService = mock(MetadataService.class);
     private final DialogFeedDAO dialogFeedDAO = mock(DialogFeedDAO.class);
     private final AktorService aktorService = mock(AktorService.class);
     private final PepClient pepClient = mock(PepClient.class);
@@ -43,7 +43,7 @@ public class AppServiceTest {
     private AppService appService = new AppService(
             aktorService,
             dialogDAO,
-            statusService,
+            metadataService,
             dialogFeedDAO,
             pepClient,
             kvpClient);

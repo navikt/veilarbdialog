@@ -22,15 +22,15 @@ public class Status {
         this.historisk = historisk ? 1 : 0;
     }
 
-    public void setVenterPaSvarFraBruker() {
+    public void settVenterPaSvarFraBruker(Date date) {
         if (venterPaSvarFraBruker == null) {
-            venterPaSvarFraBruker = new Date();
+            venterPaSvarFraBruker = date;
         }
     }
 
-    public void setVenterPaNavSiden() {
+    public void settVenterPaNavSiden(Date date) {
         if (venterPaNavSiden == null) {
-            venterPaNavSiden = new Date();
+            venterPaNavSiden = date;
         }
     }
 
