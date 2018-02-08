@@ -40,7 +40,12 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public List<DialogDTO> hentDialoger() {        
-        return appService.hentDialogerForBruker(getBrukerIdent())
+        return hentDialogerForBruker(getBrukerIdent());
+    }
+
+    @Override
+    public List<DialogDTO> hentDialogerForBruker(String fnr) {
+        return appService.hentDialogerForBruker(fnr)
                 .stream()
                 .filter(dialog -> kontorsperreFilter.harTilgang(dialog.getKontorsperreEnhetId()))
                 .map(restMapper::somDialogDTO)
@@ -49,7 +54,12 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public DialogDTO nyHenvendelse(NyHenvendelseDTO nyHenvendelseDTO) {
-        long dialogId = finnDialogId(nyHenvendelseDTO);
+        return nyHenvendelseForBruker(getBrukerIdent(), nyHenvendelseDTO);
+    }
+
+    @Override
+    public DialogDTO nyHenvendelseForBruker(String fnr, NyHenvendelseDTO nyHenvendelseDTO) {
+        long dialogId = finnDialogId(fnr, nyHenvendelseDTO);
         appService.opprettHenvendelseForDialog(HenvendelseData.builder()
                 .dialogId(dialogId)
                 .avsenderId(getVeilederIdent())
@@ -100,21 +110,21 @@ public class RestService implements DialogController, VeilederDialogController {
         return markerSomLest(dialogId);
     }
 
-    private Long finnDialogId(NyHenvendelseDTO nyHenvendelseDTO) {
+    private Long finnDialogId(String fnr, NyHenvendelseDTO nyHenvendelseDTO) {
         if (notNullOrEmpty(nyHenvendelseDTO.dialogId)) {
             return Long.parseLong(nyHenvendelseDTO.dialogId);
         } else {
             return of(nyHenvendelseDTO.aktivitetId)
                     .flatMap(appService::hentDialogForAktivitetId)
-                    .orElseGet(() -> opprettDialog(nyHenvendelseDTO))
+                    .orElseGet(() -> opprettDialog(fnr, nyHenvendelseDTO))
                     .getId();
         }
     }
 
-    private DialogData opprettDialog(NyHenvendelseDTO nyHenvendelseDTO) {
+    private DialogData opprettDialog(String fnr, NyHenvendelseDTO nyHenvendelseDTO) {
         DialogData dialogData = DialogData.builder()
                 .overskrift(nyHenvendelseDTO.overskrift)
-                .aktorId(appService.hentAktoerIdForIdent(getBrukerIdent()))
+                .aktorId(appService.hentAktoerIdForIdent(fnr))
                 .aktivitetId(nyHenvendelseDTO.aktivitetId)
                 .egenskaper(nyHenvendelseDTO.egenskaper
                         .stream()
@@ -133,4 +143,5 @@ public class RestService implements DialogController, VeilederDialogController {
     private String getBrukerIdent() {
         return of(requestProvider.get().getParameter("fnr")).orElseThrow(UgyldigRequest::new);
     }
+
 }
