@@ -1,26 +1,22 @@
 package no.nav.fo.veilarbdialog.feed.avsluttetoppfolging;
 
-import static java.util.Arrays.asList;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import no.nav.fo.veilarbdialog.db.dao.FeedMetaDataDAO;
+import no.nav.fo.veilarbdialog.service.AppService;
+import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
+import org.junit.Test;
 
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Test;
 
-import no.nav.fo.veilarbdialog.db.dao.FeedConsumerDAO;
 import no.nav.fo.veilarbdialog.feed.avsluttetoppfolging.AvsluttetOppfolgingFeedConsumer;
-import no.nav.fo.veilarbdialog.service.AppService;
-import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
+import static java.util.Arrays.asList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 public class AvsluttetOppfolgingFeedConsumerTest {
 
-    private FeedConsumerDAO dao = mock(FeedConsumerDAO.class);
+    private FeedMetaDataDAO dao = mock(FeedMetaDataDAO.class);
     private AppService appService = mock(AppService.class);        
 
     @Test(expected=RuntimeException.class)
@@ -31,7 +27,7 @@ public class AvsluttetOppfolgingFeedConsumerTest {
         try {
             new AvsluttetOppfolgingFeedConsumer(appService, dao).lesAvsluttetOppfolgingFeed(null, elements);
         } finally {
-            verify(dao, never()).oppdaterSisteFeedId(any(Date.class));
+            verify(dao, never()).oppdaterSisteLest(any(Date.class));
         }
                 
     }
@@ -48,7 +44,7 @@ public class AvsluttetOppfolgingFeedConsumerTest {
 
         new AvsluttetOppfolgingFeedConsumer(appService, dao).lesAvsluttetOppfolgingFeed(null, elements);
 
-        verify(dao).oppdaterSisteFeedId(date2);
+        verify(dao).oppdaterSisteLest(date2);
         
     }
     
