@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.feed;
 
-import no.nav.fo.veilarbdialog.db.dao.FeedConsumerDAO;
+import no.nav.fo.veilarbdialog.db.dao.FeedMetaDataDAO;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
 import org.springframework.stereotype.Component;
@@ -16,17 +16,17 @@ public class AvsluttetOppfolgingFeedConsumer {
 
     private final AppService appService;
 
-    private final FeedConsumerDAO feedConsumerDAO;
+    private final FeedMetaDataDAO feedMetaDataDAO;
 
     @Inject
     public AvsluttetOppfolgingFeedConsumer(AppService appService,
-                                           FeedConsumerDAO feedConsumerDAO) {
+                                           FeedMetaDataDAO feedMetaDataDAO) {
         this.appService = appService;
-        this.feedConsumerDAO = feedConsumerDAO;
+        this.feedMetaDataDAO = feedMetaDataDAO;
     }
 
     String sisteEndring() {
-        Date sisteEndring = feedConsumerDAO.hentSisteHistoriskeTidspunkt();
+        Date sisteEndring = feedMetaDataDAO.hentSisteLestTidspunkt();
         return ZonedDateTime.ofInstant(sisteEndring.toInstant(), ZoneId.systemDefault()).toString();
     }
 
@@ -42,7 +42,7 @@ public class AvsluttetOppfolgingFeedConsumer {
         // prosessere noen elementer flere ganger. Dette skal gå bra, siden koden som setter dialoger til historisk
         // er idempotent
         if(lastSuccessfulId != null) {
-            feedConsumerDAO.oppdaterSisteFeedId(lastSuccessfulId);
+            feedMetaDataDAO.oppdaterSisteLest(lastSuccessfulId);
         }
     }
 }
