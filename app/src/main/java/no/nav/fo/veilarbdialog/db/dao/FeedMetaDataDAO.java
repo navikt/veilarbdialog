@@ -9,15 +9,15 @@ import java.util.Date;
 
 
 @Component
-public class FeedConsumerDAO {
+public class FeedMetaDataDAO {
     private final Database database;
 
     @Inject
-    public FeedConsumerDAO(Database database) {
+    public FeedMetaDataDAO(Database database) {
         this.database = database;
     }
 
-    public Date hentSisteHistoriskeTidspunkt() {
+    public Date hentSisteLestTidspunkt() {
         return database.queryForObject(
                 "SELECT tidspunkt_siste_endring " +
                         "FROM FEED_METADATA",
@@ -25,10 +25,10 @@ public class FeedConsumerDAO {
         );
     }
 
-    public void oppdaterSisteFeedId(Date id) {
+    public void oppdaterSisteLest(Date date) {
         database.update(
                 "UPDATE FEED_METADATA SET tidspunkt_siste_endring = ?", 
-                id
+                date
         );
     }
 
