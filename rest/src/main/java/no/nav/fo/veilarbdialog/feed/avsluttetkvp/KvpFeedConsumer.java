@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import no.nav.fo.veilarbdialog.db.dao.KvpFeedConsumerDAO;
+import no.nav.fo.veilarbdialog.db.dao.KvpFeedMetadataDAO;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
 
@@ -15,11 +15,11 @@ public class KvpFeedConsumer {
 
     private final AppService appService;
 
-    private final KvpFeedConsumerDAO kvpFeedConsumerDAO;
+    private final KvpFeedMetadataDAO kvpFeedConsumerDAO;
 
     @Inject
     public KvpFeedConsumer(AppService appService,
-            KvpFeedConsumerDAO feedConsumerDAO) {
+            KvpFeedMetadataDAO feedConsumerDAO) {
         this.appService = appService;
         this.kvpFeedConsumerDAO = feedConsumerDAO;
     }

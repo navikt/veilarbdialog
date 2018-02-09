@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 import no.nav.sbl.jdbc.Database;
 
 @Component
-public class KvpFeedConsumerDAO {
+public class KvpFeedMetadataDAO {
 
     private final Database database;
 
     @Inject
-    public KvpFeedConsumerDAO(Database database) {
+    public KvpFeedMetadataDAO(Database database) {
         this.database = database;
     }
 
