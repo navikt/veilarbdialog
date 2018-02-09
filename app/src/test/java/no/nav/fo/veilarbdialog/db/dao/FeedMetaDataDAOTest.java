@@ -16,7 +16,7 @@ public class FeedMetaDataDAOTest extends IntegrasjonsTest {
     private FeedMetaDataDAO feedMetaDataDAO;
 
     @Test
-    public void skal_kunne_settte_og_hente_sist_lest_tid() {
+    public void skal_kunne_sette_og_hente_sist_lest_tid() {
         Date uniktTidspunkt = uniktTidspunkt();
         feedMetaDataDAO.oppdaterSisteLest(uniktTidspunkt);
         Date lestTidspunkt = feedMetaDataDAO.hentSisteLestTidspunkt();
