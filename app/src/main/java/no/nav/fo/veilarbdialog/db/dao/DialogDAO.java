@@ -156,9 +156,6 @@ public class DialogDAO {
         return hentDialog(status.dialogId);
     }
 
-    public Date getTimestampFromDB() {
-        return database.queryForObject("SELECT SYSTIMESTAMP FROM DUAL", DialogDAO::getSystimestamp);
-    }
 
     private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
         return ofNullable(rs.getTimestamp(kolonneNavn))
@@ -172,7 +169,7 @@ public class DialogDAO {
     }
 
     private static Date getSystimestamp(ResultSet rs) throws SQLException {
-        return hentDato(rs, "SYSTIMESTAMP");
+        return hentDato(rs, "CURRENT_TIMESTAMP");
     }
 
     private DialogData mapTilDialog(ResultSet rs) throws SQLException {

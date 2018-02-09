@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.service;
 import lombok.SneakyThrows;
 import no.nav.fo.veilarbdialog.TestDataBuilder;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
+import no.nav.fo.veilarbdialog.db.dao.UtilDAO;
 import no.nav.fo.veilarbdialog.domain.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -15,7 +16,8 @@ import static org.mockito.Mockito.*;
 class MetadataServiceTest {
 
     private DialogDAO dialogDAO = mock(DialogDAO.class);
-    private MetadataService metadataService = new MetadataService(dialogDAO);
+    private UtilDAO utilDAO = mock(UtilDAO.class);
+    private MetadataService metadataService = new MetadataService(dialogDAO, utilDAO);
 
     @Test
     public void nyHenvendelseFraBrukerEndrerEldsteUlesteForVeilederOgVenterPaNav() {
@@ -23,7 +25,7 @@ class MetadataServiceTest {
         Date uniktTidspunkt = uniktTidspunkt();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
-        when(dialogDAO.getTimestampFromDB()).thenReturn(uniktTidspunkt);
+        when(utilDAO.getTimestampFromDB()).thenReturn(uniktTidspunkt);
 
         Status original = MetadataService.getStatus(dialogData);
         original.settVenterPaNavSiden(uniktTidspunkt);
@@ -99,7 +101,7 @@ class MetadataServiceTest {
         Date uniktTidspunkt = uniktTidspunkt();
         original.settVenterPaNavSiden(uniktTidspunkt);
 
-        when(dialogDAO.getTimestampFromDB()).thenReturn(uniktTidspunkt);
+        when(utilDAO.getTimestampFromDB()).thenReturn(uniktTidspunkt);
 
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
         metadataService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
@@ -133,7 +135,7 @@ class MetadataServiceTest {
         Date uniktTidspunkt = uniktTidspunkt();
         original.settVenterPaSvarFraBruker(uniktTidspunkt);
 
-        when(dialogDAO.getTimestampFromDB()).thenReturn(uniktTidspunkt);
+        when(utilDAO.getTimestampFromDB()).thenReturn(uniktTidspunkt);
 
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), true, true);
         metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);

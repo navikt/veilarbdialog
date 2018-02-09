@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.service;
 
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
+import no.nav.fo.veilarbdialog.db.dao.UtilDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
@@ -12,12 +13,15 @@ import javax.inject.Inject;
 
 @Component
 public class MetadataService {
-    private DialogDAO dialogDAO;
+    private final DialogDAO dialogDAO;
+    private final UtilDAO utilDAO;
 
     @Inject
-    MetadataService(DialogDAO dialogDAO) {
+    public MetadataService(DialogDAO dialogDAO, UtilDAO utilDAO) {
         this.dialogDAO = dialogDAO;
+        this.utilDAO = utilDAO;
     }
+
 
     public DialogData nyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
         if (henvendelseData.getSendt() == null) {
@@ -25,7 +29,7 @@ public class MetadataService {
         }
 
         Status status = lagStatusForNyHenvendelse(dialogData, henvendelseData);
-        return  dialogDAO.oppdaterStatus(status);
+        return dialogDAO.oppdaterStatus(status);
     }
 
     public DialogData markerSomLestAvVeileder(DialogData dialogData) {
@@ -53,7 +57,7 @@ public class MetadataService {
         if (dialogStatus.ferdigbehandlet) {
             status.venterPaNavSiden = null;
         } else {
-            status.settVenterPaNavSiden(dialogDAO.getTimestampFromDB());
+            status.settVenterPaNavSiden(utilDAO.getTimestampFromDB());
         }
 
         FunkjsonelleMetrikker.oppdaterFerdigbehandletTidspunktMetrikk(dialogData, dialogStatus);
@@ -63,7 +67,7 @@ public class MetadataService {
     public DialogData oppdaterVenterPaSvarFraBrukerSiden(DialogData dialogData, DialogStatus dialogStatus) {
         Status status = getStatus(dialogData);
         if (dialogStatus.venterPaSvar) {
-            status.settVenterPaSvarFraBruker(dialogDAO.getTimestampFromDB());
+            status.settVenterPaSvarFraBruker(utilDAO.getTimestampFromDB());
         } else {
             status.venterPaSvarFraBruker = null;
         }
@@ -77,6 +81,16 @@ public class MetadataService {
         return dialogDAO.oppdaterStatus(status);
     }
 
+    public static Status getStatus(DialogData dialogData) {
+        Status status = new Status(dialogData.getId());
+        status.venterPaNavSiden = dialogData.getVenterPaNavSiden();
+        status.venterPaSvarFraBruker = dialogData.getVenterPaSvarFraBrukerSiden();
+        status.eldsteUlesteForBruker = dialogData.getEldsteUlesteTidspunktForBruker();
+        status.eldsteUlesteForVeileder = dialogData.getEldsteUlesteTidspunktForVeileder();
+        status.setHistorisk(dialogData.isHistorisk());
+        return status;
+    }
+
     private Status lagStatusForNyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
         Status status = getStatus(dialogData);
         if (henvendelseData.fraBruker()) {
@@ -87,16 +101,6 @@ public class MetadataService {
             status.setUlesteMeldingerForBruker(henvendelseData.getSendt());
             FunkjsonelleMetrikker.nyHenvedelseVeilederMetrikk(dialogData);
         }
-        return status;
-    }
-
-    public static Status getStatus(DialogData dialogData) {
-        Status status = new Status(dialogData.getId());
-        status.venterPaNavSiden = dialogData.getVenterPaNavSiden();
-        status.venterPaSvarFraBruker = dialogData.getVenterPaSvarFraBrukerSiden();
-        status.eldsteUlesteForBruker = dialogData.getEldsteUlesteTidspunktForBruker();
-        status.eldsteUlesteForVeileder = dialogData.getEldsteUlesteTidspunktForVeileder();
-        status.setHistorisk(dialogData.isHistorisk());
         return status;
     }
 }

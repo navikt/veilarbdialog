@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.fo.IntegrasjonsTest;
 import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.service.MetadataService;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -23,10 +24,17 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
     private DialogDAO dialogDAO;
 
     @Inject
+    private UtilDAO utilDAO;
+
+    @Inject
+    private MetadataService metadataService;
+
+    @Inject
     private DialogFeedDAO dialogFeedDAO;
 
     @Test
     public void hentAktorerMedEndringerEtter_nyDialog_aktorEndret() {
+
         Date ettSekundSiden = new Date(System.currentTimeMillis() - 1000L);
         Date omEttSekund = new Date(System.currentTimeMillis() + 1000L);
 
@@ -44,13 +52,14 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
     }
 
     @Test
-    public void hentAktorerMedEndringerEtter_statusPaaFeedskalTaHensynTilAlleAktorensDialoger() throws InterruptedException {
+    public void hentAktorerMedEndringerEtter_statusPaaFeedskalTaHensynTilAlleAktorensDialoger() {
         Date ettSekundSiden = new Date(System.currentTimeMillis() - 1000L);
 
         DialogData nyDialog = nyDialog(AKTOR_ID);
         long dialogId = dialogDAO.opprettDialog(nyDialog);
-        dialogDAO.oppdaterVentePaSvarTidspunkt(new DialogStatus(dialogId, true, false));
-        dialogDAO.oppdaterFerdigbehandletTidspunkt(new DialogStatus(dialogId, false, false));
+        DialogData dialogData = dialogDAO.hentDialog(dialogId);
+        DialogData opdatert1 = metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, new DialogStatus(dialogId, true, false));
+        metadataService.oppdaterVenterPaNavSiden(opdatert1, new DialogStatus(dialogId, false, false));
         updateDialogAktorFor(AKTOR_ID);
 
         List<DialogAktor> endringerForEttSekundSiden = dialogFeedDAO.hentAktorerMedEndringerFOM(ettSekundSiden, 500);
@@ -60,8 +69,7 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         assertThat(tidspunktEldsteVentende).isNotNull();
         assertThat(ubehandletTidspunkt).isNotNull();
 
-        Thread.sleep(1);
-        Date forrigeLeseTidspunkt = new Date();
+        Date forrigeLeseTidspunkt = uniktTidspunkt();
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID));
         updateDialogAktorFor(AKTOR_ID);
 
@@ -78,18 +86,19 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
     public void hentAktorerMedEndringerFOM_oppdaterDialogStatusOgNyHenvendelse_riktigStatus() {
         long dialogId = opprettNyDialog(AKTOR_ID);
 
-        HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.values()[0]);
+        Date henvedlesetid = uniktTidspunkt();
+        HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.values()[0]).withSendt(henvedlesetid);
         dialogDAO.opprettHenvendelse(henvendelseData);
 
         Date forForsteStatusOppdatering = uniktTidspunkt();
         assertThat(dialogFeedDAO.hentAktorerMedEndringerFOM(forForsteStatusOppdatering, 500)).isEmpty();
 
         DialogStatus.DialogStatusBuilder dialogStatusBuilder = builder().dialogId(dialogId);
+        DialogData dialogData = dialogDAO.hentDialog(dialogId);
 
-        dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatusBuilder
+        metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatusBuilder
                 .venterPaSvar(true)
-                .build()
-        );
+                .build());
 
         updateDialogAktorFor(AKTOR_ID);
 
@@ -101,10 +110,12 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
 
         Date forAndreStatusOppdatering = uniktTidspunkt();
         assertThat(dialogFeedDAO.hentAktorerMedEndringerFOM(forAndreStatusOppdatering, 500)).isEmpty();
-        dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatusBuilder
+
+        DialogData oppdatert = dialogDAO.hentDialog(dialogId);
+        metadataService.oppdaterVenterPaSvarFraBrukerSiden(oppdatert, dialogStatusBuilder
                 .ferdigbehandlet(true)
-                .build()
-        );
+                .build());
+
         updateDialogAktorFor(AKTOR_ID);
 
         uniktTidspunkt();

@@ -7,6 +7,7 @@ import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
+import no.nav.fo.veilarbdialog.db.dao.UtilDAO;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
@@ -24,6 +25,7 @@ public class AppService {
 
     private final AktorService aktorService;
     private final DialogDAO dialogDAO;
+    private final UtilDAO utilDAO;
     private final MetadataService metadataService;
     private final DialogFeedDAO dialogFeedDAO;
     private final PepClient pepClient;
@@ -31,11 +33,14 @@ public class AppService {
 
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
+                      UtilDAO utilDAO,
                       MetadataService metadataService,
                       DialogFeedDAO dialogFeedDAO,
-                      PepClient pepClient, KvpClient kvpClient) {
+                      PepClient pepClient,
+                      KvpClient kvpClient) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
+        this.utilDAO = utilDAO;
         this.metadataService = metadataService;
         this.dialogFeedDAO = dialogFeedDAO;
         this.pepClient = pepClient;
@@ -59,7 +64,7 @@ public class AppService {
         long dialogId = henvendelseData.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         HenvendelseData henvendelse = henvendelseData
-                .withSendt(dialogDAO.getTimestampFromDB())
+                .withSendt(utilDAO.getTimestampFromDB())
                 .withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
 
         dialogDAO.opprettHenvendelse(henvendelse);
