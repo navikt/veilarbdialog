@@ -45,16 +45,16 @@ public class FunksjonelleMetrikker {
     }
 
     public static DialogData nyDialogBrukerMetrikk(DialogData dialogData) {
-        reportMetrikMedPaaAktivitet("dialog.bruker.ny", dialogData);
+        reportMetrikkMedPaaAktivitet("dialog.bruker.ny", dialogData);
         return dialogData;
     }
 
     public static void nyHenvedelseVeilederMetrikk(DialogData dialogMedNyHenvendelse) {
-        reportMetrikMedPaaAktivitet("henvendelse.veileder.ny", dialogMedNyHenvendelse);
+        reportMetrikkMedPaaAktivitet("henvendelse.veileder.ny", dialogMedNyHenvendelse);
     }
 
     public static void nyDialogVeilederMetrikk(DialogData nyDialog) {
-        reportMetrikMedPaaAktivitet("dialog.veileder.ny", nyDialog);
+        reportMetrikkMedPaaAktivitet("dialog.veileder.ny", nyDialog);
     }
 
     public static void oppdaterVenterSvarMetrikk(DialogStatus nyStatus, DialogData eksisterendeData) {
@@ -83,7 +83,7 @@ public class FunksjonelleMetrikker {
         return dialogData;
     }
 
-    private static void reportMetrikMedPaaAktivitet(String eventName, DialogData dialog){
+    private static void reportMetrikkMedPaaAktivitet(String eventName, DialogData dialog){
         MetricsFactory.createEvent(eventName)
                 .addFieldToReport("paaAktivitet", notNullOrEmpty(dialog.getAktivitetId()))
                 .setSuccess()
