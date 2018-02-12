@@ -45,16 +45,16 @@ public class FunksjonelleMetrikker {
     }
 
     public static DialogData nyDialogBruker(DialogData dialogData) {
-        reportMetrikkMedPaaAktivitet("dialog.bruker.ny", dialogData);
+        reportDialogMedMetadata("dialog.bruker.ny", dialogData);
         return dialogData;
     }
 
     public static void nyHenvedelseVeileder(DialogData dialogMedNyHenvendelse) {
-        reportMetrikkMedPaaAktivitet("henvendelse.veileder.ny", dialogMedNyHenvendelse);
+        reportDialogMedMetadata("henvendelse.veileder.ny", dialogMedNyHenvendelse);
     }
 
     public static void nyDialogVeileder(DialogData nyDialog) {
-        reportMetrikkMedPaaAktivitet("dialog.veileder.ny", nyDialog);
+        reportDialogMedMetadata("dialog.veileder.ny", nyDialog);
     }
 
     public static void oppdaterVenterSvar(DialogStatus nyStatus, DialogData eksisterendeData) {
@@ -69,9 +69,8 @@ public class FunksjonelleMetrikker {
     }
 
     public static DialogData nyHenvendelseBruker(DialogData dialogData) {
-        Event event = MetricsFactory
-                .createEvent("henvendelse.bruker.ny")
-                .addFieldToReport("paaAktivitet", notNullOrEmpty(dialogData.getAktivitetId()));
+        Event event = MetricsFactory.createEvent("henvendelse.bruker.ny");
+        event = addDialogMetadata(event, dialogData);
 
         boolean svartPaa = isSvartPaa(dialogData);
         event.addFieldToReport("erSvar", svartPaa);
@@ -83,11 +82,18 @@ public class FunksjonelleMetrikker {
         return dialogData;
     }
 
-    private static void reportMetrikkMedPaaAktivitet(String eventName, DialogData dialog){
-        MetricsFactory.createEvent(eventName)
+    private static Event addDialogMetadata(Event event, DialogData dialog) {
+        return event
                 .addFieldToReport("paaAktivitet", notNullOrEmpty(dialog.getAktivitetId()))
-                .setSuccess()
-                .report();
+                .addFieldToReport("kontorsperret", notNullOrEmpty(dialog.getKontorsperreEnhetId()));
+
+    }
+
+    private static void reportDialogMedMetadata(String eventName, DialogData dialog) {
+        Event event = MetricsFactory.createEvent(eventName);
+        event = addDialogMetadata(event, dialog);
+        event.setSuccess();
+        event.report();
     }
 
     private static boolean isSvartPaa(DialogData dialogData) {
