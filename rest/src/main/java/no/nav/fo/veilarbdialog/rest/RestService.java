@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
-import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyDialogVeilederMetrikk;
-import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyHenvedelseVeilederMetrikk;
+import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeilederMetrikk;
+import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyHenvedelseVeilederMetrikk;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 

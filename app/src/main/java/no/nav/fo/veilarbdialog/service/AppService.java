@@ -11,7 +11,7 @@ import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker;
+import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -96,7 +96,7 @@ public class AppService {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvVeileder(dialogId);
         statusService.markerSomLestAvVeileder(dialogData);
-        FunkjsonelleMetrikker.markerSomLestAvVeilederMetrikk(dialogData);
+        FunksjonelleMetrikker.markerSomLestAvVeilederMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -104,7 +104,7 @@ public class AppService {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvBruker(dialogId);
         statusService.markerSomLestAvBruker(dialogData);
-        FunkjsonelleMetrikker.merkDialogSomLestAvBrukerMetrikk(dialogData);
+        FunksjonelleMetrikker.merkDialogSomLestAvBrukerMetrikk(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -113,7 +113,7 @@ public class AppService {
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
         statusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
-        FunkjsonelleMetrikker.oppdaterFerdigbehandletTidspunktMetrikk(dialogData, dialogStatus);
+        FunksjonelleMetrikker.oppdaterFerdigbehandletTidspunktMetrikk(dialogData, dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -122,7 +122,7 @@ public class AppService {
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
         statusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
-        FunkjsonelleMetrikker.oppdaterVenterSvarMetrikk(dialogStatus, dialogData);
+        FunksjonelleMetrikker.oppdaterVenterSvarMetrikk(dialogStatus, dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 

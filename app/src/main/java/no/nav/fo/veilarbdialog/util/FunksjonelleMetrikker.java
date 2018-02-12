@@ -17,7 +17,7 @@ import static java.util.Comparator.naturalOrder;
 import static no.nav.fo.veilarbdialog.util.DateUtils.msSiden;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 
-public class FunkjsonelleMetrikker {
+public class FunksjonelleMetrikker {
 
     public static void oppdaterFerdigbehandletTidspunktMetrikk(DialogData dialog, DialogStatus dialogStatus) {
         if(dialog.erFerdigbehandlet() == dialogStatus.ferdigbehandlet)
@@ -36,12 +36,12 @@ public class FunkjsonelleMetrikker {
 
     public static void merkDialogSomLestAvBrukerMetrikk(DialogData dialogData) {
         Optional<Long> readTime = tidSidenSiteMeldingSom(dialogData, erIkkeLestAvBruker());
-        readTime.ifPresent(FunkjsonelleMetrikker::sendMarkerSomLestAvBrukerMetrikk);
+        readTime.ifPresent(FunksjonelleMetrikker::sendMarkerSomLestAvBrukerMetrikk);
     }
 
     public static void markerSomLestAvVeilederMetrikk(DialogData dialogData) {
         Optional<Long> readTime = tidSidenSiteMeldingSom(dialogData, erIkkeLestAvVeileder());
-        readTime.ifPresent(FunkjsonelleMetrikker::sendMarkerSomLestAvVeilederMetrikk);
+        readTime.ifPresent(FunksjonelleMetrikker::sendMarkerSomLestAvVeilederMetrikk);
     }
 
     public static DialogData nyDialogBrukerMetrikk(DialogData dialogData) {
@@ -134,6 +134,6 @@ public class FunkjsonelleMetrikker {
                 .report();
     }
 
-    private FunkjsonelleMetrikker() {
+    private FunksjonelleMetrikker() {
     }
 }
