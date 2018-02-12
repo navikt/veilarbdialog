@@ -31,7 +31,7 @@ public class FeedIntegrationTest {
                     .withAktorId("aktorId")
             );
 
-            dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, "aktorId", BRUKER));
+            dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, "aktorId", BRUKER).withSendt(new Date()));
 
             val dialoger = dialogDAO.hentDialogerForAktorId("aktorId");
             dialogFeedDAO.updateDialogAktorFor("aktorId", dialoger);

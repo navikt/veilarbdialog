@@ -84,19 +84,21 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
 
     @Test
     public void hentAktorerMedEndringerFOM_oppdaterDialogStatusOgNyHenvendelse_riktigStatus() {
-        long dialogId = opprettNyDialog(AKTOR_ID);
+        DialogData dialogData = opprettNyDialog(AKTOR_ID);
+        long dialogId = dialogData.getId();
 
         Date henvedlesetid = uniktTidspunkt();
         HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.values()[0]).withSendt(henvedlesetid);
         dialogDAO.opprettHenvendelse(henvendelseData);
+        metadataService.nyHenvendelse(dialogData, henvendelseData);
 
         Date forForsteStatusOppdatering = uniktTidspunkt();
         assertThat(dialogFeedDAO.hentAktorerMedEndringerFOM(forForsteStatusOppdatering, 500)).isEmpty();
 
         DialogStatus.DialogStatusBuilder dialogStatusBuilder = builder().dialogId(dialogId);
-        DialogData dialogData = dialogDAO.hentDialog(dialogId);
+        DialogData oppdatert = dialogDAO.hentDialog(dialogId);
 
-        metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatusBuilder
+        metadataService.oppdaterVenterPaSvarFraBrukerSiden(oppdatert, dialogStatusBuilder
                 .venterPaSvar(true)
                 .build());
 
@@ -111,8 +113,8 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         Date forAndreStatusOppdatering = uniktTidspunkt();
         assertThat(dialogFeedDAO.hentAktorerMedEndringerFOM(forAndreStatusOppdatering, 500)).isEmpty();
 
-        DialogData oppdatert = dialogDAO.hentDialog(dialogId);
-        metadataService.oppdaterVenterPaSvarFraBrukerSiden(oppdatert, dialogStatusBuilder
+        DialogData oppdatert2 = dialogDAO.hentDialog(dialogId);
+        metadataService.oppdaterVenterPaNavSiden(oppdatert2, dialogStatusBuilder
                 .ferdigbehandlet(true)
                 .build());
 
@@ -126,7 +128,9 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         assertThat(etterAndreOppdatering.tidspunktEldsteUbehandlede).isNull();
 
         Date forNyHenvendelse = uniktTidspunkt();
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.values()[0]));
+        HenvendelseData nyHenvendelse = nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.BRUKER).withSendt(uniktTidspunkt());
+        dialogDAO.opprettHenvendelse(nyHenvendelse);
+        metadataService.nyHenvendelse(dialogDAO.hentDialog(dialogId), nyHenvendelse);
         updateDialogAktorFor(AKTOR_ID);
 
         DialogAktor etterNyHenvenselse = hentAktorMedEndringerEtter(forNyHenvendelse);
@@ -149,8 +153,9 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         return tidspunkt;
     }
 
-    private long opprettNyDialog(String aktorId) {
-        return dialogDAO.opprettDialog(nyDialog(aktorId));
+    private DialogData opprettNyDialog(String aktorId) {
+        long id = dialogDAO.opprettDialog(nyDialog(aktorId));
+        return dialogDAO.hentDialog(id);
     }
 
     public void updateDialogAktorFor(String aktorId){

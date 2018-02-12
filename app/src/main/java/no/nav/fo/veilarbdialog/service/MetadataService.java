@@ -96,6 +96,7 @@ public class MetadataService {
         if (henvendelseData.fraBruker()) {
             status.settVenterPaNavSiden(henvendelseData.getSendt());
             status.setUlesteMeldingerForVeileder(henvendelseData.getSendt());
+            status.resetVenterPaBrukerSiden();
             FunkjsonelleMetrikker.nyHenvendelseBrukerMetrikk(dialogData);
         } else {
             status.setUlesteMeldingerForBruker(henvendelseData.getSendt());

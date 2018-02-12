@@ -72,6 +72,13 @@ public class DialogDAO {
                 .orElse(null);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
+        return database.query(SELECT_DIALOG + "WHERE aktivitet_id = ?", this::mapTilDialog, aktivitetId)
+                .stream()
+                .findFirst();
+    }
+
     public long opprettDialog(DialogData dialogData) {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
 
@@ -128,14 +135,6 @@ public class DialogDAO {
         return henvendelseId;
     }
 
-    @Transactional(readOnly = true)
-    public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
-        return database.query(SELECT_DIALOG + "WHERE aktivitet_id = ?", this::mapTilDialog, aktivitetId)
-                .stream()
-                .findFirst();
-    }
-
-
     public DialogData oppdaterStatus(Status status) {
         database.update("" +
                         "UPDATE DIALOG SET " +
@@ -157,6 +156,7 @@ public class DialogDAO {
     }
 
 
+
     private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
         return ofNullable(rs.getTimestamp(kolonneNavn))
                 .map(Timestamp::getTime)
@@ -166,10 +166,6 @@ public class DialogDAO {
 
     private static boolean erLest(Date leseTidspunkt, Date henvendelseTidspunkt) {
         return leseTidspunkt != null && henvendelseTidspunkt.before(leseTidspunkt);
-    }
-
-    private static Date getSystimestamp(ResultSet rs) throws SQLException {
-        return hentDato(rs, "CURRENT_TIMESTAMP");
     }
 
     private DialogData mapTilDialog(ResultSet rs) throws SQLException {

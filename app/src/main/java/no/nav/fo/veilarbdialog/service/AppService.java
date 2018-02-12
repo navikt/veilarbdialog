@@ -56,8 +56,7 @@ public class AppService {
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
         sjekkTilgangTilAktorId(dialogData.getAktorId());
         DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
-        long dialogId = dialogDAO.opprettDialog(kontorsperretDialog);
-        return hentDialogUtenTilgangskontroll(dialogId);
+        return dialogDAO.opprettDialog(kontorsperretDialog);
     }
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
@@ -68,7 +67,7 @@ public class AppService {
                 .withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
 
         dialogDAO.opprettHenvendelse(henvendelse);
-        return metadataService.nyHenvendelse(dialogData, henvendelseData);
+        return metadataService.nyHenvendelse(dialogData, henvendelse);
     }
 
     @Transactional(readOnly = true)

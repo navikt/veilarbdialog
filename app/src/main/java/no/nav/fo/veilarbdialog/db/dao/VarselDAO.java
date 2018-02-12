@@ -2,7 +2,6 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.sbl.jdbc.Database;
-
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -19,7 +18,7 @@ public class VarselDAO {
     @Inject
     DateProvider dateProvider;
 
-    public List<String> hentAktorerMedUlesteMeldinger(long graceMillis) {
+    public List<String> hentAktorerMedUlesteMeldingerEtterSisteVarsel(long graceMillis) {
         Date grense = new Date(System.currentTimeMillis() - graceMillis);
         return database.query("SELECT d.aktor_id " +
                         "FROM DIALOG d " +
