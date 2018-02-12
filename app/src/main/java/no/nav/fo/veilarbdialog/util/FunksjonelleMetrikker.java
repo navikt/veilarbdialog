@@ -49,7 +49,7 @@ public class FunksjonelleMetrikker {
         return dialogData;
     }
 
-    public static void nyHenvedelseVeileder(DialogData dialogMedNyHenvendelse) {
+    public static void nyHenvendelseVeileder(DialogData dialogMedNyHenvendelse) {
         reportDialogMedMetadata("henvendelse.veileder.ny", dialogMedNyHenvendelse);
     }
 

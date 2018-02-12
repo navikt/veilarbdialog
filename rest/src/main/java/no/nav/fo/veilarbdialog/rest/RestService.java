@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeileder;
-import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyHenvedelseVeileder;
+import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyHenvendelseVeileder;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
@@ -69,7 +69,7 @@ public class RestService implements DialogController, VeilederDialogController {
         );
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(dialogId);
         appService.updateDialogAktorFor(dialogData.getAktorId());
-        nyHenvedelseVeileder(dialogData);
+        nyHenvendelseVeileder(dialogData);
         return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ? 
                 restMapper.somDialogDTO(dialogData) 
                 : null;
