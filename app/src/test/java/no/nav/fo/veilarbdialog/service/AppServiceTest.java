@@ -64,7 +64,7 @@ public class AppServiceTest {
     }
 
     private void mockDialog(DialogData dialogData) {
-        when(dialogDAO.opprettDialog(DIALOG_DATA)).thenReturn(DIALOG_ID);
+        when(dialogDAO.opprettDialog(DIALOG_DATA)).thenReturn(dialogData);
         when(dialogDAO.hentDialog(DIALOG_ID)).thenReturn(dialogData);
         when(dialogDAO.hentDialogForAktivitetId(AKTIVITET_ID)).thenReturn(of(DIALOG_DATA));
     }

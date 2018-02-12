@@ -56,8 +56,8 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         Date ettSekundSiden = new Date(System.currentTimeMillis() - 1000L);
 
         DialogData nyDialog = nyDialog(AKTOR_ID);
-        long dialogId = dialogDAO.opprettDialog(nyDialog);
-        DialogData dialogData = dialogDAO.hentDialog(dialogId);
+        DialogData dialogData = dialogDAO.opprettDialog(nyDialog);
+        long dialogId = dialogData.getId();
         DialogData opdatert1 = metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, new DialogStatus(dialogId, true, false));
         metadataService.oppdaterVenterPaNavSiden(opdatert1, new DialogStatus(dialogId, false, false));
         updateDialogAktorFor(AKTOR_ID);
@@ -154,8 +154,7 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
     }
 
     private DialogData opprettNyDialog(String aktorId) {
-        long id = dialogDAO.opprettDialog(nyDialog(aktorId));
-        return dialogDAO.hentDialog(id);
+        return dialogDAO.opprettDialog(nyDialog(aktorId));
     }
 
     public void updateDialogAktorFor(String aktorId){

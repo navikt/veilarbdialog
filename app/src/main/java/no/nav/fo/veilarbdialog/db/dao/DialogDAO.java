@@ -79,7 +79,7 @@ public class DialogDAO {
                 .findFirst();
     }
 
-    public long opprettDialog(DialogData dialogData) {
+    public DialogData opprettDialog(DialogData dialogData) {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
 
         database.update("INSERT INTO " +
@@ -107,7 +107,7 @@ public class DialogDAO {
         );
 
         LOG.info("opprettet dialog id:{} data:{}", dialogId, dialogData);
-        return dialogId;
+        return hentDialog(dialogId);
     }
 
     public long opprettHenvendelse(HenvendelseData henvendelseData) {

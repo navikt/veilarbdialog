@@ -59,12 +59,12 @@ public class DialogDAOTest extends IntegrasjonsTest {
     @Test
     public void hentDialog() {
         DialogData dialogData = nyDialog(AKTOR_ID_1234);
-        long dialogId = dialogDAO.opprettDialog(dialogData);
+        DialogData opprettDialog = dialogDAO.opprettDialog(dialogData);
 
-        DialogData hentetDialog = dialogDAO.hentDialog(dialogId);
+        DialogData hentetDialog = dialogDAO.hentDialog(opprettDialog.getId());
 
         assertThat(hentetDialog).isEqualTo(dialogData
-                .withId(dialogId)
+                .withId(opprettDialog.getId())
                 .withOppdatert(hentetDialog.getOppdatert())
                 .withOpprettetDato(hentetDialog.getOpprettetDato())
         );
@@ -73,16 +73,16 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
     @Test
     public void opprettHenvendelse() {
-        long dialogId = opprettNyDialog(AKTOR_ID_1234);
+        DialogData dialogData = opprettNyDialog(AKTOR_ID_1234);
 
-        HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID_1234, AvsenderType.values()[0]);
+        HenvendelseData henvendelseData = nyHenvendelse(dialogData.getId(), AKTOR_ID_1234, AvsenderType.values()[0]);
         dialogDAO.opprettHenvendelse(henvendelseData);
         DialogData dialogMedHenvendelse = dialogDAO.hentDialogerForAktorId(AKTOR_ID_1234).get(0);
         HenvendelseData henvendelseUtenOpprettelsesDato = dialogMedHenvendelse.getHenvendelser().get(0);
         assertThat(henvendelseUtenOpprettelsesDato).isEqualTo(henvendelseData.withId(henvendelseUtenOpprettelsesDato.getId()));
 
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID_1234, AvsenderType.values()[0]));
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, AKTOR_ID_1234, AvsenderType.values()[0]));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData.getId(), AKTOR_ID_1234, AvsenderType.values()[0]));
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData.getId(), AKTOR_ID_1234, AvsenderType.values()[0]));
 
         DialogData dialogMedHenvendelser = dialogDAO.hentDialogerForAktorId(AKTOR_ID_1234).get(0);
         assertThat(dialogMedHenvendelser.getHenvendelser()).hasSize(3);
@@ -90,15 +90,15 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
     @Test
     public void markerDialogSomLest() {
-        long dialogId = opprettNyDialog(AKTOR_ID_1234);
+        DialogData dialog = opprettNyDialog(AKTOR_ID_1234);
 
-        metadataService.markerSomLestAvBruker(dialogDAO.hentDialog(dialogId));
-        metadataService.markerSomLestAvVeileder(dialogDAO.hentDialog(dialogId));
+        metadataService.markerSomLestAvBruker(dialogDAO.hentDialog(dialog.getId()));
+        metadataService.markerSomLestAvVeileder(dialogDAO.hentDialog(dialog.getId()));
 
-        DialogData dialog = dialogDAO.hentDialog(dialogId);
+        DialogData oppdatertDialog = dialogDAO.hentDialog(dialog.getId());
 
-        assertThat(dialog.erLestAvBruker()).isTrue();
-        assertThat(dialog.erLestAvVeileder()).isTrue();
+        assertThat(oppdatertDialog.erLestAvBruker()).isTrue();
+        assertThat(oppdatertDialog.erLestAvVeileder()).isTrue();
     }
 
     @Test
@@ -111,16 +111,15 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
     @Test
     public void oppdaterDialogStatus_oppdatererStatusFelter() {
-        long dialogId = opprettNyDialog(AKTOR_ID_1234);
-        DialogData dialogData = dialogDAO.hentDialog(dialogId);
+        DialogData dialogData = opprettNyDialog(AKTOR_ID_1234);
 
         Date tidspunktForOppdatering = uniktTidspunkt();
         metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, builder()
-                .dialogId(dialogId)
+                .dialogId(dialogData.getId())
                 .venterPaSvar(true)
                 .build());
 
-        DialogData oppdatertDialog = dialogDAO.hentDialog(dialogId);
+        DialogData oppdatertDialog = dialogDAO.hentDialog(dialogData.getId());
         assertThat(oppdatertDialog.getOppdatert()).isAfter(tidspunktForOppdatering);
         assertThat(oppdatertDialog.getVenterPaSvarFraBrukerSiden()).isAfter(tidspunktForOppdatering);
         assertThat(oppdatertDialog.venterPaSvar()).isTrue();
@@ -133,18 +132,17 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
     @Test
     public void oppdaterFerdigbehandletTidspunkt_oppdatererStatusFelter() {
-        long dialogId = opprettNyDialog(AKTOR_ID_1234);
-        DialogData dialogData = dialogDAO.hentDialog(dialogId);
+        DialogData dialogData = opprettNyDialog(AKTOR_ID_1234);
 
         Date tidspunktForOppdatering = uniktTidspunkt();
         metadataService.oppdaterVenterPaNavSiden(dialogData, builder()
-                .dialogId(dialogId)
+                .dialogId(dialogData.getId())
                 .venterPaSvar(true)
                 .ferdigbehandlet(true)
                 .build()
         );
 
-        DialogData oppdatertDialog = dialogDAO.hentDialog(dialogId);
+        DialogData oppdatertDialog = dialogDAO.hentDialog(dialogData.getId());
         assertThat(oppdatertDialog.getOppdatert()).isAfter(tidspunktForOppdatering);
         assertThat(oppdatertDialog.getVenterPaNavSiden()).isNull();
         assertThat(oppdatertDialog.erFerdigbehandlet()).isTrue();
@@ -156,11 +154,11 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
     @Test
     public void oppdaterDialogStatus_statusTilbakestillesVedNyBrukerHenvendelse() {
-        long dialogId = opprettNyDialog(AKTOR_ID_1234);
-        DialogData dialogData = dialogDAO.hentDialog(dialogId);
+        DialogData dialogData = opprettNyDialog(AKTOR_ID_1234);
+        long dialogId = dialogData.getId();
 
         metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, builder()
-                .dialogId(dialogId)
+                .dialogId(dialogData.getId())
                 .venterPaSvar(true)
                 .ferdigbehandlet(true)
                 .build()
@@ -196,9 +194,9 @@ public class DialogDAOTest extends IntegrasjonsTest {
         DialogData historiskDialog = nyDialog(AKTOR_ID_1234).toBuilder().overskrift("historisk").build();
 
         dialogDAO.opprettDialog(dialog);
-        long historiskDialogId = dialogDAO.opprettDialog(historiskDialog);
+        DialogData oppretetHistoriskDialog = dialogDAO.opprettDialog(historiskDialog);
 
-        metadataService.settDialogTilHistorisk(historiskDialog.withId(historiskDialogId));
+        metadataService.settDialogTilHistorisk(historiskDialog.withId(oppretetHistoriskDialog.getId()));
 
         List<DialogData> dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, new Date(System.currentTimeMillis() + 1000));
         assertThat(dialoger).hasSize(1);
@@ -221,20 +219,19 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
     @Test
     public void settDialogTilHistoriskOgOppdaterFeed_dialog_blir_historisk() {
-        long dialogId = dialogDAO.opprettDialog(nyDialog());
-        DialogData dialog = dialogDAO.hentDialog(dialogId);
+        DialogData dialog = dialogDAO.opprettDialog(nyDialog());
         assertThat(dialog.isHistorisk()).isFalse();
 
         metadataService.settDialogTilHistorisk(dialog);
 
-        assertThat(dialogDAO.hentDialog(dialogId).isHistorisk()).isTrue();
+        assertThat(dialogDAO.hentDialog(dialog.getId()).isHistorisk()).isTrue();
     }
 
     @Test
     public void skalOppdatereStatus() {
-        long dialogId = dialogDAO.opprettDialog(nyDialog());
+        DialogData dialog = dialogDAO.opprettDialog(nyDialog());
 
-        Status status = new Status(dialogId);
+        Status status = new Status(dialog.getId());
         status.setHistorisk(false);
         status.settVenterPaSvarFraBruker(new Date());
         status.settVenterPaNavSiden(new Date());
@@ -244,7 +241,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         Date uniktTidspunkt = uniktTidspunkt();
         dialogDAO.oppdaterStatus(status);
 
-        DialogData dialogData = dialogDAO.hentDialog(dialogId);
+        DialogData dialogData = dialogDAO.hentDialog(dialog.getId());
         Status oppdatert = MetadataService.getStatus(dialogData);
 
         assertThat(oppdatert).isEqualTo(status);
@@ -272,7 +269,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         assertThat(dialogStr).doesNotContain(sensitivtInnhold);
     }
 
-    private long opprettNyDialog(String aktorId) {
+    private DialogData opprettNyDialog(String aktorId) {
         return dialogDAO.opprettDialog(nyDialog(aktorId));
     }
 
