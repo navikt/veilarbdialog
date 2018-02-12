@@ -38,7 +38,10 @@ public class MetadataService {
             return dialogData;
         }
         FunkjsonelleMetrikker.markerSomLestAvVeilederMetrikk(dialogData);
+
         status.eldsteUlesteForVeileder = null;
+        status.setLestAvVeilederTid(utilDAO.getTimestampFromDB());
+
         return dialogDAO.oppdaterStatus(status);
     }
 
@@ -49,6 +52,7 @@ public class MetadataService {
         }
         FunkjsonelleMetrikker.merkDialogSomLestAvBrukerMetrikk(dialogData);
         status.eldsteUlesteForBruker = null;
+        status.setLestAvBrukerTid(utilDAO.getTimestampFromDB());
         return dialogDAO.oppdaterStatus(status);
     }
 

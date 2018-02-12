@@ -1,10 +1,10 @@
 package no.nav.fo.veilarbdialog.domain;
 
-import lombok.EqualsAndHashCode;
+import lombok.Data;
 
 import java.util.Date;
 
-@EqualsAndHashCode
+@Data
 public class Status {
 
     public Status(long dialogId) {
@@ -17,6 +17,8 @@ public class Status {
     public Date venterPaNavSiden;
     public Date eldsteUlesteForVeileder;
     public Date eldsteUlesteForBruker;
+    private Date lestAvVeilederTid;
+    private Date lestAvBrukerTid;
 
     public void setHistorisk(boolean historisk) {
         this.historisk = historisk ? 1 : 0;

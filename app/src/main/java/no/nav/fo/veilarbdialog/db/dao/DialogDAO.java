@@ -92,7 +92,7 @@ public class DialogDAO {
                         "kontorsperre_enhet_id, " +
                         OPPDATERT + ", " +
                         "siste_status_endring) " + //TODO ved neste migrering slett denne
-                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?," + dateProvider.getNow() + ","+ dateProvider.getNow() + ")",
+                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?," + dateProvider.getNow() + "," + dateProvider.getNow() + ")",
                 dialogId,
                 dialogData.getAktorId(),
                 dialogData.getAktivitetId(),
@@ -142,20 +142,22 @@ public class DialogDAO {
                         VENTER_PA_SVAR_FRA_BRUKER + " = ?, " +
                         ELDSTE_ULESTE_FOR_BRUKER + " = ?, " +
                         ELDSTE_ULESTE_FOR_VEILEDER + " = ?, " +
+                        LEST_AV_BRUKER_TID + " = ?, " +
+                        LEST_AV_VEILEDER_TID + " = ?, " +
                         HISTORISK + " = ?, " +
                         OPPDATERT + " = " + dateProvider.getNow() + " " +
                         "WHERE " + DIALOG_ID + " = ?",
-                status.venterPaNavSiden,
-                status.venterPaSvarFraBruker,
-                status.eldsteUlesteForBruker,
-                status.eldsteUlesteForVeileder,
-                status.historisk,
-                status.dialogId);
+                status.getVenterPaNavSiden(),
+                status.getVenterPaSvarFraBruker(),
+                status.getEldsteUlesteForBruker(),
+                status.getEldsteUlesteForVeileder(),
+                status.getLestAvBrukerTid(),
+                status.getLestAvVeilederTid(),
+                status.getHistorisk(),
+                status.getDialogId());
 
-        return hentDialog(status.dialogId);
+        return hentDialog(status.getDialogId());
     }
-
-
 
     private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
         return ofNullable(rs.getTimestamp(kolonneNavn))
