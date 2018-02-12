@@ -96,7 +96,7 @@ public class AppService {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvVeileder(dialogId);
         statusService.markerSomLestAvVeileder(dialogData);
-        FunksjonelleMetrikker.markerSomLestAvVeilederMetrikk(dialogData);
+        FunksjonelleMetrikker.markerDialogSomLestAvVeileder(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -104,7 +104,7 @@ public class AppService {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
         dialogDAO.markerDialogSomLestAvBruker(dialogId);
         statusService.markerSomLestAvBruker(dialogData);
-        FunksjonelleMetrikker.merkDialogSomLestAvBrukerMetrikk(dialogData);
+        FunksjonelleMetrikker.markerDialogSomLestAvBruker(dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -113,7 +113,7 @@ public class AppService {
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
         statusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
-        FunksjonelleMetrikker.oppdaterFerdigbehandletTidspunktMetrikk(dialogData, dialogStatus);
+        FunksjonelleMetrikker.oppdaterFerdigbehandletTidspunkt(dialogData, dialogStatus);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 
@@ -122,7 +122,7 @@ public class AppService {
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
         statusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
-        FunksjonelleMetrikker.oppdaterVenterSvarMetrikk(dialogStatus, dialogData);
+        FunksjonelleMetrikker.oppdaterVenterSvar(dialogStatus, dialogData);
         return hentDialogUtenTilgangskontroll(dialogId);
     }
 

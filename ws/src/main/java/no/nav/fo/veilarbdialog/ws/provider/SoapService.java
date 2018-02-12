@@ -76,7 +76,7 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(appService::opprettDialogForAktivitetsplanPaIdent)
                 .map(this::markerDialogSomLest)
                 .map(this::updateDialogAktorFor)
-                .map(FunksjonelleMetrikker::nyDialogBrukerMetrikk)
+                .map(FunksjonelleMetrikker::nyDialogBruker)
                 .map(this::opprettDialogForAktivitetResponse)
                 .orElseThrow(RuntimeException::new);
     }
@@ -95,7 +95,7 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(dialogData -> appService.opprettDialogForAktivitetsplanPaIdent(dialogData))
                 .map(this::markerDialogSomLest)
                 .map(this::updateDialogAktorFor)
-                .map(FunksjonelleMetrikker::nyDialogBrukerMetrikk)
+                .map(FunksjonelleMetrikker::nyDialogBruker)
                 .map(this::opprettDialogForAktivitetsplanResponse)
                 .orElseThrow(RuntimeException::new);
     }
@@ -108,7 +108,7 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(r -> soapServiceMapper.somHenvendelseData(r, personIdent))
                 .map(appService::opprettHenvendelseForDialog)
                 .map(this::markerDialogSomLest)
-                .map(FunksjonelleMetrikker::nyHenvendelseBrukerMetrikk)
+                .map(FunksjonelleMetrikker::nyHenvendelseBruker)
                 .ifPresent(this::updateDialogAktorFor);
     }
 

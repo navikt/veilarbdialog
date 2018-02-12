@@ -19,7 +19,7 @@ import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 
 public class FunksjonelleMetrikker {
 
-    public static void oppdaterFerdigbehandletTidspunktMetrikk(DialogData dialog, DialogStatus dialogStatus) {
+    public static void oppdaterFerdigbehandletTidspunkt(DialogData dialog, DialogStatus dialogStatus) {
         if(dialog.erFerdigbehandlet() == dialogStatus.ferdigbehandlet)
             return;
 
@@ -34,30 +34,30 @@ public class FunksjonelleMetrikker {
         event.report();
     }
 
-    public static void merkDialogSomLestAvBrukerMetrikk(DialogData dialogData) {
-        Optional<Long> readTime = tidSidenSiteMeldingSom(dialogData, erIkkeLestAvBruker());
-        readTime.ifPresent(FunksjonelleMetrikker::sendMarkerSomLestAvBrukerMetrikk);
+    public static void markerDialogSomLestAvBruker(DialogData dialogData) {
+        Optional<Long> readTime = tidSidenSisteMeldingSom(dialogData, erIkkeLestAvBruker());
+        readTime.ifPresent(FunksjonelleMetrikker::sendMarkerSomLestAvBruker);
     }
 
-    public static void markerSomLestAvVeilederMetrikk(DialogData dialogData) {
-        Optional<Long> readTime = tidSidenSiteMeldingSom(dialogData, erIkkeLestAvVeileder());
-        readTime.ifPresent(FunksjonelleMetrikker::sendMarkerSomLestAvVeilederMetrikk);
+    public static void markerDialogSomLestAvVeileder(DialogData dialogData) {
+        Optional<Long> readTime = tidSidenSisteMeldingSom(dialogData, erIkkeLestAvVeileder());
+        readTime.ifPresent(FunksjonelleMetrikker::sendMarkerSomLestAvVeileder);
     }
 
-    public static DialogData nyDialogBrukerMetrikk(DialogData dialogData) {
+    public static DialogData nyDialogBruker(DialogData dialogData) {
         reportMetrikkMedPaaAktivitet("dialog.bruker.ny", dialogData);
         return dialogData;
     }
 
-    public static void nyHenvedelseVeilederMetrikk(DialogData dialogMedNyHenvendelse) {
+    public static void nyHenvedelseVeileder(DialogData dialogMedNyHenvendelse) {
         reportMetrikkMedPaaAktivitet("henvendelse.veileder.ny", dialogMedNyHenvendelse);
     }
 
-    public static void nyDialogVeilederMetrikk(DialogData nyDialog) {
+    public static void nyDialogVeileder(DialogData nyDialog) {
         reportMetrikkMedPaaAktivitet("dialog.veileder.ny", nyDialog);
     }
 
-    public static void oppdaterVenterSvarMetrikk(DialogStatus nyStatus, DialogData eksisterendeData) {
+    public static void oppdaterVenterSvar(DialogStatus nyStatus, DialogData eksisterendeData) {
         if(nyStatus.venterPaSvar == eksisterendeData.venterPaSvar())
             return;
 
@@ -68,12 +68,12 @@ public class FunksjonelleMetrikker {
                 .report();
     }
 
-    public static DialogData nyHenvendelseBrukerMetrikk(DialogData dialogData) {
+    public static DialogData nyHenvendelseBruker(DialogData dialogData) {
         Event event = MetricsFactory
                 .createEvent("henvendelse.bruker.ny")
                 .addFieldToReport("paaAktivitet", notNullOrEmpty(dialogData.getAktivitetId()));
 
-        boolean svartPaa = isSvartpaa(dialogData);
+        boolean svartPaa = isSvartPaa(dialogData);
         event.addFieldToReport("erSvar", svartPaa);
         if (svartPaa) {
             event.addFieldToReport("svartid", msSiden(dialogData.getVenterPaSvarTidspunkt()));
@@ -90,7 +90,7 @@ public class FunksjonelleMetrikker {
                 .report();
     }
 
-    private static boolean isSvartpaa(DialogData dialogData) {
+    private static boolean isSvartPaa(DialogData dialogData) {
         Date venterPaSvarTidspunkt = dialogData.getVenterPaSvarTidspunkt();
         if (venterPaSvarTidspunkt == null)
             return false;
@@ -103,7 +103,7 @@ public class FunksjonelleMetrikker {
         return collect.size() == 1;
     }
 
-    private static Optional<Long> tidSidenSiteMeldingSom(DialogData dialogData, Predicate<HenvendelseData> ikkeLestAv) {
+    private static Optional<Long> tidSidenSisteMeldingSom(DialogData dialogData, Predicate<HenvendelseData> ikkeLestAv) {
         return dialogData.getHenvendelser().stream()
                 .filter(ikkeLestAv)
                 .map(HenvendelseData::getSendt)
@@ -111,12 +111,12 @@ public class FunksjonelleMetrikker {
                 .map(DateUtils::msSiden);
     }
 
-    private static void sendMarkerSomLestAvBrukerMetrikk(Long time) {
-        sendMarkerSomLesMetrikk(time, "bruker");
+    private static void sendMarkerSomLestAvBruker(Long time) {
+        sendMarkerSomLestMetrikk(time, "bruker");
     }
 
-    private static void sendMarkerSomLestAvVeilederMetrikk(Long time) {
-        sendMarkerSomLesMetrikk(time, "veileder");
+    private static void sendMarkerSomLestAvVeileder(Long time) {
+        sendMarkerSomLestMetrikk(time, "veileder");
     }
 
     private static Predicate<HenvendelseData> erIkkeLestAvBruker() {
@@ -127,7 +127,7 @@ public class FunksjonelleMetrikker {
         return h -> h.fraBruker() && !h.lestAvVeileder;
     }
 
-    private static void sendMarkerSomLesMetrikk(Long time, String lestAv){
+    private static void sendMarkerSomLestMetrikk(Long time, String lestAv){
         MetricsFactory
                 .createEvent("dialog."+ lestAv + ".lest")
                 .addFieldToReport("ReadTime", time)
