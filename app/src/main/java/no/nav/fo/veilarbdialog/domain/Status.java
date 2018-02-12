@@ -45,4 +45,8 @@ public class Status {
             eldsteUlesteForBruker = date;
         }
     }
+
+    public void resetVenterPaBrukerSiden() {
+        venterPaSvarFraBruker = null;
+    }
 }

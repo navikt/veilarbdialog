@@ -49,12 +49,13 @@ class MetadataServiceTest {
     }
 
     @Test
-    public void nyHenvendelsePaEksisterendeDialogSkalKalleOppdatertStatusMedSammeStatus() {
+    public void nyHenvendelsePaEksisterendeDialogSkalResetteVenterPaaSvar() {
         DialogData dialogData = getDialogData();
         Date uniktTidspunkt = uniktTidspunkt();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
         Status status = MetadataService.getStatus(dialogData);
+        status.venterPaSvarFraBruker = null;
 
         metadataService.nyHenvendelse(dialogData, henvendelseData);
         verify(dialogDAO).oppdaterStatus(status);
