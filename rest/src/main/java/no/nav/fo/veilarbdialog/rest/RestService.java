@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
-import static no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker.nyDialogVeilederMetrikk;
+import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeileder;
+import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyHenvendelseVeileder;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
@@ -67,6 +68,7 @@ public class RestService implements DialogController, VeilederDialogController {
         );
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(dialogId);
         appService.updateDialogAktorFor(dialogData.getAktorId());
+        nyHenvendelseVeileder(dialogData);
         return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ? 
                 restMapper.somDialogDTO(dialogData) 
                 : null;
@@ -129,7 +131,7 @@ public class RestService implements DialogController, VeilederDialogController {
                         .collect(Collectors.toList()))
                 .build();
         DialogData opprettetDialog = appService.opprettDialogForAktivitetsplanPaIdent(dialogData);
-        nyDialogVeilederMetrikk(opprettetDialog);
+        nyDialogVeileder(opprettetDialog);
         return opprettetDialog;
     }
 

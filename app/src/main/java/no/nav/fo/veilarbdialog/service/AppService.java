@@ -12,6 +12,7 @@ import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 

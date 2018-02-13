@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.ws.provider;
 import no.nav.apiapp.soap.SoapTjeneste;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.service.AppService;
-import no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker;
+import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import no.nav.modig.core.context.SubjectHandler;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.binding.AktivitetDialogV1;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.meldinger.*;
@@ -71,7 +71,7 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(appService::opprettDialogForAktivitetsplanPaIdent)
                 .map(this::markerDialogSomLest)
                 .map(this::updateDialogAktorFor)
-                .map(FunkjsonelleMetrikker::nyDialogBrukerMetrikk)
+                .map(FunksjonelleMetrikker::nyDialogBruker)
                 .map(this::opprettDialogForAktivitetResponse)
                 .orElseThrow(RuntimeException::new);
     }
@@ -89,7 +89,7 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(dialogData -> appService.opprettDialogForAktivitetsplanPaIdent(dialogData))
                 .map(this::markerDialogSomLest)
                 .map(this::updateDialogAktorFor)
-                .map(FunkjsonelleMetrikker::nyDialogBrukerMetrikk)
+                .map(FunksjonelleMetrikker::nyDialogBruker)
                 .map(this::opprettDialogForAktivitetsplanResponse)
                 .orElseThrow(RuntimeException::new);
     }
@@ -101,6 +101,7 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(r -> soapServiceMapper.somHenvendelseData(r, personIdent))
                 .map(appService::opprettHenvendelseForDialog)
                 .map(this::markerDialogSomLest)
+                .map(FunksjonelleMetrikker::nyHenvendelseBruker)
                 .ifPresent(this::updateDialogAktorFor);
     }
 
