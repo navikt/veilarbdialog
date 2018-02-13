@@ -6,7 +6,7 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.domain.Status;
-import no.nav.fo.veilarbdialog.util.FunkjsonelleMetrikker;
+import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -37,7 +37,7 @@ public class MetadataService {
         if (status.eldsteUlesteForVeileder == null) {
             return dialogData;
         }
-        FunkjsonelleMetrikker.markerSomLestAvVeilederMetrikk(dialogData);
+        FunksjonelleMetrikker.markerDialogSomLestAvVeileder(dialogData);
 
         status.eldsteUlesteForVeileder = null;
         status.setLestAvVeilederTid(utilDAO.getTimestampFromDB());
@@ -50,7 +50,7 @@ public class MetadataService {
         if (status.eldsteUlesteForBruker == null) {
             return dialogData;
         }
-        FunkjsonelleMetrikker.merkDialogSomLestAvBrukerMetrikk(dialogData);
+        FunksjonelleMetrikker.markerDialogSomLestAvBruker(dialogData);
         status.eldsteUlesteForBruker = null;
         status.setLestAvBrukerTid(utilDAO.getTimestampFromDB());
         return dialogDAO.oppdaterStatus(status);
@@ -64,7 +64,7 @@ public class MetadataService {
             status.settVenterPaNavSiden(utilDAO.getTimestampFromDB());
         }
 
-        FunkjsonelleMetrikker.oppdaterFerdigbehandletTidspunktMetrikk(dialogData, dialogStatus);
+        FunksjonelleMetrikker.oppdaterFerdigbehandletTidspunkt(dialogData, dialogStatus);
         return dialogDAO.oppdaterStatus(status);
     }
 
@@ -75,7 +75,7 @@ public class MetadataService {
         } else {
             status.venterPaSvarFraBruker = null;
         }
-        FunkjsonelleMetrikker.oppdaterVenterSvarMetrikk(dialogStatus);
+        FunksjonelleMetrikker.oppdaterVenterSvar(dialogStatus);
         return dialogDAO.oppdaterStatus(status);
     }
 
@@ -101,10 +101,10 @@ public class MetadataService {
             status.settVenterPaNavSiden(henvendelseData.getSendt());
             status.setUlesteMeldingerForVeileder(henvendelseData.getSendt());
             status.resetVenterPaBrukerSiden();
-            FunkjsonelleMetrikker.nyHenvendelseBrukerMetrikk(dialogData);
+            FunksjonelleMetrikker.nyHenvendelseBruker(dialogData);
         } else {
             status.setUlesteMeldingerForBruker(henvendelseData.getSendt());
-            FunkjsonelleMetrikker.nyHenvedelseVeilederMetrikk(dialogData);
+            FunksjonelleMetrikker.nyHenvendelseVeileder(dialogData);
         }
         return status;
     }

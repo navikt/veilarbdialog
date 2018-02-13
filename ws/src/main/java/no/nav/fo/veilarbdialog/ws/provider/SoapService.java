@@ -101,7 +101,6 @@ public class SoapService implements AktivitetDialogV1 {
                 .map(r -> soapServiceMapper.somHenvendelseData(r, personIdent))
                 .map(appService::opprettHenvendelseForDialog)
                 .map(this::markerDialogSomLest)
-                .map(FunksjonelleMetrikker::nyHenvendelseBruker)
                 .ifPresent(this::updateDialogAktorFor);
     }
 

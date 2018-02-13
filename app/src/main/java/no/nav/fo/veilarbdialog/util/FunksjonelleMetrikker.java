@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.util;
 
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
+import no.nav.metrics.Event;
 import no.nav.metrics.MetricsFactory;
 
 import static no.nav.fo.veilarbdialog.util.DateUtils.msSiden;
@@ -48,13 +49,14 @@ public class FunksjonelleMetrikker {
                 .report();
     }
 
-    public static void nyHenvendelseBruker(DialogData dialogData) {
+    public static DialogData nyHenvendelseBruker(DialogData dialogData) {
         Event event = MetricsFactory
                 .createEvent("henvendelse.bruker.ny")
                 .addFieldToReport("erSvar", dialogData.venterPaSvar())
                 .addFieldToReport("svartid", nullSafeMsSiden(dialogData.getVenterPaSvarFraBrukerSiden()));
         event = addDialogMetadata(event, dialogData);
         event.report();
+        return dialogData;
     }
 
     private static void reportDialogMedMetadata(String eventName, DialogData dialog) {
