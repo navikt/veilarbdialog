@@ -18,15 +18,15 @@ public class KvpFeedMetadataDAO {
 
     public long hentSisteId() {
         return database.queryForObject(
-                "SELECT SISTE_KVP_ID " +
-                        "FROM FEED_METADATA",
-                (rs) -> rs.getLong("SISTE_KVP_ID")
+                "SELECT SISTE_ID " +
+                        "FROM KVP_FEED_METADATA",
+                (rs) -> rs.getLong("SISTE_ID")
         );
     }
 
     public void oppdaterSisteFeedId(long id) {
         database.update(
-                "UPDATE FEED_METADATA SET SISTE_KVP_ID = ?", 
+                "UPDATE KVP_FEED_METADATA SET SISTE_ID = ?", 
                 id
         );
     }

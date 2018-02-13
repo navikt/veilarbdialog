@@ -19,15 +19,15 @@ public class FeedMetaDataDAO {
 
     public Date hentSisteLestTidspunkt() {
         return database.queryForObject(
-                "SELECT SISTE_OPPFOLGING_ID " +
+                "SELECT tidspunkt_siste_endring " +
                         "FROM FEED_METADATA",
-                (rs) -> Database.hentDato(rs, "SISTE_OPPFOLGING_ID")
+                (rs) -> Database.hentDato(rs, "tidspunkt_siste_endring")
         );
     }
 
     public void oppdaterSisteLest(Date date) {
         database.update(
-                "UPDATE FEED_METADATA SET SISTE_OPPFOLGING_ID = ?", 
+                "UPDATE FEED_METADATA SET tidspunkt_siste_endring = ?", 
                 date
         );
     }
