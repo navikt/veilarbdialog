@@ -55,12 +55,13 @@ class StatusServiceTest {
     }
 
     @Test
-    public void nyHenvendelsePaEksisterendeDialogSkalKalleOppdatertStatusMedSammeStatus() {
+    public void nyHenvendelsePaEksisterendeDialogSkalResetteVenterPaaSvar() {
         DialogData dialogData = getDialogData();
         Date uniktTidspunkt = uniktTidspunkt();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
         Status status = StatusService.getStatus(dialogData);
+        status.venterPaSvarFraBruker = null;
 
         statusService.nyHenvendelse(dialogData, henvendelseData);
         verify(dialogDAO).oppdaterStatus(status);

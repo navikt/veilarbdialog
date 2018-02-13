@@ -75,6 +75,7 @@ public class StatusService {
         Status status = getStatus(dialogData);
         if (henvendelseData.getAvsenderType() == AvsenderType.BRUKER) {
             status.setVenterPaNavSiden();
+            status.resetVenterPaBrukerSiden();
             status.setUlesteMeldingerForVeileder(henvendelseData.getSendt());
         } else {
             status.setUlesteMeldingerForBruker(henvendelseData.getSendt());
