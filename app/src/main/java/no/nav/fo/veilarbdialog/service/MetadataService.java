@@ -99,11 +99,12 @@ public class MetadataService {
         Status status = getStatus(dialogData);
         if (henvendelseData.fraBruker()) {
             status.settVenterPaNavSiden(henvendelseData.getSendt());
-            status.setUlesteMeldingerForVeileder(henvendelseData.getSendt());
             status.resetVenterPaBrukerSiden();
+            status.setLestAvBrukerTid(henvendelseData.getSendt());
             FunksjonelleMetrikker.nyHenvendelseBruker(dialogData);
         } else {
             status.setUlesteMeldingerForBruker(henvendelseData.getSendt());
+            status.setLestAvVeilederTid(henvendelseData.getSendt());
             FunksjonelleMetrikker.nyHenvendelseVeileder(dialogData);
         }
         return status;

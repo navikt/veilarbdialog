@@ -5,7 +5,8 @@ import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.metrics.Event;
 import no.nav.metrics.MetricsFactory;
 
-import static no.nav.fo.veilarbdialog.util.DateUtils.msSiden;
+import java.util.Date;
+
 import static no.nav.fo.veilarbdialog.util.DateUtils.nullSafeMsSiden;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 
@@ -20,13 +21,11 @@ public class FunksjonelleMetrikker {
     }
 
     public static void markerDialogSomLestAvBruker(DialogData dialogData) {
-        long ms = msSiden(dialogData.getEldsteUlesteTidspunktForBruker());
-        sendMarkerSomLestMetrikk(ms, "bruker");
+        sendMarkerSomLestMetrikk(dialogData.getEldsteUlesteTidspunktForBruker(), "bruker");
     }
 
     public static void markerDialogSomLestAvVeileder(DialogData dialogData) {
-        long ms = msSiden(dialogData.getEldsteUlesteTidspunktForVeileder());
-        sendMarkerSomLestMetrikk(ms, "veileder");
+        sendMarkerSomLestMetrikk(dialogData.getEldsteUlesteTidspunktForVeileder(), "veileder");
     }
 
     public static DialogData nyDialogBruker(DialogData dialogData) {
@@ -49,14 +48,13 @@ public class FunksjonelleMetrikker {
                 .report();
     }
 
-    public static DialogData nyHenvendelseBruker(DialogData dialogData) {
+    public static void nyHenvendelseBruker(DialogData dialogData) {
         Event event = MetricsFactory
                 .createEvent("henvendelse.bruker.ny")
                 .addFieldToReport("erSvar", dialogData.venterPaSvar())
                 .addFieldToReport("svartid", nullSafeMsSiden(dialogData.getVenterPaSvarFraBrukerSiden()));
         event = addDialogMetadata(event, dialogData);
         event.report();
-        return dialogData;
     }
 
     private static void reportDialogMedMetadata(String eventName, DialogData dialog) {
@@ -72,10 +70,10 @@ public class FunksjonelleMetrikker {
 
     }
 
-    private static void sendMarkerSomLestMetrikk(Long time, String lestAv) {
+    private static void sendMarkerSomLestMetrikk(Date eldsteUlesteTidspunkt, String lestAv) {
         MetricsFactory
                 .createEvent("dialog." + lestAv + ".lest")
-                .addFieldToReport("ReadTime", time)
+                .addFieldToReport("ReadTime", nullSafeMsSiden(eldsteUlesteTidspunkt))
                 .report();
     }
 

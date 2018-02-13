@@ -158,16 +158,6 @@ public class DialogDAO {
         return hentDialog(status.getDialogId());
     }
 
-    private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
-        return ofNullable(rs.getTimestamp(kolonneNavn))
-                .map(Timestamp::getTime)
-                .map(Date::new)
-                .orElse(null);
-    }
-
-    private static boolean erLest(Date leseTidspunkt, Date henvendelseTidspunkt) {
-        return leseTidspunkt != null && henvendelseTidspunkt.before(leseTidspunkt);
-    }
 
     private DialogData mapTilDialog(ResultSet rs) throws SQLException {
         long dialogId = rs.getLong("dialog_id");
@@ -222,5 +212,16 @@ public class DialogDAO {
                 .lestAvVeileder(erLest(hentDato(rs, "lest_av_veileder_tid"), henvendelseDato))
                 .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
                 .build();
+    }
+
+    private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
+        return ofNullable(rs.getTimestamp(kolonneNavn))
+                .map(Timestamp::getTime)
+                .map(Date::new)
+                .orElse(null);
+    }
+
+    private static boolean erLest(Date leseTidspunkt, Date henvendelseTidspunkt) {
+        return leseTidspunkt != null && !henvendelseTidspunkt.after(leseTidspunkt);
     }
 }
