@@ -46,6 +46,15 @@ public class DialogDAO {
     }
 
     @Transactional(readOnly = true)
+    public List<DialogData> hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(String aktorId, Date avsluttetDato) {
+        return database.query(SELECT_DIALOG + "WHERE d.aktor_id = ? AND historisk = 0 AND d.OPPRETTET_DATO < ? AND KONTORSPERRE_ENHET_ID is not null",
+                this::mapTilDialog,
+                aktorId,
+                avsluttetDato
+        );
+    }
+
+    @Transactional(readOnly = true)
     public List<DialogData> hentDialogerSomSkalAvsluttesForAktorId(String aktorId, Date avsluttetDato) {
         return database.query(SELECT_DIALOG + "WHERE d.aktor_id = ? AND historisk = 0 AND d.OPPRETTET_DATO < ?",
                 this::mapTilDialog,

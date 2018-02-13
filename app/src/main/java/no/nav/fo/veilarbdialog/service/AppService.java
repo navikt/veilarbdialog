@@ -117,6 +117,14 @@ public class AppService {
         return dialogFeedDAO.hentAktorerMedEndringerFOM(tidspunkt, pageSize);
     }
 
+    public void settKontorsperredeDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
+        // NB: ingen tilgangskontroll, brukes av vår feed-consumer
+        dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
+                .forEach(this::oppdaterDialogTilHistorisk);
+
+        updateDialogAktorFor(aktoerId);
+    }
+
     public void settDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
         // NB: ingen tilgangskontroll, brukes av vår feed-consumer
         dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
