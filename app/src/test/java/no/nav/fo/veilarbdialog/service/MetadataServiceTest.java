@@ -37,6 +37,7 @@ class MetadataServiceTest {
         Status forventetStatus = MetadataService.getStatus(dialogData);
         forventetStatus.settVenterPaNavSiden(uniktTidspunkt);
         forventetStatus.setUlesteMeldingerForVeileder(uniktTidspunkt);
+        forventetStatus.setLestAvBrukerTid(uniktTidspunkt);
 
         assertThat(status).isEqualTo(forventetStatus);
     }
@@ -51,9 +52,11 @@ class MetadataServiceTest {
         Status oppdatert = getDialogDAOOppdaterStatusArg();
 
         assertThat(oppdatert.eldsteUlesteForBruker).isEqualTo(uniktTidspunkt);
+        assertThat(oppdatert.getLestAvVeilederTid()).isEqualTo(uniktTidspunkt);
 
         Status forventetStatus = MetadataService.getStatus(dialogData);
         forventetStatus.eldsteUlesteForBruker = uniktTidspunkt;
+        forventetStatus.setLestAvVeilederTid(uniktTidspunkt);
 
         assertThat(oppdatert).isEqualTo(forventetStatus);
     }
@@ -68,9 +71,11 @@ class MetadataServiceTest {
 
         Status status = getDialogDAOOppdaterStatusArg();
         assertThat(status.venterPaSvarFraBruker).isNull();
+        assertThat(status.getLestAvBrukerTid()).isEqualTo(uniktTidspunkt);
 
         Status forventetStatus = MetadataService.getStatus(dialogData);
         forventetStatus.venterPaSvarFraBruker = null;
+        forventetStatus.setLestAvBrukerTid(uniktTidspunkt);
         assertThat(status).isEqualTo(forventetStatus);
     }
 
