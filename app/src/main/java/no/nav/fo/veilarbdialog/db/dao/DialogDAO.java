@@ -92,7 +92,8 @@ public class DialogDAO {
         long dialogId = database.nesteFraSekvens("DIALOG_ID_SEQ");
 
         database.update("INSERT INTO " +
-                        "DIALOG (dialog_id, " +
+                        "DIALOG (" +
+                        "dialog_id, " +
                         "aktor_id, " +
                         "opprettet_dato, " +
                         "aktivitet_id, " +
