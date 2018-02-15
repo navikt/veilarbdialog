@@ -23,10 +23,6 @@ public class MetadataService {
 
 
     public DialogData nyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
-        if (henvendelseData.getSendt() == null) {
-            throw new IllegalArgumentException("HenvendelseData må ha Sendt-tidspunkt");
-        }
-
         DialogStatusOppdaterer status = lagStatusForNyHenvendelse(dialogData, henvendelseData);
         return dialogDAO.oppdaterStatus(status);
     }
