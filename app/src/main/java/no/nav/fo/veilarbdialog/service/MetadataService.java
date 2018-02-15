@@ -1,25 +1,24 @@
 package no.nav.fo.veilarbdialog.service;
 
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
-import no.nav.fo.veilarbdialog.db.dao.UtilDAO;
-import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.DialogStatus;
-import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.domain.Status;
+import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 
+import static no.nav.fo.veilarbdialog.domain.BooleanUpdateEnum.TRUE;
+import static no.nav.fo.veilarbdialog.domain.DateUpdateEnum.NOW;
+import static no.nav.fo.veilarbdialog.domain.DateUpdateEnum.NULL;
+import static no.nav.fo.veilarbdialog.domain.DateUpdateEnum.NYESTE_HENVENDELSE;
+
 @Component
 public class MetadataService {
     private final DialogDAO dialogDAO;
-    private final UtilDAO utilDAO;
 
     @Inject
-    public MetadataService(DialogDAO dialogDAO, UtilDAO utilDAO) {
+    public MetadataService(DialogDAO dialogDAO) {
         this.dialogDAO = dialogDAO;
-        this.utilDAO = utilDAO;
     }
 
 
@@ -28,86 +27,92 @@ public class MetadataService {
             throw new IllegalArgumentException("HenvendelseData må ha Sendt-tidspunkt");
         }
 
-        Status status = lagStatusForNyHenvendelse(dialogData, henvendelseData);
+        DialogStatusOppdaterer status = lagStatusForNyHenvendelse(dialogData, henvendelseData);
         return dialogDAO.oppdaterStatus(status);
     }
 
     public DialogData markerSomLestAvVeileder(DialogData dialogData) {
-        Status status = getStatus(dialogData);
-        if (status.eldsteUlesteForVeileder == null) {
+        if (dialogData.erLestAvVeileder()) {
             return dialogData;
         }
+        DialogStatusOppdaterer oppdaterer = new DialogStatusOppdaterer(dialogData.getId());
+        oppdaterer.lestAvVeileder();
         FunksjonelleMetrikker.markerDialogSomLestAvVeileder(dialogData);
 
-        status.eldsteUlesteForVeileder = null;
-        status.setLestAvVeilederTid(utilDAO.getTimestampFromDB());
-
-        return dialogDAO.oppdaterStatus(status);
+        return dialogDAO.oppdaterStatus(oppdaterer);
     }
 
     public DialogData markerSomLestAvBruker(DialogData dialogData) {
-        Status status = getStatus(dialogData);
-        if (status.eldsteUlesteForBruker == null) {
+        if (dialogData.erLestAvBruker()) {
             return dialogData;
         }
+        DialogStatusOppdaterer oppdaterer = new DialogStatusOppdaterer(dialogData.getId());
+        oppdaterer.lestAvBruker();
         FunksjonelleMetrikker.markerDialogSomLestAvBruker(dialogData);
-        status.eldsteUlesteForBruker = null;
-        status.setLestAvBrukerTid(utilDAO.getTimestampFromDB());
-        return dialogDAO.oppdaterStatus(status);
+        return dialogDAO.oppdaterStatus(oppdaterer);
     }
 
     public DialogData oppdaterVenterPaNavSiden(DialogData dialogData, DialogStatus dialogStatus) {
-        Status status = getStatus(dialogData);
+        DialogStatusOppdaterer oppdaterer = new DialogStatusOppdaterer(dialogStatus.getDialogId());
         if (dialogStatus.ferdigbehandlet) {
-            status.venterPaNavSiden = null;
+            oppdaterer.setVenterPaNavSiden(NULL);
         } else {
-            status.settVenterPaNavSiden(utilDAO.getTimestampFromDB());
+            oppdaterer.setVenterPaNavSiden(NOW);
         }
-
         FunksjonelleMetrikker.oppdaterFerdigbehandletTidspunkt(dialogData, dialogStatus);
-        return dialogDAO.oppdaterStatus(status);
+        return dialogDAO.oppdaterStatus(oppdaterer);
     }
 
-    public DialogData oppdaterVenterPaSvarFraBrukerSiden(DialogData dialogData, DialogStatus dialogStatus) {
-        Status status = getStatus(dialogData);
+    public DialogData oppdaterVenterPaSvarFraBrukerSiden(DialogStatus dialogStatus) {
+        DialogStatusOppdaterer oppdaterer = new DialogStatusOppdaterer(dialogStatus.getDialogId());
         if (dialogStatus.venterPaSvar) {
-            status.settVenterPaSvarFraBruker(utilDAO.getTimestampFromDB());
+            oppdaterer.setVenterPaSvarFraBruker(NOW);
         } else {
-            status.venterPaSvarFraBruker = null;
+            oppdaterer.setVenterPaSvarFraBruker(NULL);
         }
         FunksjonelleMetrikker.oppdaterVenterSvar(dialogStatus);
-        return dialogDAO.oppdaterStatus(status);
+        return dialogDAO.oppdaterStatus(oppdaterer);
     }
 
     public DialogData settDialogTilHistorisk(DialogData dialogData) {
-        Status status = new Status(dialogData.getId());
-        status.setHistorisk(true);
-        return dialogDAO.oppdaterStatus(status);
+        DialogStatusOppdaterer oppdaterer = new DialogStatusOppdaterer(dialogData.getId());
+        oppdaterer.setHistorisk(TRUE);
+        oppdaterer.setVenterPaNavSiden(NULL);
+        oppdaterer.setVenterPaSvarFraBruker(NULL);
+        return dialogDAO.oppdaterStatus(oppdaterer);
     }
 
-    public static Status getStatus(DialogData dialogData) {
-        Status status = new Status(dialogData.getId());
-        status.venterPaNavSiden = dialogData.getVenterPaNavSiden();
-        status.venterPaSvarFraBruker = dialogData.getVenterPaSvarFraBrukerSiden();
-        status.eldsteUlesteForBruker = dialogData.getEldsteUlesteTidspunktForBruker();
-        status.eldsteUlesteForVeileder = dialogData.getEldsteUlesteTidspunktForVeileder();
-        status.setHistorisk(dialogData.isHistorisk());
-        return status;
-    }
-
-    private Status lagStatusForNyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
-        Status status = getStatus(dialogData);
+    private DialogStatusOppdaterer lagStatusForNyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
+        DialogStatusOppdaterer oppdaterer;
         if (henvendelseData.fraBruker()) {
-            status.settVenterPaNavSiden(henvendelseData.getSendt());
-            status.setUlesteMeldingerForVeileder(henvendelseData.getSendt());
-            status.resetVenterPaBrukerSiden();
-            status.setLestAvBrukerTid(henvendelseData.getSendt());
+            oppdaterer = nyHenvendelseFraBruker(dialogData);
             FunksjonelleMetrikker.nyHenvendelseBruker(dialogData);
         } else {
-            status.setUlesteMeldingerForBruker(henvendelseData.getSendt());
-            status.setLestAvVeilederTid(henvendelseData.getSendt());
+            oppdaterer = nyHenvendelseFraVeileder(dialogData);
             FunksjonelleMetrikker.nyHenvendelseVeileder(dialogData);
         }
-        return status;
+        return oppdaterer;
+    }
+
+    private DialogStatusOppdaterer nyHenvendelseFraVeileder(DialogData dialogData) {
+        DialogStatusOppdaterer oppdaterer = new DialogStatusOppdaterer(dialogData.getId());
+        if (dialogData.erLestAvBruker()) {
+            oppdaterer.setEldsteUlesteForBruker(NYESTE_HENVENDELSE);
+        }
+        return oppdaterer;
+    }
+
+    private DialogStatusOppdaterer nyHenvendelseFraBruker(DialogData dialogData) {
+        DialogStatusOppdaterer oppdaterer = new DialogStatusOppdaterer(dialogData.getId());
+        if (dialogData.venterPaSvar()) {
+            oppdaterer.setVenterPaSvarFraBruker(NULL);
+        }
+        if (dialogData.erLestAvVeileder()) {
+            oppdaterer.setEldsteUlesteForVeileder(NYESTE_HENVENDELSE);
+        }
+        if (dialogData.erFerdigbehandlet()) {
+            oppdaterer.setVenterPaNavSiden(NYESTE_HENVENDELSE);
+        }
+        return oppdaterer;
     }
 }

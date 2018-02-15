@@ -129,10 +129,9 @@ public class DialogDAO {
                         "kontorsperre_enhet_id, " +
                         "avsender_id, " +
                         "avsender_type) " +
-                        "VALUES (?,?,?,?,?,?,?)",
+                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?)",
                 henvendelseId,
                 henvendelseData.dialogId,
-                henvendelseData.sendt,
                 henvendelseData.tekst,
                 henvendelseData.kontorsperreEnhetId,
                 henvendelseData.avsenderId,
@@ -143,30 +142,34 @@ public class DialogDAO {
         return henvendelseId;
     }
 
-    public DialogData oppdaterStatus(Status status) {
+    public DialogData oppdaterStatus(DialogStatusOppdaterer status) {
+
         database.update("" +
                         "UPDATE DIALOG SET " +
-                        VENTER_PA_NAV_SIDEN + " = ?, " +
-                        VENTER_PA_SVAR_FRA_BRUKER + " = ?, " +
-                        ELDSTE_ULESTE_FOR_BRUKER + " = ?, " +
-                        ELDSTE_ULESTE_FOR_VEILEDER + " = ?, " +
-                        LEST_AV_BRUKER_TID + " = ?, " +
-                        LEST_AV_VEILEDER_TID + " = ?, " +
-                        HISTORISK + " = ?, " +
+                        status.getVenterPaNavSiden().toSQL(VENTER_PA_NAV_SIDEN) + ", " +
+                        status.getVenterPaSvarFraBruker().toSQL(VENTER_PA_SVAR_FRA_BRUKER) + ", " +
+                        status.getEldsteUlesteForBruker().toSQL(ELDSTE_ULESTE_FOR_BRUKER) + ", " +
+                        status.getEldsteUlesteForVeileder().toSQL(ELDSTE_ULESTE_FOR_VEILEDER) + ", " +
+                        status.getLestAvBrukerTid().toSQL(LEST_AV_BRUKER_TID) + ", " +
+                        status.getLestAvVeilederTid().toSQL(LEST_AV_VEILEDER_TID) + ", " +
+                        status.getHistorisk().toSQL(HISTORISK) + ", " +
                         OPPDATERT + " = " + dateProvider.getNow() + " " +
                         "WHERE " + DIALOG_ID + " = ?",
-                status.getVenterPaNavSiden(),
-                status.getVenterPaSvarFraBruker(),
-                status.getEldsteUlesteForBruker(),
-                status.getEldsteUlesteForVeileder(),
-                status.getLestAvBrukerTid(),
-                status.getLestAvVeilederTid(),
-                status.getHistorisk(),
                 status.getDialogId());
 
         return hentDialog(status.getDialogId());
     }
 
+    private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
+        return ofNullable(rs.getTimestamp(kolonneNavn))
+                .map(Timestamp::getTime)
+                .map(Date::new)
+                .orElse(null);
+    }
+
+    private static boolean erLest(Date eldsteUleste, Date henvendelseTidspunkt) {
+        return eldsteUleste == null || henvendelseTidspunkt.before(eldsteUleste);
+    }
 
     private DialogData mapTilDialog(ResultSet rs) throws SQLException {
         long dialogId = rs.getLong("dialog_id");
@@ -217,20 +220,10 @@ public class DialogDAO {
                 .tekst(rs.getString("tekst"))
                 .avsenderId(rs.getString("avsender_id"))
                 .avsenderType(EnumUtils.valueOf(AvsenderType.class, rs.getString("avsender_type")))
-                .lestAvBruker(erLest(hentDato(rs, "lest_av_bruker_tid"), henvendelseDato))
-                .lestAvVeileder(erLest(hentDato(rs, "lest_av_veileder_tid"), henvendelseDato))
+                .lestAvBruker(erLest(hentDato(rs, ELDSTE_ULESTE_FOR_BRUKER), henvendelseDato))
+                .lestAvVeileder(erLest(hentDato(rs, ELDSTE_ULESTE_FOR_VEILEDER), henvendelseDato))
                 .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
                 .build();
     }
 
-    private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
-        return ofNullable(rs.getTimestamp(kolonneNavn))
-                .map(Timestamp::getTime)
-                .map(Date::new)
-                .orElse(null);
-    }
-
-    private static boolean erLest(Date leseTidspunkt, Date henvendelseTidspunkt) {
-        return leseTidspunkt != null && !henvendelseTidspunkt.after(leseTidspunkt);
-    }
 }

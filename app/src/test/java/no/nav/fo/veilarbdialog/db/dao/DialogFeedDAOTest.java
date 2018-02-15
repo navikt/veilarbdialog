@@ -24,9 +24,6 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
     private DialogDAO dialogDAO;
 
     @Inject
-    private UtilDAO utilDAO;
-
-    @Inject
     private MetadataService metadataService;
 
     @Inject
@@ -58,7 +55,7 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         DialogData nyDialog = nyDialog(AKTOR_ID);
         DialogData dialogData = dialogDAO.opprettDialog(nyDialog);
         long dialogId = dialogData.getId();
-        DialogData opdatert1 = metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, new DialogStatus(dialogId, true, false));
+        DialogData opdatert1 = metadataService.oppdaterVenterPaSvarFraBrukerSiden(new DialogStatus(dialogId, true, false));
         metadataService.oppdaterVenterPaNavSiden(opdatert1, new DialogStatus(dialogId, false, false));
         updateDialogAktorFor(AKTOR_ID);
 
@@ -96,9 +93,8 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         assertThat(dialogFeedDAO.hentAktorerMedEndringerFOM(forForsteStatusOppdatering, 500)).isEmpty();
 
         DialogStatus.DialogStatusBuilder dialogStatusBuilder = builder().dialogId(dialogId);
-        DialogData oppdatert = dialogDAO.hentDialog(dialogId);
 
-        metadataService.oppdaterVenterPaSvarFraBrukerSiden(oppdatert, dialogStatusBuilder
+        metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatusBuilder
                 .venterPaSvar(true)
                 .build());
 

@@ -7,12 +7,10 @@ import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
-import no.nav.fo.veilarbdialog.db.dao.UtilDAO;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +24,6 @@ public class AppService {
 
     private final AktorService aktorService;
     private final DialogDAO dialogDAO;
-    private final UtilDAO utilDAO;
     private final MetadataService metadataService;
     private final DialogFeedDAO dialogFeedDAO;
     private final PepClient pepClient;
@@ -34,14 +31,12 @@ public class AppService {
 
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
-                      UtilDAO utilDAO,
                       MetadataService metadataService,
                       DialogFeedDAO dialogFeedDAO,
                       PepClient pepClient,
                       KvpClient kvpClient) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
-        this.utilDAO = utilDAO;
         this.metadataService = metadataService;
         this.dialogFeedDAO = dialogFeedDAO;
         this.pepClient = pepClient;
@@ -64,7 +59,6 @@ public class AppService {
         long dialogId = henvendelseData.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         HenvendelseData henvendelse = henvendelseData
-                .withSendt(utilDAO.getTimestampFromDB())
                 .withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
 
         dialogDAO.opprettHenvendelse(henvendelse);
@@ -96,8 +90,8 @@ public class AppService {
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
-        return metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
+        sjekkSkriveTilgangTilDialog(dialogId);
+        return metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatus);
     }
 
     @Transactional(readOnly = true)

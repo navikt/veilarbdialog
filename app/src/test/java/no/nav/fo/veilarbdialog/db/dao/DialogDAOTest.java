@@ -3,10 +3,7 @@ package no.nav.fo.veilarbdialog.db.dao;
 import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.fo.IntegrasjonsTest;
-import no.nav.fo.veilarbdialog.domain.AvsenderType;
-import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.domain.Status;
+import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.MetadataService;
 import org.junit.Test;
 
@@ -136,7 +133,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("gammel").kontorsperreEnhetId("123").build());
         Thread.sleep(10);
         Date avslutningsdato = new Date();
-        
+
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").kontorsperreEnhetId("123").build());
 
         List<DialogData> dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
@@ -150,7 +147,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("med_sperre").kontorsperreEnhetId("123").build());
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("uten_sperre").build());
         Thread.sleep(10);
-        Date avslutningsdato = new Date();       
+        Date avslutningsdato = new Date();
 
         val dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
         assertThat(dialoger).hasSize(1);
@@ -161,21 +158,27 @@ public class DialogDAOTest extends IntegrasjonsTest {
     public void skalOppdatereStatus() {
         DialogData dialog = dialogDAO.opprettDialog(nyDialog());
 
-        Status status = new Status(dialog.getId());
-        status.setHistorisk(true);
-        status.settVenterPaSvarFraBruker(uniktTidspunkt());
-        status.settVenterPaNavSiden(uniktTidspunkt());
-        status.setUlesteMeldingerForVeileder(uniktTidspunkt());
-        status.setUlesteMeldingerForBruker(uniktTidspunkt());
+        DialogStatusOppdaterer oppdaterer = new DialogStatusOppdaterer(dialog.getId());
+        oppdaterer.setHistorisk(BooleanUpdateEnum.TRUE);
+        oppdaterer.setVenterPaSvarFraBruker(DateUpdateEnum.NOW);
+        oppdaterer.setVenterPaNavSiden(DateUpdateEnum.NOW);
+        oppdaterer.setLestAvBrukerTid(DateUpdateEnum.NOW);
+        oppdaterer.setEldsteUlesteForBruker(DateUpdateEnum.NOW);
+        oppdaterer.setEldsteUlesteForVeileder(DateUpdateEnum.NOW);
+        oppdaterer.setLestAvVeilederTid(DateUpdateEnum.NOW);
 
         Date uniktTidspunkt = uniktTidspunkt();
-        dialogDAO.oppdaterStatus(status);
+        dialogDAO.oppdaterStatus(oppdaterer);
 
         DialogData dialogData = dialogDAO.hentDialog(dialog.getId());
-        Status oppdatert = MetadataService.getStatus(dialogData);
 
-        assertThat(oppdatert).isEqualTo(status);
         assertThat(dialogData.getOppdatert()).isAfter(uniktTidspunkt);
+        assertThat(dialogData.getLestAvBrukerTidspunkt()).isAfter(uniktTidspunkt);
+        assertThat(dialogData.getLestAvVeilederTidspunkt()).isAfter(uniktTidspunkt);
+        assertThat(dialogData.getVenterPaNavSiden()).isAfter(uniktTidspunkt);
+        assertThat(dialogData.getVenterPaSvarFraBrukerSiden()).isAfter(uniktTidspunkt);
+        assertThat(dialogData.getEldsteUlesteTidspunktForBruker()).isAfter(uniktTidspunkt);
+        assertThat(dialogData.getEldsteUlesteTidspunktForVeileder()).isAfter(uniktTidspunkt);
     }
 
     @Test
