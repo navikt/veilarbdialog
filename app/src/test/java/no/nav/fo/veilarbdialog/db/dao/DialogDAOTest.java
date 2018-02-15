@@ -4,7 +4,6 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.fo.IntegrasjonsTest;
 import no.nav.fo.veilarbdialog.domain.*;
-import no.nav.fo.veilarbdialog.service.MetadataService;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -77,12 +76,21 @@ public class DialogDAOTest extends IntegrasjonsTest {
         DialogData dialogData = opprettNyDialog(AKTOR_ID_1234);
         HenvendelseData henvendelseData = nyHenvendelse(dialogData.getId(), AKTOR_ID_1234, AvsenderType.BRUKER);
 
+        Date uniktTidspunkt = uniktTidspunkt();
         long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
         List<HenvendelseData> henvendelser = dialogDAO.hentDialog(dialogData.getId()).getHenvendelser();
 
         assertThat(henvendelser.size()).isEqualTo(1);
         HenvendelseData opprettet = henvendelser.get(0);
-        assertThat(opprettet).isEqualTo(henvendelseData.withId(henvendelseId));
+        assertThat(opprettet.getSendt()).isAfter(uniktTidspunkt);
+
+        HenvendelseData forventet = henvendelseData
+                .withId(henvendelseId)
+                .withLestAvBruker(true)
+                .withLestAvVeileder(true)
+                .withSendt(opprettet.getSendt());
+        assertThat(opprettet.getTekst()).isEqualTo(henvendelseData.getTekst());
+        assertThat(opprettet).isEqualTo(forventet);
     }
 
 
@@ -129,10 +137,9 @@ public class DialogDAOTest extends IntegrasjonsTest {
     }
 
     @Test
-    public void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() throws Exception {
+    public void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("gammel").kontorsperreEnhetId("123").build());
-        Thread.sleep(10);
-        Date avslutningsdato = new Date();
+        Date avslutningsdato = uniktTidspunkt();
 
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").kontorsperreEnhetId("123").build());
 
@@ -143,11 +150,10 @@ public class DialogDAOTest extends IntegrasjonsTest {
     }
 
     @Test
-    public void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerSomIkkeErKontorsperret() throws Exception {
+    public void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerSomIkkeErKontorsperret() {
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("med_sperre").kontorsperreEnhetId("123").build());
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("uten_sperre").build());
-        Thread.sleep(10);
-        Date avslutningsdato = new Date();
+        Date avslutningsdato = uniktTidspunkt();
 
         val dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
         assertThat(dialoger).hasSize(1);
