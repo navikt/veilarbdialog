@@ -66,7 +66,7 @@ public class FunksjonelleMetrikker {
     private static Event addDialogMetadata(Event event, DialogData dialog) {
         return event
                 .addFieldToReport("paaAktivitet", notNullOrEmpty(dialog.getAktivitetId()))
-                .addFieldToReport("kontorsperret", notNullOrEmpty(dialog.getKontorsperreEnhetId()));
+                .addFieldToReport("kontorsperre", notNullOrEmpty(dialog.getKontorsperreEnhetId()));
 
     }
 
@@ -75,8 +75,5 @@ public class FunksjonelleMetrikker {
                 .createEvent("dialog." + lestAv + ".lest")
                 .addFieldToReport("ReadTime", nullSafeMsSiden(eldsteUlesteTidspunkt))
                 .report();
-    }
-
-    private FunksjonelleMetrikker() {
     }
 }
