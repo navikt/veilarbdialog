@@ -13,16 +13,8 @@ public interface DialogController {
     @GET
     List<DialogDTO> hentDialoger();
 
-    @GET
-    @Path("/{fnr}")
-    List<DialogDTO> hentDialogerForBruker(@PathParam("fnr") String fnr);
-
     @POST
     DialogDTO nyHenvendelse(NyHenvendelseDTO nyHenvendelseDTO);
-
-    @POST
-    @Path("/{fnr}")
-    DialogDTO nyHenvendelseForBruker(@PathParam("fnr") String fnr, NyHenvendelseDTO nyHenvendelseDTO);
 
     @PUT
     @Path("/{dialogId}/les")
