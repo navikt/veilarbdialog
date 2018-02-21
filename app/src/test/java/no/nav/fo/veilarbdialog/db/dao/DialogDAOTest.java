@@ -77,7 +77,7 @@ public class DialogDAOTest extends IntegrasjonsTest {
         HenvendelseData henvendelseData = nyHenvendelse(dialogData.getId(), AKTOR_ID_1234, AvsenderType.BRUKER);
 
         Date uniktTidspunkt = uniktTidspunkt();
-        long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData);
+        long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData).getId();
         List<HenvendelseData> henvendelser = dialogDAO.hentDialog(dialogData.getId()).getHenvendelser();
 
         assertThat(henvendelser.size()).isEqualTo(1);
@@ -158,33 +158,6 @@ public class DialogDAOTest extends IntegrasjonsTest {
         val dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
         assertThat(dialoger).hasSize(1);
         assertThat(dialoger.get(0).getOverskrift()).isEqualTo("med_sperre");
-    }
-
-    @Test
-    public void skalOppdatereStatus() {
-        DialogData dialog = dialogDAO.opprettDialog(nyDialog());
-
-        DialogStatusOppdaterer oppdaterer = new DialogStatusOppdaterer(dialog.getId());
-        oppdaterer.setHistorisk(BooleanUpdateEnum.TRUE);
-        oppdaterer.setVenterPaSvarFraBruker(DateUpdateEnum.NOW);
-        oppdaterer.setVenterPaNavSiden(DateUpdateEnum.NOW);
-        oppdaterer.setLestAvBrukerTid(DateUpdateEnum.NOW);
-        oppdaterer.setEldsteUlesteForBruker(DateUpdateEnum.NOW);
-        oppdaterer.setEldsteUlesteForVeileder(DateUpdateEnum.NOW);
-        oppdaterer.setLestAvVeilederTid(DateUpdateEnum.NOW);
-
-        Date uniktTidspunkt = uniktTidspunkt();
-        dialogDAO.oppdaterStatus(oppdaterer);
-
-        DialogData dialogData = dialogDAO.hentDialog(dialog.getId());
-
-        assertThat(dialogData.getOppdatert()).isAfter(uniktTidspunkt);
-        assertThat(dialogData.getLestAvBrukerTidspunkt()).isAfter(uniktTidspunkt);
-        assertThat(dialogData.getLestAvVeilederTidspunkt()).isAfter(uniktTidspunkt);
-        assertThat(dialogData.getVenterPaNavSiden()).isAfter(uniktTidspunkt);
-        assertThat(dialogData.getVenterPaSvarFraBrukerSiden()).isAfter(uniktTidspunkt);
-        assertThat(dialogData.getEldsteUlesteTidspunktForBruker()).isAfter(uniktTidspunkt);
-        assertThat(dialogData.getEldsteUlesteTidspunktForVeileder()).isAfter(uniktTidspunkt);
     }
 
     @Test

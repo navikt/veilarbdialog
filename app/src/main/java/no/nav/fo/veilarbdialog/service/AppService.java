@@ -61,8 +61,8 @@ public class AppService {
         HenvendelseData henvendelse = henvendelseData
                 .withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
 
-        dialogDAO.opprettHenvendelse(henvendelse);
-        return metadataService.nyHenvendelse(dialogData, henvendelse);
+        HenvendelseData opprettet = dialogDAO.opprettHenvendelse(henvendelse);
+        return metadataService.nyHenvendelse(dialogData, opprettet);
     }
 
     @Transactional(readOnly = true)
@@ -164,6 +164,4 @@ public class AppService {
         }
         return dialogData;
     }
-
-
 }

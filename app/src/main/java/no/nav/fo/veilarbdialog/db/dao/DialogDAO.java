@@ -119,7 +119,7 @@ public class DialogDAO {
         return hentDialog(dialogId);
     }
 
-    public long opprettHenvendelse(HenvendelseData henvendelseData) {
+    public HenvendelseData opprettHenvendelse(HenvendelseData henvendelseData) {
         long henvendelseId = database.nesteFraSekvens("HENVENDELSE_ID_SEQ");
 
         database.update("INSERT INTO HENVENDELSE(" +
@@ -140,25 +140,7 @@ public class DialogDAO {
         );
 
         LOG.info("opprettet henvendelse id:{} data:{}", henvendelseId, henvendelseData);
-        return henvendelseId;
-    }
-
-    public DialogData oppdaterStatus(DialogStatusOppdaterer status) {
-
-        database.update("" +
-                        "UPDATE DIALOG SET " +
-                        status.getVenterPaNavSiden().toSQL(VENTER_PA_NAV_SIDEN) + ", " +
-                        status.getVenterPaSvarFraBruker().toSQL(VENTER_PA_SVAR_FRA_BRUKER) + ", " +
-                        status.getEldsteUlesteForBruker().toSQL(ELDSTE_ULESTE_FOR_BRUKER) + ", " +
-                        status.getEldsteUlesteForVeileder().toSQL(ELDSTE_ULESTE_FOR_VEILEDER) + ", " +
-                        status.getLestAvBrukerTid().toSQL(LEST_AV_BRUKER_TID) + ", " +
-                        status.getLestAvVeilederTid().toSQL(LEST_AV_VEILEDER_TID) + ", " +
-                        status.getHistorisk().toSQL(HISTORISK) + ", " +
-                        OPPDATERT + " = " + dateProvider.getNow() + " " +
-                        "WHERE " + DIALOG_ID + " = ?",
-                status.getDialogId());
-
-        return hentDialog(status.getDialogId());
+        return hentHenvendelse(henvendelseId);
     }
 
     private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
