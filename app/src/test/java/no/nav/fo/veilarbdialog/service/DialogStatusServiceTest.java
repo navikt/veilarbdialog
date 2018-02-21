@@ -12,18 +12,18 @@ import java.util.Date;
 import static java.lang.Thread.sleep;
 import static org.mockito.Mockito.*;
 
-class MetadataServiceTest {
+class DialogStatusServiceTest {
 
     private StatusDAO statusDAO = mock(StatusDAO.class);
     private DialogDAO dialogDAO = mock(DialogDAO.class);
-    private MetadataService metadataService = new MetadataService(statusDAO, dialogDAO);
+    private DialogStatusService dialogStatusService = new DialogStatusService(statusDAO, dialogDAO);
 
     @Test
     public void ny_henvendelse_fra_bruker_kaller_set_ny_melding_fra_bruker() {
         DialogData dialogData = TestDataBuilder.nyDialog();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt());
 
-        metadataService.nyHenvendelse(dialogData, henvendelseData);
+        dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
 
         verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), henvendelseData.getSendt(), henvendelseData.getSendt());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -35,7 +35,7 @@ class MetadataServiceTest {
         Date uniktTidspunkt = uniktTidspunkt();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
 
-        metadataService.nyHenvendelse(dialogData, henvendelseData);
+        dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
 
         verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), uniktTidspunkt, dialogData.getVenterPaNavSiden());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -49,7 +49,7 @@ class MetadataServiceTest {
 
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt());
 
-        metadataService.nyHenvendelse(dialogData, henvendelseData);
+        dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
 
         verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), dialogData.getEldsteUlesteTidspunktForVeileder(), dialogData.getVenterPaNavSiden());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -60,7 +60,7 @@ class MetadataServiceTest {
         DialogData dialogData = TestDataBuilder.nyDialog();
         HenvendelseData henvendelseData = nyHenvendelseFraVeileder(dialogData, uniktTidspunkt());
 
-        metadataService.nyHenvendelse(dialogData, henvendelseData);
+        dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
 
         verify(statusDAO, only()).setEldsteUlesteForBruker(dialogData.getId(), henvendelseData.getSendt());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -71,7 +71,7 @@ class MetadataServiceTest {
         DialogData dialogData = TestDataBuilder.nyDialog().withEldsteUlesteTidspunktForBruker(uniktTidspunkt());
         HenvendelseData henvendelseData = nyHenvendelseFraVeileder(dialogData, uniktTidspunkt());
 
-        metadataService.nyHenvendelse(dialogData, henvendelseData);
+        dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
 
         verify(statusDAO, only()).setEldsteUlesteForBruker(dialogData.getId(), dialogData.getEldsteUlesteTidspunktForBruker());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -81,7 +81,7 @@ class MetadataServiceTest {
     public void marker_som_lest_av_veileder_skal_sette_eldste_uleste_for_veileder_til_null() {
         DialogData dialogData = getDialogData().withEldsteUlesteTidspunktForVeileder(new Date());
 
-        metadataService.markerSomLestAvVeileder(dialogData);
+        dialogStatusService.markerSomLestAvVeileder(dialogData);
 
         verify(statusDAO, only()).markerSomLestAvVeileder(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -91,7 +91,7 @@ class MetadataServiceTest {
     public void marker_som_lest_av_bruker_skal_sette_eldste_uleste_for_bruker_til_null() {
         DialogData dialogData = getDialogData();
 
-        metadataService.markerSomLestAvBruker(dialogData);
+        dialogStatusService.markerSomLestAvBruker(dialogData);
 
         verify(statusDAO, only()).markerSomLestAvBruker(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -102,7 +102,7 @@ class MetadataServiceTest {
         DialogData dialogData = getDialogData().withVenterPaNavSiden(new Date());
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, true);
 
-        metadataService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
+        dialogStatusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
 
         verify(statusDAO, only()).setVenterPaNavTilNull(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -113,7 +113,7 @@ class MetadataServiceTest {
         DialogData dialogData = getDialogData().withVenterPaNavSiden(null);
 
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
-        metadataService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
+        dialogStatusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
 
         verify(statusDAO, only()).setVenterPaNavTilNaa(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -124,7 +124,7 @@ class MetadataServiceTest {
         DialogData dialogData = getDialogData();
 
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
-        metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatus);
+        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatus);
 
         verify(statusDAO, only()).setVenterPaSvarFraBrukerTilNull(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -135,7 +135,7 @@ class MetadataServiceTest {
         DialogData dialogData = getDialogData().withVenterPaSvarFraBrukerSiden(null);
 
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), true, true);
-        metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatus);
+        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatus);
 
         verify(statusDAO, only()).setVenterPaSvarFraBrukerTilNaa(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -144,7 +144,7 @@ class MetadataServiceTest {
     @Test
     public void nar_jeg_setter_dialog_til_historisk_forventer_jeg_at_statusdao_set_dialog_til_historisk_blir_kalt() {
         DialogData dialogData = getDialogData();
-        metadataService.settDialogTilHistorisk(dialogData);
+        dialogStatusService.settDialogTilHistorisk(dialogData);
         verify(statusDAO, only()).setHistorisk(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
     }

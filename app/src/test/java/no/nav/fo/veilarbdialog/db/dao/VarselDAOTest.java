@@ -5,7 +5,7 @@ import no.nav.fo.IntegrasjonsTest;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.service.MetadataService;
+import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.junit.Test;
 
@@ -27,7 +27,7 @@ public class VarselDAOTest extends IntegrasjonsTest {
     private DialogDAO dialogDAO;
 
     @Inject
-    private MetadataService metadataService;
+    private DialogStatusService dialogStatusService;
 
     @Inject
     private VarselDAO varselDAO;
@@ -123,7 +123,7 @@ public class VarselDAOTest extends IntegrasjonsTest {
 
     private HenvendelseData getHenvendelseData(DialogData dialogData) {
         HenvendelseData henvendelseData = nyHenvendelse(dialogData.getId(), AKTOR_ID, AvsenderType.VEILEDER).withSendt(new Date());
-        metadataService.nyHenvendelse(dialogData, henvendelseData);
+        dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
         return henvendelseData;
     }
 }

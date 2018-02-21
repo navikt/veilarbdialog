@@ -4,7 +4,7 @@ import lombok.SneakyThrows;
 import lombok.val;
 import no.nav.fo.IntegrasjonsTest;
 import no.nav.fo.veilarbdialog.domain.*;
-import no.nav.fo.veilarbdialog.service.MetadataService;
+import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import org.junit.Test;
 
 import javax.inject.Inject;
@@ -24,7 +24,7 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
     private DialogDAO dialogDAO;
 
     @Inject
-    private MetadataService metadataService;
+    private DialogStatusService dialogStatusService;
 
     @Inject
     private DialogFeedDAO dialogFeedDAO;
@@ -55,8 +55,8 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         DialogData nyDialog = nyDialog(AKTOR_ID);
         DialogData dialogData = dialogDAO.opprettDialog(nyDialog);
         long dialogId = dialogData.getId();
-        DialogData opdatert1 = metadataService.oppdaterVenterPaSvarFraBrukerSiden(new DialogStatus(dialogId, true, false));
-        metadataService.oppdaterVenterPaNavSiden(opdatert1, new DialogStatus(dialogId, false, false));
+        DialogData opdatert1 = dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(new DialogStatus(dialogId, true, false));
+        dialogStatusService.oppdaterVenterPaNavSiden(opdatert1, new DialogStatus(dialogId, false, false));
         updateDialogAktorFor(AKTOR_ID);
 
         List<DialogAktor> endringerForEttSekundSiden = dialogFeedDAO.hentAktorerMedEndringerFOM(ettSekundSiden, 500);
@@ -88,14 +88,14 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.BRUKER);
 
         dialogDAO.opprettHenvendelse(henvendelseData);
-        metadataService.nyHenvendelse(dialogData, henvendelseData);
+        dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
 
         Date forForsteStatusOppdatering = uniktTidspunkt();
         assertThat(dialogFeedDAO.hentAktorerMedEndringerFOM(forForsteStatusOppdatering, 500)).isEmpty();
 
         DialogStatus.DialogStatusBuilder dialogStatusBuilder = builder().dialogId(dialogId);
 
-        metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatusBuilder
+        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatusBuilder
                 .venterPaSvar(true)
                 .build());
 
@@ -111,7 +111,7 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         assertThat(dialogFeedDAO.hentAktorerMedEndringerFOM(forAndreStatusOppdatering, 500)).isEmpty();
 
         DialogData oppdatert2 = dialogDAO.hentDialog(dialogId);
-        metadataService.oppdaterVenterPaNavSiden(oppdatert2, dialogStatusBuilder
+        dialogStatusService.oppdaterVenterPaNavSiden(oppdatert2, dialogStatusBuilder
                 .ferdigbehandlet(true)
                 .build());
 
@@ -127,7 +127,7 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         Date forNyHenvendelse = uniktTidspunkt();
         HenvendelseData nyHenvendelse = nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.BRUKER);
         HenvendelseData nyOpprettetHenvendelse = dialogDAO.opprettHenvendelse(nyHenvendelse);
-        metadataService.nyHenvendelse(dialogDAO.hentDialog(dialogId), nyOpprettetHenvendelse);
+        dialogStatusService.nyHenvendelse(dialogDAO.hentDialog(dialogId), nyOpprettetHenvendelse);
         updateDialogAktorFor(AKTOR_ID);
 
         DialogAktor etterNyHenvenselse = hentAktorMedEndringerEtter(forNyHenvendelse);

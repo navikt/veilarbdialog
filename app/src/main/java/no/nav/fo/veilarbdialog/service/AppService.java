@@ -24,20 +24,20 @@ public class AppService {
 
     private final AktorService aktorService;
     private final DialogDAO dialogDAO;
-    private final MetadataService metadataService;
+    private final DialogStatusService dialogStatusService;
     private final DialogFeedDAO dialogFeedDAO;
     private final PepClient pepClient;
     private final KvpClient kvpClient;
 
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
-                      MetadataService metadataService,
+                      DialogStatusService dialogStatusService,
                       DialogFeedDAO dialogFeedDAO,
                       PepClient pepClient,
                       KvpClient kvpClient) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
-        this.metadataService = metadataService;
+        this.dialogStatusService = dialogStatusService;
         this.dialogFeedDAO = dialogFeedDAO;
         this.pepClient = pepClient;
         this.kvpClient = kvpClient;
@@ -62,7 +62,7 @@ public class AppService {
                 .withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
 
         HenvendelseData opprettet = dialogDAO.opprettHenvendelse(henvendelse);
-        return metadataService.nyHenvendelse(dialogData, opprettet);
+        return dialogStatusService.nyHenvendelse(dialogData, opprettet);
     }
 
     @Transactional(readOnly = true)
@@ -74,24 +74,24 @@ public class AppService {
 
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
-        return metadataService.markerSomLestAvVeileder(dialogData);
+        return dialogStatusService.markerSomLestAvVeileder(dialogData);
     }
 
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
-        return metadataService.markerSomLestAvBruker(dialogData);
+        return dialogStatusService.markerSomLestAvBruker(dialogData);
     }
 
     public DialogData oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
-        return metadataService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
+        return dialogStatusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
     }
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
         sjekkSkriveTilgangTilDialog(dialogId);
-        return metadataService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatus);
+        return dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatus);
     }
 
     @Transactional(readOnly = true)
@@ -137,7 +137,7 @@ public class AppService {
     }
 
     private void oppdaterDialogTilHistorisk(DialogData dialogData) {
-        metadataService.settDialogTilHistorisk(dialogData);
+        dialogStatusService.settDialogTilHistorisk(dialogData);
     }
 
     private String sjekkTilgangTilFnr(String ident) {

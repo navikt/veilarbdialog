@@ -12,12 +12,12 @@ import javax.inject.Inject;
 import java.util.Date;
 
 @Component
-public class MetadataService {
+public class DialogStatusService {
     private final StatusDAO statusDAO;
     private final DialogDAO dialogDAO;
 
     @Inject
-    public MetadataService(StatusDAO statusDAO, DialogDAO dialogDAO) {
+    public DialogStatusService(StatusDAO statusDAO, DialogDAO dialogDAO) {
         this.statusDAO = statusDAO;
         this.dialogDAO = dialogDAO;
     }
