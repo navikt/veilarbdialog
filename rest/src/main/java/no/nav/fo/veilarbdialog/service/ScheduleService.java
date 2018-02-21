@@ -59,7 +59,7 @@ public class ScheduleService {
     @Scheduled(cron = "${varslingsrate.cron}")
     public void sjekkForSendVarsel() {
         if (IS_MASTER) {
-            val aktorer = varselDAO.hentAktorerMedUlesteMeldinger(GRACE_PERIODE);
+            val aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(GRACE_PERIODE);
 
             LOG.info("Varsler {} brukere", aktorer.size());
             aktorer.forEach(this::sendVarsel);

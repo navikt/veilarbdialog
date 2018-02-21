@@ -1,12 +1,12 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import lombok.val;
 import no.nav.brukerdialog.security.context.SubjectHandler;
 import no.nav.fo.IntegrasjonsTest;
 import no.nav.fo.feed.FeedProducerTester;
 import no.nav.fo.feed.controller.FeedController;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
+import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.util.DateUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import java.sql.Timestamp;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
@@ -27,13 +28,13 @@ public class FeedIntegrationTest {
         @Override
         public void opprettElementForFeed(String feedName, String id) {
             setCurrentTimestamp(DateUtils.toDate(id).getTime());
-            val dialogId = dialogDAO.opprettDialog(nyDialog()
+            DialogData dialogData = dialogDAO.opprettDialog(nyDialog()
                     .withAktorId("aktorId")
             );
 
-            dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId, "aktorId", BRUKER));
+            dialogDAO.opprettHenvendelse(nyHenvendelse(dialogData.getId(), "aktorId", BRUKER).withSendt(new Date()));
 
-            val dialoger = dialogDAO.hentDialogerForAktorId("aktorId");
+            List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId("aktorId");
             dialogFeedDAO.updateDialogAktorFor("aktorId", dialoger);
         }
 
@@ -48,7 +49,7 @@ public class FeedIntegrationTest {
             dialogDAO.opprettDialog(nyDialog()
                     .withAktorId("aktorId")
             );
-            val dialoger = dialogDAO.hentDialogerForAktorId("aktorId");
+            List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId("aktorId");
             dialogFeedDAO.updateDialogAktorFor("aktorId", dialoger);
         }
     }

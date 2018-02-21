@@ -11,7 +11,6 @@ import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,38 +24,23 @@ public class AppService {
 
     private final AktorService aktorService;
     private final DialogDAO dialogDAO;
-    private final StatusService statusService;
+    private final DialogStatusService dialogStatusService;
     private final DialogFeedDAO dialogFeedDAO;
     private final PepClient pepClient;
     private final KvpClient kvpClient;
 
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
-                      StatusService statusService,
+                      DialogStatusService dialogStatusService,
                       DialogFeedDAO dialogFeedDAO,
-                      PepClient pepClient, KvpClient kvpClient) {
+                      PepClient pepClient,
+                      KvpClient kvpClient) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
-        this.statusService = statusService;
+        this.dialogStatusService = dialogStatusService;
         this.dialogFeedDAO = dialogFeedDAO;
         this.pepClient = pepClient;
         this.kvpClient = kvpClient;
-    }
-
-    /**
-     * Returnerer en kopi av AktivitetData-objektet hvor kontorsperreEnhetId
-     * er satt dersom brukeren er under KVP.
-     */
-    private DialogData tagMedKontorsperre(DialogData dialogData) {
-        return Optional.ofNullable(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()))
-                .map(dialogData::withKontorsperreEnhetId)
-                .orElse(dialogData);
-    }
-
-    private HenvendelseData tagMedKontorsperre(HenvendelseData henvendelseData, DialogData dialogData) {
-        return Optional.ofNullable(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()))
-                .map(henvendelseData::withKontorsperreEnhetId)
-                .orElse(henvendelseData);
     }
 
     @Transactional(readOnly = true)
@@ -67,18 +51,18 @@ public class AppService {
 
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
         sjekkTilgangTilAktorId(dialogData.getAktorId());
-        DialogData kontorsperretDialog = tagMedKontorsperre(dialogData);
-        long dialogId = dialogDAO.opprettDialog(kontorsperretDialog);
-        return hentDialogUtenTilgangskontroll(dialogId);
+        DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
+        return dialogDAO.opprettDialog(kontorsperretDialog);
     }
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
         long dialogId = henvendelseData.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
-        HenvendelseData kontorsperretHenvendelse = tagMedKontorsperre(henvendelseData, dialogData);
-        HenvendelseData opprettetHenvendelse = dialogDAO.opprettHenvendelse(kontorsperretHenvendelse);
-        statusService.nyHenvendelse(dialogData, opprettetHenvendelse);
-        return hentDialogUtenTilgangskontroll(dialogId);
+        HenvendelseData henvendelse = henvendelseData
+                .withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
+
+        HenvendelseData opprettet = dialogDAO.opprettHenvendelse(henvendelse);
+        return dialogStatusService.nyHenvendelse(dialogData, opprettet);
     }
 
     @Transactional(readOnly = true)
@@ -88,42 +72,26 @@ public class AppService {
         return dialogData;
     }
 
-    private DialogData hentDialogUtenTilgangskontroll(long dialogId) {
-        return dialogDAO.hentDialog(dialogId);
-    }
-
     public DialogData markerDialogSomLestAvVeileder(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
-        dialogDAO.markerDialogSomLestAvVeileder(dialogId);
-        statusService.markerSomLestAvVeileder(dialogData);
-        FunksjonelleMetrikker.markerDialogSomLestAvVeileder(dialogData);
-        return hentDialogUtenTilgangskontroll(dialogId);
+        return dialogStatusService.markerSomLestAvVeileder(dialogData);
     }
 
     public DialogData markerDialogSomLestAvBruker(long dialogId) {
         DialogData dialogData = sjekkLeseTilgangTilDialog(dialogId);
-        dialogDAO.markerDialogSomLestAvBruker(dialogId);
-        statusService.markerSomLestAvBruker(dialogData);
-        FunksjonelleMetrikker.markerDialogSomLestAvBruker(dialogData);
-        return hentDialogUtenTilgangskontroll(dialogId);
+        return dialogStatusService.markerSomLestAvBruker(dialogData);
     }
 
     public DialogData oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
-        dialogDAO.oppdaterFerdigbehandletTidspunkt(dialogStatus);
-        statusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
-        FunksjonelleMetrikker.oppdaterFerdigbehandletTidspunkt(dialogData, dialogStatus);
-        return hentDialogUtenTilgangskontroll(dialogId);
+        return dialogStatusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
     }
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
-        dialogDAO.oppdaterVentePaSvarTidspunkt(dialogStatus);
-        statusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
-        FunksjonelleMetrikker.oppdaterVenterSvar(dialogStatus, dialogData);
-        return hentDialogUtenTilgangskontroll(dialogId);
+        sjekkSkriveTilgangTilDialog(dialogId);
+        return dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatus);
     }
 
     @Transactional(readOnly = true)
@@ -164,9 +132,12 @@ public class AppService {
         dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
     }
 
+    private DialogData hentDialogUtenTilgangskontroll(long dialogId) {
+        return dialogDAO.hentDialog(dialogId);
+    }
+
     private void oppdaterDialogTilHistorisk(DialogData dialogData) {
-        dialogDAO.oppdaterDialogTilHistorisk(dialogData);
-        statusService.settDialogTilHistorisk(dialogData);
+        dialogStatusService.settDialogTilHistorisk(dialogData);
     }
 
     private String sjekkTilgangTilFnr(String ident) {
@@ -193,6 +164,4 @@ public class AppService {
         }
         return dialogData;
     }
-
-
 }

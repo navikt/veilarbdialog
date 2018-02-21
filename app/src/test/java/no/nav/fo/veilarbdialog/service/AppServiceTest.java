@@ -35,15 +35,16 @@ public class AppServiceTest {
     private static final DialogData DIALOG_DATA = DialogData.builder().id(DIALOG_ID).aktorId(AKTOR_ID).build();
 
     private final DialogDAO dialogDAO = mock(DialogDAO.class);
-    private final StatusService statusService = mock(StatusService.class);
+    private final DialogStatusService dialogStatusService = mock(DialogStatusService.class);
     private final DialogFeedDAO dialogFeedDAO = mock(DialogFeedDAO.class);
     private final AktorService aktorService = mock(AktorService.class);
     private final PepClient pepClient = mock(PepClient.class);
     private final KvpClient kvpClient = mock(KvpClient.class);
+
     private AppService appService = new AppService(
             aktorService,
             dialogDAO,
-            statusService,
+            dialogStatusService,
             dialogFeedDAO,
             pepClient,
             kvpClient);
@@ -60,7 +61,7 @@ public class AppServiceTest {
     }
 
     private void mockDialog(DialogData dialogData) {
-        when(dialogDAO.opprettDialog(DIALOG_DATA)).thenReturn(DIALOG_ID);
+        when(dialogDAO.opprettDialog(DIALOG_DATA)).thenReturn(dialogData);
         when(dialogDAO.hentDialog(DIALOG_ID)).thenReturn(dialogData);
         when(dialogDAO.hentDialogForAktivitetId(AKTIVITET_ID)).thenReturn(of(DIALOG_DATA));
     }

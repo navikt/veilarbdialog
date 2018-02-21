@@ -4,6 +4,7 @@ import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 
+import java.util.Date;
 import java.util.Random;
 
 import static java.util.Collections.emptyList;
@@ -26,6 +27,7 @@ public class TestDataBuilder {
         return HenvendelseData.builder()
                 .dialogId(dialogId)
                 .avsenderId(aktorId)
+                .sendt(new Date())
                 .avsenderType(avsenderType)
                 .tekst("ny henvendelse!")
                 .build();

@@ -5,7 +5,7 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import no.nav.modig.core.context.SubjectHandler;
-import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.binding.*;
+import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.binding.AktivitetDialogV1;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.meldinger.*;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +30,7 @@ public class SoapService implements AktivitetDialogV1 {
     }
 
     @Override
-    public HentDialogerForBrukerResponse hentDialogerForBruker(HentDialogerForBrukerRequest hentDialogerForBrukerRequest)
-            throws HentDialogerForBrukerPersonIkkeFunnet, HentDialogerForBrukerSikkerhetsbegrensning, HentDialogerForBrukerUgyldigInput {
+    public HentDialogerForBrukerResponse hentDialogerForBruker(HentDialogerForBrukerRequest hentDialogerForBrukerRequest) {
         String personIdent = hentDialogerForBrukerRequest.getPersonIdent();
         return of(personIdent)
                 .map(appService::hentDialogerForBruker)
@@ -46,14 +45,12 @@ public class SoapService implements AktivitetDialogV1 {
     }
 
     @Override
-    public HentDialogerForAktivitetResponse hentDialogerForAktivitet(HentDialogerForAktivitetRequest hentDialogerForAktivitetRequest)
-            throws HentDialogerForAktivitetSikkerhetsbegrensning, HentDialogerForAktivitetUgyldigInput {
+    public HentDialogerForAktivitetResponse hentDialogerForAktivitet(HentDialogerForAktivitetRequest hentDialogerForAktivitetRequest) {
         throw new UnsupportedOperationException("not implemented");
     }
 
     @Override
-    public HentDialogMedIdResponse hentDialogMedId(HentDialogMedIdRequest hentDialogMedIdRequest)
-            throws HentDialogMedIdSikkerhetsbegrensning, HentDialogMedIdUgyldigInput {
+    public HentDialogMedIdResponse hentDialogMedId(HentDialogMedIdRequest hentDialogMedIdRequest) {
         String personIdent = getPersonIdent();
         HentDialogMedIdResponse hentDialogMedIdResponse = new HentDialogMedIdResponse();
         hentDialogMedIdResponse.getDialogListe().add(soapServiceMapper.somWSDialog(appService.hentDialog(Long.parseLong(hentDialogMedIdRequest.getDialogId())), personIdent));
@@ -61,14 +58,12 @@ public class SoapService implements AktivitetDialogV1 {
     }
 
     @Override
-    public void markerDialogSomLest(MarkerDialogSomLestRequest markerDialogSomLestRequest)
-            throws MarkerDialogSomLestSikkerhetsbegrensning, MarkerDialogSomLestUgyldigInput {
+    public void markerDialogSomLest(MarkerDialogSomLestRequest markerDialogSomLestRequest) {
         appService.markerDialogSomLestAvBruker(Long.parseLong(markerDialogSomLestRequest.getDialogId()));
     }
 
     @Override
-    public OpprettDialogForAktivitetResponse opprettDialogForAktivitet(OpprettDialogForAktivitetRequest opprettDialogForAktivitetRequest)
-            throws OpprettDialogForAktivitetSikkerhetsbegrensning, OpprettDialogForAktivitetUgyldigInput {
+    public OpprettDialogForAktivitetResponse opprettDialogForAktivitet(OpprettDialogForAktivitetRequest opprettDialogForAktivitetRequest) {
         String personIdent = getPersonIdent();
 
         return of(opprettDialogForAktivitetRequest)
@@ -88,8 +83,7 @@ public class SoapService implements AktivitetDialogV1 {
     }
 
     @Override
-    public OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplan(OpprettDialogForAktivitetsplanRequest opprettDialogForAktivitetsplanRequest)
-            throws OpprettDialogForAktivitetsplanPersonIkkeFunnet, OpprettDialogForAktivitetsplanSikkerhetsbegrensning, OpprettDialogForAktivitetsplanUgyldigInput {
+    public OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplan(OpprettDialogForAktivitetsplanRequest opprettDialogForAktivitetsplanRequest) {
         return of(opprettDialogForAktivitetsplanRequest)
                 .map(soapServiceMapper::somDialogData)
                 .map(dialogData -> appService.opprettDialogForAktivitetsplanPaIdent(dialogData))
@@ -101,14 +95,12 @@ public class SoapService implements AktivitetDialogV1 {
     }
 
     @Override
-    public void opprettHenvendelseForDialog(OpprettHenvendelseForDialogRequest opprettHenvendelseForDialogRequest)
-            throws OpprettHenvendelseForDialogSikkerhetsbegrensning, OpprettHenvendelseForDialogUgyldigInput {
+    public void opprettHenvendelseForDialog(OpprettHenvendelseForDialogRequest opprettHenvendelseForDialogRequest) {
         String personIdent = getPersonIdent();
         of(opprettHenvendelseForDialogRequest)
                 .map(r -> soapServiceMapper.somHenvendelseData(r, personIdent))
                 .map(appService::opprettHenvendelseForDialog)
                 .map(this::markerDialogSomLest)
-                .map(FunksjonelleMetrikker::nyHenvendelseBruker)
                 .ifPresent(this::updateDialogAktorFor);
     }
 
