@@ -55,7 +55,7 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         DialogData nyDialog = nyDialog(AKTOR_ID);
         DialogData dialogData = dialogDAO.opprettDialog(nyDialog);
         long dialogId = dialogData.getId();
-        DialogData opdatert1 = dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(new DialogStatus(dialogId, true, false));
+        DialogData opdatert1 = dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, new DialogStatus(dialogId, true, false));
         dialogStatusService.oppdaterVenterPaNavSiden(opdatert1, new DialogStatus(dialogId, false, false));
         updateDialogAktorFor(AKTOR_ID);
 
@@ -95,7 +95,7 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
 
         DialogStatus.DialogStatusBuilder dialogStatusBuilder = builder().dialogId(dialogId);
 
-        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatusBuilder
+        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatusBuilder
                 .venterPaSvar(true)
                 .build());
 

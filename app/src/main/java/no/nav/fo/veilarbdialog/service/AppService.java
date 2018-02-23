@@ -52,7 +52,9 @@ public class AppService {
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
         sjekkTilgangTilAktorId(dialogData.getAktorId());
         DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
-        return dialogDAO.opprettDialog(kontorsperretDialog);
+        DialogData oprettet = dialogDAO.opprettDialog(kontorsperretDialog);
+        dialogStatusService.nyDialog(oprettet);
+        return oprettet;
     }
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
@@ -90,8 +92,8 @@ public class AppService {
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        sjekkSkriveTilgangTilDialog(dialogId);
-        return dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatus);
+        DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
+        return dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
     }
 
     @Transactional(readOnly = true)
