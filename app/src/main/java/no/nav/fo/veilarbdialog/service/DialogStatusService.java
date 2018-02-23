@@ -53,6 +53,9 @@ public class DialogStatusService {
     }
 
     public DialogData oppdaterVenterPaNavSiden(DialogData dialogData, DialogStatus dialogStatus) {
+        if(dialogData.erFerdigbehandlet() == dialogStatus.ferdigbehandlet) {
+            return dialogData;
+        }
         if (dialogStatus.ferdigbehandlet) {
             statusDAO.setVenterPaNavTilNull(dialogData.getId());
         } else {
@@ -62,7 +65,10 @@ public class DialogStatusService {
         return dialogDAO.hentDialog(dialogData.getId());
     }
 
-    public DialogData oppdaterVenterPaSvarFraBrukerSiden(DialogStatus dialogStatus) {
+    public DialogData oppdaterVenterPaSvarFraBrukerSiden(DialogData dialogData, DialogStatus dialogStatus) {
+        if(dialogData.venterPaSvar() == dialogStatus.venterPaSvar) {
+            return dialogData;
+        }
         if (dialogStatus.venterPaSvar) {
             statusDAO.setVenterPaSvarFraBrukerTilNaa(dialogStatus.getDialogId());
         } else {
@@ -80,6 +86,7 @@ public class DialogStatusService {
     private void nyMeldingFraVeileder(DialogData dialogData, HenvendelseData henvendelseData) {
         Date eldsteUlesteForBruker = getEldsteUlesteForBruker(dialogData, henvendelseData);
         statusDAO.setEldsteUlesteForBruker(dialogData.getId(), eldsteUlesteForBruker);
+        FunksjonelleMetrikker.nyHenvendelseVeileder(dialogData);
     }
 
     private Date getEldsteUlesteForBruker(DialogData dialogData, HenvendelseData henvendelseData) {
@@ -94,6 +101,7 @@ public class DialogStatusService {
                 eldsteUlesteForVeileder,
                 venterPaNavSiden
         );
+        FunksjonelleMetrikker.nyHenvendelseBruker(dialogData);
     }
 
     private Date getVenterPaNavSiden(DialogData dialogData, HenvendelseData henvendelseData) {
