@@ -110,7 +110,7 @@ public class DialogStatusService {
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_VEILEDER);
 
         Date eldsteUlesteForBruker = getEldsteUlesteForBruker(dialogData, henvendelseData);
-        FunksjonelleMetrikker.nyHenvendelseBruker(dialogData);
+        FunksjonelleMetrikker.nyHenvendelseVeileder(dialogData);
         statusDAO.setEldsteUlesteForBruker(dialogData.getId(), eldsteUlesteForBruker);
     }
 
