@@ -124,7 +124,7 @@ class DialogStatusServiceTest {
         DialogData dialogData = getDialogData();
 
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
-        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatus);
+        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
 
         verify(statusDAO, only()).setVenterPaSvarFraBrukerTilNull(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -135,7 +135,7 @@ class DialogStatusServiceTest {
         DialogData dialogData = getDialogData().withVenterPaSvarFraBrukerSiden(null);
 
         DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), true, true);
-        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatus);
+        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
 
         verify(statusDAO, only()).setVenterPaSvarFraBrukerTilNaa(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());

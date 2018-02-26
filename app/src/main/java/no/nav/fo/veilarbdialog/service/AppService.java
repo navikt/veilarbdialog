@@ -90,8 +90,8 @@ public class AppService {
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        sjekkSkriveTilgangTilDialog(dialogId);
-        return dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogStatus);
+        DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
+        return dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
     }
 
     @Transactional(readOnly = true)
