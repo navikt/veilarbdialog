@@ -8,7 +8,7 @@ CREATE TABLE EVENT (
   dialogid    NUMBER(19)    NOT NULL,
   event       NVARCHAR2(255) NOT NULL,
   tidspunkt   TIMESTAMP,
-  akor_id      NVARCHAR2(255),
+  aktor_id      NVARCHAR2(255),
   aktivitet_id NVARCHAR2(255),
   CONSTRAINT EVENT_PK PRIMARY KEY (event_id),
   CONSTRAINT EVENT_EVENT_TYPE_FK FOREIGN KEY (event) REFERENCES EVENT_TYPE (event)
@@ -35,7 +35,7 @@ CREATE VIEW DVH_Dialog_hendelse AS
     dialogid,
     event,
     tidspunkt,
-    akor_id,
+    aktor_id,
     aktivitet_id
   FROM EVENT;
 

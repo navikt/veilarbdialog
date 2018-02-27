@@ -42,9 +42,9 @@ public class DialogStatusService {
         if (dialogData.erLestAvVeileder()) {
             return dialogData;
         }
-        FunksjonelleMetrikker.markerDialogSomLestAvVeileder(dialogData);
         statusDAO.markerSomLestAvVeileder(dialogData.getId());
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.LEST_AV_VEILEDER);
+        FunksjonelleMetrikker.markerDialogSomLestAvVeileder(dialogData);
         return dialogDAO.hentDialog(dialogData.getId());
     }
 
@@ -110,8 +110,8 @@ public class DialogStatusService {
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_VEILEDER);
 
         Date eldsteUlesteForBruker = getEldsteUlesteForBruker(dialogData, henvendelseData);
-        FunksjonelleMetrikker.nyHenvendelseVeileder(dialogData);
         statusDAO.setEldsteUlesteForBruker(dialogData.getId(), eldsteUlesteForBruker);
+        FunksjonelleMetrikker.nyHenvendelseVeileder(dialogData);
     }
 
     private Date getEldsteUlesteForBruker(DialogData dialogData, HenvendelseData henvendelseData) {
@@ -132,12 +132,12 @@ public class DialogStatusService {
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
         }
 
-        FunksjonelleMetrikker.nyHenvendelseBruker(dialogData);
         statusDAO.setNyMeldingFraBruker(
                 dialogData.getId(),
                 eldsteUlesteForVeileder,
                 venterPaNavSiden
         );
+        FunksjonelleMetrikker.nyHenvendelseBruker(dialogData);
     }
 
     private Date getEldsteUlesteForVeileder(DialogData dialogData, HenvendelseData henvendelseData) {

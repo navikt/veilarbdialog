@@ -20,7 +20,7 @@ class DialogStatusServiceTest {
 
     private StatusDAO statusDAO = mock(StatusDAO.class);
     private DialogDAO dialogDAO = mock(DialogDAO.class);
-    private DataVarehusDAO dataVarehusDAO= mock(DataVarehusDAO.class);
+    private DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
     private DialogStatusService dialogStatusService = new DialogStatusService(statusDAO, dialogDAO, dataVarehusDAO);
 
     @Test

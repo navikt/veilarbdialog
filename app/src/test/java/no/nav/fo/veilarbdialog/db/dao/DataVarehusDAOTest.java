@@ -37,7 +37,7 @@ class DataVarehusDAOTest extends IntegrasjonsTest{
                 .column(DIALOGID)
                 .column(EVENT_ID)
                 .column(TIDSPUNKT)
-                .column(AKOR_ID)
+                .column(AKTOR_ID)
                 .column(AKTIVITET_ID)
                 .column(EVENT)
                 .execute();
@@ -60,7 +60,7 @@ class DataVarehusDAOTest extends IntegrasjonsTest{
         datavarehusData.dialogId = rs.getLong(DIALOGID);
         datavarehusData.eventId = rs.getString(EVENT_ID);
         datavarehusData.tidspunkt = rs.getDate(TIDSPUNKT);
-        datavarehusData.aktorId = rs.getString(AKOR_ID);
+        datavarehusData.aktorId = rs.getString(AKTOR_ID);
         datavarehusData.aktivitetId = rs.getString(AKTIVITET_ID);
         datavarehusData.event = rs.getString(EVENT);
 

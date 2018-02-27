@@ -17,13 +17,13 @@ import static no.nav.sbl.sql.DbConstants.CURRENT_TIMESTAMP;
 @Component
 public class DataVarehusDAO {
 
-    protected static final String EVENT_ID = "event_id";
-    protected static final String DIALOGID = "dialogid";
-    protected static final String EVENT = "event";
-    protected static final String TIDSPUNKT = "tidspunkt";
-    protected static final String AKOR_ID = "akor_id";
-    protected static final String AKTIVITET_ID = "aktivitet_id";
-    protected static final String EVENT_TABELL = "EVENT";
+    static final String EVENT_ID = "event_id";
+    static final String DIALOGID = "dialogid";
+    static final String EVENT = "event";
+    static final String TIDSPUNKT = "tidspunkt";
+    static final String AKTOR_ID = "aktor_id";
+    static final String AKTIVITET_ID = "aktivitet_id";
+    static final String EVENT_TABELL = "EVENT";
 
     private final JdbcTemplate jdbc;
     private final DataSource ds;
@@ -44,7 +44,7 @@ public class DataVarehusDAO {
                 .value(DIALOGID, dialogData.getId())
                 .value(EVENT, datavarehusEvent.toString())
                 .value(TIDSPUNKT, CURRENT_TIMESTAMP)
-                .value(AKOR_ID, dialogData.getAktorId())
+                .value(AKTOR_ID, dialogData.getAktorId())
                 .value(AKTIVITET_ID, dialogData.getAktivitetId())
                 .execute();
     }
