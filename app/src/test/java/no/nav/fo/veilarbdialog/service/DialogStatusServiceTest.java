@@ -2,21 +2,28 @@ package no.nav.fo.veilarbdialog.service;
 
 import lombok.SneakyThrows;
 import no.nav.fo.veilarbdialog.TestDataBuilder;
+import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
 import no.nav.fo.veilarbdialog.domain.*;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Date;
 
 import static java.lang.Thread.sleep;
 import static org.mockito.Mockito.*;
 
+@RunWith(MockitoJUnitRunner.class)
 class DialogStatusServiceTest {
 
     private StatusDAO statusDAO = mock(StatusDAO.class);
     private DialogDAO dialogDAO = mock(DialogDAO.class);
-    private DialogStatusService dialogStatusService = new DialogStatusService(statusDAO, dialogDAO);
+    private DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
+    private DialogStatusService dialogStatusService = new DialogStatusService(statusDAO, dialogDAO, dataVarehusDAO);
 
     @Test
     public void ny_henvendelse_fra_bruker_kaller_set_ny_melding_fra_bruker() {
@@ -27,6 +34,10 @@ class DialogStatusServiceTest {
 
         verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), henvendelseData.getSendt(), henvendelseData.getSendt());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_BRUKER);
+        verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_NAV);
+        Mockito.verifyNoMoreInteractions(dataVarehusDAO);
     }
 
     @Test
@@ -39,6 +50,8 @@ class DialogStatusServiceTest {
 
         verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), uniktTidspunkt, dialogData.getVenterPaNavSiden());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_BRUKER);
     }
 
     @Test
@@ -53,6 +66,8 @@ class DialogStatusServiceTest {
 
         verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), dialogData.getEldsteUlesteTidspunktForVeileder(), dialogData.getVenterPaNavSiden());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_BRUKER);
     }
 
     @Test
@@ -64,6 +79,8 @@ class DialogStatusServiceTest {
 
         verify(statusDAO, only()).setEldsteUlesteForBruker(dialogData.getId(), henvendelseData.getSendt());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_VEILEDER);
     }
 
     @Test
@@ -75,6 +92,8 @@ class DialogStatusServiceTest {
 
         verify(statusDAO, only()).setEldsteUlesteForBruker(dialogData.getId(), dialogData.getEldsteUlesteTidspunktForBruker());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_VEILEDER);
     }
 
     @Test
@@ -85,6 +104,8 @@ class DialogStatusServiceTest {
 
         verify(statusDAO, only()).markerSomLestAvVeileder(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.LEST_AV_VEILEDER);
     }
 
     @Test
@@ -95,6 +116,8 @@ class DialogStatusServiceTest {
 
         verify(statusDAO, only()).markerSomLestAvBruker(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.LEST_AV_BRUKER);
     }
 
     @Test
@@ -106,6 +129,8 @@ class DialogStatusServiceTest {
 
         verify(statusDAO, only()).setVenterPaNavTilNull(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_NAV);
     }
 
     @Test
@@ -117,6 +142,8 @@ class DialogStatusServiceTest {
 
         verify(statusDAO, only()).setVenterPaNavTilNaa(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_NAV);
     }
 
     @Test
@@ -128,6 +155,8 @@ class DialogStatusServiceTest {
 
         verify(statusDAO, only()).setVenterPaSvarFraBrukerTilNull(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
     }
 
     @Test
@@ -139,14 +168,47 @@ class DialogStatusServiceTest {
 
         verify(statusDAO, only()).setVenterPaSvarFraBrukerTilNaa(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_BRUKER);
     }
 
     @Test
-    public void nar_jeg_setter_dialog_til_historisk_forventer_jeg_at_statusdao_set_dialog_til_historisk_blir_kalt() {
+    public void nar_jeg_setter_historisk_med_venter_pa_bruker_og_nav_skal_set_historisk_bli_kalt_og_datavarehus_skal_fa_BESVART_AV_BRUKER__BESVART_AV_NAV_og_SATT_TIL_HISTORISK() {
         DialogData dialogData = getDialogData();
         dialogStatusService.settDialogTilHistorisk(dialogData);
         verify(statusDAO, only()).setHistorisk(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        InOrder inOrder = inOrder(dataVarehusDAO);
+        verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_NAV);
+        verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
+        inOrder.verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.SATT_TIL_HISTORISK);
+        inOrder.verifyNoMoreInteractions();
+        Mockito.verifyNoMoreInteractions(dataVarehusDAO);
+    }
+
+    @Test
+    public void nar_jeg_setter_historisk_med_venter_pa_svar_fra_bruker_skal_set_historisk_bli_kalt_og_datavarehus_skal_fa_BESVART_AV_BRUKER_og_SATT_TIL_HISTORISK() {
+        DialogData dialogData = getDialogData().withVenterPaNavSiden(null);
+        dialogStatusService.settDialogTilHistorisk(dialogData);
+        verify(statusDAO, only()).setHistorisk(dialogData.getId());
+        verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        InOrder inOrder = inOrder(dataVarehusDAO);
+        inOrder.verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
+        inOrder.verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.SATT_TIL_HISTORISK);
+        Mockito.verifyNoMoreInteractions(dataVarehusDAO);
+    }
+
+
+    @Test
+    public void nar_jeg_seter_historisk_uten_venter_pa_nav_eller_bruker_skal_setHistorisk_bli_kalt_og_datavarehus_fa_SATT_TIL_HISTORISK() {
+        DialogData dialogData = getDialogData().withVenterPaNavSiden(null).withVenterPaSvarFraBrukerSiden(null);
+        dialogStatusService.settDialogTilHistorisk(dialogData);
+        verify(statusDAO, only()).setHistorisk(dialogData.getId());
+        verify(dialogDAO, only()).hentDialog(dialogData.getId());
+
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.SATT_TIL_HISTORISK);
     }
 
     private DialogData getDialogData() {

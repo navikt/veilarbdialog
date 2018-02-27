@@ -1,0 +1,14 @@
+package no.nav.fo.veilarbdialog.domain;
+
+public enum DatavarehusEvent {
+    DIALOG_OPPRETTET,
+    NY_HENVENDELSE_FRA_BRUKER,
+    NY_HENVENDELSE_FRA_VEILEDER,
+    VENTER_PAA_NAV,
+    BESVART_AV_NAV,
+    VENTER_PAA_BRUKER,
+    BESVART_AV_BRUKER,
+    LEST_AV_VEILEDER,
+    LEST_AV_BRUKER,
+    SATT_TIL_HISTORISK
+}

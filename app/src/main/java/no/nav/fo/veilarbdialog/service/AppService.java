@@ -52,7 +52,9 @@ public class AppService {
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
         sjekkTilgangTilAktorId(dialogData.getAktorId());
         DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
-        return dialogDAO.opprettDialog(kontorsperretDialog);
+        DialogData oprettet = dialogDAO.opprettDialog(kontorsperretDialog);
+        dialogStatusService.nyDialog(oprettet);
+        return oprettet;
     }
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
