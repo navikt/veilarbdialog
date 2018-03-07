@@ -50,14 +50,11 @@ public class StartJetty {
         Properties properties = new Properties();
         try {
             properties.load(System.class.getResourceAsStream(propertyFile));
-        } catch (IOException e) {
-            //Ignores non-exisiting file
+        } catch (IOException e) { //Ignores non-exisiting file
             return;
         }
 
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-            setProperty((String) entry.getKey(), (String) entry.getValue());
-        }
+        properties.forEach((key, value) -> setProperty((String) key, (String) value)); 
     }
 
     private static DataSource createDataSource() {
