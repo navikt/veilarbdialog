@@ -61,17 +61,4 @@
         </pluginManagement>
     </build>
 
-
-
-    <profiles>
-        <profile>
-            <id>t6</id>
-            <properties>
-                <flyway.url>jdbc:oracle:thin:@d26dbfl007.test.local:1521/t6veilarbdialog</flyway.url>
-                <flyway.user>t6_veilarbdialog</flyway.user>
-                <flyway.password>y0Mb6ITh7SdO</flyway.password>
-            </properties>
-        </profile>
-    </profiles>
-
 </project>
