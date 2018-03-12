@@ -22,19 +22,6 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
-        <plugins>
-            <plugin>
-                <groupId>no.nav.maven.plugins</groupId>
-                <artifactId>aura-maven-plugin</artifactId>
-                <version>6.1.48</version>
-                <configuration>
-                    <apps>${project.parent.artifactId}:${project.version}</apps>
-                    <envConfigUrl>https://envconfig.adeo.no/conf</envConfigUrl>
-                    <username>admin</username>
-                    <password>admin</password>
-                </configuration>
-            </plugin>
-        </plugins>
 
         <pluginManagement>
             <plugins>
