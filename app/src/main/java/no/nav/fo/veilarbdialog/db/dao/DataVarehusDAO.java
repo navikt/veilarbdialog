@@ -35,7 +35,7 @@ public class DataVarehusDAO {
     }
 
     public void insertEvent(DialogData dialogData, DatavarehusEvent datavarehusEvent) {
-        Long nextSeq = SqlUtils.select(ds, "dual", DataVarehusDAO::hentLongFraForsteKollone)
+        Long nextSeq = SqlUtils.select(jdbc, "dual", DataVarehusDAO::hentLongFraForsteKollone)
                 .column("EVENT_ID_SEQ.NEXTVAL")
                 .execute();
 
@@ -50,7 +50,6 @@ public class DataVarehusDAO {
     }
 
     private static Long hentLongFraForsteKollone(ResultSet resultSet) throws SQLException {
-
         return resultSet.getLong(1);
     }
 }
