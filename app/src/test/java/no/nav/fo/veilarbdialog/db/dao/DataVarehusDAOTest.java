@@ -6,6 +6,7 @@ import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.sbl.sql.SqlUtils;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.inject.Inject;
 import javax.sql.DataSource;
@@ -25,7 +26,7 @@ class DataVarehusDAOTest extends IntegrasjonsTest{
     private DataVarehusDAO dataVarehusDAO;
 
     @Inject
-    private DataSource ds;
+    private JdbcTemplate jdbc;
 
 
     @Test
@@ -33,7 +34,7 @@ class DataVarehusDAOTest extends IntegrasjonsTest{
         DialogData dialog = DialogData.builder().id(1).aktivitetId("aktivitet").aktorId("aktor").build();
         dataVarehusDAO.insertEvent(dialog, DatavarehusEvent.VENTER_PAA_BRUKER);
 
-        DatavarehusData data = SqlUtils.select(ds, EVENT_TABELL, this::map)
+        DatavarehusData data = SqlUtils.select(jdbc, EVENT_TABELL, this::map)
                 .column(DIALOGID)
                 .column(EVENT_ID)
                 .column(TIDSPUNKT)
