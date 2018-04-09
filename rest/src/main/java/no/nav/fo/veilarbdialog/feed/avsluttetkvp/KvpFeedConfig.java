@@ -29,7 +29,7 @@ public class KvpFeedConfig {
                     host,
                     KvpDTO.FEED_NAME
                 ),
-                new FeedConsumerConfig.PollingConfig(polling)
+                new FeedConsumerConfig.CronPollingConfig(polling)
         )
                 .callback(kvpFeedConsumer::lesKvpFeed)
                 .interceptors(Collections.singletonList(new OidcFeedOutInterceptor()));

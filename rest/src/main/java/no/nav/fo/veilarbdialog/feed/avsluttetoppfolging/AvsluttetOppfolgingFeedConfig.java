@@ -29,7 +29,7 @@ public class AvsluttetOppfolgingFeedConfig {
                     host,
                     AvsluttetOppfolgingFeedDTO.FEED_NAME
                 ),
-                new FeedConsumerConfig.PollingConfig(polling)
+                new FeedConsumerConfig.CronPollingConfig(polling)
         )
                 .callback(avsluttetOppfolgingFeedConsumer::lesAvsluttetOppfolgingFeed)
                 .interceptors(Collections.singletonList(new OidcFeedOutInterceptor()));
