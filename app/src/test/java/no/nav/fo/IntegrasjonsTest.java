@@ -9,6 +9,7 @@ import no.nav.dialogarena.config.security.ISSOProvider;
 import no.nav.fo.feed.consumer.FeedPoller;
 import no.nav.fo.veilarbdialog.ApplicationContext;
 import no.nav.fo.veilarbdialog.db.dao.DateProvider;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -37,6 +38,7 @@ import static no.nav.brukerdialog.security.context.SubjectHandlerUtils.setSubjec
 import static no.nav.dialogarena.config.util.Util.setProperty;
 import static no.nav.fo.veilarbdialog.ApplicationContext.APPLICATION_NAME;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
+import static no.nav.testconfig.ApiAppTest.setupTestContext;
 import static org.mockito.Mockito.mock;
 import static org.springframework.util.ReflectionUtils.setField;
 
@@ -70,7 +72,8 @@ public abstract class IntegrasjonsTest {
     @BeforeClass
     public static void setupContext() {
         DevelopmentSecurity.setupIntegrationTestSecurity(new DevelopmentSecurity.IntegrationTestConfig(APPLICATION_NAME));
-
+        setupTestContext();
+        
         annotationConfigApplicationContext = new AnnotationConfigApplicationContext(
                 ApplicationContext.class,
                 IntegrasjonsTest.JndiBean.class,
@@ -97,7 +100,7 @@ public abstract class IntegrasjonsTest {
         public JndiBean() throws Exception {
             builder.bind("java:/jboss/jms/VARSELPRODUKSJON.VARSLINGER", mock(Destination.class));
             builder.bind("java:jboss/mqConnectionFactory", mock(ConnectionFactory.class));
-            builder.bind(AKTIVITET_DATA_SOURCE_JDNI_NAME, DatabaseTestContext.buildDataSource());
+            builder.bind(AKTIVITET_DATA_SOURCE_JDNI_NAME, DatabaseTestContext.buildMultiDataSource());
             builder.activate();
         }
 
