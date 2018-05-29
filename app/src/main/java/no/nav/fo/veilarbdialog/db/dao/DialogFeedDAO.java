@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.val;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.sbl.jdbc.Database;
@@ -16,6 +17,7 @@ import static java.util.Comparator.naturalOrder;
 import static no.nav.sbl.jdbc.Database.hentDato;
 
 @Component
+@Slf4j
 public class DialogFeedDAO {
 
     private final Database database;
@@ -39,6 +41,10 @@ public class DialogFeedDAO {
     }
 
     public void updateDialogAktorFor(String aktorId, List<DialogData> dialoger) {
+        if(dialoger.isEmpty()) {
+            log.info("Finner ingen dialoger for aktør [{}]. Oppretter ikke innslag i DIALOG_AKTOR", aktorId);
+            return;
+        }
         val dialogAktor = mapTilDialogAktor(dialoger);
         database.update("INSERT INTO DIALOG_AKTOR (" +
                         "aktor_id, " +
