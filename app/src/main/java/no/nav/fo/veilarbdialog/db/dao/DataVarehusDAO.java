@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import javax.sql.DataSource;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,11 +25,9 @@ public class DataVarehusDAO {
     static final String EVENT_TABELL = "EVENT";
 
     private final JdbcTemplate jdbc;
-    private final DataSource ds;
 
     @Inject
-    public DataVarehusDAO(DataSource ds, JdbcTemplate jdbcTemplate) {
-        this.ds = ds;
+    public DataVarehusDAO(JdbcTemplate jdbcTemplate) {
         this.jdbc = jdbcTemplate;
     }
 

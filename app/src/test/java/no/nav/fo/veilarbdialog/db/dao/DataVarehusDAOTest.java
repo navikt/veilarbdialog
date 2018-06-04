@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.inject.Inject;
-import javax.sql.DataSource;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,7 +26,6 @@ class DataVarehusDAOTest extends IntegrasjonsTest{
 
     @Inject
     private JdbcTemplate jdbc;
-
 
     @Test
     void insertEvent() {
@@ -69,7 +67,7 @@ class DataVarehusDAOTest extends IntegrasjonsTest{
     }
 
     @Data
-    static class DatavarehusData {
+    private static class DatavarehusData {
         long dialogId;
         String eventId;
         Date tidspunkt;

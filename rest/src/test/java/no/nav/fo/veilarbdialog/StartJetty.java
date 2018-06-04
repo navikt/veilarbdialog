@@ -18,9 +18,7 @@ import static no.nav.sbl.dialogarena.common.jetty.Jetty.usingWar;
 import static no.nav.sbl.dialogarena.common.jetty.JettyStarterUtils.*;
 import static no.nav.testconfig.ApiAppTest.setupTestContext;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.sql.DataSource;
