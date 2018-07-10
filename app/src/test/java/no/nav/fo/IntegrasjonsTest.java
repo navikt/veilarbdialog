@@ -1,19 +1,17 @@
 package no.nav.fo;
 
 import lombok.SneakyThrows;
-import no.nav.brukerdialog.security.context.SubjectHandlerUtils;
-import no.nav.brukerdialog.security.context.ThreadLocalSubjectHandler;
+import no.nav.brukerdialog.security.context.SubjectRule;
 import no.nav.brukerdialog.security.domain.IdentType;
+import no.nav.common.auth.SsoToken;
+import no.nav.common.auth.Subject;
 import no.nav.dialogarena.config.DevelopmentSecurity;
 import no.nav.dialogarena.config.security.ISSOProvider;
 import no.nav.fo.feed.consumer.FeedPoller;
 import no.nav.fo.veilarbdialog.ApplicationContext;
 import no.nav.fo.veilarbdialog.db.dao.DateProvider;
-
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import no.nav.testconfig.ApiAppTest;
+import org.junit.*;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,10 +31,6 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.util.function.Supplier;
 
-import static no.nav.brukerdialog.security.context.SubjectHandler.SUBJECTHANDLER_KEY;
-import static no.nav.brukerdialog.security.context.SubjectHandlerUtils.setSubject;
-import static no.nav.dialogarena.config.util.Util.setProperty;
-import static no.nav.fo.veilarbdialog.ApplicationContext.APPLICATION_NAME;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
 import static no.nav.testconfig.ApiAppTest.setupTestContext;
 import static org.mockito.Mockito.mock;
@@ -44,9 +38,14 @@ import static org.springframework.util.ReflectionUtils.setField;
 
 public abstract class IntegrasjonsTest {
 
+    public static final String APPLICATION_NAME = "veilarbdialog";
+
     protected static AnnotationConfigApplicationContext annotationConfigApplicationContext;
     private static PlatformTransactionManager platformTransactionManager;
     private TransactionStatus transactionStatus;
+
+    @Rule
+    public SubjectRule subjectRule = new SubjectRule();
 
     @Before
     @BeforeEach
@@ -72,7 +71,10 @@ public abstract class IntegrasjonsTest {
     @BeforeClass
     public static void setupContext() {
         DevelopmentSecurity.setupIntegrationTestSecurity(new DevelopmentSecurity.IntegrationTestConfig(APPLICATION_NAME));
-        setupTestContext();
+        setupTestContext(ApiAppTest.Config.builder()
+                .applicationName(APPLICATION_NAME)
+                .build()
+        );
         
         annotationConfigApplicationContext = new AnnotationConfigApplicationContext(
                 ApplicationContext.class,
@@ -88,8 +90,7 @@ public abstract class IntegrasjonsTest {
     }
 
     protected void setVeilederSubject(String ident) {
-        setProperty(SUBJECTHANDLER_KEY, ThreadLocalSubjectHandler.class.getName());
-        setSubject(new SubjectHandlerUtils.SubjectBuilder(ident, IdentType.InternBruker, ISSOProvider.getISSOToken()).getSubject());
+        subjectRule.setSubject(new Subject(ident, IdentType.InternBruker, SsoToken.oidcToken(ISSOProvider.getISSOToken())));
     }
 
     @Component

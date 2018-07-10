@@ -1,10 +1,10 @@
 package no.nav.fo.veilarbdialog.ws.provider;
 
 import no.nav.apiapp.soap.SoapTjeneste;
+import no.nav.common.auth.SubjectHandler;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
-import no.nav.modig.core.context.SubjectHandler;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.binding.AktivitetDialogV1;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.meldinger.*;
 import org.springframework.stereotype.Service;
@@ -104,13 +104,9 @@ public class SoapService implements AktivitetDialogV1 {
                 .ifPresent(this::updateDialogAktorFor);
     }
 
-
-
     private String getPersonIdent() {
-        return SubjectHandler.getSubjectHandler().getUid();
+        return SubjectHandler.getIdent().orElseThrow(IllegalStateException::new);
     }
-
-
 
     private OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse(DialogData dialogData) {
         OpprettDialogForAktivitetsplanResponse opprettDialogForAktivitetsplanResponse = new OpprettDialogForAktivitetsplanResponse();

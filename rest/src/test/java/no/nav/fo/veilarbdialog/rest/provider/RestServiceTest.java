@@ -8,7 +8,6 @@ import no.nav.fo.veilarbdialog.rest.RestService;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeAll;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -45,7 +44,6 @@ public class RestServiceTest extends IntegrasjonsTest {
         restService.markerSomLest(hentAktiviteterResponse.get(0).id);
     }
 
-    @BeforeAll
     @BeforeClass
     public static void addKvpClientMock() {
         annotationConfigApplicationContext.register(Config.class);
