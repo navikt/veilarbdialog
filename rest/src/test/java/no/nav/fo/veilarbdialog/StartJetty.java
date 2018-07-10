@@ -8,10 +8,11 @@ import no.nav.dialogarena.config.fasit.TestEnvironment;
 import no.nav.fo.DatabaseTestContext;
 import no.nav.fo.veilarbdialog.util.VarselMock;
 import no.nav.sbl.dialogarena.common.jetty.Jetty;
+import no.nav.testconfig.ApiAppTest;
 
 import static java.lang.System.setProperty;
 import static no.nav.dialogarena.config.DevelopmentSecurity.setupISSO;
-import static no.nav.fo.veilarbdialog.ApplicationContext.APPLICATION_NAME;
+import static no.nav.fo.IntegrasjonsTest.APPLICATION_NAME;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 import static no.nav.sbl.dialogarena.common.jetty.Jetty.usingWar;
@@ -39,7 +40,7 @@ public class StartJetty {
                 , new ISSOSecurityConfig(APPLICATION_NAME)).buildJetty();
 
         VarselMock.init();
-        setupTestContext();
+        setupTestContext(ApiAppTest.Config.builder().applicationName(APPLICATION_NAME).build());
 
         jetty.startAnd(first(waitFor(gotKeypress())).then(jetty.stop));
     }
