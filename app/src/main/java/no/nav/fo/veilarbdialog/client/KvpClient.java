@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.client;
 
 import no.nav.apiapp.feil.Feil;
+import no.nav.apiapp.feil.FeilType;
 import no.nav.brukerdialog.security.oidc.SystemUserTokenProvider;
 import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
 
@@ -35,9 +36,9 @@ public class KvpClient {
                     .map(KvpDTO::getEnhet)
                     .orElse(null);
         } catch (ForbiddenException e) {
-            throw new Feil(Feil.Type.UKJENT, "veilarbdialog har ikke tilgang til å spørre om KVP-status.");
+            throw new Feil(FeilType.UKJENT, "veilarbdialog har ikke tilgang til å spørre om KVP-status.");
         } catch (InternalServerErrorException e) {
-            throw new Feil(Feil.Type.UKJENT, "veilarboppfolging har en intern bug, vennligst fiks applikasjonen.");
+            throw new Feil(FeilType.UKJENT, "veilarboppfolging har en intern bug, vennligst fiks applikasjonen.");
         }
     }
 }

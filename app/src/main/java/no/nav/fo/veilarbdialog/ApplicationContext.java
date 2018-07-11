@@ -18,21 +18,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Import({AbacContext.class, AktorConfig.class})
 public class ApplicationContext implements ApiApplication {
 
-    public static final String APPLICATION_NAME = "veilarbdialog";
-    
-    @Override
-    public Sone getSone() {
-        return Sone.FSS;
-    }
-
     @Bean
     public PepClient pepClient(Pep pep) {
         return new PepClient(pep, "veilarb", ResourceType.VeilArbPerson);
-    }
-
-    @Override
-    public String getApplicationName() {
-        return APPLICATION_NAME;
     }
 
 }
