@@ -93,6 +93,7 @@ function handleSok(event) {
         fetch(`/veilarbdialog/api/dialog/${dialogIdValue}`, { credentials: 'same-origin' })
             .then(sjekkStatus)
             .then(toJson)
+            .then((json) => [json])
             .then(handleData)
             .catch((err) => alert(err));
     } else if (fnrValue && fnrValue.length > 0) {

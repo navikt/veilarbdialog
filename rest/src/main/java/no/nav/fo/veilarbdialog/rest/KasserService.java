@@ -18,6 +18,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 @Slf4j
 @Component
@@ -33,7 +34,7 @@ public class KasserService {
     @Inject
     private AktorService aktorService;
 
-    @Value("${veilarb.kassering.identer:Z999999}")
+    @Value("${veilarb.kassering.identer:Z990322}")
     String godkjenteIdenter;
 
     @PUT
@@ -41,9 +42,8 @@ public class KasserService {
     public int kasserHenvendelse(@Context Request request, @PathParam("id") String henvendelseId) {
         long id = Long.parseLong(henvendelseId);
         DialogData dialogData = dialogDAO.hentDialogGittHenvendelse(id);
-        sjekkTilgang(dialogData.getAktorId(), "henvendelse", henvendelseId);
 
-        return dialogDAO.kasserHenvendelse(id);
+        return kjorHvisTilgang(dialogData.getAktorId(), "henvendelse", henvendelseId, () -> dialogDAO.kasserHenvendelse(id));
     }
 
     @PUT
@@ -51,17 +51,18 @@ public class KasserService {
     public int kasserDialog(@PathParam("id") String dialogId) {
         long id = Long.parseLong(dialogId);
         DialogData dialogData = dialogDAO.hentDialog(id);
-        sjekkTilgang(dialogData.getAktorId(), "dialog", dialogId);
 
-        int antallHenvendelser = dialogData.getHenvendelser()
-                .stream()
-                .mapToInt((henvendelse) -> dialogDAO.kasserHenvendelse(henvendelse.id))
-                .sum();
+        return kjorHvisTilgang(dialogData.getAktorId(), "dialog", dialogId, () -> {
+            int antallHenvendelser = dialogData.getHenvendelser()
+                    .stream()
+                    .mapToInt((henvendelse) -> dialogDAO.kasserHenvendelse(henvendelse.id))
+                    .sum();
 
-        return dialogDAO.kasserDialog(id) + antallHenvendelser;
+            return dialogDAO.kasserDialog(id) + antallHenvendelser;
+        });
     }
 
-    private void sjekkTilgang(String aktorId, String kasseringAv, String id) {
+    private int kjorHvisTilgang(String aktorId, String kasseringAv, String id, Supplier<Integer> fn) {
         String fnr = aktorService.getFnr(aktorId).orElseThrow(IngenTilgang::new);
         pep.sjekkLeseTilgangTilFnr(fnr);
 
@@ -71,6 +72,10 @@ public class KasserService {
             log.error("[KASSERING] {} har ikke tilgang til kassering av {} dialoger", veilederIdent, aktorId);
             throw new IngenTilgang(String.format("[KASSERING] %s har ikke tilgang til kassinger av %s dialoger", veilederIdent, aktorId));
         }
+
+        int updated = fn.get();
+
         log.info("[KASSERING] {} kasserte en {}. AktoerId: {} {}_id: {}", veilederIdent, kasseringAv, aktorId, kasseringAv, id);
+        return updated;
     }
 }

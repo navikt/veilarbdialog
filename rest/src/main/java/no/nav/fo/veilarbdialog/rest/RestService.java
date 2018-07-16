@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.NotFoundException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeileder;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
@@ -47,13 +47,12 @@ public class RestService implements DialogController, VeilederDialogController {
     }
 
     @Override
-    public List<DialogDTO> hentDialog(String dialogId) {
+    public DialogDTO hentDialog(String dialogId) {
         return Optional.ofNullable(dialogId)
                 .map(Long::parseLong)
                 .map(appService::hentDialog)
                 .map(restMapper::somDialogDTO)
-                .map(Arrays::asList)
-                .orElse(emptyList());
+                .orElseThrow(() -> new NotFoundException(""));
     }
 
     @Override
