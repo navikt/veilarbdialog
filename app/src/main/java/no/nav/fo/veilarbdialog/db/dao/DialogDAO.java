@@ -72,6 +72,14 @@ public class DialogDAO {
     }
 
     @Transactional(readOnly = true)
+    public DialogData hentDialogGittHenvendelse(long henvendelseId) {
+        return database.queryForObject("SELECT d.* FROM DIALOG d LEFT JOIN HENVENDELSE h ON (d.dialog_id = h.dialog_id) WHERE h.henvendelse_id = ?",
+                this::mapTilDialog,
+                henvendelseId
+        );
+    }
+
+    @Transactional(readOnly = true)
     public HenvendelseData hentHenvendelse(long id) {
         return database.query(
                 "SELECT * FROM HENVENDELSE h LEFT JOIN DIALOG d ON h.dialog_id = d.dialog_id WHERE h.henvendelse_id = ?",
@@ -79,6 +87,13 @@ public class DialogDAO {
                 id).stream()
                 .findFirst()
                 .orElse(null);
+    }
+
+    public int kasserHenvendelse(long id) {
+        return database.update("UPDATE HENVENDELSE SET TEKST = 'Kassert av NAV' WHERE HENVENDELSE_ID = ?", id);
+    }
+    public int kasserDialog(long id) {
+        return database.update("UPDATE DIALOG SET OVERSKRIFT = 'Kassert av NAV' WHERE DIALOG_ID = ?", id);
     }
 
     @Transactional(readOnly = true)
