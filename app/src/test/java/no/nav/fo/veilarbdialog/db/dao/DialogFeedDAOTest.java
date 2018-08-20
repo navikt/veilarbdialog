@@ -1,23 +1,23 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import lombok.SneakyThrows;
 import lombok.val;
-import no.nav.fo.IntegrasjonsTest;
+import no.nav.fo.veilarbdialog.db.DbTest;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
 
-import static java.lang.Thread.sleep;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static no.nav.fo.veilarbdialog.domain.DialogStatus.builder;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DialogFeedDAOTest extends IntegrasjonsTest {
+public class DialogFeedDAOTest extends DbTest {
     private static final String AKTOR_ID = "1234";
 
     @Inject
@@ -28,6 +28,15 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
 
     @Inject
     private DialogFeedDAO dialogFeedDAO;
+
+    @BeforeClass
+    public static void addSpringBeans() {
+        annotationConfigApplicationContext.registerBean(DialogDAO.class);
+        annotationConfigApplicationContext.registerBean(DialogStatusService.class);
+        annotationConfigApplicationContext.registerBean(DialogFeedDAO.class);
+        annotationConfigApplicationContext.registerBean(StatusDAO.class);
+        annotationConfigApplicationContext.registerBean(DataVarehusDAO.class);
+    }
 
     @Test
     public void hentAktorerMedEndringerEtter_nyDialog_aktorEndret() {
@@ -84,7 +93,6 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         DialogData dialogData = opprettNyDialog(AKTOR_ID);
         long dialogId = dialogData.getId();
 
-        Date henvedlesetid = uniktTidspunkt();
         HenvendelseData henvendelseData = nyHenvendelse(dialogId, AKTOR_ID, AvsenderType.BRUKER);
 
         dialogDAO.opprettHenvendelse(henvendelseData);
@@ -140,14 +148,6 @@ public class DialogFeedDAOTest extends IntegrasjonsTest {
         List<DialogAktor> endredeAktorer = dialogFeedDAO.hentAktorerMedEndringerFOM(tidspunkt, 500);
         assertThat(endredeAktorer).hasSize(1);
         return endredeAktorer.get(0);
-    }
-
-    @SneakyThrows
-    private Date uniktTidspunkt() {
-        sleep(1);
-        Date tidspunkt = new Date();
-        sleep(1);
-        return tidspunkt;
     }
 
     private DialogData opprettNyDialog(String aktorId) {

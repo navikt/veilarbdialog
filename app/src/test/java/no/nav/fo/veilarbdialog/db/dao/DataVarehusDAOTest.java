@@ -1,10 +1,12 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.*;
-import no.nav.fo.IntegrasjonsTest;
+import no.nav.fo.veilarbdialog.db.DbTest;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.sbl.sql.SqlUtils;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -19,13 +21,18 @@ import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DataVarehusDAOTest extends IntegrasjonsTest{
+class DataVarehusDAOTest extends DbTest {
 
     @Inject
     private DataVarehusDAO dataVarehusDAO;
 
     @Inject
     private JdbcTemplate jdbc;
+
+    @BeforeAll
+    public static void addSpringBeans() {
+        annotationConfigApplicationContext.registerBean(DataVarehusDAO.class);
+    }
 
     @Test
     void insertEvent() {
