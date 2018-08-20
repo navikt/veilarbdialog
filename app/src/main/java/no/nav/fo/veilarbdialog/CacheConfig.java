@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog;
 
-import no.nav.sbl.dialogarena.common.abac.pep.context.AbacContext;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.ehcache.EhCacheCacheManager;
