@@ -31,7 +31,7 @@ class DataVarehusDAOTest extends DbTest {
 
     @BeforeAll
     public static void addSpringBeans() {
-        annotationConfigApplicationContext.registerBean(DataVarehusDAO.class);
+        initSpringContext(Arrays.asList(DataVarehusDAO.class));
     }
 
     @Test

@@ -6,6 +6,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.inject.Inject;
+
+import java.util.Arrays;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,7 +19,7 @@ public class FeedMetaDataDAOTest extends DbTest {
 
     @BeforeClass
     public static void addSpringBeans() {
-        annotationConfigApplicationContext.registerBean(FeedMetaDataDAO.class);
+        initSpringContext(Arrays.asList(FeedMetaDataDAO.class));
     }
 
     @Test

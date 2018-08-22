@@ -9,6 +9,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.inject.Inject;
+
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -31,11 +33,7 @@ public class DialogFeedDAOTest extends DbTest {
 
     @BeforeClass
     public static void addSpringBeans() {
-        annotationConfigApplicationContext.registerBean(DialogDAO.class);
-        annotationConfigApplicationContext.registerBean(DialogStatusService.class);
-        annotationConfigApplicationContext.registerBean(DialogFeedDAO.class);
-        annotationConfigApplicationContext.registerBean(StatusDAO.class);
-        annotationConfigApplicationContext.registerBean(DataVarehusDAO.class);
+        initSpringContext(Arrays.asList(DialogDAO.class, DialogStatusService.class, DialogFeedDAO.class, StatusDAO.class, DataVarehusDAO.class));
     }
 
     @Test

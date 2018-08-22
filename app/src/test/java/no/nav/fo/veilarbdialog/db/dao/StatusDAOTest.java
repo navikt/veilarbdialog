@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
@@ -23,8 +24,7 @@ class StatusDAOTest extends DbTest {
 
     @BeforeAll
     public static void addSpringBeans() {
-        annotationConfigApplicationContext.registerBean(StatusDAO.class);
-        annotationConfigApplicationContext.registerBean(DialogDAO.class);
+        initSpringContext(Arrays.asList(StatusDAO.class, DialogDAO.class));
     }
 
     @Test

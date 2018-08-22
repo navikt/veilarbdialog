@@ -2,6 +2,8 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
+
 import javax.inject.Inject;
 
 import org.junit.BeforeClass;
@@ -16,7 +18,7 @@ public class KvpFeedMetadataDAOTest extends DbTest {
 
     @BeforeClass
     public static void addSpringBeans() {
-        annotationConfigApplicationContext.registerBean(KvpFeedMetadataDAO.class);
+        initSpringContext(Arrays.asList(KvpFeedMetadataDAO.class));
     }
 
     @Test

@@ -12,12 +12,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.assertj.core.util.Lists;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
@@ -36,13 +33,6 @@ public abstract class DbTest {
     protected static AnnotationConfigApplicationContext annotationConfigApplicationContext;
     private static PlatformTransactionManager platformTransactionManager;
     private TransactionStatus transactionStatus;
-
-    @SneakyThrows
-    @BeforeAll
-    @BeforeClass
-    public static void setupContext() {
-        initSpringContext(Lists.emptyList());
-    }
 
     protected static void initSpringContext(List<Class> classes) {
         List<Class> list = new ArrayList<>(asList(DbTest.JndiBean.class, DatabaseContext.class, DateProvider.class));
