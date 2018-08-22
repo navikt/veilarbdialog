@@ -1,14 +1,18 @@
 package no.nav.fo.veilarbdialog.db;
 
 import static java.lang.Thread.sleep;
+import static java.util.Arrays.asList;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
 import static org.springframework.util.ReflectionUtils.setField;
 
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Supplier;
 
+import org.assertj.core.util.Lists;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -37,12 +41,13 @@ public abstract class DbTest {
     @BeforeAll
     @BeforeClass
     public static void setupContext() {
-        
-        annotationConfigApplicationContext = new AnnotationConfigApplicationContext(
-                DbTest.JndiBean.class,
-                DatabaseContext.class,
-                DateProvider.class
-        );
+        initSpringContext(Lists.emptyList());
+    }
+
+    protected static void initSpringContext(List<Class> classes) {
+        List<Class> list = new ArrayList<>(asList(DbTest.JndiBean.class, DatabaseContext.class, DateProvider.class));
+        list.addAll(classes);
+        annotationConfigApplicationContext = new AnnotationConfigApplicationContext(list.toArray(new Class[]{}));
         annotationConfigApplicationContext.start();
         platformTransactionManager = annotationConfigApplicationContext.getBean(PlatformTransactionManager.class);
     }
@@ -58,7 +63,7 @@ public abstract class DbTest {
     }
 
     @SneakyThrows
-    private void changeDateProvider(Supplier<String> timestampProvider) {
+    protected void changeDateProvider(Supplier<String> timestampProvider) {
         Field providerField = DateProvider.class.getDeclaredField("provider");
         providerField.setAccessible(true);
         setField(providerField, null, timestampProvider);
