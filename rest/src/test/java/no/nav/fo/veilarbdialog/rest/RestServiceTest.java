@@ -26,7 +26,6 @@ import no.nav.brukerdialog.security.domain.IdentType;
 import no.nav.common.auth.SsoToken;
 import no.nav.common.auth.Subject;
 import no.nav.dialogarena.aktor.AktorService;
-import no.nav.dialogarena.config.security.ISSOProvider;
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.DbTest;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
@@ -97,7 +96,7 @@ public class RestServiceTest extends DbTest {
 
     @Before
     public void setup() {
-        subjectRule.setSubject(new Subject("veileder", IdentType.InternBruker, SsoToken.oidcToken(ISSOProvider.getISSOToken())));
+        subjectRule.setSubject(new Subject("veileder", IdentType.InternBruker, mock(SsoToken.class)));
         mockHttpServletRequest.setParameter("fnr", "***REMOVED***");
     }
 
