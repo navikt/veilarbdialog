@@ -30,7 +30,7 @@ import no.nav.fo.veilarbdialog.db.dao.DateProvider;
 
 public abstract class DbTest {
 
-    protected static AnnotationConfigApplicationContext annotationConfigApplicationContext;
+    private static AnnotationConfigApplicationContext annotationConfigApplicationContext;
     private static PlatformTransactionManager platformTransactionManager;
     private TransactionStatus transactionStatus;
 
