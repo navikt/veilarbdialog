@@ -12,7 +12,6 @@ import no.nav.testconfig.ApiAppTest;
 
 import static java.lang.System.setProperty;
 import static no.nav.dialogarena.config.DevelopmentSecurity.setupISSO;
-import static no.nav.fo.IntegrasjonsTest.APPLICATION_NAME;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 import static no.nav.sbl.dialogarena.common.jetty.Jetty.usingWar;
@@ -28,6 +27,7 @@ public class StartJetty {
 
     public static final int PORT = 8580;
     private static final int SSL_PORT = 8585;
+    public static final String APPLICATION_NAME = "veilarbdialog";
 
     public static void main(String[] args) throws Exception {
         loadPropertiesFile("/environment-local.properties");
