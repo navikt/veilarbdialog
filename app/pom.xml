@@ -26,10 +26,6 @@
             <artifactId>rest</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>auth</artifactId>
-        </dependency>
-        <dependency>
             <groupId>no.nav.sbl.dialogarena</groupId>
             <artifactId>aktor-klient</artifactId>
         </dependency>
@@ -65,10 +61,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jms</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.sbl.dialogarena</groupId>
-            <artifactId>feed</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav</groupId>
