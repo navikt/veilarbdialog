@@ -4,6 +4,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import no.nav.fo.DbTest;
+
 import javax.inject.Inject;
 
 import static org.hamcrest.collection.IsEmptyCollection.empty;

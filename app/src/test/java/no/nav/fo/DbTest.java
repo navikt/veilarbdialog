@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.db;
+package no.nav.fo;
 
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
@@ -24,7 +24,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import lombok.SneakyThrows;
-import no.nav.fo.DatabaseTestContext;
 import no.nav.fo.veilarbdialog.db.DatabaseContext;
 import no.nav.fo.veilarbdialog.db.dao.DateProvider;
 
