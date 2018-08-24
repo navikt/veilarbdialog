@@ -97,6 +97,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>no.nav.sbl.dialogarena</groupId>
+            <artifactId>aktor-klient</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.activemq</groupId>
             <artifactId>activemq-core</artifactId>
         </dependency>
@@ -119,6 +124,10 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>

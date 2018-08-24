@@ -1,27 +1,35 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import lombok.SneakyThrows;
 import lombok.val;
-import no.nav.fo.IntegrasjonsTest;
+import no.nav.fo.veilarbdialog.db.DbTest;
 import no.nav.fo.veilarbdialog.domain.*;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.inject.Inject;
+
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DialogDAOTest extends IntegrasjonsTest {
+public class DialogDAOTest extends DbTest {
+
     private static final String AKTOR_ID_1234 = "1234";
 
     @Inject
     private DialogDAO dialogDAO;
 
+    @BeforeClass
+    public static void addSpringBeans() {
+        initSpringContext(Arrays.asList(DialogDAO.class));
+    }
+    
     @Test
     public void kan_opprette_dialog() {
         DialogData dialog = nyDialog();
@@ -183,14 +191,6 @@ public class DialogDAOTest extends IntegrasjonsTest {
 
     private DialogData opprettNyDialog(String aktorId) {
         return dialogDAO.opprettDialog(nyDialog(aktorId));
-    }
-
-    @SneakyThrows
-    private Date uniktTidspunkt() {
-        sleep(1);
-        Date tidspunkt = new Date();
-        sleep(1);
-        return tidspunkt;
     }
 
 }

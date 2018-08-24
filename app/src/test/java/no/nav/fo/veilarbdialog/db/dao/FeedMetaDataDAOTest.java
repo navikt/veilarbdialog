@@ -1,19 +1,26 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import lombok.SneakyThrows;
-import no.nav.fo.IntegrasjonsTest;
+import no.nav.fo.veilarbdialog.db.DbTest;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.inject.Inject;
+
+import java.util.Arrays;
 import java.util.Date;
 
-import static java.lang.Thread.sleep;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FeedMetaDataDAOTest extends IntegrasjonsTest {
+public class FeedMetaDataDAOTest extends DbTest {
 
     @Inject
     private FeedMetaDataDAO feedMetaDataDAO;
+
+    @BeforeClass
+    public static void addSpringBeans() {
+        initSpringContext(Arrays.asList(FeedMetaDataDAO.class));
+    }
 
     @Test
     public void skal_kunne_sette_og_hente_sist_lest_tid() {
@@ -23,11 +30,4 @@ public class FeedMetaDataDAOTest extends IntegrasjonsTest {
         assertThat(lestTidspunkt).isEqualTo(uniktTidspunkt);
     }
 
-    @SneakyThrows
-    private Date uniktTidspunkt() {
-        sleep(1);
-        Date date = new Date();
-        sleep(1);
-        return date;
-    }
 }

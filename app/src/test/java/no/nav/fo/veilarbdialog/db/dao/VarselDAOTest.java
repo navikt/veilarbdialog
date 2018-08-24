@@ -1,15 +1,18 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.val;
-import no.nav.fo.IntegrasjonsTest;
+import no.nav.fo.veilarbdialog.db.DbTest;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.inject.Inject;
+
+import java.util.Arrays;
 import java.util.Date;
 
 import static java.lang.Thread.sleep;
@@ -18,7 +21,7 @@ import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-public class VarselDAOTest extends IntegrasjonsTest {
+public class VarselDAOTest extends DbTest {
 
     private static final String AKTOR_ID = "1234";
     private static final long TI_MINUTTER = 1000 * 60 * 10;
@@ -32,6 +35,11 @@ public class VarselDAOTest extends IntegrasjonsTest {
     @Inject
     private VarselDAO varselDAO;
 
+    @BeforeClass
+    public static void addSpringBeans() {
+        initSpringContext(Arrays.asList(DialogDAO.class, DialogStatusService.class, VarselDAO.class, StatusDAO.class, DataVarehusDAO.class));
+    }
+    
 
     private DialogData opprettNyDialog(String aktorId) {
         return dialogDAO.opprettDialog(nyDialog(aktorId));

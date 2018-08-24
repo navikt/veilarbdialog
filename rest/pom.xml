@@ -130,6 +130,11 @@
             <artifactId>test-config</artifactId>
         </dependency>
         <dependency>
+            <groupId>no.nav.sbl.dialogarena</groupId>
+            <artifactId>aktor-klient</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>no.nav.sbl</groupId>
             <artifactId>fasit</artifactId>
         </dependency>

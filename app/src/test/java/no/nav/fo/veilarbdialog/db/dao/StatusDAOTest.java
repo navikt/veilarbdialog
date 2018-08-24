@@ -1,24 +1,31 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import lombok.SneakyThrows;
-import no.nav.fo.IntegrasjonsTest;
+import no.nav.fo.veilarbdialog.db.DbTest;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
 
+import java.util.Arrays;
 import java.util.Date;
 
-import static java.lang.Thread.sleep;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StatusDAOTest extends IntegrasjonsTest {
+class StatusDAOTest extends DbTest {
 
     @Inject
     private StatusDAO statusDAO;
+
     @Inject
     private DialogDAO dialogDAO;
+
+    @BeforeAll
+    public static void addSpringBeans() {
+        initSpringContext(Arrays.asList(StatusDAO.class, DialogDAO.class));
+    }
 
     @Test
     void markerSomLestAvVeilederSkalSetteLestTidspunkt() {
@@ -204,12 +211,5 @@ class StatusDAOTest extends IntegrasjonsTest {
         statusDAO.setVenterPaSvarFraBrukerTilNaa(id);
         return dialogDAO.hentDialog(id);
     }
-
-    @SneakyThrows
-    private Date uniktTidspunkt() {
-        sleep(1);
-        Date tidspunkt = new Date();
-        sleep(1);
-        return tidspunkt;
-    }
+    
 }

@@ -16,7 +16,7 @@ public class VarselDAO {
     private Database database;
 
     @Inject
-    DateProvider dateProvider;
+    private DateProvider dateProvider;
 
     public List<String> hentAktorerMedUlesteMeldingerEtterSisteVarsel(long graceMillis) {
         Date grense = new Date(System.currentTimeMillis() - graceMillis);
