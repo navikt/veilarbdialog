@@ -17,13 +17,13 @@ import javax.sql.DataSource;
 @EnableTransactionManagement(proxyTargetClass = true)
 public class DatabaseContext {
 
-    public static final String AKTIVITET_DATA_SOURCE_JDNI_NAME = "jdbc/DialogDS";
+    public static final String DATA_SOURCE_JDNI_NAME = "jdbc/DialogDS";
 
     @Bean
     public DataSource dataSourceJndiLookup() throws NamingException {
         JndiDataSourceLookup jndiDataSourceLookup = new JndiDataSourceLookup();
         jndiDataSourceLookup.setResourceRef(true);
-        return jndiDataSourceLookup.getDataSource(AKTIVITET_DATA_SOURCE_JDNI_NAME);
+        return jndiDataSourceLookup.getDataSource(DATA_SOURCE_JDNI_NAME);
     }
 
     @Bean(name = "transactionManager")

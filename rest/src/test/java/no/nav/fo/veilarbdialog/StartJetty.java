@@ -12,7 +12,7 @@ import no.nav.testconfig.ApiAppTest;
 
 import static java.lang.System.setProperty;
 import static no.nav.dialogarena.config.DevelopmentSecurity.setupISSO;
-import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
+import static no.nav.fo.veilarbdialog.db.DatabaseContext.DATA_SOURCE_JDNI_NAME;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 import static no.nav.sbl.dialogarena.common.jetty.Jetty.usingWar;
 import static no.nav.sbl.dialogarena.common.jetty.JettyStarterUtils.*;
@@ -34,7 +34,7 @@ public class StartJetty {
         Jetty jetty = setupISSO(usingWar()
                         .at(APPLICATION_NAME)
                         .loadProperties("/environment-test.properties")
-                        .addDatasource(createDataSource(), AKTIVITET_DATA_SOURCE_JDNI_NAME)
+                        .addDatasource(createDataSource(), DATA_SOURCE_JDNI_NAME)
                         .port(PORT)
                         .sslPort(SSL_PORT)
                 , new ISSOSecurityConfig(APPLICATION_NAME)).buildJetty();
