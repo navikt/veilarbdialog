@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.val;
-import no.nav.fo.veilarbdialog.db.DbTest;
+import no.nav.fo.DbTest;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
 

@@ -1,8 +1,8 @@
-package no.nav.fo.veilarbdialog.db;
+package no.nav.fo;
 
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
-import static no.nav.fo.veilarbdialog.db.DatabaseContext.AKTIVITET_DATA_SOURCE_JDNI_NAME;
+import static no.nav.fo.veilarbdialog.db.DatabaseContext.DATA_SOURCE_JDNI_NAME;
 import static org.springframework.util.ReflectionUtils.setField;
 
 import java.lang.reflect.Field;
@@ -24,7 +24,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import lombok.SneakyThrows;
-import no.nav.fo.DatabaseTestContext;
 import no.nav.fo.veilarbdialog.db.DatabaseContext;
 import no.nav.fo.veilarbdialog.db.dao.DateProvider;
 
@@ -66,7 +65,7 @@ public abstract class DbTest {
         private final SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
 
         public JndiBean() throws Exception {
-            builder.bind(AKTIVITET_DATA_SOURCE_JDNI_NAME, DatabaseTestContext.buildMultiDataSource());
+            builder.bind(DATA_SOURCE_JDNI_NAME, DatabaseTestContext.buildMultiDataSource());
             builder.activate();
         }
 

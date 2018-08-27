@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import no.nav.fo.veilarbdialog.db.DbTest;
+import no.nav.fo.DbTest;
 
 public class KvpFeedMetadataDAOTest extends DbTest {
 

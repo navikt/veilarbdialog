@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import no.nav.fo.veilarbdialog.db.DbTest;
+import no.nav.fo.DbTest;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 
 import org.junit.jupiter.api.BeforeAll;
