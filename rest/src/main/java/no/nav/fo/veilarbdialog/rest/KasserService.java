@@ -9,6 +9,7 @@ import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import javax.ws.rs.PUT;
@@ -48,6 +49,7 @@ public class KasserService {
 
     @PUT
     @Path("/dialog/{id}/kasser")
+    @Transactional
     public int kasserDialog(@PathParam("id") String dialogId) {
         long id = Long.parseLong(dialogId);
         DialogData dialogData = dialogDAO.hentDialog(id);
