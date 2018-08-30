@@ -12,7 +12,8 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
+import javax.ws.rs.NotFoundException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -37,12 +38,21 @@ public class RestService implements DialogController, VeilederDialogController {
     private KontorsperreFilter kontorsperreFilter;
 
     @Override
-    public List<DialogDTO> hentDialoger() {        
+    public List<DialogDTO> hentDialoger() {
         return appService.hentDialogerForBruker(getBrukerIdent())
                 .stream()
                 .filter(dialog -> kontorsperreFilter.harTilgang(dialog.getKontorsperreEnhetId()))
                 .map(restMapper::somDialogDTO)
                 .collect(toList());
+    }
+
+    @Override
+    public DialogDTO hentDialog(String dialogId) {
+        return Optional.ofNullable(dialogId)
+                .map(Long::parseLong)
+                .map(appService::hentDialog)
+                .map(restMapper::somDialogDTO)
+                .orElseThrow(() -> new NotFoundException(""));
     }
 
     @Override
@@ -57,8 +67,8 @@ public class RestService implements DialogController, VeilederDialogController {
         );
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(dialogId);
         appService.updateDialogAktorFor(dialogData.getAktorId());
-        return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ? 
-                restMapper.somDialogDTO(dialogData) 
+        return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ?
+                restMapper.somDialogDTO(dialogData)
                 : null;
     }
 
@@ -66,8 +76,8 @@ public class RestService implements DialogController, VeilederDialogController {
     public DialogDTO markerSomLest(String dialogId) {
 
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(Long.parseLong(dialogId));
-        return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ? 
-                restMapper.somDialogDTO(dialogData) 
+        return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ?
+                restMapper.somDialogDTO(dialogData)
                 : null;
     }
 
