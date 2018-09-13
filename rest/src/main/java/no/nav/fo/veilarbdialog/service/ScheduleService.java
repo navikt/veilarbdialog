@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import lombok.val;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
+import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLAktoerId;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarslingstyper;
@@ -62,6 +63,7 @@ public class ScheduleService {
             val aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(GRACE_PERIODE);
 
             LOG.info("Varsler {} brukere", aktorer.size());
+            FunksjonelleMetrikker.nyeVarseler(aktorer.size());
             aktorer.forEach(this::sendVarsel);
         }
     }
