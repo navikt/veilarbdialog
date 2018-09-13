@@ -57,6 +57,12 @@ public class FunksjonelleMetrikker {
         event.report();
     }
 
+    public static void nyeVarseler(int antall) {
+        MetricsFactory.createEvent("dialog.varsel")
+                .addFieldToReport("antall", antall)
+                .report();
+    }
+
     private static void reportDialogMedMetadata(String eventName, DialogData dialog) {
         Event event = MetricsFactory.createEvent(eventName);
         event = addDialogMetadata(event, dialog);
