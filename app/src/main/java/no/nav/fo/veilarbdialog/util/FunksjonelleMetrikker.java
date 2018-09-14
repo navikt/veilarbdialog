@@ -63,6 +63,12 @@ public class FunksjonelleMetrikker {
                 .report();
     }
 
+    public static void stopetRevarsling(int antall) {
+        MetricsFactory.createEvent("dialog.revarselstoppet")
+                .addFieldToReport("antall", antall)
+                .report();
+    }
+
     private static void reportDialogMedMetadata(String eventName, DialogData dialog) {
         Event event = MetricsFactory.createEvent(eventName);
         event = addDialogMetadata(event, dialog);

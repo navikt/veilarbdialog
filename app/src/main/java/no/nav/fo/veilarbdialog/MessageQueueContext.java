@@ -38,9 +38,17 @@ public class MessageQueueContext {
 
     @Bean
     public JmsTemplate varselQueue() throws NamingException {
+        return queue(varselDestination());
+    }
+
+    @Bean JmsTemplate stopVarselQueue() throws NamingException {
+        return queue(stopVarselDestination());
+    }
+
+    private JmsTemplate queue(Destination destination) throws NamingException {
         JmsTemplate jmsTemplate = new JmsTemplate();
         jmsTemplate.setConnectionFactory(connectionFactory());
-        jmsTemplate.setDefaultDestination(varselDestination());
+        jmsTemplate.setDefaultDestination(destination);
         return jmsTemplate;
     }
 
@@ -50,6 +58,10 @@ public class MessageQueueContext {
 
     private Destination varselDestination() throws NamingException {
         return (Destination) new InitialContext().lookup("java:/jboss/jms/VARSELPRODUKSJON.VARSLINGER");
+    }
+
+    private Destination stopVarselDestination() throws NamingException {
+        return (Destination) new InitialContext().lookup("java:/jboss/jms/VARSELPRODUKSJON.STOPP_VARSEL_UTSENDING");
     }
 
 }

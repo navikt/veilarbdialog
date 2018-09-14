@@ -194,6 +194,8 @@ public class DialogDAO {
                 .oppdatert(hentDato(rs, OPPDATERT))
                 .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
                 .egenskaper(egenskaper)
+                .harUlestParagraf8Henvendelse(rs.getBoolean("ulestParagraf8Varsel"))
+                .paragraf8VarselUUID("paragraf8_varsel_uuid")
                 .build();
     }
 

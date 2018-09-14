@@ -29,6 +29,9 @@ public class DialogData {
     private Date opprettetDato;
     private boolean historisk;
 
+    private boolean harUlestParagraf8Henvendelse;
+    private String paragraf8VarselUUID;
+
     private String kontorsperreEnhetId;
 
     private Date eldsteUlesteTidspunktForVeileder;
