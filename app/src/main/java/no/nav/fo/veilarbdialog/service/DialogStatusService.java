@@ -56,9 +56,9 @@ public class DialogStatusService {
             return dialogData;
         }
         if (harAktivtparagraf8Varsel(dialogData)) {
-            int antall = varselDAO.hentAntallAktiveDilogerForVarsel(dialogData.getParagraf8VarselUUID());
+            int antall = varselDAO.hentAntallAktiveDialogerForVarsel(dialogData.getParagraf8VarselUUID());
             if(antall == 1) {
-                varselDAO.revaslingSkalAvslutes(dialogData.getParagraf8VarselUUID());
+                varselDAO.revarslingSkalAvsluttes(dialogData.getParagraf8VarselUUID());
             }
         }
         statusDAO.markerSomLestAvBruker(dialogData.getId());

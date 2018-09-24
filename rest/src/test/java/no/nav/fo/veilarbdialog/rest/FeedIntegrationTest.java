@@ -9,10 +9,7 @@ import no.nav.fo.feed.FeedProducerTester;
 import no.nav.fo.feed.consumer.FeedConsumer;
 import no.nav.fo.feed.controller.FeedController;
 import no.nav.fo.veilarbdialog.client.KvpClient;
-import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
-import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
-import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
-import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
+import no.nav.fo.veilarbdialog.db.dao.*;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.feed.FeedConfig;
 import no.nav.fo.veilarbdialog.service.AppService;
@@ -20,7 +17,6 @@ import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import no.nav.fo.veilarbdialog.util.DateUtils;
 import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
 import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -131,7 +127,8 @@ public class FeedIntegrationTest {
                     StatusDAO.class,
                     DataVarehusDAO.class,
                     DialogFeedDAO.class,
-                    FeedConfig.class));
+                    FeedConfig.class,
+                    VarselDAO.class));
         }
 
         @BeforeEach

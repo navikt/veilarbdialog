@@ -2,6 +2,8 @@ package no.nav.fo.veilarbdialog.service;
 
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
+import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.ObjectFactory;
+import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.StoppReVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLAktoerId;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarslingstyper;
@@ -65,7 +67,7 @@ public class ScheduleService {
     @Scheduled(cron = "${varslingsrate.cron}")
     public void sjekkForVarsel() {
         if (IS_MASTER) {
-            List<String> varselUUIDer = varselDAO.hentRevarselrSomSkalStoppes();
+            List<String> varselUUIDer = varselDAO.hentRevarslerSomSkalStoppes();
             LOG.info("revarser {} som stoppes", varselUUIDer.size());
             varselUUIDer.forEach(this::stopRevarsel);
             FunksjonelleMetrikker.stopetRevarsling(varselUUIDer.size());
@@ -78,12 +80,15 @@ public class ScheduleService {
     }
 
     private void stopRevarsel(String varselUUID) {
-        //TODO stopp revarslingen :)
+        StoppReVarsel stoppReVarsel = new StoppReVarsel();
+        stoppReVarsel.setVarselbestillingId(varselUUID);
+        String melding = marshallVarsel(new ObjectFactory().createStoppReVarsel(stoppReVarsel));
+        stopVarselQueue.send(messageCreator(melding, varselUUID));
         varselDAO.markerSomStoppet(varselUUID);
     }
 
     private void sendVarsel(String aktorId) {
-        boolean paragraf8 = varselDAO.harUlesteUvarselteParagraf8Henvedelser(aktorId);
+        boolean paragraf8 = varselDAO.harUlesteUvarsledeParagraf8Henvedelser(aktorId);
         if(paragraf8) {
             String varselUuid = sendParagraf8Varsel(aktorId);
             varselDAO.insertParagraf8Varsel(aktorId, varselUuid);
@@ -131,4 +136,6 @@ public class ScheduleService {
                 .withMottaker(new XMLAktoerId().withAktoerId(aktoerId))
                 .withVarslingstype(new XMLVarslingstyper(varselId, null, null));
     }
+
+
 }

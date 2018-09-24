@@ -68,6 +68,12 @@
             <groupId>no.nav.sbl.dialogarena</groupId>
             <artifactId>varsel-inn</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.meldinger.virksomhet</groupId>
+            <artifactId>nav-virksomhet-stoppReVarsel-v1-meldingsdefinisjon</artifactId>
+            <version>1.0.1</version>
+            <classifier>jaxb</classifier>
+        </dependency>
 
         <!--Annet-->
         <dependency>
