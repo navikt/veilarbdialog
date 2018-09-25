@@ -88,8 +88,8 @@ public class ScheduleService {
     }
 
     private void sendVarsel(String aktorId) {
-        boolean paragraf8 = varselDAO.harUlesteUvarsledeParagraf8Henvedelser(aktorId);
-        if(paragraf8) {
+        boolean paragraf8 = varselDAO.harUlesteUvarsledeParagraf8Henvendelser(aktorId);
+        if (paragraf8) {
             String varselUuid = sendParagraf8Varsel(aktorId);
             varselDAO.insertParagraf8Varsel(aktorId, varselUuid);
             varselDAO.setVarselUUIDForParagraf8Dialoger(aktorId, varselUuid);

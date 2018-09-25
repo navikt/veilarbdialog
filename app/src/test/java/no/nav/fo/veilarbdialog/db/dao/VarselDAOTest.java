@@ -11,11 +11,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.inject.Inject;
-
-import java.util.Arrays;
 import java.util.Date;
 
 import static java.lang.Thread.sleep;
+import static java.util.Arrays.asList;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -37,7 +36,7 @@ public class VarselDAOTest extends DbTest {
 
     @BeforeClass
     public static void addSpringBeans() {
-        initSpringContext(Arrays.asList(DialogDAO.class, DialogStatusService.class, VarselDAO.class, StatusDAO.class, DataVarehusDAO.class));
+        initSpringContext(asList(DialogDAO.class, DialogStatusService.class, VarselDAO.class, StatusDAO.class, DataVarehusDAO.class));
     }
     
 

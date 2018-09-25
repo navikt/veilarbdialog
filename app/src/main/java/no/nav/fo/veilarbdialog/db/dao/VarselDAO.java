@@ -50,7 +50,7 @@ public class VarselDAO {
         database.update("UPDATE DIALOG SET paragraf8_varsel_uuid = ? WHERE paragraf8_varsel_uuid IS NULL AND ulestParagraf8Varsel = 1 AND aktor_id = ?", varselUUID, aktorId);
     }
 
-    public boolean harUlesteUvarsledeParagraf8Henvedelser(String aktorId) {
+    public boolean harUlesteUvarsledeParagraf8Henvendelser(String aktorId) {
         List<String> aktors = database.query("SELECT aktor_id FROM DIALOG where ulestParagraf8Varsel = 1, and paragraf8_varsel_uuid IS NULL and aktor_id = ?", (rs) -> rs.getString("aktor_id"), aktorId);
         return !aktors.isEmpty();
     }
@@ -64,20 +64,20 @@ public class VarselDAO {
 
 
     public void insertParagraf8Varsel(String aktorid, String varselUuid) {
-        database.update("INSERT INTO paragraf8varsel (uuid, aktorid, sendt) VALUES (?, ?, "+ dateProvider.getNow() + ")",
+        database.update("INSERT INTO PARAGRAF8VARSEL (uuid, aktorid, sendt) VALUES (?, ?, "+ dateProvider.getNow() + ")",
                 varselUuid, aktorid);
     }
 
     public void revarslingSkalAvsluttes(String paragraf8VarselUUID) {
-        database.update("update paragraf8varsel set skalStoppes = 1 where "+ PARAGAF8_VARSEL_UUID + " = ?", paragraf8VarselUUID);
+        database.update("update PARAGRAF8VARSEL set skalStoppes = 1 where "+ PARAGAF8_VARSEL_UUID + " = ?", paragraf8VarselUUID);
     }
 
     public List<String> hentRevarslerSomSkalStoppes() {
-        return database.query("select " + PARAGAF8_VARSEL_UUID + " from paragraf8varsel where skalStoppes = 1", rs -> rs.getString(PARAGAF8_VARSEL_UUID));
+        return database.query("select " + PARAGAF8_VARSEL_UUID + " from PARAGRAF8VARSEL where skalStoppes = 1", rs -> rs.getString(PARAGAF8_VARSEL_UUID));
     }
 
     public void markerSomStoppet(String varselUUID) {
-        database.update("update paragraf8varsel set skalStoppes = 0, deaktivert = " + dateProvider.getNow() +
+        database.update("update PARAGRAF8VARSEL set skalStoppes = 0, deaktivert = " + dateProvider.getNow() +
                 " where " + PARAGAF8_VARSEL_UUID + " = ? ", varselUUID);
     }
 

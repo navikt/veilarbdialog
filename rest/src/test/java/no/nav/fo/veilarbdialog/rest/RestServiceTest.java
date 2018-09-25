@@ -24,9 +24,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.Optional;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.Mockito.mock;
@@ -71,7 +71,7 @@ public class RestServiceTest extends DbTest {
 
     @BeforeClass
     public static void addSpringBeans() {
-        initSpringContext(Arrays.asList(ContextConfig.class,
+        initSpringContext(asList(ContextConfig.class,
                 AppService.class,
                 DialogDAO.class,
                 DialogStatusService.class,

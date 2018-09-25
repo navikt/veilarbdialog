@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.domain;
 
 public enum EgenskapType {
-    ESKALERINGSVARSEL
+    ESKALERINGSVARSEL,
+    PARAGRAF8
 }
