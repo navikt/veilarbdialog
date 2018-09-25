@@ -10,7 +10,6 @@ import java.util.List;
 
 import static no.nav.fo.veilarbdialog.db.dao.DBKonstanter.PARAGAF8_VARSEL_UUID;
 
-
 @Component
 public class VarselDAO {
 
@@ -47,21 +46,34 @@ public class VarselDAO {
     }
 
     public void setVarselUUIDForParagraf8Dialoger(String aktorId, String varselUUID) {
-        database.update("UPDATE DIALOG SET paragraf8_varsel_uuid = ? WHERE paragraf8_varsel_uuid IS NULL AND ulestParagraf8Varsel = 1 AND aktor_id = ?", varselUUID, aktorId);
+        database.update("UPDATE DIALOG " +
+                "SET paragraf8_varsel_uuid = ? " +
+                "WHERE paragraf8_varsel_uuid IS NULL " +
+                "AND ulestParagraf8Varsel = 1 " +
+                "AND aktor_id = ?",
+                varselUUID,
+                aktorId);
     }
 
     public boolean harUlesteUvarsledeParagraf8Henvendelser(String aktorId) {
-        List<String> aktors = database.query("SELECT aktor_id FROM DIALOG where ulestParagraf8Varsel = 1, and paragraf8_varsel_uuid IS NULL and aktor_id = ?", (rs) -> rs.getString("aktor_id"), aktorId);
+        List<String> aktors = database.query("SELECT aktor_id " +
+                "FROM DIALOG " +
+                "where ulestParagraf8Varsel = 1, " +
+                "and paragraf8_varsel_uuid IS NULL " +
+                "and aktor_id = ?",
+                (rs) -> rs.getString("aktor_id"),
+                aktorId);
+
         return !aktors.isEmpty();
     }
 
     public int hentAntallAktiveDialogerForVarsel(String paragraf8VarselUUID) {
-        return database.queryForObject("select count(*) as antall from DILAOG where " + PARAGAF8_VARSEL_UUID + " = ? ",
+        return database.queryForObject("select count(*) as antall " +
+                        "from DILAOG " +
+                        "where " + PARAGAF8_VARSEL_UUID + " = ? ",
                 rs -> rs.getInt("antall"),
                 paragraf8VarselUUID);
     }
-
-
 
     public void insertParagraf8Varsel(String aktorid, String varselUuid) {
         database.update("INSERT INTO PARAGRAF8VARSEL (uuid, aktorid, sendt) VALUES (?, ?, "+ dateProvider.getNow() + ")",
@@ -86,6 +98,4 @@ public class VarselDAO {
                 aktorId
         );
     }
-
-
 }
