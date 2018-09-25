@@ -45,9 +45,6 @@
 
         <queueManager alias="mqGateway03" xaEnabled="true" jndi="java:jboss/mqConnectionFactory" unifiedConnectionFactory="true">
             <queue jndi="java:/jboss/jms/VARSELPRODUKSJON.VARSLINGER" alias="VARSELPRODUKSJON.VARSLINGER"/>
-        </queueManager>
-
-        <queueManager alias="mqGateway03" xaEnabled="true" jndi="java:jboss/mqConnectionFactory" unifiedConnectionFactory="true">
             <queue jndi="java:/jboss/jms/VARSELPRODUKSJON.STOPP_VARSEL_UTSENDING" alias="VARSELPRODUKSJON.STOPP_VARSEL_UTSENDING"/>
         </queueManager>
     </resources>
