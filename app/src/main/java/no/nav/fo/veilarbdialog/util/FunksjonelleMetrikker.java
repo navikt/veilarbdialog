@@ -57,14 +57,19 @@ public class FunksjonelleMetrikker {
         event.report();
     }
 
-    public static void nyeVarseler(int antall) {
+    public static void nyeVarsler(int antall) {
         MetricsFactory.createEvent("dialog.varsel")
                 .addFieldToReport("antall", antall)
                 .report();
     }
 
-    public static void stopetRevarsling(int antall) {
-        MetricsFactory.createEvent("dialog.revarselstoppet")
+    public static void paragraf8Varsel() {
+        MetricsFactory.createEvent("dialog.paragraf8.varsel")
+                .report();
+    }
+
+    public static void stoppetRevarsling(int antall) {
+        MetricsFactory.createEvent("dialog.revarsel.stoppet")
                 .addFieldToReport("antall", antall)
                 .report();
     }

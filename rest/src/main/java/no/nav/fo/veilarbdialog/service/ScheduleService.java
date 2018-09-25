@@ -68,13 +68,13 @@ public class ScheduleService {
     public void sjekkForVarsel() {
         if (IS_MASTER) {
             List<String> varselUUIDer = varselDAO.hentRevarslerSomSkalStoppes();
-            LOG.info("revarser {} som stoppes", varselUUIDer.size());
+            LOG.info("Stopper {} revarsler", varselUUIDer.size());
             varselUUIDer.forEach(this::stopRevarsel);
-            FunksjonelleMetrikker.stopetRevarsling(varselUUIDer.size());
+            FunksjonelleMetrikker.stoppetRevarsling(varselUUIDer.size());
 
             List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(GRACE_PERIODE);
             LOG.info("Varsler {} brukere", aktorer.size());
-            FunksjonelleMetrikker.nyeVarseler(aktorer.size());
+            FunksjonelleMetrikker.nyeVarsler(aktorer.size());
             aktorer.forEach(this::sendVarsel);
         }
     }
@@ -102,6 +102,7 @@ public class ScheduleService {
     private String sendParagraf8Varsel(String aktorId) {
         String uuid = randomUUID().toString() + PARAGAF8_VARSEL_NAVN;
         varselQueue.send(messageCreator(marshallVarsel(lagNyttVarsel(aktorId, PARAGAF8_VARSEL_ID)), uuid));
+        FunksjonelleMetrikker.paragraf8Varsel();
         return uuid;
     }
 
