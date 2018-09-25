@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.service;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
+import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
@@ -18,12 +19,14 @@ public class DialogStatusService {
     private final StatusDAO statusDAO;
     private final DialogDAO dialogDAO;
     private final DataVarehusDAO dataVarehusDAO;
+    private final VarselDAO varselDAO;
 
     @Inject
-    public DialogStatusService(StatusDAO statusDAO, DialogDAO dialogDAO, DataVarehusDAO dataVarehusDAO) {
+    public DialogStatusService(StatusDAO statusDAO, DialogDAO dialogDAO, DataVarehusDAO dataVarehusDAO, VarselDAO varselDAO) {
         this.statusDAO = statusDAO;
         this.dialogDAO = dialogDAO;
         this.dataVarehusDAO = dataVarehusDAO;
+        this.varselDAO = varselDAO;
     }
 
     public DialogData nyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
@@ -52,10 +55,21 @@ public class DialogStatusService {
         if (dialogData.erLestAvBruker()) {
             return dialogData;
         }
+        if (harAktivtparagraf8Varsel(dialogData)) {
+            int antall = varselDAO.hentAntallAktiveDialogerForVarsel(dialogData.getParagraf8VarselUUID());
+            if(antall == 1) {
+                varselDAO.revarslingSkalAvsluttes(dialogData.getParagraf8VarselUUID());
+            }
+        }
         statusDAO.markerSomLestAvBruker(dialogData.getId());
+
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.LEST_AV_BRUKER);
         FunksjonelleMetrikker.markerDialogSomLestAvBruker(dialogData);
         return dialogDAO.hentDialog(dialogData.getId());
+    }
+
+    private boolean harAktivtparagraf8Varsel(DialogData dialogData) {
+        return dialogData.isHarUlestParagraf8Henvendelse() && dialogData.getParagraf8VarselUUID() != null;
     }
 
     public DialogData oppdaterVenterPaNavSiden(DialogData dialogData, DialogStatus dialogStatus) {

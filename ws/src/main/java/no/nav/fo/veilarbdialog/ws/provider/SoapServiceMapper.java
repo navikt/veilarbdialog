@@ -86,7 +86,7 @@ class SoapServiceMapper {
                 .egenskaper(opprettDialogForAktivitetsplanRequest
                         .getEgenskaper()
                         .stream()
-                        .map(tmp -> EgenskapType.ESKALERINGSVARSEL)
+                        .map(tmp -> EgenskapType.valueOf(tmp.value()))
                         .collect(Collectors.toList()))
                 .build();
     }
@@ -99,7 +99,7 @@ class SoapServiceMapper {
                 .egenskaper(opprettDialogForAktivitetRequest
                         .getEgenskaper()
                         .stream()
-                        .map(tmp -> EgenskapType.ESKALERINGSVARSEL)
+                        .map(tmp -> EgenskapType.valueOf(tmp.value()))
                         .collect(Collectors.toList()))
                 .build();
     }

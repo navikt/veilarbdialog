@@ -5,6 +5,7 @@ import no.nav.fo.veilarbdialog.TestDataBuilder;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
+import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.domain.*;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +24,8 @@ class DialogStatusServiceTest {
     private StatusDAO statusDAO = mock(StatusDAO.class);
     private DialogDAO dialogDAO = mock(DialogDAO.class);
     private DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
-    private DialogStatusService dialogStatusService = new DialogStatusService(statusDAO, dialogDAO, dataVarehusDAO);
+    private VarselDAO varselDao = mock(VarselDAO.class);
+    private DialogStatusService dialogStatusService = new DialogStatusService(statusDAO, dialogDAO, dataVarehusDAO, varselDao);
 
     @Test
     public void ny_henvendelse_fra_bruker_kaller_set_ny_melding_fra_bruker() {

@@ -1,24 +1,5 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Optional;
-
-import javax.inject.Inject;
-
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.stereotype.Component;
-
 import lombok.val;
 import no.nav.apiapp.security.PepClient;
 import no.nav.brukerdialog.security.context.SubjectRule;
@@ -28,15 +9,28 @@ import no.nav.common.auth.Subject;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.DbTest;
 import no.nav.fo.veilarbdialog.client.KvpClient;
-import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
-import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
-import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
-import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
+import no.nav.fo.veilarbdialog.db.dao.*;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.rest.RestService;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.Optional;
+
+import static java.util.Arrays.asList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RestServiceTest extends DbTest {
 
@@ -77,7 +71,7 @@ public class RestServiceTest extends DbTest {
 
     @BeforeClass
     public static void addSpringBeans() {
-        initSpringContext(Arrays.asList(ContextConfig.class,
+        initSpringContext(asList(ContextConfig.class,
                 AppService.class,
                 DialogDAO.class,
                 DialogStatusService.class,
@@ -87,7 +81,8 @@ public class RestServiceTest extends DbTest {
                 Request.class,
                 RestService.class,
                 RestMapper.class,
-                KontorsperreFilter.class));
+                KontorsperreFilter.class,
+                VarselDAO.class));
     }
 
     @Component

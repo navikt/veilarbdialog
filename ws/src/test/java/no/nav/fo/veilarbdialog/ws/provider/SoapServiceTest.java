@@ -5,30 +5,25 @@ import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.DbTest;
 import no.nav.fo.veilarbdialog.client.KvpClient;
-import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
-import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
-import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
-import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
+import no.nav.fo.veilarbdialog.db.dao.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.meldinger.HentDialogerForBrukerRequest;
 import no.nav.tjeneste.domene.brukerdialog.dialogoppfoelging.v1.meldinger.OpprettDialogForAktivitetsplanRequest;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.inject.Inject;
+import java.util.Arrays;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Optional;
 
 
 public class SoapServiceTest extends DbTest {
@@ -74,7 +69,8 @@ public class SoapServiceTest extends DbTest {
                 DialogFeedDAO.class,
                 KontorsperreFilter.class,
                 SoapService.class,
-                SoapServiceMapper.class));
+                SoapServiceMapper.class,
+                VarselDAO.class));
     }
 
     @Test

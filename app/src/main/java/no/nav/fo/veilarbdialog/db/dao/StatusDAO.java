@@ -34,6 +34,7 @@ public class StatusDAO {
 
     public void markerSomLestAvBruker(long dialogId) {
         db.update("UPDATE DIALOG SET " +
+                HAR_ULEST_PARAGRAF_8 + " = 0, " +
                 ELDSTE_ULESTE_FOR_BRUKER + " = null, " +
                 LEST_AV_BRUKER_TID + " = " + dateProvider.getNow() + ", " +
                 OPPDATERT + " = "+ dateProvider.getNow() + " " +

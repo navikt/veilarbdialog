@@ -1,7 +1,10 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.SneakyThrows;
-import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.domain.AvsenderType;
+import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.domain.EgenskapType;
+import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
 import no.nav.sbl.jdbc.Database;
 import org.slf4j.Logger;
@@ -194,6 +197,8 @@ public class DialogDAO {
                 .oppdatert(hentDato(rs, OPPDATERT))
                 .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
                 .egenskaper(egenskaper)
+                .harUlestParagraf8Henvendelse(rs.getBoolean(HAR_ULEST_PARAGRAF_8))
+                .paragraf8VarselUUID(rs.getString(PARAGAF8_VARSEL_UUID))
                 .build();
     }
 

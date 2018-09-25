@@ -1,8 +1,9 @@
 package no.nav.fo.veilarbdialog.service;
 
-import lombok.val;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
+import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.ObjectFactory;
+import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.StoppReVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLAktoerId;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarslingstyper;
@@ -19,6 +20,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
+import java.util.List;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.UUID.randomUUID;
@@ -36,7 +38,9 @@ public class ScheduleService {
     private static final long GRACE_PERIODE = Long.parseLong(System.getProperty("grace.periode.millis"));
     private static final boolean IS_MASTER = Boolean.parseBoolean(System.getProperty("cluster.ismasternode", "false"));
     private static final String VARSEL_ID = "DittNAV_000007";
+    private static final String PARAGAF8_VARSEL_ID = "DittNAV_000008";
     private static final String VARSEL_NAVN = "Aktivitetsplan_nye_henvendelser";
+    private static final String PARAGAF8_VARSEL_NAVN = "Aktivitetsplan_§8_mal";
 
     private static final JAXBContext VARSEL_CONTEXT;
 
@@ -57,31 +61,65 @@ public class ScheduleService {
     @Inject
     private JmsTemplate varselQueue;
 
-    @Scheduled(cron = "${varslingsrate.cron}")
-    public void sjekkForSendVarsel() {
-        if (IS_MASTER) {
-            val aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(GRACE_PERIODE);
+    @Inject
+    private JmsTemplate stopVarselQueue;
 
+    @Scheduled(cron = "${varslingsrate.cron}")
+    public void sjekkForVarsel() {
+        if (IS_MASTER) {
+            List<String> varselUUIDer = varselDAO.hentRevarslerSomSkalStoppes();
+            LOG.info("Stopper {} revarsler", varselUUIDer.size());
+            varselUUIDer.forEach(this::stopRevarsel);
+            FunksjonelleMetrikker.stoppetRevarsling(varselUUIDer.size());
+
+            List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(GRACE_PERIODE);
             LOG.info("Varsler {} brukere", aktorer.size());
-            FunksjonelleMetrikker.nyeVarseler(aktorer.size());
+            FunksjonelleMetrikker.nyeVarsler(aktorer.size());
             aktorer.forEach(this::sendVarsel);
         }
     }
 
+    private void stopRevarsel(String varselUUID) {
+        StoppReVarsel stoppReVarsel = new StoppReVarsel();
+        stoppReVarsel.setVarselbestillingId(varselUUID);
+        String melding = marshallVarsel(new ObjectFactory().createStoppReVarsel(stoppReVarsel));
+        stopVarselQueue.send(messageCreator(melding, varselUUID));
+        varselDAO.markerSomStoppet(varselUUID);
+    }
+
     private void sendVarsel(String aktorId) {
-        varselQueue.send(messageCreator(marshallVarsel(lagNyttVarsel(aktorId))));
+        boolean paragraf8 = varselDAO.harUlesteUvarsledeParagraf8Henvendelser(aktorId);
+        if (paragraf8) {
+            String varselUuid = sendParagraf8Varsel(aktorId);
+            varselDAO.insertParagraf8Varsel(aktorId, varselUuid);
+            varselDAO.setVarselUUIDForParagraf8Dialoger(aktorId, varselUuid);
+        } else {
+            sendServicMelding(aktorId);
+        }
         varselDAO.oppdaterSisteVarselForBruker(aktorId);
     }
 
-    public static MessageCreator messageCreator(final String hendelse) {
+    private String sendParagraf8Varsel(String aktorId) {
+        String uuid = randomUUID().toString() + PARAGAF8_VARSEL_NAVN;
+        varselQueue.send(messageCreator(marshallVarsel(lagNyttVarsel(aktorId, PARAGAF8_VARSEL_ID)), uuid));
+        FunksjonelleMetrikker.paragraf8Varsel();
+        return uuid;
+    }
+
+    private void sendServicMelding(String aktorId) {
+        String uuid = randomUUID().toString() + VARSEL_NAVN;
+        varselQueue.send(messageCreator(marshallVarsel(lagNyttVarsel(aktorId, VARSEL_ID)), uuid));
+    }
+
+    private static MessageCreator messageCreator(final String hendelse, String uuid) {
         return session -> {
             TextMessage msg = session.createTextMessage(hendelse);
-            msg.setStringProperty("callId", randomUUID().toString() + VARSEL_NAVN);
+            msg.setStringProperty("callId", uuid);
             return msg;
         };
     }
 
-    public static String marshallVarsel(Object element) {
+    private static String marshallVarsel(Object element) {
         try {
             StringWriter writer = new StringWriter();
             Marshaller marshaller = VARSEL_CONTEXT.createMarshaller();
@@ -94,9 +132,11 @@ public class ScheduleService {
         }
     }
 
-    private XMLVarsel lagNyttVarsel(String aktoerId) {
+    private XMLVarsel lagNyttVarsel(String aktoerId, String varselId) {
         return new XMLVarsel()
                 .withMottaker(new XMLAktoerId().withAktoerId(aktoerId))
-                .withVarslingstype(new XMLVarslingstyper(VARSEL_ID, null, null));
+                .withVarslingstype(new XMLVarslingstyper(varselId, null, null));
     }
+
+
 }

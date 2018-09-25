@@ -13,7 +13,8 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.NotFoundException;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -125,7 +126,7 @@ public class RestService implements DialogController, VeilederDialogController {
                 .aktivitetId(nyHenvendelseDTO.aktivitetId)
                 .egenskaper(nyHenvendelseDTO.egenskaper
                         .stream()
-                        .map(egenskap -> EgenskapType.ESKALERINGSVARSEL)
+                        .map(egenskap -> EgenskapType.valueOf(egenskap.name()))
                         .collect(Collectors.toList()))
                 .build();
         DialogData opprettetDialog = appService.opprettDialogForAktivitetsplanPaIdent(dialogData);

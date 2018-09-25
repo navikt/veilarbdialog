@@ -4,12 +4,10 @@ import lombok.val;
 import no.nav.fo.DbTest;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.inject.Inject;
-
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +31,7 @@ public class DialogFeedDAOTest extends DbTest {
 
     @BeforeClass
     public static void addSpringBeans() {
-        initSpringContext(Arrays.asList(DialogDAO.class, DialogStatusService.class, DialogFeedDAO.class, StatusDAO.class, DataVarehusDAO.class));
+        initSpringContext(Arrays.asList(DialogDAO.class, DialogStatusService.class, DialogFeedDAO.class, StatusDAO.class, DataVarehusDAO.class, VarselDAO.class));
     }
 
     @Test

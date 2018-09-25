@@ -1,24 +1,17 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
-import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
+import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
+import org.springframework.stereotype.Component;
 
+import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
-
-import no.nav.fo.veilarbdialog.domain.Avsender;
-import no.nav.fo.veilarbdialog.domain.DialogDTO;
-import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.Egenskap;
-import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
-import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
+import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 
 @Component
 class RestMapper {
@@ -58,7 +51,7 @@ class RestMapper {
                 .setOpprettetDato(dialogData.getOpprettetDato())
                 .setEgenskaper(dialogData.getEgenskaper()
                         .stream()
-                        .map(tmp -> Egenskap.ESKALERINGSVARSEL)
+                        .map(egenskapType -> Egenskap.valueOf(egenskapType.name()))
                         .collect(Collectors.toList()))
                 .setHistorisk(dialogData.isHistorisk())
                 .setSisteTekst(sisteHenvendelse
