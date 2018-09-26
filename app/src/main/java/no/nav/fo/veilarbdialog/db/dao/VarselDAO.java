@@ -81,16 +81,16 @@ public class VarselDAO {
     }
 
     public void revarslingSkalAvsluttes(String paragraf8VarselUUID) {
-        database.update("update PARAGRAF8VARSEL set skalStoppes = 1 where "+ PARAGAF8_VARSEL_UUID + " = ?", paragraf8VarselUUID);
+        database.update("update PARAGRAF8VARSEL set skalStoppes = 1 where UUID = ?", paragraf8VarselUUID);
     }
 
     public List<String> hentRevarslerSomSkalStoppes() {
-        return database.query("select " + PARAGAF8_VARSEL_UUID + " from PARAGRAF8VARSEL where skalStoppes = 1", rs -> rs.getString(PARAGAF8_VARSEL_UUID));
+        return database.query("select UUID from PARAGRAF8VARSEL where skalStoppes = 1", rs -> rs.getString(PARAGAF8_VARSEL_UUID));
     }
 
     public void markerSomStoppet(String varselUUID) {
         database.update("update PARAGRAF8VARSEL set skalStoppes = 0, deaktivert = " + dateProvider.getNow() +
-                " where " + PARAGAF8_VARSEL_UUID + " = ? ", varselUUID);
+                " where UUID = ? ", varselUUID);
     }
 
     private void opprettVarselForBruker(String aktorId) {
