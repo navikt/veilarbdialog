@@ -20,6 +20,10 @@ public interface DialogController {
     @POST
     DialogDTO nyHenvendelse(NyHenvendelseDTO nyHenvendelseDTO);
 
+    @POST
+    @Path("/forhandsorientering")
+    DialogDTO forhandsorienteringPaAktivitet(NyHenvendelseDTO nyHenvendelseDTO);
+
     @PUT
     @Path("/{dialogId}/les")
     DialogDTO markerSomLest(@PathParam("dialogId") String dialogId);

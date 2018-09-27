@@ -10,6 +10,7 @@ import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.DbTest;
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.*;
+import no.nav.fo.veilarbdialog.domain.Egenskap;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
@@ -28,6 +29,7 @@ import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -104,4 +106,12 @@ public class RestServiceTest extends DbTest {
         restService.markerSomLest(hentAktiviteterResponse.get(0).id);
     }
 
+    @Test
+    public void skalHaParagraf8Egenskap() {
+        restService.forhandsorienteringPaAktivitet(new NyHenvendelseDTO().setTekst("tekst"));
+        val hentedeDialoger = restService.hentDialoger();
+
+        assertThat(hentedeDialoger, hasSize(1));
+        assertThat(hentedeDialoger.get(0).getEgenskaper().contains(Egenskap.PARAGRAF8), is(true));
+    }
 }
