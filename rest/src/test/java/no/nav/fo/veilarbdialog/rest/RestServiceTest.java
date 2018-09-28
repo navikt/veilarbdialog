@@ -20,7 +20,6 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +44,6 @@ public class RestServiceTest extends DbTest {
     @Rule
     public SubjectRule subjectRule = new SubjectRule();
 
-    @Configuration
     static class ContextConfig {
 
         private static final String AKTORID = "123";
@@ -107,10 +105,39 @@ public class RestServiceTest extends DbTest {
     }
 
     @Test
-    public void skalHaParagraf8Egenskap() {
-        restService.forhandsorienteringPaAktivitet(new NyHenvendelseDTO().setTekst("tekst"));
-        val hentedeDialoger = restService.hentDialoger();
+    public void forhandsorienteringPaEksisterendeDialogPaAktivitetSkalFaEgenskapenParagraf8() {
+        final String aktivitetId = "123";
 
+        restService.nyHenvendelse(
+                new NyHenvendelseDTO()
+                        .setTekst("forhandsorienteringPaEksisterendeDialogPaAktivitetSkalFaEgenskapenParagraf8")
+                        .setAktivitetId(aktivitetId)
+        );
+
+        val opprettetDialog = restService.hentDialoger();
+        assertThat(opprettetDialog.get(0).getEgenskaper().isEmpty(), is(true));
+        assertThat(opprettetDialog.size(), is(1));
+
+        restService.forhandsorienteringPaAktivitet(
+                new NyHenvendelseDTO()
+                        .setTekst("paragraf8")
+                        .setAktivitetId(aktivitetId)
+        );
+
+        val dialogMedParagraf8 = restService.hentDialoger();
+        assertThat(dialogMedParagraf8.get(0).getEgenskaper().contains(Egenskap.PARAGRAF8), is(true));
+        assertThat(dialogMedParagraf8.size(), is(1));
+    }
+
+    @Test
+    public void skalHaParagraf8Egenskap() {
+        restService.forhandsorienteringPaAktivitet(
+                new NyHenvendelseDTO()
+                        .setTekst("skalHaParagraf8Egenskap")
+                        .setAktivitetId("123")
+        );
+
+        val hentedeDialoger = restService.hentDialoger();
         assertThat(hentedeDialoger, hasSize(1));
         assertThat(hentedeDialoger.get(0).getEgenskaper().contains(Egenskap.PARAGRAF8), is(true));
     }
