@@ -58,7 +58,7 @@ public class VarselDAO {
     public boolean harUlesteUvarsledeParagraf8Henvendelser(String aktorId) {
         List<String> aktors = database.query("SELECT aktor_id " +
                 "FROM DIALOG " +
-                "where ulestParagraf8Varsel = 1, " +
+                "where ulestParagraf8Varsel = 1 " +
                 "and paragraf8_varsel_uuid IS NULL " +
                 "and aktor_id = ?",
                 (rs) -> rs.getString("aktor_id"),
