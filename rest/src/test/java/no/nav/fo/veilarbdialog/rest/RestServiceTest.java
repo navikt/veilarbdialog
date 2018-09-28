@@ -19,7 +19,6 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +42,6 @@ public class RestServiceTest extends DbTest {
     @Rule
     public SubjectRule subjectRule = new SubjectRule();
 
-    @Configuration
     static class ContextConfig {
 
         private static final String AKTORID = "123";
