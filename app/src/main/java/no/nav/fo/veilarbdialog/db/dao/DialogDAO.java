@@ -127,9 +127,9 @@ public class DialogDAO {
                 dialogData.isHistorisk() ? 1 : 0,
                 dialogData.getKontorsperreEnhetId()
         );
-        if (!dialogData.getEgenskaper().isEmpty()) {
-            updateDialogEgenskap(dialogData.getEgenskaper().get(0), dialogId);
-        }
+
+        dialogData.getEgenskaper()
+                .forEach(egenskapType -> updateDialogEgenskap(egenskapType, dialogId));
 
         LOG.info("opprettet dialog id:{} data:{}", dialogId, dialogData);
         return hentDialog(dialogId);
