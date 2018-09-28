@@ -88,7 +88,6 @@ public class FeedIntegrationTest {
         @Inject
         protected DialogFeedDAO dialogFeedDAO;
 
-        @Configuration
         static class ContextConfig {
 
             @Bean
