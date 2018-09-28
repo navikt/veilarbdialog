@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeileder;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
@@ -71,6 +72,13 @@ public class RestService implements DialogController, VeilederDialogController {
         return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
+    }
+
+    @Override
+    public DialogDTO forhandsorienteringPaAktivitet(NyHenvendelseDTO nyHenvendelseDTO) {
+        long dialogId = finnDialogId(nyHenvendelseDTO);
+        appService.updateDialogEgenskap(EgenskapType.PARAGRAF8, dialogId);
+        return nyHenvendelse(nyHenvendelseDTO.setEgenskaper(singletonList(Egenskap.PARAGRAF8)));
     }
 
     @Override

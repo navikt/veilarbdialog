@@ -128,13 +128,16 @@ public class DialogDAO {
                 dialogData.getKontorsperreEnhetId()
         );
 
-        dialogData.getEgenskaper().forEach(egenskapType ->
-                database.update("INSERT INTO DIALOG_EGENSKAP(DIALOG_ID, DIALOG_EGENSKAP_TYPE_KODE) VALUES (?, ?)",
-                        dialogId, egenskapType.toString())
-        );
+        dialogData.getEgenskaper()
+                .forEach(egenskapType -> updateDialogEgenskap(egenskapType, dialogId));
 
         LOG.info("opprettet dialog id:{} data:{}", dialogId, dialogData);
         return hentDialog(dialogId);
+    }
+
+    public void updateDialogEgenskap(EgenskapType type, long dialogId) {
+        database.update("INSERT INTO DIALOG_EGENSKAP(DIALOG_ID, DIALOG_EGENSKAP_TYPE_KODE) VALUES (?, ?)",
+                        dialogId, type.toString());
     }
 
     public HenvendelseData opprettHenvendelse(HenvendelseData henvendelseData) {
