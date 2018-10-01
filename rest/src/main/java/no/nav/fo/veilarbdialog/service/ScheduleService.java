@@ -35,14 +35,15 @@ public class ScheduleService {
 
     private static final Logger LOG = getLogger(ScheduleService.class);
 
-    private static final long GRACE_PERIODE = Long.parseLong(System.getProperty("grace.periode.millis"));
+    private static final long GRACE_PERIODE = Long.parseLong(System.getProperty("grace.periode.millis", String.valueOf(24*60*60*1000)));
     private static final boolean IS_MASTER = Boolean.parseBoolean(System.getProperty("cluster.ismasternode", "false"));
     private static final String VARSEL_ID = "DittNAV_000007";
     private static final String PARAGAF8_VARSEL_ID = "DittNAV_000008";
     private static final String VARSEL_NAVN = "Aktivitetsplan_nye_henvendelser";
     private static final String PARAGAF8_VARSEL_NAVN = "Aktivitetsplan_§8_mal";
 
-    private static final JAXBContext VARSEL_CONTEXT;
+    static final JAXBContext VARSEL_CONTEXT;
+    static final JAXBContext STOPP_VARSEL_CONTEXT;
 
     static {
         try {
@@ -50,6 +51,9 @@ public class ScheduleService {
                     XMLVarsel.class,
                     XMLVarslingstyper.class
             );
+            STOPP_VARSEL_CONTEXT = newInstance(
+                  StoppReVarsel.class
+          );
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
@@ -82,7 +86,7 @@ public class ScheduleService {
     private void stopRevarsel(String varselUUID) {
         StoppReVarsel stoppReVarsel = new StoppReVarsel();
         stoppReVarsel.setVarselbestillingId(varselUUID);
-        String melding = marshallVarsel(new ObjectFactory().createStoppReVarsel(stoppReVarsel));
+        String melding = marshall(new ObjectFactory().createStoppReVarsel(stoppReVarsel), STOPP_VARSEL_CONTEXT);
         stopVarselQueue.send(messageCreator(melding, varselUUID));
         varselDAO.markerSomStoppet(varselUUID);
     }
@@ -101,14 +105,14 @@ public class ScheduleService {
 
     private String sendParagraf8Varsel(String aktorId) {
         String uuid = randomUUID().toString() + PARAGAF8_VARSEL_NAVN;
-        varselQueue.send(messageCreator(marshallVarsel(lagNyttVarsel(aktorId, PARAGAF8_VARSEL_ID)), uuid));
+        varselQueue.send(messageCreator(marshall(lagNyttVarsel(aktorId, PARAGAF8_VARSEL_ID), VARSEL_CONTEXT), uuid));
         FunksjonelleMetrikker.paragraf8Varsel();
         return uuid;
     }
 
     private void sendServicMelding(String aktorId) {
         String uuid = randomUUID().toString() + VARSEL_NAVN;
-        varselQueue.send(messageCreator(marshallVarsel(lagNyttVarsel(aktorId, VARSEL_ID)), uuid));
+        varselQueue.send(messageCreator(marshall(lagNyttVarsel(aktorId, VARSEL_ID), VARSEL_CONTEXT), uuid));
     }
 
     private static MessageCreator messageCreator(final String hendelse, String uuid) {
@@ -119,10 +123,10 @@ public class ScheduleService {
         };
     }
 
-    private static String marshallVarsel(Object element) {
+    static String marshall(Object element, JAXBContext jaxbContext) {
         try {
             StringWriter writer = new StringWriter();
-            Marshaller marshaller = VARSEL_CONTEXT.createMarshaller();
+            Marshaller marshaller = jaxbContext.createMarshaller();
             marshaller.setProperty(JAXB_FORMATTED_OUTPUT, TRUE);
             marshaller.setProperty(JAXB_FRAGMENT, true);
             marshaller.marshal(element, new StreamResult(writer));
@@ -132,7 +136,7 @@ public class ScheduleService {
         }
     }
 
-    private XMLVarsel lagNyttVarsel(String aktoerId, String varselId) {
+    static XMLVarsel lagNyttVarsel(String aktoerId, String varselId) {
         return new XMLVarsel()
                 .withMottaker(new XMLAktoerId().withAktoerId(aktoerId))
                 .withVarslingstype(new XMLVarslingstyper(varselId, null, null));
