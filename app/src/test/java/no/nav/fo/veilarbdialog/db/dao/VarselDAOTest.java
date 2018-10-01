@@ -133,4 +133,9 @@ public class VarselDAOTest extends DbTest {
         dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
         return henvendelseData;
     }
+
+    @Test
+    public void sqlForUthentingAvUvarsledeParagraf8SkalIkkeHaSyntaksFeil() {
+        varselDAO.harUlesteUvarsledeParagraf8Henvendelser("123");
+    }
 }
