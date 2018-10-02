@@ -69,7 +69,7 @@ public class VarselDAO {
 
     public int hentAntallAktiveDialogerForVarsel(String paragraf8VarselUUID) {
         return database.queryForObject("select count(*) as antall " +
-                        "from DILAOG " +
+                        "from DIALOG " +
                         "where " + PARAGAF8_VARSEL_UUID + " = ? ",
                 rs -> rs.getInt("antall"),
                 paragraf8VarselUUID);

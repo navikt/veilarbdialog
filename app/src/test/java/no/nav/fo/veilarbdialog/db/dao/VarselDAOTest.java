@@ -138,4 +138,9 @@ public class VarselDAOTest extends DbTest {
     public void sqlForUthentingAvUvarsledeParagraf8SkalIkkeHaSyntaksFeil() {
         varselDAO.harUlesteUvarsledeParagraf8Henvendelser("123");
     }
+    
+    @Test
+    public void sqlForHentAntallAktiveDialogerForVarselSkalIkkeHaSyntaksFeil() {
+        varselDAO.hentAntallAktiveDialogerForVarsel("uuid");
+    }
 }
