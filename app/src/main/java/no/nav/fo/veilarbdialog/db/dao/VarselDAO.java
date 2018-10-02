@@ -85,7 +85,7 @@ public class VarselDAO {
     }
 
     public List<String> hentRevarslerSomSkalStoppes() {
-        return database.query("select UUID from PARAGRAF8VARSEL where skalStoppes = 1", rs -> rs.getString(PARAGAF8_VARSEL_UUID));
+        return database.query("select UUID from PARAGRAF8VARSEL where skalStoppes = 1", rs -> rs.getString("UUID"));
     }
 
     public void markerSomStoppet(String varselUUID) {
