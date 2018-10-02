@@ -201,7 +201,7 @@ public class DialogDAO {
                 .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
                 .egenskaper(egenskaper)
                 .harUlestParagraf8Henvendelse(rs.getBoolean(HAR_ULEST_PARAGRAF_8))
-                .paragraf8VarselUUID(rs.getString(PARAGAF8_VARSEL_UUID))
+                .paragraf8VarselUUID(rs.getString(PARAGRAF8_VARSEL_UUID))
                 .build();
     }
 
