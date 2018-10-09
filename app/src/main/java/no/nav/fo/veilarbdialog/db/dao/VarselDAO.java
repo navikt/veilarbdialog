@@ -8,7 +8,7 @@ import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
 
-import static no.nav.fo.veilarbdialog.db.dao.DBKonstanter.PARAGAF8_VARSEL_UUID;
+import static no.nav.fo.veilarbdialog.db.dao.DBKonstanter.PARAGRAF8_VARSEL_UUID;
 
 @Component
 public class VarselDAO {
@@ -70,7 +70,8 @@ public class VarselDAO {
     public int hentAntallAktiveDialogerForVarsel(String paragraf8VarselUUID) {
         return database.queryForObject("select count(*) as antall " +
                         "from DIALOG " +
-                        "where " + PARAGAF8_VARSEL_UUID + " = ? ",
+                        "where " + PARAGRAF8_VARSEL_UUID + " = ? " +
+                        "AND ULESTPARAGRAF8VARSEL = 1",
                 rs -> rs.getInt("antall"),
                 paragraf8VarselUUID);
     }
