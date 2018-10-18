@@ -78,8 +78,14 @@ public class ScheduleService {
 
             List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(GRACE_PERIODE);
             LOG.info("Varsler {} brukere", aktorer.size());
-            FunksjonelleMetrikker.nyeVarsler(aktorer.size());
-            aktorer.forEach(this::sendVarsel);
+            long paragraf8Varsler = aktorer
+                    .stream()
+                    .map(this::sendVarsel)
+                    .filter(varselType -> varselType == VarselType.PARAGRAF8)
+                    .count();
+
+            LOG.info("Varsler sendt, {} paragraf8", paragraf8Varsler);
+            FunksjonelleMetrikker.nyeVarsler(aktorer.size(), paragraf8Varsler);
         }
     }
 
@@ -91,7 +97,7 @@ public class ScheduleService {
         varselDAO.markerSomStoppet(varselUUID);
     }
 
-    private void sendVarsel(String aktorId) {
+    private VarselType sendVarsel(String aktorId) {
         boolean paragraf8 = varselDAO.harUlesteUvarsledeParagraf8Henvendelser(aktorId);
         if (paragraf8) {
             String varselUuid = sendParagraf8Varsel(aktorId);
@@ -101,6 +107,7 @@ public class ScheduleService {
             sendServicMelding(aktorId);
         }
         varselDAO.oppdaterSisteVarselForBruker(aktorId);
+        return paragraf8 ? VarselType.PARAGRAF8 : VarselType.DIALOG;
     }
 
     private String sendParagraf8Varsel(String aktorId) {
@@ -142,5 +149,9 @@ public class ScheduleService {
                 .withVarslingstype(new XMLVarslingstyper(varselId, null, null));
     }
 
+    private enum VarselType {
+        PARAGRAF8,
+        DIALOG
+    }
 
 }
