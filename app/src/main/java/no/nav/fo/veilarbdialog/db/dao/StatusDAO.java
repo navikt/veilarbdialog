@@ -93,4 +93,10 @@ public class StatusDAO {
                 OPPDATERT + " = "+ dateProvider.getNow() + " " +
                 "WHERE " + DIALOG_ID + " = ?",  dialogId);
     }
+
+    public void markerSomParagraf8(long dialogId) {
+        db.update("UPDATE DIALOG SET " +
+                HAR_ULEST_PARAGRAF_8 + " = 1 " +
+                "WHERE " + DIALOG_ID + " = ?", dialogId);
+    }
 }

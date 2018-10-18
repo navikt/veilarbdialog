@@ -78,6 +78,7 @@ public class RestService implements DialogController, VeilederDialogController {
     public DialogDTO forhandsorienteringPaAktivitet(NyHenvendelseDTO nyHenvendelseDTO) {
         long dialogId = finnDialogId(nyHenvendelseDTO);
         appService.updateDialogEgenskap(EgenskapType.PARAGRAF8, dialogId);
+        appService.markerSomParagra8(dialogId);
         return nyHenvendelse(nyHenvendelseDTO.setEgenskaper(singletonList(Egenskap.PARAGRAF8)));
     }
 

@@ -157,4 +157,8 @@ public class DialogStatusService {
     private Date getEldsteUlesteForVeileder(DialogData dialogData, HenvendelseData henvendelseData) {
         return dialogData.erLestAvVeileder() ? henvendelseData.getSendt() : dialogData.getEldsteUlesteTidspunktForVeileder();
     }
+
+    public void markerSomParagraf8(long dialogId) {
+        statusDAO.markerSomParagraf8(dialogId);
+    }
 }
