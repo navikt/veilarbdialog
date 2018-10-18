@@ -167,4 +167,8 @@ public class AppService {
         }
         return dialogData;
     }
+
+    public void markerSomParagra8(long dialogId) {
+        dialogStatusService.markerSomParagraf8(dialogId);
+    }
 }
