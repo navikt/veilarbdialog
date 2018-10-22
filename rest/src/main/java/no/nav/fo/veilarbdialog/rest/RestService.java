@@ -7,6 +7,7 @@ import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
+import no.nav.fo.veilarbdialog.service.AutorisasjonService;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -39,8 +40,12 @@ public class RestService implements DialogController, VeilederDialogController {
     @Inject
     private KontorsperreFilter kontorsperreFilter;
 
+    @Inject
+    private AutorisasjonService autorisasjonService;
+
     @Override
     public List<DialogDTO> hentDialoger() {
+        autorisasjonService.skalVereInternBruker();
         return appService.hentDialogerForBruker(getBrukerIdent())
                 .stream()
                 .filter(dialog -> kontorsperreFilter.harTilgang(dialog.getKontorsperreEnhetId()))
@@ -50,6 +55,7 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public DialogDTO hentDialog(String dialogId) {
+        autorisasjonService.skalVereInternBruker();
         return Optional.ofNullable(dialogId)
                 .map(Long::parseLong)
                 .map(appService::hentDialog)
@@ -59,6 +65,7 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public DialogDTO nyHenvendelse(NyHenvendelseDTO nyHenvendelseDTO) {
+        autorisasjonService.skalVereInternBruker();
         long dialogId = finnDialogId(nyHenvendelseDTO);
         appService.opprettHenvendelseForDialog(HenvendelseData.builder()
                 .dialogId(dialogId)
@@ -76,6 +83,7 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public DialogDTO forhandsorienteringPaAktivitet(NyHenvendelseDTO nyHenvendelseDTO) {
+        autorisasjonService.skalVereInternBruker();
         long dialogId = finnDialogId(nyHenvendelseDTO);
         appService.updateDialogEgenskap(EgenskapType.PARAGRAF8, dialogId);
         appService.markerSomParagra8(dialogId);
@@ -84,7 +92,7 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public DialogDTO markerSomLest(String dialogId) {
-
+        autorisasjonService.skalVereInternBruker();
         DialogData dialogData = appService.markerDialogSomLestAvVeileder(Long.parseLong(dialogId));
         return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ?
                 restMapper.somDialogDTO(dialogData)
@@ -93,6 +101,8 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public DialogDTO oppdaterVenterPaSvar(String dialogId, boolean venter) {
+        autorisasjonService.skalVereInternBruker();
+
         DialogStatus dialogStatus = DialogStatus.builder()
                 .dialogId(Long.parseLong(dialogId))
                 .venterPaSvar(venter)
@@ -106,6 +116,8 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public DialogDTO oppdaterFerdigbehandlet(String dialogId, boolean ferdigbehandlet) {
+        autorisasjonService.skalVereInternBruker();
+
         DialogStatus dialogStatus = DialogStatus.builder()
                 .dialogId(Long.parseLong(dialogId))
                 .ferdigbehandlet(ferdigbehandlet)
