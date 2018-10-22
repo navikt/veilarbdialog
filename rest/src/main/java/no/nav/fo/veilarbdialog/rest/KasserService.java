@@ -7,6 +7,7 @@ import no.nav.common.auth.SubjectHandler;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.service.AutorisasjonService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,9 +39,14 @@ public class KasserService {
     @Value("${veilarb.kassering.identer:Z990322}")
     String godkjenteIdenter;
 
+    @Inject
+    private AutorisasjonService autorisasjonService;
+
     @PUT
     @Path("/henvendelse/{id}/kasser")
     public int kasserHenvendelse(@Context Request request, @PathParam("id") String henvendelseId) {
+        autorisasjonService.skalVereInternBruker();
+
         long id = Long.parseLong(henvendelseId);
         DialogData dialogData = dialogDAO.hentDialogGittHenvendelse(id);
 
@@ -51,6 +57,8 @@ public class KasserService {
     @Path("/dialog/{id}/kasser")
     @Transactional
     public int kasserDialog(@PathParam("id") String dialogId) {
+        autorisasjonService.skalVereInternBruker();
+
         long id = Long.parseLong(dialogId);
         DialogData dialogData = dialogDAO.hentDialog(id);
 

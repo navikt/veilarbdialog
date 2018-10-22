@@ -14,6 +14,7 @@ import no.nav.fo.veilarbdialog.domain.Egenskap;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
+import no.nav.fo.veilarbdialog.service.AutorisasjonService;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -80,6 +81,7 @@ public class RestServiceTest extends DbTest {
                 DialogFeedDAO.class,
                 Request.class,
                 RestService.class,
+                AutorisasjonService.class,
                 RestMapper.class,
                 KontorsperreFilter.class,
                 VarselDAO.class));
