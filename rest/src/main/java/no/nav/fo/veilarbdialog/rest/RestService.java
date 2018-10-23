@@ -1,7 +1,6 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import no.nav.apiapp.feil.UgyldigRequest;
-import no.nav.brukerdialog.security.context.SubjectHandler;
 import no.nav.fo.veilarbdialog.api.DialogController;
 import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
@@ -20,9 +19,12 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeileder;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
+
+import no.nav.common.auth.SubjectHandler;
 
 
 @Component
@@ -45,7 +47,6 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public List<DialogDTO> hentDialoger() {
-        autorisasjonService.skalVereInternBruker();
         return appService.hentDialogerForBruker(getBrukerIdent())
                 .stream()
                 .filter(dialog -> kontorsperreFilter.harTilgang(dialog.getKontorsperreEnhetId()))
@@ -55,7 +56,6 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public DialogDTO hentDialog(String dialogId) {
-        autorisasjonService.skalVereInternBruker();
         return Optional.ofNullable(dialogId)
                 .map(Long::parseLong)
                 .map(appService::hentDialog)
@@ -156,10 +156,14 @@ public class RestService implements DialogController, VeilederDialogController {
     }
 
     private String getVeilederIdent() {
-        return SubjectHandler.getSubjectHandler().getUid();
+        return SubjectHandler.getIdent().orElse(null);
     }
 
     private String getBrukerIdent() {
+        if (erEksternBruker()) {
+            return SubjectHandler.getIdent().orElseThrow(RuntimeException::new);
+        }
+
         return of(requestProvider.get().getParameter("fnr")).orElseThrow(UgyldigRequest::new);
     }
 }

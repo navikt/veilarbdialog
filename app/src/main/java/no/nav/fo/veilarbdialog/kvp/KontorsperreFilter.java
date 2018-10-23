@@ -1,13 +1,12 @@
 package no.nav.fo.veilarbdialog.kvp;
 
-import static no.nav.apiapp.util.StringUtils.nullOrEmpty;
+import lombok.SneakyThrows;
+import no.nav.apiapp.security.PepClient;
+import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 
-import org.springframework.stereotype.Component;
-
-import lombok.SneakyThrows;
-import no.nav.apiapp.security.PepClient;
+import static no.nav.apiapp.util.StringUtils.nullOrEmpty;
 
 @Component
 public class KontorsperreFilter {
