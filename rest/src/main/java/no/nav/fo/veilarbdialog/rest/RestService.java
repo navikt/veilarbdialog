@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
+import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erInternBruker;
+import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogBruker;
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeileder;
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
@@ -65,20 +67,27 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public DialogDTO nyHenvendelse(NyHenvendelseDTO nyHenvendelseDTO) {
-        autorisasjonService.skalVereInternBruker();
         long dialogId = finnDialogId(nyHenvendelseDTO);
         appService.opprettHenvendelseForDialog(HenvendelseData.builder()
                 .dialogId(dialogId)
-                .avsenderId(getVeilederIdent())
-                .avsenderType(AvsenderType.VEILEDER)
+                .avsenderId(getLoggedInUserIdent())
+                .avsenderType(erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
                 .tekst(nyHenvendelseDTO.tekst)
                 .build()
         );
-        DialogData dialogData = appService.markerDialogSomLestAvVeileder(dialogId);
+        DialogData dialogData = markerSomLest(dialogId);
         appService.updateDialogAktorFor(dialogData.getAktorId());
         return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
+    }
+
+    private DialogData markerSomLest(long dialogId){
+        if (erEksternBruker()){
+            return appService.markerDialogSomLestAvBruker(dialogId);
+        }
+        return appService.markerDialogSomLestAvVeileder(dialogId);
+
     }
 
     @Override
@@ -151,11 +160,19 @@ public class RestService implements DialogController, VeilederDialogController {
                         .collect(Collectors.toList()))
                 .build();
         DialogData opprettetDialog = appService.opprettDialogForAktivitetsplanPaIdent(dialogData);
-        nyDialogVeileder(opprettetDialog);
+
+        if (erEksternBruker()){
+            nyDialogBruker(opprettetDialog);
+        }
+        else if (erInternBruker()){
+            nyDialogVeileder(opprettetDialog);
+        }
+
+
         return opprettetDialog;
     }
 
-    private String getVeilederIdent() {
+    private String getLoggedInUserIdent() {
         return SubjectHandler.getIdent().orElse(null);
     }
 
