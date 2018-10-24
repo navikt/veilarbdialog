@@ -209,6 +209,10 @@
             <artifactId>veilarboppfolging-api</artifactId>
             <version>RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>auth</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
