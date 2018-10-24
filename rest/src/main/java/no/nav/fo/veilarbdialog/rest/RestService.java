@@ -82,30 +82,20 @@ public class RestService implements DialogController, VeilederDialogController {
                 : null;
     }
 
+    @Override
+    public DialogDTO markerSomLest(String dialogId) {
+        DialogData dialogData = markerSomLest(Long.parseLong(dialogId));
+        return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ?
+                restMapper.somDialogDTO(dialogData)
+                : null;
+    }
+
     private DialogData markerSomLest(long dialogId){
         if (erEksternBruker()){
             return appService.markerDialogSomLestAvBruker(dialogId);
         }
         return appService.markerDialogSomLestAvVeileder(dialogId);
 
-    }
-
-    @Override
-    public DialogDTO forhandsorienteringPaAktivitet(NyHenvendelseDTO nyHenvendelseDTO) {
-        autorisasjonService.skalVereInternBruker();
-        long dialogId = finnDialogId(nyHenvendelseDTO);
-        appService.updateDialogEgenskap(EgenskapType.PARAGRAF8, dialogId);
-        appService.markerSomParagra8(dialogId);
-        return nyHenvendelse(nyHenvendelseDTO.setEgenskaper(singletonList(Egenskap.PARAGRAF8)));
-    }
-
-    @Override
-    public DialogDTO markerSomLest(String dialogId) {
-        autorisasjonService.skalVereInternBruker();
-        DialogData dialogData = appService.markerDialogSomLestAvVeileder(Long.parseLong(dialogId));
-        return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ?
-                restMapper.somDialogDTO(dialogData)
-                : null;
     }
 
     @Override
@@ -136,6 +126,16 @@ public class RestService implements DialogController, VeilederDialogController {
         appService.updateDialogAktorFor(dialog.getAktorId());
 
         return markerSomLest(dialogId);
+    }
+
+    @Override
+    public DialogDTO forhandsorienteringPaAktivitet(NyHenvendelseDTO nyHenvendelseDTO) {
+        autorisasjonService.skalVereInternBruker();
+
+        long dialogId = finnDialogId(nyHenvendelseDTO);
+        appService.updateDialogEgenskap(EgenskapType.PARAGRAF8, dialogId);
+        appService.markerSomParagra8(dialogId);
+        return nyHenvendelse(nyHenvendelseDTO.setEgenskaper(singletonList(Egenskap.PARAGRAF8)));
     }
 
     private Long finnDialogId(NyHenvendelseDTO nyHenvendelseDTO) {
