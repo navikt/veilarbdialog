@@ -31,6 +31,8 @@ public class StartJetty {
 
     public static void main(String[] args) throws Exception {
         loadPropertiesFile("/environment-local.properties");
+        System.setProperty("aktivitetsplan.url", "https://aktivitetsplan.no");
+
         Jetty jetty = setupISSO(usingWar()
                         .at(APPLICATION_NAME)
                         .loadProperties("/environment-test.properties")
@@ -53,14 +55,14 @@ public class StartJetty {
             return;
         }
 
-        properties.forEach((key, value) -> setProperty((String) key, (String) value)); 
+        properties.forEach((key, value) -> setProperty((String) key, (String) value));
     }
 
     private static DataSource createDataSource() {
         return of(System.getProperty("database"))
-                .map(TestEnvironment::valueOf)          
+                .map(TestEnvironment::valueOf)
                 .map(testEnvironment -> FasitUtils.getDbCredentials(testEnvironment, APPLICATION_NAME))
-                .map(DatabaseTestContext::build)  
+                .map(DatabaseTestContext::build)
                 .orElseGet(DatabaseTestContext::buildDataSource);
     }
 
