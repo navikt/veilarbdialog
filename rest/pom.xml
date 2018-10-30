@@ -17,6 +17,10 @@
         <!--Project-->
         <dependency>
             <groupId>no.nav.sbl</groupId>
+            <artifactId>util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.sbl</groupId>
             <artifactId>feature-toggle</artifactId>
         </dependency>
         <dependency>
@@ -218,16 +222,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenester.virksomhet.dokument</groupId>
-            <artifactId>varseloppgave-v1-tjenestespesifikasjon</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenester.virksomhet.dokument</groupId>
-            <artifactId>varseloppgave-v1-tjenestespesifikasjon</artifactId>
-            <version>1.1.0</version>
         </dependency>
     </dependencies>
 
