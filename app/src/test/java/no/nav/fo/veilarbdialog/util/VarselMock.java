@@ -25,7 +25,9 @@ public class VarselMock {
         ctx.createSubcontext("java:/jboss/jms/");
 
         ctx.bind("java:/jboss/jms/VARSELPRODUKSJON.VARSLINGER", new ActiveMQQueue("dialogvarsel"));
+        ctx.bind("java:/jboss/jms/VARSELPRODUKSJON.BEST_VARSEL_M_HANDLING", new ActiveMQQueue("varselMedHandling"));
         ctx.bind("java:/jboss/jms/VARSELPRODUKSJON.STOPP_VARSEL_UTSENDING", new ActiveMQQueue("stopp_varsel"));
+        ctx.bind("java:/jboss/jms/henvendelse_OPPGAVE.HENVENDELSE", new ActiveMQQueue("oppgave_henvendelse"));
         ctx.bind("java:jboss/mqConnectionFactory", new ActiveMQConnectionFactory("tcp://localhost:61616"));
     }
 }

@@ -33,6 +33,11 @@
 
         <!--Tjenester-->
         <dialogOppfoelging.tjenestespesifikasjon.version>1.0.1.11.4</dialogOppfoelging.tjenestespesifikasjon.version>
+        <opprettoppgavehenvendelse.version>1.0.0</opprettoppgavehenvendelse.version>
+        <stoppReVarsel.version>1.0.1</stoppReVarsel.version>
+        <varselMedHandling.version>1.0.0</varselMedHandling.version>
+
+
     </properties>
 
     <dependencyManagement>
@@ -76,10 +81,28 @@
 
             <!--Tjenester-->
             <dependency>
+                <groupId>no.nav.meldinger.virksomhet</groupId>
+                <artifactId>nav-virksomhet-varselMedHandling-v1-meldingsdefinisjon</artifactId>
+                <version>${varselMedHandling.version}</version>
+                <classifier>jaxb</classifier>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.meldinger.virksomhet</groupId>
+                <artifactId>nav-virksomhet-stoppReVarsel-v1-meldingsdefinisjon</artifactId>
+                <version>${stoppReVarsel.version}</version>
+                <classifier>jaxb</classifier>
+            </dependency>
+            <dependency>
                 <groupId>no.nav.tjenester</groupId>
                 <artifactId>brukerdialog-dialogOppfoelging-v1-tjenestespesifikasjon</artifactId>
                 <version>${dialogOppfoelging.tjenestespesifikasjon.version}</version>
                 <classifier>jaxws</classifier>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.meldinger.virksomhet</groupId>
+                <artifactId>nav-virksomhet-opprettOppgavehenvendelse-v1-meldingsdefinisjon</artifactId>
+                <version>${opprettoppgavehenvendelse.version}</version>
+                <classifier>jaxb</classifier>
             </dependency>
         </dependencies>
     </dependencyManagement>

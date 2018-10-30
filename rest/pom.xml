@@ -16,6 +16,10 @@
 
         <!--Project-->
         <dependency>
+            <groupId>no.nav.sbl</groupId>
+            <artifactId>feature-toggle</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.nav.fo</groupId>
             <artifactId>veilarbdialog-app</artifactId>
         </dependency>
@@ -70,8 +74,17 @@
         </dependency>
         <dependency>
             <groupId>no.nav.meldinger.virksomhet</groupId>
+            <artifactId>nav-virksomhet-varselMedHandling-v1-meldingsdefinisjon</artifactId>
+            <classifier>jaxb</classifier>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.meldinger.virksomhet</groupId>
             <artifactId>nav-virksomhet-stoppReVarsel-v1-meldingsdefinisjon</artifactId>
-            <version>1.0.1</version>
+            <classifier>jaxb</classifier>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.meldinger.virksomhet</groupId>
+            <artifactId>nav-virksomhet-opprettOppgavehenvendelse-v1-meldingsdefinisjon</artifactId>
             <classifier>jaxb</classifier>
         </dependency>
 
@@ -205,6 +218,16 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.tjenester.virksomhet.dokument</groupId>
+            <artifactId>varseloppgave-v1-tjenestespesifikasjon</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.tjenester.virksomhet.dokument</groupId>
+            <artifactId>varseloppgave-v1-tjenestespesifikasjon</artifactId>
+            <version>1.1.0</version>
         </dependency>
     </dependencies>
 

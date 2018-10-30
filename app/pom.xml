@@ -47,6 +47,14 @@
 
         <!-- EXTERNAL DEPENDENCIES -->
         <dependency>
+            <groupId>no.nav.sbl</groupId>
+            <artifactId>feature-toggle</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.finn.unleash</groupId>
+            <artifactId>unleash-client-java</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.nav.sbl.dialogarena</groupId>
             <artifactId>common-types</artifactId>
         </dependency>
