@@ -18,7 +18,7 @@ import static no.nav.fo.veilarbdialog.service.Utils.messageCreator;
 public class VarselMedHandlingService {
 
     private static final String PARAGAF8_VARSEL_ID = "DittNAV_000008";
-    public static final String PARAGAF8_VARSEL_NAVN = "Aktivitetsplan_§8_mal";
+    public static final String PARAGAF8_VARSEL_NAVN = "Aktivitetsplan_p8_mal";
 
     @Inject
     private JmsTemplate varselMedHandlingQueue;
