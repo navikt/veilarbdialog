@@ -65,7 +65,7 @@ public class ScheduleService {
     @Inject
     private UnleashService unleashService;
 
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(cron = "${varslingsrate.cron}")
     public void sjekkForVarsel() {
         if (IS_MASTER) {
             List<String> varselUUIDer = varselDAO.hentRevarslerSomSkalStoppes();
