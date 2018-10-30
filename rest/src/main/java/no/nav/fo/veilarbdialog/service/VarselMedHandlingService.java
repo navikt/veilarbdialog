@@ -28,7 +28,7 @@ public class VarselMedHandlingService {
     static {
         try {
             VARSEL_MED_HANDLING = newInstance(
-                    VarselMedHandling.class
+                    ObjectFactory.class
             );
         } catch (JAXBException e) {
             throw new RuntimeException(e);
