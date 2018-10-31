@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
+import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
+import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erInternBruker;
 
 @Component
 class RestMapper {
@@ -26,49 +28,67 @@ class RestMapper {
                 .stream()
                 .filter((henvendelse) -> kontorsperreFilter.harTilgang(henvendelse.getKontorsperreEnhetId()))
                 .collect(toList());
-        
-        Optional<HenvendelseData> sisteHenvendelse = henvendelser.stream()
-                .sorted(comparing(HenvendelseData::getSendt).reversed())
-                .findFirst();
 
-        return new DialogDTO()
+        Optional<HenvendelseData> sisteHenvendelse = henvendelser.stream()
+                .max(comparing(HenvendelseData::getSendt));
+
+
+        DialogDTO dto =  new DialogDTO()
                 .setId(Long.toString(dialogData.getId()))
-                .setAktivitetId(dialogData.getAktivitetId())
                 .setOverskrift(dialogData.getOverskrift())
-                .setHenvendelser(henvendelser.stream()
-                        .map(this::somHenvendelseDTO)
-                        .collect(toList())
-                )
-                .setLest(dialogData.erLestAvVeileder())
-                .setLestAvBrukerTidspunkt(dialogData.getLestAvBrukerTidspunkt())
-                .setErLestAvBruker(dialogData.erLestAvBruker())
-                .setFerdigBehandlet(dialogData.erFerdigbehandlet())
+                .setAktivitetId(dialogData.getAktivitetId())
                 .setVenterPaSvar(dialogData.venterPaSvar())
-                .setSisteDato(sisteHenvendelse
-                        .map(HenvendelseData::getSendt)
-                        .orElse(null)
-                )
                 .setOpprettetDato(dialogData.getOpprettetDato())
                 .setEgenskaper(dialogData.getEgenskaper()
                         .stream()
                         .map(egenskapType -> Egenskap.valueOf(egenskapType.name()))
                         .collect(Collectors.toList()))
                 .setHistorisk(dialogData.isHistorisk())
+                .setHenvendelser(henvendelser.stream()
+                        .map(this::somHenvendelseDTO)
+                        .collect(toList())
+                )
+                .setSisteDato(sisteHenvendelse
+                        .map(HenvendelseData::getSendt)
+                        .orElse(null)
+                )
                 .setSisteTekst(sisteHenvendelse
                         .map(HenvendelseData::getTekst)
                         .orElse(null))
                 ;
+
+        if(erEksternBruker()){
+            dto.setLest(dialogData.erLestAvBruker())
+                    .setLestAvBrukerTidspunkt(null)
+                    .setErLestAvBruker(false)
+                    .setFerdigBehandlet(true);
+
+
+        } else if (erInternBruker()){
+            dto.setLest(dialogData.erLestAvVeileder())
+                    .setLestAvBrukerTidspunkt(dialogData.getLestAvBrukerTidspunkt())
+                    .setErLestAvBruker(dialogData.erLestAvBruker())
+                    .setFerdigBehandlet(dialogData.erFerdigbehandlet());
+        }
+
+        return dto;
     }
 
     private HenvendelseDTO somHenvendelseDTO(HenvendelseData henvendelseData) {
-        return new HenvendelseDTO()
+        HenvendelseDTO dto = new HenvendelseDTO()
                 .setId(Long.toString(henvendelseData.id))
                 .setDialogId(Long.toString(henvendelseData.dialogId))
-                .setAvsender(henvendelseData.avsenderType == BRUKER ? Avsender.BRUKER : Avsender.VEILEDER)
-                .setAvsenderId(henvendelseData.avsenderId)
+                .setAvsender(BRUKER.equals(henvendelseData.avsenderType) ? Avsender.BRUKER : Avsender.VEILEDER)
                 .setSendt(henvendelseData.sendt)
-                .setLest(henvendelseData.lestAvVeileder)
                 .setTekst(henvendelseData.tekst);
+
+        if(erEksternBruker()){
+            dto.setLest(henvendelseData.lestAvBruker);
+        } else if (erInternBruker()){
+            dto.setLest(henvendelseData.lestAvVeileder)
+                    .setAvsenderId(henvendelseData.avsenderId);
+        }
+        return dto;
     }
 }
 

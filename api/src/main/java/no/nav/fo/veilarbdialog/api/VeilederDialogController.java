@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.api;
 
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
+import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 
 import javax.ws.rs.*;
 
@@ -16,4 +17,7 @@ public interface VeilederDialogController {
     @Path("/{id}/ferdigbehandlet/{ferdigbehandlet}")
     DialogDTO oppdaterFerdigbehandlet(@PathParam("id") String dialogId, @PathParam("ferdigbehandlet") boolean ferdigbehandlet);
 
+    @POST
+    @Path("/forhandsorientering")
+    DialogDTO forhandsorienteringPaAktivitet(NyHenvendelseDTO nyHenvendelseDTO);
 }
