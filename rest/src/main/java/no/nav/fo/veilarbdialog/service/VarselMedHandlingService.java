@@ -44,6 +44,15 @@ public class VarselMedHandlingService {
         varselMedHandling.setMottaker(motaker);
         varselMedHandling.setVarselbestillingId(varselbestillingId);
 
+        Parameter parameter = new Parameter();
+        parameter.setKey("varselbestillingId");
+        parameter.setValue(varselbestillingId);
+
+        varselMedHandling
+                .getParameterListe()
+                .add(parameter);
+
+
         JAXBElement<VarselMedHandling> melding = new ObjectFactory().createVarselMedHandling(varselMedHandling);
 
         varselMedHandlingQueue.send(messageCreator(marshall(melding, VARSEL_MED_HANDLING), varselbestillingId));
