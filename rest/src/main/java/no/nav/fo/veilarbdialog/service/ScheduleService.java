@@ -93,7 +93,7 @@ public class ScheduleService {
         boolean paragraf8 = varselDAO.harUlesteUvarsledeParagraf8Henvendelser(aktorId);
         boolean enabled = unleashService.isEnabled("veilarbdialog-send-paragraf8");
         if (paragraf8  && enabled) {
-            String varselBestillingId = randomUUID().toString() + PARAGAF8_VARSEL_NAVN;
+            String varselBestillingId = randomUUID().toString();
 
             varselMedHandlingService.send(aktorId, varselBestillingId);
             oppgaveService.send(aktorId, varselBestillingId);
