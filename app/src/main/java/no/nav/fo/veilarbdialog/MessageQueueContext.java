@@ -21,14 +21,34 @@ public class MessageQueueContext {
 
     @Bean
     public Pingable varselQueuePingable(JmsTemplate varselQueue) {
+        return  queuePingable(varselQueue, "VarselQueue", "Brukes for å sende varsler til bruker om nye dialoger.");
+    }
+
+    @Bean
+    public Pingable paragraf8VarselQueuePingable(JmsTemplate varselMedHandlingQueue) {
+        return  queuePingable(varselMedHandlingQueue, "varselMedHandlingQueue", "Brukes for å sende §8 varsler til bruker.");
+    }
+
+    @Bean
+    public Pingable stoppRevarselQueuePingable(JmsTemplate stopVarselQueue) {
+        return  queuePingable(stopVarselQueue, "stopVarselQueue", "Brukes for å stoppe revarseler av §8 varselr.");
+    }
+
+    @Bean
+    public Pingable oppgaveHenvendelseQueuePingable(JmsTemplate oppgaveHenvendelseQueue) {
+        return  queuePingable(oppgaveHenvendelseQueue, "oppgaveHenvendelseQueue", "Brukes for å sende §8 varsler til bruker.");
+    }
+
+
+    private Pingable queuePingable(JmsTemplate queue, String queueName, String beskrivelse) {
         final PingMetadata metadata = new PingMetadata(
-                "VarselQueue via " + System.getProperty("mqGateway03.hostname"),
-                "Brukes for å sende varsler til bruker om nye dialoger.",
-                true
+                 queueName + " via " + System.getProperty("mqGateway03.hostname"),
+                beskrivelse,
+                false
         );
         return () -> {
             try {
-                varselQueue.getConnectionFactory().createConnection().close();
+                queue.getConnectionFactory().createConnection().close();
             } catch (JMSException e) {
                 return Ping.feilet(metadata, "Kunne ikke opprette connection", e);
             }
@@ -49,7 +69,7 @@ public class MessageQueueContext {
         return queue(varselMedHandlingDestination());
     }
 
-    @Bean JmsTemplate oppgaveHenvendelseQue() throws NamingException {
+    @Bean JmsTemplate oppgaveHenvendelseQueue() throws NamingException {
         return queue(oppgaveHenvendelseDestinasjon());
     }
 
