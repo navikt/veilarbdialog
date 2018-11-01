@@ -25,7 +25,7 @@ public class OppgaveService {
 
 
     @Inject
-    private JmsTemplate oppgaveHenvendelseQue;
+    private JmsTemplate oppgaveHenvendelseQueue;
 
     private static final JAXBContext OPPGAVE_HENVENDELSE;
 
@@ -41,7 +41,7 @@ public class OppgaveService {
 
     public void send(String aktorId, String varselId) {
         MessageCreator messageCreator = messageCreator(marshall(createMelding(aktorId, varselId), OPPGAVE_HENVENDELSE), varselId);
-        oppgaveHenvendelseQue.send(messageCreator);
+        oppgaveHenvendelseQueue.send(messageCreator);
     }
 
     JAXBElement<Oppgavehenvendelse> createMelding(String aktorid, String uuid) {
