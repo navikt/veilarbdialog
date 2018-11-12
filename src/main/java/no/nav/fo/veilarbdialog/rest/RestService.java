@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.rest;
 import no.nav.apiapp.feil.UgyldigRequest;
 import no.nav.fo.veilarbdialog.api.DialogController;
 import no.nav.fo.veilarbdialog.api.VeilederDialogController;
+import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.AutorisasjonService;

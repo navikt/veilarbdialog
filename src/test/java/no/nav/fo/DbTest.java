@@ -1,8 +1,10 @@
 package no.nav.fo;
 
+import static java.lang.System.setProperty;
 import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static no.nav.fo.veilarbdialog.db.DatabaseContext.DATA_SOURCE_JDNI_NAME;
+import static no.nav.fo.veilarbdialog.db.DatabaseContext.VEILARBDIALOGDATASOURCE_URL_PROPERTY_NAME;
 import static org.springframework.util.ReflectionUtils.setField;
 
 import java.lang.reflect.Field;

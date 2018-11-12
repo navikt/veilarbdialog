@@ -11,14 +11,25 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import static java.lang.System.setProperty;
+import static no.nav.fo.veilarbdialog.db.DatabaseContext.VEILARBDIALOGDATASOURCE_PASSWORD_PROPERTY_NAME;
+import static no.nav.fo.veilarbdialog.db.DatabaseContext.VEILARBDIALOGDATASOURCE_URL_PROPERTY_NAME;
+import static no.nav.fo.veilarbdialog.db.DatabaseContext.VEILARBDIALOGDATASOURCE_USERNAME_PROPERTY_NAME;
+
 @Configuration
 @EnableTransactionManagement
 public class DatabaseTestContext {
 
+    static{
+        setProperty(VEILARBDIALOGDATASOURCE_URL_PROPERTY_NAME, inMemoryUrl());
+        setProperty(VEILARBDIALOGDATASOURCE_USERNAME_PROPERTY_NAME, "sa");
+        setProperty(VEILARBDIALOGDATASOURCE_PASSWORD_PROPERTY_NAME, "");
+    }
+
     private static int counter;
 
     public static DataSource buildDataSource() {
-        String url = StringUtils.of(System.getProperty("database.url")).orElse(imMemoryUrl());
+        String url = StringUtils.of(System.getProperty("database.url")).orElse(inMemoryUrl());
         return doBuildSingleConnectionDataSource(new DbCredentials()
                         .setUrl(url)
                         .setUsername("sa")
@@ -27,7 +38,7 @@ public class DatabaseTestContext {
         );
     }
 
-    private static String imMemoryUrl() {
+    private static String inMemoryUrl() {
         return "jdbc:h2:mem:veilarbdialog-" + (counter++) + ";DB_CLOSE_DELAY=-1;MODE=Oracle";
     }
 
@@ -49,14 +60,14 @@ public class DatabaseTestContext {
 
     private static void createTables(DataSource dataSource) {
         Flyway flyway = new Flyway();
-        flyway.setLocations("db/migration/veilarbdialogDataSource");
+//        flyway.setLocations("db/migration/veilarbdialogDataSource");
         flyway.setDataSource(dataSource);
         flyway.migrate();
     }
 
     public static DataSource buildMultiDataSource() {
         JdbcDataSource dataSource = new JdbcDataSource();
-        dataSource.setUrl(imMemoryUrl());
+        dataSource.setUrl(inMemoryUrl());
         dataSource.setUser("sa");
         dataSource.setPassword("");
         createTables(dataSource);

@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.rest;
 
+import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import org.springframework.stereotype.Component;
 

@@ -2,10 +2,7 @@ package no.nav.fo.veilarbdialog.feed.avsluttetkvp;
 
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.util.Date;
 import java.util.List;
