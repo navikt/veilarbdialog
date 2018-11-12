@@ -25,6 +25,8 @@
     <abacSecurity serviceUserResourceAlias="srvveilarbdialog"/>
 
     <resources>
+        <rest alias="veilarbazureadproxy_discovery" mapToProperty="aad_b2c_discovery" />
+        <credential alias="aad_b2c_clientid"/>
         <applicationProperties alias="veilarbdialog.properties"/>
         <credential alias="srvveilarbdialog" mapToProperty="systembruker"/>
         <applicationCertificate alias="srvveilarbdialog"/>
