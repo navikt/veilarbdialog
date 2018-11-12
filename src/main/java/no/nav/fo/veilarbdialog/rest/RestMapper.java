@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +19,7 @@ class RestMapper {
 
     @Inject
     KontorsperreFilter kontorsperreFilter;
-    
+
     public DialogDTO somDialogDTO(DialogData dialogData) {
 
         List<HenvendelseData> henvendelser = dialogData

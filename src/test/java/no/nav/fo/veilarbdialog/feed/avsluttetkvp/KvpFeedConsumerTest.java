@@ -6,7 +6,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.Date;
 import java.util.List;
@@ -20,11 +19,11 @@ import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
 public class KvpFeedConsumerTest {
 
     private KvpFeedMetadataDAO dao = mock(KvpFeedMetadataDAO.class);
-    private AppService appService = mock(AppService.class);        
+    private AppService appService = mock(AppService.class);
 
     @Test(expected=RuntimeException.class)
     public void skal_ikke_oppdatere_siste_feed_id_hvis_behandling_av_innlesing_feiler() {
-        doThrow(new RuntimeException("Mock exception")).when(appService).settKontorsperredeDialogerTilHistoriske(anyString(), any(Date.class));       
+        doThrow(new RuntimeException("Mock exception")).when(appService).settKontorsperredeDialogerTilHistoriske(anyString(), any(Date.class));
         List<KvpDTO> elements = asList(feedElement(1, "123", new Date()));
 
         try {
@@ -32,7 +31,7 @@ public class KvpFeedConsumerTest {
         } finally {
             verify(dao, never()).oppdaterSisteFeedId(anyLong());
         }
-                
+
     }
 
     @Test
@@ -42,9 +41,9 @@ public class KvpFeedConsumerTest {
         new KvpFeedConsumer(appService, dao).lesKvpFeed(null, elements);
 
         verify(dao).oppdaterSisteFeedId(2);
-        
+
     }
-    
+
     @Test
     public void skal_sette_dialoger_til_historiske_for_alle_elementer_i_feed_som_har_en_sluttdato() {
         String aktor1 = "Aktor1";
@@ -72,9 +71,9 @@ public class KvpFeedConsumerTest {
         verify(appService).settKontorsperredeDialogerTilHistoriske(aktor1, date1);
         verifyNoMoreInteractions(appService);
     }
-    
+
     private KvpDTO feedElement(long id, String aktoerId, Date sluttDato) {
         return new KvpDTO().setSerial(id).setAktorId(aktoerId).setAvsluttetDato(sluttDato);
     }
-    
+
 }
