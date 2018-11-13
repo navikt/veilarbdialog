@@ -1,11 +1,15 @@
 package no.nav.fo;
 
-import static java.lang.System.setProperty;
-import static java.lang.Thread.sleep;
-import static java.util.Arrays.asList;
-import static no.nav.fo.veilarbdialog.db.DatabaseContext.DATA_SOURCE_JDNI_NAME;
-import static no.nav.fo.veilarbdialog.db.DatabaseContext.VEILARBDIALOGDATASOURCE_URL_PROPERTY_NAME;
-import static org.springframework.util.ReflectionUtils.setField;
+import lombok.SneakyThrows;
+import no.nav.fo.veilarbdialog.db.dao.DateProvider;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.lang.reflect.Field;
 import java.sql.Timestamp;
@@ -14,20 +18,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.mock.jndi.SimpleNamingContextBuilder;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
-
-import lombok.SneakyThrows;
-import no.nav.fo.veilarbdialog.db.DatabaseContext;
-import no.nav.fo.veilarbdialog.db.dao.DateProvider;
+import static java.lang.Thread.sleep;
+import static java.util.Arrays.asList;
+import static org.springframework.util.ReflectionUtils.setField;
 
 public abstract class DbTest {
 
@@ -36,7 +29,7 @@ public abstract class DbTest {
     private TransactionStatus transactionStatus;
 
     protected static void initSpringContext(List<Class> classes) {
-        List<Class> list = new ArrayList<>(asList(DbTest.JndiBean.class, DatabaseContext.class, DateProvider.class));
+        List<Class> list = new ArrayList<>(asList(DatabaseTestContext.class, DateProvider.class));
         list.addAll(classes);
         annotationConfigApplicationContext = new AnnotationConfigApplicationContext(list.toArray(new Class[]{}));
         annotationConfigApplicationContext.start();
@@ -58,19 +51,6 @@ public abstract class DbTest {
         Field providerField = DateProvider.class.getDeclaredField("provider");
         providerField.setAccessible(true);
         setField(providerField, null, timestampProvider);
-    }
-
-
-    @Component
-    public static class JndiBean {
-
-        private final SimpleNamingContextBuilder builder = new SimpleNamingContextBuilder();
-
-        public JndiBean() throws Exception {
-            builder.bind(DATA_SOURCE_JDNI_NAME, DatabaseTestContext.buildMultiDataSource());
-            builder.activate();
-        }
-
     }
 
     @BeforeEach
