@@ -2,17 +2,19 @@ package no.nav.fo.veilarbdialog.config;
 
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.sbl.rest.RestUtils;
+import no.nav.sbl.util.EnvironmentUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.ws.rs.client.Client;
 
+import static no.nav.fo.veilarbdialog.ApplicationContext.VEILARBOPPFOLGINGAPI_URL_PROPERTY;
+
 @Configuration
 public class KvpClientConfig {
 
-    @Value("${veilarboppfolging.api.url}")
-    private String VEILARBOPPFOLGING_API_URL;
+    private String VEILARBOPPFOLGINGAPI_URL = EnvironmentUtils.getRequiredProperty(VEILARBOPPFOLGINGAPI_URL_PROPERTY);
 
     @Value("${kvp.connect.timeout.ms:1000}")
     private int KVP_CONNECT_TIMEOUT;
@@ -30,6 +32,6 @@ public class KvpClientConfig {
         RestUtils.RestConfig config = configBuilder.build();
         Client client = RestUtils.createClient(config);
 
-        return new KvpClient(VEILARBOPPFOLGING_API_URL, client);
+        return new KvpClient(VEILARBOPPFOLGINGAPI_URL, client);
     }
 }

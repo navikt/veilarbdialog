@@ -1,14 +1,5 @@
 package no.nav.fo.veilarbdialog.feed.avsluttetoppfolging;
 
-import java.util.Collections;
-
-import javax.inject.Inject;
-import javax.sql.DataSource;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.jdbc.JdbcLockProvider;
 import no.nav.brukerdialog.security.oidc.OidcFeedOutInterceptor;
@@ -16,14 +7,23 @@ import no.nav.fo.feed.consumer.FeedConsumer;
 import no.nav.fo.feed.consumer.FeedConsumerConfig;
 import no.nav.fo.feed.consumer.FeedConsumerConfig.BaseConfig;
 import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import javax.inject.Inject;
+import javax.sql.DataSource;
+import java.util.Collections;
+
+import static no.nav.fo.veilarbdialog.ApplicationContext.VEILARBOPPFOLGINGAPI_URL_PROPERTY;
+import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 
 @Configuration
 public class AvsluttetOppfolgingFeedConfig {
 
-    @Value("${veilarboppfolging.api.url}")
-    private String host;
+    private String host = getRequiredProperty(VEILARBOPPFOLGINGAPI_URL_PROPERTY);
 
-    @Value("${avsluttoppfolging.feed.consumer.pollingrate}")
+    @Value("${avsluttoppfolging.feed.consumer.pollingrate:/10 * * * * ?}")
     private String polling;
 
     @Inject
@@ -38,11 +38,11 @@ public class AvsluttetOppfolgingFeedConfig {
     public FeedConsumer<AvsluttetOppfolgingFeedDTO> avsluttetOppfolgingFeedDTOFeedConsumer(
             AvsluttetOppfolgingFeedConsumer avsluttetOppfolgingFeedConsumer) {
         BaseConfig<AvsluttetOppfolgingFeedDTO> baseConfig = new FeedConsumerConfig.BaseConfig<>(
-                    AvsluttetOppfolgingFeedDTO.class,
-                    avsluttetOppfolgingFeedConsumer::sisteEndring,
-                    host,
-                    AvsluttetOppfolgingFeedDTO.FEED_NAME
-                );
+                AvsluttetOppfolgingFeedDTO.class,
+                avsluttetOppfolgingFeedConsumer::sisteEndring,
+                host,
+                AvsluttetOppfolgingFeedDTO.FEED_NAME
+        );
         FeedConsumerConfig<AvsluttetOppfolgingFeedDTO> config = new FeedConsumerConfig<>(
                 baseConfig,
                 new FeedConsumerConfig.CronPollingConfig(polling)

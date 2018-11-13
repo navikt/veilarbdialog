@@ -14,6 +14,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import static javax.xml.bind.JAXBContext.newInstance;
+import static no.nav.fo.veilarbdialog.ApplicationContext.AKTIVITETSPLAN_URL_PROPERTY;
 import static no.nav.fo.veilarbdialog.service.Utils.marshall;
 import static no.nav.fo.veilarbdialog.service.Utils.messageCreator;
 import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
@@ -21,7 +22,7 @@ import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 @Component
 public class OppgaveService {
 
-    private String aktivitetsplanBaseUrl = getRequiredProperty("aktivitetsplan.url");
+    private String aktivitetsplanBaseUrl = getRequiredProperty(AKTIVITETSPLAN_URL_PROPERTY);
 
 
     @Inject
