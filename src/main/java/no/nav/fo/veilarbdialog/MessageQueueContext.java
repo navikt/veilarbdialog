@@ -85,7 +85,7 @@ public class MessageQueueContext {
         jmsTemplate.setConnectionFactory(connectionFactory);
 
         JMSContext context = connectionFactory.createContext();
-        jmsTemplate.setDefaultDestination(context.createQueue("queue://" + queueName));
+        jmsTemplate.setDefaultDestination(context.createQueue(queueName));
 
         return jmsTemplate;
     }

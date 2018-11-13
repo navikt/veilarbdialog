@@ -19,6 +19,7 @@ import static no.nav.sbl.dialogarena.common.abac.pep.service.AbacServiceConfig.A
 import static no.nav.sbl.dialogarena.common.cxf.StsSecurityConstants.STS_URL_KEY;
 import static no.nav.sbl.dialogarena.common.cxf.StsSecurityConstants.SYSTEMUSER_PASSWORD;
 import static no.nav.sbl.dialogarena.common.cxf.StsSecurityConstants.SYSTEMUSER_USERNAME;
+import static no.nav.sbl.featuretoggle.unleash.UnleashServiceConfig.UNLEASH_API_URL_PROPERTY_NAME;
 
 public class MainTest {
 
@@ -50,6 +51,7 @@ public class MainTest {
         setProperty(CredentialConstants.SYSTEMUSER_USERNAME, serviceUser.getUsername());
         setProperty(CredentialConstants.SYSTEMUSER_PASSWORD, serviceUser.getPassword());
         setProperty(AKTOER_V2_URL_PROPERTY, getWebServiceEndpoint(AKTOER_V2_ALIAS).getUrl());
+        setProperty(UNLEASH_API_URL_PROPERTY_NAME, "https://unleash.nais.adeo.no/api/");
 
         setProperty(VEILARBOPPFOLGINGAPI_URL_PROPERTY, getRestService(VEIL_ARB_OPPFOLGING_API_ALIAS, getDefaultEnvironment()).getUrl());
         setProperty(AKTIVITETSPLAN_URL_PROPERTY, getBaseUrl(AKTIVITETSPLAN_ALIAS));
