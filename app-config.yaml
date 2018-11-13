@@ -84,3 +84,6 @@ fasitResources:
   - alias: veilarbdialogAPI
     resourceType: restservice
     path: /veilarbdialog/api
+
+alertProfiles:
+  - common-java-modules
