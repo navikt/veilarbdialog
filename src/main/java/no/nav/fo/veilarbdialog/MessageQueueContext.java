@@ -15,6 +15,8 @@ import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
 
+import java.util.UUID;
+
 import static no.nav.fo.veilarbdialog.ApplicationContext.*;
 import static no.nav.sbl.util.EnvironmentUtils.*;
 
@@ -46,7 +48,8 @@ public class MessageQueueContext {
 
     private Pingable queuePingable(JmsTemplate queue, String queueName, String beskrivelse) {
         final PingMetadata metadata = new PingMetadata(
-                queueName + " via " + System.getProperty("mqGateway03.hostname"),
+                UUID.randomUUID().toString(),
+                queueName + " via " + getRequiredProperty(MQGATEWAY03_HOSTNAME_PROPERTY),
                 beskrivelse,
                 false
         );
