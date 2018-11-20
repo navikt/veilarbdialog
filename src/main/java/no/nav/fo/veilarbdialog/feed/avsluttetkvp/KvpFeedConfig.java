@@ -6,8 +6,6 @@ import no.nav.brukerdialog.security.oidc.OidcFeedOutInterceptor;
 import no.nav.fo.feed.consumer.FeedConsumer;
 import no.nav.fo.feed.consumer.FeedConsumerConfig;
 import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
-import no.nav.sbl.util.EnvironmentUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,14 +14,10 @@ import javax.sql.DataSource;
 import java.util.Collections;
 
 import static no.nav.fo.veilarbdialog.ApplicationContext.VEILARBOPPFOLGINGAPI_URL_PROPERTY;
+import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 
 @Configuration
 public class KvpFeedConfig {
-
-    private String host = EnvironmentUtils.getRequiredProperty(VEILARBOPPFOLGINGAPI_URL_PROPERTY);
-
-    @Value("${kvp.feed.consumer.pollingrate:/10 * * * * ?}")
-    private String polling;
 
     @Inject
     private DataSource dataSource;
@@ -39,10 +33,10 @@ public class KvpFeedConfig {
                 new FeedConsumerConfig.BaseConfig<>(
                         KvpDTO.class,
                         kvpFeedConsumer::sisteEndring,
-                        host,
+                        getRequiredProperty(VEILARBOPPFOLGINGAPI_URL_PROPERTY),
                         KvpDTO.FEED_NAME
                 ),
-                new FeedConsumerConfig.CronPollingConfig(polling)
+                new FeedConsumerConfig.CronPollingConfig("/10 * * * * ?")
         )
                 .lockProvider(lockProvider(dataSource), 10000)
                 .callback(kvpFeedConsumer::lesKvpFeed)

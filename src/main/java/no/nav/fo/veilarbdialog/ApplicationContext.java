@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog;
 
-import no.nav.apiapp.ApiApplication;
 import no.nav.apiapp.ApiApplication.NaisApiApplication;
 import no.nav.apiapp.config.ApiAppConfigurator;
 import no.nav.apiapp.security.PepClient;
@@ -16,6 +15,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
+
+import static no.nav.sbl.util.EnvironmentUtils.Type.PUBLIC;
+import static no.nav.sbl.util.EnvironmentUtils.setProperty;
 
 @Configuration
 @EnableTransactionManagement
@@ -40,6 +42,8 @@ public class ApplicationContext implements NaisApiApplication {
     public static final String VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_QUEUENAME_PROPERTY = "VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_QUEUENAME";
     public static final String VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_QUEUENAME_PROPERTY = "VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_QUEUENAME";
     public static final String HENVENDELSE_OPPGAVE_HENVENDELSE_QUEUENAME_PROPERTY = "HENVENDELSE_OPPGAVE_HENVENDELSE_QUEUENAME";
+    public static final String VEILARB_KASSERING_IDENTER_PROPERTY = "VEILARB_KASSERING_IDENTER";
+    public static final String DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY = "dialogaktor.feed.brukertilgang";
 
     @Bean
     public PepClient pepClient(Pep pep) {
@@ -51,6 +55,7 @@ public class ApplicationContext implements NaisApiApplication {
 
     @Override
     public void startup(ServletContext servletContext) {
+        setProperty(DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY, "srvveilarbportefolje", PUBLIC);
         Flyway flyway = new Flyway();
         flyway.setDataSource(dataSource);
         flyway.migrate();

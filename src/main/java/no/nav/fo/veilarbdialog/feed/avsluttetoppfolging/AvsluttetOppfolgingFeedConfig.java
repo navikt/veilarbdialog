@@ -7,7 +7,6 @@ import no.nav.fo.feed.consumer.FeedConsumer;
 import no.nav.fo.feed.consumer.FeedConsumerConfig;
 import no.nav.fo.feed.consumer.FeedConsumerConfig.BaseConfig;
 import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,11 +19,6 @@ import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 
 @Configuration
 public class AvsluttetOppfolgingFeedConfig {
-
-    private String host = getRequiredProperty(VEILARBOPPFOLGINGAPI_URL_PROPERTY);
-
-    @Value("${avsluttoppfolging.feed.consumer.pollingrate:/10 * * * * ?}")
-    private String polling;
 
     @Inject
     private DataSource dataSource;
@@ -40,12 +34,12 @@ public class AvsluttetOppfolgingFeedConfig {
         BaseConfig<AvsluttetOppfolgingFeedDTO> baseConfig = new FeedConsumerConfig.BaseConfig<>(
                 AvsluttetOppfolgingFeedDTO.class,
                 avsluttetOppfolgingFeedConsumer::sisteEndring,
-                host,
+                getRequiredProperty(VEILARBOPPFOLGINGAPI_URL_PROPERTY),
                 AvsluttetOppfolgingFeedDTO.FEED_NAME
         );
         FeedConsumerConfig<AvsluttetOppfolgingFeedDTO> config = new FeedConsumerConfig<>(
                 baseConfig,
-                new FeedConsumerConfig.CronPollingConfig(polling)
+                new FeedConsumerConfig.CronPollingConfig("/10 * * * * ?")
         )
                 .lockProvider(lockProvider(dataSource), 10000)
                 .callback(avsluttetOppfolgingFeedConsumer::lesAvsluttetOppfolgingFeed)

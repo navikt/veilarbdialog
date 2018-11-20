@@ -8,7 +8,6 @@ import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.service.AutorisasjonService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +20,9 @@ import javax.ws.rs.core.Request;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
+
+import static no.nav.fo.veilarbdialog.ApplicationContext.VEILARB_KASSERING_IDENTER_PROPERTY;
+import static no.nav.sbl.util.EnvironmentUtils.getOptionalProperty;
 
 @Slf4j
 @Component
@@ -36,11 +38,10 @@ public class KasserService {
     @Inject
     private AktorService aktorService;
 
-    @Value("${veilarb.kassering.identer:Z990322}")
-    String godkjenteIdenter;
-
     @Inject
     private AutorisasjonService autorisasjonService;
+
+    private String godkjenteIdenter = getOptionalProperty(VEILARB_KASSERING_IDENTER_PROPERTY).orElse("");
 
     @PUT
     @Path("/henvendelse/{id}/kasser")

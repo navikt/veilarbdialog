@@ -32,6 +32,7 @@ import java.util.List;
 
 import static no.nav.brukerdialog.security.domain.IdentType.InternBruker;
 import static no.nav.common.auth.SsoToken.oidcToken;
+import static no.nav.fo.veilarbdialog.ApplicationContext.DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
@@ -107,7 +108,7 @@ public class FeedIntegrationTest {
             @Bean
             public FeedConsumer<AvsluttetOppfolgingFeedDTO> avsluttetOppfolgingFeedDTOFeedConsumer() {
                 return mock(FeedConsumer.class);
-            };
+            }
 
             @Bean
             public FeedConsumer<KvpDTO> kvpDTOFeedConsumer() {
@@ -132,7 +133,7 @@ public class FeedIntegrationTest {
         @BeforeEach
         void setup(SubjectExtension.SubjectStore subjectStore) {
             subjectStore.setSubject(new Subject(TEST_IDENT, InternBruker, oidcToken("token")));
-            System.setProperty("dialogaktor.feed.brukertilgang", TEST_IDENT);
+            System.setProperty(DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY, TEST_IDENT);
         }
 
         protected void setCurrentTimestamp(long time) {

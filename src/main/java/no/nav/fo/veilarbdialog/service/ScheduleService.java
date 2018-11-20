@@ -17,7 +17,6 @@ import java.util.List;
 
 import static java.util.UUID.randomUUID;
 import static javax.xml.bind.JAXBContext.newInstance;
-import static no.nav.fo.veilarbdialog.service.VarselMedHandlingService.PARAGAF8_VARSEL_NAVN;
 import static org.slf4j.LoggerFactory.getLogger;
 
 
@@ -26,7 +25,7 @@ public class ScheduleService {
 
     private static final Logger LOG = getLogger(ScheduleService.class);
 
-    private static final long GRACE_PERIODE = Long.parseLong(System.getProperty("grace.periode.millis", String.valueOf(24*60*60*1000)));
+    private static final long GRACE_PERIODE = 30 * 60 * 1000;
     private static final boolean IS_MASTER = Boolean.parseBoolean(System.getProperty("cluster.ismasternode", "false"));
 
 
@@ -40,8 +39,8 @@ public class ScheduleService {
                     XMLVarslingstyper.class
             );
             STOPP_VARSEL_CONTEXT = newInstance(
-                  StoppReVarsel.class
-          );
+                    StoppReVarsel.class
+            );
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
@@ -92,7 +91,7 @@ public class ScheduleService {
     private VarselType sendVarsel(String aktorId) {
         boolean paragraf8 = varselDAO.harUlesteUvarsledeParagraf8Henvendelser(aktorId);
         boolean enabled = unleashService.isEnabled("veilarbdialog-send-paragraf8");
-        if (paragraf8  && enabled) {
+        if (paragraf8 && enabled) {
             String varselBestillingId = randomUUID().toString();
 
             varselMedHandlingService.send(aktorId, varselBestillingId);
