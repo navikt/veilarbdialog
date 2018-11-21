@@ -48,6 +48,10 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.javacrumbs.shedlock</groupId>
+            <artifactId>shedlock-provider-jdbc</artifactId>
+        </dependency>
 
         <!-- EXTERNAL DEPENDENCIES -->
         <dependency>
