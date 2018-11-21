@@ -36,6 +36,9 @@ import static org.mockito.Mockito.when;
 
 public class RestServiceTest extends DbTest {
 
+    private static final String AKTORID = "123";
+    private static final String FNR = "4321";
+
     @Inject
     private RestService restService;
 
@@ -47,8 +50,6 @@ public class RestServiceTest extends DbTest {
 
     static class ContextConfig {
 
-        private static final String AKTORID = "123";
-        private static final String FNR = "***REMOVED***";
 
         @Bean
         public AktorService aktorService() {
@@ -94,7 +95,7 @@ public class RestServiceTest extends DbTest {
     @Before
     public void setup() {
         subjectRule.setSubject(new Subject("veileder", IdentType.InternBruker, mock(SsoToken.class)));
-        mockHttpServletRequest.setParameter("fnr", "***REMOVED***");
+        mockHttpServletRequest.setParameter("fnr", FNR);
     }
 
     @Test
