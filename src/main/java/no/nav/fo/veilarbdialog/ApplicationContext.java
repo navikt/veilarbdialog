@@ -1,5 +1,8 @@
 package no.nav.fo.veilarbdialog;
 
+import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
+import net.javacrumbs.shedlock.core.LockingTaskExecutor;
+import net.javacrumbs.shedlock.provider.jdbc.JdbcLockProvider;
 import no.nav.apiapp.ApiApplication.NaisApiApplication;
 import no.nav.apiapp.config.ApiAppConfigurator;
 import no.nav.apiapp.security.PepClient;
@@ -50,6 +53,12 @@ public class ApplicationContext implements NaisApiApplication {
     public PepClient pepClient(Pep pep) {
         return new PepClient(pep, "veilarb", ResourceType.VeilArbPerson);
     }
+
+    @Bean
+    public LockingTaskExecutor lockingTaskExecutor(DataSource ds) {
+        return new DefaultLockingTaskExecutor(new JdbcLockProvider(ds));
+    }
+
 
     @Inject
     private DataSource dataSource;
