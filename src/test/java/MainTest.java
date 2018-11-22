@@ -1,4 +1,5 @@
 import no.nav.dialogarena.config.fasit.DbCredentials;
+import no.nav.dialogarena.config.fasit.QueueManager;
 import no.nav.dialogarena.config.fasit.ServiceUser;
 import no.nav.sbl.dialogarena.common.abac.pep.CredentialConstants;
 import no.nav.testconfig.ApiAppTest;
@@ -26,6 +27,11 @@ public class MainTest {
     private static final String AAD_B2C_CLIENTID_ALIAS = "aad_b2c_clientid";
     private static final String AKTIVITETSPLAN_ALIAS = "aktivitetsplan";
     private static final String UNLEASH_API_ALIAS = "unleash-api";
+    private static final String MQ_GATEWAY03_ALIAS = "mqGateway03";
+    private static final String HENVENDELSE_OPPGAVE_HENVENDELSE_ALIAS = "henvendelse_OPPGAVE.HENVENDELSE";
+    private static final String VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_ALIAS = "VARSELPRODUKSJON.STOPP_VARSEL_UTSENDING";
+    private static final String VARSELPRODUKSJON_VARSLINGER_ALIAS = "VARSELPRODUKSJON.VARSLINGER";
+    private static final String VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_ALIAS = "VARSELPRODUKSJON.BEST_VARSEL_M_HANDLING";
 
     public static void main(String[] args) {
         ApiAppTest.setupTestContext(ApiAppTest.Config.builder().applicationName(APPLICATION_NAME).build());
@@ -49,13 +55,15 @@ public class MainTest {
         setProperty(VEILARBOPPFOLGINGAPI_URL_PROPERTY, getRestService(VEIL_ARB_OPPFOLGING_API_ALIAS, getDefaultEnvironment()).getUrl());
         setProperty(AKTIVITETSPLAN_URL_PROPERTY, getBaseUrl(AKTIVITETSPLAN_ALIAS));
 
-        setProperty(MQGATEWAY03_HOSTNAME_PROPERTY, "b27apvl170.preprod.local");
-        setProperty(MQGATEWAY03_PORT_PROPERTY, "1413");
-        setProperty(MQGATEWAY03_NAME_PROPERTY, "MQXLSC01");
-        setProperty(VARSELPRODUKSJON_VARSLINGER_QUEUENAME_PROPERTY, "QA.Q6_VARSELPRODUKSJON.SEND_VARSEL");
-        setProperty(VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_QUEUENAME_PROPERTY, "QA.Q6_VARSELPRODUKSJON.BEST_VARSEL_M_HANDLING");
-        setProperty(VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_QUEUENAME_PROPERTY, "QA.Q6_VARSELPRODUKSJON.STOPP_VARSEL_UTSENDING");
-        setProperty(HENVENDELSE_OPPGAVE_HENVENDELSE_QUEUENAME_PROPERTY, "QA.Q6_HENVENDELSE_OPPGAVE.HENVENDELSE");
+        QueueManager queueManager = getQueueManager(MQ_GATEWAY03_ALIAS);
+        setProperty(MQGATEWAY03_HOSTNAME_PROPERTY, queueManager.getHostname());
+        setProperty(MQGATEWAY03_PORT_PROPERTY, String.valueOf(queueManager.getPort()));
+        setProperty(MQGATEWAY03_NAME_PROPERTY, queueManager.getName());
+
+        setProperty(VARSELPRODUKSJON_VARSLINGER_QUEUENAME_PROPERTY, getQueue(VARSELPRODUKSJON_VARSLINGER_ALIAS).getName());
+        setProperty(VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_QUEUENAME_PROPERTY, getQueue(VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_ALIAS).getName());
+        setProperty(VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_QUEUENAME_PROPERTY, getQueue(VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_ALIAS).getName());
+        setProperty(HENVENDELSE_OPPGAVE_HENVENDELSE_QUEUENAME_PROPERTY, getQueue(HENVENDELSE_OPPGAVE_HENVENDELSE_ALIAS).getName());
 
         ServiceUser isso_rp_user = getServiceUser("isso-rp-user", APPLICATION_NAME);
         String loginUrl = getRestService(VEILARBLOGIN_REDIRECT_URL_ALIAS, getDefaultEnvironment()).getUrl();
