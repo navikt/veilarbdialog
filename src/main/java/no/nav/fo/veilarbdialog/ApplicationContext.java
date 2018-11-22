@@ -47,7 +47,7 @@ public class ApplicationContext implements NaisApiApplication {
     public static final String VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_QUEUENAME_PROPERTY = "VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_QUEUENAME";
     public static final String HENVENDELSE_OPPGAVE_HENVENDELSE_QUEUENAME_PROPERTY = "HENVENDELSE_OPPGAVE_HENVENDELSE_QUEUENAME";
     public static final String VEILARB_KASSERING_IDENTER_PROPERTY = "VEILARB_KASSERING_IDENTER";
-    public static final String DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY = "DIALOGAKTOR_FEED_BRUKERTILGANG";
+    public static final String DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY = "dialogaktor.feed.brukertilgang";
 
     @Bean
     public PepClient pepClient(Pep pep) {
