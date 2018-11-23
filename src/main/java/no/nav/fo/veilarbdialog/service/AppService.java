@@ -44,7 +44,9 @@ public class AppService {
     public List<DialogData> hentDialogerForBruker(Person person) {
         String fnr = hentFnrForPerson(person);
         sjekkTilgangTilFnr(fnr);
-        return dialogDAO.hentDialogerForAktorId(fnr);
+
+        String aktorId = hentAktoerIdForPerson(person);
+        return dialogDAO.hentDialogerForAktorId(aktorId);
     }
 
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
