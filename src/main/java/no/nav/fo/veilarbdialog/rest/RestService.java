@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import no.nav.apiapp.feil.UgyldigRequest;
+import no.nav.common.auth.SubjectHandler;
 import no.nav.fo.veilarbdialog.api.DialogController;
 import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
@@ -26,8 +26,6 @@ import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeilede
 import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
-import no.nav.common.auth.SubjectHandler;
-
 
 @Component
 public class RestService implements DialogController, VeilederDialogController {
@@ -49,7 +47,7 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public List<DialogDTO> hentDialoger() {
-        return appService.hentDialogerForBruker(getBrukerIdent())
+        return appService.hentDialogerForBruker(getContextUserIdent().get())
                 .stream()
                 .filter(dialog -> kontorsperreFilter.harTilgang(dialog.getKontorsperreEnhetId()))
                 .map(restMapper::somDialogDTO)
@@ -90,8 +88,8 @@ public class RestService implements DialogController, VeilederDialogController {
                 : null;
     }
 
-    private DialogData markerSomLest(long dialogId){
-        if (erEksternBruker()){
+    private DialogData markerSomLest(long dialogId) {
+        if (erEksternBruker()) {
             return appService.markerDialogSomLestAvBruker(dialogId);
         }
         return appService.markerDialogSomLestAvVeileder(dialogId);
@@ -152,7 +150,7 @@ public class RestService implements DialogController, VeilederDialogController {
     private DialogData opprettDialog(NyHenvendelseDTO nyHenvendelseDTO) {
         DialogData dialogData = DialogData.builder()
                 .overskrift(nyHenvendelseDTO.overskrift)
-                .aktorId(appService.hentAktoerIdForIdent(getBrukerIdent()))
+                .aktorId(appService.hentAktoerIdForPerson(getContextUserIdent()))
                 .aktivitetId(nyHenvendelseDTO.aktivitetId)
                 .egenskaper(nyHenvendelseDTO.egenskaper
                         .stream()
@@ -161,10 +159,9 @@ public class RestService implements DialogController, VeilederDialogController {
                 .build();
         DialogData opprettetDialog = appService.opprettDialogForAktivitetsplanPaIdent(dialogData);
 
-        if (erEksternBruker()){
+        if (erEksternBruker()) {
             nyDialogBruker(opprettetDialog);
-        }
-        else if (erInternBruker()){
+        } else if (erInternBruker()) {
             nyDialogVeileder(opprettetDialog);
         }
 
@@ -176,11 +173,13 @@ public class RestService implements DialogController, VeilederDialogController {
         return SubjectHandler.getIdent().orElse(null);
     }
 
-    private String getBrukerIdent() {
+    private Person getContextUserIdent() {
         if (erEksternBruker()) {
-            return SubjectHandler.getIdent().orElseThrow(RuntimeException::new);
+            return SubjectHandler.getIdent().map(Person::fnr).orElseThrow(RuntimeException::new);
         }
 
-        return of(requestProvider.get().getParameter("fnr")).orElseThrow(UgyldigRequest::new);
+        Optional<Person> fnr = Optional.ofNullable(requestProvider.get().getParameter("fnr")).map(Person::fnr);
+        Optional<Person> aktorId = Optional.ofNullable(requestProvider.get().getParameter("aktorId")).map(Person::aktorId);
+        return fnr.orElseGet(() -> aktorId.orElseThrow(RuntimeException::new));
     }
 }

@@ -98,6 +98,17 @@ public class AppService {
         return dialogDAO.hentDialogForAktivitetId(aktivitetId).map(this::sjekkLeseTilgangTilDialog);
     }
 
+    public String hentAktoerIdForPerson(Person person) {
+        if (person instanceof Person.Fnr) {
+            return aktorService.getAktorId(person.get())
+                    .orElseThrow(RuntimeException::new);
+        } else if (person instanceof Person.AktorId) {
+            return person.get();
+        } else {
+            throw new RuntimeException("Kan ikke identifisere persontype");
+        }
+    }
+
     public String hentAktoerIdForIdent(String ident) {
         // NB: ingen tilgangskontroll på dette oppslaget
         return aktorService.getAktorId(ident)
