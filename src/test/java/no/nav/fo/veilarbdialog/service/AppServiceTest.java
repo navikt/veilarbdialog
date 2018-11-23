@@ -10,6 +10,7 @@ import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.domain.Person;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
@@ -119,7 +120,6 @@ public class AppServiceTest {
         sjekkTilgang(
                 this::hentDialog,
                 this::hentDialogerForBruker,
-                this::hentAktoerIdForIdent,
                 this::markerDialogSomLestAvBruker,
                 this::markerDialogSomLestAvVeileder,
                 this::hentDialogForAktivitetId,
@@ -139,7 +139,6 @@ public class AppServiceTest {
         sjekkTilgang(
                 this::hentDialog,
                 this::hentDialogerForBruker,
-                this::hentAktoerIdForIdent,
                 this::oppdaterFerdigbehandletTidspunkt,
                 this::oppdaterVentePaSvarTidspunkt,
                 this::opprettHenvendelseForDialog,
@@ -197,12 +196,8 @@ public class AppServiceTest {
         return appService.oppdaterFerdigbehandletTidspunkt(DIALOG_STATUS);
     }
 
-    private String hentAktoerIdForIdent() {
-        return appService.hentAktoerIdForIdent(IDENT);
-    }
-
     private List<DialogData> hentDialogerForBruker() {
-        return appService.hentDialogerForBruker(IDENT);
+        return appService.hentDialogerForBruker(Person.fnr(IDENT));
     }
 
 }
