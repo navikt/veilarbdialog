@@ -41,9 +41,10 @@ public class AppService {
     }
 
     @Transactional(readOnly = true)
-    public List<DialogData> hentDialogerForBruker(String ident) {
-        sjekkTilgangTilFnr(ident);
-        return dialogDAO.hentDialogerForAktorId(hentAktoerIdForIdent(ident));
+    public List<DialogData> hentDialogerForBruker(Person person) {
+        String fnr = hentFnrForPerson(person);
+        sjekkTilgangTilFnr(fnr);
+        return dialogDAO.hentDialogerForAktorId(fnr);
     }
 
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
@@ -108,11 +109,15 @@ public class AppService {
             throw new RuntimeException("Kan ikke identifisere persontype");
         }
     }
-
-    public String hentAktoerIdForIdent(String ident) {
-        // NB: ingen tilgangskontroll på dette oppslaget
-        return aktorService.getAktorId(ident)
-                .orElseThrow(RuntimeException::new); // Hvordan håndere dette?
+    public String hentFnrForPerson(Person person) {
+        if (person instanceof Person.Fnr) {
+            return person.get();
+        } else if (person instanceof Person.AktorId) {
+            return aktorService.getFnr(person.get())
+                    .orElseThrow(RuntimeException::new);
+        } else {
+            throw new RuntimeException("Kan ikke identifisere persontype");
+        }
     }
 
     @Transactional(readOnly = true)

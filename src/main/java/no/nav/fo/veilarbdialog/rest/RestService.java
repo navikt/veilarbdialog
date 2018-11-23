@@ -47,7 +47,7 @@ public class RestService implements DialogController, VeilederDialogController {
 
     @Override
     public List<DialogDTO> hentDialoger() {
-        return appService.hentDialogerForBruker(getContextUserIdent().get())
+        return appService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
                 .filter(dialog -> kontorsperreFilter.harTilgang(dialog.getKontorsperreEnhetId()))
                 .map(restMapper::somDialogDTO)
