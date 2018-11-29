@@ -34,13 +34,13 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class RestServiceTest extends IntegationTest {
+public class DialogRessursTest extends IntegationTest {
 
     private static final String AKTORID = "123";
     private static final String FNR = "4321";
 
     @Inject
-    private RestService restService;
+    private DialogRessurs dialogRessurs;
 
     @Inject
     private MockHttpServletRequest mockHttpServletRequest;
@@ -81,7 +81,7 @@ public class RestServiceTest extends IntegationTest {
                 DataVarehusDAO.class,
                 DialogFeedDAO.class,
                 Request.class,
-                RestService.class,
+                DialogRessurs.class,
                 AutorisasjonService.class,
                 RestMapper.class,
                 KontorsperreFilter.class,
@@ -100,47 +100,47 @@ public class RestServiceTest extends IntegationTest {
 
     @Test
     public void opprettOgHentDialoger() throws Exception {
-        restService.nyHenvendelse(new NyHenvendelseDTO().setTekst("tekst"));
-        val hentAktiviteterResponse = restService.hentDialoger();
+        dialogRessurs.nyHenvendelse(new NyHenvendelseDTO().setTekst("tekst"));
+        val hentAktiviteterResponse = dialogRessurs.hentDialoger();
         assertThat(hentAktiviteterResponse, hasSize(1));
 
-        restService.markerSomLest(hentAktiviteterResponse.get(0).id);
+        dialogRessurs.markerSomLest(hentAktiviteterResponse.get(0).id);
     }
 
     @Test
     public void forhandsorienteringPaEksisterendeDialogPaAktivitetSkalFaEgenskapenParagraf8() {
         final String aktivitetId = "123";
 
-        restService.nyHenvendelse(
+        dialogRessurs.nyHenvendelse(
                 new NyHenvendelseDTO()
                         .setTekst("forhandsorienteringPaEksisterendeDialogPaAktivitetSkalFaEgenskapenParagraf8")
                         .setAktivitetId(aktivitetId)
         );
 
-        val opprettetDialog = restService.hentDialoger();
+        val opprettetDialog = dialogRessurs.hentDialoger();
         assertThat(opprettetDialog.get(0).getEgenskaper().isEmpty(), is(true));
         assertThat(opprettetDialog.size(), is(1));
 
-        restService.forhandsorienteringPaAktivitet(
+        dialogRessurs.forhandsorienteringPaAktivitet(
                 new NyHenvendelseDTO()
                         .setTekst("paragraf8")
                         .setAktivitetId(aktivitetId)
         );
 
-        val dialogMedParagraf8 = restService.hentDialoger();
+        val dialogMedParagraf8 = dialogRessurs.hentDialoger();
         assertThat(dialogMedParagraf8.get(0).getEgenskaper().contains(Egenskap.PARAGRAF8), is(true));
         assertThat(dialogMedParagraf8.size(), is(1));
     }
 
     @Test
     public void skalHaParagraf8Egenskap() {
-        restService.forhandsorienteringPaAktivitet(
+        dialogRessurs.forhandsorienteringPaAktivitet(
                 new NyHenvendelseDTO()
                         .setTekst("skalHaParagraf8Egenskap")
                         .setAktivitetId("123")
         );
 
-        val hentedeDialoger = restService.hentDialoger();
+        val hentedeDialoger = dialogRessurs.hentDialoger();
         assertThat(hentedeDialoger, hasSize(1));
         assertThat(hentedeDialoger.get(0).getEgenskaper().contains(Egenskap.PARAGRAF8), is(true));
     }

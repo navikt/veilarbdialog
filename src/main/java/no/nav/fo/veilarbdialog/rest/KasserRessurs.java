@@ -27,7 +27,7 @@ import static no.nav.sbl.util.EnvironmentUtils.getOptionalProperty;
 @Slf4j
 @Component
 @Path("/kassering")
-public class KasserService {
+public class KasserRessurs {
 
     @Inject
     private DialogDAO dialogDAO;

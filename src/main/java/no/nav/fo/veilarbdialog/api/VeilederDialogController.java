@@ -3,8 +3,10 @@ package no.nav.fo.veilarbdialog.api;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 
-import javax.ws.rs.*;
-
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 
 @Path("/dialog")
 public interface VeilederDialogController {
@@ -20,4 +22,5 @@ public interface VeilederDialogController {
     @POST
     @Path("/forhandsorientering")
     DialogDTO forhandsorienteringPaAktivitet(NyHenvendelseDTO nyHenvendelseDTO);
+
 }

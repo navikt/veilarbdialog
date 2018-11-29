@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import java.util.Date;
 import java.util.List;
 
+import no.nav.fo.veilarbdialog.feed.KvpFeedConsumer;
 import org.junit.Test;
 
 import no.nav.fo.veilarbdialog.db.dao.KvpFeedMetadataDAO;

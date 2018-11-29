@@ -22,11 +22,10 @@ import static java.util.UUID.randomUUID;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static org.slf4j.LoggerFactory.getLogger;
 
-
 @Component
-public class ScheduleService {
+public class ScheduleRessurs {
 
-    private static final Logger LOG = getLogger(ScheduleService.class);
+    private static final Logger LOG = getLogger(ScheduleRessurs.class);
 
     private static final long GRACE_PERIODE = 30 * 60 * 1000;
 

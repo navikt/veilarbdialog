@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.feed.avsluttetkvp;
+package no.nav.fo.veilarbdialog.feed;
 
 import java.util.List;
 
@@ -24,11 +24,11 @@ public class KvpFeedConsumer {
         this.kvpFeedConsumerDAO = feedConsumerDAO;
     }
 
-    String sisteEndring() {
+    public String sisteEndring() {
         return String.valueOf(kvpFeedConsumerDAO.hentSisteId());
     }
 
-    void lesKvpFeed(String lastEntryId, List<KvpDTO> elements) {
+    public void lesKvpFeed(String lastEntryId, List<KvpDTO> elements) {
         long lastSuccessfulId = -1;
         for (KvpDTO element : elements) {
             if(element.getAvsluttetDato() != null) {
@@ -37,7 +37,7 @@ public class KvpFeedConsumer {
             lastSuccessfulId = element.getSerial();
         }
 
-        // Håndterer ikke exceptions her. Dersom en exception oppstår i løkkeprosesseringen over, vil 
+        // Håndterer ikke exceptions her. Dersom en exception oppstår i løkkeprosesseringen over, vil
         // vi altså IKKE få oppdatert siste id. Dermed vil vi lese feeden på nytt fra siste kjente id og potensielt
         // prosessere noen elementer flere ganger. Dette skal gå bra, siden koden som setter dialoger til historisk
         // er idempotent

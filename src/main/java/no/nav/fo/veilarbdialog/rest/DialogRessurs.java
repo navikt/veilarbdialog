@@ -7,6 +7,7 @@ import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.AutorisasjonService;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -28,7 +29,11 @@ import static no.nav.fo.veilarbdialog.util.StringUtils.of;
 
 
 @Component
-public class RestService implements DialogController, VeilederDialogController {
+@Import({
+        RestMapper.class,
+        KontorsperreFilter.class
+})
+public class DialogRessurs implements DialogController, VeilederDialogController {
 
     @Inject
     private AppService appService;

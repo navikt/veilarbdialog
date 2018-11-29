@@ -1,17 +1,23 @@
 package no.nav.fo.veilarbdialog.config;
 
 import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
+import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import net.javacrumbs.shedlock.provider.jdbc.JdbcLockProvider;
 import no.nav.apiapp.ApiApplication.NaisApiApplication;
 import no.nav.apiapp.config.ApiAppConfigurator;
 import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorConfig;
+import no.nav.fo.veilarbdialog.rest.DialogRessurs;
+import no.nav.fo.veilarbdialog.service.ScheduleRessurs;
 import no.nav.sbl.dialogarena.common.abac.pep.Pep;
 import no.nav.sbl.dialogarena.common.abac.pep.context.AbacContext;
 import no.nav.sbl.dialogarena.common.abac.pep.domain.ResourceType;
 import org.flywaydb.core.Flyway;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -27,8 +33,19 @@ import static no.nav.sbl.util.EnvironmentUtils.setProperty;
 @EnableTransactionManagement
 @EnableScheduling
 @EnableAspectJAutoProxy
-@ComponentScan("no.nav.fo.veilarbdialog")
-@Import({AbacContext.class, AktorConfig.class})
+@Import({
+        AbacContext.class,
+        AktorConfig.class,
+        CacheConfig.class,
+        DatabaseConfig.class,
+        FeedConfig.class,
+        KvpClientConfig.class,
+        MessageQueueConfig.class,
+        ServiceConfig.class,
+        UnleashConfig.class,
+        DialogRessurs.class,
+        ScheduleRessurs.class
+})
 public class ApplicationConfig implements NaisApiApplication {
 
     public static final String APPLICATION_NAME = "veilarbdialog";
@@ -59,6 +76,10 @@ public class ApplicationConfig implements NaisApiApplication {
         return new DefaultLockingTaskExecutor(new JdbcLockProvider(ds));
     }
 
+    @Bean
+    public LockProvider lockProvider(DataSource dataSource) {
+        return new JdbcLockProvider(dataSource);
+    }
 
     @Inject
     private DataSource dataSource;
