@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.db;
+package no.nav.fo.veilarbdialog.config;
 
 import no.nav.sbl.jdbc.DataSourceFactory;
 import no.nav.sbl.jdbc.Database;

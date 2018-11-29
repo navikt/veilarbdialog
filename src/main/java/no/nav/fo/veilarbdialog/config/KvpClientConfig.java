@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.ws.rs.client.Client;
 
-import static no.nav.fo.veilarbdialog.ApplicationContext.VEILARBOPPFOLGINGAPI_URL_PROPERTY;
+import static no.nav.fo.veilarbdialog.config.ApplicationContext.VEILARBOPPFOLGINGAPI_URL_PROPERTY;
 
 @Configuration
 public class KvpClientConfig {

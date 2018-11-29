@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog;
+package no.nav.fo.veilarbdialog.config;
 
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;

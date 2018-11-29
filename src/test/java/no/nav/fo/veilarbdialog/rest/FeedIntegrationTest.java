@@ -11,7 +11,7 @@ import no.nav.fo.feed.controller.FeedController;
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.*;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.feed.FeedConfig;
+import no.nav.fo.veilarbdialog.config.FeedConfig;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import no.nav.fo.veilarbdialog.util.DateUtils;
@@ -32,7 +32,7 @@ import java.util.List;
 
 import static no.nav.brukerdialog.security.domain.IdentType.InternBruker;
 import static no.nav.common.auth.SsoToken.oidcToken;
-import static no.nav.fo.veilarbdialog.ApplicationContext.DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY;
+import static no.nav.fo.veilarbdialog.config.ApplicationContext.DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;

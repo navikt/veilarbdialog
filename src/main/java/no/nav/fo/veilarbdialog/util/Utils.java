@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.service;
+package no.nav.fo.veilarbdialog.util;
 
 
 import org.springframework.jms.core.MessageCreator;
@@ -16,7 +16,7 @@ import static javax.xml.bind.Marshaller.JAXB_FRAGMENT;
 
 public class Utils {
 
-    static MessageCreator messageCreator(final String hendelse, String uuid) {
+    public static MessageCreator messageCreator(final String hendelse, String uuid) {
         return session -> {
             TextMessage msg = session.createTextMessage(hendelse);
             msg.setStringProperty("callId", uuid);
@@ -24,7 +24,7 @@ public class Utils {
         };
     }
 
-    static String marshall(Object element, JAXBContext jaxbContext) {
+    public static String marshall(Object element, JAXBContext jaxbContext) {
         try {
             StringWriter writer = new StringWriter();
             Marshaller marshaller = jaxbContext.createMarshaller();

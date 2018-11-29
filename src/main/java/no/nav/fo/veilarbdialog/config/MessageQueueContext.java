@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog;
+package no.nav.fo.veilarbdialog.config;
 
 import com.ibm.msg.client.jms.JmsConnectionFactory;
 import com.ibm.msg.client.jms.JmsFactoryFactory;
@@ -17,7 +17,7 @@ import javax.jms.JMSException;
 
 import java.util.UUID;
 
-import static no.nav.fo.veilarbdialog.ApplicationContext.*;
+import static no.nav.fo.veilarbdialog.config.ApplicationContext.*;
 import static no.nav.sbl.util.EnvironmentUtils.*;
 
 

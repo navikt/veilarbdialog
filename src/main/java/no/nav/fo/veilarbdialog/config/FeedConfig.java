@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.feed;
+package no.nav.fo.veilarbdialog.config;
 
 import lombok.val;
 import no.nav.brukerdialog.security.oidc.OidcFeedAuthorizationModule;

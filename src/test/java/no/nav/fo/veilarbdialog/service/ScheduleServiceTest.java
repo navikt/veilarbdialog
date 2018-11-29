@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.service;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
+import no.nav.fo.veilarbdialog.util.Utils;
 import org.junit.Test;
 
 import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.ObjectFactory;

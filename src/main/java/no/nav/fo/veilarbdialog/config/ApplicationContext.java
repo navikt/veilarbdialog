@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog;
+package no.nav.fo.veilarbdialog.config;
 
 import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;

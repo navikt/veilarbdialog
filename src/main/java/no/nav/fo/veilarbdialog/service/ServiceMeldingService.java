@@ -14,8 +14,8 @@ import javax.xml.bind.JAXBException;
 
 import static java.util.UUID.randomUUID;
 import static javax.xml.bind.JAXBContext.newInstance;
-import static no.nav.fo.veilarbdialog.service.Utils.marshall;
-import static no.nav.fo.veilarbdialog.service.Utils.messageCreator;
+import static no.nav.fo.veilarbdialog.util.Utils.marshall;
+import static no.nav.fo.veilarbdialog.util.Utils.messageCreator;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component

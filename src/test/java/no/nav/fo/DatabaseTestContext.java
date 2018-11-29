@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 
 import static java.lang.System.setProperty;
-import static no.nav.fo.veilarbdialog.db.DatabaseContext.*;
+import static no.nav.fo.veilarbdialog.config.DatabaseContext.*;
 
 @Configuration
 @EnableTransactionManagement
