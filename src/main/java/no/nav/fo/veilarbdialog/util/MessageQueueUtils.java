@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.util;
 
 
+import lombok.SneakyThrows;
 import org.springframework.jms.core.MessageCreator;
 
 import javax.jms.TextMessage;
@@ -11,6 +12,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
 
 import static java.lang.Boolean.TRUE;
+import static javax.xml.bind.JAXBContext.newInstance;
 import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 import static javax.xml.bind.Marshaller.JAXB_FRAGMENT;
 
@@ -35,6 +37,11 @@ public class MessageQueueUtils {
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @SneakyThrows
+    public static JAXBContext jaxbContext(Class<?>... classes) {
+        return newInstance(classes);
     }
 
 }
