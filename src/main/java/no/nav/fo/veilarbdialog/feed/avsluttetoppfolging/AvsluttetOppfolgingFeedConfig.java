@@ -14,7 +14,7 @@ import javax.inject.Inject;
 import javax.sql.DataSource;
 import java.util.Collections;
 
-import static no.nav.fo.veilarbdialog.config.ApplicationContext.VEILARBOPPFOLGINGAPI_URL_PROPERTY;
+import static no.nav.fo.veilarbdialog.config.ApplicationConfig.VEILARBOPPFOLGINGAPI_URL_PROPERTY;
 import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 
 @Configuration

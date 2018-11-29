@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import no.nav.fo.DbTest;
+import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -14,7 +14,7 @@ import java.util.Date;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StatusDAOTest extends DbTest {
+class StatusDAOTest extends IntegationTest {
 
     @Inject
     private StatusDAO statusDAO;
@@ -211,5 +211,5 @@ class StatusDAOTest extends DbTest {
         statusDAO.setVenterPaSvarFraBrukerTilNaa(id);
         return dialogDAO.hentDialog(id);
     }
-    
+
 }

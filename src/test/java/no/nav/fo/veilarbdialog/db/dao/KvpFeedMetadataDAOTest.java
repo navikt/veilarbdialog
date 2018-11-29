@@ -9,9 +9,9 @@ import javax.inject.Inject;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import no.nav.fo.DbTest;
+import no.nav.fo.IntegationTest;
 
-public class KvpFeedMetadataDAOTest extends DbTest {
+public class KvpFeedMetadataDAOTest extends IntegationTest {
 
     @Inject
     private KvpFeedMetadataDAO kvpFeedMetadataDAO;

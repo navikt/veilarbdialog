@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.*;
-import no.nav.fo.DbTest;
+import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.sbl.sql.SqlUtils;
@@ -21,7 +21,7 @@ import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DataVarehusDAOTest extends DbTest {
+class DataVarehusDAOTest extends IntegationTest {
 
     @Inject
     private DataVarehusDAO dataVarehusDAO;

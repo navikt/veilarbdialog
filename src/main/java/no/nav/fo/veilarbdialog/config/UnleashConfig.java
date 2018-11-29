@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class Unleash {
+public class UnleashConfig {
 
     @Bean
     public UnleashService unleashService() {

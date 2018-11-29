@@ -17,13 +17,13 @@ import javax.jms.JMSException;
 
 import java.util.UUID;
 
-import static no.nav.fo.veilarbdialog.config.ApplicationContext.*;
+import static no.nav.fo.veilarbdialog.config.ApplicationConfig.*;
 import static no.nav.sbl.util.EnvironmentUtils.*;
 
 
 @Configuration
 @EnableJms
-public class MessageQueueContext {
+public class MessageQueueConfig {
 
     @Bean
     public Pingable varselQueuePingable(JmsTemplate varselQueue) {

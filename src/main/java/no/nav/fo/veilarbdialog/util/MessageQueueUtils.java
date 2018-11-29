@@ -14,7 +14,7 @@ import static java.lang.Boolean.TRUE;
 import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 import static javax.xml.bind.Marshaller.JAXB_FRAGMENT;
 
-public class Utils {
+public class MessageQueueUtils {
 
     public static MessageCreator messageCreator(final String hendelse, String uuid) {
         return session -> {

@@ -4,7 +4,7 @@ import no.nav.apiapp.security.PepClient;
 import no.nav.brukerdialog.security.context.SubjectExtension;
 import no.nav.common.auth.Subject;
 import no.nav.dialogarena.aktor.AktorService;
-import no.nav.fo.DbTest;
+import no.nav.fo.IntegationTest;
 import no.nav.fo.feed.FeedProducerTester;
 import no.nav.fo.feed.consumer.FeedConsumer;
 import no.nav.fo.feed.controller.FeedController;
@@ -32,7 +32,7 @@ import java.util.List;
 
 import static no.nav.brukerdialog.security.domain.IdentType.InternBruker;
 import static no.nav.common.auth.SsoToken.oidcToken;
-import static no.nav.fo.veilarbdialog.config.ApplicationContext.DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY;
+import static no.nav.fo.veilarbdialog.config.ApplicationConfig.DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
@@ -75,7 +75,7 @@ public class FeedIntegrationTest {
     }
 
     @ExtendWith(SubjectExtension.class)
-    public static abstract class Base extends DbTest implements FeedProducerTester {
+    public static abstract class Base extends IntegationTest implements FeedProducerTester {
 
         private static long counter = 1;
 

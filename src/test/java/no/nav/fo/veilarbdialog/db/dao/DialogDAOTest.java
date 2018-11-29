@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.val;
-import no.nav.fo.DbTest;
+import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.*;
 
 import org.junit.BeforeClass;
@@ -18,7 +18,7 @@ import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DialogDAOTest extends DbTest {
+public class DialogDAOTest extends IntegationTest {
 
     private static final String AKTOR_ID_1234 = "1234";
 
@@ -29,7 +29,7 @@ public class DialogDAOTest extends DbTest {
     public static void addSpringBeans() {
         initSpringContext(Arrays.asList(DialogDAO.class));
     }
-    
+
     @Test
     public void kan_opprette_dialog() {
         DialogData dialog = nyDialog();

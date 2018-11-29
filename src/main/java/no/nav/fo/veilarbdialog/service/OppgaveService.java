@@ -14,9 +14,9 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import static javax.xml.bind.JAXBContext.newInstance;
-import static no.nav.fo.veilarbdialog.config.ApplicationContext.AKTIVITETSPLAN_URL_PROPERTY;
-import static no.nav.fo.veilarbdialog.util.Utils.marshall;
-import static no.nav.fo.veilarbdialog.util.Utils.messageCreator;
+import static no.nav.fo.veilarbdialog.config.ApplicationConfig.AKTIVITETSPLAN_URL_PROPERTY;
+import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.marshall;
+import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.messageCreator;
 import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 
 @Component

@@ -11,8 +11,8 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import static javax.xml.bind.JAXBContext.newInstance;
-import static no.nav.fo.veilarbdialog.util.Utils.marshall;
-import static no.nav.fo.veilarbdialog.util.Utils.messageCreator;
+import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.marshall;
+import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.messageCreator;
 
 @Component
 public class VarselMedHandlingService {

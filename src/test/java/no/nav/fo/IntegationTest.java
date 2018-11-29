@@ -22,14 +22,14 @@ import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static org.springframework.util.ReflectionUtils.setField;
 
-public abstract class DbTest {
+public abstract class IntegationTest {
 
     private static AnnotationConfigApplicationContext annotationConfigApplicationContext;
     private static PlatformTransactionManager platformTransactionManager;
     private TransactionStatus transactionStatus;
 
     protected static void initSpringContext(List<Class> classes) {
-        List<Class> list = new ArrayList<>(asList(DatabaseTestContext.class, DateProvider.class));
+        List<Class> list = new ArrayList<>(asList(TestDatabaseConfig.class, DateProvider.class));
         list.addAll(classes);
         annotationConfigApplicationContext = new AnnotationConfigApplicationContext(list.toArray(new Class[]{}));
         annotationConfigApplicationContext.start();
@@ -39,7 +39,7 @@ public abstract class DbTest {
     @Before
     @BeforeEach
     public void setupDateProvider() {
-        changeDateProvider(DbTest::timestampFromSystemTime);
+        changeDateProvider(IntegationTest::timestampFromSystemTime);
     }
 
     private static String timestampFromSystemTime() {

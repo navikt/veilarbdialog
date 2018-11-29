@@ -7,7 +7,7 @@ import no.nav.brukerdialog.security.domain.IdentType;
 import no.nav.common.auth.SsoToken;
 import no.nav.common.auth.Subject;
 import no.nav.dialogarena.aktor.AktorService;
-import no.nav.fo.DbTest;
+import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.*;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
@@ -34,7 +34,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class RestServiceTest extends DbTest {
+public class RestServiceTest extends IntegationTest {
 
     private static final String AKTORID = "123";
     private static final String FNR = "4321";

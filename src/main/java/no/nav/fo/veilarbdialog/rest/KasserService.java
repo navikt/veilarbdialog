@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static no.nav.fo.veilarbdialog.config.ApplicationContext.VEILARB_KASSERING_IDENTER_PROPERTY;
+import static no.nav.fo.veilarbdialog.config.ApplicationConfig.VEILARB_KASSERING_IDENTER_PROPERTY;
 import static no.nav.sbl.util.EnvironmentUtils.getOptionalProperty;
 
 @Slf4j

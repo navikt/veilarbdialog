@@ -29,7 +29,7 @@ import static no.nav.sbl.util.EnvironmentUtils.setProperty;
 @EnableAspectJAutoProxy
 @ComponentScan("no.nav.fo.veilarbdialog")
 @Import({AbacContext.class, AktorConfig.class})
-public class ApplicationContext implements NaisApiApplication {
+public class ApplicationConfig implements NaisApiApplication {
 
     public static final String APPLICATION_NAME = "veilarbdialog";
     public static final String AKTOER_V2_URL_PROPERTY = "AKTOER_V2_ENDPOINTURL";

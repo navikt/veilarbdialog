@@ -12,8 +12,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
 import static javax.xml.bind.JAXBContext.newInstance;
-import static no.nav.fo.veilarbdialog.util.Utils.marshall;
-import static no.nav.fo.veilarbdialog.util.Utils.messageCreator;
+import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.marshall;
+import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.messageCreator;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component

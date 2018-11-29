@@ -16,7 +16,7 @@ import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
-public class DatabaseContext {
+public class DatabaseConfig {
 
     public static final String VEILARBDIALOGDATASOURCE_URL_PROPERTY_NAME = "VEILARBDIALOGDATASOURCE_URL";
     public static final String VEILARBDIALOGDATASOURCE_USERNAME_PROPERTY_NAME = "VEILARBDIALOGDATASOURCE_USERNAME";

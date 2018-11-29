@@ -4,7 +4,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import no.nav.fo.DbTest;
+import no.nav.fo.IntegationTest;
 
 import javax.inject.Inject;
 
@@ -13,7 +13,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Collections;
 
-public class MigrerDatabaseTest extends DbTest {
+public class MigrerDatabaseTest extends IntegationTest {
 
     @Inject
     private JdbcTemplate jdbcTemplate;
@@ -21,8 +21,8 @@ public class MigrerDatabaseTest extends DbTest {
     @BeforeClass
     public static void initContext() {
         initSpringContext(Collections.emptyList());
-    }    
-    
+    }
+
     @Test
     public void kanQueryeDatabasen() {
         assertThat(jdbcTemplate.queryForList("SELECT * FROM DIALOG"), empty());
