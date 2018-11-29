@@ -1,45 +1,27 @@
 package no.nav.fo.veilarbdialog.config;
 
 import lombok.val;
-import net.javacrumbs.shedlock.core.LockProvider;
 import no.nav.brukerdialog.security.oidc.OidcFeedAuthorizationModule;
-import no.nav.brukerdialog.security.oidc.OidcFeedOutInterceptor;
 import no.nav.fo.feed.common.FeedElement;
 import no.nav.fo.feed.consumer.FeedConsumer;
-import no.nav.fo.feed.consumer.FeedConsumerConfig;
 import no.nav.fo.feed.controller.FeedController;
 import no.nav.fo.feed.producer.FeedProducer;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogAktorDTO;
-import no.nav.fo.veilarbdialog.feed.KvpFeedConsumer;
-import no.nav.fo.veilarbdialog.feed.AvsluttetOppfolgingFeedConsumer;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.util.DateUtils;
 import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
 import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
-import javax.inject.Inject;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static no.nav.fo.veilarbdialog.config.ApplicationConfig.VEILARBOPPFOLGINGAPI_URL_PROPERTY;
-import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
-
 @Configuration
-@Import({
-        AvsluttetOppfolgingFeedConsumer.class,
-        KvpFeedConsumer.class
-})
 public class FeedConfig {
-
-    @Inject
-    private LockProvider lockProvider;
 
     @Bean
     public FeedController feedController(
@@ -62,43 +44,6 @@ public class FeedConfig {
                 .authorizationModule(new OidcFeedAuthorizationModule())
                 .maxPageSize(1000)
                 .build();
-    }
-
-    @Bean
-    public FeedConsumer<KvpDTO> kvpFeedDTOFeedConsumer(KvpFeedConsumer kvpFeedConsumer) {
-        FeedConsumerConfig<KvpDTO> config = new FeedConsumerConfig<>(
-                new FeedConsumerConfig.BaseConfig<>(
-                        KvpDTO.class,
-                        kvpFeedConsumer::sisteEndring,
-                        getRequiredProperty(VEILARBOPPFOLGINGAPI_URL_PROPERTY),
-                        KvpDTO.FEED_NAME
-                ),
-                new FeedConsumerConfig.CronPollingConfig("/10 * * * * ?")
-        )
-                .lockProvider(lockProvider, 10000)
-                .callback(kvpFeedConsumer::lesKvpFeed)
-                .interceptors(Collections.singletonList(new OidcFeedOutInterceptor()));
-
-        return new FeedConsumer<>(config);
-    }
-
-    @Bean
-    public FeedConsumer<AvsluttetOppfolgingFeedDTO> avsluttetOppfolgingFeedDTOFeedConsumer(
-            AvsluttetOppfolgingFeedConsumer avsluttetOppfolgingFeedConsumer) {
-        FeedConsumerConfig<AvsluttetOppfolgingFeedDTO> config = new FeedConsumerConfig<>(
-                new FeedConsumerConfig.BaseConfig<>(
-                        AvsluttetOppfolgingFeedDTO.class,
-                        avsluttetOppfolgingFeedConsumer::sisteEndring,
-                        getRequiredProperty(VEILARBOPPFOLGINGAPI_URL_PROPERTY),
-                        AvsluttetOppfolgingFeedDTO.FEED_NAME
-                ),
-                new FeedConsumerConfig.CronPollingConfig("/10 * * * * ?")
-        )
-                .lockProvider(lockProvider, 10000)
-                .callback(avsluttetOppfolgingFeedConsumer::lesAvsluttetOppfolgingFeed)
-                .interceptors(Collections.singletonList(new OidcFeedOutInterceptor()));
-
-        return new FeedConsumer<>(config);
     }
 
     private Stream<FeedElement<DialogAktorDTO>> getFeedElementStream(String tidspunkt, int pageSize, AppService appService) {

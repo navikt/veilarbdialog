@@ -39,6 +39,7 @@ import static no.nav.sbl.util.EnvironmentUtils.setProperty;
         CacheConfig.class,
         DatabaseConfig.class,
         FeedConfig.class,
+        FeedConsumerConfig.class,
         KvpClientConfig.class,
         MessageQueueConfig.class,
         ServiceConfig.class,
