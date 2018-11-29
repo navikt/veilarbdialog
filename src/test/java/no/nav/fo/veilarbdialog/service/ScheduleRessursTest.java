@@ -1,13 +1,12 @@
 package no.nav.fo.veilarbdialog.service;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
-
 import no.nav.fo.veilarbdialog.util.MessageQueueUtils;
-import org.junit.Test;
-
 import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.ObjectFactory;
 import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.StoppReVarsel;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertThat;
 
 public class ScheduleRessursTest {
 

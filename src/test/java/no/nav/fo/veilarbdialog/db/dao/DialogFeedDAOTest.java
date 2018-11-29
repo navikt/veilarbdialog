@@ -150,7 +150,7 @@ public class DialogFeedDAOTest extends IntegationTest {
         return dialogDAO.opprettDialog(nyDialog(aktorId));
     }
 
-    public void updateDialogAktorFor(String aktorId){
+    public void updateDialogAktorFor(String aktorId) {
         val dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
         dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
     }

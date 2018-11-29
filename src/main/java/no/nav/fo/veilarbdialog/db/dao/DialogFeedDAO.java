@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import lombok.val;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.sbl.jdbc.Database;
@@ -41,7 +41,7 @@ public class DialogFeedDAO {
     }
 
     public void updateDialogAktorFor(String aktorId, List<DialogData> dialoger) {
-        if(dialoger.isEmpty()) {
+        if (dialoger.isEmpty()) {
             log.info("Finner ingen dialoger for aktør [{}]. Oppretter ikke innslag i DIALOG_AKTOR", aktorId);
             return;
         }

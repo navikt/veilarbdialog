@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog.util;
 
-
 import lombok.SneakyThrows;
 import org.springframework.jms.core.MessageCreator;
 

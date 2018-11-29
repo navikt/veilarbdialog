@@ -39,7 +39,6 @@ public class VarselDAOTest extends IntegationTest {
         initSpringContext(asList(DialogDAO.class, DialogStatusService.class, VarselDAO.class, StatusDAO.class, DataVarehusDAO.class));
     }
 
-
     private DialogData opprettNyDialog(String aktorId) {
         return dialogDAO.opprettDialog(nyDialog(aktorId));
     }

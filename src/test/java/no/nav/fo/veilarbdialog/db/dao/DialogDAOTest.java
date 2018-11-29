@@ -2,13 +2,13 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.val;
 import no.nav.fo.IntegationTest;
-import no.nav.fo.veilarbdialog.domain.*;
-
+import no.nav.fo.veilarbdialog.domain.AvsenderType;
+import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.inject.Inject;
-
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;

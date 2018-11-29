@@ -14,12 +14,10 @@ import org.springframework.jms.core.JmsTemplate;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
-
 import java.util.UUID;
 
 import static no.nav.fo.veilarbdialog.config.ApplicationConfig.*;
 import static no.nav.sbl.util.EnvironmentUtils.*;
-
 
 @Configuration
 @EnableJms
@@ -44,7 +42,6 @@ public class MessageQueueConfig {
     public Pingable oppgaveHenvendelseQueuePingable(JmsTemplate oppgaveHenvendelseQueue) {
         return queuePingable(oppgaveHenvendelseQueue, "oppgaveHenvendelseQueue", "Brukes for å sende §8 varsler til bruker.");
     }
-
 
     private Pingable queuePingable(JmsTemplate queue, String queueName, String beskrivelse) {
         final PingMetadata metadata = new PingMetadata(

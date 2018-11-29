@@ -1,12 +1,10 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
+import no.nav.fo.IntegationTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import no.nav.fo.IntegationTest;
-
 import javax.inject.Inject;
-
 import java.util.Arrays;
 import java.util.Date;
 

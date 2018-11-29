@@ -19,8 +19,7 @@ public class AvsluttetOppfolgingFeedConsumer {
     private final FeedMetaDataDAO feedMetaDataDAO;
 
     @Inject
-    public AvsluttetOppfolgingFeedConsumer(AppService appService,
-                                           FeedMetaDataDAO feedMetaDataDAO) {
+    public AvsluttetOppfolgingFeedConsumer(AppService appService, FeedMetaDataDAO feedMetaDataDAO) {
         this.appService = appService;
         this.feedMetaDataDAO = feedMetaDataDAO;
     }
@@ -41,7 +40,7 @@ public class AvsluttetOppfolgingFeedConsumer {
         // vi altså IKKE få oppdatert siste id. Dermed vil vi lese feeden på nytt fra siste kjente id og potensielt
         // prosessere noen elementer flere ganger. Dette skal gå bra, siden koden som setter dialoger til historisk
         // er idempotent
-        if(lastSuccessfulId != null) {
+        if (lastSuccessfulId != null) {
             feedMetaDataDAO.oppdaterSisteLest(lastSuccessfulId);
         }
     }

@@ -50,7 +50,6 @@ public class DialogRessursTest extends IntegationTest {
 
     static class ContextConfig {
 
-
         @Bean
         public AktorService aktorService() {
             AktorService aktorService = mock(AktorService.class);

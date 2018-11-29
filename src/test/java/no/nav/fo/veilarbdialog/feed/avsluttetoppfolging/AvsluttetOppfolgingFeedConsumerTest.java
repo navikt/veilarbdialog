@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.feed.avsluttetoppfolging;
 
 import no.nav.fo.veilarbdialog.db.dao.FeedMetaDataDAO;
+import no.nav.fo.veilarbdialog.feed.AvsluttetOppfolgingFeedConsumer;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
 import org.junit.Test;
@@ -8,8 +9,6 @@ import org.junit.Test;
 import java.util.Date;
 import java.util.List;
 
-
-import no.nav.fo.veilarbdialog.feed.AvsluttetOppfolgingFeedConsumer;
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -19,7 +18,7 @@ public class AvsluttetOppfolgingFeedConsumerTest {
     private FeedMetaDataDAO dao = mock(FeedMetaDataDAO.class);
     private AppService appService = mock(AppService.class);
 
-    @Test(expected=RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void skalIkkeOppdatereSisteIdHvisException() {
         doThrow(new RuntimeException("Mock exception")).when(appService).settDialogerTilHistoriske(null, null);
         List<AvsluttetOppfolgingFeedDTO> elements = asList(feedElement(new Date(), null, null));

@@ -2,12 +2,10 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
-
 import java.util.Arrays;
 import java.util.Date;
 
@@ -169,7 +167,7 @@ class StatusDAOTest extends IntegationTest {
 
         Date elsteUlesteForVeileder = uniktTidspunkt();
         Date venterPaNavSiden = uniktTidspunkt();
-        statusDAO.setNyMeldingFraBruker(dialogData.getId(),elsteUlesteForVeileder, venterPaNavSiden);
+        statusDAO.setNyMeldingFraBruker(dialogData.getId(), elsteUlesteForVeileder, venterPaNavSiden);
         Date after = uniktTidspunkt();
 
         DialogData nyMeldingFraBruker = dialogDAO.hentDialog(dialogData.getId());

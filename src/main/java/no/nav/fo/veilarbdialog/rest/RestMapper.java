@@ -32,8 +32,7 @@ class RestMapper {
         Optional<HenvendelseData> sisteHenvendelse = henvendelser.stream()
                 .max(comparing(HenvendelseData::getSendt));
 
-
-        DialogDTO dto =  new DialogDTO()
+        DialogDTO dto = new DialogDTO()
                 .setId(Long.toString(dialogData.getId()))
                 .setOverskrift(dialogData.getOverskrift())
                 .setAktivitetId(dialogData.getAktivitetId())
@@ -54,17 +53,16 @@ class RestMapper {
                 )
                 .setSisteTekst(sisteHenvendelse
                         .map(HenvendelseData::getTekst)
-                        .orElse(null))
-                ;
+                        .orElse(null));
 
-        if(erEksternBruker()){
+        if (erEksternBruker()) {
             dto.setLest(dialogData.erLestAvBruker())
                     .setLestAvBrukerTidspunkt(null)
                     .setErLestAvBruker(false)
                     .setFerdigBehandlet(true);
 
 
-        } else if (erInternBruker()){
+        } else if (erInternBruker()) {
             dto.setLest(dialogData.erLestAvVeileder())
                     .setLestAvBrukerTidspunkt(dialogData.getLestAvBrukerTidspunkt())
                     .setErLestAvBruker(dialogData.erLestAvBruker())
@@ -82,9 +80,9 @@ class RestMapper {
                 .setSendt(henvendelseData.sendt)
                 .setTekst(henvendelseData.tekst);
 
-        if(erEksternBruker()){
+        if (erEksternBruker()) {
             dto.setLest(henvendelseData.lestAvBruker);
-        } else if (erInternBruker()){
+        } else if (erInternBruker()) {
             dto.setLest(henvendelseData.lestAvVeileder)
                     .setAvsenderId(henvendelseData.avsenderId);
         }

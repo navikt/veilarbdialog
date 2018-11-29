@@ -20,13 +20,12 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static no.nav.apiapp.util.StringUtils.notNullOrEmpty;
+import static no.nav.apiapp.util.StringUtils.of;
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erInternBruker;
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogBruker;
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeileder;
-import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
-import static no.nav.fo.veilarbdialog.util.StringUtils.of;
-
 
 @Component
 @Import({

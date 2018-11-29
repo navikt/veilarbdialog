@@ -111,6 +111,7 @@ public class AppService {
             throw new RuntimeException("Kan ikke identifisere persontype");
         }
     }
+
     public String hentFnrForPerson(Person person) {
         if (person instanceof Person.Fnr) {
             return person.get();

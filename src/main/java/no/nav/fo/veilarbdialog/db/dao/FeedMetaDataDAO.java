@@ -1,12 +1,10 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-
 import no.nav.sbl.jdbc.Database;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import java.util.Date;
-
 
 @Component
 public class FeedMetaDataDAO {
@@ -27,7 +25,7 @@ public class FeedMetaDataDAO {
 
     public void oppdaterSisteLest(Date date) {
         database.update(
-                "UPDATE FEED_METADATA SET tidspunkt_siste_endring = ?", 
+                "UPDATE FEED_METADATA SET tidspunkt_siste_endring = ?",
                 date
         );
     }
