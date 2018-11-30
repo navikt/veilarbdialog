@@ -6,7 +6,6 @@ import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import javax.ws.rs.*;
 import java.util.List;
 
-
 @Path("/dialog")
 public interface DialogController {
 

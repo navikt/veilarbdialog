@@ -1,18 +1,17 @@
 package no.nav.fo.veilarbdialog.service;
 
+import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.AktoerId;
+import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.ObjectFactory;
+import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.Parameter;
+import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.VarselMedHandling;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
-
-import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.*;
 
 import javax.inject.Inject;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 
-import static javax.xml.bind.JAXBContext.newInstance;
-import static no.nav.fo.veilarbdialog.service.Utils.marshall;
-import static no.nav.fo.veilarbdialog.service.Utils.messageCreator;
+import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.*;
 
 @Component
 public class VarselMedHandlingService {
@@ -23,17 +22,7 @@ public class VarselMedHandlingService {
     @Inject
     private JmsTemplate varselMedHandlingQueue;
 
-    private static final JAXBContext VARSEL_MED_HANDLING;
-
-    static {
-        try {
-            VARSEL_MED_HANDLING = newInstance(
-                    ObjectFactory.class
-            );
-        } catch (JAXBException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private static final JAXBContext VARSEL_MED_HANDLING = jaxbContext(ObjectFactory.class);
 
     public void send(String aktorId, String varselbestillingId) {
         AktoerId motaker = new AktoerId();
@@ -51,7 +40,6 @@ public class VarselMedHandlingService {
         varselMedHandling
                 .getParameterListe()
                 .add(parameter);
-
 
         JAXBElement<VarselMedHandling> melding = new ObjectFactory().createVarselMedHandling(varselMedHandling);
 

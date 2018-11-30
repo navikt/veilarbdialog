@@ -1,24 +1,26 @@
 package no.nav.fo.veilarbdialog.feed.avsluttetkvp;
 
-import static java.util.Arrays.asList;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import no.nav.fo.veilarbdialog.db.dao.KvpFeedMetadataDAO;
+import no.nav.fo.veilarbdialog.feed.KvpFeedConsumer;
+import no.nav.fo.veilarbdialog.service.AppService;
+import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
+import org.junit.Test;
 
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Test;
-
-import no.nav.fo.veilarbdialog.db.dao.KvpFeedMetadataDAO;
-import no.nav.fo.veilarbdialog.service.AppService;
-import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
+import static java.util.Arrays.asList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 public class KvpFeedConsumerTest {
 
     private KvpFeedMetadataDAO dao = mock(KvpFeedMetadataDAO.class);
     private AppService appService = mock(AppService.class);
 
-    @Test(expected=RuntimeException.class)
+    @Test(expected = RuntimeException.class)
     public void skal_ikke_oppdatere_siste_feed_id_hvis_behandling_av_innlesing_feiler() {
         doThrow(new RuntimeException("Mock exception")).when(appService).settKontorsperredeDialogerTilHistoriske(anyString(), any(Date.class));
         List<KvpDTO> elements = asList(feedElement(1, "123", new Date()));

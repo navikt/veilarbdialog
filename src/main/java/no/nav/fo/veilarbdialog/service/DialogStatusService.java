@@ -30,7 +30,7 @@ public class DialogStatusService {
     }
 
     public DialogData nyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
-        if(henvendelseData.getSendt() == null){
+        if (henvendelseData.getSendt() == null) {
             throw new UnsupportedOperationException("sendt tidspunkt kan ikke være null");
         }
         if (henvendelseData.fraBruker()) {
@@ -57,7 +57,7 @@ public class DialogStatusService {
         }
         if (harAktivtparagraf8Varsel(dialogData)) {
             int antall = varselDAO.hentAntallAktiveDialogerForVarsel(dialogData.getParagraf8VarselUUID());
-            if(antall == 1) {
+            if (antall == 1) {
                 varselDAO.revarslingSkalAvsluttes(dialogData.getParagraf8VarselUUID());
             }
         }
@@ -73,32 +73,32 @@ public class DialogStatusService {
     }
 
     public DialogData oppdaterVenterPaNavSiden(DialogData dialogData, DialogStatus dialogStatus) {
-        if(dialogData.erFerdigbehandlet() == dialogStatus.ferdigbehandlet){
+        if (dialogData.erFerdigbehandlet() == dialogStatus.ferdigbehandlet) {
             return dialogData;
         }
 
         if (dialogStatus.ferdigbehandlet) {
             statusDAO.setVenterPaNavTilNull(dialogData.getId());
-            dataVarehusDAO.insertEvent(dialogData,  DatavarehusEvent.BESVART_AV_NAV);
+            dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_NAV);
         } else {
             statusDAO.setVenterPaNavTilNaa(dialogData.getId());
-            dataVarehusDAO.insertEvent(dialogData,  DatavarehusEvent.VENTER_PAA_NAV);
+            dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_NAV);
         }
         FunksjonelleMetrikker.oppdaterFerdigbehandletTidspunkt(dialogData, dialogStatus);
         return dialogDAO.hentDialog(dialogData.getId());
     }
 
     public DialogData oppdaterVenterPaSvarFraBrukerSiden(DialogData dialogData, DialogStatus dialogStatus) {
-        if(dialogData.venterPaSvar() == dialogStatus.venterPaSvar) {
+        if (dialogData.venterPaSvar() == dialogStatus.venterPaSvar) {
             return dialogData;
         }
 
         if (dialogStatus.venterPaSvar) {
             statusDAO.setVenterPaSvarFraBrukerTilNaa(dialogStatus.getDialogId());
-            dataVarehusDAO.insertEvent(dialogData,  DatavarehusEvent.VENTER_PAA_BRUKER);
+            dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_BRUKER);
         } else {
             statusDAO.setVenterPaSvarFraBrukerTilNull(dialogStatus.getDialogId());
-            dataVarehusDAO.insertEvent(dialogData,  DatavarehusEvent.BESVART_AV_BRUKER);
+            dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
         }
         FunksjonelleMetrikker.oppdaterVenterSvar(dialogStatus);
         return dialogDAO.hentDialog(dialogStatus.getDialogId());
@@ -106,10 +106,10 @@ public class DialogStatusService {
 
     public DialogData settDialogTilHistorisk(DialogData dialogData) {
         statusDAO.setHistorisk(dialogData.getId());
-        if(!dialogData.erFerdigbehandlet()) {
+        if (!dialogData.erFerdigbehandlet()) {
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_NAV);
         }
-        if(dialogData.venterPaSvar()) {
+        if (dialogData.venterPaSvar()) {
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
         }
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.SATT_TIL_HISTORISK);
@@ -138,11 +138,11 @@ public class DialogStatusService {
         Date eldsteUlesteForVeileder = getEldsteUlesteForVeileder(dialogData, henvendelseData);
         Date venterPaNavSiden = dialogData.getVenterPaNavSiden();
 
-        if(dialogData.erFerdigbehandlet()) {
+        if (dialogData.erFerdigbehandlet()) {
             venterPaNavSiden = henvendelseData.getSendt();
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_NAV);
         }
-        if(dialogData.venterPaSvar()) {
+        if (dialogData.venterPaSvar()) {
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
         }
 

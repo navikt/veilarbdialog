@@ -7,8 +7,8 @@ import no.nav.metrics.MetricsFactory;
 
 import java.util.Date;
 
+import static no.nav.apiapp.util.StringUtils.notNullOrEmpty;
 import static no.nav.fo.veilarbdialog.util.DateUtils.nullSafeMsSiden;
-import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
 
 public class FunksjonelleMetrikker {
 

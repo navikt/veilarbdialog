@@ -1,14 +1,12 @@
-package no.nav.fo.veilarbdialog.feed.avsluttetkvp;
-
-import java.util.List;
-
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Component;
+package no.nav.fo.veilarbdialog.feed;
 
 import no.nav.fo.veilarbdialog.db.dao.KvpFeedMetadataDAO;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.List;
 
 @Component
 public class KvpFeedConsumer {
@@ -18,30 +16,29 @@ public class KvpFeedConsumer {
     private final KvpFeedMetadataDAO kvpFeedConsumerDAO;
 
     @Inject
-    public KvpFeedConsumer(AppService appService,
-            KvpFeedMetadataDAO feedConsumerDAO) {
+    public KvpFeedConsumer(AppService appService, KvpFeedMetadataDAO feedConsumerDAO) {
         this.appService = appService;
         this.kvpFeedConsumerDAO = feedConsumerDAO;
     }
 
-    String sisteEndring() {
+    public String sisteEndring() {
         return String.valueOf(kvpFeedConsumerDAO.hentSisteId());
     }
 
-    void lesKvpFeed(String lastEntryId, List<KvpDTO> elements) {
+    public void lesKvpFeed(String lastEntryId, List<KvpDTO> elements) {
         long lastSuccessfulId = -1;
         for (KvpDTO element : elements) {
-            if(element.getAvsluttetDato() != null) {
+            if (element.getAvsluttetDato() != null) {
                 appService.settKontorsperredeDialogerTilHistoriske(element.getAktorId(), element.getAvsluttetDato());
             }
             lastSuccessfulId = element.getSerial();
         }
 
-        // Håndterer ikke exceptions her. Dersom en exception oppstår i løkkeprosesseringen over, vil 
+        // Håndterer ikke exceptions her. Dersom en exception oppstår i løkkeprosesseringen over, vil
         // vi altså IKKE få oppdatert siste id. Dermed vil vi lese feeden på nytt fra siste kjente id og potensielt
         // prosessere noen elementer flere ganger. Dette skal gå bra, siden koden som setter dialoger til historisk
         // er idempotent
-        if(lastSuccessfulId > -1) {
+        if (lastSuccessfulId > -1) {
             kvpFeedConsumerDAO.oppdaterSisteFeedId(lastSuccessfulId);
         }
     }

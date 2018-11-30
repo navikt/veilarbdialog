@@ -1,10 +1,9 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import javax.inject.Inject;
-
+import no.nav.sbl.jdbc.Database;
 import org.springframework.stereotype.Component;
 
-import no.nav.sbl.jdbc.Database;
+import javax.inject.Inject;
 
 @Component
 public class KvpFeedMetadataDAO {
@@ -26,7 +25,7 @@ public class KvpFeedMetadataDAO {
 
     public void oppdaterSisteFeedId(long id) {
         database.update(
-                "UPDATE KVP_FEED_METADATA SET SISTE_ID = ?", 
+                "UPDATE KVP_FEED_METADATA SET SISTE_ID = ?",
                 id
         );
     }

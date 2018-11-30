@@ -15,11 +15,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 
 import static java.lang.System.setProperty;
-import static no.nav.fo.veilarbdialog.db.DatabaseContext.*;
+import static no.nav.fo.veilarbdialog.config.DatabaseConfig.*;
 
 @Configuration
 @EnableTransactionManagement
-public class DatabaseTestContext {
+public class TestDatabaseConfig {
 
     static {
         setProperty(VEILARBDIALOGDATASOURCE_URL_PROPERTY_NAME, inMemoryUrl());

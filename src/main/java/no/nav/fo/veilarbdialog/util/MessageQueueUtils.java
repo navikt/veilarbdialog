@@ -1,6 +1,6 @@
-package no.nav.fo.veilarbdialog.service;
+package no.nav.fo.veilarbdialog.util;
 
-
+import lombok.SneakyThrows;
 import org.springframework.jms.core.MessageCreator;
 
 import javax.jms.TextMessage;
@@ -11,12 +11,13 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.StringWriter;
 
 import static java.lang.Boolean.TRUE;
+import static javax.xml.bind.JAXBContext.newInstance;
 import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
 import static javax.xml.bind.Marshaller.JAXB_FRAGMENT;
 
-public class Utils {
+public class MessageQueueUtils {
 
-    static MessageCreator messageCreator(final String hendelse, String uuid) {
+    public static MessageCreator messageCreator(final String hendelse, String uuid) {
         return session -> {
             TextMessage msg = session.createTextMessage(hendelse);
             msg.setStringProperty("callId", uuid);
@@ -24,7 +25,7 @@ public class Utils {
         };
     }
 
-    static String marshall(Object element, JAXBContext jaxbContext) {
+    public static String marshall(Object element, JAXBContext jaxbContext) {
         try {
             StringWriter writer = new StringWriter();
             Marshaller marshaller = jaxbContext.createMarshaller();
@@ -35,6 +36,11 @@ public class Utils {
         } catch (JAXBException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @SneakyThrows
+    public static JAXBContext jaxbContext(Class<?>... classes) {
+        return newInstance(classes);
     }
 
 }

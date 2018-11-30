@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class EnumUtils {
 
-    public static String getName(Enum<?> anEnum){
+    public static String getName(Enum<?> anEnum) {
         return anEnum != null ? anEnum.name() : null;
     }
 

@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.val;
-import no.nav.fo.DbTest;
+import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import org.junit.BeforeClass;
@@ -17,7 +17,7 @@ import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static no.nav.fo.veilarbdialog.domain.DialogStatus.builder;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DialogFeedDAOTest extends DbTest {
+public class DialogFeedDAOTest extends IntegationTest {
     private static final String AKTOR_ID = "1234";
 
     @Inject
@@ -150,7 +150,7 @@ public class DialogFeedDAOTest extends DbTest {
         return dialogDAO.opprettDialog(nyDialog(aktorId));
     }
 
-    public void updateDialogAktorFor(String aktorId){
+    public void updateDialogAktorFor(String aktorId) {
         val dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
         dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
     }

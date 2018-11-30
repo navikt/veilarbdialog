@@ -1,17 +1,15 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import lombok.*;
-import no.nav.fo.DbTest;
+import lombok.Data;
+import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.sbl.sql.SqlUtils;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.inject.Inject;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -21,7 +19,7 @@ import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DataVarehusDAOTest extends DbTest {
+class DataVarehusDAOTest extends IntegationTest {
 
     @Inject
     private DataVarehusDAO dataVarehusDAO;

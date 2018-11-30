@@ -13,7 +13,7 @@ public class KontorsperreFilter {
 
     @Inject
     PepClient pepClient;
-    
+
     @SneakyThrows
     public boolean harTilgang(String enhet) {
         return nullOrEmpty(enhet) || pepClient.harTilgangTilEnhet(enhet);

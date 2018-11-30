@@ -47,20 +47,20 @@ public class VarselDAO {
 
     public void setVarselUUIDForParagraf8Dialoger(String aktorId, String varselUUID) {
         database.update("UPDATE DIALOG " +
-                "SET paragraf8_varsel_uuid = ? " +
-                "WHERE paragraf8_varsel_uuid IS NULL " +
-                "AND ulestParagraf8Varsel = 1 " +
-                "AND aktor_id = ?",
+                        "SET paragraf8_varsel_uuid = ? " +
+                        "WHERE paragraf8_varsel_uuid IS NULL " +
+                        "AND ulestParagraf8Varsel = 1 " +
+                        "AND aktor_id = ?",
                 varselUUID,
                 aktorId);
     }
 
     public boolean harUlesteUvarsledeParagraf8Henvendelser(String aktorId) {
         List<String> aktors = database.query("SELECT aktor_id " +
-                "FROM DIALOG " +
-                "where ulestParagraf8Varsel = 1 " +
-                "and paragraf8_varsel_uuid IS NULL " +
-                "and aktor_id = ?",
+                        "FROM DIALOG " +
+                        "where ulestParagraf8Varsel = 1 " +
+                        "and paragraf8_varsel_uuid IS NULL " +
+                        "and aktor_id = ?",
                 (rs) -> rs.getString("aktor_id"),
                 aktorId);
 
@@ -77,7 +77,7 @@ public class VarselDAO {
     }
 
     public void insertParagraf8Varsel(String aktorid, String varselUuid) {
-        database.update("INSERT INTO PARAGRAF8VARSEL (uuid, aktorid, sendt) VALUES (?, ?, "+ dateProvider.getNow() + ")",
+        database.update("INSERT INTO PARAGRAF8VARSEL (uuid, aktorid, sendt) VALUES (?, ?, " + dateProvider.getNow() + ")",
                 varselUuid, aktorid);
     }
 

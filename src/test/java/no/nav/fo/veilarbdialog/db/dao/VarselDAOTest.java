@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.val;
-import no.nav.fo.DbTest;
+import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
@@ -20,7 +20,7 @@ import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-public class VarselDAOTest extends DbTest {
+public class VarselDAOTest extends IntegationTest {
 
     private static final String AKTOR_ID = "1234";
     private static final long TI_MINUTTER = 1000 * 60 * 10;
@@ -38,7 +38,6 @@ public class VarselDAOTest extends DbTest {
     public static void addSpringBeans() {
         initSpringContext(asList(DialogDAO.class, DialogStatusService.class, VarselDAO.class, StatusDAO.class, DataVarehusDAO.class));
     }
-    
 
     private DialogData opprettNyDialog(String aktorId) {
         return dialogDAO.opprettDialog(nyDialog(aktorId));
@@ -138,7 +137,7 @@ public class VarselDAOTest extends DbTest {
     public void sqlForUthentingAvUvarsledeParagraf8SkalIkkeHaSyntaksFeil() {
         varselDAO.harUlesteUvarsledeParagraf8Henvendelser("123");
     }
-    
+
     @Test
     public void sqlForHentAntallAktiveDialogerForVarselSkalIkkeHaSyntaksFeil() {
         varselDAO.hentAntallAktiveDialogerForVarsel("uuid");

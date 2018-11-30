@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.feed;
+package no.nav.fo.veilarbdialog.config;
 
 import lombok.val;
 import no.nav.brukerdialog.security.oidc.OidcFeedAuthorizationModule;
@@ -12,7 +12,6 @@ import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.util.DateUtils;
 import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
 import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

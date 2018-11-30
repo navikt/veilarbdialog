@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
+import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
@@ -8,44 +9,25 @@ import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.StoppReVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarslingstyper;
 import no.nav.sbl.featuretoggle.unleash.UnleashService;
-import org.slf4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
 import java.time.Instant;
 import java.util.List;
 
 import static java.util.UUID.randomUUID;
-import static javax.xml.bind.JAXBContext.newInstance;
-import static org.slf4j.LoggerFactory.getLogger;
+import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.jaxbContext;
 
-
+@Slf4j
 @Component
-public class ScheduleService {
-
-    private static final Logger LOG = getLogger(ScheduleService.class);
+public class ScheduleRessurs {
 
     private static final long GRACE_PERIODE = 30 * 60 * 1000;
 
-    static final JAXBContext VARSEL_CONTEXT;
-    static final JAXBContext STOPP_VARSEL_CONTEXT;
-
-    static {
-        try {
-            VARSEL_CONTEXT = newInstance(
-                    XMLVarsel.class,
-                    XMLVarslingstyper.class
-            );
-            STOPP_VARSEL_CONTEXT = newInstance(
-                    StoppReVarsel.class
-            );
-        } catch (JAXBException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    static final JAXBContext VARSEL_CONTEXT = jaxbContext(XMLVarsel.class, XMLVarslingstyper.class);
+    static final JAXBContext STOPP_VARSEL_CONTEXT = jaxbContext(StoppReVarsel.class);
 
     @Inject
     private VarselDAO varselDAO;
@@ -76,19 +58,19 @@ public class ScheduleService {
 
     private void sjekkForVarselWithLock() {
         List<String> varselUUIDer = varselDAO.hentRevarslerSomSkalStoppes();
-        LOG.info("Stopper {} revarsler", varselUUIDer.size());
+        log.info("Stopper {} revarsler", varselUUIDer.size());
         varselUUIDer.forEach(stopRevarslingService::stopRevarsel);
         FunksjonelleMetrikker.stoppetRevarsling(varselUUIDer.size());
 
         List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(GRACE_PERIODE);
-        LOG.info("Varsler {} brukere", aktorer.size());
+        log.info("Varsler {} brukere", aktorer.size());
         long paragraf8Varsler = aktorer
                 .stream()
                 .map(this::sendVarsel)
                 .filter(varselType -> varselType == VarselType.PARAGRAF8)
                 .count();
 
-        LOG.info("Varsler sendt, {} paragraf8", paragraf8Varsler);
+        log.info("Varsler sendt, {} paragraf8", paragraf8Varsler);
         FunksjonelleMetrikker.nyeVarsler(aktorer.size(), paragraf8Varsler);
     }
 

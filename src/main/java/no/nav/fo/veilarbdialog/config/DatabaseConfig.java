@@ -1,9 +1,12 @@
-package no.nav.fo.veilarbdialog.db;
+package no.nav.fo.veilarbdialog.config;
 
+import no.nav.fo.veilarbdialog.db.DatabaseHelsesjekk;
+import no.nav.fo.veilarbdialog.db.dao.*;
 import no.nav.sbl.jdbc.DataSourceFactory;
 import no.nav.sbl.jdbc.Database;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -16,7 +19,18 @@ import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
-public class DatabaseContext {
+@Import({
+        DataVarehusDAO.class,
+        DateProvider.class,
+        DialogDAO.class,
+        DialogFeedDAO.class,
+        FeedMetaDataDAO.class,
+        KvpFeedMetadataDAO.class,
+        StatusDAO.class,
+        VarselDAO.class,
+        DatabaseHelsesjekk.class
+})
+public class DatabaseConfig {
 
     public static final String VEILARBDIALOGDATASOURCE_URL_PROPERTY_NAME = "VEILARBDIALOGDATASOURCE_URL";
     public static final String VEILARBDIALOGDATASOURCE_USERNAME_PROPERTY_NAME = "VEILARBDIALOGDATASOURCE_USERNAME";
@@ -31,7 +45,7 @@ public class DatabaseContext {
                 .build();
     }
 
-    @Bean(name = "transactionManager")
+    @Bean
     public PlatformTransactionManager transactionManager(DataSource ds) {
         return new DataSourceTransactionManager(ds);
     }

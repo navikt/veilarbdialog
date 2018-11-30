@@ -1,13 +1,13 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.EgenskapType;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
 import no.nav.sbl.jdbc.Database;
-import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,13 +21,11 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static no.nav.fo.veilarbdialog.db.dao.DBKonstanter.*;
-import static org.slf4j.LoggerFactory.getLogger;
 
+@Slf4j
 @Component
 @Transactional
 public class DialogDAO {
-
-    private static final Logger LOG = getLogger(DialogDAO.class);
 
     private static final String SELECT_DIALOG = "SELECT * FROM DIALOG d ";
 
@@ -95,6 +93,7 @@ public class DialogDAO {
     public int kasserHenvendelse(long id) {
         return database.update("UPDATE HENVENDELSE SET TEKST = 'Kassert av NAV' WHERE HENVENDELSE_ID = ?", id);
     }
+
     public int kasserDialog(long id) {
         return database.update("UPDATE DIALOG SET OVERSKRIFT = 'Kassert av NAV' WHERE DIALOG_ID = ?", id);
     }
@@ -131,13 +130,13 @@ public class DialogDAO {
         dialogData.getEgenskaper()
                 .forEach(egenskapType -> updateDialogEgenskap(egenskapType, dialogId));
 
-        LOG.info("opprettet dialog id:{} data:{}", dialogId, dialogData);
+        log.info("opprettet dialog id:{} data:{}", dialogId, dialogData);
         return hentDialog(dialogId);
     }
 
     public void updateDialogEgenskap(EgenskapType type, long dialogId) {
         database.update("INSERT INTO DIALOG_EGENSKAP(DIALOG_ID, DIALOG_EGENSKAP_TYPE_KODE) VALUES (?, ?)",
-                        dialogId, type.toString());
+                dialogId, type.toString());
     }
 
     public HenvendelseData opprettHenvendelse(HenvendelseData henvendelseData) {
@@ -160,7 +159,7 @@ public class DialogDAO {
                 EnumUtils.getName(henvendelseData.avsenderType)
         );
 
-        LOG.info("opprettet henvendelse id:{} data:{}", henvendelseId, henvendelseData);
+        log.info("opprettet henvendelse id:{} data:{}", henvendelseId, henvendelseData);
         return hentHenvendelse(henvendelseId);
     }
 

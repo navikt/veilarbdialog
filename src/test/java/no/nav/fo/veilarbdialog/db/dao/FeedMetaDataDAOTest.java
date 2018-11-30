@@ -1,18 +1,16 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
+import no.nav.fo.IntegationTest;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import no.nav.fo.DbTest;
-
 import javax.inject.Inject;
-
 import java.util.Arrays;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FeedMetaDataDAOTest extends DbTest {
+public class FeedMetaDataDAOTest extends IntegationTest {
 
     @Inject
     private FeedMetaDataDAO feedMetaDataDAO;

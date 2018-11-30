@@ -19,12 +19,12 @@ public class AutorisasjonService {
         }
     }
 
-    public static boolean erEksternBruker(){
+    public static boolean erEksternBruker() {
         IdentType type = SubjectHandler.getIdentType().orElse(null);
         return IdentType.EksternBruker.equals(type);
     }
 
-    public static boolean erInternBruker(){
+    public static boolean erInternBruker() {
         IdentType type = SubjectHandler.getIdentType().orElse(null);
         return IdentType.InternBruker.equals(type);
     }

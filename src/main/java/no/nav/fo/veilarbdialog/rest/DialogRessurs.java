@@ -7,6 +7,7 @@ import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.AutorisasjonService;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -19,16 +20,19 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static no.nav.apiapp.util.StringUtils.notNullOrEmpty;
+import static no.nav.apiapp.util.StringUtils.of;
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erInternBruker;
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogBruker;
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeileder;
-import static no.nav.fo.veilarbdialog.util.StringUtils.notNullOrEmpty;
-import static no.nav.fo.veilarbdialog.util.StringUtils.of;
-
 
 @Component
-public class RestService implements DialogController, VeilederDialogController {
+@Import({
+        RestMapper.class,
+        KontorsperreFilter.class
+})
+public class DialogRessurs implements DialogController, VeilederDialogController {
 
     @Inject
     private AppService appService;
