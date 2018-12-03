@@ -18,7 +18,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -85,16 +84,9 @@ public class ApplicationConfig implements NaisApiApplication {
     @Inject
     private DataSource dataSource;
 
-    @Inject
-    private JdbcTemplate jdbcTemplate;
-
     @Override
     public void startup(ServletContext servletContext) {
         setProperty(DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY, "srvveilarbportefolje", PUBLIC);
-
-        jdbcTemplate.update("UPDATE \"schema_version\" SET \"checksum\"=153834897 WHERE \"version\" = '1.12'");
-        jdbcTemplate.update("UPDATE \"schema_version\" SET \"checksum\"=1010501922 WHERE \"version\" = '1.25'");
-
         Flyway flyway = new Flyway();
         flyway.setDataSource(dataSource);
         flyway.migrate();
