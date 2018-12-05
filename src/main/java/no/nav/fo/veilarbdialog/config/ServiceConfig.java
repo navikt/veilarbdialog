@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.config;
 
+import no.nav.fo.veilarbdialog.rest.KasserRessurs;
 import no.nav.fo.veilarbdialog.service.*;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -12,7 +13,8 @@ import org.springframework.context.annotation.Import;
         OppgaveService.class,
         ServiceMeldingService.class,
         StopRevarslingService.class,
-        VarselMedHandlingService.class
+        VarselMedHandlingService.class,
+        KasserRessurs.class,
 })
 public class ServiceConfig {
 }
