@@ -8,7 +8,6 @@ import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.StoppReVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarslingstyper;
-import no.nav.sbl.featuretoggle.unleash.UnleashService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -45,9 +44,6 @@ public class ScheduleRessurs {
     private VarselMedHandlingService varselMedHandlingService;
 
     @Inject
-    private UnleashService unleashService;
-
-    @Inject
     private LockingTaskExecutor lockingTaskExecutor;
 
     @Scheduled(cron = "0 0/2 * * * *")
@@ -77,8 +73,7 @@ public class ScheduleRessurs {
 
     private VarselType sendVarsel(String aktorId) {
         boolean paragraf8 = varselDAO.harUlesteUvarsledeParagraf8Henvendelser(aktorId);
-        boolean enabled = unleashService.isEnabled("veilarbdialog-send-paragraf8");
-        if (paragraf8 && enabled) {
+        if (paragraf8) {
             String varselBestillingId = randomUUID().toString();
 
             varselMedHandlingService.send(aktorId, varselBestillingId);
