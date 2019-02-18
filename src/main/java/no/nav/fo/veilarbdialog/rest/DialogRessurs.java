@@ -9,6 +9,7 @@ import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.AutorisasjonService;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -28,6 +29,7 @@ import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogBruker;
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeileder;
 
 @Component
+@Transactional
 @Import({
         RestMapper.class,
         KontorsperreFilter.class
@@ -100,7 +102,6 @@ public class DialogRessurs implements DialogController, VeilederDialogController
 
     }
 
-    @Override
     public DialogDTO oppdaterVenterPaSvar(String dialogId, boolean venter) {
         autorisasjonService.skalVereInternBruker();
 
