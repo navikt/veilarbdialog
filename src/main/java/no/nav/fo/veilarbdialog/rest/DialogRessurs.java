@@ -102,6 +102,7 @@ public class DialogRessurs implements DialogController, VeilederDialogController
 
     }
 
+    @Override
     public DialogDTO oppdaterVenterPaSvar(String dialogId, boolean venter) {
         autorisasjonService.skalVereInternBruker();
 
