@@ -61,6 +61,10 @@ public class DialogData {
         return venterPaSvarFraBrukerSiden != null;
     }
 
+    public boolean erUlestForBruker() {
+        return !erLestAvBruker();
+    }
+
     public boolean erLestAvBruker() {
         return eldsteUlesteTidspunktForBruker == null;
     }

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.lang.Math.toIntExact;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static no.nav.apiapp.util.StringUtils.notNullOrEmpty;
@@ -56,6 +57,17 @@ public class DialogRessurs implements DialogController, VeilederDialogController
                 .filter(dialog -> kontorsperreFilter.harTilgang(dialog.getKontorsperreEnhetId()))
                 .map(restMapper::somDialogDTO)
                 .collect(toList());
+    }
+
+    @Override
+    public AntallUlesteDTO antallUleste() {
+        long antall = appService.hentDialogerForBruker(getContextUserIdent())
+                .stream()
+                .filter(DialogData::erUlestForBruker)
+                .filter(it -> !it.isHistorisk())
+                .count();
+
+        return new AntallUlesteDTO(toIntExact(antall));
     }
 
     @Override
