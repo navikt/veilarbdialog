@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.api;
 
+import no.nav.fo.veilarbdialog.domain.AntallUlesteDTO;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 
@@ -11,6 +12,10 @@ public interface DialogController {
 
     @GET
     List<DialogDTO> hentDialoger();
+
+    @GET
+    @Path("/antallUleste")
+    AntallUlesteDTO antallUleste();
 
     @GET
     @Path("/{dialogId}")
