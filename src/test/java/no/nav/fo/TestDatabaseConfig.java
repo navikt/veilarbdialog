@@ -1,7 +1,7 @@
 package no.nav.fo;
 
 import no.nav.apiapp.util.StringUtils;
-import no.nav.dialogarena.config.fasit.DbCredentials;
+import no.nav.fasit.DbCredentials;
 import no.nav.sbl.jdbc.Database;
 import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;

@@ -1,14 +1,14 @@
-import no.nav.dialogarena.config.fasit.DbCredentials;
-import no.nav.dialogarena.config.fasit.QueueManager;
-import no.nav.dialogarena.config.fasit.ServiceUser;
+import no.nav.fasit.DbCredentials;
+import no.nav.fasit.QueueManager;
+import no.nav.fasit.ServiceUser;
 import no.nav.sbl.dialogarena.common.abac.pep.CredentialConstants;
 import no.nav.testconfig.ApiAppTest;
 
 import static java.lang.System.setProperty;
 import static no.nav.brukerdialog.security.Constants.*;
 import static no.nav.brukerdialog.security.oidc.provider.AzureADB2CConfig.AZUREAD_B2C_DISCOVERY_URL_PROPERTY_NAME;
-import static no.nav.dialogarena.config.fasit.FasitUtils.*;
-import static no.nav.dialogarena.config.fasit.FasitUtils.Zone.FSS;
+import static no.nav.fasit.FasitUtils.*;
+import static no.nav.fasit.FasitUtils.Zone.FSS;
 import static no.nav.fo.veilarbdialog.config.ApplicationConfig.*;
 import static no.nav.fo.veilarbdialog.config.DatabaseConfig.*;
 import static no.nav.sbl.dialogarena.common.abac.pep.service.AbacServiceConfig.ABAC_ENDPOINT_URL_PROPERTY_NAME;
@@ -74,7 +74,7 @@ public class MainTest {
         setProperty(ISSO_RP_USER_PASSWORD_PROPERTY_NAME, isso_rp_user.getPassword());
         setProperty(ISSO_JWKS_URL_PROPERTY_NAME, getBaseUrl("isso-jwks"));
         setProperty(ISSO_ISSUER_URL_PROPERTY_NAME, getBaseUrl("isso-issuer"));
-        setProperty(ISSO_ISALIVE_URL_PROPERTY_NAME, getBaseUrl("isso.isalive", Zone.FSS));
+        setProperty(ISSO_ISALIVE_URL_PROPERTY_NAME, getBaseUrl("isso.isalive", FSS));
         setProperty(VEILARBLOGIN_REDIRECT_URL_URL_PROPERTY, loginUrl);
 
         ServiceUser aadB2cUser = getServiceUser(AAD_B2C_CLIENTID_ALIAS, APPLICATION_NAME);
