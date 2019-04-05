@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.api;
 import no.nav.fo.veilarbdialog.domain.AntallUlesteDTO;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.VenterPaSvarDTO;
 
 import javax.ws.rs.*;
 import java.util.List;
@@ -16,6 +17,10 @@ public interface DialogController {
     @GET
     @Path("/antallUleste")
     AntallUlesteDTO antallUleste();
+
+    @GET
+    @Path("/venterPaSvar")
+    VenterPaSvarDTO venterPaSvar();
 
     @GET
     @Path("/{dialogId}")

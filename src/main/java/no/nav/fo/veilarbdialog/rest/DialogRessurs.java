@@ -71,6 +71,17 @@ public class DialogRessurs implements DialogController, VeilederDialogController
     }
 
     @Override
+    public VenterPaSvarDTO venterPaSvar() {
+        long antall = appService.hentDialogerForBruker(getContextUserIdent())
+                .stream()
+                .filter(DialogData::venterPaSvar)
+                .filter(it -> !it.isHistorisk())
+                .count();
+
+        return new VenterPaSvarDTO(toIntExact(antall));
+    }
+
+    @Override
     public DialogDTO hentDialog(String dialogId) {
         return Optional.ofNullable(dialogId)
                 .map(Long::parseLong)
