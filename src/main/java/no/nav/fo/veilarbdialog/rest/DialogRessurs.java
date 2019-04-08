@@ -63,7 +63,7 @@ public class DialogRessurs implements DialogController, VeilederDialogController
     public AntallUlesteDTO antallUleste() {
         long antall = appService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
-                .filter(DialogData::erUlestForBruker)
+                .filter(erEksternBruker() ? DialogData::erUlestForBruker : DialogData::erUlestAvVeileder)
                 .filter(it -> !it.isHistorisk())
                 .count();
 
