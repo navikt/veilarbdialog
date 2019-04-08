@@ -73,5 +73,10 @@ public class DialogData {
         return eldsteUlesteTidspunktForVeileder == null;
     }
 
+    public boolean erUlestAvVeileder() {
+        return !erLestAvVeileder();
+    }
+
+
 }
 
