@@ -4,15 +4,16 @@ import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import net.javacrumbs.shedlock.provider.jdbc.JdbcLockProvider;
-import no.nav.apiapp.ApiApplication.NaisApiApplication;
+import no.nav.apiapp.ApiApplication;
 import no.nav.apiapp.config.ApiAppConfigurator;
-import no.nav.apiapp.security.PepClient;
+import no.nav.apiapp.security.veilarbabac.VeilarbAbacPepClient;
+import no.nav.brukerdialog.security.oidc.SystemUserTokenProvider;
 import no.nav.dialogarena.aktor.AktorConfig;
 import no.nav.fo.veilarbdialog.rest.DialogRessurs;
 import no.nav.fo.veilarbdialog.service.ScheduleRessurs;
 import no.nav.sbl.dialogarena.common.abac.pep.Pep;
 import no.nav.sbl.dialogarena.common.abac.pep.context.AbacContext;
-import no.nav.sbl.dialogarena.common.abac.pep.domain.ResourceType;
+import no.nav.sbl.featuretoggle.unleash.UnleashService;
 import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,7 +47,7 @@ import static no.nav.sbl.util.EnvironmentUtils.setProperty;
         DialogRessurs.class,
         ScheduleRessurs.class
 })
-public class ApplicationConfig implements NaisApiApplication {
+public class ApplicationConfig implements ApiApplication {
 
     public static final String APPLICATION_NAME = "veilarbdialog";
     public static final String AKTOER_V2_URL_PROPERTY = "AKTOER_V2_ENDPOINTURL";
@@ -66,9 +67,21 @@ public class ApplicationConfig implements NaisApiApplication {
     public static final String VEILARB_KASSERING_IDENTER_PROPERTY = "VEILARB_KASSERING_IDENTER";
     public static final String DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY = "dialogaktor.feed.brukertilgang";
 
+    private SystemUserTokenProvider systemUserTokenProvider = new SystemUserTokenProvider();
+
+    @Inject
+    UnleashService unleashService;
+
     @Bean
-    public PepClient pepClient(Pep pep) {
-        return new PepClient(pep, "veilarb", ResourceType.VeilArbPerson);
+    public VeilarbAbacPepClient pepClient(Pep pep) {
+
+        return VeilarbAbacPepClient.ny()
+                .medPep(pep)
+                .medSystemUserTokenProvider(()->systemUserTokenProvider.getToken())
+                .brukAktoerId(()->unleashService.isEnabled("veilarbdialog.veilarbabac.aktor"))
+                .sammenlikneTilgang(()->unleashService.isEnabled("veilarbdialog.veilarbabac.sammenlikn"))
+                .foretrekkVeilarbAbacResultat(()->unleashService.isEnabled("veilarbdialog.veilarbabac.foretrekk_veilarbabac"))
+                .bygg();
     }
 
     @Bean

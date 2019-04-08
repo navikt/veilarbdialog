@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import no.nav.apiapp.security.PepClient;
+import no.nav.apiapp.security.veilarbabac.VeilarbAbacPepClient;
 import no.nav.brukerdialog.security.context.SubjectExtension;
 import no.nav.common.auth.Subject;
 import no.nav.dialogarena.aktor.AktorService;
@@ -95,8 +95,8 @@ public class FeedIntegrationTest {
             }
 
             @Bean
-            public PepClient pepClient() {
-                return mock(PepClient.class);
+            public VeilarbAbacPepClient pepClient() {
+                return mock(VeilarbAbacPepClient.class);
             }
 
             @Bean
