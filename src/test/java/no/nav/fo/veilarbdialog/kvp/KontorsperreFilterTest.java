@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.kvp;
 
-import no.nav.apiapp.security.PepClient;
+import no.nav.apiapp.security.veilarbabac.VeilarbAbacPepClient;
 import no.nav.sbl.dialogarena.common.abac.pep.exception.PepException;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,11 +13,11 @@ public class KontorsperreFilterTest {
 
     private static final String ENHET = "123";
     private KontorsperreFilter filter = new KontorsperreFilter();
-    private PepClient pepClient = mock(PepClient.class);
+    private VeilarbAbacPepClient pepClient = mock(VeilarbAbacPepClient.class);
 
     @Before
     public void setUp() {
-        pepClient = mock(PepClient.class);
+        pepClient = mock(VeilarbAbacPepClient.class);
         filter.pepClient = pepClient;
     }
 

@@ -2,7 +2,8 @@ package no.nav.fo.veilarbdialog.service;
 
 import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UlovligHandling;
-import no.nav.apiapp.security.PepClient;
+import no.nav.apiapp.security.veilarbabac.Bruker;
+import no.nav.apiapp.security.veilarbabac.VeilarbAbacPepClient;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
@@ -23,14 +24,14 @@ public class AppService {
     private final DialogDAO dialogDAO;
     private final DialogStatusService dialogStatusService;
     private final DialogFeedDAO dialogFeedDAO;
-    private final PepClient pepClient;
+    private final VeilarbAbacPepClient pepClient;
     private final KvpClient kvpClient;
 
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
                       DialogStatusService dialogStatusService,
                       DialogFeedDAO dialogFeedDAO,
-                      PepClient pepClient,
+                      VeilarbAbacPepClient pepClient,
                       KvpClient kvpClient) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
@@ -162,12 +163,23 @@ public class AppService {
         dialogStatusService.settDialogTilHistorisk(dialogData);
     }
 
-    private String sjekkTilgangTilFnr(String ident) {
-        return pepClient.sjekkLeseTilgangTilFnr(ident);
+    private void sjekkTilgangTilFnr(String ident) {
+        Bruker bruker = Bruker.fraFnr(ident)
+                .medAktoerIdSupplier(()->aktorService.getAktorId(ident).orElseThrow(IngenTilgang::new));
+
+        sjekkTilgangTilBruker(bruker);
     }
 
     private void sjekkTilgangTilAktorId(String aktorId) {
-        sjekkTilgangTilFnr(aktorService.getFnr(aktorId).orElseThrow(IngenTilgang::new));
+
+        Bruker bruker = Bruker.fraAktoerId(aktorId)
+                .medFoedselnummerSupplier(()->aktorService.getFnr(aktorId).orElseThrow(IngenTilgang::new));
+
+        sjekkTilgangTilBruker(bruker);
+    }
+
+    private void sjekkTilgangTilBruker(Bruker bruker) {
+        pepClient.sjekkLesetilgangTilBruker(bruker);
     }
 
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {

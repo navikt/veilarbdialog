@@ -2,7 +2,8 @@ package no.nav.fo.veilarbdialog.service;
 
 import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UlovligHandling;
-import no.nav.apiapp.security.PepClient;
+import no.nav.apiapp.security.veilarbabac.Bruker;
+import no.nav.apiapp.security.veilarbabac.VeilarbAbacPepClient;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
@@ -13,7 +14,6 @@ import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.domain.Person;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +39,7 @@ public class AppServiceTest {
     private final DialogStatusService dialogStatusService = mock(DialogStatusService.class);
     private final DialogFeedDAO dialogFeedDAO = mock(DialogFeedDAO.class);
     private final AktorService aktorService = mock(AktorService.class);
-    private final PepClient pepClient = mock(PepClient.class);
+    private final VeilarbAbacPepClient pepClient = mock(VeilarbAbacPepClient.class);
     private final KvpClient kvpClient = mock(KvpClient.class);
 
     private AppService appService = new AppService(
@@ -49,10 +49,6 @@ public class AppServiceTest {
             dialogFeedDAO,
             pepClient,
             kvpClient);
-    private Answer<?> ingenAbacTilgang = (a) -> {
-        throw new IngenTilgang();
-    };
-    private Answer<?> abacTilgang = (a) -> a.getArgument(0);
 
     @Before
     public void setup() {
@@ -97,7 +93,7 @@ public class AppServiceTest {
 
     @Test
     public void tilgangskontroll__ingen_tilgang() {
-        mockAbac(ingenAbacTilgang);
+        mockAbacIngenTilgang();
         sjekkIngenTilgang(
                 IngenTilgang.class,
                 this::hentDialog,
@@ -114,7 +110,7 @@ public class AppServiceTest {
 
     @Test
     public void tilgangskontroll__lesetilgang() {
-        mockAbac(abacTilgang);
+        mockAbacTilgang();
         mockDialog(DIALOG_DATA.withHistorisk(true));
 
         sjekkTilgang(
@@ -135,7 +131,7 @@ public class AppServiceTest {
 
     @Test
     public void tilgangskontroll__skrivetilgang() {
-        mockAbac(abacTilgang);
+        mockAbacTilgang();
         sjekkTilgang(
                 this::hentDialog,
                 this::hentDialogerForBruker,
@@ -149,8 +145,12 @@ public class AppServiceTest {
         );
     }
 
-    private void mockAbac(Answer<?> okAnswer) {
-        when(pepClient.sjekkLeseTilgangTilFnr(IDENT)).thenAnswer(okAnswer);
+    private void mockAbacIngenTilgang() {
+        doThrow(new IngenTilgang()).when(pepClient).sjekkLesetilgangTilBruker(any());
+    }
+
+    private void mockAbacTilgang() {
+        doNothing().when(pepClient).sjekkLesetilgangTilBruker(any());
     }
 
     private void sjekkIngenTilgang(Class<? extends Exception> exceptionClass, Runnable... runnable) {
