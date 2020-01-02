@@ -6,12 +6,12 @@ import no.nav.fo.feed.common.FeedElement;
 import no.nav.fo.feed.consumer.FeedConsumer;
 import no.nav.fo.feed.controller.FeedController;
 import no.nav.fo.feed.producer.FeedProducer;
+import no.nav.fo.veilarbdialog.domain.AvsluttetOppfolgingFeedDTO;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogAktorDTO;
+import no.nav.fo.veilarbdialog.domain.KvpDTO;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.util.DateUtils;
-import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
-import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -1,9 +1,9 @@
 package no.nav.fo.veilarbdialog.feed.avsluttetoppfolging;
 
 import no.nav.fo.veilarbdialog.db.dao.FeedMetaDataDAO;
+import no.nav.fo.veilarbdialog.domain.AvsluttetOppfolgingFeedDTO;
 import no.nav.fo.veilarbdialog.feed.AvsluttetOppfolgingFeedConsumer;
 import no.nav.fo.veilarbdialog.service.AppService;
-import no.nav.fo.veilarboppfolging.rest.domain.AvsluttetOppfolgingFeedDTO;
 import org.junit.Test;
 
 import java.util.Date;

@@ -1,8 +1,8 @@
 package no.nav.fo.veilarbdialog.feed;
 
 import no.nav.fo.veilarbdialog.db.dao.KvpFeedMetadataDAO;
+import no.nav.fo.veilarbdialog.domain.KvpDTO;
 import no.nav.fo.veilarbdialog.service.AppService;
-import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;

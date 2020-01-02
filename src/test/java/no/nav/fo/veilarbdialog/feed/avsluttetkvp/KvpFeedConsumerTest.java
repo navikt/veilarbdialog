@@ -1,9 +1,9 @@
 package no.nav.fo.veilarbdialog.feed.avsluttetkvp;
 
 import no.nav.fo.veilarbdialog.db.dao.KvpFeedMetadataDAO;
+import no.nav.fo.veilarbdialog.domain.KvpDTO;
 import no.nav.fo.veilarbdialog.feed.KvpFeedConsumer;
 import no.nav.fo.veilarbdialog.service.AppService;
-import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
 import org.junit.Test;
 
 import java.util.Date;

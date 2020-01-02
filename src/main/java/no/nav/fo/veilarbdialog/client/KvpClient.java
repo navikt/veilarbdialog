@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.client;
 import no.nav.apiapp.feil.Feil;
 import no.nav.apiapp.feil.FeilType;
 import no.nav.brukerdialog.security.oidc.SystemUserTokenProvider;
-import no.nav.fo.veilarboppfolging.rest.domain.KvpDTO;
+import no.nav.fo.veilarbdialog.domain.KvpDTO;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
