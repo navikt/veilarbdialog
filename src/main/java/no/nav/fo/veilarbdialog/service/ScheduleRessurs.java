@@ -8,6 +8,8 @@ import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.StoppReVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarslingstyper;
+import no.nav.metrics.MetricsFactory;
+import no.nav.metrics.Timer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -49,10 +51,13 @@ public class ScheduleRessurs {
     @Scheduled(cron = "0 0/2 * * * *")
     public void sjekkForVarsel() {
         lockingTaskExecutor.executeWithLock(this::sjekkForVarselWithLock,
-                new LockConfiguration("varsel", Instant.now().plusSeconds(90)));
+                new LockConfiguration("varsel", Instant.now().plusSeconds(60 * 30)));
     }
 
     private void sjekkForVarselWithLock() {
+        Timer timer = MetricsFactory.createTimer("dialog.varsel.timer");
+        timer.start();
+
         List<String> varselUUIDer = varselDAO.hentRevarslerSomSkalStoppes();
         log.info("Stopper {} revarsler", varselUUIDer.size());
         varselUUIDer.forEach(stopRevarslingService::stopRevarsel);
@@ -60,12 +65,17 @@ public class ScheduleRessurs {
 
         List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(GRACE_PERIODE);
         log.info("Varsler {} brukere", aktorer.size());
+        log.info("Varsler aktorer: " + aktorer);
         long paragraf8Varsler = aktorer
                 .stream()
                 .map(this::sendVarsel)
                 .filter(varselType -> varselType == VarselType.PARAGRAF8)
                 .count();
 
+        timer.addFieldToReport("antall", aktorer.size());
+        timer.addFieldToReport("paragraf8", paragraf8Varsler);
+        timer.stop();
+        timer.report();
         log.info("Varsler sendt, {} paragraf8", paragraf8Varsler);
         FunksjonelleMetrikker.nyeVarsler(aktorer.size(), paragraf8Varsler);
     }
