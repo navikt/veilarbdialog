@@ -97,7 +97,7 @@ public class MessageQueueConfig {
 
         connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, getRequiredProperty(MQGATEWAY03_HOSTNAME_PROPERTY));
         connectionFactory.setStringProperty(WMQConstants.WMQ_PORT, getRequiredProperty(MQGATEWAY03_PORT_PROPERTY));
-        connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, String.format("%s_%s", requireEnvironmentName(), requireApplicationName()).toUpperCase());
+        connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, String.format("%s_%s", requireNamespace(), requireApplicationName()).toUpperCase());
         connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
         connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, getRequiredProperty(MQGATEWAY03_NAME_PROPERTY));
         connectionFactory.setStringProperty(WMQConstants.USERID, "srvappserver");
