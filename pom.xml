@@ -6,7 +6,7 @@
     <parent>
         <groupId>no.nav.common</groupId>
         <artifactId>mor-pom</artifactId>
-        <version>1.2019.11.28-16.07-69bf339eebe8</version>
+        <version>1.2020.01.07-16.15-300a924a10d4</version>
     </parent>
 
     <groupId>no.nav.fo</groupId>
@@ -19,9 +19,7 @@
     </build>
 
     <properties>
-        <opprettoppgavehenvendelse.version>1.0.0</opprettoppgavehenvendelse.version>
-        <stoppReVarsel.version>1.0.1</stoppReVarsel.version>
-        <varselMedHandling.version>1.0.0</varselMedHandling.version>
+        <tjenestespesifikasjoner.version>1.2019.09.25-00.21-49b69f0625e0</tjenestespesifikasjoner.version>
     </properties>
 
     <dependencyManagement>
@@ -34,30 +32,26 @@
                 <scope>import</scope>
             </dependency>
 
-            <dependency>
-                <groupId>no.nav.sbl.dialogarena</groupId>
-                <artifactId>varsel-inn</artifactId>
-                <version>1.0.5</version>
-            </dependency>
-
             <!--Tjenester-->
             <dependency>
-                <groupId>no.nav.meldinger.virksomhet</groupId>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
+                <artifactId>varsel-inn</artifactId>
+                <version>${tjenestespesifikasjoner.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>nav-virksomhet-varselMedHandling-v1-meldingsdefinisjon</artifactId>
-                <version>${varselMedHandling.version}</version>
-                <classifier>jaxb</classifier>
+                <version>${tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.meldinger.virksomhet</groupId>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>nav-virksomhet-stoppReVarsel-v1-meldingsdefinisjon</artifactId>
-                <version>${stoppReVarsel.version}</version>
-                <classifier>jaxb</classifier>
+                <version>${tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
-                <groupId>no.nav.meldinger.virksomhet</groupId>
+                <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>nav-virksomhet-opprettOppgavehenvendelse-v1-meldingsdefinisjon</artifactId>
-                <version>${opprettoppgavehenvendelse.version}</version>
-                <classifier>jaxb</classifier>
+                <version>${tjenestespesifikasjoner.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -95,8 +89,8 @@
             <artifactId>h2</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.oracle</groupId>
-            <artifactId>ojdbc6</artifactId>
+            <groupId>com.oracle.ojdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
             <scope>runtime</scope>
         </dependency>
 
@@ -224,33 +218,26 @@
             <artifactId>oidc-security</artifactId>
             <type>test-jar</type>
         </dependency>
-        <dependency>
-            <groupId>no.nav.fo</groupId>
-            <artifactId>veilarboppfolging-api</artifactId>
-            <version>RELEASE</version>
-        </dependency>
+
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>auth</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.sbl.dialogarena</groupId>
+            <groupId>no.nav.tjenestespesifikasjoner</groupId>
             <artifactId>varsel-inn</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.meldinger.virksomhet</groupId>
+            <groupId>no.nav.tjenestespesifikasjoner</groupId>
             <artifactId>nav-virksomhet-varselMedHandling-v1-meldingsdefinisjon</artifactId>
-            <classifier>jaxb</classifier>
         </dependency>
         <dependency>
-            <groupId>no.nav.meldinger.virksomhet</groupId>
+            <groupId>no.nav.tjenestespesifikasjoner</groupId>
             <artifactId>nav-virksomhet-stoppReVarsel-v1-meldingsdefinisjon</artifactId>
-            <classifier>jaxb</classifier>
         </dependency>
         <dependency>
-            <groupId>no.nav.meldinger.virksomhet</groupId>
+            <groupId>no.nav.tjenestespesifikasjoner</groupId>
             <artifactId>nav-virksomhet-opprettOppgavehenvendelse-v1-meldingsdefinisjon</artifactId>
-            <classifier>jaxb</classifier>
         </dependency>
 
         <!--Annet-->
