@@ -2,7 +2,7 @@ name: Test, build, push and deploy
 on: push
 env:
   IMAGE_TAG: ${{ github.sha }}
-  IMAGE: docker.pkg.github.com/${{ github.repository }}/veilarbportefolje
+  IMAGE: docker.pkg.github.com/${{ github.repository }}/veilarbdialog
   PRINT_PAYLOAD: true
 jobs:
   test:
