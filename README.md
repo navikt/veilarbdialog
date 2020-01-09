@@ -1,6 +1,4 @@
 # Veilarbdialog
-[![CircleCI](https://circleci.com/gh/navikt/veilarbdialog.svg?style=svg)](https://circleci.com/gh/navikt/veilarbdialog)
-
 Backend applikasjon for aktivitetsplan. Tilbyr REST tjenester for å hente/opprette/endre dialoger.
 
 
