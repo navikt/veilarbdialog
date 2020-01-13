@@ -81,7 +81,7 @@ public class KasserRessurs {
          pep.sjekkLesetilgangTilBruker(bruker);
 
         String veilederIdent = SubjectHandler.getIdent().orElse(null);
-        List<String> godkjente = Arrays.asList(godkjenteIdenter.split("[\\.\\s]"));
+        List<String> godkjente = Arrays.asList(godkjenteIdenter.split(","));
         if (!godkjente.contains(veilederIdent)) {
             log.error("[KASSERING] {} har ikke tilgang til kassering av {} dialoger", veilederIdent, aktorId);
             throw new IngenTilgang(String.format("[KASSERING] %s har ikke tilgang til kassinger av %s dialoger", veilederIdent, aktorId));
