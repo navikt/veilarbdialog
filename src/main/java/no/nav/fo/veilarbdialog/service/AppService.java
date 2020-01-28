@@ -9,6 +9,8 @@ import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.kafka.KafkaDialogProducer;
+import no.nav.sbl.featuretoggle.unleash.UnleashService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,12 +28,16 @@ public class AppService {
     private final DialogFeedDAO dialogFeedDAO;
     private final VeilarbAbacPepClient pepClient;
     private final KvpClient kvpClient;
+    private final UnleashService unleashService;
+    private final KafkaDialogProducer kafkaDialogProducer;
 
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
                       DialogStatusService dialogStatusService,
                       DialogFeedDAO dialogFeedDAO,
                       VeilarbAbacPepClient pepClient,
+                      UnleashService unleashService,
+                      KafkaDialogProducer kafkaDialogProducer,
                       KvpClient kvpClient) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
@@ -39,6 +45,8 @@ public class AppService {
         this.dialogFeedDAO = dialogFeedDAO;
         this.pepClient = pepClient;
         this.kvpClient = kvpClient;
+        this.unleashService = unleashService;
+        this.kafkaDialogProducer = kafkaDialogProducer;
     }
 
     @Transactional(readOnly = true)
@@ -148,7 +156,12 @@ public class AppService {
 
     public void updateDialogAktorFor(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
-        dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
+        if(unleashService.isEnabled("veilarbdialog.veilarbabac.aktor")) {
+            kafkaDialogProducer.dialogEvent(aktorId, dialoger);
+        } else {
+            dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
+
+        }
     }
 
     public void updateDialogEgenskap(EgenskapType type, long dialogId) {
