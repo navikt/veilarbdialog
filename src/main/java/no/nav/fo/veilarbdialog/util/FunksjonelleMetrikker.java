@@ -51,8 +51,12 @@ public class FunksjonelleMetrikker {
     public static void nyHenvendelseBruker(DialogData dialogData) {
         Event event = MetricsFactory
                 .createEvent("henvendelse.bruker.ny")
-                .addFieldToReport("erSvar", dialogData.venterPaSvar())
-                .addFieldToReport("svartid", nullSafeMsSiden(dialogData.getVenterPaSvarFraBrukerSiden()));
+                .addFieldToReport("erSvar", dialogData.venterPaSvar());
+
+        if(dialogData.getVenterPaSvarFraBrukerSiden() != null){
+            event.addFieldToReport("svartid", nullSafeMsSiden(dialogData.getVenterPaSvarFraBrukerSiden()));
+        }
+
         event = addDialogMetadata(event, dialogData);
         event.report();
     }
