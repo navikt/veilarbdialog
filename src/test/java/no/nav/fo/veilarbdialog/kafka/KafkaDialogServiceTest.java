@@ -1,10 +1,10 @@
-package no.nav.fo.veilarbdialog.service;
+package no.nav.fo.veilarbdialog.kafka;
 
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class KafkaDialogService {
+public class KafkaDialogServiceTest {
 
 
 }

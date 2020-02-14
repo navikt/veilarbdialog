@@ -12,6 +12,8 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.domain.Person;
+import no.nav.fo.veilarbdialog.kafka.KafkaDialogService;
+import no.nav.sbl.featuretoggle.unleash.UnleashService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,6 +43,8 @@ public class AppServiceTest {
     private final AktorService aktorService = mock(AktorService.class);
     private final VeilarbAbacPepClient pepClient = mock(VeilarbAbacPepClient.class);
     private final KvpClient kvpClient = mock(KvpClient.class);
+    private final UnleashService unleashService = mock(UnleashService.class);
+    private final KafkaDialogService kafkaDialogService = mock(KafkaDialogService.class);
 
     private AppService appService = new AppService(
             aktorService,
@@ -48,7 +52,10 @@ public class AppServiceTest {
             dialogStatusService,
             dialogFeedDAO,
             pepClient,
-            kvpClient);
+            kafkaDialogService,
+            kvpClient,
+            unleashService
+    );
 
     @Before
     public void setup() {

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
+import no.nav.fo.veilarbdialog.kafka.KafkaDialogService;
 import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.StoppReVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarsel;
@@ -45,6 +46,15 @@ public class ScheduleRessurs {
 
     @Inject
     private LockingTaskExecutor lockingTaskExecutor;
+
+    @Inject
+    private KafkaDialogService kafkaDialogService;
+
+    //5MIN ER VALGT ARBITRÆRT
+    @Scheduled(cron = "0 0/5 * * * *")
+    public void sendFeilendeKafkaMeldinger() {
+       kafkaDialogService.sendAlleFeilendeMeldinger();
+    }
 
     @Scheduled(cron = "0 0/2 * * * *")
     public void sjekkForVarsel() {
