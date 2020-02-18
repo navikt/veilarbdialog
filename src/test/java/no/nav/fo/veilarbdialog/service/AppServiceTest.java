@@ -16,6 +16,7 @@ import no.nav.fo.veilarbdialog.kafka.KafkaDialogService;
 import no.nav.sbl.featuretoggle.unleash.UnleashService;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,21 +45,26 @@ public class AppServiceTest {
     private final VeilarbAbacPepClient pepClient = mock(VeilarbAbacPepClient.class);
     private final KvpClient kvpClient = mock(KvpClient.class);
     private final UnleashService unleashService = mock(UnleashService.class);
-    private final KafkaDialogService kafkaDialogService = mock(KafkaDialogService.class);
 
-    private AppService appService = new AppService(
-            aktorService,
-            dialogDAO,
-            dialogStatusService,
-            dialogFeedDAO,
-            pepClient,
-            kafkaDialogService,
-            kvpClient,
-            unleashService
-    );
+    private AppService appService;
+
 
     @Before
     public void setup() {
+
+        System.setProperty("APP_ENVIRONMENT_NAME", "TEST-Q0");
+        KafkaDialogService kafkaDialogService = mock(KafkaDialogService.class);
+        this.appService  = new AppService(
+                aktorService,
+                dialogDAO,
+                dialogStatusService,
+                dialogFeedDAO,
+                pepClient,
+                kafkaDialogService,
+                kvpClient,
+                unleashService
+        );
+
         mockDialog(DIALOG_DATA);
         when(aktorService.getFnr(AKTOR_ID)).thenReturn(of(IDENT));
         when(aktorService.getAktorId(IDENT)).thenReturn(of(AKTOR_ID));

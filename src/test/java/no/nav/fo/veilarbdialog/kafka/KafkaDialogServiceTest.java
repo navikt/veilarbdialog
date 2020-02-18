@@ -1,7 +1,6 @@
 package no.nav.fo.veilarbdialog.kafka;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import org.apache.kafka.clients.producer.MockProducer;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,7 +12,13 @@ public class KafkaDialogServiceTest {
 
     MockProducer kafkaProducer = new MockProducer();
     KafkaDAO kafkaDAO = mock(KafkaDAO.class);
-    KafkaDialogService kafkaDialogService = new KafkaDialogService(kafkaProducer, kafkaDAO,  mock(DialogDAO.class));
+    KafkaDialogService kafkaDialogService;
+
+    @Before
+    public void setup(){
+        System.setProperty("APP_ENVIRONMENT_NAME", "TEST-Q0");
+        kafkaDialogService = new KafkaDialogService(kafkaProducer, kafkaDAO,   mock(DialogDAO.class));
+    }
 
     @Test
     public void test_insert_feilende_aktorId() {

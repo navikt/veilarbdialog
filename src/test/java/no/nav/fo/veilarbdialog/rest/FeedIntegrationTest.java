@@ -14,9 +14,13 @@ import no.nav.fo.veilarbdialog.db.dao.*;
 import no.nav.fo.veilarbdialog.domain.AvsluttetOppfolgingFeedDTO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.KvpDTO;
+import no.nav.fo.veilarbdialog.kafka.KafkaDAO;
+import no.nav.fo.veilarbdialog.kafka.KafkaDialogService;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import no.nav.fo.veilarbdialog.util.DateUtils;
+import no.nav.sbl.featuretoggle.unleash.UnleashService;
+import org.apache.kafka.clients.producer.Producer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -112,6 +116,18 @@ public class FeedIntegrationTest {
             @Bean
             public FeedConsumer<KvpDTO> kvpDTOFeedConsumer() {
                 return mock(FeedConsumer.class);
+            }
+
+
+            @Bean
+            public KafkaDialogService kafkaDialogService() {
+                System.setProperty("APP_ENVIRONMENT_NAME", "TEST-Q0");
+                return new KafkaDialogService(mock(Producer.class), mock(KafkaDAO.class), mock(DialogDAO.class));
+            }
+
+            @Bean
+            public UnleashService unleashService() {
+                return mock(UnleashService.class);
             }
 
         }

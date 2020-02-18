@@ -3,7 +3,6 @@ package no.nav.fo.veilarbdialog.kafka;
 
 import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.sbl.dialogarena.common.cxf.StsSecurityConstants;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -24,8 +23,6 @@ public class KafkaConfig {
     static final String KAFKA_BROKERS = getRequiredProperty(KAFKA_BROKERS_URL_PROPERTY);
     private static final String USERNAME = getRequiredProperty(StsSecurityConstants.SYSTEMUSER_USERNAME);
     private static final String PASSWORD = getRequiredProperty(StsSecurityConstants.SYSTEMUSER_PASSWORD);
-    private static final String APP_ENVIRONMENT_NAME = "APP_ENVIRONMENT_NAME";
-    static final String KAFKA_PRODUCER_TOPIC = "aapen-fo-endringPaaDialog-v1" + "-" + getRequiredProperty(APP_ENVIRONMENT_NAME);
 
     static HashMap<String, Object> kafkaProducerProperties () {
         HashMap<String, Object> props = new HashMap<>();
@@ -50,8 +47,4 @@ public class KafkaConfig {
         return new KafkaDAO(jdbcTemplate);
     }
 
-    @Bean
-    public KafkaDialogService kafkaDialogProducer (KafkaProducer kafkaProducer, KafkaDAO kafkaDB, DialogDAO dialogDAO) {
-        return new KafkaDialogService(kafkaProducer, kafkaDB, dialogDAO);
-    }
 }

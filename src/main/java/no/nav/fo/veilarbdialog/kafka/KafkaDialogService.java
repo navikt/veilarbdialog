@@ -6,19 +6,26 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.json.JsonUtils;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.stereotype.Component;
 
+import javax.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static no.nav.fo.veilarbdialog.kafka.KafkaConfig.KAFKA_PRODUCER_TOPIC;
+import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 
 @Slf4j
+@Component
 public class KafkaDialogService  {
 
     private KafkaDAO kafkaDAO;
     private DialogDAO dialogDAO;
     private Producer<String, String> kafkaProducer;
 
+
+    private static final String APP_ENVIRONMENT_NAME = "APP_ENVIRONMENT_NAME";
+    static final String KAFKA_PRODUCER_TOPIC = "aapen-fo-endringPaaDialog-v1" + "-" + getRequiredProperty(APP_ENVIRONMENT_NAME);
+
+    @Inject
     public KafkaDialogService(Producer<String, String> kafkaProducer, KafkaDAO kafkaDAO, DialogDAO dialogDAO) {
         this.kafkaDAO = kafkaDAO;
         this.kafkaProducer = kafkaProducer;
