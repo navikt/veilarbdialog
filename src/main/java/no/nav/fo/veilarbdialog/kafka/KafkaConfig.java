@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.kafka;
 
 import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.sbl.dialogarena.common.cxf.StsSecurityConstants;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 
 import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
@@ -24,8 +26,6 @@ public class KafkaConfig {
     public static final String KAFKA_BROKERS = getRequiredProperty(KAFKA_BROKERS_URL_PROPERTY);
     private static final String USERNAME = getRequiredProperty(StsSecurityConstants.SYSTEMUSER_USERNAME);
     private static final String PASSWORD = getRequiredProperty(StsSecurityConstants.SYSTEMUSER_PASSWORD);
-
-
 
     static HashMap<String, Object> kafkaProducerProperties () {
         HashMap<String, Object> props = new HashMap<>();
@@ -51,7 +51,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaDialogService kafkaDialogProducer (KafkaProducer kafkaProducer, KafkaDAO kafkaDB) {
-        return new KafkaDialogService(kafkaProducer, kafkaDB);
+    public KafkaDialogService kafkaDialogProducer (KafkaProducer kafkaProducer, KafkaDAO kafkaDB, DialogDAO dialogDAO) {
+        return new KafkaDialogService(kafkaProducer, kafkaDB, dialogDAO);
     }
 }

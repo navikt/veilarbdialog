@@ -16,7 +16,6 @@ public class KafkaDialogMelding {
     private String aktorId;
     private LocalDateTime tidspunktEldsteVentende;
     private LocalDateTime tidspunktEldsteUbehandlede;
-    private LocalDateTime tidspunktOpprettet;
 
 
     public static KafkaDialogMelding mapTilDialogData(List<DialogData> dialoger, String aktorId) {
@@ -35,7 +34,6 @@ public class KafkaDialogMelding {
                         .map(dato -> LocalDateTime.ofInstant(dato.toInstant(), ZoneId.systemDefault()))
                         .orElse(null)
                 )
-                .tidspunktOpprettet(LocalDateTime.now())
                 .aktorId(aktorId)
                 .build();
     }
