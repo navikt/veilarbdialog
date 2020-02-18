@@ -12,20 +12,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.inject.Inject;
 import java.util.HashMap;
 
 import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 import static org.apache.kafka.clients.producer.ProducerConfig.*;
-
 @Slf4j
 @Configuration
 public class KafkaConfig {
 
-    public static final String KAFKA_BROKERS_URL_PROPERTY = "KAFKA_BROKERS_URL";
-    public static final String KAFKA_BROKERS = getRequiredProperty(KAFKA_BROKERS_URL_PROPERTY);
+    static final String KAFKA_BROKERS_URL_PROPERTY = "KAFKA_BROKERS_URL";
+    static final String KAFKA_BROKERS = getRequiredProperty(KAFKA_BROKERS_URL_PROPERTY);
     private static final String USERNAME = getRequiredProperty(StsSecurityConstants.SYSTEMUSER_USERNAME);
     private static final String PASSWORD = getRequiredProperty(StsSecurityConstants.SYSTEMUSER_PASSWORD);
+    private static final String APP_ENVIRONMENT_NAME = "APP_ENVIRONMENT_NAME";
+    static final String KAFKA_PRODUCER_TOPIC = "aapen-fo-endringPaaDialog-v1" + "-" + getRequiredProperty(APP_ENVIRONMENT_NAME);
 
     static HashMap<String, Object> kafkaProducerProperties () {
         HashMap<String, Object> props = new HashMap<>();

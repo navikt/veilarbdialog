@@ -10,13 +10,10 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
+import static no.nav.fo.veilarbdialog.kafka.KafkaConfig.KAFKA_PRODUCER_TOPIC;
 
 @Slf4j
 public class KafkaDialogService  {
-
-    private static final String APP_ENVIRONMENT_NAME = "APP_ENVIRONMENT_NAME";
-    private static final String KAFKA_PRODUCER_TOPIC = "aapen-fo-endringPaaDialog-v1" + "-" + getRequiredProperty(APP_ENVIRONMENT_NAME);
 
     private KafkaDAO kafkaDAO;
     private DialogDAO dialogDAO;

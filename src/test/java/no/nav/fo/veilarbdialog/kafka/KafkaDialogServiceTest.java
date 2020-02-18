@@ -13,14 +13,7 @@ public class KafkaDialogServiceTest {
 
     MockProducer kafkaProducer = new MockProducer();
     KafkaDAO kafkaDAO = mock(KafkaDAO.class);
-    DialogDAO dialogDAO = mock(DialogDAO.class);
-    KafkaDialogService kafkaDialogService ;
-
-    @Before
-    public void setup(){
-        System.setProperty("APP_ENVIRONMENT_NAME", "TEST-Q0");
-        this.kafkaDialogService = new KafkaDialogService(kafkaProducer, kafkaDAO,  dialogDAO);
-    }
+    KafkaDialogService kafkaDialogService = new KafkaDialogService(kafkaProducer, kafkaDAO,  mock(DialogDAO.class));
 
     @Test
     public void test_insert_feilende_aktorId() {
@@ -34,11 +27,4 @@ public class KafkaDialogServiceTest {
         kafkaProducer.errorNext(new RuntimeException("Failed to send record"));
         verify(kafkaDAO, times(1)).insertFeiletAktorId("123456789");
     }
-
-    @After
-    public void cleanup(){
-        System.clearProperty("APP_ENVIRONMENT_NAME");
-    }
-
-
 }
