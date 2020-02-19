@@ -3,13 +3,13 @@ package no.nav.fo.veilarbdialog.kafka;
 
 import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.sbl.dialogarena.common.cxf.StsSecurityConstants;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.HashMap;
@@ -18,7 +18,6 @@ import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 import static org.apache.kafka.clients.producer.ProducerConfig.*;
 @Slf4j
 @Configuration
-@Import({KafkaDialogService.class})
 public class KafkaConfig {
 
     static final String KAFKA_BROKERS_URL_PROPERTY = "KAFKA_BROKERS_URL";
@@ -47,6 +46,11 @@ public class KafkaConfig {
     @Bean
     public KafkaDAO kafkaDB(JdbcTemplate jdbcTemplate) {
         return new KafkaDAO(jdbcTemplate);
+    }
+
+    @Bean
+    public KafkaDialogService kafkaDialogService(KafkaProducer<String, String> kafkaProducer, KafkaDAO kafkaDAO, DialogDAO dialogDAO) {
+        return new KafkaDialogService(kafkaProducer, kafkaDAO, dialogDAO);
     }
 
 }
