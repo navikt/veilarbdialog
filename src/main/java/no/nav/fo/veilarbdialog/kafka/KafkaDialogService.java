@@ -12,12 +12,12 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 
 @Slf4j
 @Component
-@Import({KafkaConfig.class})
-public class KafkaDialogService  {
+public class KafkaDialogService {
 
     private KafkaDAO kafkaDAO;
     private DialogDAO dialogDAO;
@@ -33,30 +33,32 @@ public class KafkaDialogService  {
         this.dialogDAO = dialogDAO;
     }
 
-    public void dialogEvent (KafkaDialogMelding kafkaDialogMelding) {
+    public void dialogEvent(KafkaDialogMelding kafkaDialogMelding) {
         String kafkaStringMelding = JsonUtils.toJson(kafkaDialogMelding);
         ProducerRecord<String, String> kafkaMelding = new ProducerRecord<>(KAFKA_PRODUCER_TOPIC, kafkaStringMelding);
+
         kafkaProducer.send(kafkaMelding, (metadata, exception) -> {
-            if(exception == null) {
+            if (exception == null) {
                 log.info("Bruker med aktorid {} har lagt på {}-topic", kafkaDialogMelding.getAktorId(), KAFKA_PRODUCER_TOPIC);
                 int result = kafkaDAO.slettFeiletAktorId(kafkaDialogMelding.getAktorId());
-                if(result != 0 ) {
+                if (result != 0) {
                     log.info("Sendte den feilende meldingen {} på {}-topic", kafkaDialogMelding, KAFKA_PRODUCER_TOPIC);
                 }
             } else {
-                log.error("Kunne ikke publisere melding  {} til {}-topic", kafkaStringMelding, KAFKA_PRODUCER_TOPIC );
+                log.error("Kunne ikke publisere melding  {} til {}-topic", kafkaStringMelding, KAFKA_PRODUCER_TOPIC);
                 kafkaDAO.insertFeiletAktorId(kafkaDialogMelding.getAktorId());
             }
         });
     }
 
-    public void sendAlleFeilendeMeldinger () {
+    public void sendAlleFeilendeMeldinger() {
         kafkaDAO.hentAlleFeilendeAktorId()
                 .stream()
                 .map(aktorId -> {
-                    List<DialogData> dialoger =  dialogDAO.hentDialogerForAktorId(aktorId);
+                    List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
                     return KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
                 })
-                .collect(Collectors.toList()).forEach(this::dialogEvent);
+                .collect(Collectors.toList())
+                .forEach(this::dialogEvent);
     }
 }

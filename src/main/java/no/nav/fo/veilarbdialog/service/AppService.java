@@ -15,6 +15,7 @@ import no.nav.sbl.featuretoggle.unleash.UnleashService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.inject.Inject;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,7 @@ public class AppService {
     private final UnleashService unleashService;
     private final KafkaDialogService kafkaDialogService;
 
+    @Inject
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
                       DialogStatusService dialogStatusService,
