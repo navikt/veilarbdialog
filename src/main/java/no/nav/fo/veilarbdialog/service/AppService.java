@@ -160,10 +160,9 @@ public class AppService {
         if(unleashService.isEnabled("veilarbdialog.kafka")) {
             KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
             kafkaDialogService.dialogEvent(kafkaDialogMelding);
-        } else {
-            dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
-
         }
+        dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
+
     }
 
     public void updateDialogEgenskap(EgenskapType type, long dialogId) {

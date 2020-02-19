@@ -21,9 +21,8 @@ public class KafkaDialogService  {
     private DialogDAO dialogDAO;
     private Producer<String, String> kafkaProducer;
 
-
     private static final String APP_ENVIRONMENT_NAME = "APP_ENVIRONMENT_NAME";
-    static final String KAFKA_PRODUCER_TOPIC = "aapen-fo-endringPaaDialog-v1" + "-" + getRequiredProperty(APP_ENVIRONMENT_NAME);
+    static final String KAFKA_PRODUCER_TOPIC = "aapen-pto-endringPaaDialog-v1" + "-" + getRequiredProperty(APP_ENVIRONMENT_NAME);
 
     @Inject
     public KafkaDialogService(Producer<String, String> kafkaProducer, KafkaDAO kafkaDAO, DialogDAO dialogDAO) {
