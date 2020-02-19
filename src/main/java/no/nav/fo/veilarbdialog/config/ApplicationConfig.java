@@ -46,7 +46,8 @@ import static no.nav.sbl.util.EnvironmentUtils.setProperty;
         ServiceConfig.class,
         UnleashConfig.class,
         DialogRessurs.class,
-        ScheduleRessurs.class
+        ScheduleRessurs.class,
+        KafkaConfig.class
 })
 public class ApplicationConfig implements ApiApplication {
 
