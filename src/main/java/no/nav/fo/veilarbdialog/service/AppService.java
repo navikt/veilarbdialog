@@ -9,6 +9,9 @@ import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.kafka.KafkaDialogMelding;
+import no.nav.fo.veilarbdialog.kafka.KafkaDialogService;
+import no.nav.sbl.featuretoggle.unleash.UnleashService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,19 +29,25 @@ public class AppService {
     private final DialogFeedDAO dialogFeedDAO;
     private final VeilarbAbacPepClient pepClient;
     private final KvpClient kvpClient;
+    private final UnleashService unleashService;
+    private final KafkaDialogService kafkaDialogService;
 
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
                       DialogStatusService dialogStatusService,
                       DialogFeedDAO dialogFeedDAO,
                       VeilarbAbacPepClient pepClient,
-                      KvpClient kvpClient) {
+                      KafkaDialogService kafkaDialogService,
+                      KvpClient kvpClient,
+                      UnleashService unleashService) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
         this.dialogStatusService = dialogStatusService;
         this.dialogFeedDAO = dialogFeedDAO;
         this.pepClient = pepClient;
         this.kvpClient = kvpClient;
+        this.unleashService = unleashService;
+        this.kafkaDialogService = kafkaDialogService;
     }
 
     @Transactional(readOnly = true)
@@ -148,7 +157,12 @@ public class AppService {
 
     public void updateDialogAktorFor(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
+        if(unleashService.isEnabled("veilarbdialog.kafka")) {
+            KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
+            kafkaDialogService.dialogEvent(kafkaDialogMelding);
+        }
         dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
+
     }
 
     public void updateDialogEgenskap(EgenskapType type, long dialogId) {

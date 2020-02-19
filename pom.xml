@@ -140,6 +140,13 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
+        <!-- Kafka -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+        </dependency>
+
+
         <!-- test dependencies -->
         <dependency>
             <groupId>no.nav.common</groupId>
