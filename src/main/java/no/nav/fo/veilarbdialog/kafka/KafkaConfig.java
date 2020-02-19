@@ -48,9 +48,4 @@ public class KafkaConfig {
         return new KafkaDAO(jdbcTemplate);
     }
 
-    @Bean
-    public KafkaDialogService kafkaDialogService(KafkaProducer<String, String> kafkaProducer, KafkaDAO kafkaDAO, DialogDAO dialogDAO) {
-        return new KafkaDialogService(kafkaProducer, kafkaDAO, dialogDAO);
-    }
-
 }
