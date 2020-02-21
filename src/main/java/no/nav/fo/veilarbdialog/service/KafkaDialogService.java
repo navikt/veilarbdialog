@@ -1,8 +1,10 @@
-package no.nav.fo.veilarbdialog.kafka;
+package no.nav.fo.veilarbdialog.service;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
+import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
 import no.nav.json.JsonUtils;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;

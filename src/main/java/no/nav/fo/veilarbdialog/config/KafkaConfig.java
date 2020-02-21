@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.kafka;
+package no.nav.fo.veilarbdialog.config;
 
 
 import com.fasterxml.jackson.databind.ser.std.StringSerializer;
@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.sbl.dialogarena.common.cxf.StsSecurityConstants;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.config.SaslConfigs;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,9 +17,8 @@ import java.util.HashMap;
 
 import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 import static org.apache.kafka.clients.producer.ProducerConfig.*;
-@Slf4j
+
 @Configuration
-@Import({KafkaDialogService.class})
 public class KafkaConfig {
 
     static final String KAFKA_BROKERS_URL_PROPERTY = "KAFKA_BROKERS_URL";
@@ -40,13 +40,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaProducer<String, String> kafkaProducer() {
+    public Producer<String, String> kafkaProducer() {
         return new KafkaProducer<>(kafkaProducerProperties());
     }
-
-    @Bean
-    public KafkaDAO kafkaDB(JdbcTemplate jdbcTemplate) {
-        return new KafkaDAO(jdbcTemplate);
-    }
-
 }

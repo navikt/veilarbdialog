@@ -1,6 +1,7 @@
-package no.nav.fo.veilarbdialog.kafka;
+package no.nav.fo.veilarbdialog.db;
 
 import no.nav.fo.IntegationTest;
+import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
