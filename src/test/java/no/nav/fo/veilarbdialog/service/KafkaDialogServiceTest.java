@@ -1,5 +1,8 @@
-package no.nav.fo.veilarbdialog.kafka;
+package no.nav.fo.veilarbdialog.service;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
+import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
+import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
+import no.nav.fo.veilarbdialog.service.KafkaDialogService;
 import org.apache.kafka.clients.producer.MockProducer;
 import org.junit.Before;
 import org.junit.Test;

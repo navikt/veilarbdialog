@@ -28,6 +28,7 @@ import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
         KvpFeedMetadataDAO.class,
         StatusDAO.class,
         VarselDAO.class,
+        KafkaDAO.class,
         DatabaseHelsesjekk.class
 })
 public class DatabaseConfig {
