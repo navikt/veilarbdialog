@@ -1,22 +1,20 @@
-package no.nav.fo.veilarbdialog.kafka;
+package no.nav.fo.veilarbdialog.config;
 
 
-import com.fasterxml.jackson.databind.ser.std.StringSerializer;
-import lombok.extern.slf4j.Slf4j;
-import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.sbl.dialogarena.common.cxf.StsSecurityConstants;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.config.SaslConfigs;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.HashMap;
 
 import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 import static org.apache.kafka.clients.producer.ProducerConfig.*;
-@Slf4j
+
 @Configuration
 public class KafkaConfig {
 
@@ -39,18 +37,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaProducer<String, String> kafkaProducer() {
+    public Producer<String, String> kafkaProducer() {
         return new KafkaProducer<>(kafkaProducerProperties());
     }
-
-    @Bean
-    public KafkaDAO kafkaDB(JdbcTemplate jdbcTemplate) {
-        return new KafkaDAO(jdbcTemplate);
-    }
-
-    @Bean
-    public KafkaDialogService kafkaDialogService(KafkaProducer<String, String> kafkaProducer, KafkaDAO kafkaDAO, DialogDAO dialogDAO) {
-        return new KafkaDialogService(kafkaProducer, kafkaDAO, dialogDAO);
-    }
-
 }

@@ -1,15 +1,19 @@
-package no.nav.fo.veilarbdialog.kafka;
+package no.nav.fo.veilarbdialog.db.dao;
 
 import no.nav.sbl.sql.SqlUtils;
 import no.nav.sbl.sql.where.WhereClause;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
 import java.util.List;
 
-
+@Component
 public class KafkaDAO {
     private String TABLE_NAME = "FEILEDE_KAFKA_AKTOR_ID";
     private final JdbcTemplate jdbc;
 
+    @Inject
     public KafkaDAO(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }

@@ -8,7 +8,6 @@ import no.nav.apiapp.ApiApplication;
 import no.nav.apiapp.config.ApiAppConfigurator;
 import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorConfig;
-import no.nav.fo.veilarbdialog.kafka.KafkaConfig;
 import no.nav.fo.veilarbdialog.rest.DialogRessurs;
 import no.nav.fo.veilarbdialog.service.ScheduleRessurs;
 import no.nav.sbl.dialogarena.common.abac.pep.Pep;

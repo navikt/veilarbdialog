@@ -1,8 +1,7 @@
-package no.nav.fo.veilarbdialog.kafka;
+package no.nav.fo.veilarbdialog.domain;
 
 import lombok.Builder;
 import lombok.Data;
-import no.nav.fo.veilarbdialog.domain.DialogData;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
