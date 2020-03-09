@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import lombok.val;
-import no.nav.apiapp.security.veilarbabac.VeilarbAbacPepClient;
+import no.nav.apiapp.security.PepClient;
 import no.nav.brukerdialog.security.context.SubjectRule;
 import no.nav.brukerdialog.security.domain.IdentType;
 import no.nav.common.auth.SsoToken;
@@ -63,8 +63,8 @@ public class DialogRessursTest extends IntegationTest {
         }
 
         @Bean
-        public VeilarbAbacPepClient pepClient() {
-            return mock(VeilarbAbacPepClient.class);
+        public PepClient pepClient() {
+            return mock(PepClient.class);
         }
 
         @Bean

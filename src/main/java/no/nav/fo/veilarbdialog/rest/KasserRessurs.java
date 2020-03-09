@@ -2,10 +2,8 @@ package no.nav.fo.veilarbdialog.rest;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.apiapp.feil.IngenTilgang;
-import no.nav.apiapp.security.veilarbabac.Bruker;
-import no.nav.apiapp.security.veilarbabac.VeilarbAbacPepClient;
+import no.nav.apiapp.security.PepClient;
 import no.nav.common.auth.SubjectHandler;
-import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.service.AutorisasjonService;
@@ -34,10 +32,7 @@ public class KasserRessurs {
     private DialogDAO dialogDAO;
 
     @Inject
-    private VeilarbAbacPepClient pep;
-
-    @Inject
-    private AktorService aktorService;
+    private PepClient pep;
 
     @Inject
     private AutorisasjonService autorisasjonService;
@@ -75,10 +70,8 @@ public class KasserRessurs {
     }
 
     private int kjorHvisTilgang(String aktorId, String kasseringAv, String id, Supplier<Integer> fn) {
-        Bruker bruker = Bruker.fraAktoerId(aktorId)
-                .medFoedselnummerSupplier(()->aktorService.getFnr(aktorId).orElseThrow(IngenTilgang::new));
 
-         pep.sjekkLesetilgangTilBruker(bruker);
+        pep.sjekkLesetilgangTilAktorId(aktorId);
 
         String veilederIdent = SubjectHandler.getIdent().orElse(null);
         List<String> godkjente = Arrays.asList(godkjenteIdenter.split(","));

@@ -2,7 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UlovligHandling;
-import no.nav.apiapp.security.veilarbabac.VeilarbAbacPepClient;
+import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
@@ -39,7 +39,7 @@ public class AppServiceTest {
     private final DialogStatusService dialogStatusService = mock(DialogStatusService.class);
     private final DialogFeedDAO dialogFeedDAO = mock(DialogFeedDAO.class);
     private final AktorService aktorService = mock(AktorService.class);
-    private final VeilarbAbacPepClient pepClient = mock(VeilarbAbacPepClient.class);
+    private final PepClient pepClient = mock(PepClient.class);
     private final KvpClient kvpClient = mock(KvpClient.class);
     private final UnleashService unleashService = mock(UnleashService.class);
 
@@ -156,11 +156,11 @@ public class AppServiceTest {
     }
 
     private void mockAbacIngenTilgang() {
-        doThrow(new IngenTilgang()).when(pepClient).sjekkLesetilgangTilBruker(any());
+        doThrow(new IngenTilgang()).when(pepClient).sjekkLesetilgangTilAktorId((any()));
     }
 
     private void mockAbacTilgang() {
-        doNothing().when(pepClient).sjekkLesetilgangTilBruker(any());
+        reset(pepClient);
     }
 
     private void sjekkIngenTilgang(Class<? extends Exception> exceptionClass, Runnable... runnable) {

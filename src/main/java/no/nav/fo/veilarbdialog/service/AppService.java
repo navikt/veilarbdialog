@@ -1,9 +1,7 @@
 package no.nav.fo.veilarbdialog.service;
 
-import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UlovligHandling;
-import no.nav.apiapp.security.veilarbabac.Bruker;
-import no.nav.apiapp.security.veilarbabac.VeilarbAbacPepClient;
+import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
@@ -26,7 +24,7 @@ public class AppService {
     private final DialogDAO dialogDAO;
     private final DialogStatusService dialogStatusService;
     private final DialogFeedDAO dialogFeedDAO;
-    private final VeilarbAbacPepClient pepClient;
+    private final PepClient pepClient;
     private final KvpClient kvpClient;
     private final UnleashService unleashService;
     private final KafkaDialogService kafkaDialogService;
@@ -35,7 +33,7 @@ public class AppService {
                       DialogDAO dialogDAO,
                       DialogStatusService dialogStatusService,
                       DialogFeedDAO dialogFeedDAO,
-                      VeilarbAbacPepClient pepClient,
+                      PepClient pepClient,
                       KafkaDialogService kafkaDialogService,
                       KvpClient kvpClient,
                       UnleashService unleashService) {
@@ -51,15 +49,14 @@ public class AppService {
 
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person) {
-        String fnr = hentFnrForPerson(person);
-        sjekkTilgangTilFnr(fnr);
-
         String aktorId = hentAktoerIdForPerson(person);
+        pepClient.sjekkLesetilgangTilAktorId(aktorId);
+
         return dialogDAO.hentDialogerForAktorId(aktorId);
     }
 
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
-        sjekkTilgangTilAktorId(dialogData.getAktorId());
+        pepClient.sjekkLesetilgangTilAktorId(dialogData.getAktorId());
         DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
         DialogData oprettet = dialogDAO.opprettDialog(kontorsperretDialog);
         dialogStatusService.nyDialog(oprettet);
@@ -176,27 +173,8 @@ public class AppService {
         dialogStatusService.settDialogTilHistorisk(dialogData);
     }
 
-    private void sjekkTilgangTilFnr(String ident) {
-        Bruker bruker = Bruker.fraFnr(ident)
-                .medAktoerIdSupplier(()->aktorService.getAktorId(ident).orElseThrow(IngenTilgang::new));
-
-        sjekkTilgangTilBruker(bruker);
-    }
-
-    private void sjekkTilgangTilAktorId(String aktorId) {
-
-        Bruker bruker = Bruker.fraAktoerId(aktorId)
-                .medFoedselnummerSupplier(()->aktorService.getFnr(aktorId).orElseThrow(IngenTilgang::new));
-
-        sjekkTilgangTilBruker(bruker);
-    }
-
-    private void sjekkTilgangTilBruker(Bruker bruker) {
-        pepClient.sjekkLesetilgangTilBruker(bruker);
-    }
-
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
-        sjekkTilgangTilAktorId(dialogData.getAktorId());
+        pepClient.sjekkLesetilgangTilAktorId(dialogData.getAktorId());
         return dialogData;
     }
 
