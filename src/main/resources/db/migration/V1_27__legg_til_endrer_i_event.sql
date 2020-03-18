@@ -11,4 +11,5 @@ CREATE OR REPLACE VIEW DVH_Dialog_hendelse AS (
     aktor_id,
     aktivitet_id,
     lagt_inn_av
-  FROM EVENT;
+  FROM EVENT
+)
