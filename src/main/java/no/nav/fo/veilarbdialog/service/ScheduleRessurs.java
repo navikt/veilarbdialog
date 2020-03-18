@@ -48,6 +48,15 @@ public class ScheduleRessurs {
     @Inject
     private LockingTaskExecutor lockingTaskExecutor;
 
+    @Inject
+    private KafkaDialogService kafkaDialogService;
+
+    //5MIN ER VALGT ARBITRÆRT
+    @Scheduled(cron = "0 0/5 * * * *")
+    public void sendFeilendeKafkaMeldinger() {
+       kafkaDialogService.sendAlleFeilendeMeldinger();
+    }
+
     @Scheduled(cron = "0 0/2 * * * *")
     public void sjekkForVarsel() {
         lockingTaskExecutor.executeWithLock(this::sjekkForVarselWithLock,

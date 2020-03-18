@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import lombok.val;
-import no.nav.apiapp.security.veilarbabac.VeilarbAbacPepClient;
+import no.nav.apiapp.security.PepClient;
 import no.nav.brukerdialog.security.context.SubjectRule;
 import no.nav.brukerdialog.security.domain.IdentType;
 import no.nav.common.auth.SsoToken;
@@ -12,10 +12,14 @@ import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.*;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
+import no.nav.fo.veilarbdialog.service.KafkaDialogService;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.AutorisasjonService;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
+import no.nav.sbl.featuretoggle.unleash.UnleashService;
+import org.apache.kafka.clients.producer.Producer;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -59,13 +63,24 @@ public class DialogRessursTest extends IntegationTest {
         }
 
         @Bean
-        public VeilarbAbacPepClient pepClient() {
-            return mock(VeilarbAbacPepClient.class);
+        public PepClient pepClient() {
+            return mock(PepClient.class);
         }
 
         @Bean
         public KvpClient kvpClient() {
             return mock(KvpClient.class);
+        }
+
+        @Bean
+        public KafkaDialogService kafkaDialogService() {
+            System.setProperty("APP_ENVIRONMENT_NAME", "TEST-Q0");
+            return new KafkaDialogService(mock(Producer.class), mock(KafkaDAO.class), mock(DialogDAO.class));
+        }
+
+        @Bean
+        public UnleashService unleashService() {
+            return mock(UnleashService.class);
         }
 
     }

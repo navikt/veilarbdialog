@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
+import no.nav.common.auth.SubjectHandler;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.sbl.sql.SqlUtils;
@@ -21,6 +22,7 @@ public class DataVarehusDAO {
     static final String TIDSPUNKT = "tidspunkt";
     static final String AKTOR_ID = "aktor_id";
     static final String AKTIVITET_ID = "aktivitet_id";
+    static final String LAGT_INN_AV = "lagt_inn_av";
     static final String EVENT_TABELL = "EVENT";
 
     private final JdbcTemplate jdbc;
@@ -42,10 +44,16 @@ public class DataVarehusDAO {
                 .value(TIDSPUNKT, CURRENT_TIMESTAMP)
                 .value(AKTOR_ID, dialogData.getAktorId())
                 .value(AKTIVITET_ID, dialogData.getAktivitetId())
+                .value(LAGT_INN_AV, getLagtInnAv())
                 .execute();
     }
 
     private static Long hentLongFraForsteKollone(ResultSet resultSet) throws SQLException {
         return resultSet.getLong(1);
     }
+
+    private String getLagtInnAv() {
+        return SubjectHandler.getIdent().orElse("SYSTEM");
+    }
+
 }

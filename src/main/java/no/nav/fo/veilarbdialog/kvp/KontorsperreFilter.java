@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.kvp;
 
 import lombok.SneakyThrows;
-import no.nav.apiapp.security.veilarbabac.VeilarbAbacPepClient;
+import no.nav.apiapp.security.PepClient;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
@@ -12,7 +12,7 @@ import static no.nav.apiapp.util.StringUtils.nullOrEmpty;
 public class KontorsperreFilter {
 
     @Inject
-    VeilarbAbacPepClient pepClient;
+    PepClient pepClient;
 
     @SneakyThrows
     public boolean harTilgang(String enhet) {

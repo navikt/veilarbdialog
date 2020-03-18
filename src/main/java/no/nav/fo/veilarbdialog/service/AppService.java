@@ -1,14 +1,14 @@
 package no.nav.fo.veilarbdialog.service;
 
-import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UlovligHandling;
-import no.nav.apiapp.security.veilarbabac.Bruker;
-import no.nav.apiapp.security.veilarbabac.VeilarbAbacPepClient;
+import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
+import no.nav.sbl.featuretoggle.unleash.UnleashService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,34 +24,39 @@ public class AppService {
     private final DialogDAO dialogDAO;
     private final DialogStatusService dialogStatusService;
     private final DialogFeedDAO dialogFeedDAO;
-    private final VeilarbAbacPepClient pepClient;
+    private final PepClient pepClient;
     private final KvpClient kvpClient;
+    private final UnleashService unleashService;
+    private final KafkaDialogService kafkaDialogService;
 
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
                       DialogStatusService dialogStatusService,
                       DialogFeedDAO dialogFeedDAO,
-                      VeilarbAbacPepClient pepClient,
-                      KvpClient kvpClient) {
+                      PepClient pepClient,
+                      KafkaDialogService kafkaDialogService,
+                      KvpClient kvpClient,
+                      UnleashService unleashService) {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
         this.dialogStatusService = dialogStatusService;
         this.dialogFeedDAO = dialogFeedDAO;
         this.pepClient = pepClient;
         this.kvpClient = kvpClient;
+        this.unleashService = unleashService;
+        this.kafkaDialogService = kafkaDialogService;
     }
 
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person) {
-        String fnr = hentFnrForPerson(person);
-        sjekkTilgangTilFnr(fnr);
-
         String aktorId = hentAktoerIdForPerson(person);
+        pepClient.sjekkLesetilgangTilAktorId(aktorId);
+
         return dialogDAO.hentDialogerForAktorId(aktorId);
     }
 
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
-        sjekkTilgangTilAktorId(dialogData.getAktorId());
+        pepClient.sjekkLesetilgangTilAktorId(dialogData.getAktorId());
         DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
         DialogData oprettet = dialogDAO.opprettDialog(kontorsperretDialog);
         dialogStatusService.nyDialog(oprettet);
@@ -148,7 +153,12 @@ public class AppService {
 
     public void updateDialogAktorFor(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
+        if(unleashService.isEnabled("veilarbdialog.kafka")) {
+            KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
+            kafkaDialogService.dialogEvent(kafkaDialogMelding);
+        }
         dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
+
     }
 
     public void updateDialogEgenskap(EgenskapType type, long dialogId) {
@@ -163,27 +173,8 @@ public class AppService {
         dialogStatusService.settDialogTilHistorisk(dialogData);
     }
 
-    private void sjekkTilgangTilFnr(String ident) {
-        Bruker bruker = Bruker.fraFnr(ident)
-                .medAktoerIdSupplier(()->aktorService.getAktorId(ident).orElseThrow(IngenTilgang::new));
-
-        sjekkTilgangTilBruker(bruker);
-    }
-
-    private void sjekkTilgangTilAktorId(String aktorId) {
-
-        Bruker bruker = Bruker.fraAktoerId(aktorId)
-                .medFoedselnummerSupplier(()->aktorService.getFnr(aktorId).orElseThrow(IngenTilgang::new));
-
-        sjekkTilgangTilBruker(bruker);
-    }
-
-    private void sjekkTilgangTilBruker(Bruker bruker) {
-        pepClient.sjekkLesetilgangTilBruker(bruker);
-    }
-
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
-        sjekkTilgangTilAktorId(dialogData.getAktorId());
+        pepClient.sjekkLesetilgangTilAktorId(dialogData.getAktorId());
         return dialogData;
     }
 
