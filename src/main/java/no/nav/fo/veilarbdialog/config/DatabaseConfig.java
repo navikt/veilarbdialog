@@ -29,6 +29,7 @@ import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
         StatusDAO.class,
         VarselDAO.class,
         KafkaDAO.class,
+        KladdDAO.class,
         DatabaseHelsesjekk.class
 })
 public class DatabaseConfig {

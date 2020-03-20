@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @Builder(toBuilder = true)
 public class Kladd {
-    public long dialogId;
+    public Long dialogId;
     public String aktivitetId;
     public String aktorId;
     public String overskrift;

@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static no.nav.sbl.sql.DbConstants.CURRENT_TIMESTAMP;
 
@@ -37,9 +38,14 @@ public class KladdDAO {
 
     private WhereClause whereKladdEq(Kladd kladd){
         WhereClause eqAktorId = WhereClause.equals(AKTOR_ID, kladd.aktorId);
-        WhereClause eqDialogId = WhereClause.equals(DIALOG_ID, Long.toString(kladd.dialogId));
-        WhereClause eqAktivitetId = WhereClause.equals(AKTIVITET_ID, kladd.aktivitetId);
         WhereClause eqLagtInnAv = WhereClause.equals(LAGT_INN_AV, kladd.lagtInnAv);
+
+        WhereClause eqDialogId = Optional.ofNullable(kladd.dialogId)
+                .map(id -> WhereClause.equals(DIALOG_ID, Long.toString(id)))
+                .orElse(WhereClause.isNull(DIALOG_ID));
+        WhereClause eqAktivitetId = Optional.ofNullable(kladd.aktivitetId)
+                .map(aktivitetId -> WhereClause.equals(AKTIVITET_ID, kladd.aktivitetId))
+                .orElse(WhereClause.isNull(AKTIVITET_ID));
 
 
         return eqAktorId.and(eqDialogId)
@@ -70,8 +76,8 @@ public class KladdDAO {
 
     public void slettKladderGamlereEnnTimer(long timer){
         LocalDateTime olderThenThis = LocalDateTime.now().minusHours(timer);
-
         WhereClause whereOlderOrEqualThen = WhereClause.lteq(OPPDATERT, Timestamp.valueOf(olderThenThis));
+
         SqlUtils.delete(jdbc, KLADD_TABELL)
                 .where(whereOlderOrEqualThen)
                 .execute();

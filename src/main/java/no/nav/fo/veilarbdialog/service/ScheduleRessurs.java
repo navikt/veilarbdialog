@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.service;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
+import no.nav.fo.veilarbdialog.db.dao.KladdDAO;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
 import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.StoppReVarsel;
@@ -32,6 +33,9 @@ public class ScheduleRessurs {
     private VarselDAO varselDAO;
 
     @Inject
+    private KladdDAO kladdDAO;
+
+    @Inject
     private ServiceMeldingService serviceMeldingService;
 
     @Inject
@@ -48,6 +52,12 @@ public class ScheduleRessurs {
 
     @Inject
     private KafkaDialogService kafkaDialogService;
+
+    @Scheduled(cron = "0 0/10 * * * *")
+    public void slettGamleKladder() {
+        int enTime = 1;
+        kladdDAO.slettKladderGamlereEnnTimer(enTime);
+    }
 
     //5MIN ER VALGT ARBITRÆRT
     @Scheduled(cron = "0 0/5 * * * *")
