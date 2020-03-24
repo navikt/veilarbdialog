@@ -9,6 +9,7 @@ import no.nav.apiapp.config.ApiAppConfigurator;
 import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorConfig;
 import no.nav.fo.veilarbdialog.rest.DialogRessurs;
+import no.nav.fo.veilarbdialog.rest.KladdRessurs;
 import no.nav.fo.veilarbdialog.service.ScheduleRessurs;
 import no.nav.sbl.dialogarena.common.abac.pep.Pep;
 import no.nav.sbl.dialogarena.common.abac.pep.context.AbacContext;
@@ -45,6 +46,7 @@ import static no.nav.sbl.util.EnvironmentUtils.setProperty;
         UnleashConfig.class,
         DialogRessurs.class,
         ScheduleRessurs.class,
+        KladdRessurs.class,
         KafkaConfig.class
 })
 public class ApplicationConfig implements ApiApplication {

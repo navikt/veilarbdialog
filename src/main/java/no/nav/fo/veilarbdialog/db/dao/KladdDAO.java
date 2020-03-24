@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static no.nav.sbl.sql.DbConstants.CURRENT_TIMESTAMP;
@@ -41,7 +42,7 @@ public class KladdDAO {
         WhereClause eqLagtInnAv = WhereClause.equals(LAGT_INN_AV, kladd.lagtInnAv);
 
         WhereClause eqDialogId = Optional.ofNullable(kladd.dialogId)
-                .map(id -> WhereClause.equals(DIALOG_ID, Long.toString(id)))
+                .map(id -> WhereClause.equals(DIALOG_ID, id))
                 .orElse(WhereClause.isNull(DIALOG_ID));
         WhereClause eqAktivitetId = Optional.ofNullable(kladd.aktivitetId)
                 .map(aktivitetId -> WhereClause.equals(AKTIVITET_ID, kladd.aktivitetId))
@@ -68,10 +69,13 @@ public class KladdDAO {
 
     }
 
-    public Kladd getKladd(Kladd eqKladd) {
+    public List<Kladd> getKladder(String aktorId, String lagtInnAv) {
+        WhereClause eqAktorId = WhereClause.equals(AKTOR_ID, aktorId);
+        WhereClause eqLagtInnAv = WhereClause.equals(LAGT_INN_AV, lagtInnAv);
+
         return SqlUtils.select(jdbc, KLADD_TABELL, KladdDAO::toStatusnumbers)
-                .where(whereKladdEq(eqKladd))
-                .execute();
+                .where(eqAktorId.and(eqLagtInnAv))
+                .executeToList();
     }
 
     public void slettKladderGamlereEnnTimer(long timer){
@@ -83,10 +87,16 @@ public class KladdDAO {
                 .execute();
     }
 
+    public void slettKladd(Kladd kladd){
+        SqlUtils.delete(jdbc, KLADD_TABELL)
+                .where(whereKladdEq(kladd))
+                .execute();
+    }
+
     private static Kladd toStatusnumbers(ResultSet rs) throws SQLException {
         return Kladd.builder()
                 .aktorId(rs.getString(AKTOR_ID))
-                .dialogId(rs.getLong(DIALOG_ID))
+                .dialogId(rs.getString(DIALOG_ID))
                 .aktivitetId(rs.getString(AKTIVITET_ID))
                 .overskrift(rs.getString(OVERSKRIFT))
                 .tekst(rs.getString(TEKST))

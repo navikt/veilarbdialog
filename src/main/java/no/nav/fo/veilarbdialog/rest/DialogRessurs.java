@@ -7,6 +7,7 @@ import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.AutorisasjonService;
+import no.nav.fo.veilarbdialog.service.KladdService;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +51,9 @@ public class DialogRessurs implements DialogController, VeilederDialogController
     @Inject
     private AutorisasjonService autorisasjonService;
 
+    @Inject
+    private KladdService kladdService;
+
     @Override
     public List<DialogDTO> hentDialoger() {
         return appService.hentDialogerForBruker(getContextUserIdent())
@@ -81,6 +85,8 @@ public class DialogRessurs implements DialogController, VeilederDialogController
 
     @Override
     public DialogDTO nyHenvendelse(NyHenvendelseDTO nyHenvendelseDTO) {
+        slettUtdattertKladd(nyHenvendelseDTO);
+
         long dialogId = finnDialogId(nyHenvendelseDTO);
         appService.opprettHenvendelseForDialog(HenvendelseData.builder()
                 .dialogId(dialogId)
@@ -94,6 +100,13 @@ public class DialogRessurs implements DialogController, VeilederDialogController
         return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
+    }
+
+    private void slettUtdattertKladd(NyHenvendelseDTO nyHenvendelseDTO) {
+        Person person = getContextUserIdent();
+        if (person instanceof Person.Fnr) {
+            kladdService.deleteKladd(person.get(), nyHenvendelseDTO.dialogId, nyHenvendelseDTO.aktivitetId);
+        }
     }
 
     @Override

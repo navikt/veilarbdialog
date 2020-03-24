@@ -33,7 +33,7 @@ public class ScheduleRessurs {
     private VarselDAO varselDAO;
 
     @Inject
-    private KladdDAO kladdDAO;
+    private KladdService kladdService;
 
     @Inject
     private ServiceMeldingService serviceMeldingService;
@@ -55,8 +55,7 @@ public class ScheduleRessurs {
 
     @Scheduled(cron = "0 0/10 * * * *")
     public void slettGamleKladder() {
-        int enTime = 1;
-        kladdDAO.slettKladderGamlereEnnTimer(enTime);
+        kladdService.slettGamleKladder();
     }
 
     //5MIN ER VALGT ARBITRÆRT
