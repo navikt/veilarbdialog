@@ -74,6 +74,7 @@ public class KladdDAO {
         WhereClause eqLagtInnAv = WhereClause.equals(LAGT_INN_AV, lagtInnAv);
 
         return SqlUtils.select(jdbc, KLADD_TABELL, KladdDAO::toStatusnumbers)
+                .column("*")
                 .where(eqAktorId.and(eqLagtInnAv))
                 .executeToList();
     }
