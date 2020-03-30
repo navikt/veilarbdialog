@@ -42,7 +42,7 @@ public class KladdDAO {
         WhereClause eqLagtInnAv = WhereClause.equals(LAGT_INN_AV, kladd.lagtInnAv);
 
         WhereClause eqDialogId = Optional.ofNullable(kladd.dialogId)
-                .map(id -> WhereClause.equals(DIALOG_ID, id))
+                .map(id -> WhereClause.equals(DIALOG_ID, Long.parseLong(id)))
                 .orElse(WhereClause.isNull(DIALOG_ID));
         WhereClause eqAktivitetId = Optional.ofNullable(kladd.aktivitetId)
                 .map(aktivitetId -> WhereClause.equals(AKTIVITET_ID, kladd.aktivitetId))
@@ -56,9 +56,10 @@ public class KladdDAO {
     }
 
     public void upsertKladd(Kladd kladd) {
+        Long id = Optional.ofNullable(kladd.dialogId).map(Long::parseLong).orElse(null);
         SqlUtils.upsert(jdbc, KLADD_TABELL)
                 .set(AKTOR_ID, kladd.aktorId)
-                .set(DIALOG_ID, kladd.dialogId)
+                .set(DIALOG_ID, id)
                 .set(AKTIVITET_ID, kladd.aktivitetId)
                 .set(OVERSKRIFT, kladd.overskrift)
                 .set(TEKST, kladd.tekst)
