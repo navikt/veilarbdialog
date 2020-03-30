@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,7 +65,7 @@ public class KladdDAO {
                 .set(OVERSKRIFT, kladd.overskrift)
                 .set(TEKST, kladd.tekst)
                 .set(LAGT_INN_AV, kladd.lagtInnAv)
-                .set(OPPDATERT, CURRENT_TIMESTAMP)
+                .set(OPPDATERT, new Date())
                 .where(whereKladdEq(kladd))
                 .execute();
 
