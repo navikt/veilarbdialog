@@ -20,7 +20,7 @@ public class KladdService {
 
     private AktorService aktorService;
 
-    private final int EN_TIME = 1;
+    private final int EN_TIME = 24;
 
     @Inject
     public KladdService(KladdDAO kladdDAO, AktorService aktorService){
