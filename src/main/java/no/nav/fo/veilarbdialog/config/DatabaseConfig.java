@@ -44,6 +44,7 @@ public class DatabaseConfig {
                 .url(getRequiredProperty(VEILARBDIALOGDATASOURCE_URL_PROPERTY_NAME))
                 .username(getRequiredProperty(VEILARBDIALOGDATASOURCE_USERNAME_PROPERTY_NAME))
                 .password(getOptionalProperty(VEILARBDIALOGDATASOURCE_PASSWORD_PROPERTY_NAME).orElse(""))
+                .maxPoolSize(300)
                 .build();
     }
 
