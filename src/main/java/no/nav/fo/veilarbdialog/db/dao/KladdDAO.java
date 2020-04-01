@@ -5,6 +5,7 @@ import no.nav.sbl.sql.SqlUtils;
 import no.nav.sbl.sql.where.WhereClause;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.sql.ResultSet;
@@ -24,6 +25,7 @@ public class KladdDAO {
     private static final String TEKST = "TEKST";
     private static final String LAGT_INN_AV = "LAGT_INN_AV";
     private static final String OPPDATERT = "OPPDATERT";
+    private static final String UNIQUE_SEQ = "UNIQUE_SEQ";
 
     private static final String KLADD_TABELL = "KLADD";
 
@@ -53,17 +55,24 @@ public class KladdDAO {
                 .and(eqLagtInnAv);
     }
 
+    @Transactional
     public void upsertKladd(Kladd kladd) {
         Long id = Optional.ofNullable(kladd.dialogId).map(Long::parseLong).orElse(null);
-        SqlUtils.upsert(jdbc, KLADD_TABELL)
-                .set(AKTOR_ID, kladd.aktorId)
-                .set(DIALOG_ID, id)
-                .set(AKTIVITET_ID, kladd.aktivitetId)
-                .set(OVERSKRIFT, kladd.overskrift)
-                .set(TEKST, kladd.tekst)
-                .set(LAGT_INN_AV, kladd.lagtInnAv)
-                .set(OPPDATERT, Timestamp.valueOf(LocalDateTime.now()))
-                .where(whereKladdEq(kladd))
+        Long kladdSeq = SqlUtils.nextFromSeq(jdbc,"KLADD_ID_SEQ").execute();
+
+        SqlUtils.insert(jdbc, KLADD_TABELL)
+                .value(AKTOR_ID, kladd.aktorId)
+                .value(DIALOG_ID, id)
+                .value(AKTIVITET_ID, kladd.aktivitetId)
+                .value(OVERSKRIFT, kladd.overskrift)
+                .value(TEKST, kladd.tekst)
+                .value(LAGT_INN_AV, kladd.lagtInnAv)
+                .value(OPPDATERT, Timestamp.valueOf(LocalDateTime.now()))
+                .value(UNIQUE_SEQ, kladdSeq)
+                .execute();
+
+        SqlUtils.delete(jdbc, KLADD_TABELL)
+                .where(whereKladdEq(kladd).and(WhereClause.lt(UNIQUE_SEQ, kladdSeq)))
                 .execute();
 
     }
