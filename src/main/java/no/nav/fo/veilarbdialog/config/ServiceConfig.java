@@ -15,7 +15,8 @@ import org.springframework.context.annotation.Import;
         StopRevarslingService.class,
         VarselMedHandlingService.class,
         KasserRessurs.class,
-        KafkaDialogService.class
+        KafkaDialogService.class,
+        KladdService.class
 })
 public class ServiceConfig {
 }

@@ -13,11 +13,8 @@ import no.nav.fo.veilarbdialog.db.dao.*;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
-import no.nav.fo.veilarbdialog.service.KafkaDialogService;
+import no.nav.fo.veilarbdialog.service.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.service.AppService;
-import no.nav.fo.veilarbdialog.service.AutorisasjonService;
-import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import no.nav.sbl.featuretoggle.unleash.UnleashService;
 import org.apache.kafka.clients.producer.Producer;
 import org.junit.Before;
@@ -93,8 +90,10 @@ public class DialogRessursTest extends IntegationTest {
                 DialogStatusService.class,
                 StatusDAO.class,
                 DataVarehusDAO.class,
+                KladdDAO.class,
                 DialogFeedDAO.class,
                 Request.class,
+                KladdService.class,
                 DialogRessurs.class,
                 AutorisasjonService.class,
                 RestMapper.class,
