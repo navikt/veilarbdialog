@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import no.nav.fo.veilarbdialog.domain.Kladd;
 import no.nav.sbl.sql.SqlUtils;
+import no.nav.sbl.sql.order.OrderClause;
 import no.nav.sbl.sql.where.WhereClause;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -84,6 +85,7 @@ public class KladdDAO {
         return SqlUtils.select(jdbc, KLADD_TABELL, KladdDAO::toStatusnumbers)
                 .column("*")
                 .where(eqAktorId.and(eqLagtInnAv))
+                .orderBy(OrderClause.desc(UNIQUE_SEQ))
                 .executeToList();
     }
 
