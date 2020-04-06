@@ -99,8 +99,13 @@ public class KladdDAO {
     }
 
     public void slettKladd(Kladd kladd){
+        WhereClause eq = Optional
+                .ofNullable(kladd.dialogId)
+                .map(id -> WhereClause.equals(DIALOG_ID, Long.parseLong(id)))
+                .orElse(whereKladdEq(kladd));
+
         SqlUtils.delete(jdbc, KLADD_TABELL)
-                .where(whereKladdEq(kladd))
+                .where(eq)
                 .execute();
     }
 
