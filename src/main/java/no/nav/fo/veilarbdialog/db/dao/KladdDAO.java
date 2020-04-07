@@ -42,13 +42,20 @@ public class KladdDAO {
         WhereClause eqAktorId = WhereClause.equals(AKTOR_ID, kladd.aktorId);
         WhereClause eqLagtInnAv = WhereClause.equals(LAGT_INN_AV, kladd.lagtInnAv);
 
-        WhereClause eqDialogId = Optional.ofNullable(kladd.dialogId)
+        Optional<String> maybeDialogID = Optional.ofNullable(kladd.dialogId);
+        WhereClause eqDialogId = maybeDialogID
                 .map(id -> WhereClause.equals(DIALOG_ID, Long.parseLong(id)))
                 .orElse(WhereClause.isNull(DIALOG_ID));
         WhereClause eqAktivitetId = Optional.ofNullable(kladd.aktivitetId)
                 .map(aktivitetId -> WhereClause.equals(AKTIVITET_ID, kladd.aktivitetId))
                 .orElse(WhereClause.isNull(AKTIVITET_ID));
 
+
+        if (maybeDialogID.isPresent()) {
+            return eqAktorId.and(eqDialogId)
+                    .and(eqAktorId)
+                    .and(eqLagtInnAv);
+        }
 
         return eqAktorId.and(eqDialogId)
                 .and(eqAktivitetId)
