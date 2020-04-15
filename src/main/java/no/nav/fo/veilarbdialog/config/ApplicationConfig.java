@@ -53,7 +53,7 @@ public class ApplicationConfig implements ApiApplication {
 
     public static final String APPLICATION_NAME = "veilarbdialog";
     public static final String VEILARBOPPFOLGINGAPI_URL_PROPERTY = "VEILARBOPPFOLGINGAPI_URL";
-    public static final String AKTIVITETSPLAN_URL_PROPERTY = "AKTIVITETSPLAN_URL";
+    public static final String ARBEIDSRETTET_DIALOG_URL = "ARBEIDSRETTET_DIALOG_URL";
     public static final String MQGATEWAY03_HOSTNAME_PROPERTY = "MQGATEWAY03_HOSTNAME";
     public static final String MQGATEWAY03_PORT_PROPERTY = "MQGATEWAY03_PORT";
     public static final String MQGATEWAY03_NAME_PROPERTY = "MQGATEWAY03_NAME";
