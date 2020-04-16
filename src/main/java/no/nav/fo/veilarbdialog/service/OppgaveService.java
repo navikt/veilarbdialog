@@ -12,8 +12,7 @@ import javax.inject.Inject;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 
-import static javax.xml.bind.JAXBContext.newInstance;
-import static no.nav.fo.veilarbdialog.config.ApplicationConfig.AKTIVITETSPLAN_URL_PROPERTY;
+import static no.nav.fo.veilarbdialog.config.ApplicationConfig.ARBEIDSRETTET_DIALOG_URL;
 import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.jaxbContext;
 import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.marshall;
 import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.messageCreator;
@@ -43,7 +42,7 @@ public class OppgaveService {
         henvendelse.setMottaker(aktoerId);
         henvendelse.setOppgaveType(oppgaveType);
         henvendelse.setVarselbestillingId(uuid);
-        henvendelse.setOppgaveURL(getRequiredProperty(AKTIVITETSPLAN_URL_PROPERTY) + "/dialog");
+        henvendelse.setOppgaveURL(getRequiredProperty(ARBEIDSRETTET_DIALOG_URL));
         henvendelse.setStoppRepeterendeVarsel(false);
 
         return new ObjectFactory().createOppgavehenvendelse(henvendelse);
