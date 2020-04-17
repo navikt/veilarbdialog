@@ -12,8 +12,7 @@ import javax.inject.Inject;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 
-import static javax.xml.bind.JAXBContext.newInstance;
-import static no.nav.fo.veilarbdialog.config.ApplicationConfig.AKTIVITETSPLAN_URL_PROPERTY;
+import static no.nav.fo.veilarbdialog.config.ApplicationConfig.ARBEIDSRETTET_DIALOG_URL_PROPERTY;
 import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.jaxbContext;
 import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.marshall;
 import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.messageCreator;
@@ -26,6 +25,7 @@ public class OppgaveService {
     private JmsTemplate oppgaveHenvendelseQueue;
 
     private static final JAXBContext OPPGAVE_HENVENDELSE = jaxbContext(Oppgavehenvendelse.class);
+    private String dialogUrl = getRequiredProperty(ARBEIDSRETTET_DIALOG_URL_PROPERTY);
 
     public void send(String aktorId, String varselId) {
         MessageCreator messageCreator = messageCreator(marshall(createMelding(aktorId, varselId), OPPGAVE_HENVENDELSE), varselId);
@@ -43,7 +43,7 @@ public class OppgaveService {
         henvendelse.setMottaker(aktoerId);
         henvendelse.setOppgaveType(oppgaveType);
         henvendelse.setVarselbestillingId(uuid);
-        henvendelse.setOppgaveURL(getRequiredProperty(AKTIVITETSPLAN_URL_PROPERTY) + "/dialog");
+        henvendelse.setOppgaveURL(dialogUrl);
         henvendelse.setStoppRepeterendeVarsel(false);
 
         return new ObjectFactory().createOppgavehenvendelse(henvendelse);
