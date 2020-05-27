@@ -18,6 +18,7 @@ import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import no.nav.fo.veilarbdialog.service.KafkaDialogService;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
+import no.nav.fo.veilarbdialog.service.UnleashServiceMock;
 import no.nav.fo.veilarbdialog.util.DateUtils;
 import no.nav.sbl.featuretoggle.unleash.UnleashService;
 import org.apache.kafka.clients.producer.Producer;
@@ -127,7 +128,7 @@ public class FeedIntegrationTest {
 
             @Bean
             public UnleashService unleashService() {
-                return mock(UnleashService.class);
+                return new UnleashServiceMock(false);
             }
 
         }
