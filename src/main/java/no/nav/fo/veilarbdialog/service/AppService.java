@@ -12,6 +12,7 @@ import no.nav.sbl.featuretoggle.unleash.UnleashService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -132,7 +133,10 @@ public class AppService {
     @Transactional(readOnly = true)
     public List<DialogAktor> hentAktorerMedEndringerFOM(Date tidspunkt, int pageSize) {
         // NB: ingen tilgangskontroll her siden feed har egen mekanisme for dette
-        return dialogFeedDAO.hentAktorerMedEndringerFOM(tidspunkt, pageSize);
+        if(!this.unleashService.isEnabled("veilarbdialog.skruav.feed")) {
+            return dialogFeedDAO.hentAktorerMedEndringerFOM(tidspunkt, pageSize);
+        }
+        return Collections.emptyList();
     }
 
     public void settKontorsperredeDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
