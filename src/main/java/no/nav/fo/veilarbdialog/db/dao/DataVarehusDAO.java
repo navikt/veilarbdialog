@@ -55,12 +55,15 @@ public class DataVarehusDAO {
 
     @Transactional(readOnly = true)
     public Date hentSisteEndringSomIkkeErDine(String aktorId, String bruker) {
-        return database.queryForObject(
+        return database.query(
                 "SELECT TIDSPUNKT from EVENT where AKTOR_ID = ? and LAGT_INN_AV != ? ORDER BY EVENT_ID DESC FETCH FIRST 1 ROWS ONLY",
                 rs -> Database.hentDato(rs, "TIDSPUNKT"),
                 aktorId,
                 bruker
-        );
+        )
+                .stream()
+                .findFirst()
+                .orElse(null);
     }
 
 
