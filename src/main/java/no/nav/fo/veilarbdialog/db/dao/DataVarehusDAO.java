@@ -57,15 +57,12 @@ public class DataVarehusDAO {
     public Date hentSisteEndringSomIkkeErDine(String aktorId, String bruker) {
         return database.queryForObject(
                 "SELECT TIDSPUNKT from EVENT where AKTOR_ID = ? and LAGT_INN_AV != ? ORDER BY EVENT_ID DESC FETCH FIRST 1 ROWS ONLY",
-                this::hentDato,
+                rs -> Database.hentDato(rs, "TIDSPUNKT"),
                 aktorId,
                 bruker
         );
     }
 
-    private Date hentDato(ResultSet resultSet) throws SQLException {
-        return resultSet.getDate(1);
-    }
 
     private static Long hentLongFraForsteKollone(ResultSet resultSet) throws SQLException {
         return resultSet.getLong(1);
