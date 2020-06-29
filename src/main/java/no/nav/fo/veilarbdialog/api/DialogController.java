@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.api;
 import no.nav.fo.veilarbdialog.domain.AntallUlesteDTO;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.SistOppdatert;
 
 import javax.ws.rs.*;
 import java.util.List;
@@ -12,6 +13,10 @@ public interface DialogController {
 
     @GET
     List<DialogDTO> hentDialoger();
+
+    @GET
+    @Path("/sistOppdatert")
+    SistOppdatert sistOppdatert();
 
     @GET
     @Path("/antallUleste")

@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.NotFoundException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,6 +62,12 @@ public class DialogRessurs implements DialogController, VeilederDialogController
                 .filter(dialog -> kontorsperreFilter.harTilgang(dialog.getKontorsperreEnhetId()))
                 .map(restMapper::somDialogDTO)
                 .collect(toList());
+    }
+
+    @Override
+    public SistOppdatert sistOppdatert(){
+        Date oppdatert = appService.hentSistOppdatertForBruker(getContextUserIdent(), getLoggedInUserIdent());
+        return new SistOppdatert(oppdatert);
     }
 
     @Override

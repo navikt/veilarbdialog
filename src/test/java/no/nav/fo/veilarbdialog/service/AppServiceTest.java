@@ -5,6 +5,7 @@ import no.nav.apiapp.feil.UlovligHandling;
 import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.client.KvpClient;
+import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
@@ -38,6 +39,7 @@ public class AppServiceTest {
     private final DialogDAO dialogDAO = mock(DialogDAO.class);
     private final DialogStatusService dialogStatusService = mock(DialogStatusService.class);
     private final DialogFeedDAO dialogFeedDAO = mock(DialogFeedDAO.class);
+    private final DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
     private final AktorService aktorService = mock(AktorService.class);
     private final PepClient pepClient = mock(PepClient.class);
     private final KvpClient kvpClient = mock(KvpClient.class);
@@ -55,6 +57,7 @@ public class AppServiceTest {
                 aktorService,
                 dialogDAO,
                 dialogStatusService,
+                dataVarehusDAO,
                 dialogFeedDAO,
                 pepClient,
                 kafkaDialogService,

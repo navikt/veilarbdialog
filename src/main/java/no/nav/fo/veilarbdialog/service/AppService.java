@@ -4,6 +4,7 @@ import no.nav.apiapp.feil.UlovligHandling;
 import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.veilarbdialog.client.KvpClient;
+import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.*;
@@ -24,6 +25,7 @@ public class AppService {
     private final AktorService aktorService;
     private final DialogDAO dialogDAO;
     private final DialogStatusService dialogStatusService;
+    private final DataVarehusDAO dataVarehusDAO;
     private final DialogFeedDAO dialogFeedDAO;
     private final PepClient pepClient;
     private final KvpClient kvpClient;
@@ -33,6 +35,7 @@ public class AppService {
     public AppService(AktorService aktorService,
                       DialogDAO dialogDAO,
                       DialogStatusService dialogStatusService,
+                      DataVarehusDAO dataVarehusDAO,
                       DialogFeedDAO dialogFeedDAO,
                       PepClient pepClient,
                       KafkaDialogService kafkaDialogService,
@@ -41,6 +44,7 @@ public class AppService {
         this.aktorService = aktorService;
         this.dialogDAO = dialogDAO;
         this.dialogStatusService = dialogStatusService;
+        this.dataVarehusDAO = dataVarehusDAO;
         this.dialogFeedDAO = dialogFeedDAO;
         this.pepClient = pepClient;
         this.kvpClient = kvpClient;
@@ -54,6 +58,13 @@ public class AppService {
         pepClient.sjekkLesetilgangTilAktorId(aktorId);
 
         return dialogDAO.hentDialogerForAktorId(aktorId);
+    }
+
+    public Date hentSistOppdatertForBruker(Person person, String meg) {
+        String aktorId = hentAktoerIdForPerson(person);
+        pepClient.sjekkLesetilgangTilAktorId(aktorId);
+
+        return dataVarehusDAO.hentSisteEndringSomIkkeErDine(aktorId, meg);
     }
 
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
