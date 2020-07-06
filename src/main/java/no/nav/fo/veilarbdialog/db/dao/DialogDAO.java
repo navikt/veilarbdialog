@@ -149,14 +149,16 @@ public class DialogDAO {
                         "tekst, " +
                         "kontorsperre_enhet_id, " +
                         "avsender_id, " +
-                        "avsender_type) " +
-                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?)",
+                        "avsender_type," +
+                        "viktig) " +
+                        "VALUES (?,?," + dateProvider.getNow() + ",?,?,?,?,?)",
                 henvendelseId,
                 henvendelseData.dialogId,
                 henvendelseData.tekst,
                 henvendelseData.kontorsperreEnhetId,
                 henvendelseData.avsenderId,
-                EnumUtils.getName(henvendelseData.avsenderType)
+                EnumUtils.getName(henvendelseData.avsenderType),
+                henvendelseData.viktig
         );
 
         log.info("opprettet henvendelse id:{} data:{}", henvendelseId, henvendelseData);
@@ -228,6 +230,7 @@ public class DialogDAO {
                 .lestAvBruker(erLest(hentDato(rs, ELDSTE_ULESTE_FOR_BRUKER), henvendelseDato))
                 .lestAvVeileder(erLest(hentDato(rs, ELDSTE_ULESTE_FOR_VEILEDER), henvendelseDato))
                 .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
+                .viktig(rs.getBoolean("viktig"))
                 .build();
     }
 
