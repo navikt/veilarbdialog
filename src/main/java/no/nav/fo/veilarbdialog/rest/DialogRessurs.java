@@ -98,6 +98,7 @@ public class DialogRessurs implements DialogController, VeilederDialogController
         appService.opprettHenvendelseForDialog(HenvendelseData.builder()
                 .dialogId(dialogId)
                 .avsenderId(getLoggedInUserIdent())
+                .viktig(!nyHenvendelseDTO.egenskaper.isEmpty())
                 .avsenderType(erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
                 .tekst(nyHenvendelseDTO.tekst)
                 .build()
