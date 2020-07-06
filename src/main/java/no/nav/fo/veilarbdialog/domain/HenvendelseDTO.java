@@ -15,6 +15,7 @@ public class HenvendelseDTO {
     public String avsenderId;
     public Date sendt;
     public boolean lest;
+    public boolean viktig;
     public String tekst;
 
 }

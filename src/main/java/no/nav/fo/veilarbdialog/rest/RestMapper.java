@@ -77,6 +77,7 @@ class RestMapper {
                 .setId(Long.toString(henvendelseData.id))
                 .setDialogId(Long.toString(henvendelseData.dialogId))
                 .setAvsender(BRUKER.equals(henvendelseData.avsenderType) ? Avsender.BRUKER : Avsender.VEILEDER)
+                .setViktig(henvendelseData.viktig)
                 .setSendt(henvendelseData.sendt)
                 .setTekst(henvendelseData.tekst);
 
