@@ -21,10 +21,6 @@ public abstract class Person {
         return new AktorId(aktorId);
     }
 
-    public static NavIdent navIdent(String navIdent) {
-        return new NavIdent(navIdent);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
