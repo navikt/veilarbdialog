@@ -1,28 +1,22 @@
 package no.nav.fo.veilarbdialog.feed;
 
+import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.db.dao.FeedMetaDataDAO;
 import no.nav.fo.veilarbdialog.domain.AvsluttetOppfolgingFeedDTO;
 import no.nav.fo.veilarbdialog.service.AppService;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class AvsluttetOppfolgingFeedConsumer {
 
     private final AppService appService;
-
     private final FeedMetaDataDAO feedMetaDataDAO;
-
-    @Inject
-    public AvsluttetOppfolgingFeedConsumer(AppService appService, FeedMetaDataDAO feedMetaDataDAO) {
-        this.appService = appService;
-        this.feedMetaDataDAO = feedMetaDataDAO;
-    }
 
     public String sisteEndring() {
         Date sisteEndring = feedMetaDataDAO.hentSisteLestTidspunkt();
