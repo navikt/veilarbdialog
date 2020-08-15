@@ -1,60 +1,37 @@
 package no.nav.fo.veilarbdialog.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
-import no.nav.fo.veilarbdialog.db.dao.KladdDAO;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
-import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
-import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.StoppReVarsel;
-import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarsel;
-import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarslingstyper;
-import no.nav.metrics.MetricsFactory;
-import no.nav.metrics.Timer;
+import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import javax.xml.bind.JAXBContext;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static java.util.UUID.randomUUID;
-import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.jaxbContext;
 
-@Slf4j
 @Component
+@RequiredArgsConstructor
+@Slf4j
 public class ScheduleRessurs {
 
-    private static final long GRACE_PERIODE = 30 * 60 * 1000;
-
-    static final JAXBContext VARSEL_CONTEXT = jaxbContext(XMLVarsel.class, XMLVarslingstyper.class);
-    static final JAXBContext STOPP_VARSEL_CONTEXT = jaxbContext(StoppReVarsel.class);
-
-    @Inject
-    private VarselDAO varselDAO;
-
-    @Inject
-    private KladdService kladdService;
-
-    @Inject
-    private ServiceMeldingService serviceMeldingService;
-
-    @Inject
-    private OppgaveService oppgaveService;
-
-    @Inject
-    private StopRevarslingService stopRevarslingService;
-
-    @Inject
-    private VarselMedHandlingService varselMedHandlingService;
-
-    @Inject
-    private LockingTaskExecutor lockingTaskExecutor;
-
-    @Inject
-    private KafkaDialogService kafkaDialogService;
+    private final VarselDAO varselDAO;
+    private final KladdService kladdService;
+    private final ServiceMeldingService serviceMeldingService;
+    private final OppgaveService oppgaveService;
+    private final StopRevarslingService stopRevarslingService;
+    private final VarselMedHandlingService varselMedHandlingService;
+    private final LockingTaskExecutor lockingTaskExecutor;
+    private final KafkaDialogService kafkaDialogService;
+    private final MeterRegistry registry;
+    private final FunksjonelleMetrikker funksjonelleMetrikker;
 
     @Scheduled(cron = "0 0/10 * * * *")
     public void slettGamleKladder() {
@@ -64,39 +41,42 @@ public class ScheduleRessurs {
     //5MIN ER VALGT ARBITRÆRT
     @Scheduled(cron = "0 0/5 * * * *")
     public void sendFeilendeKafkaMeldinger() {
-       kafkaDialogService.sendAlleFeilendeMeldinger();
+        kafkaDialogService.sendAlleFeilendeMeldinger();
     }
 
     @Scheduled(cron = "0 0/2 * * * *")
     public void sjekkForVarsel() {
-        lockingTaskExecutor.executeWithLock(this::sjekkForVarselWithLock,
-                new LockConfiguration("varsel", Instant.now().plusSeconds(60 * 30)));
+        lockingTaskExecutor.executeWithLock(
+                (Runnable) this::sjekkForVarselWithLock,
+                new LockConfiguration(Instant.now(), "varsel", Duration.ofMinutes(30), Duration.ZERO)
+        );
     }
 
     private void sjekkForVarselWithLock() {
-        Timer timer = MetricsFactory.createTimer("dialog.varsel.timer");
-        timer.start();
 
-        List<String> varselUUIDer = varselDAO.hentRevarslerSomSkalStoppes();
-        log.info("Stopper {} revarsler", varselUUIDer.size());
-        varselUUIDer.forEach(stopRevarslingService::stopRevarsel);
-        FunksjonelleMetrikker.stoppetRevarsling(varselUUIDer.size());
+        Timer timer = registry.timer("dialog.varsel.timer");
+        timer.record(() -> {
 
-        List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(TimeUnit.MINUTES.toMillis(1)); // TODO: Reset.
-        log.info("Varsler {} brukere", aktorer.size());
-        log.info("Varsler aktorer: " + aktorer);
-        long paragraf8Varsler = aktorer
-                .stream()
-                .map(this::sendVarsel)
-                .filter(varselType -> varselType == VarselType.PARAGRAF8)
-                .count();
+            List<String> varselUUIDer = varselDAO.hentRevarslerSomSkalStoppes();
+            log.info("Stopper {} revarsler", varselUUIDer.size());
+            varselUUIDer.forEach(stopRevarslingService::stopRevarsel);
+            funksjonelleMetrikker.stoppetRevarsling(varselUUIDer.size());
 
-        timer.addFieldToReport("antall", aktorer.size());
-        timer.addFieldToReport("paragraf8", paragraf8Varsler);
-        timer.stop();
-        timer.report();
-        log.info("Varsler sendt, {} paragraf8", paragraf8Varsler);
-        FunksjonelleMetrikker.nyeVarsler(aktorer.size(), paragraf8Varsler);
+            List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(Duration.ofMinutes(30).toMillis());
+
+            log.info("Varsler {} brukere", aktorer.size());
+            log.info("Varsler aktorer: " + aktorer);
+            long paragraf8Varsler = aktorer
+                    .stream()
+                    .map(this::sendVarsel)
+                    .filter(varselType -> varselType == VarselType.PARAGRAF8)
+                    .count();
+
+            log.info("Varsler sendt, {} paragraf8", paragraf8Varsler);
+            funksjonelleMetrikker.nyeVarsler(aktorer.size(), paragraf8Varsler);
+
+        });
+
     }
 
 

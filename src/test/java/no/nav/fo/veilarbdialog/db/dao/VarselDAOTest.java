@@ -1,43 +1,42 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.val;
-import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
 import java.util.Date;
 
 import static java.lang.Thread.sleep;
-import static java.util.Arrays.asList;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-public class VarselDAOTest extends IntegationTest {
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@Transactional
+public class VarselDAOTest {
 
     private static final String AKTOR_ID = "1234";
     private static final long TI_MINUTTER = 1000 * 60 * 10;
 
-    @Inject
+    @Autowired
     private DialogDAO dialogDAO;
 
-    @Inject
+    @Autowired
     private DialogStatusService dialogStatusService;
 
-    @Inject
+    @Autowired
     private VarselDAO varselDAO;
-
-    @BeforeClass
-    public static void addSpringBeans() {
-        initSpringContext(asList(DialogDAO.class, DialogStatusService.class, VarselDAO.class, StatusDAO.class, DataVarehusDAO.class));
-    }
 
     private DialogData opprettNyDialog(String aktorId) {
         return dialogDAO.opprettDialog(nyDialog(aktorId));

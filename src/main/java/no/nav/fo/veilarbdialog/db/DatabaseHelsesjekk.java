@@ -1,30 +1,26 @@
 package no.nav.fo.veilarbdialog.db;
 
-import no.nav.apiapp.selftest.Helsesjekk;
-import no.nav.apiapp.selftest.HelsesjekkMetadata;
+import lombok.RequiredArgsConstructor;
+import no.nav.common.health.HealthCheck;
+import no.nav.common.health.HealthCheckResult;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-
 @Component
-public class DatabaseHelsesjekk implements Helsesjekk {
+@RequiredArgsConstructor
+public class DatabaseHelsesjekk implements HealthCheck {
 
-    @Inject
-    private JdbcTemplate jdbcTemplate;
-
-    @Override
-    public void helsesjekk() {
-        jdbcTemplate.queryForObject("SELECT 1 FROM DUAL", Long.class);
-    }
+    private final JdbcTemplate jdbc;
 
     @Override
-    public HelsesjekkMetadata getMetadata() {
-        return new HelsesjekkMetadata(
-                "veilarbdialogDS",
-                "N/A",
-                "Database for VeilArbDialog",
-                true
-        );
+    public HealthCheckResult checkHealth() {
+        try {
+            jdbc.queryForObject("select 1 from DUAL", Long.class);
+        } catch (DataAccessException e) {
+            return HealthCheckResult.unhealthy(e);
+        }
+        return HealthCheckResult.healthy();
     }
+
 }

@@ -1,34 +1,34 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.val;
-import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static no.nav.fo.IntegationTest.uniktTidspunkt;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DialogDAOTest extends IntegationTest {
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@Transactional
+public class DialogDAOTest {
 
     private static final String AKTOR_ID_1234 = "1234";
 
-    @Inject
+    @Autowired
     private DialogDAO dialogDAO;
-
-    @BeforeClass
-    public static void addSpringBeans() {
-        initSpringContext(Arrays.asList(DialogDAO.class));
-    }
 
     @Test
     public void kan_opprette_dialog() {
