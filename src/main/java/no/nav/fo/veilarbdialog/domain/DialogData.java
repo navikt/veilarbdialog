@@ -2,7 +2,7 @@ package no.nav.fo.veilarbdialog.domain;
 
 import lombok.Builder;
 import lombok.Value;
-import lombok.experimental.Wither;
+import lombok.With;
 
 import java.util.Collections;
 import java.util.Date;
@@ -12,34 +12,34 @@ import static java.util.Optional.ofNullable;
 
 @Value
 @Builder(toBuilder = true)
-@Wither
+@With
 public class DialogData {
 
-    private long id;
-    private String aktorId;
-    private String overskrift;
-    private String aktivitetId;
+    long id;
+    String aktorId;
+    String overskrift;
+    String aktivitetId;
 
-    private Date lestAvBrukerTidspunkt;
-    private Date lestAvVeilederTidspunkt;
-    private Date venterPaSvarFraBrukerSiden;
-    private Date venterPaNavSiden;
-    private Date oppdatert;
+    Date lestAvBrukerTidspunkt;
+    Date lestAvVeilederTidspunkt;
+    Date venterPaSvarFraBrukerSiden;
+    Date venterPaNavSiden;
+    Date oppdatert;
 
-    private Date opprettetDato;
-    private boolean historisk;
+    Date opprettetDato;
+    boolean historisk;
 
-    private boolean harUlestParagraf8Henvendelse;
-    private String paragraf8VarselUUID;
+    boolean harUlestParagraf8Henvendelse;
+    String paragraf8VarselUUID;
 
-    private String kontorsperreEnhetId;
+    String kontorsperreEnhetId;
 
-    private Date eldsteUlesteTidspunktForVeileder;
-    private Date eldsteUlesteTidspunktForBruker;
+    Date eldsteUlesteTidspunktForVeileder;
+    Date eldsteUlesteTidspunktForBruker;
 
-    private List<HenvendelseData> henvendelser;
+    List<HenvendelseData> henvendelser;
 
-    private List<EgenskapType> egenskaper;
+    List<EgenskapType> egenskaper;
 
     public List<EgenskapType> getEgenskaper() {
         return ofNullable(egenskaper).orElseGet(Collections::emptyList);

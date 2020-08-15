@@ -1,22 +1,19 @@
 package no.nav.fo.veilarbdialog.kvp;
 
-import lombok.SneakyThrows;
-import no.nav.apiapp.security.PepClient;
+import lombok.RequiredArgsConstructor;
+import no.nav.fo.veilarbdialog.auth.AuthService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-
-import static no.nav.apiapp.util.StringUtils.nullOrEmpty;
-
 @Component
+@RequiredArgsConstructor
 public class KontorsperreFilter {
 
-    @Inject
-    PepClient pepClient;
+    private final AuthService auth;
 
-    @SneakyThrows
-    public boolean harTilgang(String enhet) {
-        return nullOrEmpty(enhet) || pepClient.harTilgangTilEnhet(enhet);
+    // TODO: When bumping commons-java, the harVeilederTilgangTilEnhet(...) will change behaviour.
+    public boolean harTilgang(String ident, String enhet) {
+        return StringUtils.isEmpty(enhet) || auth.harVeilederTilgangTilEnhet(ident, enhet);
     }
 
 }

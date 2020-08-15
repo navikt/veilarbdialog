@@ -1,0 +1,64 @@
+spring:
+  application:
+    name: "veilarbdialog"
+  flyway:
+    enabled: false
+
+server:
+  servlet:
+    context-path: "/veilarbdialog"
+
+application:
+  cluster: TEST
+  namespace: APP_ENVIRONMENT_NAME
+  loginservice:
+    idporten:
+      audience: IDPORTEN_CLIENTID_USERNAME
+      discoveryUrl: http://localhost:8080/IDPORTEN_DISCOVERY_URL
+  abac:
+    url: http://localhost:8080/ABAC_PDP_ENDPOINT_URL
+  aktorregister:
+    url: http://localhost:8080/AKTOERREGISTER_API_V1_URL
+  azure:
+    ad:
+      clientId: LOGINSERVICE_OIDC_CLIENT_ID
+      discoveryUrl: http://localhost:8080/AAD_DISCOVERY_URL
+  datasource:
+    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;MODE=Oracle
+    username: sa
+    password: sa
+  dialog:
+    url: http://localhost:8080/ARBEIDSRETTET_DIALOG_URL
+  kafka:
+    broker:
+      url: http://localhost:8080/KAFKA_BROKERS_URL
+    topic: aapen-fo-endringPaaDialog-v1-APP_ENVIRONMENT_NAME
+  kvp:
+    url: http://localhost:8080/VEILARBOPPFOLGINGAPI_URL
+  mq:
+    hostname: MQGATEWAY03_HOSTNAME
+    name: MQGATEWAY03_NAME
+    port: MQGATEWAY03_PORT
+    queues:
+      oppgaveHenvendelse: HENVENDELSE_OPPGAVE_HENVENDELSE_QUEUENAME
+      stoppVarslinger: VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_QUEUENAME_PROPERTY
+      varselHandling: VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_QUEUENAME
+      varslinger: VARSELPRODUKSJON_VARSLINGER_QUEUENAME
+    userid: srvappserver
+  oidc:
+    disabled: true
+  openam:
+    clientId: VEILARBLOGIN_OPENAM_CLIENT_ID
+    discoveryUrl: http://localhost:8080/OPENAM_DISCOVERY_URL
+    refreshUrl: http://localhost:8080/VEILARBLOGIN_OPENAM_REFRESH_URL
+  serviceuser:
+    username: SERVICEUSER_USERNAME
+    password: SERVICEUSER_PASSWORD
+  sts:
+    discovery:
+      url: http://localhost:8080/SECURITYTOKENSERVICE_URL
+  unleash:
+    url: http://localhost:8080/UNLEASH_API_URL
+  veilarboppfolging:
+    api:
+      url: http://localhost:8080/VEILARBOPPFOLGINGAPI_URL

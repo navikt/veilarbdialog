@@ -3,25 +3,78 @@ package no.nav.fo.veilarbdialog.config;
 import com.ibm.msg.client.jms.JmsConnectionFactory;
 import com.ibm.msg.client.jms.JmsFactoryFactory;
 import com.ibm.msg.client.wmq.WMQConstants;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.sbl.dialogarena.types.Pingable;
 import no.nav.sbl.dialogarena.types.Pingable.Ping;
 import no.nav.sbl.dialogarena.types.Pingable.Ping.PingMetadata;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.core.JmsTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
 import java.util.UUID;
 
-import static no.nav.fo.veilarbdialog.config.ApplicationConfig.*;
-import static no.nav.sbl.util.EnvironmentUtils.*;
-
 @Configuration
 @EnableJms
+@Slf4j
 public class MessageQueueConfig {
+
+    @Value("${spring.application.name}")
+    private String applicationName;
+
+    @Value("${application.namespace}")
+    private String namespace;
+
+    @Value("${application.mq.hostname}")
+    private String mqGatewayHostname;
+
+    @Value("${application.mq.port}")
+    private String mqGatewayPort;
+
+    @Value("${application.mq.name}")
+    private String mqGatewayName;
+
+    @Value("${application.mq.userid}")
+    private String mqUserId;
+
+    /**
+     * Optional. If not configured, the value {@code <namespace>_<applicationName>} (uppercase) will be used automatically.
+     *
+     * @see #postConstruct()
+     */
+    @Value("${application.mq.channel:}")
+    private String mqChannel;
+
+    @Value("${application.mq.queues.varslinger}")
+    private String queueNameVarslinger;
+
+    @Value("${application.mq.queues.stoppVarslinger}")
+    private String queueNameStoppVarslinger;
+
+    @Value("${application.mq.queues.varselHandling}")
+    private String queueNameVarselHandling;
+
+    @Value("${application.mq.queues.oppgaveHenvendelse}")
+    private String queueNameOppgaveHenvendelse;
+
+    @PostConstruct
+    private void postConstruct() {
+
+        // Fallback to autoconfigured channel name.
+        if (mqChannel.isEmpty()) {
+            String env = namespace.equals("default") ? "p" : namespace;
+            mqChannel = String.format("%s_%s", env, applicationName).toUpperCase();
+            log.info("Using implicit channel {}", mqChannel);
+        } else {
+            log.info("Using explicit channel {}", mqChannel);
+        }
+
+    }
 
     @Bean
     public Pingable varselQueuePingable(JmsTemplate varselQueue) {
@@ -46,7 +99,7 @@ public class MessageQueueConfig {
     private Pingable queuePingable(JmsTemplate queue, String queueName, String beskrivelse) {
         final PingMetadata metadata = new PingMetadata(
                 UUID.randomUUID().toString(),
-                queueName + " via " + getRequiredProperty(MQGATEWAY03_HOSTNAME_PROPERTY),
+                queueName + " via " + mqGatewayHostname,
                 beskrivelse,
                 false
         );
@@ -62,22 +115,22 @@ public class MessageQueueConfig {
 
     @Bean
     public JmsTemplate varselQueue(ConnectionFactory connectionFactory) {
-        return queue(connectionFactory, getRequiredProperty(VARSELPRODUKSJON_VARSLINGER_QUEUENAME_PROPERTY));
+        return queue(connectionFactory, queueNameVarslinger);
     }
 
     @Bean
     JmsTemplate stopVarselQueue(ConnectionFactory connectionFactory) {
-        return queue(connectionFactory, getRequiredProperty(VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_QUEUENAME_PROPERTY));
+        return queue(connectionFactory, queueNameStoppVarslinger);
     }
 
     @Bean
     JmsTemplate varselMedHandlingQueue(ConnectionFactory connectionFactory) {
-        return queue(connectionFactory, getRequiredProperty(VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_QUEUENAME_PROPERTY));
+        return queue(connectionFactory, queueNameVarselHandling);
     }
 
     @Bean
     JmsTemplate oppgaveHenvendelseQueue(ConnectionFactory connectionFactory) {
-        return queue(connectionFactory, getRequiredProperty(HENVENDELSE_OPPGAVE_HENVENDELSE_QUEUENAME_PROPERTY));
+        return queue(connectionFactory, queueNameOppgaveHenvendelse);
     }
 
     private JmsTemplate queue(ConnectionFactory connectionFactory, String queueName) {
@@ -91,19 +144,20 @@ public class MessageQueueConfig {
     }
 
     @Bean
-    public ConnectionFactory connectionFactory() throws JMSException {
-        JmsFactoryFactory jmsFactoryFactory = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
-        JmsConnectionFactory connectionFactory = jmsFactoryFactory.createConnectionFactory();
+    public ConnectionFactory connectionFactory()
+            throws JMSException {
 
-        String env = requireNamespace().equals("default") ? "p" : requireNamespace();
-
-        connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, getRequiredProperty(MQGATEWAY03_HOSTNAME_PROPERTY));
-        connectionFactory.setStringProperty(WMQConstants.WMQ_PORT, getRequiredProperty(MQGATEWAY03_PORT_PROPERTY));
-        connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, String.format("%s_%s", env, requireApplicationName()).toUpperCase());
+        JmsConnectionFactory connectionFactory = JmsFactoryFactory
+                .getInstance(WMQConstants.WMQ_PROVIDER)
+                .createConnectionFactory();
+        connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, mqGatewayHostname);
+        connectionFactory.setStringProperty(WMQConstants.WMQ_PORT, mqGatewayPort);
+        connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, mqChannel);
         connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
-        connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, getRequiredProperty(MQGATEWAY03_NAME_PROPERTY));
-        connectionFactory.setStringProperty(WMQConstants.USERID, "srvappserver");
-
+        connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, mqGatewayName);
+        connectionFactory.setStringProperty(WMQConstants.USERID, mqUserId);
         return connectionFactory;
+
     }
+
 }
