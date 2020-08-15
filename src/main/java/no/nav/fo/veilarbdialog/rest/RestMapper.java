@@ -1,10 +1,10 @@
 package no.nav.fo.veilarbdialog.rest;
 
+import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,10 +16,10 @@ import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruke
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erInternBruker;
 
 @Component
+@RequiredArgsConstructor
 class RestMapper {
 
-    @Inject
-    KontorsperreFilter kontorsperreFilter;
+    private final KontorsperreFilter kontorsperreFilter;
 
     public DialogDTO somDialogDTO(DialogData dialogData) {
 

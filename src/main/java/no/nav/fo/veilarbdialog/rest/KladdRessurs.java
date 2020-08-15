@@ -1,35 +1,33 @@
 package no.nav.fo.veilarbdialog.rest;
 
 
-import no.nav.common.auth.SubjectHandler;
+import lombok.RequiredArgsConstructor;
+import no.nav.common.auth.subject.SubjectHandler;
 import no.nav.fo.veilarbdialog.domain.Kladd;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.service.KladdService;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.ServiceLoader;
 
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
 
-@Component
-@Path("/kladd")
+@RestController
+@RequestMapping("/kladd")
+@RequiredArgsConstructor
 public class KladdRessurs {
 
-    @Inject
-    private KladdService kladdService;
+    private final KladdService kladdService;
+    private final ServiceLoader.Provider<HttpServletRequest> requestProvider;
 
-    @Inject
-    private Provider<HttpServletRequest> requestProvider;
-
-    @GET
+    @GetMapping
     public List<KladdDTO> hentKladder() {
         return kladdService.hentKladder(getContextUserIdent())
                 .stream()
@@ -37,7 +35,7 @@ public class KladdRessurs {
                 .collect(toList());
     }
 
-    @POST
+    @PostMapping
     public void oppdaterKladd(KladdDTO dto) {
         kladdService.upsertKladd(getContextUserIdent(), somKladd(dto));
     }

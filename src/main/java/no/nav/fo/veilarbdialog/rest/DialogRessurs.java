@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import no.nav.common.auth.SubjectHandler;
+import lombok.RequiredArgsConstructor;
+import no.nav.common.auth.subject.SubjectHandler;
 import no.nav.fo.veilarbdialog.api.DialogController;
 import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
@@ -8,23 +9,22 @@ import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.AutorisasjonService;
 import no.nav.fo.veilarbdialog.service.KladdService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.NotFoundException;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.toIntExact;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static no.nav.apiapp.util.StringUtils.notNullOrEmpty;
-import static no.nav.apiapp.util.StringUtils.of;
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erInternBruker;
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogBruker;
@@ -35,25 +35,15 @@ import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeilede
         RestMapper.class,
         KontorsperreFilter.class
 })
+@RequiredArgsConstructor
 public class DialogRessurs implements DialogController, VeilederDialogController {
 
-    @Inject
-    private AppService appService;
-
-    @Inject
-    private RestMapper restMapper;
-
-    @Inject
-    private Provider<HttpServletRequest> requestProvider;
-
-    @Inject
-    private KontorsperreFilter kontorsperreFilter;
-
-    @Inject
-    private AutorisasjonService autorisasjonService;
-
-    @Inject
-    private KladdService kladdService;
+    private final AppService appService;
+    private final RestMapper restMapper;
+    private final ServiceLoader.Provider<HttpServletRequest> requestProvider;
+    private final KontorsperreFilter kontorsperreFilter;
+    private final AutorisasjonService autorisasjonService;
+    private final KladdService kladdService;
 
     @Override
     public List<DialogDTO> hentDialoger() {
@@ -65,7 +55,7 @@ public class DialogRessurs implements DialogController, VeilederDialogController
     }
 
     @Override
-    public SistOppdatert sistOppdatert(){
+    public SistOppdatert sistOppdatert() {
         Date oppdatert = appService.hentSistOppdatertForBruker(getContextUserIdent(), getLoggedInUserIdent());
         return new SistOppdatert(oppdatert);
     }
@@ -87,7 +77,7 @@ public class DialogRessurs implements DialogController, VeilederDialogController
                 .map(Long::parseLong)
                 .map(appService::hentDialog)
                 .map(restMapper::somDialogDTO)
-                .orElseThrow(() -> new NotFoundException(""));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @Override
@@ -174,10 +164,11 @@ public class DialogRessurs implements DialogController, VeilederDialogController
     }
 
     private Long finnDialogId(NyHenvendelseDTO nyHenvendelseDTO) {
-        if (notNullOrEmpty(nyHenvendelseDTO.dialogId)) {
+        if (StringUtils.isEmpty(nyHenvendelseDTO.dialogId)) {
             return Long.parseLong(nyHenvendelseDTO.dialogId);
         } else {
-            return of(nyHenvendelseDTO.aktivitetId)
+            return Optional.ofNullable(nyHenvendelseDTO.aktivitetId)
+                    .filter(StringUtils::isNotEmpty)
                     .flatMap(appService::hentDialogForAktivitetId)
                     .orElseGet(() -> opprettDialog(nyHenvendelseDTO))
                     .getId();
