@@ -1,43 +1,50 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import no.nav.fo.veilarbdialog.domain.DialogAktor;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.sbl.jdbc.Database;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
 import static java.util.Comparator.naturalOrder;
-import static no.nav.sbl.jdbc.Database.hentDato;
+import static java.util.Optional.ofNullable;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class DialogFeedDAO {
 
-    private final Database database;
+    private final JdbcTemplate jdbc;
     private final DateProvider dateProvider;
 
-    @Inject
-    public DialogFeedDAO(Database database, DateProvider dateProvider) {
-        this.database = database;
-        this.dateProvider = dateProvider;
+    private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
+        return ofNullable(rs.getTimestamp(kolonneNavn))
+                .map(Timestamp::getTime)
+                .map(Date::new)
+                .orElse(null);
     }
 
-
     public List<DialogAktor> hentAktorerMedEndringerFOM(Date date, int pageSize) {
-        return database.query("SELECT * FROM " +
-                        "(SELECT * FROM DIALOG_AKTOR WHERE opprettet_tidspunkt >= ? ORDER BY opprettet_tidspunkt) " +
-                        "WHERE rownum <= ?",
-                this::mapTilDialogAktor,
+        return jdbc.query("select * from " +
+                        "(select * from DIALOG_AKTOR where OPPRETTET_TIDSPUNKT >= ? order by OPPRETTET_TIDSPUNKT) " +
+                        "where ROWNUM <= ?",
+                (rs, rowNum) -> DialogAktor.builder()
+                        .aktorId(rs.getString("AKTOR_ID"))
+                        .sisteEndring(hentDato(rs, "SISTE_ENDRING"))
+                        .tidspunktEldsteVentende(hentDato(rs, "TIDSPUNKT_ELDSTE_VENTENDE"))
+                        .tidspunktEldsteUbehandlede(hentDato(rs, "TIDSPUNKT_ELDSTE_UBEHANDLEDE"))
+                        .opprettetTidspunkt(hentDato(rs, "OPPRETTET_TIDSPUNKT"))
+                        .build(),
                 date,
-                pageSize
-        );
+                pageSize);
     }
 
     public void updateDialogAktorFor(String aktorId, List<DialogData> dialoger) {
@@ -46,19 +53,12 @@ public class DialogFeedDAO {
             return;
         }
         val dialogAktor = mapTilDialogAktor(dialoger);
-        database.update("INSERT INTO DIALOG_AKTOR (" +
-                        "aktor_id, " +
-                        "siste_endring, " +
-                        "tidspunkt_eldste_ventende, " +
-                        "tidspunkt_eldste_ubehandlede, " +
-                        "opprettet_tidspunkt) " +
-                        "VALUES (?,?,?,?, " + dateProvider.getNow() + ")",
+        jdbc.update("insert into DIALOG_AKTOR (AKTOR_ID, SISTE_ENDRING, TIDSPUNKT_ELDSTE_VENTENDE, TIDSPUNKT_ELDSTE_UBEHANDLEDE, OPPRETTET_TIDSPUNKT) " +
+                        "values (?, ?, ?, ?, "+dateProvider.getNow()+")",
                 aktorId,
                 dialogAktor.getSisteEndring(),
                 dialogAktor.getTidspunktEldsteVentende(),
-                dialogAktor.getTidspunktEldsteUbehandlede()
-        );
-
+                dialogAktor.getTidspunktEldsteUbehandlede());
     }
 
     private static DialogAktor mapTilDialogAktor(List<DialogData> dialoger) {
@@ -82,13 +82,4 @@ public class DialogFeedDAO {
                 ).build();
     }
 
-    private DialogAktor mapTilDialogAktor(ResultSet rs) throws SQLException {
-        return DialogAktor.builder()
-                .aktorId(rs.getString("aktor_id"))
-                .sisteEndring(hentDato(rs, "siste_endring"))
-                .tidspunktEldsteVentende(hentDato(rs, "tidspunkt_eldste_ventende"))
-                .tidspunktEldsteUbehandlede(hentDato(rs, "tidspunkt_eldste_ubehandlede"))
-                .opprettetTidspunkt(hentDato(rs, "opprettet_tidspunkt"))
-                .build();
-    }
 }

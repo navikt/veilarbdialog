@@ -1,33 +1,30 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import no.nav.sbl.jdbc.Database;
+import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
+import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class KvpFeedMetadataDAO {
 
-    private final Database database;
-
-    @Inject
-    public KvpFeedMetadataDAO(Database database) {
-        this.database = database;
-    }
+    private final JdbcTemplate jdbc;
 
     public long hentSisteId() {
-        return database.queryForObject(
-                "SELECT SISTE_ID " +
-                        "FROM KVP_FEED_METADATA",
-                (rs) -> rs.getLong("SISTE_ID")
-        );
+        try {
+            return Optional
+                    .ofNullable(jdbc.queryForObject("select SISTE_ID from KVP_FEED_METADATA", Long.class))
+                    .orElse(0L);
+        } catch (EmptyResultDataAccessException e) {
+            return 0L;
+        }
     }
 
     public void oppdaterSisteFeedId(long id) {
-        database.update(
-                "UPDATE KVP_FEED_METADATA SET SISTE_ID = ?",
-                id
-        );
+        jdbc.update("update KVP_FEED_METADATA set SISTE_ID = ?", id);
     }
 
 }

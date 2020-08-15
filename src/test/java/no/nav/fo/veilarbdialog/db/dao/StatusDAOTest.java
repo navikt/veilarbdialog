@@ -1,29 +1,29 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.Date;
 
+import static no.nav.fo.IntegationTest.uniktTidspunkt;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StatusDAOTest extends IntegationTest {
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@Transactional
+class StatusDAOTest {
 
-    @Inject
+    @Autowired
     private StatusDAO statusDAO;
 
-    @Inject
+    @Autowired
     private DialogDAO dialogDAO;
-
-    @BeforeAll
-    public static void addSpringBeans() {
-        initSpringContext(Arrays.asList(StatusDAO.class, DialogDAO.class));
-    }
 
     @Test
     void markerSomLestAvVeilederSkalSetteLestTidspunkt() {

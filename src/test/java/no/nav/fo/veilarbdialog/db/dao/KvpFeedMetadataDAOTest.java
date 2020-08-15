@@ -1,23 +1,21 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import no.nav.fo.IntegationTest;
-import org.junit.BeforeClass;
 import org.junit.Test;
-
-import javax.inject.Inject;
-import java.util.Arrays;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class KvpFeedMetadataDAOTest extends IntegationTest {
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@Transactional
+public class KvpFeedMetadataDAOTest {
 
-    @Inject
+    @Autowired
     private KvpFeedMetadataDAO kvpFeedMetadataDAO;
-
-    @BeforeClass
-    public static void addSpringBeans() {
-        initSpringContext(Arrays.asList(KvpFeedMetadataDAO.class));
-    }
 
     @Test
     public void siste_id_skal_vare_samme_som_forrige_oppdaterte() {

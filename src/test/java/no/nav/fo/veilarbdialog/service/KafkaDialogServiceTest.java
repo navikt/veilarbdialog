@@ -1,8 +1,8 @@
 package no.nav.fo.veilarbdialog.service;
+
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
-import no.nav.fo.veilarbdialog.service.KafkaDialogService;
 import org.apache.kafka.clients.producer.MockProducer;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,19 +13,19 @@ import static org.mockito.Mockito.*;
 
 public class KafkaDialogServiceTest {
 
-    MockProducer kafkaProducer = new MockProducer();
+    MockProducer<String, String> kafkaProducer = new MockProducer<>();
     KafkaDAO kafkaDAO = mock(KafkaDAO.class);
     KafkaDialogService kafkaDialogService;
 
     @Before
-    public void setup(){
+    public void setup() {
         System.setProperty("APP_ENVIRONMENT_NAME", "TEST-Q0");
-        kafkaDialogService = new KafkaDialogService(kafkaProducer, kafkaDAO,   mock(DialogDAO.class));
+        kafkaDialogService = new KafkaDialogService(kafkaDAO, mock(DialogDAO.class), kafkaProducer, "aapen-fo-endringPaaDialog-v1-test");
     }
 
     @Test
     public void test_insert_feilende_aktorId() {
-        KafkaDialogMelding melding =  KafkaDialogMelding.builder()
+        KafkaDialogMelding melding = KafkaDialogMelding.builder()
                 .aktorId("123456789")
                 .tidspunktEldsteUbehandlede(LocalDateTime.now())
                 .tidspunktEldsteVentende(LocalDateTime.now())

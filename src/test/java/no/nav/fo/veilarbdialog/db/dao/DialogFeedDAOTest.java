@@ -1,38 +1,38 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.val;
-import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static no.nav.fo.IntegationTest.uniktTidspunkt;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static no.nav.fo.veilarbdialog.domain.DialogStatus.builder;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DialogFeedDAOTest extends IntegationTest {
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@Transactional
+public class DialogFeedDAOTest {
     private static final String AKTOR_ID = "1234";
 
-    @Inject
+    @Autowired
     private DialogDAO dialogDAO;
 
-    @Inject
+    @Autowired
     private DialogStatusService dialogStatusService;
 
-    @Inject
+    @Autowired
     private DialogFeedDAO dialogFeedDAO;
-
-    @BeforeClass
-    public static void addSpringBeans() {
-        initSpringContext(Arrays.asList(DialogDAO.class, DialogStatusService.class, DialogFeedDAO.class, StatusDAO.class, DataVarehusDAO.class, VarselDAO.class));
-    }
 
     @Test
     public void hentAktorerMedEndringerEtter_nyDialog_aktorEndret() {
@@ -121,7 +121,7 @@ public class DialogFeedDAOTest extends IntegationTest {
 
         updateDialogAktorFor(AKTOR_ID);
 
-        uniktTidspunkt();
+        uniktTidspunkt(); // TODO: Check this.
 
         DialogAktor etterAndreOppdatering = hentAktorMedEndringerEtter(forAndreStatusOppdatering);
         assertThat(etterAndreOppdatering.sisteEndring).isBetween(forAndreStatusOppdatering, uniktTidspunkt());
