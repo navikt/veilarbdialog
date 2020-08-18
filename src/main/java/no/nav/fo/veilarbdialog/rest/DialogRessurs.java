@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.NotFoundException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -64,6 +65,12 @@ public class DialogRessurs implements DialogController, VeilederDialogController
     }
 
     @Override
+    public SistOppdatert sistOppdatert(){
+        Date oppdatert = appService.hentSistOppdatertForBruker(getContextUserIdent(), getLoggedInUserIdent());
+        return new SistOppdatert(oppdatert);
+    }
+
+    @Override
     public AntallUlesteDTO antallUleste() {
         long antall = appService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
@@ -91,6 +98,7 @@ public class DialogRessurs implements DialogController, VeilederDialogController
         appService.opprettHenvendelseForDialog(HenvendelseData.builder()
                 .dialogId(dialogId)
                 .avsenderId(getLoggedInUserIdent())
+                .viktig(!nyHenvendelseDTO.egenskaper.isEmpty())
                 .avsenderType(erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
                 .tekst(nyHenvendelseDTO.tekst)
                 .build()

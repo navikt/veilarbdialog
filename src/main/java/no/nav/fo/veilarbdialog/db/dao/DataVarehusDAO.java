@@ -3,13 +3,16 @@ package no.nav.fo.veilarbdialog.db.dao;
 import no.nav.common.auth.SubjectHandler;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.sbl.jdbc.Database;
 import no.nav.sbl.sql.SqlUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Inject;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 
 import static no.nav.sbl.sql.DbConstants.CURRENT_TIMESTAMP;
 
@@ -26,10 +29,12 @@ public class DataVarehusDAO {
     static final String EVENT_TABELL = "EVENT";
 
     private final JdbcTemplate jdbc;
+    private final Database database;
 
     @Inject
-    public DataVarehusDAO(JdbcTemplate jdbcTemplate) {
+    public DataVarehusDAO(JdbcTemplate jdbcTemplate, Database database) {
         this.jdbc = jdbcTemplate;
+        this.database = database;
     }
 
     public void insertEvent(DialogData dialogData, DatavarehusEvent datavarehusEvent) {
@@ -47,6 +52,20 @@ public class DataVarehusDAO {
                 .value(LAGT_INN_AV, getLagtInnAv())
                 .execute();
     }
+
+    @Transactional(readOnly = true)
+    public Date hentSisteEndringSomIkkeErDine(String aktorId, String bruker) {
+        return database.query(
+                "SELECT TIDSPUNKT from EVENT where AKTOR_ID = ? and LAGT_INN_AV != ? ORDER BY EVENT_ID DESC FETCH FIRST 1 ROWS ONLY",
+                rs -> Database.hentDato(rs, "TIDSPUNKT"),
+                aktorId,
+                bruker
+        )
+                .stream()
+                .findFirst()
+                .orElse(null);
+    }
+
 
     private static Long hentLongFraForsteKollone(ResultSet resultSet) throws SQLException {
         return resultSet.getLong(1);

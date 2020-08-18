@@ -28,6 +28,7 @@ public class HenvendelseData {
     public final AvsenderType avsenderType;
     public final String avsenderId;
 
+    public final boolean viktig;
     public final boolean lestAvBruker;
     public final boolean lestAvVeileder;
 
