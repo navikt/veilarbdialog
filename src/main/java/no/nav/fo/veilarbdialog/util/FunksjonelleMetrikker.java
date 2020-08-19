@@ -1,23 +1,28 @@
 package no.nav.fo.veilarbdialog.util;
 
+import lombok.RequiredArgsConstructor;
+import no.nav.common.metrics.Event;
+import no.nav.common.metrics.InfluxClient;
+import no.nav.common.metrics.MetricsClient;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
-import no.nav.metrics.Event;
-import no.nav.metrics.MetricsFactory;
 
 import java.util.Date;
 
-import static no.nav.apiapp.util.StringUtils.notNullOrEmpty;
 import static no.nav.fo.veilarbdialog.util.DateUtils.nullSafeMsSiden;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+@RequiredArgsConstructor
 public class FunksjonelleMetrikker {
 
+    private static final MetricsClient client = new InfluxClient();
+
     public static void oppdaterFerdigbehandletTidspunkt(DialogData dialog, DialogStatus dialogStatus) {
-        MetricsFactory
-                .createEvent("dialog.veileder.oppdater.ferdigbehandlet")
-                .addFieldToReport("ferdigbehandlet", dialogStatus.ferdigbehandlet)
-                .addFieldToReport("behandlingsTid", nullSafeMsSiden(dialog.getVenterPaNavSiden()))
-                .report();
+        client.report(
+                new Event("dialog.veileder.oppdater.ferdigbehandlet")
+                        .addFieldToReport("ferdigbehandlet", dialogStatus.ferdigbehandlet)
+                        .addFieldToReport("behandlingsTid", nullSafeMsSiden(dialog.getVenterPaNavSiden()))
+        );
     }
 
     public static void markerDialogSomLestAvBruker(DialogData dialogData) {
@@ -42,60 +47,54 @@ public class FunksjonelleMetrikker {
     }
 
     public static void oppdaterVenterSvar(DialogStatus nyStatus) {
-        MetricsFactory
-                .createEvent("dialog.veileder.oppdater.VenterSvarFraBruker")
-                .addFieldToReport("venter", nyStatus.venterPaSvar)
-                .report();
+        client.report(
+                new Event("dialog.veileder.oppdater.VenterSvarFraBruker")
+                        .addFieldToReport("venter", nyStatus.venterPaSvar)
+        );
     }
 
     public static void nyHenvendelseBruker(DialogData dialogData) {
-        Event event = MetricsFactory
-                .createEvent("henvendelse.bruker.ny")
+        Event event = new Event("henvendelse.bruker.ny")
                 .addFieldToReport("erSvar", dialogData.venterPaSvar());
-
-        if(dialogData.getVenterPaSvarFraBrukerSiden() != null){
+        if (dialogData.getVenterPaSvarFraBrukerSiden() != null) {
             event.addFieldToReport("svartid", nullSafeMsSiden(dialogData.getVenterPaSvarFraBrukerSiden()));
         }
-
         event = addDialogMetadata(event, dialogData);
-        event.report();
+        client.report(event);
     }
 
     public static void nyeVarsler(int antall, long paragraf8Varsler) {
-        MetricsFactory.createEvent("dialog.varsel")
-                .addFieldToReport("antall", antall)
-                .addFieldToReport("antallParagraf8", paragraf8Varsler)
-                .report();
-    }
-
-    public static void paragraf8Varsel() {
-        MetricsFactory.createEvent("dialog.paragraf8.varsel")
-                .report();
+        client.report(
+                new Event("dialog.varsel")
+                        .addFieldToReport("antall", antall)
+                        .addFieldToReport("antallParagraf8", paragraf8Varsler)
+        );
     }
 
     public static void stoppetRevarsling(int antall) {
-        MetricsFactory.createEvent("dialog.revarsel.stoppet")
-                .addFieldToReport("antall", antall)
-                .report();
+        client.report(
+                new Event("dialog.revarsel.stoppet")
+                        .addFieldToReport("antall", antall)
+        );
     }
 
     private static void reportDialogMedMetadata(String eventName, DialogData dialog) {
-        Event event = MetricsFactory.createEvent(eventName);
-        event = addDialogMetadata(event, dialog);
-        event.report();
+        client.report(addDialogMetadata(new Event(eventName), dialog));
     }
 
     private static Event addDialogMetadata(Event event, DialogData dialog) {
         return event
-                .addFieldToReport("paaAktivitet", notNullOrEmpty(dialog.getAktivitetId()))
-                .addFieldToReport("kontorsperre", notNullOrEmpty(dialog.getKontorsperreEnhetId()));
+                .addFieldToReport("paaAktivitet", isNotEmpty(dialog.getAktivitetId()))
+                .addFieldToReport("kontorsperre", isNotEmpty(dialog.getKontorsperreEnhetId()));
 
     }
 
     private static void sendMarkerSomLestMetrikk(Date eldsteUlesteTidspunkt, String lestAv) {
-        MetricsFactory
-                .createEvent("dialog." + lestAv + ".lest")
-                .addFieldToReport("ReadTime", nullSafeMsSiden(eldsteUlesteTidspunkt))
-                .report();
+        client.report(
+                new Event("dialog." + lestAv + ".lest")
+                        .addFieldToReport("ReadTime", nullSafeMsSiden(eldsteUlesteTidspunkt))
+
+        );
     }
+
 }
