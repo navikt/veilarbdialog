@@ -95,7 +95,7 @@ public class DialogDAO {
     }
 
     public int kasserDialog(long id) {
-        return database.update("UPDATE DIALOG SET OVERSKRIFT = 'Kassert av NAV' WHERE DIALOG_ID = ?", id);
+        return database.update("UPDATE DIALOG SET OVERSKRIFT = 'Det var skrevet noe feil, og det er nå slettet.' WHERE DIALOG_ID = ?", id);
     }
 
     @Transactional(readOnly = true)
