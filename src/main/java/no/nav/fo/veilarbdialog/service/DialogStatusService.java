@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
+import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
@@ -9,25 +10,18 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import java.util.Date;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class DialogStatusService {
+
     private final StatusDAO statusDAO;
     private final DialogDAO dialogDAO;
     private final DataVarehusDAO dataVarehusDAO;
     private final VarselDAO varselDAO;
-
-    @Inject
-    public DialogStatusService(StatusDAO statusDAO, DialogDAO dialogDAO, DataVarehusDAO dataVarehusDAO, VarselDAO varselDAO) {
-        this.statusDAO = statusDAO;
-        this.dialogDAO = dialogDAO;
-        this.dataVarehusDAO = dataVarehusDAO;
-        this.varselDAO = varselDAO;
-    }
 
     public DialogData nyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
         if (henvendelseData.getSendt() == null) {
@@ -104,7 +98,7 @@ public class DialogStatusService {
         return dialogDAO.hentDialog(dialogStatus.getDialogId());
     }
 
-    public DialogData settDialogTilHistorisk(DialogData dialogData) {
+    public void settDialogTilHistorisk(DialogData dialogData) {
         statusDAO.setHistorisk(dialogData.getId());
         if (!dialogData.erFerdigbehandlet()) {
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_NAV);
@@ -113,7 +107,7 @@ public class DialogStatusService {
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
         }
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.SATT_TIL_HISTORISK);
-        return dialogDAO.hentDialog(dialogData.getId());
+        dialogDAO.hentDialog(dialogData.getId());
     }
 
     public void nyDialog(DialogData oprettet) {
