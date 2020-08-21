@@ -2,8 +2,6 @@ package no.nav.fo.veilarbdialog.rest;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.common.auth.subject.SubjectHandler;
-import no.nav.fo.veilarbdialog.api.DialogController;
-import no.nav.fo.veilarbdialog.api.VeilederDialogController;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AppService;
@@ -12,7 +10,7 @@ import no.nav.fo.veilarbdialog.service.KladdService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,13 +28,14 @@ import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erInternBruker
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogBruker;
 import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeileder;
 
-@Component
+@RestController
+@RequestMapping("dialog")
 @Import({
         RestMapper.class,
         KontorsperreFilter.class
 })
 @RequiredArgsConstructor
-public class DialogRessurs implements DialogController, VeilederDialogController {
+public class DialogRessurs {
 
     private final AppService appService;
     private final RestMapper restMapper;
@@ -45,7 +44,7 @@ public class DialogRessurs implements DialogController, VeilederDialogController
     private final AutorisasjonService autorisasjonService;
     private final KladdService kladdService;
 
-    @Override
+    @GetMapping
     public List<DialogDTO> hentDialoger() {
         return appService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
@@ -54,13 +53,13 @@ public class DialogRessurs implements DialogController, VeilederDialogController
                 .collect(toList());
     }
 
-    @Override
+    @GetMapping("sistOppdatert")
     public SistOppdatert sistOppdatert() {
         Date oppdatert = appService.hentSistOppdatertForBruker(getContextUserIdent(), getLoggedInUserIdent());
         return new SistOppdatert(oppdatert);
     }
 
-    @Override
+    @GetMapping("antallUleste")
     public AntallUlesteDTO antallUleste() {
         long antall = appService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
@@ -71,8 +70,8 @@ public class DialogRessurs implements DialogController, VeilederDialogController
         return new AntallUlesteDTO(toIntExact(antall));
     }
 
-    @Override
-    public DialogDTO hentDialog(String dialogId) {
+    @GetMapping("{dialogId}")
+    public DialogDTO hentDialog(@PathVariable String dialogId) {
         return Optional.ofNullable(dialogId)
                 .map(Long::parseLong)
                 .map(appService::hentDialog)
@@ -80,7 +79,7 @@ public class DialogRessurs implements DialogController, VeilederDialogController
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @Override
+    @PostMapping
     public DialogDTO nyHenvendelse(NyHenvendelseDTO nyHenvendelseDTO) {
         slettUtdattertKladd(nyHenvendelseDTO);
 
@@ -107,8 +106,8 @@ public class DialogRessurs implements DialogController, VeilederDialogController
         }
     }
 
-    @Override
-    public DialogDTO markerSomLest(String dialogId) {
+    @PutMapping("{dialogId}/les")
+    public DialogDTO markerSomLest(@PathVariable String dialogId) {
         DialogData dialogData = markerSomLest(Long.parseLong(dialogId));
         return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ?
                 restMapper.somDialogDTO(dialogData)
@@ -123,8 +122,8 @@ public class DialogRessurs implements DialogController, VeilederDialogController
 
     }
 
-    @Override
-    public DialogDTO oppdaterVenterPaSvar(String dialogId, boolean venter) {
+    @PutMapping("{dialogId}/venter_pa_svar/{venter}")
+    public DialogDTO oppdaterVenterPaSvar(@PathVariable String dialogId, @PathVariable boolean venter) {
         autorisasjonService.skalVereInternBruker();
 
         DialogStatus dialogStatus = DialogStatus.builder()
@@ -138,8 +137,8 @@ public class DialogRessurs implements DialogController, VeilederDialogController
         return markerSomLest(dialogId);
     }
 
-    @Override
-    public DialogDTO oppdaterFerdigbehandlet(String dialogId, boolean ferdigbehandlet) {
+    @PutMapping("{dialogId}/ferdigbehandlet/{ferdigbehandlet}")
+    public DialogDTO oppdaterFerdigbehandlet(@PathVariable String dialogId, @PathVariable boolean ferdigbehandlet) {
         autorisasjonService.skalVereInternBruker();
 
         DialogStatus dialogStatus = DialogStatus.builder()
@@ -153,7 +152,7 @@ public class DialogRessurs implements DialogController, VeilederDialogController
         return markerSomLest(dialogId);
     }
 
-    @Override
+    @PostMapping("forhandsorientering")
     public DialogDTO forhandsorienteringPaAktivitet(NyHenvendelseDTO nyHenvendelseDTO) {
         autorisasjonService.skalVereInternBruker();
 
