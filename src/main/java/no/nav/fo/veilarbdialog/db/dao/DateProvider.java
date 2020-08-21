@@ -7,10 +7,9 @@ import java.util.function.Supplier;
 @Component
 public class DateProvider {
 
-    // mockes i tester
-    private static Supplier<String> provider = () -> "CURRENT_TIMESTAMP";
-
+    private static final Supplier<String> provider = () -> "CURRENT_TIMESTAMP";
     public String getNow() {
         return provider.get();
     }
+
 }
