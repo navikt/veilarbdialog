@@ -47,9 +47,4 @@ public abstract class Person {
         }
     }
 
-    public static class NavIdent extends Person {
-        private NavIdent(String id) {
-            super(id);
-        }
-    }
 }
