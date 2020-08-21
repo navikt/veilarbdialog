@@ -48,7 +48,7 @@ public class DialogRessurs {
     public List<DialogDTO> hentDialoger() {
         return appService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
-                .filter(dialog -> kontorsperreFilter.harTilgang(dialog.getKontorsperreEnhetId()))
+                .filter(dialog -> kontorsperreFilter.harTilgang(getLoggedInUserIdent(), dialog.getKontorsperreEnhetId()))
                 .map(restMapper::somDialogDTO)
                 .collect(toList());
     }
@@ -94,7 +94,7 @@ public class DialogRessurs {
         );
         DialogData dialogData = markerSomLest(dialogId);
         appService.updateDialogAktorFor(dialogData.getAktorId());
-        return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ?
+        return kontorsperreFilter.harTilgang(getLoggedInUserIdent(), dialogData.getKontorsperreEnhetId()) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
     }
@@ -109,7 +109,7 @@ public class DialogRessurs {
     @PutMapping("{dialogId}/les")
     public DialogDTO markerSomLest(@PathVariable String dialogId) {
         DialogData dialogData = markerSomLest(Long.parseLong(dialogId));
-        return kontorsperreFilter.harTilgang(dialogData.getKontorsperreEnhetId()) ?
+        return kontorsperreFilter.harTilgang(getLoggedInUserIdent(), dialogData.getKontorsperreEnhetId()) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
     }
@@ -196,7 +196,7 @@ public class DialogRessurs {
         return opprettetDialog;
     }
 
-    private String getLoggedInUserIdent() {
+    private static String getLoggedInUserIdent() {
         return SubjectHandler.getIdent().orElse(null);
     }
 

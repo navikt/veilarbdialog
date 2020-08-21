@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import lombok.RequiredArgsConstructor;
+import no.nav.common.auth.subject.SubjectHandler;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import org.springframework.stereotype.Component;
@@ -21,12 +22,16 @@ class RestMapper {
 
     private final KontorsperreFilter kontorsperreFilter;
 
+    private static String getLoggedInUserIdent() {
+        return SubjectHandler.getIdent().orElse(null);
+    }
+
     public DialogDTO somDialogDTO(DialogData dialogData) {
 
         List<HenvendelseData> henvendelser = dialogData
                 .getHenvendelser()
                 .stream()
-                .filter((henvendelse) -> kontorsperreFilter.harTilgang(henvendelse.getKontorsperreEnhetId()))
+                .filter((henvendelse) -> kontorsperreFilter.harTilgang(getLoggedInUserIdent(), henvendelse.getKontorsperreEnhetId()))
                 .collect(toList());
 
         Optional<HenvendelseData> sisteHenvendelse = henvendelser.stream()
