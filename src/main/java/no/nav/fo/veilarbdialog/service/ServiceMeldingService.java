@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
+import lombok.RequiredArgsConstructor;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLAktoerId;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarsel;
 import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarslingstyper;
@@ -7,22 +8,20 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import javax.xml.bind.JAXBContext;
 
 import static java.util.UUID.randomUUID;
 import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.*;
 
 @Component
+@RequiredArgsConstructor
 public class ServiceMeldingService {
-
-    @Inject
-    private JmsTemplate varselQueue;
 
     private static final String VARSEL_ID = "DittNAV_000007";
     private static final String VARSEL_NAVN = "Aktivitetsplan_nye_henvendelser";
-
     private static final JAXBContext VARSEL_CONTEXT = jaxbContext(XMLVarsel.class, XMLVarslingstyper.class);
+
+    private final JmsTemplate varselQueue;
 
     void sendVarsel(String aktorId) {
         XMLVarsel xmlVarsel = lagNyttVarsel(aktorId);
@@ -37,4 +36,5 @@ public class ServiceMeldingService {
                 .withMottaker(new XMLAktoerId().withAktoerId(aktoerId))
                 .withVarslingstype(new XMLVarslingstyper(VARSEL_ID, null, null));
     }
+
 }

@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
+import lombok.RequiredArgsConstructor;
 import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.AktoerId;
 import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.ObjectFactory;
 import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.Parameter;
@@ -7,22 +8,19 @@ import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.VarselMe
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 
 import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.*;
 
 @Component
+@RequiredArgsConstructor
 public class VarselMedHandlingService {
 
     private static final String PARAGAF8_VARSEL_ID = "DittNAV_000008";
-    public static final String PARAGAF8_VARSEL_NAVN = "Aktivitetsplan_p8_mal";
-
-    @Inject
-    private JmsTemplate varselMedHandlingQueue;
-
     private static final JAXBContext VARSEL_MED_HANDLING = jaxbContext(ObjectFactory.class);
+
+    private final JmsTemplate varselMedHandlingQueue;
 
     public void send(String aktorId, String varselbestillingId) {
         AktoerId motaker = new AktoerId();
@@ -45,4 +43,5 @@ public class VarselMedHandlingService {
 
         varselMedHandlingQueue.send(messageCreator(marshall(melding, VARSEL_MED_HANDLING), varselbestillingId));
     }
+
 }

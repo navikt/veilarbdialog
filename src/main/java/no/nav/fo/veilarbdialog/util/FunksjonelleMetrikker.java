@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog.util;
 
-import lombok.RequiredArgsConstructor;
 import no.nav.common.metrics.Event;
 import no.nav.common.metrics.InfluxClient;
 import no.nav.common.metrics.MetricsClient;
@@ -12,7 +11,6 @@ import java.util.Date;
 import static no.nav.fo.veilarbdialog.util.DateUtils.nullSafeMsSiden;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-@RequiredArgsConstructor
 public class FunksjonelleMetrikker {
 
     private static final MetricsClient client = new InfluxClient();
