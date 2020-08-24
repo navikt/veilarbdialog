@@ -8,7 +8,7 @@ import no.nav.fo.IntegationTest;
 import no.nav.fo.feed.FeedProducerTester;
 import no.nav.fo.feed.consumer.FeedConsumer;
 import no.nav.fo.feed.controller.FeedController;
-import no.nav.fo.veilarbdialog.client.KvpClient;
+import no.nav.fo.veilarbdialog.service.KvpService;
 import no.nav.fo.veilarbdialog.config.FeedConfig;
 import no.nav.fo.veilarbdialog.db.dao.*;
 import no.nav.fo.veilarbdialog.domain.AvsluttetOppfolgingFeedDTO;
@@ -83,13 +83,13 @@ public class FeedIntegrationTest {
 
         private static long counter = 1;
 
-        @Inject
+        @Autowired
         protected FeedController feedController;
 
-        @Inject
+        @Autowired
         protected DialogDAO dialogDAO;
 
-        @Inject
+        @Autowired
         protected DialogFeedDAO dialogFeedDAO;
 
         static class ContextConfig {
@@ -105,8 +105,8 @@ public class FeedIntegrationTest {
             }
 
             @Bean
-            public KvpClient kvpClient() {
-                return mock(KvpClient.class);
+            public KvpService kvpClient() {
+                return mock(KvpService.class);
             }
 
             @Bean

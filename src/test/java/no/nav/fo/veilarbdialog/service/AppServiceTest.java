@@ -4,7 +4,6 @@ import no.nav.apiapp.feil.IngenTilgang;
 import no.nav.apiapp.feil.UlovligHandling;
 import no.nav.apiapp.security.PepClient;
 import no.nav.dialogarena.aktor.AktorService;
-import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
@@ -42,7 +41,7 @@ public class AppServiceTest {
     private final DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
     private final AktorService aktorService = mock(AktorService.class);
     private final PepClient pepClient = mock(PepClient.class);
-    private final KvpClient kvpClient = mock(KvpClient.class);
+    private final KvpService kvpService = mock(KvpService.class);
     private final UnleashService unleashService = mock(UnleashService.class);
 
     private AppService appService;
@@ -61,7 +60,7 @@ public class AppServiceTest {
                 dialogFeedDAO,
                 pepClient,
                 kafkaDialogService,
-                kvpClient,
+                kvpService,
                 unleashService
         );
 
@@ -78,28 +77,28 @@ public class AppServiceTest {
 
     @Test
     public void kontorsperre_tagger_dialog_med_enhet_id() {
-        when(kvpClient.kontorsperreEnhetId(AKTOR_ID)).thenReturn(KONTORSPERRE_ENHET_ID);
+        when(kvpService.kontorsperreEnhetId(AKTOR_ID)).thenReturn(KONTORSPERRE_ENHET_ID);
         appService.opprettDialogForAktivitetsplanPaIdent(DIALOG_DATA);
         verify(dialogDAO, times(1)).opprettDialog(DIALOG_DATA.withKontorsperreEnhetId(KONTORSPERRE_ENHET_ID));
     }
 
     @Test
     public void kontorsperre_tagger_henvendelse_med_enhet_id() {
-        when(kvpClient.kontorsperreEnhetId(AKTOR_ID)).thenReturn(KONTORSPERRE_ENHET_ID);
+        when(kvpService.kontorsperreEnhetId(AKTOR_ID)).thenReturn(KONTORSPERRE_ENHET_ID);
         appService.opprettHenvendelseForDialog(NY_HENVENDELSE);
         verify(dialogDAO, times(1)).opprettHenvendelse(NY_HENVENDELSE.withKontorsperreEnhetId(KONTORSPERRE_ENHET_ID));
     }
 
     @Test
     public void kontorsperre_tagger_dialog_med_null() {
-        when(kvpClient.kontorsperreEnhetId(AKTOR_ID)).thenReturn(null);
+        when(kvpService.kontorsperreEnhetId(AKTOR_ID)).thenReturn(null);
         appService.opprettDialogForAktivitetsplanPaIdent(DIALOG_DATA);
         verify(dialogDAO, times(1)).opprettDialog(DIALOG_DATA);
     }
 
     @Test
     public void kontorsperre_tagger_henvendelse_med_null() {
-        when(kvpClient.kontorsperreEnhetId(AKTOR_ID)).thenReturn(null);
+        when(kvpService.kontorsperreEnhetId(AKTOR_ID)).thenReturn(null);
         appService.opprettHenvendelseForDialog(NY_HENVENDELSE);
         verify(dialogDAO, times(1)).opprettHenvendelse(NY_HENVENDELSE);
     }

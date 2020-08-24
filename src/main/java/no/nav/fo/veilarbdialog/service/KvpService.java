@@ -1,9 +1,11 @@
-package no.nav.fo.veilarbdialog.client;
+package no.nav.fo.veilarbdialog.service;
 
-import no.nav.apiapp.feil.Feil;
-import no.nav.apiapp.feil.FeilType;
-import no.nav.brukerdialog.security.oidc.SystemUserTokenProvider;
+import lombok.RequiredArgsConstructor;
+import no.nav.common.sts.SystemUserTokenProvider;
+import no.nav.common.types.feil.Feil;
+import no.nav.common.types.feil.FeilType;
 import no.nav.fo.veilarbdialog.domain.KvpDTO;
+import org.springframework.stereotype.Service;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
@@ -11,22 +13,18 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import java.util.Optional;
 
-public class KvpClient {
+@Service
+@RequiredArgsConstructor
+public class KvpService {
 
     private final String baseUrl;
     private final Client client;
-
-    public KvpClient(String baseUrl, Client client) {
-        this.baseUrl = baseUrl;
-        this.client = client;
-    }
-
-    private SystemUserTokenProvider systemUserTokenProvider = new SystemUserTokenProvider();
+    private final SystemUserTokenProvider systemUserTokenProvider;
 
     private KvpDTO get(String aktorId) {
         String uri = String.format("%s/kvp/%s/currentStatus", baseUrl, aktorId);
         Invocation.Builder b = client.target(uri).request();
-        b.header("Authorization", "Bearer " + this.systemUserTokenProvider.getToken());
+        b.header("Authorization", "Bearer " + systemUserTokenProvider.getSystemUserToken());
         return b.get(KvpDTO.class);
     }
 
@@ -41,4 +39,5 @@ public class KvpClient {
             throw new Feil(FeilType.UKJENT, "veilarboppfolging har en intern bug, vennligst fiks applikasjonen.");
         }
     }
+
 }

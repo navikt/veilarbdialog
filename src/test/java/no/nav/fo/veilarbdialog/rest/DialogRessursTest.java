@@ -8,7 +8,7 @@ import no.nav.common.auth.SsoToken;
 import no.nav.common.auth.Subject;
 import no.nav.dialogarena.aktor.AktorService;
 import no.nav.fo.IntegationTest;
-import no.nav.fo.veilarbdialog.client.KvpClient;
+import no.nav.fo.veilarbdialog.service.KvpService;
 import no.nav.fo.veilarbdialog.db.dao.*;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
@@ -40,10 +40,10 @@ public class DialogRessursTest extends IntegationTest {
     private static final String AKTORID = "123";
     private static final String FNR = "4321";
 
-    @Inject
+    @Autowired
     private DialogRessurs dialogRessurs;
 
-    @Inject
+    @Autowired
     private MockHttpServletRequest mockHttpServletRequest;
 
     @Rule
@@ -65,8 +65,8 @@ public class DialogRessursTest extends IntegationTest {
         }
 
         @Bean
-        public KvpClient kvpClient() {
-            return mock(KvpClient.class);
+        public KvpService kvpClient() {
+            return mock(KvpService.class);
         }
 
         @Bean

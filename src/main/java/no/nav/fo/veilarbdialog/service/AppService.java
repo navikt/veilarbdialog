@@ -1,16 +1,16 @@
 package no.nav.fo.veilarbdialog.service;
 
+import lombok.RequiredArgsConstructor;
 import no.nav.apiapp.feil.UlovligHandling;
 import no.nav.apiapp.security.PepClient;
+import no.nav.common.abac.Pep;
 import no.nav.dialogarena.aktor.AktorService;
-import no.nav.fo.veilarbdialog.client.KvpClient;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.*;
-import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
 import no.nav.sbl.featuretoggle.unleash.UnleashService;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
@@ -18,8 +18,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-@Component
+@Service
 @Transactional
+@RequiredArgsConstructor
 public class AppService {
 
     private final AktorService aktorService;
@@ -27,35 +28,15 @@ public class AppService {
     private final DialogStatusService dialogStatusService;
     private final DataVarehusDAO dataVarehusDAO;
     private final DialogFeedDAO dialogFeedDAO;
-    private final PepClient pepClient;
-    private final KvpClient kvpClient;
+    private final Pep pep;
+    private final KvpService kvpService;
     private final UnleashService unleashService;
     private final KafkaDialogService kafkaDialogService;
-
-    public AppService(AktorService aktorService,
-                      DialogDAO dialogDAO,
-                      DialogStatusService dialogStatusService,
-                      DataVarehusDAO dataVarehusDAO,
-                      DialogFeedDAO dialogFeedDAO,
-                      PepClient pepClient,
-                      KafkaDialogService kafkaDialogService,
-                      KvpClient kvpClient,
-                      UnleashService unleashService) {
-        this.aktorService = aktorService;
-        this.dialogDAO = dialogDAO;
-        this.dialogStatusService = dialogStatusService;
-        this.dataVarehusDAO = dataVarehusDAO;
-        this.dialogFeedDAO = dialogFeedDAO;
-        this.pepClient = pepClient;
-        this.kvpClient = kvpClient;
-        this.unleashService = unleashService;
-        this.kafkaDialogService = kafkaDialogService;
-    }
 
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person) {
         String aktorId = hentAktoerIdForPerson(person);
-        pepClient.sjekkLesetilgangTilAktorId(aktorId);
+        pep.sjekkLesetilgangTilAktorId(aktorId);
 
         return dialogDAO.hentDialogerForAktorId(aktorId);
     }
@@ -69,7 +50,7 @@ public class AppService {
 
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
         pepClient.sjekkLesetilgangTilAktorId(dialogData.getAktorId());
-        DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
+        DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(dialogData.getAktorId()));
         DialogData oprettet = dialogDAO.opprettDialog(kontorsperretDialog);
         dialogStatusService.nyDialog(oprettet);
         return oprettet;
@@ -79,7 +60,7 @@ public class AppService {
         long dialogId = henvendelseData.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         HenvendelseData henvendelse = henvendelseData
-                .withKontorsperreEnhetId(kvpClient.kontorsperreEnhetId(dialogData.getAktorId()));
+                .withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(dialogData.getAktorId()));
 
         HenvendelseData opprettet = dialogDAO.opprettHenvendelse(henvendelse);
         return dialogStatusService.nyHenvendelse(dialogData, opprettet);
@@ -144,7 +125,7 @@ public class AppService {
     @Transactional(readOnly = true)
     public List<DialogAktor> hentAktorerMedEndringerFOM(Date tidspunkt, int pageSize) {
         // NB: ingen tilgangskontroll her siden feed har egen mekanisme for dette
-        if(!this.unleashService.isEnabled("veilarbdialog.skruav.feed")) {
+        if (!this.unleashService.isEnabled("veilarbdialog.skruav.feed")) {
             return dialogFeedDAO.hentAktorerMedEndringerFOM(tidspunkt, pageSize);
         }
         return Collections.emptyList();
@@ -168,7 +149,7 @@ public class AppService {
 
     public void updateDialogAktorFor(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
-        if(unleashService.isEnabled("veilarbdialog.kafka")) {
+        if (unleashService.isEnabled("veilarbdialog.kafka")) {
             KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
             kafkaDialogService.dialogEvent(kafkaDialogMelding);
         }
