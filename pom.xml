@@ -4,82 +4,151 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>no.nav.common</groupId>
-        <artifactId>mor-pom</artifactId>
-        <version>1.2020.02.11-12.17-1a30837bb4f2</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.3.3.RELEASE</version>
+        <relativePath />
     </parent>
 
     <groupId>no.nav.fo</groupId>
     <artifactId>veilarbdialog</artifactId>
     <version>1</version>
-    <packaging>war</packaging>
 
     <build>
-        <finalName>veilarbdialog</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 
     <properties>
+        <java.version>11</java.version>
+
+        <jackson.version>2.11.2</jackson.version>
+        <no.nav.common.version>2.2020.08.07_16.18-e6be6d6a09e6</no.nav.common.version>
+        <shedlock.version>4.14.0</shedlock.version>
         <tjenestespesifikasjoner.version>1.2019.09.25-00.21-49b69f0625e0</tjenestespesifikasjoner.version>
+        <unleash-client-java.version>3.3.3</unleash-client-java.version>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>no.nav.common</groupId>
-                <artifactId>bom</artifactId>
-                <version>${project.parent.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <!--Tjenester-->
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>varsel-inn</artifactId>
-                <version>${tjenestespesifikasjoner.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>nav-virksomhet-varselMedHandling-v1-meldingsdefinisjon</artifactId>
-                <version>${tjenestespesifikasjoner.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>nav-virksomhet-stoppReVarsel-v1-meldingsdefinisjon</artifactId>
-                <version>${tjenestespesifikasjoner.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>nav-virksomhet-opprettOppgavehenvendelse-v1-meldingsdefinisjon</artifactId>
-                <version>${tjenestespesifikasjoner.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <dependencies>
+
+        <!-- Spring Boot -->
         <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>api-app</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>rest</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>aktor-klient</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jdbc</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- no.nav.common -->
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>util</artifactId>
+            <version>${no.nav.common.version}</version>
         </dependency>
-
-
-        <!-- DB -->
         <dependency>
             <groupId>no.nav.common</groupId>
-            <artifactId>jdbc</artifactId>
+            <artifactId>client</artifactId>
+            <version>${no.nav.common.version}</version>
         </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>sts</artifactId>
+            <version>${no.nav.common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>json</artifactId>
+            <version>${no.nav.common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>log</artifactId>
+            <version>${no.nav.common.version}</version>
+        </dependency>
+
+        <!-- Jackson -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-xml</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <!--Tjenester-->
+        <dependency>
+            <groupId>no.nav.tjenestespesifikasjoner</groupId>
+            <artifactId>varsel-inn</artifactId>
+            <version>${tjenestespesifikasjoner.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.tjenestespesifikasjoner</groupId>
+            <artifactId>nav-virksomhet-varselMedHandling-v1-meldingsdefinisjon</artifactId>
+            <version>${tjenestespesifikasjoner.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.tjenestespesifikasjoner</groupId>
+            <artifactId>nav-virksomhet-stoppReVarsel-v1-meldingsdefinisjon</artifactId>
+            <version>${tjenestespesifikasjoner.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.tjenestespesifikasjoner</groupId>
+            <artifactId>nav-virksomhet-opprettOppgavehenvendelse-v1-meldingsdefinisjon</artifactId>
+            <version>${tjenestespesifikasjoner.version}</version>
+        </dependency>
+
+        <!--- Old <dependencies> below this point -->
+
+        <!--<dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>api-app</artifactId>
+            <version>${no.nav.common.version}</version>
+        </dependency>-->
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>rest</artifactId>
+            <version>${no.nav.common.version}</version>
+        </dependency>
+        <!--<dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>aktor-klient</artifactId>
+            <version>${no.nav.common.version}</version>
+        </dependency>-->
+
+        <!-- DB -->
+<!--        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>jdbc</artifactId>
+            <version>${no.nav.common.jdbc.version}</version>
+        </dependency>-->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
@@ -98,18 +167,17 @@
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>feature-toggle</artifactId>
+            <version>${no.nav.common.version}</version>
         </dependency>
         <dependency>
             <groupId>no.finn.unleash</groupId>
             <artifactId>unleash-client-java</artifactId>
+            <version>${unleash-client-java.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>types</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
+            <version>${no.nav.common.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.jms</groupId>
@@ -122,6 +190,7 @@
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>metrics</artifactId>
+            <version>${no.nav.common.version}</version>
         </dependency>
         <dependency>
             <groupId>com.ibm.mq</groupId>
@@ -138,6 +207,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <!-- Kafka -->
@@ -152,15 +222,18 @@
             <groupId>no.nav.common</groupId>
             <artifactId>auth</artifactId>
             <type>test-jar</type>
+            <version>${no.nav.common.version}</version>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>test-config</artifactId>
-        </dependency>
-        <dependency>
+            <version>${no.nav.common.version}</version>
+        </dependency>-->
+        <!--<dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>fasit</artifactId>
-        </dependency>
+            <version>${no.nav.common.version}</version>
+        </dependency>-->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
@@ -175,6 +248,7 @@
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>abac</artifactId>
+            <version>${no.nav.common.version}</version>
         </dependency>
         <dependency>
             <groupId>net.sf.ehcache</groupId>
@@ -216,35 +290,22 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>oidc-security</artifactId>
-        </dependency>
-        <dependency>
+            <version>${no.nav.common.version}</version>
+        </dependency>-->
+        <!--<dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>oidc-security</artifactId>
+            <version>${no.nav.common.version}</version>
             <type>test-jar</type>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>auth</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>varsel-inn</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-virksomhet-varselMedHandling-v1-meldingsdefinisjon</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-virksomhet-stoppReVarsel-v1-meldingsdefinisjon</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-virksomhet-opprettOppgavehenvendelse-v1-meldingsdefinisjon</artifactId>
+            <version>${no.nav.common.version}</version>
         </dependency>
 
         <!--Annet-->
@@ -252,22 +313,28 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>feed</artifactId>
-        </dependency>
-        <dependency>
+            <version>${no.nav.common.version}</version>
+        </dependency>-->
+        <!--<dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>feed</artifactId>
+            <version>${no.nav.common.version}</version>
             <type>test-jar</type>
-        </dependency>
+        </dependency>-->
+
+        <!-- ShedLock -->
         <dependency>
             <groupId>net.javacrumbs.shedlock</groupId>
             <artifactId>shedlock-core</artifactId>
+            <version>${shedlock.version}</version>
         </dependency>
         <dependency>
             <groupId>net.javacrumbs.shedlock</groupId>
             <artifactId>shedlock-provider-jdbc</artifactId>
+            <version>${shedlock.version}</version>
         </dependency>
     </dependencies>
 

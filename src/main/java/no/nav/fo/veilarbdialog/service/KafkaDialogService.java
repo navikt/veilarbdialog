@@ -1,44 +1,38 @@
 package no.nav.fo.veilarbdialog.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.common.json.JsonUtils;
 import no.nav.common.utils.IdUtils;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
-import no.nav.json.JsonUtils;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.slf4j.MDC;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static no.nav.log.LogFilter.PREFERRED_NAV_CALL_ID_HEADER_NAME;
-import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
+import static no.nav.common.log.LogFilter.PREFERRED_NAV_CALL_ID_HEADER_NAME;
+import static no.nav.common.utils.EnvironmentUtils.getRequiredProperty;
 
+@Service
+@RequiredArgsConstructor
 @Slf4j
-@Component
 public class KafkaDialogService  {
 
-    private KafkaDAO kafkaDAO;
-    private DialogDAO dialogDAO;
-    private Producer<String, String> kafkaProducer;
+    private final KafkaDAO kafkaDAO;
+    private final DialogDAO dialogDAO;
+    private final Producer<String, String> kafkaProducer;
 
     private static final String APP_ENVIRONMENT_NAME = "APP_ENVIRONMENT_NAME";
     static final String KAFKA_PRODUCER_TOPIC = "aapen-fo-endringPaaDialog-v1" + "-" + getRequiredProperty(APP_ENVIRONMENT_NAME);
-
-    @Inject
-    public KafkaDialogService(Producer<String, String> kafkaProducer, KafkaDAO kafkaDAO, DialogDAO dialogDAO) {
-        this.kafkaDAO = kafkaDAO;
-        this.kafkaProducer = kafkaProducer;
-        this.dialogDAO = dialogDAO;
-    }
 
     public void dialogEvent(KafkaDialogMelding kafkaDialogMelding) {
         String kafkaStringMelding = JsonUtils.toJson(kafkaDialogMelding);
