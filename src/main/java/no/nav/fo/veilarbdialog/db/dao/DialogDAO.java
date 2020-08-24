@@ -91,11 +91,11 @@ public class DialogDAO {
     }
 
     public int kasserHenvendelse(long id) {
-        return database.update("UPDATE HENVENDELSE SET TEKST = 'Kassert av NAV' WHERE HENVENDELSE_ID = ?", id);
+        return database.update("UPDATE HENVENDELSE SET TEKST = '- Det var skrevet noe feil, og det er nå slettet. -' WHERE HENVENDELSE_ID = ?", id);
     }
 
     public int kasserDialog(long id) {
-        return database.update("UPDATE DIALOG SET OVERSKRIFT = 'Kassert av NAV' WHERE DIALOG_ID = ?", id);
+        return database.update("UPDATE DIALOG SET OVERSKRIFT = '- Det var skrevet noe feil, og det er nå slettet. -' WHERE DIALOG_ID = ?", id);
     }
 
     @Transactional(readOnly = true)
