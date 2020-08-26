@@ -33,7 +33,7 @@ spec:
       memory: 8092Mi
     requests:
       cpu: "1"
-      memory: 1536Mi
+      memory: 3072Mi
   envFrom:
     - configmap: pto-config
   vault:
