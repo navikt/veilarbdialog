@@ -1,15 +1,18 @@
 package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.apiapp.feil.UlovligHandling;
-import no.nav.apiapp.security.PepClient;
 import no.nav.common.abac.Pep;
-import no.nav.dialogarena.aktor.AktorService;
+import no.nav.common.abac.domain.AbacPersonId;
+import no.nav.common.abac.domain.request.ActionId;
+import no.nav.common.auth.subject.SubjectHandler;
+import no.nav.common.client.aktorregister.AktorregisterClient;
+import no.nav.common.featuretoggle.UnleashService;
+import no.nav.common.types.feil.IngenTilgang;
+import no.nav.common.types.feil.UlovligHandling;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.*;
-import no.nav.sbl.featuretoggle.unleash.UnleashService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +26,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AppService {
 
-    private final AktorService aktorService;
+    private final AktorregisterClient aktorregisterClient;
     private final DialogDAO dialogDAO;
     private final DialogStatusService dialogStatusService;
     private final DataVarehusDAO dataVarehusDAO;
@@ -33,27 +36,36 @@ public class AppService {
     private final UnleashService unleashService;
     private final KafkaDialogService kafkaDialogService;
 
-    @Transactional(readOnly = true)
-    public List<DialogData> hentDialogerForBruker(Person person) {
-        String aktorId = hentAktoerIdForPerson(person);
-        pep.sjekkLesetilgangTilAktorId(aktorId);
+    private String assertAccessToAktorId(String aktorId)
+            throws IngenTilgang {
+        String actor = SubjectHandler.getIdent().orElse(null);
+        AbacPersonId subject = AbacPersonId.aktorId(aktorId);
+        if (!pep.harTilgangTilPerson(actor, ActionId.READ, subject)) {
+            throw new IngenTilgang(String.format("%s har ikke lesetilgang til %s", actor, subject.getId()));
+        }
+        return subject.getId();
+    }
 
+    @Transactional(readOnly = true)
+    public List<DialogData> hentDialogerForBruker(Person person)
+            throws IngenTilgang {
+        String aktorId = assertAccessToAktorId(hentAktoerIdForPerson(person));
         return dialogDAO.hentDialogerForAktorId(aktorId);
     }
 
-    public Date hentSistOppdatertForBruker(Person person, String meg) {
-        String aktorId = hentAktoerIdForPerson(person);
-        pepClient.sjekkLesetilgangTilAktorId(aktorId);
-
+    public Date hentSistOppdatertForBruker(Person person, String meg)
+            throws IngenTilgang {
+        String aktorId = assertAccessToAktorId(hentAktoerIdForPerson(person));
         return dataVarehusDAO.hentSisteEndringSomIkkeErDine(aktorId, meg);
     }
 
-    public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
-        pepClient.sjekkLesetilgangTilAktorId(dialogData.getAktorId());
-        DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(dialogData.getAktorId()));
-        DialogData oprettet = dialogDAO.opprettDialog(kontorsperretDialog);
-        dialogStatusService.nyDialog(oprettet);
-        return oprettet;
+    public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData)
+            throws IngenTilgang {
+        String aktorId = assertAccessToAktorId(dialogData.getAktorId());
+        DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(aktorId));
+        DialogData opprettet = dialogDAO.opprettDialog(kontorsperretDialog);
+        dialogStatusService.nyDialog(opprettet);
+        return opprettet;
     }
 
     public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
@@ -102,21 +114,11 @@ public class AppService {
 
     public String hentAktoerIdForPerson(Person person) {
         if (person instanceof Person.Fnr) {
-            return aktorService.getAktorId(person.get())
+            return Optional
+                    .ofNullable(aktorregisterClient.hentAktorId(person.get()))
                     .orElseThrow(RuntimeException::new);
         } else if (person instanceof Person.AktorId) {
             return person.get();
-        } else {
-            throw new RuntimeException("Kan ikke identifisere persontype");
-        }
-    }
-
-    public String hentFnrForPerson(Person person) {
-        if (person instanceof Person.Fnr) {
-            return person.get();
-        } else if (person instanceof Person.AktorId) {
-            return aktorService.getFnr(person.get())
-                    .orElseThrow(RuntimeException::new);
         } else {
             throw new RuntimeException("Kan ikke identifisere persontype");
         }
@@ -170,7 +172,12 @@ public class AppService {
     }
 
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
-        pepClient.sjekkLesetilgangTilAktorId(dialogData.getAktorId());
+
+        String actor = SubjectHandler.getIdent().orElse(null);
+        AbacPersonId subject = AbacPersonId.aktorId(dialogData.getAktorId());
+        if (!pep.harTilgangTilPerson(actor, ActionId.READ, subject)) {
+            throw new IngenTilgang(String.format("%s har ikke lesetilgang til %s", actor, subject.getId()));
+        }
         return dialogData;
     }
 
