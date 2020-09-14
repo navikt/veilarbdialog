@@ -2,7 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -14,11 +16,21 @@
     <artifactId>veilarbdialog</artifactId>
     <version>1</version>
 
+    <packaging>pom</packaging>
+    <modules>
+        <module>feed</module>
+    </modules>
+
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>${flyway.version}</version>
             </plugin>
         </plugins>
     </build>
@@ -28,12 +40,25 @@
 
         <jackson.version>2.11.2</jackson.version>
         <no.nav.common.version>2.2020.08.07_16.18-e6be6d6a09e6</no.nav.common.version>
+        <ojdbc.version>12.2.0.1</ojdbc.version>
         <shedlock.version>4.14.0</shedlock.version>
         <tjenestespesifikasjoner.version>1.2019.09.25-00.21-49b69f0625e0</tjenestespesifikasjoner.version>
         <unleash-client-java.version>3.3.3</unleash-client-java.version>
     </properties>
 
     <dependencies>
+
+        <!-- DB -->
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>${ojdbc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <scope>compile</scope>
+        </dependency>
 
         <!-- Spring Boot -->
         <dependency>
@@ -61,7 +86,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -94,6 +118,18 @@
             <groupId>no.nav.common</groupId>
             <artifactId>log</artifactId>
             <version>${no.nav.common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>feature-toggle</artifactId>
+            <version>${no.nav.common.version}</version>
+        </dependency>
+
+        <!-- Temporary feed workaround, see separate module -->
+        <dependency>
+            <groupId>no.nav.fo.obsolete</groupId>
+            <artifactId>feed</artifactId>
+            <version>1</version>
         </dependency>
 
         <!-- Jackson -->
@@ -157,18 +193,13 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
         </dependency>
-        <dependency>
+        <!-- dependency>
             <groupId>com.oracle.ojdbc</groupId>
             <artifactId>ojdbc8</artifactId>
             <scope>runtime</scope>
-        </dependency>
+        </dependency -->
 
         <!-- EXTERNAL DEPENDENCIES -->
-        <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>feature-toggle</artifactId>
-            <version>${no.nav.common.version}</version>
-        </dependency>
         <dependency>
             <groupId>no.finn.unleash</groupId>
             <artifactId>unleash-client-java</artifactId>
@@ -238,11 +269,11 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
         </dependency>
-        <dependency>
+        <!-- dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
             <scope>compile</scope>
-        </dependency>
+        </dependency -->
 
         <!-- transitive avhengigheter -->
         <dependency>
@@ -263,7 +294,7 @@
             <artifactId>spring-context</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
+                <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
         </dependency>
         <dependency>
