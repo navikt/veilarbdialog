@@ -1,29 +1,25 @@
 package no.nav.fo.veilarbdialog.db;
 
 import no.nav.fo.IntegationTest;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.inject.Inject;
-import java.util.Collections;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertThat;
-
+@SpringBootTest
+@RunWith(SpringRunner.class)
 public class MigrerDatabaseTest extends IntegationTest {
 
-    @Inject
+    @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @BeforeClass
-    public static void initContext() {
-        initSpringContext(Collections.emptyList());
-    }
 
     @Test
     public void kanQueryeDatabasen() {
-        assertThat(jdbcTemplate.queryForList("SELECT * FROM DIALOG"), empty());
+        assertThat(jdbcTemplate.queryForList("SELECT * FROM DIALOG")).isEmpty();
     }
 
 }

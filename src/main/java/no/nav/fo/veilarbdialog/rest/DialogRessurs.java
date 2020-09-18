@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import no.nav.common.auth.subject.SubjectHandler;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.service.AppService;
 import no.nav.fo.veilarbdialog.service.AutorisasjonService;
+import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.service.KladdService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.toIntExact;
@@ -30,23 +28,19 @@ import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeilede
 
 @RestController
 @RequestMapping("dialog")
-@Import({
-        RestMapper.class,
-        KontorsperreFilter.class
-})
 @RequiredArgsConstructor
 public class DialogRessurs {
 
-    private final AppService appService;
+    private final DialogDataService dialogDataService;
     private final RestMapper restMapper;
-    private final ServiceLoader.Provider<HttpServletRequest> requestProvider;
+    private final HttpServletRequest httpServletRequest;
     private final KontorsperreFilter kontorsperreFilter;
     private final AutorisasjonService autorisasjonService;
     private final KladdService kladdService;
 
     @GetMapping
     public List<DialogDTO> hentDialoger() {
-        return appService.hentDialogerForBruker(getContextUserIdent())
+        return dialogDataService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
                 .filter(dialog -> kontorsperreFilter.harTilgang(getLoggedInUserIdent(), dialog.getKontorsperreEnhetId()))
                 .map(restMapper::somDialogDTO)
@@ -55,13 +49,13 @@ public class DialogRessurs {
 
     @GetMapping("sistOppdatert")
     public SistOppdatert sistOppdatert() {
-        Date oppdatert = appService.hentSistOppdatertForBruker(getContextUserIdent(), getLoggedInUserIdent());
+        Date oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), getLoggedInUserIdent());
         return new SistOppdatert(oppdatert);
     }
 
     @GetMapping("antallUleste")
     public AntallUlesteDTO antallUleste() {
-        long antall = appService.hentDialogerForBruker(getContextUserIdent())
+        long antall = dialogDataService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
                 .filter(erEksternBruker() ? DialogData::erUlestForBruker : DialogData::erUlestAvVeileder)
                 .filter(it -> !it.isHistorisk())
@@ -74,7 +68,7 @@ public class DialogRessurs {
     public DialogDTO hentDialog(@PathVariable String dialogId) {
         return Optional.ofNullable(dialogId)
                 .map(Long::parseLong)
-                .map(appService::hentDialog)
+                .map(dialogDataService::hentDialog)
                 .map(restMapper::somDialogDTO)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
@@ -84,7 +78,7 @@ public class DialogRessurs {
         slettUtdattertKladd(nyHenvendelseDTO);
 
         long dialogId = finnDialogId(nyHenvendelseDTO);
-        appService.opprettHenvendelseForDialog(HenvendelseData.builder()
+        dialogDataService.opprettHenvendelseForDialog(HenvendelseData.builder()
                 .dialogId(dialogId)
                 .avsenderId(getLoggedInUserIdent())
                 .viktig(!nyHenvendelseDTO.egenskaper.isEmpty())
@@ -93,7 +87,7 @@ public class DialogRessurs {
                 .build()
         );
         DialogData dialogData = markerSomLest(dialogId);
-        appService.updateDialogAktorFor(dialogData.getAktorId());
+        dialogDataService.updateDialogAktorFor(dialogData.getAktorId());
         return kontorsperreFilter.harTilgang(getLoggedInUserIdent(), dialogData.getKontorsperreEnhetId()) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
@@ -116,9 +110,9 @@ public class DialogRessurs {
 
     private DialogData markerSomLest(long dialogId) {
         if (erEksternBruker()) {
-            return appService.markerDialogSomLestAvBruker(dialogId);
+            return dialogDataService.markerDialogSomLestAvBruker(dialogId);
         }
-        return appService.markerDialogSomLestAvVeileder(dialogId);
+        return dialogDataService.markerDialogSomLestAvVeileder(dialogId);
 
     }
 
@@ -131,8 +125,8 @@ public class DialogRessurs {
                 .venterPaSvar(venter)
                 .build();
 
-        DialogData dialog = appService.oppdaterVentePaSvarTidspunkt(dialogStatus);
-        appService.updateDialogAktorFor(dialog.getAktorId());
+        DialogData dialog = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
+        dialogDataService.updateDialogAktorFor(dialog.getAktorId());
 
         return markerSomLest(dialogId);
     }
@@ -146,8 +140,8 @@ public class DialogRessurs {
                 .ferdigbehandlet(ferdigbehandlet)
                 .build();
 
-        DialogData dialog = appService.oppdaterFerdigbehandletTidspunkt(dialogStatus);
-        appService.updateDialogAktorFor(dialog.getAktorId());
+        DialogData dialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogStatus);
+        dialogDataService.updateDialogAktorFor(dialog.getAktorId());
 
         return markerSomLest(dialogId);
     }
@@ -157,8 +151,8 @@ public class DialogRessurs {
         autorisasjonService.skalVereInternBruker();
 
         long dialogId = finnDialogId(nyHenvendelseDTO);
-        appService.updateDialogEgenskap(EgenskapType.PARAGRAF8, dialogId);
-        appService.markerSomParagra8(dialogId);
+        dialogDataService.updateDialogEgenskap(EgenskapType.PARAGRAF8, dialogId);
+        dialogDataService.markerSomParagra8(dialogId);
         return nyHenvendelse(nyHenvendelseDTO.setEgenskaper(singletonList(Egenskap.PARAGRAF8)));
     }
 
@@ -168,7 +162,7 @@ public class DialogRessurs {
         } else {
             return Optional.ofNullable(nyHenvendelseDTO.aktivitetId)
                     .filter(StringUtils::isNotEmpty)
-                    .flatMap(appService::hentDialogForAktivitetId)
+                    .flatMap(dialogDataService::hentDialogForAktivitetId)
                     .orElseGet(() -> opprettDialog(nyHenvendelseDTO))
                     .getId();
         }
@@ -177,14 +171,14 @@ public class DialogRessurs {
     private DialogData opprettDialog(NyHenvendelseDTO nyHenvendelseDTO) {
         DialogData dialogData = DialogData.builder()
                 .overskrift(nyHenvendelseDTO.overskrift)
-                .aktorId(appService.hentAktoerIdForPerson(getContextUserIdent()))
+                .aktorId(dialogDataService.hentAktoerIdForPerson(getContextUserIdent()))
                 .aktivitetId(nyHenvendelseDTO.aktivitetId)
                 .egenskaper(nyHenvendelseDTO.egenskaper
                         .stream()
                         .map(egenskap -> EgenskapType.valueOf(egenskap.name()))
                         .collect(Collectors.toList()))
                 .build();
-        DialogData opprettetDialog = appService.opprettDialogForAktivitetsplanPaIdent(dialogData);
+        DialogData opprettetDialog = dialogDataService.opprettDialogForAktivitetsplanPaIdent(dialogData);
 
         if (erEksternBruker()) {
             nyDialogBruker(opprettetDialog);
@@ -204,9 +198,12 @@ public class DialogRessurs {
         if (erEksternBruker()) {
             return SubjectHandler.getIdent().map(Person::fnr).orElseThrow(RuntimeException::new);
         }
-
-        Optional<Person> fnr = Optional.ofNullable(requestProvider.get().getParameter("fnr")).map(Person::fnr);
-        Optional<Person> aktorId = Optional.ofNullable(requestProvider.get().getParameter("aktorId")).map(Person::aktorId);
+        Optional<Person> fnr = Optional
+                .ofNullable(httpServletRequest.getParameter("fnr"))
+                .map(Person::fnr);
+        Optional<Person> aktorId = Optional
+                .ofNullable(httpServletRequest.getParameter("aktorId"))
+                .map(Person::aktorId);
         return fnr.orElseGet(() -> aktorId.orElseThrow(RuntimeException::new));
     }
 }

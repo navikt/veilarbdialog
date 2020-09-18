@@ -16,30 +16,13 @@
     <artifactId>veilarbdialog</artifactId>
     <version>1</version>
 
-    <packaging>pom</packaging>
-    <modules>
-        <module>feed</module>
-    </modules>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>${flyway.version}</version>
-            </plugin>
-        </plugins>
-    </build>
-
     <properties>
         <java.version>11</java.version>
 
+        <allclient.version>9.2.0.0</allclient.version>
+        <common.version>2.2020.08.07_16.18-e6be6d6a09e6</common.version>
+        <common-obsolete.version>1.2020.02.11-12.17-1a30837bb4f2</common-obsolete.version>
         <jackson.version>2.11.2</jackson.version>
-        <no.nav.common.version>2.2020.08.07_16.18-e6be6d6a09e6</no.nav.common.version>
         <ojdbc.version>12.2.0.1</ojdbc.version>
         <shedlock.version>4.14.0</shedlock.version>
         <tjenestespesifikasjoner.version>1.2019.09.25-00.21-49b69f0625e0</tjenestespesifikasjoner.version>
@@ -51,13 +34,20 @@
         <!-- DB -->
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
+            <!--<groupId>com.oracle.ojdbc</groupId>-->
             <artifactId>ojdbc8</artifactId>
             <version>${ojdbc.version}</version>
+            <!--<version>19.3.0.0</version>-->
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- Spring Boot -->
@@ -88,48 +78,88 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
 
+        <!-- Spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+        </dependency>
+
         <!-- no.nav.common -->
         <dependency>
             <groupId>no.nav.common</groupId>
+            <artifactId>nais</artifactId>
+            <version>${common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
             <artifactId>util</artifactId>
-            <version>${no.nav.common.version}</version>
+            <version>${common.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>client</artifactId>
-            <version>${no.nav.common.version}</version>
+            <version>${common.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>sts</artifactId>
-            <version>${no.nav.common.version}</version>
+            <version>${common.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>json</artifactId>
-            <version>${no.nav.common.version}</version>
+            <version>${common.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>log</artifactId>
-            <version>${no.nav.common.version}</version>
+            <version>${common.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>feature-toggle</artifactId>
-            <version>${no.nav.common.version}</version>
+            <version>${common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>rest</artifactId>
+            <version>${common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>metrics</artifactId>
+            <version>${common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>types</artifactId>
+            <version>${common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>feed</artifactId>
+            <version>${common-obsolete.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>oidc-security</artifactId>
+            <version>${common-obsolete.version}</version>
         </dependency>
 
-        <!-- Temporary feed workaround, see separate module -->
+        <!-- CATO -->
         <dependency>
-            <groupId>no.nav.fo.obsolete</groupId>
-            <artifactId>feed</artifactId>
-            <version>1</version>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+            <version>2.1.6</version>
         </dependency>
 
         <!-- Jackson -->
@@ -168,47 +198,17 @@
             <artifactId>api-app</artifactId>
             <version>${no.nav.common.version}</version>
         </dependency>-->
-        <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>rest</artifactId>
-            <version>${no.nav.common.version}</version>
-        </dependency>
         <!--<dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>aktor-klient</artifactId>
             <version>${no.nav.common.version}</version>
         </dependency>-->
 
-        <!-- DB -->
-<!--        <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>jdbc</artifactId>
-            <version>${no.nav.common.jdbc.version}</version>
-        </dependency>-->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
-        <!-- dependency>
-            <groupId>com.oracle.ojdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <scope>runtime</scope>
-        </dependency -->
-
         <!-- EXTERNAL DEPENDENCIES -->
         <dependency>
             <groupId>no.finn.unleash</groupId>
             <artifactId>unleash-client-java</artifactId>
             <version>${unleash-client-java.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>types</artifactId>
-            <version>${no.nav.common.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.jms</groupId>
@@ -219,14 +219,21 @@
             <artifactId>spring-jms</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>metrics</artifactId>
-            <version>${no.nav.common.version}</version>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>2.27</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+            <version>2.11.2</version>
+        </dependency>
+
+        <!-- IBM MQ -->
         <dependency>
             <groupId>com.ibm.mq</groupId>
             <artifactId>com.ibm.mq.allclient</artifactId>
-            <version>9.1.0.0</version>
+            <version>${allclient.version}</version>
         </dependency>
 
         <!-- LOGGING -->
@@ -253,7 +260,7 @@
             <groupId>no.nav.common</groupId>
             <artifactId>auth</artifactId>
             <type>test-jar</type>
-            <version>${no.nav.common.version}</version>
+            <version>${common.version}</version>
         </dependency>
         <!--<dependency>
             <groupId>no.nav.common</groupId>
@@ -279,7 +286,7 @@
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>abac</artifactId>
-            <version>${no.nav.common.version}</version>
+            <version>${common.version}</version>
         </dependency>
         <dependency>
             <groupId>net.sf.ehcache</groupId>
@@ -336,7 +343,7 @@
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>auth</artifactId>
-            <version>${no.nav.common.version}</version>
+            <version>${common.version}</version>
         </dependency>
 
         <!--Annet-->
@@ -344,17 +351,6 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
         </dependency>
-        <!--<dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>feed</artifactId>
-            <version>${no.nav.common.version}</version>
-        </dependency>-->
-        <!--<dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>feed</artifactId>
-            <version>${no.nav.common.version}</version>
-            <type>test-jar</type>
-        </dependency>-->
 
         <!-- ShedLock -->
         <dependency>
@@ -368,5 +364,19 @@
             <version>${shedlock.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>${flyway.version}</version>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

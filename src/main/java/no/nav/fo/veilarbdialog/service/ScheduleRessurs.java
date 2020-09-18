@@ -8,19 +8,14 @@ import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
-import no.nav.melding.virksomhet.stopprevarsel.v1.stopprevarsel.StoppReVarsel;
-import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarsel;
-import no.nav.melding.virksomhet.varsel.v1.varsel.XMLVarslingstyper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBContext;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
 import static java.util.UUID.randomUUID;
-import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.jaxbContext;
 
 @Component
 @RequiredArgsConstructor
@@ -28,9 +23,6 @@ import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.jaxbContext;
 public class ScheduleRessurs {
 
     private static final long GRACE_PERIODE = 30 * 60 * 1000;
-
-    static final JAXBContext VARSEL_CONTEXT = jaxbContext(XMLVarsel.class, XMLVarslingstyper.class);
-    static final JAXBContext STOPP_VARSEL_CONTEXT = jaxbContext(StoppReVarsel.class);
 
     private final VarselDAO varselDAO;
     private final KladdService kladdService;

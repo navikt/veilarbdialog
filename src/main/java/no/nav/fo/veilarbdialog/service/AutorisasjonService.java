@@ -1,11 +1,11 @@
 package no.nav.fo.veilarbdialog.service;
 
-import no.nav.apiapp.feil.IngenTilgang;
-import no.nav.brukerdialog.security.domain.IdentType;
-import no.nav.common.auth.SubjectHandler;
-import org.springframework.stereotype.Component;
+import no.nav.common.auth.subject.IdentType;
+import no.nav.common.auth.subject.SubjectHandler;
+import no.nav.common.types.feil.IngenTilgang;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class AutorisasjonService {
 
     public void skalVereInternBruker() {

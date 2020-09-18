@@ -20,35 +20,31 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static no.nav.common.log.LogFilter.PREFERRED_NAV_CALL_ID_HEADER_NAME;
-import static no.nav.common.utils.EnvironmentUtils.getRequiredProperty;
 
-@Service
 @RequiredArgsConstructor
 @Slf4j
-public class KafkaDialogService  {
+public class KafkaDialogService {
 
     private final KafkaDAO kafkaDAO;
     private final DialogDAO dialogDAO;
     private final Producer<String, String> kafkaProducer;
-
-    private static final String APP_ENVIRONMENT_NAME = "APP_ENVIRONMENT_NAME";
-    static final String KAFKA_PRODUCER_TOPIC = "aapen-fo-endringPaaDialog-v1" + "-" + getRequiredProperty(APP_ENVIRONMENT_NAME);
+    private final String topic;
 
     public void dialogEvent(KafkaDialogMelding kafkaDialogMelding) {
         String kafkaStringMelding = JsonUtils.toJson(kafkaDialogMelding);
         String aktorId = kafkaDialogMelding.getAktorId();
-        ProducerRecord<String, String> kafkaMelding = new ProducerRecord<>(KAFKA_PRODUCER_TOPIC, aktorId, kafkaStringMelding);
+        ProducerRecord<String, String> kafkaMelding = new ProducerRecord<>(topic, aktorId, kafkaStringMelding);
         kafkaMelding.headers().add(new RecordHeader(PREFERRED_NAV_CALL_ID_HEADER_NAME, getCallIdOrRandom().getBytes()));
         kafkaProducer.send(kafkaMelding, kafkaCallbackFunction(aktorId));
     }
 
     private Callback kafkaCallbackFunction(String aktorId) {
         return (metadata, exception) -> {
-            if(exception == null) {
-                log.info("Bruker {} har lagt på {}-topic", aktorId, KAFKA_PRODUCER_TOPIC);
+            if (exception == null) {
+                log.info("Bruker {} har lagt på {}-topic", aktorId, topic);
                 kafkaDAO.slettFeiletAktorId(aktorId);
             } else {
-                log.error("Kunne ikke publisere melding for bruker {} på {}-topic", aktorId, KAFKA_PRODUCER_TOPIC );
+                log.error("Kunne ikke publisere melding for bruker {} på {}-topic", aktorId, topic);
                 kafkaDAO.insertFeiletAktorId(aktorId);
             }
         };

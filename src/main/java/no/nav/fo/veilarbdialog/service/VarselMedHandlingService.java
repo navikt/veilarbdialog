@@ -1,6 +1,8 @@
 package no.nav.fo.veilarbdialog.service;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.AktoerId;
 import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.ObjectFactory;
 import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.Parameter;
@@ -8,20 +10,20 @@ import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.VarselMe
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 
-import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.*;
+import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.messageCreator;
 
 @Component
 @RequiredArgsConstructor
 public class VarselMedHandlingService {
 
     private static final String PARAGAF8_VARSEL_ID = "DittNAV_000008";
-    private static final JAXBContext VARSEL_MED_HANDLING = jaxbContext(ObjectFactory.class);
 
     private final JmsTemplate varselMedHandlingQueue;
+    private final XmlMapper xmlMapper;
 
+    @SneakyThrows
     public void send(String aktorId, String varselbestillingId) {
         AktoerId motaker = new AktoerId();
         motaker.setAktoerId(aktorId);
@@ -41,7 +43,7 @@ public class VarselMedHandlingService {
 
         JAXBElement<VarselMedHandling> melding = new ObjectFactory().createVarselMedHandling(varselMedHandling);
 
-        varselMedHandlingQueue.send(messageCreator(marshall(melding, VARSEL_MED_HANDLING), varselbestillingId));
+        varselMedHandlingQueue.send(messageCreator(xmlMapper.writeValueAsString(melding.getValue()), varselbestillingId));
     }
 
 }

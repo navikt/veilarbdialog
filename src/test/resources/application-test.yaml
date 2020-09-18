@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;MODE=Oracle
+    username: sa
+    password: sa
+  flyway:
+    locations: classpath:/db/migration,classpath:/db/testdata
+
+application:
+  abac:
+    url: ABAC_PDP_ENDPOINT_URL
+  aktorregister:
+    url: AKTOERREGISTER_API_V1_URL
+  dialog:
+    url: ARBEIDSRETTET_DIALOG_URL
+  namespace: APP_ENVIRONMENT_NAME
+  kafka:
+    broker:
+      url: KAFKA_BROKERS_URL
+    topic: aapen-fo-endringPaaDialog-v1-APPLICATION_ENVIRONMENT_NAME
+  kvp:
+    url: VEILARBOPPFOLGINGAPI_URL
+  mq:
+    hostname: MQGATEWAY03_HOSTNAME
+    name: MQGATEWAY03_NAME
+    port: MQGATEWAY03_PORT
+    queues:
+      oppgaveHenvendelse: HENVENDELSE_OPPGAVE_HENVENDELSE_QUEUENAME
+      stoppVarslinger: VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_QUEUENAME_PROPERTY
+      varselHandling: VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_QUEUENAME
+      varslinger: VARSELPRODUKSJON_VARSLINGER_QUEUENAME
+    userid: srvappserver
+  serviceuser:
+    username: SERVICEUSER_USERNAME
+    password: SERVICEUSER_PASSWORD
+  sts:
+    discovery:
+      url: SECURITYTOKENSERVICE_URL
+  unleash:
+    url: UNLEASH_API_URL
+
+isso-host:
+  url: http://localhost

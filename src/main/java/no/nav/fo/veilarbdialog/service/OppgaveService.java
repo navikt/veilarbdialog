@@ -1,38 +1,31 @@
 package no.nav.fo.veilarbdialog.service;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import no.nav.melding.virksomhet.opprettoppgavehenvendelse.v1.opprettoppgavehenvendelse.AktoerId;
-import no.nav.melding.virksomhet.opprettoppgavehenvendelse.v1.opprettoppgavehenvendelse.ObjectFactory;
 import no.nav.melding.virksomhet.opprettoppgavehenvendelse.v1.opprettoppgavehenvendelse.OppgaveType;
 import no.nav.melding.virksomhet.opprettoppgavehenvendelse.v1.opprettoppgavehenvendelse.Oppgavehenvendelse;
 import org.springframework.jms.core.JmsTemplate;
-import org.springframework.jms.core.MessageCreator;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-
-import static no.nav.fo.veilarbdialog.config.ApplicationConfig.ARBEIDSRETTET_DIALOG_URL_PROPERTY;
-import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.jaxbContext;
-import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.marshall;
 import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.messageCreator;
-import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class OppgaveService {
 
-    @Inject
-    private JmsTemplate oppgaveHenvendelseQueue;
+    private final ServiceConfig config;
+    private final JmsTemplate oppgaveHenvendelseQueue;
+    private final XmlMapper xmlMapper;
 
-    private static final JAXBContext OPPGAVE_HENVENDELSE = jaxbContext(Oppgavehenvendelse.class);
-    private String dialogUrl = getRequiredProperty(ARBEIDSRETTET_DIALOG_URL_PROPERTY);
-
+    @SneakyThrows
     public void send(String aktorId, String varselId) {
-        MessageCreator messageCreator = messageCreator(marshall(createMelding(aktorId, varselId), OPPGAVE_HENVENDELSE), varselId);
-        oppgaveHenvendelseQueue.send(messageCreator);
+        String xml = xmlMapper.writeValueAsString(createMelding(aktorId, varselId));
+        oppgaveHenvendelseQueue.send(messageCreator(xml, varselId));
     }
 
-    JAXBElement<Oppgavehenvendelse> createMelding(String aktorid, String uuid) {
+    Oppgavehenvendelse createMelding(String aktorid, String uuid) {
         AktoerId aktoerId = new AktoerId();
         aktoerId.setAktoerId(aktorid);
 
@@ -43,9 +36,9 @@ public class OppgaveService {
         henvendelse.setMottaker(aktoerId);
         henvendelse.setOppgaveType(oppgaveType);
         henvendelse.setVarselbestillingId(uuid);
-        henvendelse.setOppgaveURL(dialogUrl);
+        henvendelse.setOppgaveURL(config.getArbeidsrettetDialogUrl().toString());
         henvendelse.setStoppRepeterendeVarsel(false);
 
-        return new ObjectFactory().createOppgavehenvendelse(henvendelse);
+        return henvendelse;
     }
 }

@@ -22,14 +22,13 @@ public class RestMapperTest {
 
     @Before
     public void setUp() {
-        restMapper = new RestMapper();
         filter = mock(KontorsperreFilter.class);
-        restMapper.kontorsperreFilter = filter;
+        restMapper = new RestMapper(filter);
     }
 
     @Test
     public void skal_inneholde_alle_henvendelser_dersom_ikke_kontorsperret() {
-        when(filter.harTilgang(null)).thenReturn(true);
+        when(filter.harTilgang(null, null)).thenReturn(true);
         DialogDTO dialogDto = restMapper.somDialogDTO(nyDialog(1, nyHenvendelse(1, null)));
 
         assertThat(dialogDto.henvendelser.size(), is(1));
@@ -46,8 +45,8 @@ public class RestMapperTest {
     @Test
     public void skal_inneholde_kontorsperrede_henvendelser_dersom_tilgang() {
         String kontorsperretEnhet = "123";
-        when(filter.harTilgang(any())).thenReturn(true);
-        when(filter.harTilgang(kontorsperretEnhet)).thenReturn(true);
+        when(filter.harTilgang(any(), any())).thenReturn(true);
+        when(filter.harTilgang(any(), kontorsperretEnhet)).thenReturn(true);
 
         DialogDTO dialogDto = restMapper.somDialogDTO(nyDialog(1, nyHenvendelse(1, null), nyHenvendelse(2, kontorsperretEnhet), nyHenvendelse(3, "")));
         assertThat(dialogDto.henvendelser.size(), is(3));
@@ -57,8 +56,8 @@ public class RestMapperTest {
     @Test
     public void skal_fjerne_kontorsperrede_henvendelser_dersom_ikke_tilgang() {
         String kontorsperretEnhet = "123";
-        when(filter.harTilgang(any())).thenReturn(true);
-        when(filter.harTilgang(kontorsperretEnhet)).thenReturn(false);
+        when(filter.harTilgang(any(), any())).thenReturn(true);
+        when(filter.harTilgang(any(), kontorsperretEnhet)).thenReturn(false);
 
         DialogDTO dialogDto = restMapper.somDialogDTO(nyDialog(1, nyHenvendelse(1, null), nyHenvendelse(2, kontorsperretEnhet), nyHenvendelse(3, "")));
         assertThat(dialogDto.henvendelser.size(), is(2));

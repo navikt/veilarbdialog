@@ -1,16 +1,22 @@
 package no.nav.fo.veilarbdialog.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.Getter;
 import no.nav.common.client.aktorregister.AktorregisterClient;
 import no.nav.common.client.aktorregister.AktorregisterHttpClient;
+import no.nav.common.client.aktorregister.CachedAktorregisterClient;
 import no.nav.common.featuretoggle.UnleashService;
 import no.nav.common.featuretoggle.UnleashServiceConfig;
 import no.nav.common.sts.NaisSystemUserTokenProvider;
 import no.nav.common.sts.SystemUserTokenProvider;
+import no.nav.common.utils.Credentials;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.ws.rs.client.Client;
 import java.net.URL;
 
 import static lombok.AccessLevel.PACKAGE;
@@ -19,31 +25,44 @@ import static lombok.AccessLevel.PACKAGE;
 @Getter(PACKAGE)
 public class ServiceConfig {
 
-    @Value("no.nav.arbeidsrettetDialogUrl")
+    @Value("${application.dialog.url}")
     private URL arbeidsrettetDialogUrl;
 
-    @Value("no.nav.sts.discoveryUrl")
+    @Value("${application.sts.discovery.url}")
     private URL discoveryUrl;
 
-    @Value("no.nav.sts.srvUsername")
-    private String srvUsername;
+    @Value("${application.aktorregister.url}")
+    private String aktorregisterUrl;
 
-    @Value("no.nav.sts.srvPassword")
-    private String srvPassword;
+    @Value("${application.unleash.url}")
+    private String unleashUrl;
+
+    @Value("${spring.application.name}")
+    private String applicationName;
 
     @Bean
-    AktorregisterClient aktorregisterClient() {
-        return new AktorregisterHttpClient("", "", null); // TODO: Configure.
+    SystemUserTokenProvider systemUserTokenProvider(Credentials serviceUser) {
+        return new NaisSystemUserTokenProvider(discoveryUrl.toString(), serviceUser.username, serviceUser.password);
     }
 
     @Bean
-    SystemUserTokenProvider systemUserTokenProvider() {
-        return new NaisSystemUserTokenProvider(discoveryUrl.toString(), srvUsername, srvPassword);
+    AktorregisterClient aktorregisterClient(SystemUserTokenProvider tokenProvider) {
+        AktorregisterClient aktorregisterClient = new AktorregisterHttpClient(
+                aktorregisterUrl,
+                applicationName,
+                tokenProvider::getSystemUserToken
+        );
+        return new CachedAktorregisterClient(aktorregisterClient);
     }
 
     @Bean
     UnleashService unleashService() {
-        return new UnleashService(UnleashServiceConfig.resolveFromEnvironment());
+        UnleashServiceConfig config = UnleashServiceConfig
+                .builder()
+                .applicationName(applicationName)
+                .unleashApiUrl(unleashUrl)
+                .build();
+        return new UnleashService(config);
     }
 
 }

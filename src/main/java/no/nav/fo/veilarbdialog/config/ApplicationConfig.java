@@ -1,55 +1,26 @@
 package no.nav.fo.veilarbdialog.config;
 
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import net.javacrumbs.shedlock.provider.jdbc.JdbcLockProvider;
-import no.nav.apiapp.ApiApplication;
-import no.nav.apiapp.config.ApiAppConfigurator;
-import no.nav.apiapp.security.PepClient;
-import no.nav.dialogarena.aktor.AktorConfig;
-import no.nav.fo.veilarbdialog.rest.DialogRessurs;
-import no.nav.fo.veilarbdialog.rest.KladdRessurs;
-import no.nav.fo.veilarbdialog.service.ScheduleRessurs;
-import no.nav.sbl.dialogarena.common.abac.pep.Pep;
-import no.nav.sbl.dialogarena.common.abac.pep.context.AbacContext;
-import no.nav.sbl.dialogarena.common.abac.pep.domain.ResourceType;
-import org.flywaydb.core.Flyway;
+import no.nav.common.abac.Pep;
+import no.nav.common.abac.VeilarbPep;
+import no.nav.common.utils.Credentials;
+import no.nav.common.utils.NaisUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.inject.Inject;
-import javax.servlet.ServletContext;
 import javax.sql.DataSource;
-
-import static no.nav.sbl.util.EnvironmentUtils.Type.PUBLIC;
-import static no.nav.sbl.util.EnvironmentUtils.setProperty;
 
 @Configuration
 @EnableTransactionManagement
 @EnableScheduling
-@EnableAspectJAutoProxy
-@Import({
-        AbacContext.class,
-        AktorConfig.class,
-        CacheConfig.class,
-        DatabaseConfig.class,
-        FeedConfig.class,
-        FeedConsumerConfig.class,
-        KvpClientConfig.class,
-        MessageQueueConfig.class,
-        ServiceConfig.class,
-        UnleashConfig.class,
-        DialogRessurs.class,
-        ScheduleRessurs.class,
-        KladdRessurs.class,
-        KafkaConfig.class
-})
-public class ApplicationConfig implements ApiApplication {
+public class ApplicationConfig {
 
     public static final String APPLICATION_NAME = "veilarbdialog";
     public static final String VEILARBOPPFOLGINGAPI_URL_PROPERTY = "VEILARBOPPFOLGINGAPI_URL";
@@ -69,12 +40,15 @@ public class ApplicationConfig implements ApiApplication {
     public static final String AKTOER_V2_ENDPOINTURL = "AKTOER_V2_ENDPOINTURL";
     public static final String REDIRECT_URL_PROPERTY = "VEILARBLOGIN_REDIRECT_URL_URL";
     public static final String SECURITYTOKENSERVICE_URL = "SECURITYTOKENSERVICE_URL";
-    public static final String ABAC_PDP_ENDPOINT_URL = "ABAC_PDP_ENDPOINT_URL";
+
+    @Value("${application.abac.url")
+    private String abacUrl;
+
     public static final String AKTOERREGISTER_API_V1_URL = "AKTOERREGISTER_API_V1_URL";
 
     @Bean
-    public PepClient pepClient(Pep pep) {
-        return new PepClient(pep, "veilarb", ResourceType.VeilArbPerson);
+    public Pep pep(Credentials systemUser) {
+        return new VeilarbPep(abacUrl, systemUser.username, systemUser.password);
     }
 
     @Bean
@@ -87,23 +61,26 @@ public class ApplicationConfig implements ApiApplication {
         return new JdbcLockProvider(dataSource);
     }
 
-    @Inject
-    private DataSource dataSource;
-
-    @Override
-    public void startup(ServletContext servletContext) {
-        setProperty(DIALOGAKTOR_FEED_BRUKERTILGANG_PROPERTY, "srvveilarbportefolje", PUBLIC);
-        Flyway flyway = new Flyway();
-        flyway.setDataSource(dataSource);
-        flyway.migrate();
-    }
-
-    @Override
+/*    @Override
     public void configure(ApiAppConfigurator apiAppConfigurator) {
+        *//*
+        .sts()
+        no.nav.modig.security.sts.url = either sysprop no.nav.modig.security.sts.url (itself) or sysprop SECURITYTOKENSERVICE_URL
+        no.nav.modig.security.systemuser.username = SRV<appname>_USERNAME
+        no.nav.modig.security.systemuser.password = SRV<appname>_PASSWORD
+         *//*
+        //OidcAuthenticator.fromConfig()
+
         apiAppConfigurator
                 .sts()
                 .azureADB2CLogin()
                 .issoLogin()
         ;
+    }*/
+
+    @Bean
+    public XmlMapper xmlMapper() {
+        return new XmlMapper();
     }
+
 }

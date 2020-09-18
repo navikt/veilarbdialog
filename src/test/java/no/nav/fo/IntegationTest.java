@@ -6,7 +6,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -27,14 +30,6 @@ public abstract class IntegationTest {
     private static AnnotationConfigApplicationContext annotationConfigApplicationContext;
     private static PlatformTransactionManager platformTransactionManager;
     private TransactionStatus transactionStatus;
-
-    protected static void initSpringContext(List<Class> classes) {
-        List<Class> list = new ArrayList<>(asList(TestDatabaseConfig.class, DateProvider.class));
-        list.addAll(classes);
-        annotationConfigApplicationContext = new AnnotationConfigApplicationContext(list.toArray(new Class[]{}));
-        annotationConfigApplicationContext.start();
-        platformTransactionManager = annotationConfigApplicationContext.getBean(PlatformTransactionManager.class);
-    }
 
     @Before
     @BeforeEach

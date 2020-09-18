@@ -5,11 +5,12 @@ import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -18,17 +19,14 @@ import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
+@RunWith(SpringRunner.class)
 public class DialogDAOTest extends IntegationTest {
 
     private static final String AKTOR_ID_1234 = "1234";
 
-    @Inject
+    @Autowired
     private DialogDAO dialogDAO;
-
-    @BeforeClass
-    public static void addSpringBeans() {
-        initSpringContext(Arrays.asList(DialogDAO.class));
-    }
 
     @Test
     public void kan_opprette_dialog() {

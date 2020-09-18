@@ -4,11 +4,12 @@ import lombok.val;
 import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -17,22 +18,19 @@ import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static no.nav.fo.veilarbdialog.domain.DialogStatus.builder;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@SpringBootTest
+@RunWith(SpringRunner.class)
 public class DialogFeedDAOTest extends IntegationTest {
     private static final String AKTOR_ID = "1234";
 
-    @Inject
+    @Autowired
     private DialogDAO dialogDAO;
 
-    @Inject
+    @Autowired
     private DialogStatusService dialogStatusService;
 
-    @Inject
+    @Autowired
     private DialogFeedDAO dialogFeedDAO;
-
-    @BeforeClass
-    public static void addSpringBeans() {
-        initSpringContext(Arrays.asList(DialogDAO.class, DialogStatusService.class, DialogFeedDAO.class, StatusDAO.class, DataVarehusDAO.class, VarselDAO.class));
-    }
 
     @Test
     public void hentAktorerMedEndringerEtter_nyDialog_aktorEndret() {

@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.feed;
 import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.db.dao.KvpFeedMetadataDAO;
 import no.nav.fo.veilarbdialog.domain.KvpDTO;
-import no.nav.fo.veilarbdialog.service.AppService;
+import no.nav.fo.veilarbdialog.service.DialogDataService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class KvpFeedConsumer {
 
-    private final AppService appService;
+    private final DialogDataService service;
     private final KvpFeedMetadataDAO kvpFeedConsumerDAO;
 
     public String sisteEndring() {
@@ -23,7 +23,7 @@ public class KvpFeedConsumer {
         long lastSuccessfulId = -1;
         for (KvpDTO element : elements) {
             if (element.getAvsluttetDato() != null) {
-                appService.settKontorsperredeDialogerTilHistoriske(element.getAktorId(), element.getAvsluttetDato());
+                service.settKontorsperredeDialogerTilHistoriske(element.getAktorId(), element.getAvsluttetDato());
             }
             lastSuccessfulId = element.getSerial();
         }
