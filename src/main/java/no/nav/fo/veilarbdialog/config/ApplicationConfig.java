@@ -4,11 +4,10 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
-import net.javacrumbs.shedlock.provider.jdbc.JdbcLockProvider;
+import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import no.nav.common.abac.Pep;
 import no.nav.common.abac.VeilarbPep;
 import no.nav.common.utils.Credentials;
-import no.nav.common.utils.NaisUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,12 +52,12 @@ public class ApplicationConfig {
 
     @Bean
     public LockingTaskExecutor lockingTaskExecutor(DataSource ds) {
-        return new DefaultLockingTaskExecutor(new JdbcLockProvider(ds));
+        return new DefaultLockingTaskExecutor(new JdbcTemplateLockProvider(ds));
     }
 
     @Bean
     public LockProvider lockProvider(DataSource dataSource) {
-        return new JdbcLockProvider(dataSource);
+        return new JdbcTemplateLockProvider(dataSource);
     }
 
 /*    @Override

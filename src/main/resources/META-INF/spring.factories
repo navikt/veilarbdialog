@@ -1,0 +1,1 @@
+org.springframework.data.jdbc.repository.config.DialectResolver$JdbcDialectProvider=no.nav.fo.veilarbdialog.db.OracleDialectResolver

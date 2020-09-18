@@ -49,3 +49,5 @@ spec:
   env:
     - name: APP_ENVIRONMENT_NAME
       value: p
+    - name: APP_CLUSTER_NAME
+      value: prod-fss

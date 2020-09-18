@@ -49,4 +49,5 @@ spec:
   env:
     - name: APP_ENVIRONMENT_NAME
       value: {{namespace}}
-
+    - name: APP_CLUSTER_NAME
+      value: dev-fss

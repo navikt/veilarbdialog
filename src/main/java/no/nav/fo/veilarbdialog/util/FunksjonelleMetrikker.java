@@ -3,6 +3,8 @@ package no.nav.fo.veilarbdialog.util;
 import no.nav.common.metrics.Event;
 import no.nav.common.metrics.InfluxClient;
 import no.nav.common.metrics.MetricsClient;
+import no.nav.common.metrics.SensuConfig;
+import no.nav.common.utils.EnvironmentUtils;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 
@@ -13,7 +15,24 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 public class FunksjonelleMetrikker {
 
-    private static final MetricsClient client = new InfluxClient();
+    // TODO: Shouldn't be static as this relies on configuration - replace by bean.
+    private static final MetricsClient client = new InfluxClient(
+            SensuConfig
+                    .builder()
+                    .sensuHost("sensu.nais")
+                    .sensuPort(3030)
+                    .application(EnvironmentUtils.getRequiredProperty("spring.application.name"))
+                    .hostname(EnvironmentUtils.resolveHostName())
+                    .cluster(EnvironmentUtils.getRequiredProperty("application.cluster"))
+                    .namespace(EnvironmentUtils.getRequiredProperty("application.namespace"))
+                    .retryInterval(5000L)
+                    .connectTimeout(3000)
+                    .queueSize(20000)
+                    .maxBatchTime(10000L)
+                    .batchSize(500)
+                    .cleanupOnShutdown(true)
+                    .build()
+    );
 
     public static void oppdaterFerdigbehandletTidspunkt(DialogData dialog, DialogStatus dialogStatus) {
         client.report(

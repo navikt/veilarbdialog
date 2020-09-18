@@ -49,12 +49,7 @@ public class ScheduleRessurs {
     public void sjekkForVarsel() {
         lockingTaskExecutor.executeWithLock(
                 (Runnable) this::sjekkForVarselWithLock,
-                new LockConfiguration(
-                        Instant.now(),
-                        "varsel",
-                        Duration.ofSeconds(60 * 30),
-                        Duration.ZERO
-                )
+                new LockConfiguration(Instant.now(), "varsel", Duration.ofSeconds(60 * 30), Duration.ZERO)
         );
     }
 
