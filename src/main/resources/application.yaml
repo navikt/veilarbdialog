@@ -1,11 +1,6 @@
 spring:
   application:
     name: "veilarbdialog"
-  datasource:
-    driver-class-name: oracle.jdbc.driver.OracleDriver
-    url: ${VEILARBDIALOGDATASOURCE_URL}
-    username: ${VEILARBDIALOGDATASOURCE_USERNAME}
-    password: ${VEILARBDIALOGDATASOURCE_PASSWORD}
 
 application:
   cluster: ${APP_CLUSTER_NAME}
@@ -14,6 +9,11 @@ application:
     url: ${ABAC_PDP_ENDPOINT_URL}
   aktorregister:
     url: ${AKTOERREGISTER_API_V1_URL}
+  datasource:
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+    url: ${VEILARBDIALOGDATASOURCE_URL}
+    username: ${VEILARBDIALOGDATASOURCE_USERNAME}
+    password: ${VEILARBDIALOGDATASOURCE_PASSWORD}
   dialog:
     url: ${ARBEIDSRETTET_DIALOG_URL}
   kafka:
