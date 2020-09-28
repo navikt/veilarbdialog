@@ -23,7 +23,6 @@
         <common.version>2.2020.08.07_16.18-e6be6d6a09e6</common.version>
         <common-obsolete.version>1.2020.02.11-12.17-1a30837bb4f2</common-obsolete.version>
         <jackson.version>2.11.2</jackson.version>
-        <ojdbc.version>12.2.0.1</ojdbc.version>
         <shedlock.version>4.14.0</shedlock.version>
         <tjenestespesifikasjoner.version>1.2019.09.25-00.21-49b69f0625e0</tjenestespesifikasjoner.version>
         <unleash-client-java.version>3.3.3</unleash-client-java.version>
@@ -33,11 +32,9 @@
 
         <!-- DB -->
         <dependency>
-            <groupId>com.oracle.database.jdbc</groupId>
-            <!--<groupId>com.oracle.ojdbc</groupId>-->
+            <groupId>com.oracle.ojdbc</groupId>
             <artifactId>ojdbc8</artifactId>
-            <version>${ojdbc.version}</version>
-            <!--<version>19.3.0.0</version>-->
+            <version>19.3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>

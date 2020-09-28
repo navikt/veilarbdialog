@@ -1,6 +1,10 @@
 spring:
   application:
     name: "veilarbdialog"
+  data:
+    jdbc:
+      repositories:
+        enabled: false
 
 application:
   cluster: ${APP_CLUSTER_NAME}
@@ -42,7 +46,7 @@ application:
     url: ${UNLEASH_API_URL}
   veilarboppfolging:
     api:
-      url: $VEILARBOPPFOLGINGAPI_URL}
+      url: ${VEILARBOPPFOLGINGAPI_URL}
 
 isso-host:
   url: http://localhost

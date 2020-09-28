@@ -144,19 +144,20 @@ public class MessageQueueConfig {
     }
 
     @Bean
-    public ConnectionFactory connectionFactory() throws JMSException {
+    public ConnectionFactory connectionFactory()
+            throws JMSException {
 
-        JmsFactoryFactory jmsFactoryFactory = JmsFactoryFactory.getInstance(WMQConstants.WMQ_PROVIDER);
-        JmsConnectionFactory connectionFactory = jmsFactoryFactory.createConnectionFactory();
-
+        JmsConnectionFactory connectionFactory = JmsFactoryFactory
+                .getInstance(WMQConstants.WMQ_PROVIDER)
+                .createConnectionFactory();
         connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, mqGatewayHostname);
         connectionFactory.setStringProperty(WMQConstants.WMQ_PORT, mqGatewayPort);
         connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, mqChannel);
         connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
         connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, mqGatewayName);
         connectionFactory.setStringProperty(WMQConstants.USERID, mqUserId);
-
         return connectionFactory;
 
     }
+
 }
