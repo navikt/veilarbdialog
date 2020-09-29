@@ -12,6 +12,7 @@ import no.nav.fo.veilarbdialog.domain.DialogAktorDTO;
 import no.nav.fo.veilarbdialog.domain.KvpDTO;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.util.DateUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,6 +25,11 @@ import java.util.stream.Stream;
 public class FeedProducerConfig {
 
     @Bean
+    @ConditionalOnProperty(
+            value = "application.kafka.disabled",
+            havingValue = "false",
+            matchIfMissing = true
+    )
     public FeedController feedController(
             FeedProducer<DialogAktorDTO> dialogaktorFeed,
             FeedConsumer<AvsluttetOppfolgingFeedDTO> avsluttetOppfolgingFeedDTOFeedConsumer,
@@ -38,6 +44,11 @@ public class FeedProducerConfig {
     }
 
     @Bean
+    @ConditionalOnProperty(
+            value = "application.kafka.disabled",
+            havingValue = "false",
+            matchIfMissing = true
+    )
     public FeedProducer<DialogAktorDTO> dialogAktorDTOFeedProducer(DialogDataService dialogDataService) {
         return FeedProducer.<DialogAktorDTO>builder()
                 .provider((tidspunkt, pageSize) -> getFeedElementStream(tidspunkt, pageSize, dialogDataService))
@@ -74,4 +85,5 @@ public class FeedProducerConfig {
                 .setSisteEndring(dialogAktor.sisteEndring)
                 ;
     }
+
 }

@@ -10,6 +10,7 @@ import no.nav.fo.veilarbdialog.domain.KvpDTO;
 import no.nav.fo.veilarbdialog.feed.AvsluttetOppfolgingFeedConsumer;
 import no.nav.fo.veilarbdialog.feed.KvpFeedConsumer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -26,6 +27,11 @@ public class FeedConsumerConfig {
     private String apiUrl;
 
     @Bean
+    @ConditionalOnProperty(
+            value = "application.kafka.disabled",
+            havingValue = "false",
+            matchIfMissing = true
+    )
     public FeedConsumer<KvpDTO> kvpFeedDTOFeedConsumer(KvpFeedConsumer kvpFeedConsumer, SystemUserTokenProvider provider) {
 
         no.nav.fo.feed.consumer.FeedConsumerConfig<KvpDTO> config = new no.nav.fo.feed.consumer.FeedConsumerConfig<>(
@@ -46,6 +52,11 @@ public class FeedConsumerConfig {
     }
 
     @Bean
+    @ConditionalOnProperty(
+            value = "application.kafka.disabled",
+            havingValue = "false",
+            matchIfMissing = true
+    )
     public FeedConsumer<AvsluttetOppfolgingFeedDTO> avsluttetOppfolgingFeedDTOFeedConsumer(
             AvsluttetOppfolgingFeedConsumer avsluttetOppfolgingFeedConsumer,
             SystemUserTokenProvider systemUserTokenProvider

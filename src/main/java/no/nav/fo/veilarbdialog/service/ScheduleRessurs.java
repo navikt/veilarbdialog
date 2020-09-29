@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
-import no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker;
+import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +33,7 @@ public class ScheduleRessurs {
     private final LockingTaskExecutor lockingTaskExecutor;
     private final KafkaDialogService kafkaDialogService;
     private final MeterRegistry registry;
+    private final FunksjonelleMetrikker funksjonelleMetrikker;
 
     @Scheduled(cron = "0 0/10 * * * *")
     public void slettGamleKladder() {
@@ -61,7 +62,7 @@ public class ScheduleRessurs {
             List<String> varselUUIDer = varselDAO.hentRevarslerSomSkalStoppes();
             log.info("Stopper {} revarsler", varselUUIDer.size());
             varselUUIDer.forEach(stopRevarslingService::stopRevarsel);
-            FunksjonelleMetrikker.stoppetRevarsling(varselUUIDer.size());
+            funksjonelleMetrikker.stoppetRevarsling(varselUUIDer.size());
 
             List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(GRACE_PERIODE);
             log.info("Varsler {} brukere", aktorer.size());
@@ -73,7 +74,7 @@ public class ScheduleRessurs {
                     .count();
 
             log.info("Varsler sendt, {} paragraf8", paragraf8Varsler);
-            FunksjonelleMetrikker.nyeVarsler(aktorer.size(), paragraf8Varsler);
+            funksjonelleMetrikker.nyeVarsler(aktorer.size(), paragraf8Varsler);
 
         });
 

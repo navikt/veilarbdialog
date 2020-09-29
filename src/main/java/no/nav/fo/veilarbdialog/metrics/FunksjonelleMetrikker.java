@@ -1,10 +1,8 @@
-package no.nav.fo.veilarbdialog.util;
+package no.nav.fo.veilarbdialog.metrics;
 
+import lombok.RequiredArgsConstructor;
 import no.nav.common.metrics.Event;
-import no.nav.common.metrics.InfluxClient;
 import no.nav.common.metrics.MetricsClient;
-import no.nav.common.metrics.SensuConfig;
-import no.nav.common.utils.EnvironmentUtils;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 
@@ -13,28 +11,12 @@ import java.util.Date;
 import static no.nav.fo.veilarbdialog.util.DateUtils.nullSafeMsSiden;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+@RequiredArgsConstructor
 public class FunksjonelleMetrikker {
 
-    // TODO: Shouldn't be static as this relies on configuration - replace by bean.
-    private static final MetricsClient client = new InfluxClient(
-            SensuConfig
-                    .builder()
-                    .sensuHost("sensu.nais")
-                    .sensuPort(3030)
-                    .application(EnvironmentUtils.getRequiredProperty("spring.application.name"))
-                    .hostname(EnvironmentUtils.resolveHostName())
-                    .cluster(EnvironmentUtils.getRequiredProperty("application.cluster"))
-                    .namespace(EnvironmentUtils.getRequiredProperty("application.namespace"))
-                    .retryInterval(5000L)
-                    .connectTimeout(3000)
-                    .queueSize(20000)
-                    .maxBatchTime(10000L)
-                    .batchSize(500)
-                    .cleanupOnShutdown(true)
-                    .build()
-    );
+    private final MetricsClient client;
 
-    public static void oppdaterFerdigbehandletTidspunkt(DialogData dialog, DialogStatus dialogStatus) {
+    public void oppdaterFerdigbehandletTidspunkt(DialogData dialog, DialogStatus dialogStatus) {
         client.report(
                 new Event("dialog.veileder.oppdater.ferdigbehandlet")
                         .addFieldToReport("ferdigbehandlet", dialogStatus.ferdigbehandlet)
@@ -42,35 +24,35 @@ public class FunksjonelleMetrikker {
         );
     }
 
-    public static void markerDialogSomLestAvBruker(DialogData dialogData) {
+    public void markerDialogSomLestAvBruker(DialogData dialogData) {
         sendMarkerSomLestMetrikk(dialogData.getEldsteUlesteTidspunktForBruker(), "bruker");
     }
 
-    public static void markerDialogSomLestAvVeileder(DialogData dialogData) {
+    public void markerDialogSomLestAvVeileder(DialogData dialogData) {
         sendMarkerSomLestMetrikk(dialogData.getEldsteUlesteTidspunktForVeileder(), "veileder");
     }
 
-    public static DialogData nyDialogBruker(DialogData dialogData) {
+    public DialogData nyDialogBruker(DialogData dialogData) {
         reportDialogMedMetadata("dialog.bruker.ny", dialogData);
         return dialogData;
     }
 
-    public static void nyHenvendelseVeileder(DialogData dialog) {
+    public void nyHenvendelseVeileder(DialogData dialog) {
         reportDialogMedMetadata("henvendelse.veileder.ny", dialog);
     }
 
-    public static void nyDialogVeileder(DialogData nyDialog) {
+    public void nyDialogVeileder(DialogData nyDialog) {
         reportDialogMedMetadata("dialog.veileder.ny", nyDialog);
     }
 
-    public static void oppdaterVenterSvar(DialogStatus nyStatus) {
+    public void oppdaterVenterSvar(DialogStatus nyStatus) {
         client.report(
                 new Event("dialog.veileder.oppdater.VenterSvarFraBruker")
                         .addFieldToReport("venter", nyStatus.venterPaSvar)
         );
     }
 
-    public static void nyHenvendelseBruker(DialogData dialogData) {
+    public void nyHenvendelseBruker(DialogData dialogData) {
         Event event = new Event("henvendelse.bruker.ny")
                 .addFieldToReport("erSvar", dialogData.venterPaSvar());
         if (dialogData.getVenterPaSvarFraBrukerSiden() != null) {
@@ -80,7 +62,7 @@ public class FunksjonelleMetrikker {
         client.report(event);
     }
 
-    public static void nyeVarsler(int antall, long paragraf8Varsler) {
+    public void nyeVarsler(int antall, long paragraf8Varsler) {
         client.report(
                 new Event("dialog.varsel")
                         .addFieldToReport("antall", antall)
@@ -88,25 +70,25 @@ public class FunksjonelleMetrikker {
         );
     }
 
-    public static void stoppetRevarsling(int antall) {
+    public void stoppetRevarsling(int antall) {
         client.report(
                 new Event("dialog.revarsel.stoppet")
                         .addFieldToReport("antall", antall)
         );
     }
 
-    private static void reportDialogMedMetadata(String eventName, DialogData dialog) {
+    private void reportDialogMedMetadata(String eventName, DialogData dialog) {
         client.report(addDialogMetadata(new Event(eventName), dialog));
     }
 
-    private static Event addDialogMetadata(Event event, DialogData dialog) {
+    private Event addDialogMetadata(Event event, DialogData dialog) {
         return event
                 .addFieldToReport("paaAktivitet", isNotEmpty(dialog.getAktivitetId()))
                 .addFieldToReport("kontorsperre", isNotEmpty(dialog.getKontorsperreEnhetId()));
 
     }
 
-    private static void sendMarkerSomLestMetrikk(Date eldsteUlesteTidspunkt, String lestAv) {
+    private void sendMarkerSomLestMetrikk(Date eldsteUlesteTidspunkt, String lestAv) {
         client.report(
                 new Event("dialog." + lestAv + ".lest")
                         .addFieldToReport("ReadTime", nullSafeMsSiden(eldsteUlesteTidspunkt))

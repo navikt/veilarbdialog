@@ -7,6 +7,7 @@ import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.AutorisasjonService;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.service.KladdService;
+import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,6 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erInternBruker;
-import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogBruker;
-import static no.nav.fo.veilarbdialog.util.FunksjonelleMetrikker.nyDialogVeileder;
 
 @RestController
 @RequestMapping("dialog")
@@ -37,6 +36,7 @@ public class DialogRessurs {
     private final KontorsperreFilter kontorsperreFilter;
     private final AutorisasjonService autorisasjonService;
     private final KladdService kladdService;
+    private final FunksjonelleMetrikker funksjonelleMetrikker;
 
     @GetMapping
     public List<DialogDTO> hentDialoger() {
@@ -181,9 +181,9 @@ public class DialogRessurs {
         DialogData opprettetDialog = dialogDataService.opprettDialogForAktivitetsplanPaIdent(dialogData);
 
         if (erEksternBruker()) {
-            nyDialogBruker(opprettetDialog);
+            funksjonelleMetrikker.nyDialogBruker(opprettetDialog);
         } else if (erInternBruker()) {
-            nyDialogVeileder(opprettetDialog);
+            funksjonelleMetrikker.nyDialogVeileder(opprettetDialog);
         }
 
 

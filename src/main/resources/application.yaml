@@ -6,6 +6,11 @@ spring:
       repositories:
         enabled: false
 
+management:
+  endpoint:
+    health:
+      show-details: always
+
 application:
   cluster: ${APP_CLUSTER_NAME}
   namespace: ${APP_ENVIRONMENT_NAME}
