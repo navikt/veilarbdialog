@@ -48,7 +48,7 @@ application:
     password: ${SERVICEUSER_PASSWORD}
   sts:
     discovery:
-      url: ${SECURITYTOKENSERVICE_URL}
+      url: ${SECURITY_TOKEN_SERVICE_DISCOVERY_URL}
   unleash:
     url: ${UNLEASH_API_URL}
   veilarboppfolging:
