@@ -21,11 +21,17 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 class DialogStatusServiceTest {
 
-    private StatusDAO statusDAO = mock(StatusDAO.class);
-    private DialogDAO dialogDAO = mock(DialogDAO.class);
-    private DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
-    private VarselDAO varselDao = mock(VarselDAO.class);
-    private DialogStatusService dialogStatusService = new DialogStatusService(statusDAO, dialogDAO, dataVarehusDAO, varselDao);
+    static {
+        System.setProperty("spring.application.name", "veilarbdialog");
+        System.setProperty("application.cluster", "test");
+        System.setProperty("application.namespace", "test");
+    }
+
+    private final StatusDAO statusDAO = mock(StatusDAO.class);
+    private final DialogDAO dialogDAO = mock(DialogDAO.class);
+    private final DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
+    private final VarselDAO varselDao = mock(VarselDAO.class);
+    private final DialogStatusService dialogStatusService = new DialogStatusService(statusDAO, dialogDAO, dataVarehusDAO, varselDao);
 
     @Test
     public void ny_henvendelse_fra_bruker_kaller_set_ny_melding_fra_bruker() {

@@ -116,6 +116,7 @@ public class DialogDAO {
         long dialogId = Optional
                 .ofNullable(jdbc.queryForObject("select DIALOG_ID_SEQ.nextval from dual", Long.class))
                 .orElseThrow(IllegalStateException::new);
+        log.info("Date provider is {} and value is {}", dateProvider, dateProvider.getNow());
 
         jdbc.update("insert into DIALOG (dialog_id, aktor_id, opprettet_dato, aktivitet_id, overskrift, historisk, kontorsperre_enhet_id, oppdatert) " +
                         "values (?, ?, ?, ?, ?, ?, ?, ?)",

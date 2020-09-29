@@ -66,8 +66,9 @@ public abstract class IntegationTest {
         platformTransactionManager.rollback(transactionStatus);
     }
 
+    // TODO: Move into a DateUtil class or something once we get rid of this class. Or check tests.
     @SneakyThrows
-    protected Date uniktTidspunkt() {
+    public static Date uniktTidspunkt() {
         sleep(1);
         Date tidspunkt = new Date();
         sleep(1);

@@ -1,22 +1,23 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
+import static no.nav.fo.IntegationTest.uniktTidspunkt;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-class StatusDAOTest extends IntegationTest {
+@Transactional
+class StatusDAOTest {
 
     @Autowired
     private StatusDAO statusDAO;

@@ -1,13 +1,12 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import no.nav.fo.IntegationTest;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
-public class DialogRessursTest extends IntegationTest {
+/*@SpringBootTest
+@RunWith(SpringRunner.class)*/
+public class DialogRessursTest {
 
     // TODO: Fix.
     /*private static final String AKTORID = "123";

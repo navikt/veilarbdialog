@@ -6,10 +6,12 @@ import no.nav.fo.veilarbdialog.domain.AvsluttetOppfolgingFeedDTO;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 @Component
 @RequiredArgsConstructor
@@ -19,7 +21,7 @@ public class AvsluttetOppfolgingFeedConsumer {
     private final FeedMetaDataDAO feedMetaDataDAO;
 
     public String sisteEndring() {
-        Date sisteEndring = feedMetaDataDAO.hentSisteLestTidspunkt();
+        ZonedDateTime sisteEndring = feedMetaDataDAO.hentSisteLestTidspunkt();
         return ZonedDateTime.ofInstant(sisteEndring.toInstant(), ZoneId.systemDefault()).toString();
     }
 

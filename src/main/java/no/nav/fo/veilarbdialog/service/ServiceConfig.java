@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.net.URL;
-
 import static lombok.AccessLevel.PACKAGE;
 
 @Configuration
@@ -22,10 +20,10 @@ import static lombok.AccessLevel.PACKAGE;
 public class ServiceConfig {
 
     @Value("${application.dialog.url}")
-    private URL arbeidsrettetDialogUrl;
+    private String arbeidsrettetDialogUrl;
 
     @Value("${application.sts.discovery.url}")
-    private URL discoveryUrl;
+    private String discoveryUrl;
 
     @Value("${application.aktorregister.url}")
     private String aktorregisterUrl;
@@ -38,7 +36,7 @@ public class ServiceConfig {
 
     @Bean
     SystemUserTokenProvider systemUserTokenProvider(Credentials serviceUser) {
-        return new NaisSystemUserTokenProvider(discoveryUrl.toString(), serviceUser.username, serviceUser.password);
+        return new NaisSystemUserTokenProvider(discoveryUrl, serviceUser.username, serviceUser.password);
     }
 
     @Bean

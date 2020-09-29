@@ -1,9 +1,6 @@
 spring:
-  datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;MODE=Oracle
-    username: sa
-    password: sa
+  application:
+    name: "veilarbdialog"
   flyway:
     locations: classpath:/db/migration,classpath:/db/testdata
 
@@ -12,6 +9,11 @@ application:
     url: ABAC_PDP_ENDPOINT_URL
   aktorregister:
     url: AKTOERREGISTER_API_V1_URL
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;MODE=Oracle
+    username: sa
+    password: sa
   dialog:
     url: ARBEIDSRETTET_DIALOG_URL
   namespace: APP_ENVIRONMENT_NAME
@@ -39,6 +41,9 @@ application:
       url: SECURITYTOKENSERVICE_URL
   unleash:
     url: UNLEASH_API_URL
+  veilarboppfolging:
+    api:
+      url: VEILARBOPPFOLGINGAPI_URL
 
 isso-host:
   url: http://localhost

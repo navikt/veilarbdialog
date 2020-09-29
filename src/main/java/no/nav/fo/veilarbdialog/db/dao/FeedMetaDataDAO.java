@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Component
@@ -12,9 +14,9 @@ public class FeedMetaDataDAO {
 
     private final JdbcTemplate jdbc;
 
-    public Date hentSisteLestTidspunkt() {
+    public ZonedDateTime hentSisteLestTidspunkt() {
         return jdbc.queryForObject("select tidspunkt_siste_endring from FEED_METADATA",
-                Date.class);
+                ZonedDateTime.class);
     }
 
     public void oppdaterSisteLest(Date date) {

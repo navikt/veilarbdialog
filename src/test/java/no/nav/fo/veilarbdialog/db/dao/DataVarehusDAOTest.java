@@ -1,15 +1,17 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.Data;
-import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapperResultSetExtractor;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -19,7 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-class DataVarehusDAOTest extends IntegationTest {
+@Transactional
+class DataVarehusDAOTest {
 
     @Autowired
     private DataVarehusDAO dataVarehusDAO;
@@ -33,7 +36,7 @@ class DataVarehusDAOTest extends IntegationTest {
         DialogData dialog = DialogData.builder().id(1).aktivitetId("aktivitet").aktorId("aktor").build();
         dataVarehusDAO.insertEvent(dialog, DatavarehusEvent.VENTER_PAA_BRUKER);
 
-        DatavarehusData data = jdbc.queryForObject("select * from event", DatavarehusData.class);
+        DatavarehusData data = jdbc.queryForObject("select * from event", new BeanPropertyRowMapper<>(DatavarehusData.class));
 
         assertThat(data).isNotNull();
         assertThat(data.dialogId).isEqualTo(dialog.getId());
