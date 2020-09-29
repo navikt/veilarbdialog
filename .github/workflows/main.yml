@@ -82,9 +82,6 @@ jobs:
           VAR: version=${{ env.IMAGE_TAG }},namespace=q1
   deploy-q1-spring-boot:
     name: Deploy application to Q1 (Spring Boot)
-    on:
-      push:
-        branches: [ spring-boot ]
     if: github.ref == 'refs/heads/spring-boot'
     needs: test-build-and-push
     runs-on: ubuntu-latest
