@@ -20,7 +20,7 @@ application:
   kafka:
     broker:
       url: KAFKA_BROKERS_URL
-    topic: aapen-fo-endringPaaDialog-v1-APPLICATION_ENVIRONMENT_NAME
+    topic: aapen-fo-endringPaaDialog-v1-APP_ENVIRONMENT_NAME
   kvp:
     url: VEILARBOPPFOLGINGAPI_URL
   mq:
