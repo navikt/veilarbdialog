@@ -379,6 +379,7 @@
                 <version>${flyway.version}</version>
             </plugin>
         </plugins>
+        <finalName>${project.artifactId}</finalName>
     </build>
 
 </project>
