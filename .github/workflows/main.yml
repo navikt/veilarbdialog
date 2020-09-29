@@ -27,7 +27,7 @@ jobs:
   test-build-and-push:
     name: Test, build and push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/master' || github.rev == 'refs/heads/spring-boot'
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/master' || github.ref == 'refs/heads/spring-boot'
     steps:
       - name: Checkout
         uses: actions/checkout@v1
@@ -82,6 +82,9 @@ jobs:
           VAR: version=${{ env.IMAGE_TAG }},namespace=q1
   deploy-q1-spring-boot:
     name: Deploy application to Q1 (Spring Boot)
+    on:
+      push:
+        branches: [ spring-boot ]
     if: github.ref == 'refs/heads/spring-boot'
     needs: test-build-and-push
     runs-on: ubuntu-latest
