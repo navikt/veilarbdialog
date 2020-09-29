@@ -2,7 +2,7 @@ spring:
   application:
     name: "veilarbdialog"
   flyway:
-    locations: classpath:/db/migration,classpath:/db/testdata
+    enabled: false
 
 application:
   abac:

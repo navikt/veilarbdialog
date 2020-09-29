@@ -4,17 +4,12 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.flywaydb.core.Flyway;
-import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.SimpleDriverDataSource;
-import org.springframework.util.ClassUtils;
 
 import javax.sql.DataSource;
-import java.sql.Driver;
 
 @Configuration
 @Slf4j
@@ -46,10 +41,8 @@ public class DataSourceConfig {
 
     public static DataSource migrate(DataSource dataSource) {
         log.info("Explicitly migrating {} using Flyway", dataSource);
-        Flyway flyway = new Flyway(
-                new FluentConfiguration()
-                        .dataSource(dataSource)
-        );
+        Flyway flyway = new Flyway();
+        flyway.setDataSource(dataSource);
         flyway.migrate();
         return dataSource;
     }

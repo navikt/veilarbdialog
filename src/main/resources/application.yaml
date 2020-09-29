@@ -5,6 +5,8 @@ spring:
     jdbc:
       repositories:
         enabled: false
+  flyway:
+    enabled: false
 
 management:
   endpoint:
