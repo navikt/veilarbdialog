@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
 import no.nav.common.sts.SystemUserTokenProvider;
 import no.nav.fo.feed.common.OutInterceptor;
@@ -19,6 +20,7 @@ import java.util.Collections;
 
 @Configuration
 @RequiredArgsConstructor
+@Slf4j
 public class FeedConsumerConfig {
 
     private final LockProvider lockProvider;
@@ -34,20 +36,27 @@ public class FeedConsumerConfig {
     )
     public FeedConsumer<KvpDTO> kvpFeedDTOFeedConsumer(KvpFeedConsumer kvpFeedConsumer, SystemUserTokenProvider provider) {
 
-        no.nav.fo.feed.consumer.FeedConsumerConfig<KvpDTO> config = new no.nav.fo.feed.consumer.FeedConsumerConfig<>(
-                new no.nav.fo.feed.consumer.FeedConsumerConfig.BaseConfig<>(
-                        KvpDTO.class,
-                        kvpFeedConsumer::sisteEndring,
-                        apiUrl,
-                        KvpDTO.FEED_NAME
-                ),
-                new no.nav.fo.feed.consumer.FeedConsumerConfig.CronPollingConfig("/10 * * * * ?")
-        )
-                .lockProvider(lockProvider, 10000)
-                .callback(kvpFeedConsumer::lesKvpFeed)
-                .interceptors(Collections.singletonList(new SystemUserTokenInterceptor(provider)));
+        try {
 
-        return new FeedConsumer<>(config);
+            no.nav.fo.feed.consumer.FeedConsumerConfig<KvpDTO> config = new no.nav.fo.feed.consumer.FeedConsumerConfig<>(
+                    new no.nav.fo.feed.consumer.FeedConsumerConfig.BaseConfig<>(
+                            KvpDTO.class,
+                            kvpFeedConsumer::sisteEndring,
+                            apiUrl,
+                            KvpDTO.FEED_NAME
+                    ),
+                    new no.nav.fo.feed.consumer.FeedConsumerConfig.CronPollingConfig("/10 * * * * ?")
+            )
+                    .lockProvider(lockProvider, 10000)
+                    .callback(kvpFeedConsumer::lesKvpFeed)
+                    .interceptors(Collections.singletonList(new SystemUserTokenInterceptor(provider)));
+
+            return new FeedConsumer<>(config);
+
+        } catch (RuntimeException e) {
+            log.error("Caught (and re-throwing) RuntimeException", e);
+            throw e;
+        }
 
     }
 
@@ -62,20 +71,27 @@ public class FeedConsumerConfig {
             SystemUserTokenProvider systemUserTokenProvider
     ) {
 
-        no.nav.fo.feed.consumer.FeedConsumerConfig<AvsluttetOppfolgingFeedDTO> config = new no.nav.fo.feed.consumer.FeedConsumerConfig<>(
-                new no.nav.fo.feed.consumer.FeedConsumerConfig.BaseConfig<>(
-                        AvsluttetOppfolgingFeedDTO.class,
-                        avsluttetOppfolgingFeedConsumer::sisteEndring,
-                        apiUrl,
-                        AvsluttetOppfolgingFeedDTO.FEED_NAME
-                ),
-                new no.nav.fo.feed.consumer.FeedConsumerConfig.CronPollingConfig("/10 * * * * ?")
-        )
-                .lockProvider(lockProvider, 10000)
-                .callback(avsluttetOppfolgingFeedConsumer::lesAvsluttetOppfolgingFeed)
-                .interceptors(Collections.singletonList(new SystemUserTokenInterceptor(systemUserTokenProvider)));
+        try {
 
-        return new FeedConsumer<>(config);
+            no.nav.fo.feed.consumer.FeedConsumerConfig<AvsluttetOppfolgingFeedDTO> config = new no.nav.fo.feed.consumer.FeedConsumerConfig<>(
+                    new no.nav.fo.feed.consumer.FeedConsumerConfig.BaseConfig<>(
+                            AvsluttetOppfolgingFeedDTO.class,
+                            avsluttetOppfolgingFeedConsumer::sisteEndring,
+                            apiUrl,
+                            AvsluttetOppfolgingFeedDTO.FEED_NAME
+                    ),
+                    new no.nav.fo.feed.consumer.FeedConsumerConfig.CronPollingConfig("/10 * * * * ?")
+            )
+                    .lockProvider(lockProvider, 10000)
+                    .callback(avsluttetOppfolgingFeedConsumer::lesAvsluttetOppfolgingFeed)
+                    .interceptors(Collections.singletonList(new SystemUserTokenInterceptor(systemUserTokenProvider)));
+
+            return new FeedConsumer<>(config);
+
+        } catch (RuntimeException e) {
+            log.error("Caught (and re-throwing) RuntimeException", e);
+            throw e;
+        }
 
     }
 
