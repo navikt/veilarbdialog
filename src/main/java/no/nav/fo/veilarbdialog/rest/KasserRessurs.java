@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 import static no.nav.fo.veilarbdialog.config.ApplicationConfig.VEILARB_KASSERING_IDENTER_PROPERTY;
 
 @RestController
-@RequestMapping("kassering")
+@RequestMapping("veilarbdialog/api/kassering")
 @RequiredArgsConstructor
 @Slf4j
 public class KasserRessurs {

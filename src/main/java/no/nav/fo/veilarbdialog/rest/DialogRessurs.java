@@ -26,7 +26,7 @@ import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruke
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erInternBruker;
 
 @RestController
-@RequestMapping("dialog")
+@RequestMapping("veilarbdialog/api/dialog")
 @RequiredArgsConstructor
 public class DialogRessurs {
 
