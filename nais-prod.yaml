@@ -14,13 +14,13 @@ spec:
   port: 8080
   prometheus:
     enabled: true
-    path: veilarbdialog/actuator/prometheus
+    path: /actuator/prometheus
   liveness:
-    path: veilarbdialog/actuator/info
+    path: /actuator/info
     port: 8080
     initialDelay: 20
   readiness:
-    path: veilarbdialog/actuator/health
+    path: /actuator/health
     port: 8080
     initialDelay: 20
   replicas:
