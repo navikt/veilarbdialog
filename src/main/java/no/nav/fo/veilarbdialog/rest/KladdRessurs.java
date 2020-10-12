@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
 
 @RestController
-@RequestMapping("veilarbdialog/api/kladd")
+@RequestMapping("/api/kladd")
 @RequiredArgsConstructor
 public class KladdRessurs {
 

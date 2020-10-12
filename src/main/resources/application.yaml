@@ -8,10 +8,9 @@ spring:
   flyway:
     enabled: false
 
-management:
-  endpoint:
-    health:
-      show-details: always
+server:
+  servlet:
+    context-path: "/veilarbdialog"
 
 application:
   cluster: ${APP_CLUSTER_NAME}

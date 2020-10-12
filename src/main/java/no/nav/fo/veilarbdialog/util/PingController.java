@@ -22,7 +22,7 @@ public class PingController {
     @Value("${management.endpoints.web.base-path:/actuator}")
     private String basePath;
 
-    @RequestMapping("/veilarbdialog/api/ping")
+    @RequestMapping("/api/ping")
     public ModelAndView forwardToPing(HttpServletRequest request) {
 
         String url = "forward:/" + basePath + "/health/ping";

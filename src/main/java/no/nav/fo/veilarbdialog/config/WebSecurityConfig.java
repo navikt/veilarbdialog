@@ -15,7 +15,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(
                         "/error",
-                        "/actuator/*"
+                        "/actuator/*",
+                        "/api/ping"
                 )
                 .permitAll();
         super.configure(http);
