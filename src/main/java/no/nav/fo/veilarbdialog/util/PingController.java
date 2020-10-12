@@ -25,14 +25,14 @@ public class PingController {
     @RequestMapping("/veilarbdialog/api/ping")
     public ModelAndView forwardToPing(HttpServletRequest request) {
 
-        String url = "forward:/" + basePath + "//health/ping";
+        String url = "forward:/" + basePath + "/health/ping";
         if (log.isDebugEnabled()) {
             Map<String, String> headers = new HashMap<>();
             request
                     .getHeaderNames()
                     .asIterator()
                     .forEachRemaining(header -> headers.put(header, request.getHeader(header)));
-            log.debug("Forwarding request to {} with headers {} to health/ping at {}", request.getRequestURI(), headers, url);
+            log.debug("Forwarding request to {} with headers {} to {}", request.getRequestURI(), headers, url);
         }
         return new ModelAndView(url);
 

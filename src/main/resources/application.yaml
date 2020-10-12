@@ -20,6 +20,13 @@ application:
     url: ${ABAC_PDP_ENDPOINT_URL}
   aktorregister:
     url: ${AKTOERREGISTER_API_V1_URL}
+  azure:
+    ad:
+      clientId: ${LOGINSERVICE_OIDC_CLIENT_ID}
+      discoveryUrl: ${AAD_DISCOVERY_URL}
+    b2c:
+      clientId: ${AAD_B2C_CLIENTID_USERNAME}
+      discoveryUrl: ${AAD_B2C_DISCOVERY_URL}
   datasource:
     driver-class-name: oracle.jdbc.driver.OracleDriver
     url: ${VEILARBDIALOGDATASOURCE_URL}
@@ -43,6 +50,10 @@ application:
       varselHandling: ${VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_QUEUENAME}
       varslinger: ${VARSELPRODUKSJON_VARSLINGER_QUEUENAME}
     userid: srvappserver
+  openam:
+    clientId: ${VEILARBLOGIN_OPENAM_CLIENT_ID}
+    discoveryUrl: ${OPENAM_DISCOVERY_URL}
+    refreshUrl: ${VEILARBLOGIN_OPENAM_REFRESH_URL}
   serviceuser:
     username: ${SERVICEUSER_USERNAME}
     password: ${SERVICEUSER_PASSWORD}
@@ -54,6 +65,3 @@ application:
   veilarboppfolging:
     api:
       url: ${VEILARBOPPFOLGINGAPI_URL}
-
-isso-host:
-  url: http://localhost

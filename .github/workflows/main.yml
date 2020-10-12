@@ -80,8 +80,8 @@ jobs:
           CLUSTER: dev-fss
           RESOURCE: nais-dev.yaml
           VAR: version=${{ env.IMAGE_TAG }},namespace=q1
-  deploy-q1-spring-boot:
-    name: Deploy application to Q1 (Spring Boot)
+  deploy-q0-spring-boot:
+    name: Deploy application to Q0 (Spring Boot)
     if: github.ref == 'refs/heads/spring-boot'
     needs: test-build-and-push
     runs-on: ubuntu-latest
@@ -94,7 +94,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
           RESOURCE: nais-dev.yaml
-          VAR: version=${{ env.IMAGE_TAG }},namespace=q1
+          VAR: version=${{ env.IMAGE_TAG }},namespace=q0
   deploy-prod:
     name: Deploy application to prod
     if: github.ref == 'refs/heads/master'

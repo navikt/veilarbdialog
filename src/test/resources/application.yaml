@@ -5,24 +5,32 @@ spring:
     enabled: false
 
 application:
+  cluster: TEST
+  namespace: APP_ENVIRONMENT_NAME
   abac:
-    url: ABAC_PDP_ENDPOINT_URL
+    url: http://localhost:8080/ABAC_PDP_ENDPOINT_URL
   aktorregister:
-    url: AKTOERREGISTER_API_V1_URL
+    url: http://localhost:8080/AKTOERREGISTER_API_V1_URL
+  azure:
+    ad:
+      clientId: LOGINSERVICE_OIDC_CLIENT_ID
+      discoveryUrl: http://localhost:8080/AAD_DISCOVERY_URL
+    b2c:
+      clientId: AAD_B2C_CLIENTID_USERNAME
+      discoveryUrl: http://localhost:8080/AAD_B2C_DISCOVERY_URL
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;MODE=Oracle
     username: sa
     password: sa
   dialog:
-    url: ARBEIDSRETTET_DIALOG_URL
-  namespace: APP_ENVIRONMENT_NAME
+    url: http://localhost:8080/ARBEIDSRETTET_DIALOG_URL
   kafka:
     broker:
-      url: KAFKA_BROKERS_URL
+      url: http://localhost:8080/KAFKA_BROKERS_URL
     topic: aapen-fo-endringPaaDialog-v1-APP_ENVIRONMENT_NAME
   kvp:
-    url: VEILARBOPPFOLGINGAPI_URL
+    url: http://localhost:8080/VEILARBOPPFOLGINGAPI_URL
   mq:
     hostname: MQGATEWAY03_HOSTNAME
     name: MQGATEWAY03_NAME
@@ -33,17 +41,20 @@ application:
       varselHandling: VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_QUEUENAME
       varslinger: VARSELPRODUKSJON_VARSLINGER_QUEUENAME
     userid: srvappserver
+  oidc:
+    disabled: true
+  openam:
+    clientId: VEILARBLOGIN_OPENAM_CLIENT_ID
+    discoveryUrl: http://localhost:8080/OPENAM_DISCOVERY_URL
+    refreshUrl: http://localhost:8080/VEILARBLOGIN_OPENAM_REFRESH_URL
   serviceuser:
     username: SERVICEUSER_USERNAME
     password: SERVICEUSER_PASSWORD
   sts:
     discovery:
-      url: SECURITYTOKENSERVICE_URL
+      url: http://localhost:8080/SECURITYTOKENSERVICE_URL
   unleash:
-    url: UNLEASH_API_URL
+    url: http://localhost:8080/UNLEASH_API_URL
   veilarboppfolging:
     api:
-      url: VEILARBOPPFOLGINGAPI_URL
-
-isso-host:
-  url: http://localhost
+      url: http://localhost:8080/VEILARBOPPFOLGINGAPI_URL
