@@ -27,8 +27,9 @@ public class VarselDAO {
                         "and (v.SENDT is null or h.SENDT > v.SENDT) " +
                         "and h.SENDT < ? " +
                         "group by d.AKTOR_ID",
-                new Object[]{AvsenderType.VEILEDER.name(), grense},
-                String.class
+                String.class,
+                AvsenderType.VEILEDER.name(),
+                grense
         );
     }
 
@@ -56,8 +57,8 @@ public class VarselDAO {
                                 "where ULESTPARAGRAF8VARSEL = 1 " +
                                 "and PARAGRAF8_VARSEL_UUID is null " +
                                 "and AKTOR_ID = ?",
-                        new Object[]{aktorId},
-                        Integer.class))
+                        Integer.class,
+                        aktorId))
                 .orElse(0);
         return unread > 0;
     }
@@ -68,8 +69,8 @@ public class VarselDAO {
                                 "from DIALOG " +
                                 "where PARAGRAF8_VARSEL_UUID = ? " +
                                 "and ULESTPARAGRAF8VARSEL = 1",
-                        new Object[]{paragraf8VarselUUID},
-                        Integer.class))
+                        Integer.class,
+                        paragraf8VarselUUID))
                 .orElse(0);
     }
 

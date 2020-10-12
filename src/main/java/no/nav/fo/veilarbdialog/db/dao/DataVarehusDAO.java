@@ -33,11 +33,9 @@ public class DataVarehusDAO {
     @Transactional(readOnly = true)
     public Date hentSisteEndringSomIkkeErDine(String aktorId, String bruker) {
         return jdbc.queryForObject("select TIDSPUNKT from EVENT where AKTOR_ID = ? and LAGT_INN_AV != ? ORDER BY EVENT_ID DESC FETCH FIRST 1 ROWS ONLY",
-                new Object[]{
-                        aktorId,
-                        bruker
-                },
-                Date.class);
+                Date.class,
+                aktorId,
+                bruker);
     }
 
     private static String getLagtInnAv() {

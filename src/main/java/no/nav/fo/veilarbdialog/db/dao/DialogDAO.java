@@ -34,8 +34,8 @@ public class DialogDAO {
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForAktorId(String aktorId) {
         return jdbc.query("select * from DIALOG where AKTOR_ID = ?",
-                new Object[]{aktorId},
-                new MapTilDialog());
+                new MapTilDialog(),
+                aktorId);
     }
 
     @Transactional(readOnly = true)
@@ -45,11 +45,9 @@ public class DialogDAO {
                         "HISTORISK = 0 and " +
                         "OPPRETTET_DATO < ? and " +
                         "KONTORSPERRE_ENHET_ID is not null",
-                new Object[]{
-                        aktorId,
-                        avsluttetDato
-                },
-                new MapTilDialog());
+                new MapTilDialog(),
+                aktorId,
+                avsluttetDato);
     }
 
     @Transactional(readOnly = true)
@@ -58,18 +56,16 @@ public class DialogDAO {
                         "AKTOR_ID = ? and " +
                         "HISTORISK = 0 and " +
                         "OPPRETTET_DATO < ?",
-                new Object[]{
-                        aktorId,
-                        avsluttetDato
-                },
-                new MapTilDialog());
+                new MapTilDialog(),
+                aktorId,
+                avsluttetDato);
     }
 
     @Transactional(readOnly = true)
     public DialogData hentDialog(long dialogId) {
         return jdbc.queryForObject("select * from DIALOG where DIALOG_ID = ?",
-                new Object[]{dialogId},
-                new MapTilDialog());
+                new MapTilDialog(),
+                dialogId);
     }
 
     @Transactional(readOnly = true)
@@ -77,8 +73,8 @@ public class DialogDAO {
         return jdbc.queryForObject("select d.* from DIALOG d " +
                         "left join HENVENDELSE h on h.DIALOG_ID = d.DIALOG_ID " +
                         "where h.HENVENDELSE_ID = ?",
-                new Object[]{henvendelseId},
-                new MapTilDialog());
+                new MapTilDialog(),
+                henvendelseId);
     }
 
     @Transactional(readOnly = true)
@@ -86,8 +82,8 @@ public class DialogDAO {
         return jdbc.query("select * from HENVENDELSE h " +
                         "left join DIALOG d on d.DIALOG_ID = h.DIALOG_ID " +
                         "where h.HENVENDELSE_ID = ?",
-                new Object[]{id},
-                new MapTilHenvendelse())
+                new MapTilHenvendelse(),
+                id)
                 .stream()
                 .findFirst()
                 .orElse(null);
@@ -106,8 +102,8 @@ public class DialogDAO {
     @Transactional(readOnly = true)
     public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
         return jdbc.query("select * from DIALOG where AKTIVITET_ID = ?",
-                new Object[]{aktivitetId},
-                new MapTilDialog())
+                new MapTilDialog(),
+                aktivitetId)
                 .stream()
                 .findFirst();
     }
@@ -178,8 +174,8 @@ public class DialogDAO {
         return jdbc.query("select * from HENVENDELSE h " +
                         "left join DIALOG d on d.DIALOG_ID = h.DIALOG_ID " +
                         "where h.DIALOG_ID = ?",
-                new Object[]{dialogId},
-                new MapTilHenvendelse());
+                new MapTilHenvendelse(),
+                dialogId);
     }
 
     private class MapTilDialog implements RowMapper<DialogData> {
@@ -190,11 +186,11 @@ public class DialogDAO {
             long dialogId = rs.getLong("DIALOG_ID");
             List<EgenskapType> egenskaper =
                     jdbc.query("select * from DIALOG_EGENSKAP where DIALOG_ID = ?",
-                            new Object[]{dialogId},
                             (rsInner, rowNumInner) -> Optional
                                     .ofNullable(rs.getString("DIALOG_EGENSKAP_TYPE_KODE"))
                                     .map(EgenskapType::valueOf)
-                                    .orElse(null));
+                                    .orElse(null),
+                            dialogId);
             return DialogData.builder()
                     .id(dialogId)
                     .aktorId(rs.getString("AKTOR_ID"))

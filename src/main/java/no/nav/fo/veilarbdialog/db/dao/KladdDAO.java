@@ -46,10 +46,6 @@ public class KladdDAO {
                         "AKTOR_ID = ? and " +
                         "LAGT_INN_AV = ? " +
                         "order by UNIQUE_SEQ",
-                new Object[]{
-                        aktorId,
-                        lagtInnAv
-                },
                 (rs, rowNum) -> Kladd.builder()
                         .aktorId(rs.getString("AKTOR_ID"))
                         .dialogId(rs.getString("DIALOG_ID"))
@@ -57,7 +53,9 @@ public class KladdDAO {
                         .overskrift(rs.getString("OVERSKRIFT"))
                         .tekst(rs.getString("TEKST"))
                         .lagtInnAv(rs.getString("LAGT_INN_AV"))
-                        .build()
+                        .build(),
+                aktorId,
+                lagtInnAv
         );
     }
 
