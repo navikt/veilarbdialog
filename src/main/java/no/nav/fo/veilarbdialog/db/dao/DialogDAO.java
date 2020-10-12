@@ -90,12 +90,12 @@ public class DialogDAO {
     }
 
     public int kasserHenvendelse(long id) {
-        return jdbc.update("update HENVENDELSE set TEKST = 'Kassert av NAV' where HENVENDELSE_ID = ?",
+        return jdbc.update("update HENVENDELSE set TEKST = '- Det var skrevet noe feil, og det er nå slettet. -' where HENVENDELSE_ID = ?",
                 id);
     }
 
     public int kasserDialog(long id) {
-        return jdbc.update("update DIALOG set OVERSKRIFT = 'Kassert av NAV' where DIALOG_ID = ?",
+        return jdbc.update("update DIALOG set OVERSKRIFT = '- Det var skrevet noe feil, og det er nå slettet. -' where DIALOG_ID = ?",
                 id);
     }
 
@@ -213,6 +213,10 @@ public class DialogDAO {
                     .build();
 
         }
+
+    }
+
+    // TODO: Check.
 
     }
 

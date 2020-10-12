@@ -152,7 +152,7 @@ public class DialogDataService {
 
     public void updateDialogAktorFor(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
-        if (unleashService.isEnabled("veilarbdialog.kafka")) {
+        if(unleashService.isEnabled("veilarbdialog.kafka1")) {
             KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
             kafkaDialogService.dialogEvent(kafkaDialogMelding);
         }
