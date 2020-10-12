@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static no.nav.fo.veilarbdialog.db.dao.DBKonstanter.*;
 
 @Component
 @Transactional
@@ -185,9 +184,9 @@ public class DialogDAO {
 
             long dialogId = rs.getLong("DIALOG_ID");
             List<EgenskapType> egenskaper =
-                    jdbc.query("select * from DIALOG_EGENSKAP where DIALOG_ID = ?",
+                    jdbc.query("select d.DIALOG_EGENSKAP_TYPE_KODE from DIALOG_EGENSKAP d where d.DIALOG_ID = ?",
                             (rsInner, rowNumInner) -> Optional
-                                    .ofNullable(rs.getString("DIALOG_EGENSKAP_TYPE_KODE"))
+                                    .ofNullable(rsInner.getString("DIALOG_EGENSKAP_TYPE_KODE"))
                                     .map(EgenskapType::valueOf)
                                     .orElse(null),
                             dialogId);
@@ -213,10 +212,6 @@ public class DialogDAO {
                     .build();
 
         }
-
-    }
-
-    // TODO: Check.
 
     }
 
