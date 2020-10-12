@@ -52,4 +52,4 @@ spec:
     - name: APP_CLUSTER_NAME
       value: dev-fss
     - name: debug
-      value: true
+      value: "true"
