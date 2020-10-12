@@ -33,7 +33,7 @@ public class DialogDAO {
 
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForAktorId(String aktorId) {
-        return jdbc.query("select * from DIALOG where aktor_id = ?",
+        return jdbc.query("select * from DIALOG where AKTOR_ID = ?",
                 new Object[]{aktorId},
                 new MapTilDialog());
     }
@@ -41,8 +41,8 @@ public class DialogDAO {
     @Transactional(readOnly = true)
     public List<DialogData> hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(String aktorId, Date avsluttetDato) {
         return jdbc.query("select * from DIALOG where " +
-                        "aktor_id = ? and " +
-                        "historisk = 0 and " +
+                        "AKTOR_ID = ? and " +
+                        "HISTORISK = 0 and " +
                         "OPPRETTET_DATO < ? and " +
                         "KONTORSPERRE_ENHET_ID is not null",
                 new Object[]{
@@ -55,8 +55,8 @@ public class DialogDAO {
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerSomSkalAvsluttesForAktorId(String aktorId, Date avsluttetDato) {
         return jdbc.query("select * from DIALOG where " +
-                        "aktor_id = ? and " +
-                        "historisk = 0 and " +
+                        "AKTOR_ID = ? and " +
+                        "HISTORISK = 0 and " +
                         "OPPRETTET_DATO < ?",
                 new Object[]{
                         aktorId,
@@ -67,7 +67,7 @@ public class DialogDAO {
 
     @Transactional(readOnly = true)
     public DialogData hentDialog(long dialogId) {
-        return jdbc.queryForObject("select * from DIALOG where dialog_id = ?",
+        return jdbc.queryForObject("select * from DIALOG where DIALOG_ID = ?",
                 new Object[]{dialogId},
                 new MapTilDialog());
     }
@@ -75,8 +75,8 @@ public class DialogDAO {
     @Transactional(readOnly = true)
     public DialogData hentDialogGittHenvendelse(long henvendelseId) {
         return jdbc.queryForObject("select d.* from DIALOG d " +
-                        "left join HENVENDELSE h on h.dialog_id = d.dialog_id " +
-                        "where h.henvendelse_id = ?",
+                        "left join HENVENDELSE h on h.DIALOG_ID = d.DIALOG_ID " +
+                        "where h.HENVENDELSE_ID = ?",
                 new Object[]{henvendelseId},
                 new MapTilDialog());
     }
@@ -84,8 +84,8 @@ public class DialogDAO {
     @Transactional(readOnly = true)
     public HenvendelseData hentHenvendelse(long id) {
         return jdbc.query("select * from HENVENDELSE h " +
-                        "left join DIALOG d on d.dialog_id = h.dialog_id " +
-                        "where h.henvendelse_id = ?",
+                        "left join DIALOG d on d.DIALOG_ID = h.DIALOG_ID " +
+                        "where h.HENVENDELSE_ID = ?",
                 new Object[]{id},
                 new MapTilHenvendelse())
                 .stream()
@@ -105,7 +105,7 @@ public class DialogDAO {
 
     @Transactional(readOnly = true)
     public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
-        return jdbc.query("select * from DIALOG where aktivitet_id = ?",
+        return jdbc.query("select * from DIALOG where AKTIVITET_ID = ?",
                 new Object[]{aktivitetId},
                 new MapTilDialog())
                 .stream()
@@ -114,11 +114,11 @@ public class DialogDAO {
 
     public DialogData opprettDialog(DialogData dialogData) {
         long dialogId = Optional
-                .ofNullable(jdbc.queryForObject("select DIALOG_ID_SEQ.nextval from dual", Long.class))
+                .ofNullable(jdbc.queryForObject("select DIALOG_ID_SEQ.nextval from DUAL", Long.class))
                 .orElseThrow(IllegalStateException::new);
         log.info("Date provider is {} and value is {}", dateProvider, dateProvider.getNow());
 
-        jdbc.update("insert into DIALOG (dialog_id, aktor_id, opprettet_dato, aktivitet_id, overskrift, historisk, kontorsperre_enhet_id, oppdatert) " +
+        jdbc.update("insert into DIALOG (DIALOG_ID, AKTOR_ID, OPPRETTET_DATO, AKTIVITET_ID, OVERSKRIFT, HISTORISK, KONTORSPERRE_ENHET_ID, OPPDATERT) " +
                         "values (?, ?, ?, ?, ?, ?, ?, ?)",
                 dialogId,
                 dialogData.getAktorId(),
@@ -145,10 +145,10 @@ public class DialogDAO {
 
     public HenvendelseData opprettHenvendelse(HenvendelseData henvendelseData) {
         long henvendelseId = Optional
-                .ofNullable(jdbc.queryForObject("select HENVENDELSE_ID_SEQ.nextval from dual", Long.class))
+                .ofNullable(jdbc.queryForObject("select HENVENDELSE_ID_SEQ.nextval from DUAL", Long.class))
                 .orElseThrow(IllegalStateException::new);
 
-        jdbc.update("insert into HENVENDELSE (henvendelse_id, dialog_id, sendt, tekst, kontorsperre_enhet_id, avsender_id, avsender_type, viktig) " +
+        jdbc.update("insert into HENVENDELSE (HENVENDELSE_ID, DIALOG_ID, SENDT, TEKST, KONTORSPERRE_ENHET_ID, AVSENDER_ID, AVSENDER_TYPE, VIKTIG) " +
                         "values (?, ?, ?, ?, ?, ?, ?, ?)",
                 henvendelseId,
                 henvendelseData.dialogId,
@@ -176,8 +176,8 @@ public class DialogDAO {
 
     private List<HenvendelseData> hentHenvendelser(long dialogId) {
         return jdbc.query("select * from HENVENDELSE h " +
-                        "left join DIALOG d on d.dialog_id = h.dialog_id " +
-                        "where h.dialog_id = ?",
+                        "left join DIALOG d on d.DIALOG_ID = h.DIALOG_ID " +
+                        "where h.DIALOG_ID = ?",
                 new Object[]{dialogId},
                 new MapTilHenvendelse());
     }
@@ -187,9 +187,9 @@ public class DialogDAO {
         @Override
         public DialogData mapRow(ResultSet rs, int rowNum) throws SQLException {
 
-            long dialogId = rs.getLong("dialog_id");
+            long dialogId = rs.getLong("DIALOG_ID");
             List<EgenskapType> egenskaper =
-                    jdbc.query("select * from DIALOG_EGENSKAP where dialog_id = ?",
+                    jdbc.query("select * from DIALOG_EGENSKAP where DIALOG_ID = ?",
                             new Object[]{dialogId},
                             (rsInner, rowNumInner) -> Optional
                                     .ofNullable(rs.getString("DIALOG_EGENSKAP_TYPE_KODE"))
@@ -197,23 +197,23 @@ public class DialogDAO {
                                     .orElse(null));
             return DialogData.builder()
                     .id(dialogId)
-                    .aktorId(rs.getString("aktor_id"))
-                    .aktivitetId(rs.getString("aktivitet_id"))
-                    .overskrift(rs.getString("overskrift"))
-                    .lestAvBrukerTidspunkt(hentDato(rs, "lest_av_bruker_tid"))
-                    .lestAvVeilederTidspunkt(hentDato(rs, "lest_av_veileder_tid"))
+                    .aktorId(rs.getString("AKTOR_ID"))
+                    .aktivitetId(rs.getString("AKTIVITET_ID"))
+                    .overskrift(rs.getString("OVERSKRIFT"))
+                    .lestAvBrukerTidspunkt(hentDato(rs, "LEST_AV_BRUKER_TID"))
+                    .lestAvVeilederTidspunkt(hentDato(rs, "LEST_AV_VEILEDER_TID"))
                     .henvendelser(hentHenvendelser(dialogId))
-                    .historisk(rs.getBoolean("historisk"))
-                    .opprettetDato(hentDato(rs, "opprettet_dato"))
-                    .venterPaNavSiden(hentDato(rs, VENTER_PA_NAV_SIDEN))
-                    .venterPaSvarFraBrukerSiden(hentDato(rs, VENTER_PA_SVAR_FRA_BRUKER))
-                    .eldsteUlesteTidspunktForBruker(hentDato(rs, ELDSTE_ULESTE_FOR_BRUKER))
-                    .eldsteUlesteTidspunktForVeileder(hentDato(rs, ELDSTE_ULESTE_FOR_VEILEDER))
-                    .oppdatert(hentDato(rs, OPPDATERT))
-                    .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
+                    .historisk(rs.getBoolean("HISTORISK"))
+                    .opprettetDato(hentDato(rs, "OPPRETTET_DATO"))
+                    .venterPaNavSiden(hentDato(rs, "VENTER_PA_NAV_SIDEN"))
+                    .venterPaSvarFraBrukerSiden(hentDato(rs, "VENTER_PA_SVAR_FRA_BRUKER"))
+                    .eldsteUlesteTidspunktForBruker(hentDato(rs, "ELDSTE_ULESTE_FOR_BRUKER"))
+                    .eldsteUlesteTidspunktForVeileder(hentDato(rs, "ELDSTE_ULESTE_FOR_VEILEDER"))
+                    .oppdatert(hentDato(rs, "OPPDATERT"))
+                    .kontorsperreEnhetId(rs.getString("KONTORSPERRE_ENHET_ID"))
                     .egenskaper(egenskaper)
-                    .harUlestParagraf8Henvendelse(rs.getBoolean(HAR_ULEST_PARAGRAF_8))
-                    .paragraf8VarselUUID(rs.getString(PARAGRAF8_VARSEL_UUID))
+                    .harUlestParagraf8Henvendelse(rs.getBoolean("ULESTPARAGRAF8VARSEL"))
+                    .paragraf8VarselUUID(rs.getString("PARAGRAF8_VARSEL_UUID"))
                     .build();
 
         }
@@ -224,18 +224,18 @@ public class DialogDAO {
 
         @Override
         public HenvendelseData mapRow(ResultSet rs, int rowNum) throws SQLException {
-            Date henvendelseDato = hentDato(rs, "sendt");
+            Date henvendelseDato = hentDato(rs, "SENDT");
             return HenvendelseData.builder()
-                    .id(rs.getLong("henvendelse_id"))
-                    .dialogId(rs.getLong("dialog_id"))
+                    .id(rs.getLong("HENVENDELSE_ID"))
+                    .dialogId(rs.getLong("DIALOG_ID"))
                     .sendt(henvendelseDato)
-                    .tekst(rs.getString("tekst"))
-                    .avsenderId(rs.getString("avsender_id"))
-                    .avsenderType(EnumUtils.valueOf(AvsenderType.class, rs.getString("avsender_type")))
-                    .lestAvBruker(erLest(hentDato(rs, ELDSTE_ULESTE_FOR_BRUKER), henvendelseDato))
-                    .lestAvVeileder(erLest(hentDato(rs, ELDSTE_ULESTE_FOR_VEILEDER), henvendelseDato))
-                    .kontorsperreEnhetId(rs.getString("kontorsperre_enhet_id"))
-                    .viktig(rs.getBoolean("viktig"))
+                    .tekst(rs.getString("TEKST"))
+                    .avsenderId(rs.getString("AVSENDER_ID"))
+                    .avsenderType(EnumUtils.valueOf(AvsenderType.class, rs.getString("AVSENDER_TYPE")))
+                    .lestAvBruker(erLest(hentDato(rs, "ELDSTE_ULESTE_FOR_BRUKER"), henvendelseDato))
+                    .lestAvVeileder(erLest(hentDato(rs, "ELDSTE_ULESTE_FOR_VEILEDER"), henvendelseDato))
+                    .kontorsperreEnhetId(rs.getString("KONTORSPERRE_ENHET_ID"))
+                    .viktig(rs.getBoolean("VIKTIG"))
                     .build();
         }
 

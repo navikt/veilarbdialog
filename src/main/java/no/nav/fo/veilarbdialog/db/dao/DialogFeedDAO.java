@@ -34,15 +34,15 @@ public class DialogFeedDAO {
 
     public List<DialogAktor> hentAktorerMedEndringerFOM(Date date, int pageSize) {
         return jdbc.query("select * from " +
-                "(select * from DIALOG_AKTOR where opprettet_tidspunkt >= ? order by opprettet_tidspunkt) " +
-                "where rownum <= ?",
+                "(select * from DIALOG_AKTOR where OPPRETTET_TIDSPUNKT >= ? order by OPPRETTET_TIDSPUNKT) " +
+                "where ROWNUM <= ?",
         new Object[]{date, pageSize},
                 (rs, rowNum) -> DialogAktor.builder()
-                        .aktorId(rs.getString("aktor_id"))
-                        .sisteEndring(hentDato(rs, "siste_endring"))
-                        .tidspunktEldsteVentende(hentDato(rs, "tidspunkt_eldste_ventende"))
-                        .tidspunktEldsteUbehandlede(hentDato(rs, "tidspunkt_eldste_ubehandlede"))
-                        .opprettetTidspunkt(hentDato(rs, "opprettet_tidspunkt"))
+                        .aktorId(rs.getString("AKTOR_ID"))
+                        .sisteEndring(hentDato(rs, "SISTE_ENDRING"))
+                        .tidspunktEldsteVentende(hentDato(rs, "TIDSPUNKT_ELDSTE_VENTENDE"))
+                        .tidspunktEldsteUbehandlede(hentDato(rs, "TIDSPUNKT_ELDSTE_UBEHANDLEDE"))
+                        .opprettetTidspunkt(hentDato(rs, "OPPRETTET_TIDSPUNKT"))
                         .build());
     }
 
@@ -52,7 +52,7 @@ public class DialogFeedDAO {
             return;
         }
         val dialogAktor = mapTilDialogAktor(dialoger);
-        jdbc.update("insert into DIALOG_AKTOR (aktor_id, siste_endring, tidspunkt_eldste_ventende, tidspunkt_eldste_ubehandlede, opprettet_tidspunkt) " +
+        jdbc.update("insert into DIALOG_AKTOR (AKTOR_ID, SISTE_ENDRING, TIDSPUNKT_ELDSTE_VENTENDE, TIDSPUNKT_ELDSTE_UBEHANDLEDE, OPPRETTET_TIDSPUNKT) " +
                 "values (?, ?, ?, ?, ?)",
                 aktorId,
                 dialogAktor.getSisteEndring(),

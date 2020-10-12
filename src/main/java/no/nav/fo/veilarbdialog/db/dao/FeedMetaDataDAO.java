@@ -15,12 +15,12 @@ public class FeedMetaDataDAO {
     private final JdbcTemplate jdbc;
 
     public ZonedDateTime hentSisteLestTidspunkt() {
-        return jdbc.queryForObject("select tidspunkt_siste_endring from FEED_METADATA",
+        return jdbc.queryForObject("select TIDSPUNKT_SISTE_ENDRING from FEED_METADATA",
                 ZonedDateTime.class);
     }
 
     public void oppdaterSisteLest(Date date) {
-        jdbc.update("update FEED_METADATA set tidspunkt_siste_endring = ?",
+        jdbc.update("update FEED_METADATA set TIDSPUNKT_SISTE_ENDRING = ?",
                 date);
     }
 

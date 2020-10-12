@@ -17,10 +17,10 @@ public class StatusDAO {
 
     public void markerSomLestAvVeileder(long dialogId) {
         jdbc.update("update DIALOG set " +
-                        "eldste_uleste_for_veileder = ?, " +
-                        "lest_av_veileder_tid = ?, " +
-                        "oppdatert = ? " +
-                        "where dialog_id = ?",
+                        "ELDSTE_ULESTE_FOR_VEILEDER = ?, " +
+                        "LEST_AV_VEILEDER_TID = ?, " +
+                        "OPPDATERT = ? " +
+                        "where DIALOG_ID = ?",
                 null,
                 dateProvider.getNow(),
                 dateProvider.getNow(),
@@ -30,11 +30,11 @@ public class StatusDAO {
 
     public void markerSomLestAvBruker(long dialogId) {
         jdbc.update("update DIALOG set " +
-                        "ulestParagraf8Varsel = ?, " +
-                        "eldste_uleste_for_bruker = ?, " +
-                        "lest_av_bruker_tid = ?, " +
-                        "oppdatert = ? " +
-                        "where dialog_id = ?",
+                        "ULESTPARAGRAF8VARSEL = ?, " +
+                        "ELDSTE_ULESTE_FOR_BRUKER = ?, " +
+                        "LEST_AV_BRUKER_TID = ?, " +
+                        "OPPDATERT = ? " +
+                        "where DIALOG_ID = ?",
                 0,
                 null,
                 dateProvider.getNow(),
@@ -44,9 +44,9 @@ public class StatusDAO {
 
     public void setVenterPaNavTilNaa(long dialogId) {
         jdbc.update("update DIALOG set " +
-                        "venter_pa_nav_siden = ?, " +
-                        "oppdatert = ? " +
-                        "where dialog_id = ?",
+                        "VENTER_PA_NAV_SIDEN = ?, " +
+                        "OPPDATERT = ? " +
+                        "where DIALOG_ID = ?",
                 dateProvider.getNow(),
                 dateProvider.getNow(),
                 dialogId);
@@ -54,9 +54,9 @@ public class StatusDAO {
 
     public void setVenterPaSvarFraBrukerTilNaa(long dialogId) {
         jdbc.update("update DIALOG set " +
-                        "venter_pa_svar_fra_bruker = ?, " +
-                        "oppdatert = ? " +
-                        "where dialog_id = ?",
+                        "VENTER_PA_SVAR_FRA_BRUKER = ?, " +
+                        "OPPDATERT = ? " +
+                        "where DIALOG_ID = ?",
                 dateProvider.getNow(),
                 dateProvider.getNow(),
                 dialogId);
@@ -64,9 +64,9 @@ public class StatusDAO {
 
     public void setVenterPaNavTilNull(long dialogId) {
         jdbc.update("update DIALOG set " +
-                        "venter_pa_nav_siden = ?, " +
-                        "oppdatert = ? " +
-                        "where dialog_id = ?",
+                        "VENTER_PA_NAV_SIDEN = ?, " +
+                        "OPPDATERT = ? " +
+                        "where DIALOG_ID = ?",
                 null,
                 dateProvider.getNow(),
                 dialogId);
@@ -74,9 +74,9 @@ public class StatusDAO {
 
     public void setVenterPaSvarFraBrukerTilNull(long dialogId) {
         jdbc.update("update DIALOG set " +
-                        "venter_pa_svar_fra_bruker = ?, " +
-                        "oppdatert = ? " +
-                        "where dialog_id = ?",
+                        "VENTER_PA_SVAR_FRA_BRUKER = ?, " +
+                        "OPPDATERT = ? " +
+                        "where DIALOG_ID = ?",
                 null,
                 dateProvider.getNow(),
                 dialogId);
@@ -84,9 +84,9 @@ public class StatusDAO {
 
     public void setEldsteUlesteForBruker(long dialogId, Date date) {
         jdbc.update("update DIALOG set " +
-                        "eldste_uleste_for_bruker = ?, " +
-                        "oppdatert = ? " +
-                        "where dialog_id = ?",
+                        "ELDSTE_ULESTE_FOR_BRUKER = ?, " +
+                        "OPPDATERT = ? " +
+                        "where DIALOG_ID = ?",
                 date,
                 dateProvider.getNow(),
                 dialogId);
@@ -94,11 +94,11 @@ public class StatusDAO {
 
     public void setNyMeldingFraBruker(long dialogId, Date eldsteUlesteForVeileder, Date venterPaNavSiden) {
         jdbc.update("update DIALOG set " +
-                        "venter_pa_svar_fra_bruker = ?, " +
-                        "eldste_uleste_for_veileder = ?, " +
-                        "venter_pa_nav_siden = ?, " +
-                        "oppdatert = ? " +
-                        "where dialog_id = ?",
+                        "VENTER_PA_SVAR_FRA_BRUKER = ?, " +
+                        "ELDSTE_ULESTE_FOR_VEILEDER = ?, " +
+                        "VENTER_PA_NAV_SIDEN = ?, " +
+                        "OPPDATERT = ? " +
+                        "where DIALOG_ID = ?",
                 null,
                 eldsteUlesteForVeileder,
                 venterPaNavSiden,
@@ -108,11 +108,11 @@ public class StatusDAO {
 
     public void setHistorisk(long dialogId) {
         jdbc.update("update DIALOG set " +
-                        "venter_pa_svar_fra_bruker = ?, " +
-                        "venter_pa_nav_siden = ?, " +
-                        "historisk = ?, " +
-                        "oppdatert = ? " +
-                        "where dialog_id = ?",
+                        "VENTER_PA_SVAR_FRA_BRUKER = ?, " +
+                        "VENTER_PA_NAV_SIDEN = ?, " +
+                        "HISTORISK = ?, " +
+                        "OPPDATERT = ? " +
+                        "where DIALOG_ID = ?",
                 null,
                 null,
                 1,
@@ -122,8 +122,8 @@ public class StatusDAO {
 
     public void markerSomParagraf8(long dialogId) {
         jdbc.update("update DIALOG set " +
-                        "ulestParagraf8Varsel = ? " +
-                        "where dialog_id = ?",
+                        "ULESTPARAGRAF8VARSEL = ? " +
+                        "where DIALOG_ID = ?",
                 1,
                 dialogId);
     }

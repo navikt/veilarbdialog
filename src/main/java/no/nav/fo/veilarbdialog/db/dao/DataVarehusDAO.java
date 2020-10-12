@@ -15,21 +15,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DataVarehusDAO {
 
-    static final String EVENT_ID = "event_id";
-    static final String DIALOGID = "dialogid";
-    static final String EVENT = "event";
-    static final String TIDSPUNKT = "tidspunkt";
-    static final String AKTOR_ID = "aktor_id";
-    static final String AKTIVITET_ID = "aktivitet_id";
-    static final String EVENT_TABELL = "EVENT";
-
     private final JdbcTemplate jdbc;
 
     public void insertEvent(DialogData dialogData, DatavarehusEvent datavarehusEvent) {
         long nextId = Optional
                 .ofNullable(jdbc.queryForObject("select EVENT_ID_SEQ.NEXTVAL from dual", Long.class))
                 .orElseThrow(IllegalStateException::new);
-        jdbc.update("insert into EVENT (event_id, dialogid, event, tidspunkt, aktor_id, aktivitet_id, lagt_inn_av) values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?)",
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, TIDSPUNKT, AKTOR_ID, AKTIVITET_ID, LAGT_INN_AV) values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?)",
                 nextId,
                 dialogData.getId(),
                 datavarehusEvent.toString(),

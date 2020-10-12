@@ -22,7 +22,7 @@ public class KladdDAO {
 
         Long id = Optional.ofNullable(kladd.dialogId).map(Long::parseLong).orElse(null);
         long kladdSeq = Optional
-                .ofNullable(jdbc.queryForObject("select KLADD_ID_SEQ.nextval from dual", Long.class))
+                .ofNullable(jdbc.queryForObject("select KLADD_ID_SEQ.nextval from DUAL", Long.class))
                 .orElseThrow(IllegalStateException::new);
 
         jdbc.update("insert into KLADD (AKTOR_ID, DIALOG_ID, AKTIVITET_ID, OVERSKRIFT, TEKST, LAGT_INN_AV, OPPDATERT, UNIQUE_SEQ) " +
