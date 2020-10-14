@@ -12,6 +12,12 @@ server:
   servlet:
     context-path: "/veilarbdialog"
 
+# See https://nav-it.slack.com/archives/CQ2H1AY3Z/p1602594649050400.
+# Remove once commons is bumped and obsolete commons code is no longer included.
+logging:
+  level:
+    org.apache.tomcat.util.http.parser.Cookie: OFF
+
 application:
   cluster: ${APP_CLUSTER_NAME}
   namespace: ${APP_ENVIRONMENT_NAME}
