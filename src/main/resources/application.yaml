@@ -7,10 +7,6 @@ spring:
         enabled: false
   flyway:
     enabled: false
-  security:
-    user:
-      name: theory
-      password: theory
 
 server:
   servlet:
