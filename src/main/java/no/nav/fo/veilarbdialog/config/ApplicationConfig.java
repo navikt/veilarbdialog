@@ -7,6 +7,7 @@ import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import no.nav.common.abac.Pep;
 import no.nav.common.abac.VeilarbPep;
+import no.nav.common.abac.audit.SpringAuditRequestInfoSupplier;
 import no.nav.common.utils.Credentials;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -47,7 +48,12 @@ public class ApplicationConfig {
 
     @Bean
     public Pep pep(Credentials systemUser) {
-        return new VeilarbPep(abacUrl, systemUser.username, systemUser.password);
+        return new VeilarbPep(
+                abacUrl,
+                systemUser.username,
+                systemUser.password,
+                new SpringAuditRequestInfoSupplier()
+        );
     }
 
     @Bean

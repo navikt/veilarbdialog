@@ -1,5 +1,5 @@
 name: Test, build, push and deploy
-on: push
+on: [push, workflow_dispatch]
 env:
   IMAGE_TAG: ${{ github.sha }}
   IMAGE: docker.pkg.github.com/${{ github.repository }}/veilarbdialog

@@ -35,8 +35,8 @@ public class ServiceConfig {
     private String applicationName;
 
     @Bean
-    SystemUserTokenProvider systemUserTokenProvider(Credentials serviceUser) {
-        return new NaisSystemUserTokenProvider(discoveryUrl, serviceUser.username, serviceUser.password);
+    SystemUserTokenProvider systemUserTokenProvider(Credentials systemUser) {
+        return new NaisSystemUserTokenProvider(discoveryUrl, systemUser.username, systemUser.password);
     }
 
     @Bean
