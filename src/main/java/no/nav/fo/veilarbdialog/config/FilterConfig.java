@@ -120,7 +120,7 @@ public class FilterConfig {
                 fromConfigs(
                         openAmAuthConfig(),
                         azureAdAuthConfig(),
-                        //azureAdB2CAuthConfig(),
+                        azureAdB2CAuthConfig(),
                         openAmStsAuthConfig(),
                         naisStsAuthConfig()
                 )
