@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 import java.util.List;
 
@@ -20,7 +19,6 @@ import static no.nav.common.auth.Constants.*;
 import static no.nav.common.auth.oidc.filter.OidcAuthenticator.fromConfigs;
 
 @Configuration
-@EnableWebSecurity
 public class FilterConfig {
 
     private static final List<String> ALLOWED_SERVICE_USERS = List.of(
