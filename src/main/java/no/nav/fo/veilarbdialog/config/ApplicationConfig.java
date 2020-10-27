@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.config;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
@@ -20,6 +21,7 @@ import javax.sql.DataSource;
 @Configuration
 @EnableTransactionManagement
 @EnableScheduling
+@Slf4j
 public class ApplicationConfig {
 
     public static final String APPLICATION_NAME = "veilarbdialog";
@@ -41,13 +43,14 @@ public class ApplicationConfig {
     public static final String REDIRECT_URL_PROPERTY = "VEILARBLOGIN_REDIRECT_URL_URL";
     public static final String SECURITYTOKENSERVICE_URL = "SECURITYTOKENSERVICE_URL";
 
-    @Value("${application.abac.url")
+    @Value("${application.abac.url}")
     private String abacUrl;
 
     public static final String AKTOERREGISTER_API_V1_URL = "AKTOERREGISTER_API_V1_URL";
 
     @Bean
     public Pep pep(Credentials systemUser) {
+        log.info("Using configured ABAC URL {}", abacUrl);
         return new VeilarbPep(
                 abacUrl,
                 systemUser.username,
