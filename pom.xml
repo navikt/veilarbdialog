@@ -22,7 +22,7 @@
 
         <allclient.version>9.2.0.0</allclient.version>
         <!-- TODO: Bump version (some breaking API changes). -->
-        <!--<common.version>2.2020.10.13_14.48-80e4c2dc5856</common.version>-->
+        <!--<common.version>2.2020.10.15_11.43-b1f02e7bd6ae</common.version>-->
         <common.version>2.2020.08.07_16.18-e6be6d6a09e6</common.version>
         <common-obsolete.version>1.2020.02.11-12.17-1a30837bb4f2</common-obsolete.version>
         <flyway.version>4.0.3</flyway.version>
@@ -170,6 +170,11 @@
         </dependency>
         <dependency>
             <groupId>no.nav.common</groupId>
+            <artifactId>auth</artifactId>
+            <version>${common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
             <artifactId>feed</artifactId>
             <version>${common-obsolete.version}</version>
         </dependency>
@@ -177,13 +182,6 @@
             <groupId>no.nav.common</groupId>
             <artifactId>oidc-security</artifactId>
             <version>${common-obsolete.version}</version>
-        </dependency>
-
-        <!-- CATO -->
-        <dependency>
-            <groupId>jakarta.ws.rs</groupId>
-            <artifactId>jakarta.ws.rs-api</artifactId>
-            <version>2.1.6</version>
         </dependency>
 
         <!-- Jackson -->
@@ -219,19 +217,6 @@
             <artifactId>nav-virksomhet-opprettOppgavehenvendelse-v1-meldingsdefinisjon</artifactId>
             <version>${tjenestespesifikasjoner.version}</version>
         </dependency>
-
-        <!--- Old <dependencies> below this point -->
-
-        <!--<dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>api-app</artifactId>
-            <version>${no.nav.common.version}</version>
-        </dependency>-->
-        <!--<dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>aktor-klient</artifactId>
-            <version>${no.nav.common.version}</version>
-        </dependency>-->
 
         <!-- EXTERNAL DEPENDENCIES -->
         <dependency>
@@ -286,30 +271,9 @@
 
         <!-- test dependencies -->
         <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>auth</artifactId>
-            <type>test-jar</type>
-            <version>${common.version}</version>
-        </dependency>
-        <!--<dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>test-config</artifactId>
-            <version>${no.nav.common.version}</version>
-        </dependency>-->
-        <!--<dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>fasit</artifactId>
-            <version>${no.nav.common.version}</version>
-        </dependency>-->
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
         </dependency>
-        <!-- dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <scope>compile</scope>
-        </dependency -->
 
         <!-- transitive avhengigheter -->
         <dependency>
@@ -356,23 +320,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-        </dependency>
-        <!--<dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>oidc-security</artifactId>
-            <version>${no.nav.common.version}</version>
-        </dependency>-->
-        <!--<dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>oidc-security</artifactId>
-            <version>${no.nav.common.version}</version>
-            <type>test-jar</type>
-        </dependency>-->
-
-        <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>auth</artifactId>
-            <version>${common.version}</version>
         </dependency>
 
         <!--Annet-->
