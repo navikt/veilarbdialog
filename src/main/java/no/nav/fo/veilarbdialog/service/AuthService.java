@@ -50,7 +50,7 @@ public class AuthService {
 
     public boolean activeUserHasReadAccessToPerson(String aktorId) {
         return pep.harTilgangTilPerson(
-                getIdent().orElse(null),
+                getSsoToken(),
                 ActionId.READ,
                 AbacPersonId.aktorId(aktorId)
         );
