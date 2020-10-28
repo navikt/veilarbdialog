@@ -1,13 +1,12 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.common.auth.subject.SubjectHandler;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.service.AutorisasjonService;
+import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
+import no.nav.fo.veilarbdialog.service.AuthService;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.service.KladdService;
-import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +21,8 @@ import java.util.stream.Collectors;
 import static java.lang.Math.toIntExact;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
-import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erInternBruker;
+import static no.nav.fo.veilarbdialog.service.AuthService.erEksternBruker;
+import static no.nav.fo.veilarbdialog.service.AuthService.erInternBruker;
 
 @RestController
 @RequestMapping("/api/dialog")
@@ -34,7 +33,7 @@ public class DialogRessurs {
     private final RestMapper restMapper;
     private final HttpServletRequest httpServletRequest;
     private final KontorsperreFilter kontorsperreFilter;
-    private final AutorisasjonService autorisasjonService;
+    private final AuthService auth;
     private final KladdService kladdService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
 
@@ -42,14 +41,14 @@ public class DialogRessurs {
     public List<DialogDTO> hentDialoger() {
         return dialogDataService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
-                .filter(dialog -> kontorsperreFilter.harTilgang(getLoggedInUserIdent(), dialog.getKontorsperreEnhetId()))
+                .filter(dialog -> kontorsperreFilter.harTilgang(auth.getSsoToken(), dialog.getKontorsperreEnhetId()))
                 .map(restMapper::somDialogDTO)
                 .collect(toList());
     }
 
     @GetMapping("sistOppdatert")
     public SistOppdatert sistOppdatert() {
-        Date oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), getLoggedInUserIdent());
+        Date oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getSsoToken());
         return new SistOppdatert(oppdatert);
     }
 
@@ -80,7 +79,7 @@ public class DialogRessurs {
         long dialogId = finnDialogId(nyHenvendelseDTO);
         dialogDataService.opprettHenvendelseForDialog(HenvendelseData.builder()
                 .dialogId(dialogId)
-                .avsenderId(getLoggedInUserIdent())
+                .avsenderId(auth.getIdent().orElse(null))
                 .viktig(!nyHenvendelseDTO.egenskaper.isEmpty())
                 .avsenderType(erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
                 .tekst(nyHenvendelseDTO.tekst)
@@ -88,7 +87,7 @@ public class DialogRessurs {
         );
         DialogData dialogData = markerSomLest(dialogId);
         dialogDataService.updateDialogAktorFor(dialogData.getAktorId());
-        return kontorsperreFilter.harTilgang(getLoggedInUserIdent(), dialogData.getKontorsperreEnhetId()) ?
+        return kontorsperreFilter.harTilgang(auth.getIdent().orElse(null), dialogData.getKontorsperreEnhetId()) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
     }
@@ -103,7 +102,7 @@ public class DialogRessurs {
     @PutMapping("{dialogId}/les")
     public DialogDTO markerSomLest(@PathVariable String dialogId) {
         DialogData dialogData = markerSomLest(Long.parseLong(dialogId));
-        return kontorsperreFilter.harTilgang(getLoggedInUserIdent(), dialogData.getKontorsperreEnhetId()) ?
+        return kontorsperreFilter.harTilgang(auth.getIdent().orElse(null), dialogData.getKontorsperreEnhetId()) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
     }
@@ -118,7 +117,7 @@ public class DialogRessurs {
 
     @PutMapping("{dialogId}/venter_pa_svar/{venter}")
     public DialogDTO oppdaterVenterPaSvar(@PathVariable String dialogId, @PathVariable boolean venter) {
-        autorisasjonService.skalVereInternBruker();
+        auth.skalVereInternBruker();
 
         DialogStatus dialogStatus = DialogStatus.builder()
                 .dialogId(Long.parseLong(dialogId))
@@ -133,7 +132,7 @@ public class DialogRessurs {
 
     @PutMapping("{dialogId}/ferdigbehandlet/{ferdigbehandlet}")
     public DialogDTO oppdaterFerdigbehandlet(@PathVariable String dialogId, @PathVariable boolean ferdigbehandlet) {
-        autorisasjonService.skalVereInternBruker();
+        auth.skalVereInternBruker();
 
         DialogStatus dialogStatus = DialogStatus.builder()
                 .dialogId(Long.parseLong(dialogId))
@@ -148,7 +147,7 @@ public class DialogRessurs {
 
     @PostMapping("forhandsorientering")
     public DialogDTO forhandsorienteringPaAktivitet(NyHenvendelseDTO nyHenvendelseDTO) {
-        autorisasjonService.skalVereInternBruker();
+        auth.skalVereInternBruker();
 
         long dialogId = finnDialogId(nyHenvendelseDTO);
         dialogDataService.updateDialogEgenskap(EgenskapType.PARAGRAF8, dialogId);
@@ -190,13 +189,9 @@ public class DialogRessurs {
         return opprettetDialog;
     }
 
-    private static String getLoggedInUserIdent() {
-        return SubjectHandler.getIdent().orElse(null);
-    }
-
     private Person getContextUserIdent() {
         if (erEksternBruker()) {
-            return SubjectHandler.getIdent().map(Person::fnr).orElseThrow(RuntimeException::new);
+            return auth.getIdent().map(Person::fnr).orElseThrow(RuntimeException::new);
         }
         Optional<Person> fnr = Optional
                 .ofNullable(httpServletRequest.getParameter("fnr"))

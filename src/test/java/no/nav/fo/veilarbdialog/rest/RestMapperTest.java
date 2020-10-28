@@ -4,6 +4,7 @@ import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
+import no.nav.fo.veilarbdialog.service.AuthService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,11 +18,13 @@ public class RestMapperTest {
 
     private RestMapper restMapper;
     private KontorsperreFilter filter;
+    private AuthService auth;
 
     @Before
     public void setUp() {
         filter = mock(KontorsperreFilter.class);
-        restMapper = new RestMapper(filter);
+        auth = mock(AuthService.class);
+        restMapper = new RestMapper(filter, auth);
     }
 
     @Test

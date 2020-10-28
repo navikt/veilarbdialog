@@ -1,9 +1,9 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.common.auth.subject.SubjectHandler;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.service.AuthService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +16,7 @@ import java.util.Optional;
 public class DataVarehusDAO {
 
     private final JdbcTemplate jdbc;
+    private final AuthService auth;
 
     public void insertEvent(DialogData dialogData, DatavarehusEvent datavarehusEvent) {
         long nextId = Optional
@@ -27,7 +28,7 @@ public class DataVarehusDAO {
                 datavarehusEvent.toString(),
                 dialogData.getAktorId(),
                 dialogData.getAktivitetId(),
-                getLagtInnAv());
+                auth.getIdent().orElse("SYSTEM"));
     }
 
     @Transactional(readOnly = true)
@@ -36,10 +37,6 @@ public class DataVarehusDAO {
                 Date.class,
                 aktorId,
                 bruker);
-    }
-
-    private static String getLagtInnAv() {
-        return SubjectHandler.getIdent().orElse("SYSTEM");
     }
 
 }

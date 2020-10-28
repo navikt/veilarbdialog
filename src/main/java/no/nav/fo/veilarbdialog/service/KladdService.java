@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 
-import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
+import static no.nav.fo.veilarbdialog.service.AuthService.erEksternBruker;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +18,7 @@ public class KladdService {
 
     private final KladdDAO kladdDAO;
     private final AktorregisterClient aktorregister;
+    private final AuthService auth;
 
     public List<Kladd> hentKladder(String fnr) {
 
@@ -49,7 +50,7 @@ public class KladdService {
         if (erEksternBruker()) {
             return kladd.withAktorId(aktorId).withLagtInnAv(aktorId);
         }
-        return kladd.withAktorId(aktorId).withLagtInnAv(getLoggedInUserIdent());
+        return kladd.withAktorId(aktorId).withLagtInnAv(auth.getIdent().orElse("SYSTEM"));
 
     }
 
@@ -65,7 +66,4 @@ public class KladdService {
 
     }
 
-    private static String getLoggedInUserIdent() {
-        return SubjectHandler.getIdent().orElse("SYSTEM");
-    }
 }

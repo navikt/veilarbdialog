@@ -3,14 +3,11 @@ package no.nav.fo.veilarbdialog.rest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.abac.Pep;
-import no.nav.common.abac.domain.AbacPersonId;
-import no.nav.common.abac.domain.request.ActionId;
-import no.nav.common.auth.subject.SubjectHandler;
 import no.nav.common.types.feil.IngenTilgang;
 import no.nav.common.utils.EnvironmentUtils;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.service.AutorisasjonService;
+import no.nav.fo.veilarbdialog.service.AuthService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -31,13 +28,13 @@ public class KasserRessurs {
 
     private final DialogDAO dialogDAO;
     private final Pep pep;
-    private final AutorisasjonService autorisasjonService;
+    private final AuthService auth;
 
     private final String godkjenteIdenter = EnvironmentUtils.getOptionalProperty(VEILARB_KASSERING_IDENTER_PROPERTY).orElse("");
 
     @PutMapping("/henvendelse/{henvendelseId}/kasser")
     public int kasserHenvendelse(@PathVariable String henvendelseId) {
-        autorisasjonService.skalVereInternBruker();
+        auth.skalVereInternBruker();
 
         long id = Long.parseLong(henvendelseId);
         DialogData dialogData = dialogDAO.hentDialogGittHenvendelse(id);
@@ -48,7 +45,7 @@ public class KasserRessurs {
     @PutMapping("/dialog/{dialogId}/kasser")
     @Transactional
     public int kasserDialog(@PathVariable String dialogId) {
-        autorisasjonService.skalVereInternBruker();
+        auth.skalVereInternBruker();
 
         long id = Long.parseLong(dialogId);
         DialogData dialogData = dialogDAO.hentDialog(id);
@@ -65,8 +62,14 @@ public class KasserRessurs {
 
     private int kjorHvisTilgang(String aktorId, String kasseringAv, String id, Supplier<Integer> fn) {
 
-        String veilederIdent = SubjectHandler.getIdent().orElse(null);
-        pep.harVeilederTilgangTilPerson(veilederIdent, ActionId.READ, AbacPersonId.aktorId(aktorId));
+        String veilederIdent = auth.getIdent().orElse(null);
+        if (!auth.identifiedUserHasReadAccessToPerson(veilederIdent, aktorId)) {
+            throw new IngenTilgang(String.format(
+                    "%s does not have read access to %s",
+                    veilederIdent,
+                    aktorId
+            ));
+        }
         List<String> godkjente = Arrays.asList(godkjenteIdenter.split(","));
         if (!godkjente.contains(veilederIdent)) {
             log.error("[KASSERING] {} har ikke tilgang til kassering av {} dialoger", veilederIdent, aktorId);

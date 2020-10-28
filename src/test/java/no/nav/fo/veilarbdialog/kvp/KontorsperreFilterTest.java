@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.kvp;
 
-import no.nav.common.abac.Pep;
+import no.nav.fo.veilarbdialog.service.AuthService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,15 +9,14 @@ import static org.mockito.Mockito.*;
 
 public class KontorsperreFilterTest {
 
-    private static final String ENHET = "123";
     private KontorsperreFilter filter;
-    private Pep pepClient;
+    private AuthService auth;
 
     @Before
     public void setUp() {
 
-        pepClient = mock(Pep.class);
-        filter = new KontorsperreFilter(pepClient);
+        auth = mock(AuthService.class);
+        filter = new KontorsperreFilter(auth);
 
     }
 
@@ -32,20 +31,21 @@ public class KontorsperreFilterTest {
     @Test
     public void skal_ha_tilgang_hvis_abac_sier_ja() {
 
-        when(pepClient.harVeilederTilgangTilEnhet("veileder", "enhet"))
+        when(auth.identifiedUserHasReadAccessToEnhet("veileder", "enhet"))
                 .thenReturn(true);
         assertThat(filter.harTilgang("veileder", "enhet")).isTrue();
-        verify(pepClient).harVeilederTilgangTilEnhet("veileder", "enhet");
+        verify(auth).identifiedUserHasReadAccessToEnhet("veileder", "enhet");
 
     }
 
     @Test
     public void skal_ikke_ha_tilgang_hvis_abac_sier_nei() {
 
-        when(pepClient.harVeilederTilgangTilEnhet("veileder", "enhet"))
+        when(auth.identifiedUserHasReadAccessToEnhet("veileder", "enhet"))
                 .thenReturn(false);
         assertThat(filter.harTilgang("veileder", "enhet")).isFalse();
-        verify(pepClient).harVeilederTilgangTilEnhet("veileder", "enhet");
+        verify(auth).identifiedUserHasReadAccessToEnhet("veileder", "enhet");
 
     }
+
 }

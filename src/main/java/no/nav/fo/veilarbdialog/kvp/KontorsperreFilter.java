@@ -1,8 +1,7 @@
 package no.nav.fo.veilarbdialog.kvp;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import no.nav.common.abac.Pep;
+import no.nav.fo.veilarbdialog.service.AuthService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -10,11 +9,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class KontorsperreFilter {
 
-    private final Pep pep;
+    private final AuthService auth;
 
-    @SneakyThrows
     public boolean harTilgang(String ident, String enhet) {
-        return StringUtils.isEmpty(enhet) || pep.harVeilederTilgangTilEnhet(ident, enhet);
+        return StringUtils.isEmpty(enhet) || auth.identifiedUserHasReadAccessToEnhet(ident, enhet);
     }
 
 }

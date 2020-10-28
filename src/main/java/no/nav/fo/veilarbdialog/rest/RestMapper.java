@@ -1,9 +1,9 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.common.auth.subject.SubjectHandler;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
+import no.nav.fo.veilarbdialog.service.AuthService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,25 +13,22 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
-import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
-import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erInternBruker;
+import static no.nav.fo.veilarbdialog.service.AuthService.erEksternBruker;
+import static no.nav.fo.veilarbdialog.service.AuthService.erInternBruker;
 
 @Component
 @RequiredArgsConstructor
 class RestMapper {
 
     private final KontorsperreFilter kontorsperreFilter;
-
-    private static String getLoggedInUserIdent() {
-        return SubjectHandler.getIdent().orElse(null);
-    }
+    private final AuthService auth;
 
     public DialogDTO somDialogDTO(DialogData dialogData) {
 
         List<HenvendelseData> henvendelser = dialogData
                 .getHenvendelser()
                 .stream()
-                .filter((henvendelse) -> kontorsperreFilter.harTilgang(getLoggedInUserIdent(), henvendelse.getKontorsperreEnhetId()))
+                .filter((henvendelse) -> kontorsperreFilter.harTilgang(auth.getIdent().orElse(null), henvendelse.getKontorsperreEnhetId()))
                 .collect(toList());
 
         Optional<HenvendelseData> sisteHenvendelse = henvendelser.stream()

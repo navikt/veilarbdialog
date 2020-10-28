@@ -2,9 +2,6 @@ package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.common.abac.Pep;
-import no.nav.common.abac.domain.AbacPersonId;
-import no.nav.common.abac.domain.request.ActionId;
-import no.nav.common.auth.subject.SubjectHandler;
 import no.nav.common.client.aktorregister.AktorregisterClient;
 import no.nav.common.featuretoggle.UnleashService;
 import no.nav.common.types.feil.IngenTilgang;
@@ -36,15 +33,18 @@ public class DialogDataService {
     private final KvpService kvpService;
     private final UnleashService unleashService;
     private final KafkaDialogService kafkaDialogService;
+    private final AuthService auth;
 
     private String assertAccessToAktorId(String aktorId)
             throws IngenTilgang {
-        String actor = SubjectHandler.getIdent().orElse(null);
-        AbacPersonId subject = AbacPersonId.aktorId(aktorId);
-        if (!pep.harTilgangTilPerson(actor, ActionId.READ, subject)) {
-            throw new IngenTilgang(String.format("%s har ikke lesetilgang til %s", actor, subject.getId()));
+        if (!auth.activeUserHasReadAccessToPerson(aktorId)) {
+            throw new IngenTilgang(String.format(
+                    "%s har ikke lesetilgang til %s",
+                    auth.getIdent().orElse("null"),
+                    aktorId
+            ));
         }
-        return subject.getId();
+        return aktorId;
     }
 
     @Transactional(readOnly = true)
@@ -152,7 +152,7 @@ public class DialogDataService {
 
     public void updateDialogAktorFor(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
-        if(unleashService.isEnabled("veilarbdialog.kafka1")) {
+        if (unleashService.isEnabled("veilarbdialog.kafka1")) {
             KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
             kafkaDialogService.dialogEvent(kafkaDialogMelding);
         }
@@ -174,12 +174,15 @@ public class DialogDataService {
 
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
 
-        String actor = SubjectHandler.getIdent().orElse(null);
-        AbacPersonId subject = AbacPersonId.aktorId(dialogData.getAktorId());
-        if (!pep.harTilgangTilPerson(actor, ActionId.READ, subject)) {
-            throw new IngenTilgang(String.format("%s har ikke lesetilgang til %s", actor, subject.getId()));
+        if (!auth.activeUserHasReadAccessToPerson(dialogData.getAktorId())) {
+            throw new IngenTilgang(String.format(
+                    "%s har ikke lesetilgang til %s",
+                    auth.getIdent().orElse(null),
+                    dialogData.getAktorId())
+            );
         }
         return dialogData;
+
     }
 
     private DialogData sjekkLeseTilgangTilDialog(long id) {
