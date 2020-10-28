@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.db.dao;
 import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.service.AuthService;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;

@@ -4,7 +4,7 @@ import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.service.AuthService;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import org.junit.Before;
 import org.junit.Test;
 

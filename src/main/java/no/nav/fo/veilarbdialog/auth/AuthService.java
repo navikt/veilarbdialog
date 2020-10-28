@@ -1,5 +1,6 @@
-package no.nav.fo.veilarbdialog.service;
+package no.nav.fo.veilarbdialog.auth;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.abac.Pep;
 import no.nav.common.abac.domain.AbacPersonId;
@@ -8,12 +9,11 @@ import no.nav.common.auth.subject.IdentType;
 import no.nav.common.auth.subject.SubjectHandler;
 import no.nav.common.types.feil.IngenTilgang;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class AuthService {
 
     private final Pep pep;

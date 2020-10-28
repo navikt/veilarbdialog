@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.kvp;
 
-import no.nav.fo.veilarbdialog.service.AuthService;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import org.junit.Before;
 import org.junit.Test;
 

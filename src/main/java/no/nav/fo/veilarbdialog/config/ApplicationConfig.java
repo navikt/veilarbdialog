@@ -1,16 +1,10 @@
 package no.nav.fo.veilarbdialog.config;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
-import no.nav.common.abac.Pep;
-import no.nav.common.abac.VeilarbPep;
-import no.nav.common.abac.audit.SpringAuditRequestInfoSupplier;
-import no.nav.common.utils.Credentials;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

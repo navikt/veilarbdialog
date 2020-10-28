@@ -102,8 +102,7 @@ public class FilterConfig {
         boolean dev = applicationCluster.contains("dev");
         FilterRegistrationBean<LogFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new LogFilter(applicationName, dev));
-        //registration.setOrder(2);
-        registration.setOrder(Integer.MIN_VALUE);
+        registration.setOrder(2);
         registration.addUrlPatterns("/*");
         return registration;
     }

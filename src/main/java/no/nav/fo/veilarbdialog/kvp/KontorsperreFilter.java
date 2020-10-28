@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.kvp;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.fo.veilarbdialog.service.AuthService;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 

@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.rest;
 import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.service.AuthService;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
-import static no.nav.fo.veilarbdialog.service.AuthService.erEksternBruker;
-import static no.nav.fo.veilarbdialog.service.AuthService.erInternBruker;
+import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
+import static no.nav.fo.veilarbdialog.auth.AuthService.erInternBruker;
 
 @Component
 @RequiredArgsConstructor

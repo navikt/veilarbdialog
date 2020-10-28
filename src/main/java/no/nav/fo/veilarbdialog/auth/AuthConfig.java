@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.service;
+package no.nav.fo.veilarbdialog.auth;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.abac.Pep;

@@ -2,12 +2,11 @@ package no.nav.fo.veilarbdialog.rest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.common.abac.Pep;
 import no.nav.common.types.feil.IngenTilgang;
 import no.nav.common.utils.EnvironmentUtils;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.service.AuthService;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,7 +26,6 @@ import static no.nav.fo.veilarbdialog.config.ApplicationConfig.VEILARB_KASSERING
 public class KasserRessurs {
 
     private final DialogDAO dialogDAO;
-    private final Pep pep;
     private final AuthService auth;
 
     private final String godkjenteIdenter = EnvironmentUtils.getOptionalProperty(VEILARB_KASSERING_IDENTER_PROPERTY).orElse("");

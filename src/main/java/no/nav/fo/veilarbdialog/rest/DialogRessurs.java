@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
-import no.nav.fo.veilarbdialog.service.AuthService;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.service.KladdService;
 import org.apache.commons.lang3.StringUtils;
@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 import static java.lang.Math.toIntExact;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static no.nav.fo.veilarbdialog.service.AuthService.erEksternBruker;
-import static no.nav.fo.veilarbdialog.service.AuthService.erInternBruker;
+import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
+import static no.nav.fo.veilarbdialog.auth.AuthService.erInternBruker;
 
 @RestController
 @RequestMapping("/api/dialog")

@@ -1,11 +1,11 @@
 package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.common.abac.Pep;
 import no.nav.common.client.aktorregister.AktorregisterClient;
 import no.nav.common.featuretoggle.UnleashService;
 import no.nav.common.types.feil.IngenTilgang;
 import no.nav.common.types.feil.UlovligHandling;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
@@ -29,7 +29,6 @@ public class DialogDataService {
     private final DialogStatusService dialogStatusService;
     private final DataVarehusDAO dataVarehusDAO;
     private final DialogFeedDAO dialogFeedDAO;
-    private final Pep pep;
     private final KvpService kvpService;
     private final UnleashService unleashService;
     private final KafkaDialogService kafkaDialogService;

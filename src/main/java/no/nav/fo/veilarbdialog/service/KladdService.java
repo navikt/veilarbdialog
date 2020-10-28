@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.service;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.auth.subject.SubjectHandler;
 import no.nav.common.client.aktorregister.AktorregisterClient;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.db.dao.KladdDAO;
 import no.nav.fo.veilarbdialog.domain.Kladd;
 import org.springframework.stereotype.Service;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 
-import static no.nav.fo.veilarbdialog.service.AuthService.erEksternBruker;
+import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
 
 @Service
 @RequiredArgsConstructor
