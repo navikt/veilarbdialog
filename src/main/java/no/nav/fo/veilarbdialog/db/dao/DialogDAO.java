@@ -7,6 +7,7 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.EgenskapType;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
@@ -62,18 +63,26 @@ public class DialogDAO {
 
     @Transactional(readOnly = true)
     public DialogData hentDialog(long dialogId) {
-        return jdbc.queryForObject("select * from DIALOG where DIALOG_ID = ?",
-                new MapTilDialog(),
-                dialogId);
+        try {
+            return jdbc.queryForObject("select * from DIALOG where DIALOG_ID = ?",
+                    new MapTilDialog(),
+                    dialogId);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Transactional(readOnly = true)
     public DialogData hentDialogGittHenvendelse(long henvendelseId) {
-        return jdbc.queryForObject("select d.* from DIALOG d " +
-                        "left join HENVENDELSE h on h.DIALOG_ID = d.DIALOG_ID " +
-                        "where h.HENVENDELSE_ID = ?",
-                new MapTilDialog(),
-                henvendelseId);
+        try {
+            return jdbc.queryForObject("select d.* from DIALOG d " +
+                            "left join HENVENDELSE h on h.DIALOG_ID = d.DIALOG_ID " +
+                            "where h.HENVENDELSE_ID = ?",
+                    new MapTilDialog(),
+                    henvendelseId);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Transactional(readOnly = true)

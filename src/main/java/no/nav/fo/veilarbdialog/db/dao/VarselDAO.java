@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -51,27 +52,36 @@ public class VarselDAO {
     }
 
     public boolean harUlesteUvarsledeParagraf8Henvendelser(String aktorId) {
-        final int unread = Optional.ofNullable(
-                jdbc.queryForObject("select count(AKTOR_ID) " +
-                                "from DIALOG " +
-                                "where ULESTPARAGRAF8VARSEL = 1 " +
-                                "and PARAGRAF8_VARSEL_UUID is null " +
-                                "and AKTOR_ID = ?",
-                        Integer.class,
-                        aktorId))
-                .orElse(0);
-        return unread > 0;
+        try {
+            final int unread = Optional
+                    .ofNullable(
+                            jdbc.queryForObject("select count(AKTOR_ID) " +
+                                            "from DIALOG " +
+                                            "where ULESTPARAGRAF8VARSEL = 1 " +
+                                            "and PARAGRAF8_VARSEL_UUID is null " +
+                                            "and AKTOR_ID = ?",
+                                    Integer.class,
+                                    aktorId))
+                    .orElse(0);
+            return unread > 0;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
     public int hentAntallAktiveDialogerForVarsel(String paragraf8VarselUUID) {
-        return Optional.ofNullable(
-                jdbc.queryForObject("select count(*) as antall " +
-                                "from DIALOG " +
-                                "where PARAGRAF8_VARSEL_UUID = ? " +
-                                "and ULESTPARAGRAF8VARSEL = 1",
-                        Integer.class,
-                        paragraf8VarselUUID))
-                .orElse(0);
+        try {
+            return Optional.ofNullable(
+                    jdbc.queryForObject("select count(*) as antall " +
+                                    "from DIALOG " +
+                                    "where PARAGRAF8_VARSEL_UUID = ? " +
+                                    "and ULESTPARAGRAF8VARSEL = 1",
+                            Integer.class,
+                            paragraf8VarselUUID))
+                    .orElse(0);
+        } catch (EmptyResultDataAccessException e) {
+            return 0;
+        }
     }
 
     public void insertParagraf8Varsel(String aktorid, String varselUuid) {

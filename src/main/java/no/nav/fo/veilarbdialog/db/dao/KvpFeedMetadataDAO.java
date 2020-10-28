@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +14,13 @@ public class KvpFeedMetadataDAO {
     private final JdbcTemplate jdbc;
 
     public long hentSisteId() {
-        return Optional
-                .ofNullable(jdbc.queryForObject("select SISTE_ID from KVP_FEED_METADATA", Long.class))
-                .orElse(0L);
+        try {
+            return Optional
+                    .ofNullable(jdbc.queryForObject("select SISTE_ID from KVP_FEED_METADATA", Long.class))
+                    .orElse(0L);
+        } catch (EmptyResultDataAccessException e) {
+            return 0L;
+        }
     }
 
     public void oppdaterSisteFeedId(long id) {

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.service.AuthService;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,10 +34,14 @@ public class DataVarehusDAO {
 
     @Transactional(readOnly = true)
     public Date hentSisteEndringSomIkkeErDine(String aktorId, String bruker) {
-        return jdbc.queryForObject("select TIDSPUNKT from EVENT where AKTOR_ID = ? and LAGT_INN_AV != ? ORDER BY EVENT_ID DESC FETCH FIRST 1 ROWS ONLY",
-                Date.class,
-                aktorId,
-                bruker);
+        try {
+            return jdbc.queryForObject("select TIDSPUNKT from EVENT where AKTOR_ID = ? and LAGT_INN_AV != ? ORDER BY EVENT_ID DESC FETCH FIRST 1 ROWS ONLY",
+                    Date.class,
+                    aktorId,
+                    bruker);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
 }
