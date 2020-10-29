@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
@@ -27,6 +28,7 @@ import static no.nav.fo.veilarbdialog.auth.AuthService.erInternBruker;
 @RestController
 @RequestMapping("/api/dialog")
 @RequiredArgsConstructor
+@Slf4j
 public class DialogRessurs {
 
     private final DialogDataService dialogDataService;
@@ -39,28 +41,48 @@ public class DialogRessurs {
 
     @GetMapping
     public List<DialogDTO> hentDialoger() {
-        return dialogDataService.hentDialogerForBruker(getContextUserIdent())
-                .stream()
-                .filter(dialog -> kontorsperreFilter.harTilgang(auth.getSsoToken(), dialog.getKontorsperreEnhetId()))
-                .map(restMapper::somDialogDTO)
-                .collect(toList());
+
+        try {
+            return dialogDataService.hentDialogerForBruker(getContextUserIdent())
+                    .stream()
+                    .filter(dialog -> kontorsperreFilter.harTilgang(auth.getSsoToken(), dialog.getKontorsperreEnhetId()))
+                    .map(restMapper::somDialogDTO)
+                    .collect(toList());
+        } catch (RuntimeException e) {
+            log.error("Failed to complete request", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to complete request", e);
+        }
+
     }
 
     @GetMapping("sistOppdatert")
     public SistOppdatert sistOppdatert() {
-        Date oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getSsoToken());
-        return new SistOppdatert(oppdatert);
+
+        try {
+            Date oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getSsoToken());
+            return new SistOppdatert(oppdatert);
+        } catch (RuntimeException e) {
+            log.error("Failed to complete request", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to complete request", e);
+        }
+
     }
 
     @GetMapping("antallUleste")
     public AntallUlesteDTO antallUleste() {
-        long antall = dialogDataService.hentDialogerForBruker(getContextUserIdent())
-                .stream()
-                .filter(erEksternBruker() ? DialogData::erUlestForBruker : DialogData::erUlestAvVeileder)
-                .filter(it -> !it.isHistorisk())
-                .count();
 
-        return new AntallUlesteDTO(toIntExact(antall));
+        try {
+            long antall = dialogDataService.hentDialogerForBruker(getContextUserIdent())
+                    .stream()
+                    .filter(erEksternBruker() ? DialogData::erUlestForBruker : DialogData::erUlestAvVeileder)
+                    .filter(it -> !it.isHistorisk())
+                    .count();
+            return new AntallUlesteDTO(toIntExact(antall));
+        } catch (RuntimeException e) {
+            log.error("Failed to complete request", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to complete request", e);
+        }
+
     }
 
     @GetMapping("{dialogId}")

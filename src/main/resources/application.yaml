@@ -19,10 +19,17 @@ logging:
     org.apache.tomcat.util.http.parser.Cookie: OFF
 
 management:
+  endpoint:
+    prometheus:
+      enabled: true
   endpoints:
     web:
       exposure:
         include: "health,info,prometheus"
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 
 application:
   cluster: ${APP_CLUSTER_NAME}
