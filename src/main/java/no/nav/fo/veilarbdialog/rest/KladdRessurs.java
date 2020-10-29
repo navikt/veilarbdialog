@@ -2,10 +2,11 @@ package no.nav.fo.veilarbdialog.rest;
 
 
 import lombok.RequiredArgsConstructor;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.Kladd;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.service.KladdService;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,9 @@ import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
 
 @RestController
-@RequestMapping("/api/kladd")
+@RequestMapping(
+        value = "/api/kladd",
+        produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class KladdRessurs {
 

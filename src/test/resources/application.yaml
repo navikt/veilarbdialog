@@ -4,6 +4,10 @@ spring:
   flyway:
     enabled: false
 
+server:
+  servlet:
+    context-path: "/veilarbdialog"
+
 application:
   cluster: TEST
   namespace: APP_ENVIRONMENT_NAME

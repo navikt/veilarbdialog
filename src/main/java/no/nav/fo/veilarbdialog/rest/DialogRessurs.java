@@ -2,14 +2,15 @@ package no.nav.fo.veilarbdialog.rest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.service.KladdService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -26,7 +27,9 @@ import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
 import static no.nav.fo.veilarbdialog.auth.AuthService.erInternBruker;
 
 @RestController
-@RequestMapping("/api/dialog")
+@RequestMapping(
+        value = "/api/dialog",
+        produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 @Slf4j
 public class DialogRessurs {
@@ -59,7 +62,7 @@ public class DialogRessurs {
     public SistOppdatert sistOppdatert() {
 
         try {
-            Date oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getSsoToken());
+            Date oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getIdent().orElse(null)); // TODO: This orElse doesn't make sense. Look at the resulting SQL...
             return new SistOppdatert(oppdatert);
         } catch (RuntimeException e) {
             log.error("Failed to complete request", e);
@@ -221,6 +224,6 @@ public class DialogRessurs {
         Optional<Person> aktorId = Optional
                 .ofNullable(httpServletRequest.getParameter("aktorId"))
                 .map(Person::aktorId);
-        return fnr.orElseGet(() -> aktorId.orElseThrow(RuntimeException::new));
+        return fnr.orElseGet(() -> aktorId.orElseThrow(RuntimeException::new)); // TODO: Fix error handling (here: missing parameters).
     }
 }

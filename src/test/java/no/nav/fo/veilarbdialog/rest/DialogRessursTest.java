@@ -1,89 +1,72 @@
 package no.nav.fo.veilarbdialog.rest;
 
+import io.restassured.http.ContentType;
+import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-/*@SpringBootTest
-@RunWith(SpringRunner.class)*/
+import java.util.Date;
+import java.util.Optional;
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@RunWith(SpringRunner.class)
 public class DialogRessursTest {
 
-    // TODO: Fix.
-    /*private static final String AKTORID = "123";
+    private static final String AKTORID = "123";
     private static final String FNR = "4321";
 
-    @Autowired
-    private DialogRessurs dialogRessurs;
+    @LocalServerPort
+    private int port;
+
+    @MockBean
+    private DataVarehusDAO dataVarehusDAO;
 
     @Autowired
-    private MockHttpServletRequest mockHttpServletRequest;
+    private JdbcTemplate jdbc;
 
-    @Rule
-    public SubjectRule subjectRule = new SubjectRule();
-
-    static class ContextConfig {
-
-        @Bean
-        public AktorService aktorService() {
-            AktorService aktorService = mock(AktorService.class);
-            when(aktorService.getAktorId(FNR)).thenReturn(Optional.of(AKTORID));
-            when(aktorService.getFnr(AKTORID)).thenReturn(Optional.of(FNR));
-            return aktorService;
-        }
-
-        @Bean
-        public PepClient pepClient() {
-            return mock(PepClient.class);
-        }
-
-        @Bean
-        public KvpService kvpClient() {
-            return mock(KvpService.class);
-        }
-
-        @Bean
-        public KafkaDialogService kafkaDialogService() {
-            System.setProperty("APP_ENVIRONMENT_NAME", "TEST-Q0");
-            return new KafkaDialogService(mock(Producer.class), mock(KafkaDAO.class), mock(DialogDAO.class));
-        }
-
-        @Bean
-        public UnleashService unleashService() {
-            return mock(UnleashService.class);
-        }
-
-    }
-
-    @BeforeClass
-    public static void addSpringBeans() {
-        initSpringContext(asList(ContextConfig.class,
-                DialogDataService.class,
-                DialogDAO.class,
-                DialogStatusService.class,
-                StatusDAO.class,
-                DataVarehusDAO.class,
-                KladdDAO.class,
-                DialogFeedDAO.class,
-                Request.class,
-                KladdService.class,
-                DialogRessurs.class,
-                AutorisasjonService.class,
-                RestMapper.class,
-                KontorsperreFilter.class,
-                VarselDAO.class));
-    }
-
-    @Component
-    public static class Request extends MockHttpServletRequest {
-    }
+    @MockBean
+    private AuthService authService;
 
     @Before
-    public void setup() {
-        subjectRule.setSubject(new Subject("veileder", IdentType.InternBruker, mock(SsoToken.class)));
-        mockHttpServletRequest.setParameter("fnr", FNR);
+    public void before() {
+        when(authService.activeUserHasReadAccessToPerson(anyString())).thenReturn(true);
     }
 
     @Test
+    public void sistOppdatert() {
+
+        Date timestamp = new Date();
+        when(dataVarehusDAO.hentSisteEndringSomIkkeErDine(anyString(), anyString())).thenReturn(timestamp);
+        when(authService.getIdent()).thenReturn(Optional.of("123"));
+
+        given()
+                .port(port)
+                .param("aktorId", "123")
+                .get("/veilarbdialog/api/dialog/sistOppdatert")
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .body("sistOppdatert", equalTo(timestamp.getTime()));
+
+    }
+
+    /*@Test
     public void opprettOgHentDialoger() throws Exception {
         dialogRessurs.nyHenvendelse(new NyHenvendelseDTO().setTekst("tekst"));
         val hentAktiviteterResponse = dialogRessurs.hentDialoger();
@@ -92,40 +75,41 @@ public class DialogRessursTest {
         dialogRessurs.markerSomLest(hentAktiviteterResponse.get(0).id);
     }
 
+
     @Test
     public void forhandsorienteringPaEksisterendeDialogPaAktivitetSkalFaEgenskapenParagraf8() {
         final String aktivitetId = "123";
 
-        dialogRessurs.nyHenvendelse(
+        dialog.nyHenvendelse(
                 new NyHenvendelseDTO()
                         .setTekst("forhandsorienteringPaEksisterendeDialogPaAktivitetSkalFaEgenskapenParagraf8")
                         .setAktivitetId(aktivitetId)
         );
 
-        val opprettetDialog = dialogRessurs.hentDialoger();
+        val opprettetDialog = dialog.hentDialoger();
         assertThat(opprettetDialog.get(0).getEgenskaper().isEmpty(), is(true));
         assertThat(opprettetDialog.size(), is(1));
 
-        dialogRessurs.forhandsorienteringPaAktivitet(
+        dialog.forhandsorienteringPaAktivitet(
                 new NyHenvendelseDTO()
                         .setTekst("paragraf8")
                         .setAktivitetId(aktivitetId)
         );
 
-        val dialogMedParagraf8 = dialogRessurs.hentDialoger();
+        val dialogMedParagraf8 = dialog.hentDialoger();
         assertThat(dialogMedParagraf8.get(0).getEgenskaper().contains(Egenskap.PARAGRAF8), is(true));
         assertThat(dialogMedParagraf8.size(), is(1));
     }
 
     @Test
     public void skalHaParagraf8Egenskap() {
-        dialogRessurs.forhandsorienteringPaAktivitet(
+        dialog.forhandsorienteringPaAktivitet(
                 new NyHenvendelseDTO()
                         .setTekst("skalHaParagraf8Egenskap")
                         .setAktivitetId("123")
         );
 
-        val hentedeDialoger = dialogRessurs.hentDialoger();
+        val hentedeDialoger = dialog.hentDialoger();
         assertThat(hentedeDialoger, hasSize(1));
         assertThat(hentedeDialoger.get(0).getEgenskaper().contains(Egenskap.PARAGRAF8), is(true));
     }*/
