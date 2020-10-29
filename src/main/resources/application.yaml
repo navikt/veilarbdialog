@@ -18,6 +18,12 @@ logging:
   level:
     org.apache.tomcat.util.http.parser.Cookie: OFF
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,prometheus"
+
 application:
   cluster: ${APP_CLUSTER_NAME}
   namespace: ${APP_ENVIRONMENT_NAME}
