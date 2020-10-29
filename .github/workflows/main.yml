@@ -93,7 +93,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
-          RESOURCE: nais-dev.yaml
+          RESOURCE: nais-dev-spring-boot.yaml
           VAR: version=${{ env.IMAGE_TAG }},namespace=q0
   deploy-prod:
     name: Deploy application to prod
