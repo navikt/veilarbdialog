@@ -181,7 +181,7 @@ public class DialogRessurs {
     }
 
     private Long finnDialogId(NyHenvendelseDTO nyHenvendelseDTO) {
-        if (StringUtils.isEmpty(nyHenvendelseDTO.dialogId)) {
+        if (!StringUtils.isEmpty(nyHenvendelseDTO.dialogId)) {
             return Long.parseLong(nyHenvendelseDTO.dialogId);
         } else {
             return Optional.ofNullable(nyHenvendelseDTO.aktivitetId)
