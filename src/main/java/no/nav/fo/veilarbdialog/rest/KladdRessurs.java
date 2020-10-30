@@ -7,10 +7,7 @@ import no.nav.fo.veilarbdialog.domain.Kladd;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.service.KladdService;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -37,7 +34,7 @@ public class KladdRessurs {
     }
 
     @PostMapping
-    public void oppdaterKladd(KladdDTO dto) {
+    public void oppdaterKladd(@RequestBody KladdDTO dto) {
         kladdService.upsertKladd(getContextUserIdent(), somKladd(dto));
     }
 
