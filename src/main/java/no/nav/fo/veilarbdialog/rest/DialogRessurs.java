@@ -83,7 +83,7 @@ public class DialogRessurs {
     }
 
     @PostMapping
-    public DialogDTO nyHenvendelse(NyHenvendelseDTO nyHenvendelseDTO) {
+    public DialogDTO nyHenvendelse(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
         slettUtdattertKladd(nyHenvendelseDTO);
 
         long dialogId = finnDialogId(nyHenvendelseDTO);
@@ -156,7 +156,7 @@ public class DialogRessurs {
     }
 
     @PostMapping("forhandsorientering")
-    public DialogDTO forhandsorienteringPaAktivitet(NyHenvendelseDTO nyHenvendelseDTO) {
+    public DialogDTO forhandsorienteringPaAktivitet(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
         auth.skalVereInternBruker();
 
         long dialogId = finnDialogId(nyHenvendelseDTO);
