@@ -27,9 +27,7 @@ import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
 import static no.nav.fo.veilarbdialog.auth.AuthService.erInternBruker;
 
 @RestController
-@RequestMapping(
-        value = "/api/dialog",
-        produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping("/api/dialog")
 @RequiredArgsConstructor
 @Slf4j
 public class DialogRessurs {

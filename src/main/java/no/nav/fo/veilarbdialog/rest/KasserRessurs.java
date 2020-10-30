@@ -7,7 +7,6 @@ import no.nav.common.utils.EnvironmentUtils;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,10 +20,7 @@ import java.util.function.Supplier;
 import static no.nav.fo.veilarbdialog.config.ApplicationConfig.VEILARB_KASSERING_IDENTER_PROPERTY;
 
 @RestController
-@RequestMapping(
-        value = "/api/kassering",
-        produces = MediaType.APPLICATION_JSON_VALUE
-)
+@RequestMapping("/api/kassering")
 @RequiredArgsConstructor
 @Slf4j
 public class KasserRessurs {
