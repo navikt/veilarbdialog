@@ -35,7 +35,7 @@ public class VarselDAO {
     }
 
     public void oppdaterSisteVarselForBruker(String aktorId) {
-        final int rowsUpdated = jdbc.update("update VARSEL set SENDT = ? where AKTOR_ID = ?", dateProvider.getNow(), aktorId);
+        final int rowsUpdated = jdbc.update("update VARSEL set SENDT = "+dateProvider.getNow()+" where AKTOR_ID = ?" , aktorId);
         if (rowsUpdated == 0) {
             opprettVarselForBruker(aktorId);
         }
