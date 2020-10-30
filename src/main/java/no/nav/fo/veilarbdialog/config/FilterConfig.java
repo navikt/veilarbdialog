@@ -49,11 +49,11 @@ public class FilterConfig {
     @Value("${application.azure.ad.discoveryUrl}")
     private String azureAdDiscoveryUrl;
 
-    @Value("${application.azure.b2c.clientId}")
-    private String azureAdB2cClientId;
+    @Value("${application.loginservice.idporten.audience}")
+    private String loginserviceIdportenAudience;
 
-    @Value("${application.azure.b2c.discoveryUrl}")
-    private String azureAdB2cDiscoveryUrl;
+    @Value("${application.loginservice.idporten.discoveryUrl}")
+    private String loginserviceIdportenDiscoveryUrl;
 
     private OidcAuthenticatorConfig openAmStsAuthConfig() {
         return new OidcAuthenticatorConfig()
@@ -89,10 +89,10 @@ public class FilterConfig {
                 .withIdentType(IdentType.InternBruker);
     }
 
-    private OidcAuthenticatorConfig azureAdB2CAuthConfig() {
+    private OidcAuthenticatorConfig loginserviceIdportenConfig() {
         return new OidcAuthenticatorConfig()
-                .withDiscoveryUrl(azureAdB2cDiscoveryUrl)
-                .withClientId(azureAdB2cClientId)
+                .withDiscoveryUrl(loginserviceIdportenDiscoveryUrl)
+                .withClientId(loginserviceIdportenAudience)
                 .withIdTokenCookieName(AZURE_AD_B2C_ID_TOKEN_COOKIE_NAME)
                 .withIdentType(IdentType.EksternBruker);
     }
@@ -119,7 +119,7 @@ public class FilterConfig {
                 fromConfigs(
                         openAmAuthConfig(),
                         azureAdAuthConfig(),
-                        azureAdB2CAuthConfig(),
+                        loginserviceIdportenConfig(),
                         openAmStsAuthConfig(),
                         naisStsAuthConfig()
                 )
