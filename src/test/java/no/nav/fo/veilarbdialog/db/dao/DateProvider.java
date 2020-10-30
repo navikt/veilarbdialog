@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 public class DateProvider {
 
     public String getNow() {
-        return new Timestamp(System.currentTimeMillis()).toString();
+        return "CURRENT_TIMESTAMP";
     }
 
 }

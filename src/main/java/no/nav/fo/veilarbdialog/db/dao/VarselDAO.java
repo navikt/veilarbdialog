@@ -100,15 +100,13 @@ public class VarselDAO {
     }
 
     public void markerSomStoppet(String varselUUID) {
-        jdbc.update("update PARAGRAF8VARSEL set SKALSTOPPES = 0, DEAKTIVERT = ? where UUID = ? ",
-                dateProvider.getNow(),
+        jdbc.update("update PARAGRAF8VARSEL set SKALSTOPPES = 0, DEAKTIVERT = "+dateProvider.getNow()+" where UUID = ? ",
                 varselUUID);
     }
 
     private void opprettVarselForBruker(String aktorId) {
-        jdbc.update("INSERT INTO VARSEL (AKTOR_ID, SENDT) VALUES (?, ?)",
-                aktorId,
-                dateProvider.getNow()
+        jdbc.update("INSERT INTO VARSEL (AKTOR_ID, SENDT) VALUES (?, "+dateProvider.getNow()+")",
+                aktorId
         );
     }
 }
