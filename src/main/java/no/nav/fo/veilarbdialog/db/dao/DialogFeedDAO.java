@@ -54,12 +54,11 @@ public class DialogFeedDAO {
         }
         val dialogAktor = mapTilDialogAktor(dialoger);
         jdbc.update("insert into DIALOG_AKTOR (AKTOR_ID, SISTE_ENDRING, TIDSPUNKT_ELDSTE_VENTENDE, TIDSPUNKT_ELDSTE_UBEHANDLEDE, OPPRETTET_TIDSPUNKT) " +
-                        "values (?, ?, ?, ?, ?)",
+                        "values (?, ?, ?, ?, "+dateProvider.getNow()+")",
                 aktorId,
                 dialogAktor.getSisteEndring(),
                 dialogAktor.getTidspunktEldsteVentende(),
-                dialogAktor.getTidspunktEldsteUbehandlede(),
-                dateProvider.getNow());
+                dialogAktor.getTidspunktEldsteUbehandlede());
     }
 
     private static DialogAktor mapTilDialogAktor(List<DialogData> dialoger) {

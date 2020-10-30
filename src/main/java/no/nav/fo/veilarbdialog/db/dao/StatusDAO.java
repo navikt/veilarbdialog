@@ -18,12 +18,10 @@ public class StatusDAO {
     public void markerSomLestAvVeileder(long dialogId) {
         jdbc.update("update DIALOG set " +
                         "ELDSTE_ULESTE_FOR_VEILEDER = ?, " +
-                        "LEST_AV_VEILEDER_TID = ?, " +
-                        "OPPDATERT = ? " +
+                        "LEST_AV_VEILEDER_TID = "+dateProvider.getNow()+", " +
+                        "OPPDATERT = "+dateProvider.getNow()+" " +
                         "where DIALOG_ID = ?",
                 null,
-                dateProvider.getNow(),
-                dateProvider.getNow(),
                 dialogId
         );
     }
@@ -32,63 +30,54 @@ public class StatusDAO {
         jdbc.update("update DIALOG set " +
                         "ULESTPARAGRAF8VARSEL = ?, " +
                         "ELDSTE_ULESTE_FOR_BRUKER = ?, " +
-                        "LEST_AV_BRUKER_TID = ?, " +
-                        "OPPDATERT = ? " +
+                        "LEST_AV_BRUKER_TID = "+dateProvider.getNow()+", " +
+                        "OPPDATERT = "+dateProvider.getNow()+" " +
                         "where DIALOG_ID = ?",
                 0,
                 null,
-                dateProvider.getNow(),
-                dateProvider.getNow(),
                 dialogId);
     }
 
     public void setVenterPaNavTilNaa(long dialogId) {
         jdbc.update("update DIALOG set " +
-                        "VENTER_PA_NAV_SIDEN = ?, " +
-                        "OPPDATERT = ? " +
+                        "VENTER_PA_NAV_SIDEN = "+dateProvider.getNow()+", " +
+                        "OPPDATERT = "+dateProvider.getNow() + " " +
                         "where DIALOG_ID = ?",
-                dateProvider.getNow(),
-                dateProvider.getNow(),
                 dialogId);
     }
 
     public void setVenterPaSvarFraBrukerTilNaa(long dialogId) {
         jdbc.update("update DIALOG set " +
-                        "VENTER_PA_SVAR_FRA_BRUKER = ?, " +
-                        "OPPDATERT = ? " +
+                        "VENTER_PA_SVAR_FRA_BRUKER = "+dateProvider.getNow()+", " +
+                        "OPPDATERT = "+dateProvider.getNow()+" " +
                         "where DIALOG_ID = ?",
-                dateProvider.getNow(),
-                dateProvider.getNow(),
                 dialogId);
     }
 
     public void setVenterPaNavTilNull(long dialogId) {
         jdbc.update("update DIALOG set " +
                         "VENTER_PA_NAV_SIDEN = ?, " +
-                        "OPPDATERT = ? " +
+                        "OPPDATERT = "+dateProvider.getNow()+" " +
                         "where DIALOG_ID = ?",
                 null,
-                dateProvider.getNow(),
                 dialogId);
     }
 
     public void setVenterPaSvarFraBrukerTilNull(long dialogId) {
         jdbc.update("update DIALOG set " +
                         "VENTER_PA_SVAR_FRA_BRUKER = ?, " +
-                        "OPPDATERT = ? " +
+                        "OPPDATERT = "+dateProvider.getNow()+" " +
                         "where DIALOG_ID = ?",
                 null,
-                dateProvider.getNow(),
                 dialogId);
     }
 
     public void setEldsteUlesteForBruker(long dialogId, Date date) {
         jdbc.update("update DIALOG set " +
                         "ELDSTE_ULESTE_FOR_BRUKER = ?, " +
-                        "OPPDATERT = ? " +
+                        "OPPDATERT = "+dateProvider.getNow()+" " +
                         "where DIALOG_ID = ?",
                 date,
-                dateProvider.getNow(),
                 dialogId);
     }
 
@@ -97,12 +86,11 @@ public class StatusDAO {
                         "VENTER_PA_SVAR_FRA_BRUKER = ?, " +
                         "ELDSTE_ULESTE_FOR_VEILEDER = ?, " +
                         "VENTER_PA_NAV_SIDEN = ?, " +
-                        "OPPDATERT = ? " +
+                        "OPPDATERT = "+dateProvider.getNow()+" " +
                         "where DIALOG_ID = ?",
                 null,
                 eldsteUlesteForVeileder,
                 venterPaNavSiden,
-                dateProvider.getNow(),
                 dialogId);
     }
 
@@ -111,12 +99,11 @@ public class StatusDAO {
                         "VENTER_PA_SVAR_FRA_BRUKER = ?, " +
                         "VENTER_PA_NAV_SIDEN = ?, " +
                         "HISTORISK = ?, " +
-                        "OPPDATERT = ? " +
+                        "OPPDATERT = "+dateProvider.getNow()+" " +
                         "where DIALOG_ID = ?",
                 null,
                 null,
                 1,
-                dateProvider.getNow(),
                 dialogId);
     }
 

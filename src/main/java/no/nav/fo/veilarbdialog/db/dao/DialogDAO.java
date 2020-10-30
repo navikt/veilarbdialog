@@ -123,10 +123,9 @@ public class DialogDAO {
         log.info("Date provider is {} and value is {}", dateProvider, dateProvider.getNow());
 
         jdbc.update("insert into DIALOG (DIALOG_ID, AKTOR_ID, OPPRETTET_DATO, AKTIVITET_ID, OVERSKRIFT, HISTORISK, KONTORSPERRE_ENHET_ID, OPPDATERT) " +
-                        "values (?, ?, ?, ?, ?, ?, ?, " +dateProvider.getNow() +")",
+                        "values (?, ?, "+dateProvider.getNow()+", ?, ?, ?, ?, " +dateProvider.getNow() +")",
                 dialogId,
                 dialogData.getAktorId(),
-                dateProvider.getNow(),
                 dialogData.getAktivitetId(),
                 dialogData.getOverskrift(),
                 dialogData.isHistorisk() ? 1 : 0,
@@ -152,7 +151,7 @@ public class DialogDAO {
                 .orElseThrow(IllegalStateException::new);
 
         jdbc.update("insert into HENVENDELSE (HENVENDELSE_ID, DIALOG_ID, SENDT, TEKST, KONTORSPERRE_ENHET_ID, AVSENDER_ID, AVSENDER_TYPE, VIKTIG) " +
-                        "values (?, ?, ?, ?, ?, ?, " + dateProvider.getNow() + ", ?)",
+                        "values (?, ?, "+ dateProvider.getNow() +", ?, ?, ?, ?, ?)",
                 henvendelseId,
                 henvendelseData.dialogId,
                 henvendelseData.tekst,
