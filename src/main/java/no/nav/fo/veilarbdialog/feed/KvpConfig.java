@@ -14,12 +14,11 @@ public class KvpConfig {
     private String kvpServiceUrl;
 
     @Bean
-    KvpService kvpService(SystemUserTokenProvider systemUserTokenProvider, ObjectMapper objectMapper) {
+    KvpService kvpService(SystemUserTokenProvider systemUserTokenProvider) {
         return new KvpService(
                 kvpServiceUrl,
                 RestClient.baseClient(),
-                systemUserTokenProvider,
-                objectMapper
+                systemUserTokenProvider
         );
     }
 
