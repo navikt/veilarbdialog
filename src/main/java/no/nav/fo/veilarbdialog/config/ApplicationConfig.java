@@ -7,6 +7,8 @@ import net.javacrumbs.shedlock.provider.jdbc.JdbcLockProvider;
 import no.nav.apiapp.ApiApplication;
 import no.nav.apiapp.config.ApiAppConfigurator;
 import no.nav.apiapp.security.PepClient;
+import no.nav.brukerdialog.security.domain.IdentType;
+import no.nav.brukerdialog.security.oidc.provider.AzureADB2CConfig;
 import no.nav.dialogarena.aktor.AktorConfig;
 import no.nav.fo.veilarbdialog.rest.DialogRessurs;
 import no.nav.fo.veilarbdialog.rest.KladdRessurs;
@@ -26,7 +28,9 @@ import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.sql.DataSource;
 
+import static no.nav.brukerdialog.security.Constants.AZUREADB2C_OIDC_COOKIE_NAME_SBS;
 import static no.nav.sbl.util.EnvironmentUtils.Type.PUBLIC;
+import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 import static no.nav.sbl.util.EnvironmentUtils.setProperty;
 
 @Configuration
@@ -100,10 +104,16 @@ public class ApplicationConfig implements ApiApplication {
 
     @Override
     public void configure(ApiAppConfigurator apiAppConfigurator) {
+        AzureADB2CConfig azureADB2CConfig = AzureADB2CConfig.builder()
+                .discoveryUrl(getRequiredProperty("LOGINSERVICE_IDPORTEN_DISCOVERY_URL"))
+                .expectedAudience(getRequiredProperty("LOGINSERVICE_IDPORTEN_AUDIENCE"))
+                .tokenName(AZUREADB2C_OIDC_COOKIE_NAME_SBS)
+                .identType(IdentType.EksternBruker)
+                .build();
+
         apiAppConfigurator
                 .sts()
-                .azureADB2CLogin()
-                .issoLogin()
-        ;
+                .azureADB2CLogin(azureADB2CConfig)
+                .issoLogin();
     }
 }
