@@ -13,6 +13,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import org.springframework.http.HttpStatus;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
@@ -36,6 +37,11 @@ public class KvpService {
                 .build();
         try (Response response = client.newCall(request).execute()) {
             RestUtils.throwIfNotSuccessful(response);
+
+            if (response.code() == HttpStatus.NO_CONTENT.value()) {
+                return null;
+            }
+
             return RestUtils.parseJsonResponse(response, KvpDTO.class).orElse(null);
         } catch (IOException e) {
             log.error("Unable to process request {}", uri, e);
