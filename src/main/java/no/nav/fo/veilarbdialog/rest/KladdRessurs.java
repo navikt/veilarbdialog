@@ -17,7 +17,10 @@ import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
 
 @RestController
-@RequestMapping("/api/kladd")
+@RequestMapping(
+        value = "/api/kladd",
+        produces = MediaType.APPLICATION_JSON_VALUE
+)
 @RequiredArgsConstructor
 public class KladdRessurs {
 

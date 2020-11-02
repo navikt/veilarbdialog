@@ -31,20 +31,20 @@ public class KontorsperreFilterTest {
     @Test
     public void skal_ha_tilgang_hvis_abac_sier_ja() {
 
-        when(auth.identifiedUserHasReadAccessToEnhet("veileder", "enhet"))
+        when(auth.harVeilederTilgangTilEnhet("veileder", "enhet"))
                 .thenReturn(true);
         assertThat(filter.harTilgang("veileder", "enhet")).isTrue();
-        verify(auth).identifiedUserHasReadAccessToEnhet("veileder", "enhet");
+        verify(auth).harVeilederTilgangTilEnhet("veileder", "enhet");
 
     }
 
     @Test
     public void skal_ikke_ha_tilgang_hvis_abac_sier_nei() {
 
-        when(auth.identifiedUserHasReadAccessToEnhet("veileder", "enhet"))
+        when(auth.harVeilederTilgangTilEnhet("veileder", "enhet"))
                 .thenReturn(false);
         assertThat(filter.harTilgang("veileder", "enhet")).isFalse();
-        verify(auth).identifiedUserHasReadAccessToEnhet("veileder", "enhet");
+        verify(auth).harVeilederTilgangTilEnhet("veileder", "enhet");
 
     }
 

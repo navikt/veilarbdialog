@@ -22,12 +22,6 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 class DialogStatusServiceTest {
 
-    static {
-        System.setProperty("spring.application.name", "veilarbdialog");
-        System.setProperty("application.cluster", "test");
-        System.setProperty("application.namespace", "test");
-    }
-
     private final StatusDAO statusDAO = mock(StatusDAO.class);
     private final DialogDAO dialogDAO = mock(DialogDAO.class);
     private final DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);

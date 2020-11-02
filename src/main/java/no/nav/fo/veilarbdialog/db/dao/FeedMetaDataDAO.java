@@ -5,7 +5,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.ZonedDateTime;
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Component
@@ -14,10 +14,12 @@ public class FeedMetaDataDAO {
 
     private final JdbcTemplate jdbc;
 
-    public ZonedDateTime hentSisteLestTidspunkt() {
+    public Date hentSisteLestTidspunkt() {
         try {
-            return jdbc.queryForObject("select TIDSPUNKT_SISTE_ENDRING from FEED_METADATA",
-                    ZonedDateTime.class);
+            Timestamp timestamp = jdbc.queryForObject("select TIDSPUNKT_SISTE_ENDRING from FEED_METADATA",
+                    Timestamp.class);
+            return timestamp == null ? null : Date.from(timestamp.toInstant());
+
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

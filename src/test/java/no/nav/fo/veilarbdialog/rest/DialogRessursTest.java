@@ -1,8 +1,7 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import io.restassured.http.ContentType;
 import no.nav.fo.veilarbdialog.auth.AuthService;
-import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,15 +9,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -28,14 +29,8 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 public class DialogRessursTest {
 
-    private static final String AKTORID = "123";
-    private static final String FNR = "4321";
-
     @LocalServerPort
     private int port;
-
-    @MockBean
-    private DataVarehusDAO dataVarehusDAO;
 
     @Autowired
     private JdbcTemplate jdbc;
@@ -45,23 +40,32 @@ public class DialogRessursTest {
 
     @Before
     public void before() {
-        when(authService.activeUserHasReadAccessToPerson(anyString())).thenReturn(true);
+        when(authService.harTilgangTilPerson(anyString())).thenReturn(true);
+        when(authService.getIdent()).thenReturn(Optional.of("101"));
+    }
+
+    @After
+    public void after() {
+        jdbc.update("delete from DIALOG where DIALOG_ID = 0");
+        jdbc.update("delete from EVENT where EVENT_ID = 0");
     }
 
     @Test
     public void sistOppdatert() {
 
-        Date timestamp = new Date();
-        when(dataVarehusDAO.hentSisteEndringSomIkkeErDine(anyString(), anyString())).thenReturn(timestamp);
-        when(authService.getIdent()).thenReturn(Optional.of("123"));
+        jdbc.update("insert into DIALOG (DIALOG_ID, OPPDATERT) values (0, current_timestamp(6))");
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', '1337', '1337', CURRENT_TIMESTAMP)");
+        Timestamp timestamp = jdbc.queryForObject("select TIDSPUNKT from EVENT where EVENT_ID = 0", Timestamp.class);
+        assertThat(timestamp).isNotNull();
 
         given()
                 .port(port)
-                .param("aktorId", "123")
+                .param("aktorId", "1337")
                 .get("/veilarbdialog/api/dialog/sistOppdatert")
                 .then()
                 .assertThat()
                 .statusCode(200)
+                .contentType(equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .body("sistOppdatert", equalTo(timestamp.getTime()));
 
     }

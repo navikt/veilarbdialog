@@ -27,9 +27,11 @@ import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
 import static no.nav.fo.veilarbdialog.auth.AuthService.erInternBruker;
 
 @RestController
-@RequestMapping("/api/dialog")
+@RequestMapping(
+        value = "/api/dialog",
+        produces = MediaType.APPLICATION_JSON_VALUE
+)
 @RequiredArgsConstructor
-@Slf4j
 public class DialogRessurs {
 
     private final DialogDataService dialogDataService;
@@ -43,46 +45,31 @@ public class DialogRessurs {
     @GetMapping
     public List<DialogDTO> hentDialoger() {
 
-        try {
-            return dialogDataService.hentDialogerForBruker(getContextUserIdent())
-                    .stream()
-                    .filter(dialog -> kontorsperreFilter.harTilgang(auth.getSsoToken(), dialog.getKontorsperreEnhetId()))
-                    .map(restMapper::somDialogDTO)
-                    .collect(toList());
-        } catch (RuntimeException e) {
-            log.error("Failed to complete request", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to complete request", e);
-        }
+        return dialogDataService.hentDialogerForBruker(getContextUserIdent())
+                .stream()
+                .filter(dialog -> kontorsperreFilter.harTilgang(auth.getSsoToken(), dialog.getKontorsperreEnhetId()))
+                .map(restMapper::somDialogDTO)
+                .collect(toList());
 
     }
 
     @GetMapping("sistOppdatert")
     public SistOppdatert sistOppdatert() {
 
-        try {
-            Date oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getIdent().orElse(null)); // TODO: This orElse doesn't make sense. Look at the resulting SQL...
-            return new SistOppdatert(oppdatert);
-        } catch (RuntimeException e) {
-            log.error("Failed to complete request", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to complete request", e);
-        }
+        Date oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getIdent().orElse(null)); // TODO: This orElse doesn't make sense. Look at the resulting SQL...
+        return new SistOppdatert(oppdatert);
 
     }
 
     @GetMapping("antallUleste")
     public AntallUlesteDTO antallUleste() {
 
-        try {
-            long antall = dialogDataService.hentDialogerForBruker(getContextUserIdent())
-                    .stream()
-                    .filter(erEksternBruker() ? DialogData::erUlestForBruker : DialogData::erUlestAvVeileder)
-                    .filter(it -> !it.isHistorisk())
-                    .count();
-            return new AntallUlesteDTO(toIntExact(antall));
-        } catch (RuntimeException e) {
-            log.error("Failed to complete request", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to complete request", e);
-        }
+        long antall = dialogDataService.hentDialogerForBruker(getContextUserIdent())
+                .stream()
+                .filter(erEksternBruker() ? DialogData::erUlestForBruker : DialogData::erUlestAvVeileder)
+                .filter(it -> !it.isHistorisk())
+                .count();
+        return new AntallUlesteDTO(toIntExact(antall));
 
     }
 

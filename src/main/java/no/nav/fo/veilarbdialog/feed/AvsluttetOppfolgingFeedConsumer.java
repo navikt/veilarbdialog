@@ -21,7 +21,7 @@ public class AvsluttetOppfolgingFeedConsumer {
     private final FeedMetaDataDAO feedMetaDataDAO;
 
     public String sisteEndring() {
-        ZonedDateTime sisteEndring = feedMetaDataDAO.hentSisteLestTidspunkt();
+        Date sisteEndring = feedMetaDataDAO.hentSisteLestTidspunkt();
         return ZonedDateTime.ofInstant(sisteEndring.toInstant(), ZoneId.systemDefault()).toString();
     }
 

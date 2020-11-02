@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Optional;
 
@@ -35,10 +36,11 @@ public class DataVarehusDAO {
     @Transactional(readOnly = true)
     public Date hentSisteEndringSomIkkeErDine(String aktorId, String bruker) {
         try {
-            return jdbc.queryForObject("select TIDSPUNKT from EVENT where AKTOR_ID = ? and LAGT_INN_AV != ? ORDER BY EVENT_ID DESC FETCH FIRST 1 ROWS ONLY",
-                    Date.class,
+            Timestamp timestamp = jdbc.queryForObject("select TIDSPUNKT from EVENT where AKTOR_ID = ? and LAGT_INN_AV != ? ORDER BY EVENT_ID DESC FETCH FIRST 1 ROWS ONLY",
+                    Timestamp.class,
                     aktorId,
                     bruker);
+            return timestamp == null ? null : Date.from(timestamp.toInstant());
         } catch (EmptyResultDataAccessException e) {
             return null;
         }

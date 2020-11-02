@@ -11,8 +11,9 @@ public class KontorsperreFilter {
 
     private final AuthService auth;
 
+    // TODO: When bumping commons-java, the harVeilederTilgangTilEnhet(...) will change behaviour.
     public boolean harTilgang(String ident, String enhet) {
-        return StringUtils.isEmpty(enhet) || auth.identifiedUserHasReadAccessToEnhet(ident, enhet);
+        return StringUtils.isEmpty(enhet) || auth.harVeilederTilgangTilEnhet(ident, enhet);
     }
 
 }

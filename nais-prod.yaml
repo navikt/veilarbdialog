@@ -14,13 +14,13 @@ spec:
   port: 8080
   prometheus:
     enabled: true
-    path: /veilarbdialog/actuator/prometheus
+    path: /veilarbdialog/internal/prometheus
   liveness:
-    path: /veilarbdialog/actuator/info
+    path: /veilarbdialog/internal/info
     port: 8080
     initialDelay: 20
   readiness:
-    path: /veilarbdialog/actuator/health
+    path: /veilarbdialog/internal/info
     port: 8080
     initialDelay: 20
   replicas:
@@ -42,6 +42,8 @@ spec:
     paths:
       - kvPath: /oracle/data/prod/creds/veilarbdialog-user
         mountPath: /var/run/secrets/nais.io/oracle_creds
+      - kvPath: /oracle/data/prod/config/veilarbdialog
+        mountPath: /var/run/secrets/nais.io/oracle_config
       - kvPath: /serviceuser/data/prod/srvveilarbdialog
         mountPath: /secrets/serviceuser
       - kvPath: /kv/prod/fss/veilarbdialog/default

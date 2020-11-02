@@ -22,14 +22,6 @@ public class SwaggerConfig {
                 .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
                 .paths(PathSelectors.any())
                 .build();
-/*        return new Docket(DocumentationType.SWAGGER_2)
-                .pathMapping("veilarbdialog")
-                .select()
-                .apis((handler) -> {
-                    if (handler == null) return false;
-                    return handler.key().getPathMappings().stream().anyMatch(path -> path.startsWith("/api"));
-                })
-                .build();*/
     }
 
 }

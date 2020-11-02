@@ -22,8 +22,6 @@ import static java.util.UUID.randomUUID;
 @Slf4j
 public class ScheduleRessurs {
 
-    private static final long GRACE_PERIODE = 30 * 60 * 1000;
-
     private final VarselDAO varselDAO;
     private final KladdService kladdService;
     private final ServiceMeldingService serviceMeldingService;
@@ -50,7 +48,7 @@ public class ScheduleRessurs {
     public void sjekkForVarsel() {
         lockingTaskExecutor.executeWithLock(
                 (Runnable) this::sjekkForVarselWithLock,
-                new LockConfiguration(Instant.now(), "varsel", Duration.ofSeconds(60 * 30), Duration.ZERO)
+                new LockConfiguration(Instant.now(), "varsel", Duration.ofMinutes(30), Duration.ZERO)
         );
     }
 
@@ -64,7 +62,8 @@ public class ScheduleRessurs {
             varselUUIDer.forEach(stopRevarslingService::stopRevarsel);
             funksjonelleMetrikker.stoppetRevarsling(varselUUIDer.size());
 
-            List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(GRACE_PERIODE);
+            List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(Duration.ofMinutes(30).toMillis());
+
             log.info("Varsler {} brukere", aktorer.size());
             log.info("Varsler aktorer: " + aktorer);
             long paragraf8Varsler = aktorer

@@ -20,12 +20,15 @@ logging:
 
 management:
   endpoint:
+    health:
+      show-details: always
     prometheus:
       enabled: true
   endpoints:
     web:
       exposure:
         include: "health,info,prometheus"
+      base-path: "/internal"
   metrics:
     export:
       prometheus:
@@ -50,10 +53,9 @@ application:
       clientId: ${AAD_B2C_CLIENTID_USERNAME}
       discoveryUrl: ${AAD_B2C_DISCOVERY_URL}
   datasource:
-    driver-class-name: oracle.jdbc.driver.OracleDriver
-    url: ${VEILARBDIALOGDATASOURCE_URL}
-    username: ${VEILARBDIALOGDATASOURCE_USERNAME}
-    password: ${VEILARBDIALOGDATASOURCE_PASSWORD}
+    url: ${JDBC_URL}
+    username: ${JDBC_USERNAME}
+    password: ${JDBC_PASSWORD}
   dialog:
     url: ${ARBEIDSRETTET_DIALOG_URL}
   kafka:

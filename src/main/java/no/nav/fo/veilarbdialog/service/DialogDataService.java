@@ -34,34 +34,25 @@ public class DialogDataService {
     private final KafkaDialogService kafkaDialogService;
     private final AuthService auth;
 
-    private String assertAccessToAktorId(String aktorId)
-            throws IngenTilgang {
-        if (!auth.activeUserHasReadAccessToPerson(aktorId)) {
-            throw new IngenTilgang(String.format(
-                    "%s har ikke lesetilgang til %s",
-                    auth.getIdent().orElse("null"),
-                    aktorId
-            ));
-        }
-        return aktorId;
-    }
-
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person)
             throws IngenTilgang {
-        String aktorId = assertAccessToAktorId(hentAktoerIdForPerson(person));
+        String aktorId = hentAktoerIdForPerson(person);
+        auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
         return dialogDAO.hentDialogerForAktorId(aktorId);
     }
 
     public Date hentSistOppdatertForBruker(Person person, String meg)
             throws IngenTilgang {
-        String aktorId = assertAccessToAktorId(hentAktoerIdForPerson(person));
+        String aktorId = hentAktoerIdForPerson(person);
+        auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
         return dataVarehusDAO.hentSisteEndringSomIkkeErDine(aktorId, meg);
     }
 
     public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData)
             throws IngenTilgang {
-        String aktorId = assertAccessToAktorId(dialogData.getAktorId());
+        String aktorId = dialogData.getAktorId();
+        auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
         DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(aktorId));
         DialogData opprettet = dialogDAO.opprettDialog(kontorsperretDialog);
         dialogStatusService.nyDialog(opprettet);
@@ -173,7 +164,7 @@ public class DialogDataService {
 
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
 
-        if (!auth.activeUserHasReadAccessToPerson(dialogData.getAktorId())) {
+        if (!auth.harTilgangTilPerson(dialogData.getAktorId())) {
             throw new IngenTilgang(String.format(
                     "%s har ikke lesetilgang til %s",
                     auth.getIdent().orElse(null),

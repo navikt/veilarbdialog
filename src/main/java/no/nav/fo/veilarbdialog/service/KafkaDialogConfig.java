@@ -26,8 +26,7 @@ public class KafkaDialogConfig {
     @Value("${application.kafka.topic}")
     private String topic;
 
-    @Bean
-    Producer<String, String> kafkaProducer(Credentials systemUser) {
+    private KafkaProducer<String, String> kafkaProducer(Credentials systemUser) {
         HashMap<String, Object> props = new HashMap<>();
         props.put(BOOTSTRAP_SERVERS_CONFIG, brokerUrl);
         props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, "SASL_SSL");
@@ -43,8 +42,8 @@ public class KafkaDialogConfig {
     @Bean
     KafkaDialogService kafkaDialogService(KafkaDAO kafkaDAO,
                                           DialogDAO dialogDAO,
-                                          Producer<String, String> kafkaProducer) {
-        return new KafkaDialogService(kafkaDAO, dialogDAO, kafkaProducer, topic);
+                                          Credentials systemUser) {
+        return new KafkaDialogService(kafkaDAO, dialogDAO, kafkaProducer(systemUser), topic);
     }
 
 }

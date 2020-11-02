@@ -15,9 +15,6 @@ import javax.sql.DataSource;
 @Slf4j
 public class DataSourceConfig {
 
-    @Value("${application.datasource.driver-class-name}")
-    private String driverClassName;
-
     @Value("${application.datasource.url}")
     private String url;
 
@@ -29,6 +26,9 @@ public class DataSourceConfig {
 
     @Bean
     public DataSource dataSource() {
+
+        log.info("Creating data source to URL '{}'", url);
+
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(url);
         config.setUsername(username);

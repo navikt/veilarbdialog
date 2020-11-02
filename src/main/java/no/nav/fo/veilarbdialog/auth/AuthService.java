@@ -36,11 +36,11 @@ public class AuthService {
         return SubjectHandler.getIdent();
     }
 
-    public boolean identifiedUserHasReadAccessToEnhet(String ident, String enhet) {
+    public boolean harVeilederTilgangTilEnhet(String ident, String enhet) {
         return pep.harVeilederTilgangTilEnhet(ident, enhet);
     }
 
-    public boolean identifiedUserHasReadAccessToPerson(String ident, String aktorId) {
+    public boolean harVeilederTilgangTilPerson(String ident, String aktorId) {
         return pep.harVeilederTilgangTilPerson(
                 ident,
                 ActionId.READ,
@@ -48,12 +48,23 @@ public class AuthService {
         );
     }
 
-    public boolean activeUserHasReadAccessToPerson(String aktorId) {
+    public boolean harTilgangTilPerson(String aktorId) {
         return pep.harTilgangTilPerson(
                 getSsoToken(),
                 ActionId.READ,
                 AbacPersonId.aktorId(aktorId)
         );
+    }
+
+    public void harTilgangTilPersonEllerKastIngenTilgang(String aktorId)
+            throws IngenTilgang {
+        if (!harTilgangTilPerson(aktorId)) {
+            throw new IngenTilgang(String.format(
+                    "%s har ikke lesetilgang til %s",
+                    getIdent().orElse("null"),
+                    aktorId
+            ));
+        }
     }
 
     public void skalVereInternBruker() {
