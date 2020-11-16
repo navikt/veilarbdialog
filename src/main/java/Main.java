@@ -8,10 +8,10 @@ import no.nav.sbl.dialogarena.common.cxf.StsSecurityConstants;
 import static java.lang.System.setProperty;
 import static no.nav.brukerdialog.security.Constants.OIDC_REDIRECT_URL_PROPERTY_NAME;
 import static no.nav.common.utils.NaisUtils.getCredentials;
+import static no.nav.common.utils.NaisUtils.getFileContent;
 import static no.nav.dialogarena.aktor.AktorConfig.AKTOER_ENDPOINT_URL;
 import static no.nav.fo.veilarbdialog.config.ApplicationConfig.*;
-import static no.nav.fo.veilarbdialog.config.DatabaseConfig.VEILARBDIALOGDATASOURCE_PASSWORD_PROPERTY_NAME;
-import static no.nav.fo.veilarbdialog.config.DatabaseConfig.VEILARBDIALOGDATASOURCE_USERNAME_PROPERTY_NAME;
+import static no.nav.fo.veilarbdialog.config.DatabaseConfig.*;
 import static no.nav.sbl.dialogarena.common.abac.pep.service.AbacServiceConfig.ABAC_ENDPOINT_URL_PROPERTY_NAME;
 import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
 
@@ -42,6 +42,9 @@ public class Main {
         NaisUtils.Credentials oracleCreds = getCredentials("oracle_creds");
         System.setProperty(VEILARBDIALOGDATASOURCE_USERNAME_PROPERTY_NAME, oracleCreds.username);
         System.setProperty(VEILARBDIALOGDATASOURCE_PASSWORD_PROPERTY_NAME, oracleCreds.password);
+
+        String dbUrl = getFileContent("/var/run/secrets/nais.io/oracle_config/jdbc_url");
+        System.setProperty(VEILARBDIALOGDATASOURCE_URL_PROPERTY_NAME, dbUrl);
 
         ApiApp.runApp(ApplicationConfig.class, args);
     }
