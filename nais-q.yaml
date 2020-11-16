@@ -46,6 +46,8 @@ spec:
         mountPath: /var/run/secrets/nais.io/service_user
       - kvPath: /kv/preprod/fss/veilarbdialog/{{namespace}}
         mountPath: /var/run/secrets/nais.io/vault
+      - kvPath: /oracle/data/dev/config/veilarbdialog_{{namespace}}
+        mountPath: /var/run/secrets/nais.io/oracle_config
   webproxy: true
   env:
     - name: APP_ENVIRONMENT_NAME
