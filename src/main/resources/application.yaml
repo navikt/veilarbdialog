@@ -1,0 +1,87 @@
+spring:
+  application:
+    name: "veilarbdialog"
+  data:
+    jdbc:
+      repositories:
+        enabled: false
+  flyway:
+    enabled: false
+
+server:
+  servlet:
+    context-path: "/veilarbdialog"
+
+# See https://nav-it.slack.com/archives/CQ2H1AY3Z/p1602594649050400.
+# Remove once commons is bumped and obsolete commons code is no longer included.
+logging:
+  level:
+    org.apache.tomcat.util.http.parser.Cookie: OFF
+
+management:
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,prometheus"
+      base-path: "/internal"
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+application:
+  cluster: ${APP_CLUSTER_NAME}
+  namespace: ${APP_ENVIRONMENT_NAME}
+  abac:
+    url: ${ABAC_PDP_ENDPOINT_URL}
+  aktorregister:
+    url: ${AKTOERREGISTER_API_V1_URL}
+  azure:
+    ad:
+      clientId: ${LOGINSERVICE_OIDC_CLIENT_ID}
+      discoveryUrl: ${AAD_DISCOVERY_URL}
+    b2c:
+      clientId: ${AAD_B2C_CLIENTID_USERNAME}
+      discoveryUrl: ${AAD_B2C_DISCOVERY_URL}
+  datasource:
+    url: ${JDBC_URL}
+    username: ${JDBC_USERNAME}
+    password: ${JDBC_PASSWORD}
+  dialog:
+    url: ${ARBEIDSRETTET_DIALOG_URL}
+  kafka:
+    broker:
+      url: ${KAFKA_BROKERS_URL}
+    topic: aapen-fo-endringPaaDialog-v1-${APP_ENVIRONMENT_NAME}
+  kvp:
+    url: ${VEILARBOPPFOLGINGAPI_URL}
+  mq:
+    hostname: ${MQGATEWAY03_HOSTNAME}
+    port: ${MQGATEWAY03_PORT}
+    name: ${MQGATEWAY03_NAME}
+    queues:
+      oppgaveHenvendelse: ${HENVENDELSE_OPPGAVE_HENVENDELSE_QUEUENAME}
+      stoppVarslinger: ${VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_QUEUENAME}
+      varselHandling: ${VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_QUEUENAME}
+      varslinger: ${VARSELPRODUKSJON_VARSLINGER_QUEUENAME}
+    userid: srvappserver
+  openam:
+    clientId: ${VEILARBLOGIN_OPENAM_CLIENT_ID}
+    discoveryUrl: ${OPENAM_DISCOVERY_URL}
+    refreshUrl: ${VEILARBLOGIN_OPENAM_REFRESH_URL}
+  serviceuser:
+    username: ${SERVICEUSER_USERNAME}
+    password: ${SERVICEUSER_PASSWORD}
+  sts:
+    discovery:
+      url: ${SECURITY_TOKEN_SERVICE_DISCOVERY_URL}
+  unleash:
+    url: ${UNLEASH_API_URL}
+  veilarboppfolging:
+    api:
+      url: ${VEILARBOPPFOLGINGAPI_URL}

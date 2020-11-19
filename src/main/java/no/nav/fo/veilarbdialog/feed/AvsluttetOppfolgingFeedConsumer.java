@@ -1,28 +1,24 @@
 package no.nav.fo.veilarbdialog.feed;
 
+import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.db.dao.FeedMetaDataDAO;
 import no.nav.fo.veilarbdialog.domain.AvsluttetOppfolgingFeedDTO;
-import no.nav.fo.veilarbdialog.service.AppService;
+import no.nav.fo.veilarbdialog.service.DialogDataService;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 @Component
+@RequiredArgsConstructor
 public class AvsluttetOppfolgingFeedConsumer {
 
-    private final AppService appService;
-
+    private final DialogDataService service;
     private final FeedMetaDataDAO feedMetaDataDAO;
-
-    @Inject
-    public AvsluttetOppfolgingFeedConsumer(AppService appService, FeedMetaDataDAO feedMetaDataDAO) {
-        this.appService = appService;
-        this.feedMetaDataDAO = feedMetaDataDAO;
-    }
 
     public String sisteEndring() {
         Date sisteEndring = feedMetaDataDAO.hentSisteLestTidspunkt();
@@ -32,7 +28,7 @@ public class AvsluttetOppfolgingFeedConsumer {
     public void lesAvsluttetOppfolgingFeed(String lastEntryId, List<AvsluttetOppfolgingFeedDTO> elements) {
         Date lastSuccessfulId = null;
         for (AvsluttetOppfolgingFeedDTO element : elements) {
-            appService.settDialogerTilHistoriske(element.getAktoerid(), element.getSluttdato());
+            service.settDialogerTilHistoriske(element.getAktoerid(), element.getSluttdato());
             lastSuccessfulId = element.getOppdatert();
         }
 
