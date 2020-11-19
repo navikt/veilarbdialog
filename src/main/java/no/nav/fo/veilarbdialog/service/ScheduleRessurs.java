@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import javax.xml.bind.JAXBContext;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.UUID.randomUUID;
 import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.jaxbContext;
@@ -81,7 +82,7 @@ public class ScheduleRessurs {
         varselUUIDer.forEach(stopRevarslingService::stopRevarsel);
         FunksjonelleMetrikker.stoppetRevarsling(varselUUIDer.size());
 
-        List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(GRACE_PERIODE);
+        List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(TimeUnit.MINUTES.toMillis(1)); // TODO: Reset.
         log.info("Varsler {} brukere", aktorer.size());
         log.info("Varsler aktorer: " + aktorer);
         long paragraf8Varsler = aktorer
