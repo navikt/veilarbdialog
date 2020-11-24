@@ -40,16 +40,14 @@ spec:
   vault:
     enabled: true
     paths:
-      - kvPath: /oracle/data/dev/config/veilarbdialog_{{namespace}}
-        mountPath: /var/run/secrets/nais.io/oracle_config
+      - kvPath: /oracle/data/dev/creds/veilarbdialog_{{namespace}}-user
+        mountPath: /var/run/secrets/nais.io/oracle_creds
       - kvPath: /oracle/data/dev/config/veilarbdialog_{{namespace}}
         mountPath: /var/run/secrets/nais.io/oracle_config
       - kvPath: /serviceuser/data/dev/srvveilarbdialog
         mountPath: /secrets/serviceuser
       - kvPath: /kv/preprod/fss/veilarbdialog/{{namespace}}
         mountPath: /var/run/secrets/nais.io/vault
-      - kvPath: /oracle/data/dev/config/veilarbdialog_{{namespace}}
-        mountPath: /var/run/secrets/nais.io/oracle_config
   webproxy: true
   env:
     - name: APP_ENVIRONMENT_NAME
