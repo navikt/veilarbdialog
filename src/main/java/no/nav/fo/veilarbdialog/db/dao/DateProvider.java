@@ -4,13 +4,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.function.Supplier;
 
+// TODO: Refactor and remove.
 @Component
 public class DateProvider {
 
-    // mockes i tester
-    private static Supplier<String> provider = () -> "CURRENT_TIMESTAMP";
-
+    private static final Supplier<String> provider = () -> "CURRENT_TIMESTAMP";
     public String getNow() {
         return provider.get();
     }
+
 }

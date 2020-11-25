@@ -1,35 +1,34 @@
 package no.nav.fo.veilarbdialog.rest;
 
 
-import no.nav.common.auth.SubjectHandler;
+import lombok.RequiredArgsConstructor;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.Kladd;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.service.KladdService;
-import org.springframework.stereotype.Component;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
-import static no.nav.fo.veilarbdialog.service.AutorisasjonService.erEksternBruker;
+import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
 
-@Component
-@Path("/kladd")
+@RestController
+@RequestMapping(
+        value = "/api/kladd",
+        produces = MediaType.APPLICATION_JSON_VALUE
+)
+@RequiredArgsConstructor
 public class KladdRessurs {
 
-    @Inject
-    private KladdService kladdService;
+    private final KladdService kladdService;
+    private final HttpServletRequest httpServletRequest;
+    private final AuthService auth;
 
-    @Inject
-    private Provider<HttpServletRequest> requestProvider;
-
-    @GET
+    @GetMapping
     public List<KladdDTO> hentKladder() {
         return kladdService.hentKladder(getContextUserIdent())
                 .stream()
@@ -37,16 +36,18 @@ public class KladdRessurs {
                 .collect(toList());
     }
 
-    @POST
-    public void oppdaterKladd(KladdDTO dto) {
+    @PostMapping
+    public void oppdaterKladd(@RequestBody KladdDTO dto) {
         kladdService.upsertKladd(getContextUserIdent(), somKladd(dto));
     }
 
     private String getContextUserIdent() {
         if (erEksternBruker()) {
-            return SubjectHandler.getIdent().orElseThrow(RuntimeException::new);
+            return auth.getIdent().orElseThrow(RuntimeException::new);
         }
-        return Optional.ofNullable(requestProvider.get().getParameter("fnr")).orElseThrow(RuntimeException::new);
+        return Optional
+                .ofNullable(httpServletRequest.getParameter("fnr"))
+                .orElseThrow(RuntimeException::new);
     }
 
     private static KladdDTO somKladdDTO(Kladd kladd) {

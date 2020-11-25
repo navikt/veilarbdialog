@@ -8,7 +8,7 @@ public class EnumUtils {
         return anEnum != null ? anEnum.name() : null;
     }
 
-    public static <T extends Enum> T valueOf(Class<T> enumClass, String name) {
+    public static <T extends Enum<?>> T valueOf(Class<T> enumClass, String name) {
         return Arrays.stream(enumClass.getEnumConstants())
                 .filter(e -> e.name().equals(name))
                 .findAny()

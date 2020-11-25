@@ -1,32 +1,32 @@
 package no.nav.fo.veilarbdialog.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.melding.virksomhet.opprettoppgavehenvendelse.v1.opprettoppgavehenvendelse.AktoerId;
 import no.nav.melding.virksomhet.opprettoppgavehenvendelse.v1.opprettoppgavehenvendelse.ObjectFactory;
 import no.nav.melding.virksomhet.opprettoppgavehenvendelse.v1.opprettoppgavehenvendelse.OppgaveType;
 import no.nav.melding.virksomhet.opprettoppgavehenvendelse.v1.opprettoppgavehenvendelse.Oppgavehenvendelse;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import javax.inject.Inject;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 
-import static no.nav.fo.veilarbdialog.config.ApplicationConfig.ARBEIDSRETTET_DIALOG_URL_PROPERTY;
-import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.jaxbContext;
-import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.marshall;
-import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.messageCreator;
-import static no.nav.sbl.util.EnvironmentUtils.getRequiredProperty;
+import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.*;
 
-@Component
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class OppgaveService {
 
-    @Inject
-    private JmsTemplate oppgaveHenvendelseQueue;
-
     private static final JAXBContext OPPGAVE_HENVENDELSE = jaxbContext(Oppgavehenvendelse.class);
-    private String dialogUrl = getRequiredProperty(ARBEIDSRETTET_DIALOG_URL_PROPERTY);
 
+    private final ServiceConfig config;
+    private final JmsTemplate oppgaveHenvendelseQueue;
+
+    @SneakyThrows
     public void send(String aktorId, String varselId) {
         MessageCreator messageCreator = messageCreator(marshall(createMelding(aktorId, varselId), OPPGAVE_HENVENDELSE), varselId);
         oppgaveHenvendelseQueue.send(messageCreator);
@@ -43,7 +43,7 @@ public class OppgaveService {
         henvendelse.setMottaker(aktoerId);
         henvendelse.setOppgaveType(oppgaveType);
         henvendelse.setVarselbestillingId(uuid);
-        henvendelse.setOppgaveURL(dialogUrl);
+        henvendelse.setOppgaveURL(config.getArbeidsrettetDialogUrl());
         henvendelse.setStoppRepeterendeVarsel(false);
 
         return new ObjectFactory().createOppgavehenvendelse(henvendelse);

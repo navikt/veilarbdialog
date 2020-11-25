@@ -1,42 +1,30 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import no.nav.sbl.sql.SqlUtils;
-import no.nav.sbl.sql.where.WhereClause;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class KafkaDAO {
-    private String TABLE_NAME = "FEILEDE_KAFKA_AKTOR_ID";
+
     private final JdbcTemplate jdbc;
 
-    @Inject
-    public KafkaDAO(JdbcTemplate jdbc) {
-        this.jdbc = jdbc;
-    }
-
     public void insertFeiletAktorId(String aktorId) {
-        SqlUtils
-                .insert(jdbc, TABLE_NAME)
-                .value("AKTOR_ID", aktorId)
-                .execute();
+        jdbc.update("insert into FEILEDE_KAFKA_AKTOR_ID (AKTOR_ID) values (?)",
+                aktorId);
     }
 
-    public int slettFeiletAktorId(String aktorId) {
-        return SqlUtils
-                .delete(jdbc, TABLE_NAME)
-                .where(WhereClause.equals("AKTOR_ID", aktorId))
-                .execute();
+    public void slettFeiletAktorId(String aktorId) {
+        jdbc.update("delete from FEILEDE_KAFKA_AKTOR_ID where AKTOR_ID = ?",
+                aktorId);
     }
 
     public List<String> hentAlleFeilendeAktorId() {
-        return  SqlUtils
-                .select(jdbc, TABLE_NAME, rs -> rs.getString("AKTOR_ID"))
-                .column("*")
-                .executeToList();
+        return jdbc.queryForList("select AKTOR_ID from FEILEDE_KAFKA_AKTOR_ID",
+                String.class);
     }
 
 }

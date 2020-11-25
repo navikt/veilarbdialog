@@ -7,6 +7,7 @@ import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -21,11 +22,18 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 class DialogStatusServiceTest {
 
-    private StatusDAO statusDAO = mock(StatusDAO.class);
-    private DialogDAO dialogDAO = mock(DialogDAO.class);
-    private DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
-    private VarselDAO varselDao = mock(VarselDAO.class);
-    private DialogStatusService dialogStatusService = new DialogStatusService(statusDAO, dialogDAO, dataVarehusDAO, varselDao);
+    private final StatusDAO statusDAO = mock(StatusDAO.class);
+    private final DialogDAO dialogDAO = mock(DialogDAO.class);
+    private final DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
+    private final VarselDAO varselDao = mock(VarselDAO.class);
+    private final FunksjonelleMetrikker funksjonelleMetrikker = mock(FunksjonelleMetrikker.class);
+    private final DialogStatusService dialogStatusService = new DialogStatusService(
+            statusDAO,
+            dialogDAO,
+            dataVarehusDAO,
+            varselDao,
+            funksjonelleMetrikker
+    );
 
     @Test
     public void ny_henvendelse_fra_bruker_kaller_set_ny_melding_fra_bruker() {
