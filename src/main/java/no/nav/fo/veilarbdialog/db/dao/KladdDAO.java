@@ -36,8 +36,22 @@ public class KladdDAO {
                 Timestamp.valueOf(LocalDateTime.now()),
                 kladdSeq);
 
-        jdbc.update("delete from KLADD where UNIQUE_SEQ < ?",
-                kladdSeq);
+
+        jdbc.update("" +
+                        " delete from KLADD " +
+                        " where UNIQUE_SEQ < ? " +
+                        " and LAGT_INN_AV = ?" +
+                        " and AKTOR_ID = ? " +
+                        " and (DIALOG_ID = ? or (DIALOG_ID is null and ? is null))" +
+                        " and (DIALOG_ID is not null or (AKTIVITET_ID = ? or (AKTIVITET_ID is null and ? is null)))  ",
+                kladdSeq,
+                kladd.lagtInnAv,
+                kladd.aktorId,
+                kladd.dialogId,
+                kladd.dialogId,
+                kladd.aktivitetId,
+                kladd.aktivitetId
+        );
 
     }
 

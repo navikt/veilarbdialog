@@ -2,15 +2,12 @@ kind: Application
 apiVersion: nais.io/v1alpha1
 metadata:
   name: veilarbdialog
-  namespace: default
+  namespace: pto
   cluster: prod-fss
   labels:
     team: pto
 spec:
   image: docker.pkg.github.com/navikt/veilarbdialog/veilarbdialog:{{version}}
-  ingresses:
-    - https://veilarbdialog.nais.adeo.no
-    - https://app.adeo.no/veilarbdialog
   port: 8080
   prometheus:
     enabled: true
@@ -34,6 +31,9 @@ spec:
     requests:
       cpu: "1"
       memory: 1536Mi
+  ingresses:
+    - https://veilarbdialog.nais.adeo.no
+    - https://app.adeo.no/veilarbdialog
   envFrom:
     - configmap: pto-config
     - configmap: loginservice-idporten
