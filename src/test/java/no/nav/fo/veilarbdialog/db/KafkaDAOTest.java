@@ -1,24 +1,24 @@
 package no.nav.fo.veilarbdialog.db;
 
-import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class KafkaDAOTest extends IntegationTest {
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@Transactional
+public class KafkaDAOTest {
 
-    @Inject
+    @Autowired
     private KafkaDAO kafkaDAO;
-
-    @BeforeClass
-    public static void addSpringBeans() {
-        initSpringContext(Arrays.asList(KafkaDAO.class));
-    }
 
     @Test
     public void kan_inserte_feilende_aktorid() {

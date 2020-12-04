@@ -11,14 +11,12 @@ import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.AktoerId
 import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.Parameter;
 import no.nav.melding.virksomhet.varselmedhandling.v1.varselmedhandling.VarselMedHandling;
 import org.junit.Test;
-import org.springframework.jms.core.MessageCreator;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 
-import java.util.UUID;
-
-import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.*;
+import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.jaxbContext;
+import static no.nav.fo.veilarbdialog.util.MessageQueueUtils.marshall;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class MessageQueueUtilsTest {

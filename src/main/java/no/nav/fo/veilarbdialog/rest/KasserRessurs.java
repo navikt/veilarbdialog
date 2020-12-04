@@ -1,48 +1,40 @@
 package no.nav.fo.veilarbdialog.rest;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.apiapp.feil.IngenTilgang;
-import no.nav.apiapp.security.PepClient;
-import no.nav.common.auth.SubjectHandler;
+import no.nav.common.types.feil.IngenTilgang;
+import no.nav.common.utils.EnvironmentUtils;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.service.AutorisasjonService;
-import org.springframework.stereotype.Component;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import javax.inject.Inject;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Request;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static no.nav.fo.veilarbdialog.config.ApplicationConfig.VEILARB_KASSERING_IDENTER_PROPERTY;
-import static no.nav.sbl.util.EnvironmentUtils.getOptionalProperty;
-
+@RestController
+@RequestMapping(
+        value = "/api/kassering",
+        produces = MediaType.APPLICATION_JSON_VALUE
+)
+@RequiredArgsConstructor
 @Slf4j
-@Component
-@Path("/kassering")
 public class KasserRessurs {
 
-    @Inject
-    private DialogDAO dialogDAO;
+    private final DialogDAO dialogDAO;
+    private final AuthService auth;
 
-    @Inject
-    private PepClient pep;
+    private final String godkjenteIdenter = EnvironmentUtils.getOptionalProperty("VEILARB_KASSERING_IDENTER").orElse("");
 
-    @Inject
-    private AutorisasjonService autorisasjonService;
-
-    private String godkjenteIdenter = getOptionalProperty(VEILARB_KASSERING_IDENTER_PROPERTY).orElse("");
-
-    @PUT
-    @Path("/henvendelse/{id}/kasser")
-    public int kasserHenvendelse(@Context Request request, @PathParam("id") String henvendelseId) {
-        autorisasjonService.skalVereInternBruker();
+    @PutMapping("/henvendelse/{henvendelseId}/kasser")
+    public int kasserHenvendelse(@PathVariable String henvendelseId) {
+        auth.skalVereInternBruker();
 
         long id = Long.parseLong(henvendelseId);
         DialogData dialogData = dialogDAO.hentDialogGittHenvendelse(id);
@@ -50,11 +42,10 @@ public class KasserRessurs {
         return kjorHvisTilgang(dialogData.getAktorId(), "henvendelse", henvendelseId, () -> dialogDAO.kasserHenvendelse(id));
     }
 
-    @PUT
-    @Path("/dialog/{id}/kasser")
+    @PutMapping("/dialog/{dialogId}/kasser")
     @Transactional
-    public int kasserDialog(@PathParam("id") String dialogId) {
-        autorisasjonService.skalVereInternBruker();
+    public int kasserDialog(@PathVariable String dialogId) {
+        auth.skalVereInternBruker();
 
         long id = Long.parseLong(dialogId);
         DialogData dialogData = dialogDAO.hentDialog(id);
@@ -71,9 +62,14 @@ public class KasserRessurs {
 
     private int kjorHvisTilgang(String aktorId, String kasseringAv, String id, Supplier<Integer> fn) {
 
-        pep.sjekkLesetilgangTilAktorId(aktorId);
-
-        String veilederIdent = SubjectHandler.getIdent().orElse(null);
+        String veilederIdent = auth.getIdent().orElse(null);
+        if (!auth.harVeilederTilgangTilPerson(veilederIdent, aktorId)) {
+            throw new IngenTilgang(String.format(
+                    "%s does not have read access to %s",
+                    veilederIdent,
+                    aktorId
+            ));
+        }
         List<String> godkjente = Arrays.asList(godkjenteIdenter.split(","));
         if (!godkjente.contains(veilederIdent)) {
             log.error("[KASSERING] {} har ikke tilgang til kassering av {} dialoger", veilederIdent, aktorId);
