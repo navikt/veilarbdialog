@@ -33,7 +33,7 @@ spec:
       memory: 8092Mi
     requests:
       cpu: "1"
-      memory: 3072Mi
+      memory: 1536Mi
   envFrom:
     - configmap: pto-config
     - configmap: loginservice-idporten
