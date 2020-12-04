@@ -14,18 +14,18 @@ spec:
   port: 8080
   prometheus:
     enabled: true
-    path: veilarbdialog/internal/metrics
+    path: /veilarbdialog/internal/prometheus
   liveness:
-    path: veilarbdialog/internal/isAlive
+    path: /veilarbdialog/internal/info
     port: 8080
     initialDelay: 60
   readiness:
-    path: veilarbdialog/internal/isReady
+    path: /veilarbdialog/internal/info
     port: 8080
     initialDelay: 60
   replicas:
     min: 2
-    max: 4
+    max: 2
     cpuThresholdPercentage: 50
   resources:
     limits:
@@ -42,14 +42,15 @@ spec:
     paths:
       - kvPath: /oracle/data/dev/creds/veilarbdialog_{{namespace}}-user
         mountPath: /var/run/secrets/nais.io/oracle_creds
-      - kvPath: /serviceuser/data/dev/srvveilarbdialog
-        mountPath: /var/run/secrets/nais.io/service_user
-      - kvPath: /kv/preprod/fss/veilarbdialog/{{namespace}}
-        mountPath: /var/run/secrets/nais.io/vault
       - kvPath: /oracle/data/dev/config/veilarbdialog_{{namespace}}
         mountPath: /var/run/secrets/nais.io/oracle_config
+      - kvPath: /serviceuser/data/dev/srvveilarbdialog
+        mountPath: /secrets/serviceuser
+      - kvPath: /kv/preprod/fss/veilarbdialog/{{namespace}}
+        mountPath: /var/run/secrets/nais.io/vault
   webproxy: true
   env:
     - name: APP_ENVIRONMENT_NAME
       value: {{namespace}}
-
+    - name: APP_CLUSTER_NAME
+      value: dev-fss

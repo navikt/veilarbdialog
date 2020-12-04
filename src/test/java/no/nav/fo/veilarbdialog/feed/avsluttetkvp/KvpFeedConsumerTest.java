@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.feed.avsluttetkvp;
 import no.nav.fo.veilarbdialog.db.dao.KvpFeedMetadataDAO;
 import no.nav.fo.veilarbdialog.domain.KvpDTO;
 import no.nav.fo.veilarbdialog.feed.KvpFeedConsumer;
-import no.nav.fo.veilarbdialog.service.AppService;
+import no.nav.fo.veilarbdialog.service.DialogDataService;
 import org.junit.Test;
 
 import java.util.Date;
@@ -18,15 +18,15 @@ import static org.mockito.Mockito.*;
 public class KvpFeedConsumerTest {
 
     private KvpFeedMetadataDAO dao = mock(KvpFeedMetadataDAO.class);
-    private AppService appService = mock(AppService.class);
+    private DialogDataService dialogDataService = mock(DialogDataService.class);
 
     @Test(expected = RuntimeException.class)
     public void skal_ikke_oppdatere_siste_feed_id_hvis_behandling_av_innlesing_feiler() {
-        doThrow(new RuntimeException("Mock exception")).when(appService).settKontorsperredeDialogerTilHistoriske(anyString(), any(Date.class));
+        doThrow(new RuntimeException("Mock exception")).when(dialogDataService).settKontorsperredeDialogerTilHistoriske(anyString(), any(Date.class));
         List<KvpDTO> elements = asList(feedElement(1, "123", new Date()));
 
         try {
-            new KvpFeedConsumer(appService, dao).lesKvpFeed(null, elements);
+            new KvpFeedConsumer(dialogDataService, dao).lesKvpFeed(null, elements);
         } finally {
             verify(dao, never()).oppdaterSisteFeedId(anyLong());
         }
@@ -37,7 +37,7 @@ public class KvpFeedConsumerTest {
     public void skal_oppdatere_siste_feed_id_hvis_behandling_av_innlesing_er_ok() {
         List<KvpDTO> elements = asList(feedElement(1, null, null), feedElement(2, null, null));
 
-        new KvpFeedConsumer(appService, dao).lesKvpFeed(null, elements);
+        new KvpFeedConsumer(dialogDataService, dao).lesKvpFeed(null, elements);
 
         verify(dao).oppdaterSisteFeedId(2);
 
@@ -51,11 +51,11 @@ public class KvpFeedConsumerTest {
         Date date2 = mock(Date.class);
         List<KvpDTO> elements = asList(feedElement(1, aktor1, date1), feedElement(2, aktor2, date2));
 
-        new KvpFeedConsumer(appService, dao).lesKvpFeed(null, elements);
+        new KvpFeedConsumer(dialogDataService, dao).lesKvpFeed(null, elements);
 
-        verify(appService).settKontorsperredeDialogerTilHistoriske(aktor1, date1);
-        verify(appService).settKontorsperredeDialogerTilHistoriske(aktor2, date2);
-        verifyNoMoreInteractions(appService);
+        verify(dialogDataService).settKontorsperredeDialogerTilHistoriske(aktor1, date1);
+        verify(dialogDataService).settKontorsperredeDialogerTilHistoriske(aktor2, date2);
+        verifyNoMoreInteractions(dialogDataService);
     }
 
     @Test
@@ -65,10 +65,10 @@ public class KvpFeedConsumerTest {
         Date date1 = mock(Date.class);
         List<KvpDTO> elements = asList(feedElement(1, aktor1, date1), feedElement(2, aktor2, null));
 
-        new KvpFeedConsumer(appService, dao).lesKvpFeed(null, elements);
+        new KvpFeedConsumer(dialogDataService, dao).lesKvpFeed(null, elements);
 
-        verify(appService).settKontorsperredeDialogerTilHistoriske(aktor1, date1);
-        verifyNoMoreInteractions(appService);
+        verify(dialogDataService).settKontorsperredeDialogerTilHistoriske(aktor1, date1);
+        verifyNoMoreInteractions(dialogDataService);
     }
 
     private KvpDTO feedElement(long id, String aktoerId, Date sluttDato) {

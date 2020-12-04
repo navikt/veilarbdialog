@@ -1,51 +1,43 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.Data;
-import no.nav.fo.IntegationTest;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.sbl.sql.SqlUtils;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.inject.Inject;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
 
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
-import static no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DataVarehusDAOTest extends IntegationTest {
+@SpringBootTest
+@RunWith(SpringRunner.class)
+@Transactional
+class DataVarehusDAOTest {
 
-    @Inject
+    @Autowired
     private DataVarehusDAO dataVarehusDAO;
 
-    @Inject
+    @Autowired
     private JdbcTemplate jdbc;
-
-    @BeforeAll
-    public static void addSpringBeans() {
-        initSpringContext(Arrays.asList(DataVarehusDAO.class));
-    }
 
     @Test
     void insertEvent() {
+
         DialogData dialog = DialogData.builder().id(1).aktivitetId("aktivitet").aktorId("aktor").build();
         dataVarehusDAO.insertEvent(dialog, DatavarehusEvent.VENTER_PAA_BRUKER);
 
-        DatavarehusData data = SqlUtils.select(jdbc, EVENT_TABELL, this::map)
-                .column(DIALOGID)
-                .column(EVENT_ID)
-                .column(TIDSPUNKT)
-                .column(AKTOR_ID)
-                .column(AKTIVITET_ID)
-                .column(EVENT)
-                .execute();
+        DatavarehusData data = jdbc.queryForObject("select * from event", new BeanPropertyRowMapper<>(DatavarehusData.class));
 
+        assertThat(data).isNotNull();
         assertThat(data.dialogId).isEqualTo(dialog.getId());
         assertThat(data.tidspunkt).isNotNull();
         assertThat(data.aktorId).isEqualTo(dialog.getAktorId());
@@ -57,18 +49,6 @@ class DataVarehusDAOTest extends IntegationTest {
     @Test
     void skal_kunne_sette_inn_alle_event_typene() {
         Arrays.stream(DatavarehusEvent.values()).forEach(event -> dataVarehusDAO.insertEvent(nyDialog(), event));
-    }
-
-    private DatavarehusData map(ResultSet rs) throws SQLException {
-        DatavarehusData datavarehusData = new DatavarehusData();
-        datavarehusData.dialogId = rs.getLong(DIALOGID);
-        datavarehusData.eventId = rs.getString(EVENT_ID);
-        datavarehusData.tidspunkt = rs.getDate(TIDSPUNKT);
-        datavarehusData.aktorId = rs.getString(AKTOR_ID);
-        datavarehusData.aktivitetId = rs.getString(AKTIVITET_ID);
-        datavarehusData.event = rs.getString(EVENT);
-
-        return datavarehusData;
     }
 
     @Data

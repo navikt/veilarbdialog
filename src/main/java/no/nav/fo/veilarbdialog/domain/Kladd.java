@@ -3,14 +3,14 @@ package no.nav.fo.veilarbdialog.domain;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.With;
 import lombok.experimental.Accessors;
-import lombok.experimental.Wither;
 
 
 @Data
 @Accessors(chain = true)
 @Builder(toBuilder = true)
-@Wither
+@With
 public class Kladd {
     public String dialogId;
     public String aktivitetId;
