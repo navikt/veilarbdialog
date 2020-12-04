@@ -31,8 +31,8 @@ spec:
     requests:
       cpu: "1"
       memory: 1536Mi
-  ingresses:		
-    - https://veilarbdialog.nais.adeo.no		
+  ingresses:
+    - https://veilarbdialog.nais.adeo.no
     - https://app.adeo.no/veilarbdialog
   envFrom:
     - configmap: pto-config
