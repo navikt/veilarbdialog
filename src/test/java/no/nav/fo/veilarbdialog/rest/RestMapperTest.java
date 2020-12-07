@@ -1,14 +1,10 @@
-// TODO: 07/12/2020 fiks denne
-
-/*
 package no.nav.fo.veilarbdialog.rest;
 
+import no.nav.common.abac.Pep;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.auth.AuthService;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Date;
@@ -19,20 +15,13 @@ import static org.mockito.Mockito.*;
 
 public class RestMapperTest {
 
-    private RestMapper restMapper;
-    private KontorsperreFilter filter;
-    private AuthService auth;
-
-    @Before
-    public void setUp() {
-        filter = mock(KontorsperreFilter.class);
-        auth = mock(AuthService.class);
-        restMapper = new RestMapper(filter, auth);
-    }
+    private final Pep pep = mock(Pep.class);
+    private final RestMapper restMapper = new RestMapper(new AuthService(pep));
 
     @Test
     public void skal_inneholde_alle_henvendelser_dersom_ikke_kontorsperret() {
-        when(filter.filterKontorsperre(null, null)).thenReturn(true);
+        when(pep.harVeilederTilgangTilEnhet(any(), anyString()))
+                .thenReturn(true);
         DialogDTO dialogDto = restMapper.somDialogDTO(nyDialog(nyHenvendelse(1, null)));
 
         assertThat(dialogDto.henvendelser.size()).isEqualTo(1);
@@ -49,8 +38,10 @@ public class RestMapperTest {
     @Test
     public void skal_inneholde_kontorsperrede_henvendelser_dersom_tilgang() {
         String kontorsperretEnhet = "123";
-        when(filter.filterKontorsperre(any(), any())).thenReturn(true);
-        when(filter.filterKontorsperre(any(), eq(kontorsperretEnhet))).thenReturn(true);
+        when(pep.harVeilederTilgangTilEnhet(any(), anyString()))
+                .thenReturn(false);
+        when(pep.harVeilederTilgangTilEnhet(any(), eq(kontorsperretEnhet)))
+                .thenReturn(true);
 
         DialogDTO dialogDto = restMapper.somDialogDTO(nyDialog(nyHenvendelse(1, null), nyHenvendelse(2, kontorsperretEnhet), nyHenvendelse(3, "")));
         assertThat(dialogDto.henvendelser.size()).isEqualTo(3);
@@ -60,12 +51,13 @@ public class RestMapperTest {
     @Test
     public void skal_fjerne_kontorsperrede_henvendelser_dersom_ikke_tilgang() {
         String kontorsperretEnhet = "123";
-        when(filter.filterKontorsperre(any(), any())).thenReturn(true);
-        when(filter.filterKontorsperre(any(), eq(kontorsperretEnhet))).thenReturn(false);
+        when(pep.harVeilederTilgangTilEnhet(any(), anyString()))
+                .thenReturn(true);
+        when(pep.harVeilederTilgangTilEnhet(any(), eq(kontorsperretEnhet)))
+                .thenReturn(false);
 
         DialogDTO dialogDto = restMapper.somDialogDTO(nyDialog(nyHenvendelse(1, null), nyHenvendelse(2, kontorsperretEnhet), nyHenvendelse(3, "")));
         assertThat(dialogDto.henvendelser.size()).isEqualTo(2);
         assertThat(dialogDto.henvendelser.stream().noneMatch(h -> ("2".equals(h.id)))).isTrue();
     }
 }
-*/

@@ -1,9 +1,8 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.fo.veilarbdialog.domain.*;
-import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.fo.veilarbdialog.domain.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,15 +11,14 @@ import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
-import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
 import static no.nav.fo.veilarbdialog.auth.AuthService.erInternBruker;
+import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 
 @Component
 @RequiredArgsConstructor
 class RestMapper {
 
-    private final KontorsperreFilter kontorsperreFilter;
     private final AuthService auth;
 
     public DialogDTO somDialogDTO(DialogData dialogData) {
@@ -28,7 +26,7 @@ class RestMapper {
         List<HenvendelseData> henvendelser = dialogData
                 .getHenvendelser()
                 .stream()
-                .filter(kontorsperreFilter::filterKontorsperre)
+                .filter(auth::filterKontorsperre)
                 .collect(toList());
 
         Optional<HenvendelseData> sisteHenvendelse = henvendelser.stream()

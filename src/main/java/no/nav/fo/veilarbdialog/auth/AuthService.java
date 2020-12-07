@@ -8,12 +8,17 @@ import no.nav.common.abac.domain.request.ActionId;
 import no.nav.common.auth.subject.IdentType;
 import no.nav.common.auth.subject.SubjectHandler;
 import no.nav.common.types.feil.IngenTilgang;
+import no.nav.fo.veilarbdialog.domain.KontorsperreEnhetData;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static no.nav.common.auth.subject.IdentType.EksternBruker;
+import static no.nav.common.auth.subject.IdentType.InternBruker;
+
 @Service
-@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+@RequiredArgsConstructor
 public class AuthService {
 
     private final Pep pep;
@@ -34,10 +39,6 @@ public class AuthService {
 
     public Optional<String> getIdent() {
         return SubjectHandler.getIdent();
-    }
-
-    public boolean harVeilederTilgangTilEnhet(String ident, String enhet) {
-        return pep.harVeilederTilgangTilEnhet(ident, enhet);
     }
 
     public boolean harVeilederTilgangTilPerson(String ident, String aktorId) {
@@ -68,24 +69,30 @@ public class AuthService {
     }
 
     public void skalVereInternBruker() {
-        skalVere(IdentType.InternBruker);
-    }
-
-    private void skalVere(IdentType forventetIdentType) {
         IdentType identType = SubjectHandler.getIdentType().orElse(null);
-        if (identType != forventetIdentType) {
-            throw new IngenTilgang(String.format("%s != %s", identType, forventetIdentType));
+        if (identType != InternBruker) {
+            throw new IngenTilgang(String.format("%s != %s", identType, InternBruker));
         }
     }
 
     public static boolean erEksternBruker() {
         IdentType type = SubjectHandler.getIdentType().orElse(null);
-        return IdentType.EksternBruker.equals(type);
+        return EksternBruker.equals(type);
     }
 
     public static boolean erInternBruker() {
         IdentType type = SubjectHandler.getIdentType().orElse(null);
-        return IdentType.InternBruker.equals(type);
+        return InternBruker.equals(type);
+    }
+
+    public boolean filterKontorsperre(KontorsperreEnhetData kontorsperreEnhetData) {
+        if (StringUtils.isEmpty(kontorsperreEnhetData.getKontorsperreEnhetId())) {
+            return true;
+        }
+        if (erEksternBruker()) {
+            return true;
+        }
+        return pep.harVeilederTilgangTilEnhet(getIdent().orElse(null), kontorsperreEnhetData.getKontorsperreEnhetId());
     }
 
 }

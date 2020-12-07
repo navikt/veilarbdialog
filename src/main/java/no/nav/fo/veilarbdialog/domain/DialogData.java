@@ -13,7 +13,7 @@ import static java.util.Optional.ofNullable;
 @Value
 @Builder(toBuilder = true)
 @With
-public class DialogData {
+public class DialogData implements KontorsperreEnhetData {
 
     long id;
     String aktorId;

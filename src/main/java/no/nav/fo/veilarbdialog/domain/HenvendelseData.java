@@ -14,7 +14,7 @@ import static no.nav.fo.veilarbdialog.domain.AvsenderType.VEILEDER;
 @Accessors(chain = true)
 @With
 @ToString(exclude = "tekst")
-public class HenvendelseData {
+public class HenvendelseData implements KontorsperreEnhetData {
 
     public final long id;
     public final long dialogId;

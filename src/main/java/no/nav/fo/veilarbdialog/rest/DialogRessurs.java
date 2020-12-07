@@ -3,7 +3,6 @@ package no.nav.fo.veilarbdialog.rest;
 import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.*;
-import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.service.KladdService;
@@ -36,7 +35,6 @@ public class DialogRessurs {
     private final DialogDataService dialogDataService;
     private final RestMapper restMapper;
     private final HttpServletRequest httpServletRequest;
-    private final KontorsperreFilter kontorsperreFilter;
     private final AuthService auth;
     private final KladdService kladdService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
@@ -46,7 +44,7 @@ public class DialogRessurs {
 
         return dialogDataService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
-                .filter(kontorsperreFilter::filterKontorsperre)
+                .filter(auth::filterKontorsperre)
                 .map(restMapper::somDialogDTO)
                 .collect(toList());
 
@@ -97,7 +95,7 @@ public class DialogRessurs {
         DialogData dialogData = markerSomLest(dialogId);
         dialogDataService.updateDialogAktorFor(dialogData.getAktorId());
 
-        return kontorsperreFilter.filterKontorsperre(dialogData) ?
+        return auth.filterKontorsperre(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
     }
@@ -112,7 +110,7 @@ public class DialogRessurs {
     @PutMapping("{dialogId}/les")
     public DialogDTO markerSomLest(@PathVariable String dialogId) {
         DialogData dialogData = markerSomLest(Long.parseLong(dialogId));
-        return kontorsperreFilter.filterKontorsperre(dialogData) ?
+        return auth.filterKontorsperre(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
     }
