@@ -28,7 +28,7 @@ class RestMapper {
         List<HenvendelseData> henvendelser = dialogData
                 .getHenvendelser()
                 .stream()
-                .filter((henvendelse) -> kontorsperreFilter.harTilgang(auth.getIdent().orElse(null), henvendelse.getKontorsperreEnhetId()))
+                .filter(kontorsperreFilter::filterKontorsperre)
                 .collect(toList());
 
         Optional<HenvendelseData> sisteHenvendelse = henvendelser.stream()
