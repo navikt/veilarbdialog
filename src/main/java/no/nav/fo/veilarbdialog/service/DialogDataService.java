@@ -115,15 +115,6 @@ public class DialogDataService {
         }
     }
 
-    @Transactional(readOnly = true)
-    public List<DialogAktor> hentAktorerMedEndringerFOM(Date tidspunkt, int pageSize) {
-        // NB: ingen tilgangskontroll her siden feed har egen mekanisme for dette
-        if (!this.unleashService.isEnabled("veilarbdialog.skruav.feed")) {
-            return dialogFeedDAO.hentAktorerMedEndringerFOM(tidspunkt, pageSize);
-        }
-        return Collections.emptyList();
-    }
-
     public void settKontorsperredeDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
         // NB: ingen tilgangskontroll, brukes av vår feed-consumer
         dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
