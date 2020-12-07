@@ -76,7 +76,5 @@ public class DialogData {
     public boolean erUlestAvVeileder() {
         return !erLestAvVeileder();
     }
-
-
 }
 

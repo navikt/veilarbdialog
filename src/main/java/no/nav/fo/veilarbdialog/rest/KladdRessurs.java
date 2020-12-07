@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog.rest;
 
-
 import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.Kladd;
