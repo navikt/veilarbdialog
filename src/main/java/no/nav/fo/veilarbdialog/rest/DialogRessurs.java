@@ -47,7 +47,7 @@ public class DialogRessurs {
 
         return dialogDataService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
-                .filter(dialog -> kontorsperreFilter.harTilgang(auth.getSsoToken(), dialog.getKontorsperreEnhetId()))
+                .filter(dialog -> kontorsperreFilter.harTilgang(auth.getIdent().orElse(null), dialog.getKontorsperreEnhetId()))
                 .map(restMapper::somDialogDTO)
                 .collect(toList());
 
