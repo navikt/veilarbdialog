@@ -1,7 +1,6 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
@@ -47,7 +46,7 @@ public class DialogRessurs {
 
         return dialogDataService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
-                .filter(dialog -> kontorsperreFilter.harTilgang(auth.getIdent().orElse(null), dialog.getKontorsperreEnhetId()))
+                .filter(kontorsperreFilter::filterKontorsperre)
                 .map(restMapper::somDialogDTO)
                 .collect(toList());
 
@@ -97,7 +96,8 @@ public class DialogRessurs {
         );
         DialogData dialogData = markerSomLest(dialogId);
         dialogDataService.updateDialogAktorFor(dialogData.getAktorId());
-        return kontorsperreFilter.harTilgang(auth.getIdent().orElse(null), dialogData.getKontorsperreEnhetId()) ?
+
+        return kontorsperreFilter.filterKontorsperre(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
     }
@@ -112,7 +112,7 @@ public class DialogRessurs {
     @PutMapping("{dialogId}/les")
     public DialogDTO markerSomLest(@PathVariable String dialogId) {
         DialogData dialogData = markerSomLest(Long.parseLong(dialogId));
-        return kontorsperreFilter.harTilgang(auth.getIdent().orElse(null), dialogData.getKontorsperreEnhetId()) ?
+        return kontorsperreFilter.filterKontorsperre(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
     }
