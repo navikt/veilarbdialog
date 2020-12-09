@@ -43,7 +43,8 @@ public class KladdDAO {
                         " and LAGT_INN_AV = ?" +
                         " and AKTOR_ID = ? " +
                         " and (DIALOG_ID = ? or (DIALOG_ID is null and ? is null))" +
-                        " and (AKTIVITET_ID = ? or (AKTIVITET_ID is null and ? is null))  ",
+                        //henvendelser på eksisterende tråer har ikke aktivitetId
+                        " and (DIALOG_ID is not null or (AKTIVITET_ID = ? or (AKTIVITET_ID is null and ? is null)))  ",
                 kladdSeq,
                 kladd.lagtInnAv,
                 kladd.aktorId,
@@ -81,11 +82,13 @@ public class KladdDAO {
     }
 
     public void slettKladd(Kladd kladd) {
-        jdbc.update("delete from KLADD where " +
-                        "AKTOR_ID = ? and " +
-                        "LAGT_INN_AV = ? and " +
-                        "(DIALOG_ID = ? or (DIALOG_ID is null and ? is null)) and" +
-                        "(AKTIVITET_ID = ? or (AKTIVITET_ID is null and ? is null))",
+
+        jdbc.update("delete from KLADD " +
+                        "where AKTOR_ID = ? " +
+                        "and LAGT_INN_AV = ? " +
+                        "and (DIALOG_ID = ? or (DIALOG_ID is null and ? is null)) " +
+                        //henvendelser på eksisterende tråer har ikke aktivitetId
+                        "and (DIALOG_ID is not null or (AKTIVITET_ID = ? or (AKTIVITET_ID is null and ? is null)))",
                 kladd.aktorId,
                 kladd.lagtInnAv,
                 kladd.dialogId, kladd.dialogId,
