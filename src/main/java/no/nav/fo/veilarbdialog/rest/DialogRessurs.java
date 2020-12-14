@@ -26,7 +26,7 @@ import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
 import static no.nav.fo.veilarbdialog.auth.AuthService.erInternBruker;
 
-@Transactional // TODO: 14/12/2020  Trekke ut al db logikk sån at det bare er et db kall.
+@Transactional
 @RestController
 @RequestMapping(
         value = "/api/dialog",
