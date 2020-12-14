@@ -11,6 +11,7 @@ spec:
   ingresses:
     - https://veilarbdialog-{{namespace}}.nais.preprod.local
     - https://app-{{namespace}}.adeo.no/veilarbdialog
+    - https://app-{{namespace}}.dev.adeo.no/veilarbdialog
   port: 8080
   prometheus:
     enabled: true
