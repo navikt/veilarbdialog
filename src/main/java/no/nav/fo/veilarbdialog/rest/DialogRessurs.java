@@ -10,6 +10,7 @@ import no.nav.fo.veilarbdialog.service.KladdService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -25,6 +26,7 @@ import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
 import static no.nav.fo.veilarbdialog.auth.AuthService.erInternBruker;
 
+@Transactional // TODO: 14/12/2020  Trekke ut al db logikk sån at det bare er et db kall.
 @RestController
 @RequestMapping(
         value = "/api/dialog",
@@ -43,13 +45,11 @@ public class DialogRessurs {
 
     @GetMapping
     public List<DialogDTO> hentDialoger() {
-
         return dialogDataService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
                 .filter(kontorsperreFilter::filterKontorsperre)
                 .map(restMapper::somDialogDTO)
                 .collect(toList());
-
     }
 
     @GetMapping("sistOppdatert")
