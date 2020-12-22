@@ -27,7 +27,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "health,info,prometheus,kassering"
+        include: "*"
       base-path: "/internal"
   metrics:
     export:
