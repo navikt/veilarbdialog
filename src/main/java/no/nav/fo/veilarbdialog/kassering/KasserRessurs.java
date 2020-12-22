@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.rest;
+package no.nav.fo.veilarbdialog.kassering;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
