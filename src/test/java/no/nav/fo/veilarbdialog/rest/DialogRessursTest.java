@@ -1,6 +1,9 @@
 package no.nav.fo.veilarbdialog.rest;
 
+import io.restassured.http.ContentType;
 import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.feed.KvpService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,10 +41,14 @@ public class DialogRessursTest {
     @MockBean
     private AuthService authService;
 
+    @MockBean
+    private KvpService kvpService;
+
     @Before
     public void before() {
         when(authService.harTilgangTilPerson(anyString())).thenReturn(true);
         when(authService.getIdent()).thenReturn(Optional.of("101"));
+        when(kvpService.kontorsperreEnhetId(anyString())).thenReturn(null);
     }
 
     @After
@@ -67,6 +74,25 @@ public class DialogRessursTest {
                 .statusCode(200)
                 .contentType(equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .body("sistOppdatert", equalTo(timestamp.getTime()));
+
+    }
+
+    @Test
+    public void nyHenvendelse() {
+
+        NyHenvendelseDTO dto = new NyHenvendelseDTO()
+                .setTekst("tekst");
+        String s =
+        given()
+                .port(port)
+                .contentType(ContentType.JSON)
+                .body(dto)
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", "1337")
+                .then()
+                .extract()
+                .body()
+                .asString();
+        System.out.println(s);
 
     }
 
