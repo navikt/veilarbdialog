@@ -24,7 +24,7 @@
 
         <!-- TODO: Bump version (some breaking API changes). -->
         <!--<common.version>2.2020.10.15_11.43-b1f02e7bd6ae</common.version>-->
-        <common.version>2.2020.08.07_16.18-e6be6d6a09e6</common.version>
+        <common.version>2.2021.02.03_08.08-9d0c8281f06b</common.version>
         <common-obsolete.version>1.2020.02.11-12.17-1a30837bb4f2</common-obsolete.version>
 
         <flyway.version>4.1.1</flyway.version>

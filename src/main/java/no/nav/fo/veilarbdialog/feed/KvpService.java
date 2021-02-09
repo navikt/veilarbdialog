@@ -1,24 +1,22 @@
 package no.nav.fo.veilarbdialog.feed;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.common.json.JsonUtils;
 import no.nav.common.rest.client.RestUtils;
 import no.nav.common.sts.SystemUserTokenProvider;
-import no.nav.common.types.feil.Feil;
-import no.nav.common.types.feil.FeilType;
 import no.nav.fo.veilarbdialog.domain.KvpDTO;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -56,9 +54,9 @@ public class KvpService {
                     .map(KvpDTO::getEnhet)
                     .orElse(null);
         } catch (ForbiddenException e) {
-            throw new Feil(FeilType.UKJENT, "veilarbdialog har ikke tilgang til å spørre om KVP-status.");
+            throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "veilarbdialog har ikke tilgang til å spørre om KVP-status.");
         } catch (InternalServerErrorException e) {
-            throw new Feil(FeilType.UKJENT, "veilarboppfolging har en intern bug, vennligst fiks applikasjonen.");
+            throw new ResponseStatusException(INTERNAL_SERVER_ERROR, "veilarboppfolging har en intern bug, vennligst fiks applikasjonen.");
         }
     }
 

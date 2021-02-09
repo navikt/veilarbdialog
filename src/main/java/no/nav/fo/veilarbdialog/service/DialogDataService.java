@@ -3,21 +3,24 @@ package no.nav.fo.veilarbdialog.service;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.client.aktorregister.AktorregisterClient;
 import no.nav.common.featuretoggle.UnleashService;
-import no.nav.common.types.feil.IngenTilgang;
-import no.nav.common.types.feil.UlovligHandling;
+import no.nav.common.types.identer.Fnr;
+import no.nav.common.types.identer.Id;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.feed.KvpService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.http.HttpStatus.CONFLICT;
 
 @Service
 @Transactional
@@ -35,22 +38,19 @@ public class DialogDataService {
     private final AuthService auth;
 
     @Transactional(readOnly = true)
-    public List<DialogData> hentDialogerForBruker(Person person)
-            throws IngenTilgang {
+    public List<DialogData> hentDialogerForBruker(Person person) {
         String aktorId = hentAktoerIdForPerson(person);
         auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
         return dialogDAO.hentDialogerForAktorId(aktorId);
     }
 
-    public Date hentSistOppdatertForBruker(Person person, String meg)
-            throws IngenTilgang {
+    public Date hentSistOppdatertForBruker(Person person, String meg) {
         String aktorId = hentAktoerIdForPerson(person);
         auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
         return dataVarehusDAO.hentSisteEndringSomIkkeErDine(aktorId, meg);
     }
 
-    public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData)
-            throws IngenTilgang {
+    public DialogData opprettDialogForAktivitetsplanPaIdent(DialogData dialogData) {
         String aktorId = dialogData.getAktorId();
         auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
         DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(aktorId));
@@ -106,7 +106,8 @@ public class DialogDataService {
     public String hentAktoerIdForPerson(Person person) {
         if (person instanceof Person.Fnr) {
             return Optional
-                    .ofNullable(aktorregisterClient.hentAktorId(person.get()))
+                    .ofNullable(aktorregisterClient.hentAktorId(Fnr.of(person.get())))
+                    .map(Id::get)
                     .orElseThrow(RuntimeException::new);
         } else if (person instanceof Person.AktorId) {
             return person.get();
@@ -156,7 +157,7 @@ public class DialogDataService {
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
 
         if (!auth.harTilgangTilPerson(dialogData.getAktorId())) {
-            throw new IngenTilgang(String.format(
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(
                     "%s har ikke lesetilgang til %s",
                     auth.getIdent().orElse(null),
                     dialogData.getAktorId())
@@ -173,7 +174,7 @@ public class DialogDataService {
     private DialogData sjekkSkriveTilgangTilDialog(long id) {
         DialogData dialogData = hentDialog(id);
         if (dialogData.isHistorisk()) {
-            throw new UlovligHandling();
+            throw new ResponseStatusException(CONFLICT);
         }
         return dialogData;
     }
