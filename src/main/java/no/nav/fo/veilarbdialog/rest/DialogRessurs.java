@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 import static java.lang.Math.toIntExact;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
-import static no.nav.fo.veilarbdialog.auth.AuthService.erInternBruker;
 
 @Transactional
 @RestController
@@ -65,7 +63,7 @@ public class DialogRessurs {
 
         long antall = dialogDataService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
-                .filter(erEksternBruker() ? DialogData::erUlestForBruker : DialogData::erUlestAvVeileder)
+                .filter(auth.erEksternBruker() ? DialogData::erUlestForBruker : DialogData::erUlestAvVeileder)
                 .filter(it -> !it.isHistorisk())
                 .count();
         return new AntallUlesteDTO(toIntExact(antall));
@@ -90,7 +88,7 @@ public class DialogRessurs {
                 .dialogId(dialogId)
                 .avsenderId(auth.getIdent().orElse(null))
                 .viktig(!nyHenvendelseDTO.egenskaper.isEmpty())
-                .avsenderType(erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
+                .avsenderType(auth.erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
                 .tekst(nyHenvendelseDTO.tekst)
                 .build()
         );
@@ -118,7 +116,7 @@ public class DialogRessurs {
     }
 
     private DialogData markerSomLest(long dialogId) {
-        if (erEksternBruker()) {
+        if (auth.erEksternBruker()) {
             return dialogDataService.markerDialogSomLestAvBruker(dialogId);
         }
         return dialogDataService.markerDialogSomLestAvVeileder(dialogId);
@@ -189,9 +187,9 @@ public class DialogRessurs {
                 .build();
         DialogData opprettetDialog = dialogDataService.opprettDialogForAktivitetsplanPaIdent(dialogData);
 
-        if (erEksternBruker()) {
+        if (auth.erEksternBruker()) {
             funksjonelleMetrikker.nyDialogBruker(opprettetDialog);
-        } else if (erInternBruker()) {
+        } else if (auth.erInternBruker()) {
             funksjonelleMetrikker.nyDialogVeileder(opprettetDialog);
         }
 
@@ -200,7 +198,7 @@ public class DialogRessurs {
     }
 
     private Person getContextUserIdent() {
-        if (erEksternBruker()) {
+        if (auth.erEksternBruker()) {
             return auth.getIdent().map(Person::fnr).orElseThrow(RuntimeException::new);
         }
         Optional<Person> fnr = Optional

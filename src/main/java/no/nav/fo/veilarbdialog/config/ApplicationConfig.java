@@ -4,6 +4,8 @@ import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
+import no.nav.common.auth.context.AuthContextHolder;
+import no.nav.common.auth.context.AuthContextHolderThreadLocal;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -27,4 +29,8 @@ public class ApplicationConfig {
         return new JdbcTemplateLockProvider(dataSource);
     }
 
+    @Bean
+    public AuthContextHolder authContextHolder() {
+        return AuthContextHolderThreadLocal.instance();
+    }
 }

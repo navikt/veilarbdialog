@@ -2,7 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.common.client.aktorregister.AktorregisterClient;
-import no.nav.common.featuretoggle.UnleashService;
+import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
 import no.nav.fo.veilarbdialog.auth.AuthService;
@@ -33,7 +33,7 @@ public class DialogDataService {
     private final DataVarehusDAO dataVarehusDAO;
     private final DialogFeedDAO dialogFeedDAO;
     private final KvpService kvpService;
-    private final UnleashService unleashService;
+    private final UnleashClient unleashClient;
     private final KafkaDialogService kafkaDialogService;
     private final AuthService auth;
 
@@ -134,7 +134,7 @@ public class DialogDataService {
 
     public void updateDialogAktorFor(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
-        if (unleashService.isEnabled("veilarbdialog.kafka1")) {
+        if (unleashClient.isEnabled("veilarbdialog.kafka1")) {
             KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
             kafkaDialogService.dialogEvent(kafkaDialogMelding);
         }

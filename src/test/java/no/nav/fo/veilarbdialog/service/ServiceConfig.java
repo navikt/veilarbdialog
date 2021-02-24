@@ -1,7 +1,8 @@
 package no.nav.fo.veilarbdialog.service;
 
+import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.client.aktorregister.AktorregisterClient;
-import no.nav.common.featuretoggle.UnleashService;
+import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.health.HealthCheckResult;
 import no.nav.common.sts.SystemUserTokenProvider;
 import no.nav.common.types.identer.AktorId;
@@ -23,7 +24,7 @@ public class ServiceConfig {
     AktorregisterClient aktorregisterClient;
 
     @MockBean
-    UnleashService unleashService;
+    UnleashClient unleashClient;
 
     @Bean
     SystemUserTokenProvider systemUserTokenProvider() {
@@ -33,27 +34,23 @@ public class ServiceConfig {
     }
 
     @Bean
-    AktorregisterClient aktorregisterClient() {
+    AktorOppslagClient aktorOppslagClient() {
         when(aktorregisterClient.hentAktorId(any(Fnr.class)))
                 .thenReturn(null);
-        when(aktorregisterClient.hentAktorId(anyList()))
-                .thenReturn(null);
         when(aktorregisterClient.hentFnr(any(AktorId.class)))
-                .thenReturn(null);
-        when(aktorregisterClient.hentFnr(anyList()))
                 .thenReturn(null);
         return aktorregisterClient;
     }
 
     @Bean
-    UnleashService unleashService() {
-        when(unleashService.checkHealth())
+    UnleashClient unleashClient() {
+        when(unleashClient.checkHealth())
                 .thenReturn(HealthCheckResult.healthy());
-        when(unleashService.isEnabled(anyString()))
+        when(unleashClient.isEnabled(anyString()))
                 .thenReturn(false);
-        when(unleashService.isEnabled(anyString(), any()))
+        when(unleashClient.isEnabled(anyString(), any()))
                 .thenReturn(false);
-        return unleashService;
+        return unleashClient;
     }
 
 }

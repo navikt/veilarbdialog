@@ -19,12 +19,13 @@ import java.util.Optional;
 public class AuthService {
 
     private final Pep pep;
+    private final AuthContextHolder authContextHolder;
 
     public Optional<String> getIdent() {
         if (erInternBruker()) {
-            return AuthContextHolder.getNavIdent().map(NavIdent::get);
+            return authContextHolder.getNavIdent().map(NavIdent::get);
         } else {
-            return AuthContextHolder.getSubject();
+            return authContextHolder.getSubject();
         }
     }
 
@@ -59,21 +60,21 @@ public class AuthService {
     }
 
     public void skalVereInternBruker() {
-        if (!AuthContextHolder.erInternBruker()){
+        if (!authContextHolder.erInternBruker()){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Ugyldig bruker type");
         };
     }
 
-    public static boolean erEksternBruker() {
-        return AuthContextHolder.erEksternBruker();
+    public boolean erEksternBruker() {
+        return authContextHolder.erEksternBruker();
     }
 
-    public static boolean erInternBruker() {
-        return AuthContextHolder.erInternBruker();
+    public boolean erInternBruker() {
+        return authContextHolder.erInternBruker();
     }
 
     public String getInnloggetBrukerToken() {
-        return AuthContextHolder.getIdTokenString()
+        return authContextHolder.getIdTokenString()
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fant ikke token for innlogget bruker"));
     }

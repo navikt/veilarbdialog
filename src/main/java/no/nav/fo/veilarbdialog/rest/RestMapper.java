@@ -13,8 +13,6 @@ import java.util.stream.Collectors;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
-import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
-import static no.nav.fo.veilarbdialog.auth.AuthService.erInternBruker;
 
 @Component
 @RequiredArgsConstructor
@@ -57,14 +55,14 @@ class RestMapper {
                         .map(HenvendelseData::getTekst)
                         .orElse(null));
 
-        if (erEksternBruker()) {
+        if (auth.erEksternBruker()) {
             dto.setLest(dialogData.erLestAvBruker())
                     .setLestAvBrukerTidspunkt(null)
                     .setErLestAvBruker(false)
                     .setFerdigBehandlet(true);
 
 
-        } else if (erInternBruker()) {
+        } else if (auth.erInternBruker()) {
             dto.setLest(dialogData.erLestAvVeileder())
                     .setLestAvBrukerTidspunkt(dialogData.getLestAvBrukerTidspunkt())
                     .setErLestAvBruker(dialogData.erLestAvBruker())
@@ -83,9 +81,9 @@ class RestMapper {
                 .setSendt(henvendelseData.sendt)
                 .setTekst(henvendelseData.tekst);
 
-        if (erEksternBruker()) {
+        if (auth.erEksternBruker()) {
             dto.setLest(henvendelseData.lestAvBruker);
-        } else if (erInternBruker()) {
+        } else if (auth.erInternBruker()) {
             dto.setLest(henvendelseData.lestAvVeileder)
                     .setAvsenderId(henvendelseData.avsenderId);
         }

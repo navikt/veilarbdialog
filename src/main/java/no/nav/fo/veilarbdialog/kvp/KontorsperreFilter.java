@@ -17,7 +17,7 @@ public class KontorsperreFilter {
         if(StringUtils.isEmpty(henvendelse.getKontorsperreEnhetId())) {
             return true;
         }
-        if(AuthService.erEksternBruker()) {
+        if(auth.erEksternBruker()) {
             return true;
         }
 
@@ -30,7 +30,7 @@ public class KontorsperreFilter {
             return true;
         }
 
-        if(AuthService.erEksternBruker()) {
+        if(auth.erEksternBruker()) {
             return true;
         }
 
