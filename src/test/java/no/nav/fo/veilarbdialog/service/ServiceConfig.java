@@ -1,7 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
-import no.nav.common.client.aktorregister.AktorregisterClient;
 import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.health.HealthCheckResult;
 import no.nav.common.sts.SystemUserTokenProvider;
@@ -21,7 +20,7 @@ public class ServiceConfig {
     SystemUserTokenProvider systemUserTokenProvider;
 
     @MockBean
-    AktorregisterClient aktorregisterClient;
+    AktorOppslagClient aktorOppslagClient;
 
     @MockBean
     UnleashClient unleashClient;
@@ -35,11 +34,11 @@ public class ServiceConfig {
 
     @Bean
     AktorOppslagClient aktorOppslagClient() {
-        when(aktorregisterClient.hentAktorId(any(Fnr.class)))
+        when(aktorOppslagClient.hentAktorId(any(Fnr.class)))
                 .thenReturn(null);
-        when(aktorregisterClient.hentFnr(any(AktorId.class)))
+        when(aktorOppslagClient.hentFnr(any(AktorId.class)))
                 .thenReturn(null);
-        return aktorregisterClient;
+        return aktorOppslagClient;
     }
 
     @Bean
