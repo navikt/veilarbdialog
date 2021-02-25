@@ -2,7 +2,6 @@ package no.nav.fo.veilarbdialog.kassering;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.common.types.feil.IngenTilgang;
 import no.nav.common.utils.EnvironmentUtils;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
@@ -13,10 +12,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
+
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 @RestController
 @RequestMapping(
@@ -64,7 +66,7 @@ public class KasserRessurs {
 
         String veilederIdent = auth.getIdent().orElse(null);
         if (!auth.harVeilederTilgangTilPerson(veilederIdent, aktorId)) {
-            throw new IngenTilgang(String.format(
+            throw new ResponseStatusException(FORBIDDEN, String.format(
                     "%s does not have read access to %s",
                     veilederIdent,
                     aktorId
@@ -73,7 +75,8 @@ public class KasserRessurs {
         List<String> godkjente = Arrays.asList(godkjenteIdenter.split(","));
         if (!godkjente.contains(veilederIdent)) {
             log.error("[KASSERING] {} har ikke tilgang til kassering av {} dialoger", veilederIdent, aktorId);
-            throw new IngenTilgang(String.format("[KASSERING] %s har ikke tilgang til kassinger av %s dialoger", veilederIdent, aktorId));
+            throw new ResponseStatusException(FORBIDDEN,
+                    String.format("[KASSERING] %s har ikke tilgang til kassinger av %s dialoger", veilederIdent, aktorId));
         }
 
         int updated = fn.get();

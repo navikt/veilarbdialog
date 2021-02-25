@@ -1,11 +1,12 @@
 package no.nav.fo.veilarbdialog.service;
 
 import lombok.Getter;
+import no.nav.common.client.aktoroppslag.AktorOppslagClient;
+import no.nav.common.client.aktoroppslag.CachedAktorOppslagClient;
 import no.nav.common.client.aktorregister.AktorregisterClient;
 import no.nav.common.client.aktorregister.AktorregisterHttpClient;
-import no.nav.common.client.aktorregister.CachedAktorregisterClient;
-import no.nav.common.featuretoggle.UnleashService;
-import no.nav.common.featuretoggle.UnleashServiceConfig;
+import no.nav.common.featuretoggle.UnleashClient;
+import no.nav.common.featuretoggle.UnleashClientImpl;
 import no.nav.common.sts.NaisSystemUserTokenProvider;
 import no.nav.common.sts.SystemUserTokenProvider;
 import no.nav.common.utils.Credentials;
@@ -40,23 +41,19 @@ public class ServiceConfig {
     }
 
     @Bean
-    AktorregisterClient aktorregisterClient(SystemUserTokenProvider tokenProvider) {
+    AktorOppslagClient aktoroppslagClient(SystemUserTokenProvider tokenProvider) {
         AktorregisterClient aktorregisterClient = new AktorregisterHttpClient(
                 aktorregisterUrl,
                 applicationName,
                 tokenProvider::getSystemUserToken
         );
-        return new CachedAktorregisterClient(aktorregisterClient);
+        return new CachedAktorOppslagClient(aktorregisterClient);
     }
 
     @Bean
-    UnleashService unleashService() {
-        UnleashServiceConfig config = UnleashServiceConfig
-                .builder()
-                .applicationName(applicationName)
-                .unleashApiUrl(unleashUrl)
-                .build();
-        return new UnleashService(config);
+    UnleashClient unleashService() {
+        return new UnleashClientImpl(unleashUrl, applicationName) {
+        };
     }
 
 }

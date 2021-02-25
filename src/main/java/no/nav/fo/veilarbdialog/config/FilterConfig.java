@@ -1,8 +1,8 @@
 package no.nav.fo.veilarbdialog.config;
 
+import no.nav.common.auth.context.UserRole;
 import no.nav.common.auth.oidc.filter.OidcAuthenticationFilter;
 import no.nav.common.auth.oidc.filter.OidcAuthenticatorConfig;
-import no.nav.common.auth.subject.IdentType;
 import no.nav.common.auth.utils.ServiceUserTokenFinder;
 import no.nav.common.auth.utils.UserTokenFinder;
 import no.nav.common.log.LogFilter;
@@ -61,14 +61,14 @@ public class FilterConfig {
                 .withDiscoveryUrl(openAmDiscoveryUrl)
                 .withClientId(openAmClientId)
                 .withIdTokenFinder(new ServiceUserTokenFinder())
-                .withIdentType(IdentType.Systemressurs);
+                .withUserRole(UserRole.SYSTEM);
     }
 
     private OidcAuthenticatorConfig naisStsAuthConfig() {
         return new OidcAuthenticatorConfig()
                 .withDiscoveryUrl(naisStsDiscoveryUrl)
                 .withClientIds(ALLOWED_SERVICE_USERS)
-                .withIdentType(IdentType.Systemressurs);
+                .withUserRole(UserRole.SYSTEM);
     }
 
     private OidcAuthenticatorConfig openAmAuthConfig() {
@@ -79,7 +79,7 @@ public class FilterConfig {
                 .withRefreshTokenCookieName(REFRESH_TOKEN_COOKIE_NAME)
                 .withIdTokenFinder(new UserTokenFinder())
                 .withRefreshUrl(openAmRefreshUrl)
-                .withIdentType(IdentType.InternBruker);
+                .withUserRole(UserRole.INTERN);
     }
 
     private OidcAuthenticatorConfig azureAdAuthConfig() {
@@ -87,7 +87,7 @@ public class FilterConfig {
                 .withDiscoveryUrl(azureAdDiscoveryUrl)
                 .withClientId(azureAdClientId)
                 .withIdTokenCookieName(AZURE_AD_ID_TOKEN_COOKIE_NAME)
-                .withIdentType(IdentType.InternBruker);
+                .withUserRole(UserRole.INTERN);
     }
 
     private OidcAuthenticatorConfig loginserviceIdportenConfig() {
@@ -95,7 +95,7 @@ public class FilterConfig {
                 .withDiscoveryUrl(loginserviceIdportenDiscoveryUrl)
                 .withClientId(loginserviceIdportenAudience)
                 .withIdTokenCookieName(AZURE_AD_B2C_ID_TOKEN_COOKIE_NAME)
-                .withIdentType(IdentType.EksternBruker);
+                .withUserRole(UserRole.EKSTERN);
     }
 
     @Bean
