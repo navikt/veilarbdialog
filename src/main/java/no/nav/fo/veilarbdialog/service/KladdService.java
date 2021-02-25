@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.common.client.aktorregister.AktorregisterClient;
+import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.db.dao.KladdDAO;
@@ -16,12 +16,12 @@ import java.util.List;
 public class KladdService {
 
     private final KladdDAO kladdDAO;
-    private final AktorregisterClient aktorregister;
+    private final AktorOppslagClient aktorOppslagClient;
     private final AuthService auth;
 
     public List<Kladd> hentKladder(String fnr) {
 
-        String aktorId = aktorregister.hentAktorId(Fnr.of(fnr)).get();
+        String aktorId = aktorOppslagClient.hentAktorId(Fnr.of(fnr)).get();
         if (auth.erEksternBruker()) {
             return kladdDAO.getKladder(aktorId, aktorId);
         }
@@ -34,7 +34,7 @@ public class KladdService {
 
     public void upsertKladd(String fnr, Kladd kladd) {
 
-        String aktorId = aktorregister.hentAktorId(Fnr.of(fnr)).get();
+        String aktorId = aktorOppslagClient.hentAktorId(Fnr.of(fnr)).get();
         Kladd kladdWithUserContext = addUserContext(aktorId, kladd);
         kladdDAO.upsertKladd(kladdWithUserContext);
 
@@ -55,7 +55,7 @@ public class KladdService {
 
     public void deleteKladd(String fnr, String dialogId, String aktivitetId) {
 
-        String aktorId = aktorregister.hentAktorId(Fnr.of(fnr)).get();
+        String aktorId = aktorOppslagClient.hentAktorId(Fnr.of(fnr)).get();
         Kladd kladd = Kladd.builder()
                 .aktivitetId(aktivitetId)
                 .dialogId(dialogId)

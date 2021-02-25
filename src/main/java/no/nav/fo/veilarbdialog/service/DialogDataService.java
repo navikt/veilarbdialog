@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.common.client.aktorregister.AktorregisterClient;
+import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
@@ -27,7 +27,7 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 @RequiredArgsConstructor
 public class DialogDataService {
 
-    private final AktorregisterClient aktorregisterClient;
+    private final AktorOppslagClient aktorOppslagClient;
     private final DialogDAO dialogDAO;
     private final DialogStatusService dialogStatusService;
     private final DataVarehusDAO dataVarehusDAO;
@@ -106,7 +106,7 @@ public class DialogDataService {
     public String hentAktoerIdForPerson(Person person) {
         if (person instanceof Person.Fnr) {
             return Optional
-                    .ofNullable(aktorregisterClient.hentAktorId(Fnr.of(person.get())))
+                    .ofNullable(aktorOppslagClient.hentAktorId(Fnr.of(person.get())))
                     .map(Id::get)
                     .orElseThrow(RuntimeException::new);
         } else if (person instanceof Person.AktorId) {
