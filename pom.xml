@@ -22,9 +22,7 @@
 
         <allclient.version>9.2.0.0</allclient.version>
 
-        <!-- TODO: Bump version (some breaking API changes). -->
-        <!--<common.version>2.2020.10.15_11.43-b1f02e7bd6ae</common.version>-->
-        <common.version>2.2020.08.07_16.18-e6be6d6a09e6</common.version>
+        <common.version>2.2021.02.23_11.33-7091f10a35ba</common.version>
         <common-obsolete.version>1.2020.02.11-12.17-1a30837bb4f2</common-obsolete.version>
 
         <flyway.version>4.1.1</flyway.version>
@@ -304,6 +302,12 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>spring-mock-mvc</artifactId>
             <version>${rest-assured.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-standalone</artifactId>
+            <version>2.27.2</version>
             <scope>test</scope>
         </dependency>
 

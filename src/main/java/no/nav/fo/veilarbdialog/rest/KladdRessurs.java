@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
-import static no.nav.fo.veilarbdialog.auth.AuthService.erEksternBruker;
 
 @RestController
 @RequestMapping(
@@ -41,7 +40,7 @@ public class KladdRessurs {
     }
 
     private String getContextUserIdent() {
-        if (erEksternBruker()) {
+        if (auth.erEksternBruker()) {
             return auth.getIdent().orElseThrow(RuntimeException::new);
         }
         return Optional
