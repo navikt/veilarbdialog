@@ -47,7 +47,7 @@ application:
     url: ${AKTOERREGISTER_API_V1_URL}
   azure:
     ad:
-      clientId: ${LOGINSERVICE_OIDC_CLIENT_ID}
+      clientId: ${VEILARBLOGIN_AAD_CLIENT_ID}
       discoveryUrl: ${AAD_DISCOVERY_URL}
     b2c:
       clientId: ${AAD_B2C_CLIENTID_USERNAME}
