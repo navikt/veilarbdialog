@@ -49,12 +49,12 @@ public class ServiceConfig {
 
         @Override
         public String hentFnr(String aktorId) {
-            return null;
+            return "112233456789";
         }
 
         @Override
         public String hentAktorId(String fnr) {
-            return null;
+            return "12345";
         }
 
         @Override
