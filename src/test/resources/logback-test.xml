@@ -2,6 +2,9 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
 
-    <logger name="no.nav.common.featuretoggle" level="OFF"/>
+    <!-- logger name="no.nav.common.featuretoggle" level="OFF"/ -->
     <logger name="no.nav.common.metrics.SensuHandler" level="OFF"/>
+    <logger name="org.apache.kafka" level="ERROR"/>
+    <logger name="org.apache.zookeeper" level="ERROR"/>
+    <logger name="kafka" level="ERROR"/>
 </configuration>
