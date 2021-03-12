@@ -123,11 +123,6 @@ public class DialogRessurs {
 
     }
 
-    @PutMapping("{ver}")
-    public void test(@RequestBody String body, @PathVariable("ver") String param) {
-
-    }
-
     @PutMapping("{dialogId}/venter_pa_svar/{venter}")
     public DialogDTO oppdaterVenterPaSvar(@PathVariable String dialogId, @PathVariable boolean venter) {
         auth.skalVereInternBruker();

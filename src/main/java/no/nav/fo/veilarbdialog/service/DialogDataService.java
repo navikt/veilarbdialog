@@ -59,14 +59,13 @@ public class DialogDataService {
         return opprettet;
     }
 
-    public DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
+    public void opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
         long dialogId = henvendelseData.dialogId;
         DialogData dialogData = sjekkSkriveTilgangTilDialog(dialogId);
         HenvendelseData henvendelse = henvendelseData
                 .withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(dialogData.getAktorId()));
 
-        HenvendelseData opprettet = dialogDAO.opprettHenvendelse(henvendelse);
-        return dialogStatusService.nyHenvendelse(dialogData, opprettet);
+        dialogDAO.opprettHenvendelse(henvendelse);
     }
 
     @Transactional(readOnly = true)
@@ -156,7 +155,7 @@ public class DialogDataService {
 
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
 
-        if (!auth.harTilgangTilPerson(dialogData.getAktorId())) {
+        if (dialogData != null && !auth.harTilgangTilPerson(dialogData.getAktorId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(
                     "%s har ikke lesetilgang til %s",
                     auth.getIdent().orElse(null),
@@ -173,7 +172,7 @@ public class DialogDataService {
 
     private DialogData sjekkSkriveTilgangTilDialog(long id) {
         DialogData dialogData = hentDialog(id);
-        if (dialogData.isHistorisk()) {
+        if (dialogData != null && dialogData.isHistorisk()) {
             throw new ResponseStatusException(CONFLICT);
         }
         return dialogData;
