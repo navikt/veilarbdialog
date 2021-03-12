@@ -79,7 +79,9 @@ public class DialogRessurs {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
+    // TODO: 12/03/2021 flytt logikk inn i servicen denne burde ikke trenge og vere transactional
     @PostMapping
+    @Transactional
     public DialogDTO nyHenvendelse(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
         slettUtdattertKladd(nyHenvendelseDTO);
 
