@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.ClassRule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -13,38 +14,32 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.Optional;
-
+@Ignore("Comment out @Ignore to run the application locally.")
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@ActiveProfiles("local")
 @EnableAutoConfiguration
 @EmbeddedKafka
-@ActiveProfiles("test")
-@Sql("/db/testdata/dialog.sql")
 @Slf4j
-public class TestApplication extends Application {
+public class TestApplication {
 
     @ClassRule
-    public static GenericContainer<?> ibmMQ = new GenericContainer<>(DockerImageName.parse("ibmcom/mq"))
+    public static final GenericContainer<?> IBM_MQ = new GenericContainer<>(DockerImageName.parse("ibmcom/mq"))
             .withEnv("LICENSE", "accept")
             .withEnv("MQ_QMGR_NAME", "QM1")
             .withExposedPorts(1414);
 
     @Test
+    @Sql("/db/testdata/dialog.sql")
     public void main()
         throws InterruptedException {
 
         System.setProperty("VEILARB_KASSERING_IDENTER", "NAVIDENT"); // See KasserRessurs.
-        TestApplication.main(new String[] {});
+        System.setProperty("spring.profiles.active", "local"); // See MessageQueueConfig (application doesn't inherit profile from test when running).
+        Application.main();
         log.info("Application ready");
         Thread.sleep(Long.MAX_VALUE);
 
-    }
-
-    public static Optional<String> getIbmMQPort() {
-        return Optional
-                .ofNullable(ibmMQ.getFirstMappedPort())
-                .map(String::valueOf);
     }
 
 }
