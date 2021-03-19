@@ -141,12 +141,12 @@ public class DialogDataService {
     }
 
     private DialogData markerDialogSomLestAvVeileder(long dialogId) {
-        DialogData dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
+        DialogData dialogData = hentDialogMedTilgangskontroll(dialogId);
         return dialogStatusService.markerSomLestAvVeileder(dialogData);
     }
 
     private DialogData markerDialogSomLestAvBruker(long dialogId) {
-        DialogData dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
+        DialogData dialogData = hentDialogMedTilgangskontroll(dialogId);
         return dialogStatusService.markerSomLestAvBruker(dialogData);
     }
 
