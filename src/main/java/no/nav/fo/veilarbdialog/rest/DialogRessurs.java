@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,7 +34,6 @@ public class DialogRessurs {
     private final HttpServletRequest httpServletRequest;
     private final KontorsperreFilter kontorsperreFilter;
     private final AuthService auth;
-    private final FunksjonelleMetrikker funksjonelleMetrikker;
 
     @GetMapping
     public List<DialogDTO> hentDialoger() {
@@ -104,7 +102,7 @@ public class DialogRessurs {
                 .build();
 
         DialogData dialog = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
-        dialogDataService.updateDialogAktorFor(dialog.getAktorId());
+        dialogDataService.sendPaaKafka(dialog.getAktorId());
 
         return markerSomLest(dialogId);
     }
@@ -119,7 +117,7 @@ public class DialogRessurs {
                 .build();
 
         DialogData dialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogStatus);
-        dialogDataService.updateDialogAktorFor(dialog.getAktorId());
+        dialogDataService.sendPaaKafka(dialog.getAktorId());
 
         return markerSomLest(dialogId);
     }

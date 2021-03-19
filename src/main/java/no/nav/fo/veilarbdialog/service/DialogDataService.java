@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -60,25 +61,16 @@ public class DialogDataService {
     public DialogData opprettHenvendelse(NyHenvendelseDTO henvendelseData, Person bruker) {
         String aktorId = hentAktoerIdForPerson(bruker);
         auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
-        DialogData dialog = hentDialogMedTilgangskontroll(henvendelseData.dialogId, henvendelseData.aktivitetId);
 
-        long dialogId = Optional.ofNullable(dialog)
-                .orElseGet(() -> opprettDialog(henvendelseData, aktorId))
-                .getId();
+        DialogData dialog = Optional.ofNullable(hentDialogMedTilgangskontroll(henvendelseData.dialogId, henvendelseData.aktivitetId))
+                .orElseGet(() -> opprettDialog(henvendelseData, aktorId));
 
         slettKladd(henvendelseData, bruker);
-        dialog = markerDialogSomLest(dialogId);
 
-        opprettHenvendelseForDialog(HenvendelseData.builder()
-                .dialogId(dialogId)
-                .avsenderId(auth.getIdent().orElse(null))
-                .viktig(!henvendelseData.egenskaper.isEmpty())
-                .avsenderType(auth.erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
-                .tekst(henvendelseData.tekst)
-                .build()
-        );
+        opprettHenvendelseForDialog(dialog, henvendelseData.egenskaper != null && !henvendelseData.egenskaper.isEmpty(), henvendelseData.tekst);
+        dialog = markerDialogSomLest(dialog.getId());
 
-        updateDialogAktorFor(aktorId);
+        sendPaaKafka(aktorId);
 
         return dialog;
     }
@@ -114,13 +106,16 @@ public class DialogDataService {
         return dialogData;
     }
 
-    private DialogData opprettHenvendelseForDialog(HenvendelseData henvendelseData) {
-        long dialogId = henvendelseData.dialogId;
-        DialogData dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
-        HenvendelseData henvendelse = henvendelseData
-                .withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(dialogData.getAktorId()));
+    private DialogData opprettHenvendelseForDialog(DialogData dialogData, boolean viktigMelding, String tekst) {
+        HenvendelseData opprettet = dialogDAO.opprettHenvendelse(HenvendelseData.builder()
+                .dialogId(dialogData.getId())
+                .avsenderId(auth.getIdent().orElse(null))
+                .viktig(viktigMelding)
+                .avsenderType(auth.erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
+                .tekst(tekst)
+                .kontorsperreEnhetId(kvpService.kontorsperreEnhetId(dialogData.getAktorId()))
+                .build());
 
-        HenvendelseData opprettet = dialogDAO.opprettHenvendelse(henvendelse);
         return dialogStatusService.nyHenvendelse(dialogData, opprettet);
     }
 
@@ -133,6 +128,8 @@ public class DialogDataService {
     }
 
     public DialogData hentDialogMedTilgangskontroll(String dialogId, String aktivitetId) {
+        if(dialogId == null && aktivitetId == null) return null;
+
         if (!dialogId.isEmpty()) {
             return hentDialogMedTilgangskontroll(Long.parseLong(dialogId));
         } else {
@@ -176,7 +173,7 @@ public class DialogDataService {
         dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
                 .forEach(this::oppdaterDialogTilHistorisk);
 
-        updateDialogAktorFor(aktoerId);
+        sendPaaKafka(aktoerId);
     }
 
     public void settDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
@@ -184,10 +181,10 @@ public class DialogDataService {
         dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
                 .forEach(this::oppdaterDialogTilHistorisk);
 
-        updateDialogAktorFor(aktoerId);
+        sendPaaKafka(aktoerId);
     }
 
-    public void updateDialogAktorFor(String aktorId) {
+    public void sendPaaKafka(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
         if (unleashClient.isEnabled("veilarbdialog.kafka1")) {
             KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
@@ -227,7 +224,8 @@ public class DialogDataService {
                 .overskrift(nyHenvendelseDTO.overskrift)
                 .aktorId(aktorId)
                 .aktivitetId(nyHenvendelseDTO.aktivitetId)
-                .egenskaper(nyHenvendelseDTO.egenskaper
+                .egenskaper(Optional.ofNullable(nyHenvendelseDTO.egenskaper)
+                        .orElse(Collections.emptyList())
                         .stream()
                         .map(egenskap -> EgenskapType.valueOf(egenskap.name()))
                         .collect(Collectors.toList()))
