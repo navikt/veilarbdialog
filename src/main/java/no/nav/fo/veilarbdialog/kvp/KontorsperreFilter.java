@@ -13,7 +13,7 @@ public class KontorsperreFilter {
 
     private final AuthService auth;
 
-    public boolean filterKontorsperre(HenvendelseData henvendelse) {
+    public boolean tilgangTilEnhet(HenvendelseData henvendelse) {
         if(StringUtils.isEmpty(henvendelse.getKontorsperreEnhetId())) {
             return true;
         }
@@ -25,7 +25,7 @@ public class KontorsperreFilter {
     }
 
 
-    public boolean filterKontorsperre(DialogData dialog) {
+    public boolean tilgangTilEnhet(DialogData dialog) {
         if(StringUtils.isEmpty(dialog.getKontorsperreEnhetId())) {
             return true;
         }
