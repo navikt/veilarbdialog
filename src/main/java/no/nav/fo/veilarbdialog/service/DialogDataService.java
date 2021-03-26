@@ -131,7 +131,7 @@ public class DialogDataService {
     public DialogData hentDialogMedTilgangskontroll(String dialogId, String aktivitetId) {
         if(dialogId == null && aktivitetId == null) return null;
 
-        if (!dialogId.isEmpty()) {
+        if (dialogId != null && !dialogId.isEmpty()) {
             return hentDialogMedTilgangskontroll(Long.parseLong(dialogId));
         } else {
             return Optional.ofNullable(aktivitetId)
