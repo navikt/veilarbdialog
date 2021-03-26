@@ -1,3 +1,4 @@
+
 package no.nav.fo.veilarbdialog.rest;
 
 import no.nav.fo.veilarbdialog.auth.AuthService;
@@ -25,10 +26,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@RunWith(SpringRunner.class)
-public class DialogRessursTest {
 
+public class DialogRessursTest {
+/*
     @LocalServerPort
     private int port;
 
@@ -51,7 +51,7 @@ public class DialogRessursTest {
     }
 
 
-    /*@Test
+    @Test
     public void opprettOgHentDialoger() throws Exception {
         dialogRessurs.nyHenvendelse(new NyHenvendelseDTO().setTekst("tekst"));
         val hentAktiviteterResponse = dialogRessurs.hentDialoger();
