@@ -50,25 +50,6 @@ public class DialogRessursTest {
         jdbc.update("delete from EVENT where EVENT_ID = 0");
     }
 
-    @Test
-    public void sistOppdatert() {
-
-        jdbc.update("insert into DIALOG (DIALOG_ID, OPPDATERT) values (0, current_timestamp(6))");
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', '1337', '1337', CURRENT_TIMESTAMP)");
-        Timestamp timestamp = jdbc.queryForObject("select TIDSPUNKT from EVENT where EVENT_ID = 0", Timestamp.class);
-        assertThat(timestamp).isNotNull();
-
-        given()
-                .port(port)
-                .param("aktorId", "1337")
-                .get("/veilarbdialog/api/dialog/sistOppdatert")
-                .then()
-                .assertThat()
-                .statusCode(200)
-                .contentType(equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .body("sistOppdatert", equalTo(timestamp.getTime()));
-
-    }
 
     /*@Test
     public void opprettOgHentDialoger() throws Exception {
