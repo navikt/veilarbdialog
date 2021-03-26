@@ -53,8 +53,9 @@ public class DialogDataService {
 
     public Date hentSistOppdatertForBruker(Person person, String meg) {
         String aktorId = hentAktoerIdForPerson(person);
+        String aktorEllerIdentInnloggetBruker = auth.erEksternBruker()? hentAktoerIdForPerson(Person.fnr(meg)): meg;
         auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
-        return dataVarehusDAO.hentSisteEndringSomIkkeErDine(aktorId, meg);
+        return dataVarehusDAO.hentSisteEndringSomIkkeErDine(aktorId, aktorEllerIdentInnloggetBruker);
     }
 
     @Transactional
