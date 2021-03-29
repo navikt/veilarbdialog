@@ -22,6 +22,7 @@ import java.util.Optional;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -80,17 +81,18 @@ public class DialogRessursTest {
 
         NyHenvendelseDTO dto = new NyHenvendelseDTO()
                 .setTekst("tekst");
-        String s =
         given()
                 .port(port)
                 .contentType(ContentType.JSON)
                 .body(dto)
                 .post("/veilarbdialog/api/dialog?aktorId={aktorId}", "1337")
                 .then()
-                .extract()
-                .body()
-                .asString();
-        System.out.println(s);
+                .assertThat()
+                .statusCode(200)
+                .body("sisteTekst", is("tekst"))
+                .body("henvendelser.size()", is(1))
+                .body("henvendelser[0].avsender", is("VEILEDER"))
+                .body("henvendelser[0].tekst", is("tekst"));
 
     }
 
