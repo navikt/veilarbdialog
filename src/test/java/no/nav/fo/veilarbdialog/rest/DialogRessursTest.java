@@ -1,9 +1,15 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import io.restassured.http.ContentType;
+import lombok.val;
+import no.nav.common.client.aktoroppslag.AktorOppslagClient;
+import no.nav.common.types.identer.AktorId;
+import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.feed.KvpService;
+import no.nav.fo.veilarbdialog.domain.DialogDTO;
+import no.nav.fo.veilarbdialog.domain.Egenskap;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,67 +18,58 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
 public class DialogRessursTest {
+    final static String fnr = "12345";
+    final static String aktorId = "54321";
 
     @LocalServerPort
     private int port;
 
-    @Autowired
-    private JdbcTemplate jdbc;
-
     @MockBean
     private AuthService authService;
+
+    @Autowired
+    JdbcTemplate jdbc;
 
     @MockBean
     private KvpService kvpService;
 
+    @Autowired
+    private AktorOppslagClient aktorOppslagClient;
+
+    @Autowired
+    private DialogRessurs dialogRessurs;
+
     @Before
     public void before() {
+        when(kvpService.kontorsperreEnhetId(anyString())).thenReturn(null);
+        when(aktorOppslagClient.hentAktorId(Fnr.of(fnr))).thenReturn(AktorId.of(aktorId));
+        when(authService.erEksternBruker()).thenReturn(true);
         when(authService.harTilgangTilPerson(anyString())).thenReturn(true);
         when(authService.getIdent()).thenReturn(Optional.of("101"));
         when(kvpService.kontorsperreEnhetId(anyString())).thenReturn(null);
+        when(authService.getIdent()).thenReturn(Optional.of(fnr));
     }
 
     @After
     public void after() {
-        jdbc.update("delete from DIALOG where DIALOG_ID = 0");
-        jdbc.update("delete from EVENT where EVENT_ID = 0");
-    }
-
-    @Test
-    public void sistOppdatert() {
-
-        jdbc.update("insert into DIALOG (DIALOG_ID, OPPDATERT) values (0, current_timestamp(6))");
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', '1337', '1337', CURRENT_TIMESTAMP)");
-        Timestamp timestamp = jdbc.queryForObject("select TIDSPUNKT from EVENT where EVENT_ID = 0", Timestamp.class);
-        assertThat(timestamp).isNotNull();
-
-        given()
-                .port(port)
-                .param("aktorId", "1337")
-                .get("/veilarbdialog/api/dialog/sistOppdatert")
-                .then()
-                .assertThat()
-                .statusCode(200)
-                .contentType(equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .body("sistOppdatert", equalTo(timestamp.getTime()));
+        jdbc.update("delete from HENVENDELSE");
+        jdbc.update("delete from DIALOG_EGENSKAP");
+        jdbc.update("delete from DIALOG");
 
     }
 
@@ -96,51 +93,48 @@ public class DialogRessursTest {
 
     }
 
-    /*@Test
-    public void opprettOgHentDialoger() throws Exception {
+    public void hentDialoger() {
         dialogRessurs.nyHenvendelse(new NyHenvendelseDTO().setTekst("tekst"));
-        val hentAktiviteterResponse = dialogRessurs.hentDialoger();
-        assertThat(hentAktiviteterResponse, hasSize(1));
-
-        dialogRessurs.markerSomLest(hentAktiviteterResponse.get(0).id);
+        List<DialogDTO> dialoger = dialogRessurs.hentDialoger();
+        assertThat(dialoger.size()).isEqualTo(1);
     }
 
 
     @Test
-    public void forhandsorienteringPaEksisterendeDialogPaAktivitetSkalFaEgenskapenParagraf8() {
+    public void forhandsorienteringPaAktivitet_dialogFinnes_oppdatererEgenskap() {
         final String aktivitetId = "123";
 
-        dialog.nyHenvendelse(
+        dialogRessurs.nyHenvendelse(
                 new NyHenvendelseDTO()
-                        .setTekst("forhandsorienteringPaEksisterendeDialogPaAktivitetSkalFaEgenskapenParagraf8")
+                        .setTekst("tekst")
                         .setAktivitetId(aktivitetId)
         );
 
-        val opprettetDialog = dialog.hentDialoger();
-        assertThat(opprettetDialog.get(0).getEgenskaper().isEmpty(), is(true));
-        assertThat(opprettetDialog.size(), is(1));
+        val opprettetDialog = dialogRessurs.hentDialoger();
+        assertThat(opprettetDialog.get(0).getEgenskaper().isEmpty()).isTrue();
+        assertThat(opprettetDialog.size()).isEqualTo(1);
 
-        dialog.forhandsorienteringPaAktivitet(
+        dialogRessurs.forhandsorienteringPaAktivitet(
                 new NyHenvendelseDTO()
-                        .setTekst("paragraf8")
+                        .setTekst("tekst")
                         .setAktivitetId(aktivitetId)
         );
 
-        val dialogMedParagraf8 = dialog.hentDialoger();
-        assertThat(dialogMedParagraf8.get(0).getEgenskaper().contains(Egenskap.PARAGRAF8), is(true));
-        assertThat(dialogMedParagraf8.size(), is(1));
+        val dialogMedParagraf8 = dialogRessurs.hentDialoger();
+        assertThat(dialogMedParagraf8.get(0).getEgenskaper()).contains(Egenskap.PARAGRAF8);
+        assertThat(dialogMedParagraf8.size()).isEqualTo(1);
     }
 
     @Test
-    public void skalHaParagraf8Egenskap() {
-        dialog.forhandsorienteringPaAktivitet(
+    public void forhandsorienteringPaAktivitet_dialogFinnesIkke_oppdatererEgenskap() {
+        dialogRessurs.forhandsorienteringPaAktivitet(
                 new NyHenvendelseDTO()
-                        .setTekst("skalHaParagraf8Egenskap")
+                        .setTekst("tekst")
                         .setAktivitetId("123")
         );
 
-        val hentedeDialoger = dialog.hentDialoger();
-        assertThat(hentedeDialoger, hasSize(1));
-        assertThat(hentedeDialoger.get(0).getEgenskaper().contains(Egenskap.PARAGRAF8), is(true));
-    }*/
+        val hentedeDialoger = dialogRessurs.hentDialoger();
+        assertThat(hentedeDialoger.size()).isEqualTo(1);
+        assertThat(hentedeDialoger.get(0).getEgenskaper()).contains(Egenskap.PARAGRAF8);
+    }
 }
