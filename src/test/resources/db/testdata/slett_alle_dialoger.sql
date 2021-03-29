@@ -1,3 +1,5 @@
-delete from HENVENDELSE;
-delete from DIALOG_AKTOR;
-delete from DIALOG;
+delete from HENVENDELSE where (select 1 from dual) = 1;
+
+delete from DIALOG_AKTOR where (select 1 from dual) = 1;
+delete from DIALOG_EGENSKAP where (select 1 from dual) = 1;
+delete from DIALOG where (select 1 from dual) = 1;

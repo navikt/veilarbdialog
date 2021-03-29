@@ -6,11 +6,10 @@ import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.auth.AuthService;
-import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
-import no.nav.fo.veilarbdialog.feed.KvpService;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
-import org.junit.After;
+import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.feed.KvpService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
@@ -29,9 +29,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
+@Sql(
+        scripts = "/db/testdata/slett_alle_dialoger.sql",
+        executionPhase = AFTER_TEST_METHOD
+)
 public class DialogRessursTest {
     final static String fnr = "12345";
     final static String aktorId = "54321";
@@ -65,14 +70,6 @@ public class DialogRessursTest {
         when(authService.getIdent()).thenReturn(Optional.of(fnr));
     }
 
-    @After
-    public void after() {
-        jdbc.update("delete from HENVENDELSE");
-        jdbc.update("delete from DIALOG_EGENSKAP");
-        jdbc.update("delete from DIALOG");
-
-    }
-
     @Test
     public void nyHenvendelse() {
 
@@ -88,7 +85,7 @@ public class DialogRessursTest {
                 .statusCode(200)
                 .body("sisteTekst", is("tekst"))
                 .body("henvendelser.size()", is(1))
-                .body("henvendelser[0].avsender", is("VEILEDER"))
+                .body("henvendelser[0].avsender", is("BRUKER"))
                 .body("henvendelser[0].tekst", is("tekst"));
 
     }
