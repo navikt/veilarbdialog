@@ -32,6 +32,7 @@
         <rest-assured.version>4.2.0</rest-assured.version>
         <shedlock.version>4.14.0</shedlock.version>
         <swagger.version>3.0.0</swagger.version>
+        <testcontainers-kafka.version>1.15.1</testcontainers-kafka.version>
         <tjenestespesifikasjoner.version>1.2019.09.25-00.21-49b69f0625e0</tjenestespesifikasjoner.version>
         <unleash-client-java.version>3.3.3</unleash-client-java.version>
     </properties>
@@ -288,8 +289,19 @@
 
         <!-- Kafka -->
         <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <version>${testcontainers-kafka.version}</version>
+            <scope>test</scope>
         </dependency>
 
 

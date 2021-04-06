@@ -209,7 +209,7 @@ public class DialogDataService {
 
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
 
-        if (!auth.harTilgangTilPerson(dialogData.getAktorId())) {
+        if (dialogData != null && !auth.harTilgangTilPerson(dialogData.getAktorId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(
                     "%s har ikke lesetilgang til %s",
                     auth.getIdent().orElse(null),

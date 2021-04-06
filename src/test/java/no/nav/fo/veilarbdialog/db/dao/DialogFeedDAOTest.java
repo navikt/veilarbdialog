@@ -3,12 +3,11 @@ package no.nav.fo.veilarbdialog.db.dao;
 import lombok.val;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,9 +27,6 @@ public class DialogFeedDAOTest {
     private static final String AKTOR_ID = "1234";
 
     @Autowired
-    private JdbcTemplate jdbc;
-
-    @Autowired
     private DialogDAO dialogDAO;
 
     @Autowired
@@ -38,13 +34,6 @@ public class DialogFeedDAOTest {
 
     @Autowired
     private DialogFeedDAO dialogFeedDAO;
-
-    @After
-    public void after() {
-        jdbc.update("delete from HENVENDELSE");
-        jdbc.update("delete from DIALOG");
-        jdbc.update("delete from DIALOG_AKTOR");
-    }
 
     @Test
     public void hentAktorerMedEndringerEtter_nyDialog_aktorEndret() {

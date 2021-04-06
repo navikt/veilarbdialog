@@ -5,6 +5,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import no.nav.common.abac.Pep;
+import no.nav.common.abac.VeilarbPepFactory;
+import no.nav.common.abac.audit.AuditLogFilterUtils;
+import no.nav.common.abac.audit.SpringAuditRequestInfoSupplier;
 import no.nav.common.abac.domain.request.ActionId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.utils.Credentials;
@@ -23,6 +26,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static no.nav.common.abac.audit.AuditLogFilterUtils.not;
 import static no.nav.common.log.LogFilter.CONSUMER_ID_HEADER_NAME;
 import static no.nav.common.utils.EnvironmentUtils.NAIS_APP_NAME_PROPERTY_NAME;
 import static org.junit.Assert.assertEquals;
@@ -41,7 +45,13 @@ public class PepAuditLogFilterTest {
         System.setProperty(NAIS_APP_NAME_PROPERTY_NAME, "test");
         AuthConfig authConfig = new AuthConfig();
         String url = "http://localhost:" + wireMockRule.port();
-        pep = authConfig.pep(url, new Credentials("", ""));
+        pep = VeilarbPepFactory.get(
+                url,
+                "",
+                "",
+                new SpringAuditRequestInfoSupplier(),
+                not(AuditLogFilterUtils.pathFilter(path -> path.endsWith("/api/dialog/sistOppdatert")))
+        );
         givenAbacPermitResponse();
     }
 

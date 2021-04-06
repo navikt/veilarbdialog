@@ -3,6 +3,8 @@ spring:
     name: "veilarbdialog"
   flyway:
     enabled: false
+  main:
+    allow-bean-definition-overriding: true
 
 server:
   servlet:
@@ -36,15 +38,16 @@ application:
   kvp:
     url: http://localhost:8080/VEILARBOPPFOLGINGAPI_URL
   mq:
-    hostname: MQGATEWAY03_HOSTNAME
-    name: MQGATEWAY03_NAME
-    port: MQGATEWAY03_PORT
+    hostname: "localhost"
+    port: "1414"
+    name: "QM1"
+    channel: "DEV.APP.SVRCONN"
+    userid: "app"
     queues:
-      oppgaveHenvendelse: HENVENDELSE_OPPGAVE_HENVENDELSE_QUEUENAME
-      stoppVarslinger: VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_QUEUENAME_PROPERTY
-      varselHandling: VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_QUEUENAME
-      varslinger: VARSELPRODUKSJON_VARSLINGER_QUEUENAME
-    userid: srvappserver
+      oppgaveHenvendelse: "DEV.QUEUE.1"
+      stoppVarslinger: "DEV.QUEUE.1"
+      varselHandling: "DEV.QUEUE.1"
+      varslinger: "DEV.QUEUE.1"
   oidc:
     disabled: true
   openam:
