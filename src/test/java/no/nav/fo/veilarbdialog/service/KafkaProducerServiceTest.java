@@ -1,5 +1,8 @@
 package no.nav.fo.veilarbdialog.service;
 
+import no.nav.common.kafka.producer.KafkaProducerClient;
+import no.nav.common.kafka.producer.KafkaProducerClientImpl;
+import no.nav.fo.veilarbdialog.config.KafkaProperties;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
@@ -11,16 +14,22 @@ import java.time.LocalDateTime;
 
 import static org.mockito.Mockito.*;
 
-public class KafkaDialogServiceTest {
+public class KafkaProducerServiceTest {
 
     MockProducer<String, String> kafkaProducer = new MockProducer<>();
+
     KafkaDAO kafkaDAO = mock(KafkaDAO.class);
-    KafkaDialogService kafkaDialogService;
+
+    KafkaProducerService kafkaProducerService;
 
     @Before
     public void setup() {
-        System.setProperty("APP_ENVIRONMENT_NAME", "TEST-Q0");
-        kafkaDialogService = new KafkaDialogService(kafkaDAO, mock(DialogDAO.class), kafkaProducer, "aapen-fo-endringPaaDialog-v1-test");
+        KafkaProducerClient<String, String> producerClient = new KafkaProducerClientImpl<>(kafkaProducer);
+
+        KafkaProperties kafkaProperties = new KafkaProperties();
+        kafkaProperties.setEndringPaaDialogTopic("aapen-fo-endringPaaDialog-v1-test");
+
+        kafkaProducerService = new KafkaProducerService(kafkaProperties, producerClient, kafkaDAO, mock(DialogDAO.class));
     }
 
     @Test
@@ -31,7 +40,7 @@ public class KafkaDialogServiceTest {
                 .tidspunktEldsteVentende(LocalDateTime.now())
                 .build();
 
-        kafkaDialogService.dialogEvent(melding);
+        kafkaProducerService.sendDialogMelding(melding);
         kafkaProducer.errorNext(new RuntimeException("Failed to send record"));
         verify(kafkaDAO, times(1)).insertFeiletAktorId("123456789");
     }
