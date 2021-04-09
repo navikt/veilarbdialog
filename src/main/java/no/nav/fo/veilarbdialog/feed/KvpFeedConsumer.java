@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.db.dao.KvpFeedMetadataDAO;
 import no.nav.fo.veilarbdialog.domain.KvpDTO;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
+//@Component TODO: Skru av midlertidig til kafka er testet
 @RequiredArgsConstructor
 public class KvpFeedConsumer {
 
