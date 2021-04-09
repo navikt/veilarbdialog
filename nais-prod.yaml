@@ -54,3 +54,9 @@ spec:
       value: p
     - name: APP_CLUSTER_NAME
       value: prod-fss
+    - name: ENDRING_PAA_DIALOG_TOPIC
+      value: aapen-fo-endringPaaDialog-v1-p
+    - name: OPPFOLGING_AVSLUTTET_TOPIC
+      value: aapen-arbeidsrettetOppfolging-oppfolgingAvsluttet-v1-p
+    - name: KVP_AVSLUTTET_TOPIC
+      value: aapen-arbeidsrettetOppfolging-kvpAvsluttet-v1-p

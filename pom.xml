@@ -22,7 +22,7 @@
 
         <allclient.version>9.2.0.0</allclient.version>
 
-        <common.version>2.2021.02.23_11.33-7091f10a35ba</common.version>
+        <common.version>2.2021.04.07_08.09-7849c92a72d0</common.version>
         <common-obsolete.version>1.2020.02.11-12.17-1a30837bb4f2</common-obsolete.version>
 
         <flyway.version>4.1.1</flyway.version>
@@ -141,6 +141,11 @@
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>nais</artifactId>
+            <version>${common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>kafka</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
@@ -293,10 +298,6 @@
         </dependency>
 
         <!-- Kafka -->
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>

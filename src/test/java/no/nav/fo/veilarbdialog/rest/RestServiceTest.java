@@ -7,11 +7,13 @@ import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.auth.AuthService;
-import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.domain.Avsender;
+import no.nav.fo.veilarbdialog.domain.DialogDTO;
+import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.feed.KvpService;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,20 +25,22 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
+@ActiveProfiles("local")
 public class RestServiceTest {
     final static Fnr fnr = Fnr.of("1234");
     final static AktorId aktorId = AktorId.of("4321");
