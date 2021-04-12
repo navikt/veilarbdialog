@@ -4,16 +4,13 @@ import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.db.dao.FeedMetaDataDAO;
 import no.nav.fo.veilarbdialog.domain.AvsluttetOppfolgingFeedDTO;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
-import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
-@Component
+//@Component TODO: Skru av midlertidig til kafka er testet
 @RequiredArgsConstructor
 public class AvsluttetOppfolgingFeedConsumer {
 
