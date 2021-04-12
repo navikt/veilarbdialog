@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.util;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
@@ -22,7 +22,7 @@ public class PingController {
     @Value("${management.endpoints.web.base-path:/actuator}")
     private String basePath;
 
-    @RequestMapping("/api/ping")
+    @GetMapping("/api/ping")
     public ModelAndView forwardToPing(HttpServletRequest request) {
 
         String url = "forward:/" + basePath + "/health/ping";

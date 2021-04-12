@@ -1,7 +1,6 @@
 package no.nav.fo;
 
 import lombok.SneakyThrows;
-import no.nav.fo.veilarbdialog.db.dao.DateProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
@@ -31,21 +30,8 @@ public abstract class IntegationTest {
     private static PlatformTransactionManager platformTransactionManager;
     private TransactionStatus transactionStatus;
 
-    @Before
-    @BeforeEach
-    public void setupDateProvider() {
-        changeDateProvider(IntegationTest::timestampFromSystemTime);
-    }
-
     private static String timestampFromSystemTime() {
         return String.format("\'%s\'", new Timestamp(System.currentTimeMillis()));
-    }
-
-    @SneakyThrows
-    protected void changeDateProvider(Supplier<String> timestampProvider) {
-        Field providerField = DateProvider.class.getDeclaredField("provider");
-        providerField.setAccessible(true);
-        setField(providerField, null, timestampProvider);
     }
 
     @BeforeEach
