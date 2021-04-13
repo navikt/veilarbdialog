@@ -1,9 +1,9 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.RequiredArgsConstructor;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Component
@@ -36,12 +37,15 @@ public class DataVarehusDAO {
     @Transactional(readOnly = true)
     public Date hentSisteEndringSomIkkeErDine(String aktorId, String bruker) {
         try {
-            Timestamp timestamp = jdbc.queryForObject("select TIDSPUNKT from EVENT where AKTOR_ID = ? and LAGT_INN_AV != ? ORDER BY EVENT_ID DESC FETCH FIRST 1 ROWS ONLY",
-                    Timestamp.class,
-                    aktorId,
-                    bruker);
-            return timestamp == null ? null : Date.from(timestamp.toInstant());
-        } catch (EmptyResultDataAccessException e) {
+            Timestamp timestamp = Optional
+                    .ofNullable(jdbc.queryForObject(
+                            "select TIDSPUNKT from EVENT where AKTOR_ID = ? and LAGT_INN_AV != ? ORDER BY EVENT_ID DESC FETCH FIRST 1 ROWS ONLY",
+                            Timestamp.class,
+                            aktorId,
+                            bruker))
+                    .orElseThrow();
+            return Date.from(timestamp.toInstant());
+        } catch (EmptyResultDataAccessException | NoSuchElementException e) {
             return null;
         }
     }
