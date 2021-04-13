@@ -82,7 +82,7 @@ public class DialogFeedDAOTest {
         Date nyttTidspunktEldsteVentende = endringerEtterForrigeLesetidspunkt.get(0).getTidspunktEldsteVentende();
         Date nyttUbehandletTidspunkt = endringerEtterForrigeLesetidspunkt.get(0).getTidspunktEldsteUbehandlede();
         assertThat(nyttTidspunktEldsteVentende).isEqualTo(tidspunktEldsteVentende);
-        assertThat(nyttUbehandletTidspunkt).isEqualTo(nyttUbehandletTidspunkt);
+        assertThat(nyttUbehandletTidspunkt).isEqualTo(ubehandletTidspunkt);
 
     }
 

@@ -2,7 +2,6 @@ package no.nav.fo.veilarbdialog.config;
 
 import com.ibm.msg.client.jms.JmsConnectionFactory;
 import com.ibm.msg.client.jms.JmsFactoryFactory;
-import com.ibm.msg.client.wmq.WMQConstants;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.sbl.dialogarena.types.Pingable;
 import no.nav.sbl.dialogarena.types.Pingable.Ping;
@@ -17,7 +16,11 @@ import javax.annotation.PostConstruct;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
+import java.util.Optional;
 import java.util.UUID;
+
+import static com.ibm.msg.client.jms.JmsConstants.WMQ_PROVIDER;
+import static com.ibm.msg.client.wmq.common.CommonConstants.*;
 
 @Configuration
 @EnableJms
@@ -105,7 +108,11 @@ public class MessageQueueConfig {
         );
         return () -> {
             try {
-                queue.getConnectionFactory().createConnection().close();
+                Optional
+                        .ofNullable(queue.getConnectionFactory())
+                        .orElseThrow(() -> new JMSException("Unable to get connection factory"))
+                        .createConnection()
+                        .close();
             } catch (JMSException e) {
                 return Ping.feilet(metadata, "Kunne ikke opprette connection", e);
             }
@@ -114,32 +121,34 @@ public class MessageQueueConfig {
     }
 
     @Bean
-    public JmsTemplate varselQueue(ConnectionFactory connectionFactory) {
-        return queue(connectionFactory, queueNameVarslinger);
+    JMSContext jmsContext(ConnectionFactory factory) {
+        return factory.createContext();
     }
 
     @Bean
-    JmsTemplate stopVarselQueue(ConnectionFactory connectionFactory) {
-        return queue(connectionFactory, queueNameStoppVarslinger);
+    public JmsTemplate varselQueue(ConnectionFactory factory, JMSContext context) {
+        return queue(factory, context, queueNameVarslinger);
     }
 
     @Bean
-    JmsTemplate varselMedHandlingQueue(ConnectionFactory connectionFactory) {
-        return queue(connectionFactory, queueNameVarselHandling);
+    JmsTemplate stopVarselQueue(ConnectionFactory factory, JMSContext context) {
+        return queue(factory, context, queueNameStoppVarslinger);
     }
 
     @Bean
-    JmsTemplate oppgaveHenvendelseQueue(ConnectionFactory connectionFactory) {
-        return queue(connectionFactory, queueNameOppgaveHenvendelse);
+    JmsTemplate varselMedHandlingQueue(ConnectionFactory factory, JMSContext context) {
+        return queue(factory, context, queueNameVarselHandling);
     }
 
-    private JmsTemplate queue(ConnectionFactory connectionFactory, String queueName) {
+    @Bean
+    JmsTemplate oppgaveHenvendelseQueue(ConnectionFactory factory, JMSContext context) {
+        return queue(factory, context, queueNameOppgaveHenvendelse);
+    }
+
+    private JmsTemplate queue(ConnectionFactory factory, JMSContext context, String queueName) {
         JmsTemplate jmsTemplate = new JmsTemplate();
-        jmsTemplate.setConnectionFactory(connectionFactory);
-
-        JMSContext context = connectionFactory.createContext();
+        jmsTemplate.setConnectionFactory(factory);
         jmsTemplate.setDefaultDestination(context.createQueue(queueName));
-
         return jmsTemplate;
     }
 
@@ -148,14 +157,14 @@ public class MessageQueueConfig {
             throws JMSException {
 
         JmsConnectionFactory connectionFactory = JmsFactoryFactory
-                .getInstance(WMQConstants.WMQ_PROVIDER)
+                .getInstance(WMQ_PROVIDER)
                 .createConnectionFactory();
-        connectionFactory.setStringProperty(WMQConstants.WMQ_HOST_NAME, mqGatewayHostname);
-        connectionFactory.setStringProperty(WMQConstants.WMQ_PORT, mqGatewayPort);
-        connectionFactory.setStringProperty(WMQConstants.WMQ_CHANNEL, mqChannel);
-        connectionFactory.setIntProperty(WMQConstants.WMQ_CONNECTION_MODE, WMQConstants.WMQ_CM_CLIENT);
-        connectionFactory.setStringProperty(WMQConstants.WMQ_QUEUE_MANAGER, mqGatewayName);
-        connectionFactory.setStringProperty(WMQConstants.USERID, mqUserId);
+        connectionFactory.setStringProperty(WMQ_HOST_NAME, mqGatewayHostname);
+        connectionFactory.setStringProperty(WMQ_PORT, mqGatewayPort);
+        connectionFactory.setStringProperty(WMQ_CHANNEL, mqChannel);
+        connectionFactory.setIntProperty(WMQ_CONNECTION_MODE, WMQ_CM_CLIENT);
+        connectionFactory.setStringProperty(WMQ_QUEUE_MANAGER, mqGatewayName);
+        connectionFactory.setStringProperty(USERID, mqUserId);
         return connectionFactory;
 
     }
