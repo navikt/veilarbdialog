@@ -1,192 +1,145 @@
 package no.nav.fo.veilarbdialog.service;
 
+import no.nav.common.client.aktoroppslag.AktorOppslagClient;
+import no.nav.common.types.identer.AktorId;
+import no.nav.common.types.identer.Fnr;
+import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
+import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
+import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
+import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.feed.KvpService;
+import org.junit.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.runner.RunWith;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Arrays;
+import java.util.Optional;
+
+import static org.mockito.Mockito.*;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@RunWith(SpringRunner.class)
 public class DialogDataServiceTest {
 
-    // TODO: Fix.
-    /*private static final long DIALOG_ID = 42;
     private static final String AKTOR_ID = "aktorId";
     private static final String IDENT = "ident";
     private static final String AKTIVITET_ID = "aktivitetId";
     private static final String KONTORSPERRE_ENHET_ID = "1337";
-    private static final DialogStatus DIALOG_STATUS = DialogStatus.builder().dialogId(DIALOG_ID).build();
-    private static final HenvendelseData NY_HENVENDELSE = HenvendelseData.builder().aktivitetId(AKTIVITET_ID).dialogId(DIALOG_ID).build();
-    private static final DialogData DIALOG_DATA = DialogData.builder().id(DIALOG_ID).aktorId(AKTOR_ID).build();
+    private static final NyHenvendelseDTO HENVENDELSE_DTO = new NyHenvendelseDTO();
 
-    private final DialogDAO dialogDAO = mock(DialogDAO.class);
-    private final DialogStatusService dialogStatusService = mock(DialogStatusService.class);
-    private final DialogFeedDAO dialogFeedDAO = mock(DialogFeedDAO.class);
-    private final DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
-    private final AktorService aktorService = mock(AktorService.class);
-    private final PepClient pepClient = mock(PepClient.class);
-    private final KvpService kvpService = mock(KvpService.class);
-    private final UnleashService unleashService = mock(UnleashService.class);
 
+    @Autowired
+    DialogDAO dialogDAO;
+
+    @MockBean
+    AuthService authService;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    DialogStatusService dialogStatusService;
+
+    @MockBean
+    DialogFeedDAO dialogFeedDAO;
+
+    @MockBean
+    DataVarehusDAO dataVarehusDAO;
+
+    @MockBean
+    KvpService kvpService;
+
+    @Autowired
+    AktorOppslagClient aktorOppslagClient;
+
+    @Autowired
     private DialogDataService dialogDataService;
-
 
     @Before
     public void setup() {
-
-        System.setProperty("APP_ENVIRONMENT_NAME", "TEST-Q0");
-        KafkaDialogService kafkaDialogService = mock(KafkaDialogService.class);
-        this.dialogDataService = new DialogDataService(
-                aktorService,
-                dialogDAO,
-                dialogStatusService,
-                dataVarehusDAO,
-                dialogFeedDAO,
-                pepClient,
-                kafkaDialogService,
-                kvpService,
-                unleashService
-        );
-
-        mockDialog(DIALOG_DATA);
-        when(aktorService.getFnr(AKTOR_ID)).thenReturn(of(IDENT));
-        when(aktorService.getAktorId(IDENT)).thenReturn(of(AKTOR_ID));
+        when(aktorOppslagClient.hentFnr(AktorId.of(AKTOR_ID))).thenReturn(Fnr.of(IDENT));
+        when(aktorOppslagClient.hentAktorId(Fnr.of(IDENT))).thenReturn(AktorId.of(AKTOR_ID));
+        when(authService.harTilgangTilPerson(AKTOR_ID)).thenReturn(true);
     }
 
-    private void mockDialog(DialogData dialogData) {
-        when(dialogDAO.opprettDialog(DIALOG_DATA)).thenReturn(dialogData);
-        when(dialogDAO.hentDialog(DIALOG_ID)).thenReturn(dialogData);
-        when(dialogDAO.hentDialogForAktivitetId(AKTIVITET_ID)).thenReturn(of(DIALOG_DATA));
+    @After
+    public void cleanUp() {
+        jdbcTemplate.update("delete from HENVENDELSE");
+        jdbcTemplate.update("delete from DIALOG");
+        jdbcTemplate.update("delete from DIALOG_AKTOR");
     }
 
     @Test
-    public void kontorsperre_tagger_dialog_med_enhet_id() {
+    public void opprettDialog_kontorsperrePaBruker_returnererKontorsperretDialog() {
         when(kvpService.kontorsperreEnhetId(AKTOR_ID)).thenReturn(KONTORSPERRE_ENHET_ID);
-        dialogDataService.opprettDialogForAktivitetsplanPaIdent(DIALOG_DATA);
-        verify(dialogDAO, times(1)).opprettDialog(DIALOG_DATA.withKontorsperreEnhetId(KONTORSPERRE_ENHET_ID));
+        DialogData dialogData = dialogDataService.opprettDialog(HENVENDELSE_DTO, AKTOR_ID);
+        Assert.assertEquals(KONTORSPERRE_ENHET_ID, dialogData.getKontorsperreEnhetId());
     }
 
     @Test
-    public void kontorsperre_tagger_henvendelse_med_enhet_id() {
+    public void opprettHenvendelse_kontorsperrePaBruker_returnererKontorsperretDialog() {
+        when(authService.getIdent()).thenReturn(Optional.of(AKTOR_ID));
         when(kvpService.kontorsperreEnhetId(AKTOR_ID)).thenReturn(KONTORSPERRE_ENHET_ID);
-        dialogDataService.opprettHenvendelseForDialog(NY_HENVENDELSE);
-        verify(dialogDAO, times(1)).opprettHenvendelse(NY_HENVENDELSE.withKontorsperreEnhetId(KONTORSPERRE_ENHET_ID));
+
+        DialogData dialogData = dialogDataService.opprettHenvendelse(HENVENDELSE_DTO.setTekst("test"), Person.aktorId(AKTOR_ID));
+        Assert.assertEquals(KONTORSPERRE_ENHET_ID, dialogData.getKontorsperreEnhetId());
     }
 
     @Test
-    public void kontorsperre_tagger_dialog_med_null() {
+    public void opprettHenvendelse_IkkeKontorsperrePaBruker_returnererNull() {
+        when(authService.getIdent()).thenReturn(Optional.of(AKTOR_ID));
         when(kvpService.kontorsperreEnhetId(AKTOR_ID)).thenReturn(null);
-        dialogDataService.opprettDialogForAktivitetsplanPaIdent(DIALOG_DATA);
-        verify(dialogDAO, times(1)).opprettDialog(DIALOG_DATA);
+
+        DialogData dialogData = dialogDataService.opprettHenvendelse(HENVENDELSE_DTO.setTekst("test"), Person.aktorId(AKTOR_ID));
+        Assert.assertNull(dialogData.getKontorsperreEnhetId());
+    }
+
+    @Test(expected = ResponseStatusException.class)
+    public void opprettHenvendelse_brukerManglerTilgangTilPerson_kasterException() {
+
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(authService).harTilgangTilPersonEllerKastIngenTilgang((AKTOR_ID));
+        dialogDataService.opprettHenvendelse(HENVENDELSE_DTO.setTekst("test"), Person.aktorId(AKTOR_ID));
+    }
+
+    @Test(expected = ResponseStatusException.class)
+    public void opprettHenvendelse_brukerManglerTilgangTilDialog_kasterException() {
+
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(authService).harTilgangTilPerson((AKTOR_ID));
+        when(authService.getIdent()).thenReturn(Optional.of(IDENT));
+        dialogDataService.opprettHenvendelse(HENVENDELSE_DTO.setTekst("test"), Person.aktorId(AKTOR_ID));
     }
 
     @Test
-    public void kontorsperre_tagger_henvendelse_med_null() {
-        when(kvpService.kontorsperreEnhetId(AKTOR_ID)).thenReturn(null);
-        dialogDataService.opprettHenvendelseForDialog(NY_HENVENDELSE);
-        verify(dialogDAO, times(1)).opprettHenvendelse(NY_HENVENDELSE);
-    }
+    public void publicMetoder_sjekkerOmBrukerHarTilgang() {
+        when(authService.getIdent()).thenReturn(Optional.of(IDENT));
 
-    @Test
-    public void tilgangskontroll__ingen_tilgang() {
-        mockAbacIngenTilgang();
-        sjekkIngenTilgang(
-                IngenTilgang.class,
-                this::hentDialog,
-                this::hentDialogerForBruker,
-                this::oppdaterFerdigbehandletTidspunkt,
-                this::oppdaterVentePaSvarTidspunkt,
-                this::opprettHenvendelseForDialog,
-                this::markerDialogSomLestAvBruker,
-                this::markerDialogSomLestAvVeileder,
-                this::opprettDialogForAktivitetsplanPaIdent,
-                this::hentDialogForAktivitetId
+        DialogData dialogData = dialogDataService.opprettHenvendelse(HENVENDELSE_DTO.setTekst("tekst").setAktivitetId(AKTIVITET_ID), Person.aktorId(AKTOR_ID));
+
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(authService).harTilgangTilPersonEllerKastIngenTilgang((any()));
+        doThrow(new ResponseStatusException(HttpStatus.FORBIDDEN)).when(authService).harTilgangTilPerson((any()));
+
+        kasterException(
+                ResponseStatusException.class,
+                () -> dialogDataService.hentDialogMedTilgangskontroll(dialogData.getId()),
+                () -> dialogDataService.hentDialogMedTilgangskontroll(Long.toString(dialogData.getId()), dialogData.getAktivitetId()),
+                () -> dialogDataService.hentDialogForAktivitetId(dialogData.getAktivitetId()),
+                () -> dialogDataService.hentDialogerForBruker(Person.aktorId(AKTOR_ID)),
+                () -> dialogDataService.markerDialogSomLest(dialogData.getId()),
+                () -> dialogDataService.opprettHenvendelse(HENVENDELSE_DTO.setTekst("tekst").setAktivitetId(AKTIVITET_ID), Person.aktorId(AKTOR_ID))
         );
     }
 
-    @Test
-    public void tilgangskontroll__lesetilgang() {
-        mockAbacTilgang();
-        mockDialog(DIALOG_DATA.withHistorisk(true));
-
-        sjekkTilgang(
-                this::hentDialog,
-                this::hentDialogerForBruker,
-                this::markerDialogSomLestAvBruker,
-                this::markerDialogSomLestAvVeileder,
-                this::hentDialogForAktivitetId,
-                this::opprettDialogForAktivitetsplanPaIdent
-        );
-        sjekkIngenTilgang(
-                UlovligHandling.class,
-                this::oppdaterFerdigbehandletTidspunkt,
-                this::oppdaterVentePaSvarTidspunkt,
-                this::opprettHenvendelseForDialog
-        );
+    private void kasterException(Class<? extends Exception> exceptionClass, Runnable... runnable) {
+        Arrays.asList(runnable)
+                .forEach(r -> Assertions.assertThrows(exceptionClass, r::run));
     }
-
-    @Test
-    public void tilgangskontroll__skrivetilgang() {
-        mockAbacTilgang();
-        sjekkTilgang(
-                this::hentDialog,
-                this::hentDialogerForBruker,
-                this::oppdaterFerdigbehandletTidspunkt,
-                this::oppdaterVentePaSvarTidspunkt,
-                this::opprettHenvendelseForDialog,
-                this::markerDialogSomLestAvBruker,
-                this::markerDialogSomLestAvVeileder,
-                this::opprettDialogForAktivitetsplanPaIdent,
-                this::hentDialogForAktivitetId
-        );
-    }
-
-    private void mockAbacIngenTilgang() {
-        doThrow(new IngenTilgang()).when(pepClient).sjekkLesetilgangTilAktorId((any()));
-    }
-
-    private void mockAbacTilgang() {
-        reset(pepClient);
-    }
-
-    private void sjekkIngenTilgang(Class<? extends Exception> exceptionClass, Runnable... runnable) {
-        Arrays.asList(runnable).forEach(r -> assertThatThrownBy(r::run)
-                .isInstanceOf(exceptionClass)
-                .describedAs(r.toString())
-        );
-    }
-
-    private void sjekkTilgang(Runnable... runnable) {
-        Arrays.asList(runnable).forEach(Runnable::run);
-    }
-
-    private void hentDialog() {
-        dialogDataService.hentDialog(DIALOG_ID);
-    }
-
-    private Optional<DialogData> hentDialogForAktivitetId() {
-        return dialogDataService.hentDialogForAktivitetId(AKTIVITET_ID);
-    }
-
-    private DialogData opprettDialogForAktivitetsplanPaIdent() {
-        return dialogDataService.opprettDialogForAktivitetsplanPaIdent(DIALOG_DATA);
-    }
-
-    private DialogData markerDialogSomLestAvVeileder() {
-        return dialogDataService.markerDialogSomLestAvVeileder(DIALOG_ID);
-    }
-
-    private DialogData markerDialogSomLestAvBruker() {
-        return dialogDataService.markerDialogSomLestAvBruker(DIALOG_ID);
-    }
-
-    private DialogData opprettHenvendelseForDialog() {
-        return dialogDataService.opprettHenvendelseForDialog(NY_HENVENDELSE);
-    }
-
-    private DialogData oppdaterVentePaSvarTidspunkt() {
-        return dialogDataService.oppdaterVentePaSvarTidspunkt(DIALOG_STATUS);
-    }
-
-    private DialogData oppdaterFerdigbehandletTidspunkt() {
-        return dialogDataService.oppdaterFerdigbehandletTidspunkt(DIALOG_STATUS);
-    }
-
-    private List<DialogData> hentDialogerForBruker() {
-        return dialogDataService.hentDialogerForBruker(Person.fnr(IDENT));
-    }
-*/
 }

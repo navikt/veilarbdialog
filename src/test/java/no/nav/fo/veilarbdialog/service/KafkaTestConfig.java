@@ -13,7 +13,6 @@ import no.nav.fo.veilarbdialog.domain.kafka.OppfolgingAvsluttetKafkaDTO;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -31,9 +30,6 @@ import static org.apache.kafka.clients.producer.ProducerConfig.*;
 @Configuration
 @Slf4j
 public class KafkaTestConfig {
-
-    @Autowired
-    KafkaConsumerClient<String, String> consumerClient;
 
     @Bean
     public KafkaProperties kafkaProperties(EmbeddedKafkaBroker embeddedKafkaBroker) {
@@ -87,11 +83,6 @@ public class KafkaTestConfig {
                 .withMetrics(meterRegistry)
                 .withProperties(kafkaProducerProperties(kafkaProperties.getBrokersUrl()))
                 .build();
-    }
-
-    @PostConstruct
-    public void start() {
-        consumerClient.start();
     }
 
     private Properties kafkaConsumerProperties(String brokerUrl) {
