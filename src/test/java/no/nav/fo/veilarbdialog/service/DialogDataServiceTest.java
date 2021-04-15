@@ -88,15 +88,17 @@ public class DialogDataServiceTest {
     @Test
     public void opprettHenvendelse_kontorsperrePaBruker_returnererKontorsperretDialog() {
         when(authService.getIdent()).thenReturn(Optional.of(AKTOR_ID));
-
         when(kvpService.kontorsperreEnhetId(AKTOR_ID)).thenReturn(KONTORSPERRE_ENHET_ID);
+
         DialogData dialogData = dialogDataService.opprettHenvendelse(HENVENDELSE_DTO.setTekst("test"), Person.aktorId(AKTOR_ID));
         Assert.assertEquals(KONTORSPERRE_ENHET_ID, dialogData.getKontorsperreEnhetId());
     }
 
     @Test
     public void opprettHenvendelse_IkkeKontorsperrePaBruker_returnererNull() {
+        when(authService.getIdent()).thenReturn(Optional.of(AKTOR_ID));
         when(kvpService.kontorsperreEnhetId(AKTOR_ID)).thenReturn(null);
+
         DialogData dialogData = dialogDataService.opprettHenvendelse(HENVENDELSE_DTO.setTekst("test"), Person.aktorId(AKTOR_ID));
         Assert.assertNull(dialogData.getKontorsperreEnhetId());
     }
