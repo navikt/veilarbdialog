@@ -22,7 +22,7 @@
 
         <allclient.version>9.2.0.0</allclient.version>
 
-        <common.version>2.2021.02.23_11.33-7091f10a35ba</common.version>
+        <common.version>2.2021.04.07_08.09-7849c92a72d0</common.version>
         <common-obsolete.version>1.2020.02.11-12.17-1a30837bb4f2</common-obsolete.version>
 
         <flyway.version>4.1.1</flyway.version>
@@ -32,8 +32,14 @@
         <rest-assured.version>4.2.0</rest-assured.version>
         <shedlock.version>4.14.0</shedlock.version>
         <swagger.version>3.0.0</swagger.version>
+        <testcontainers-kafka.version>1.15.1</testcontainers-kafka.version>
         <tjenestespesifikasjoner.version>1.2019.09.25-00.21-49b69f0625e0</tjenestespesifikasjoner.version>
         <unleash-client-java.version>3.3.3</unleash-client-java.version>
+
+
+        <sonar.projectKey>navikt_veilarbdialog</sonar.projectKey>
+        <sonar.organization>navit</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencies>
@@ -135,6 +141,11 @@
         <dependency>
             <groupId>no.nav.common</groupId>
             <artifactId>nais</artifactId>
+            <version>${common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.common</groupId>
+            <artifactId>kafka</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
@@ -288,8 +299,15 @@
 
         <!-- Kafka -->
         <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <version>${testcontainers-kafka.version}</version>
+            <scope>test</scope>
         </dependency>
 
 
@@ -393,8 +411,44 @@
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>${flyway.version}</version>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.6</version>
+            </plugin>
         </plugins>
         <finalName>${project.artifactId}</finalName>
     </build>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

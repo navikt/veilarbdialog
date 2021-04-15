@@ -29,7 +29,7 @@ public class ScheduleRessurs {
     private final StopRevarslingService stopRevarslingService;
     private final VarselMedHandlingService varselMedHandlingService;
     private final LockingTaskExecutor lockingTaskExecutor;
-    private final KafkaDialogService kafkaDialogService;
+    private final KafkaProducerService kafkaProducerService;
     private final MeterRegistry registry;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
 
@@ -41,7 +41,7 @@ public class ScheduleRessurs {
     //5MIN ER VALGT ARBITRÆRT
     @Scheduled(cron = "0 0/5 * * * *")
     public void sendFeilendeKafkaMeldinger() {
-        kafkaDialogService.sendAlleFeilendeMeldinger();
+        kafkaProducerService.sendAlleFeilendeMeldinger();
     }
 
     @Scheduled(cron = "0 0/2 * * * *")

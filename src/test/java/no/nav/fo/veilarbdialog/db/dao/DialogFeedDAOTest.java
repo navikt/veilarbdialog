@@ -3,12 +3,11 @@ package no.nav.fo.veilarbdialog.db.dao;
 import lombok.val;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,12 +22,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
+@ActiveProfiles("local")
 @Transactional
 public class DialogFeedDAOTest {
     private static final String AKTOR_ID = "1234";
-
-    @Autowired
-    private JdbcTemplate jdbc;
 
     @Autowired
     private DialogDAO dialogDAO;
@@ -38,13 +35,6 @@ public class DialogFeedDAOTest {
 
     @Autowired
     private DialogFeedDAO dialogFeedDAO;
-
-    @After
-    public void after() {
-        jdbc.update("delete from HENVENDELSE");
-        jdbc.update("delete from DIALOG");
-        jdbc.update("delete from DIALOG_AKTOR");
-    }
 
     @Test
     public void hentAktorerMedEndringerEtter_nyDialog_aktorEndret() {
@@ -92,7 +82,7 @@ public class DialogFeedDAOTest {
         Date nyttTidspunktEldsteVentende = endringerEtterForrigeLesetidspunkt.get(0).getTidspunktEldsteVentende();
         Date nyttUbehandletTidspunkt = endringerEtterForrigeLesetidspunkt.get(0).getTidspunktEldsteUbehandlede();
         assertThat(nyttTidspunktEldsteVentende).isEqualTo(tidspunktEldsteVentende);
-        assertThat(nyttUbehandletTidspunkt).isEqualTo(nyttUbehandletTidspunkt);
+        assertThat(nyttUbehandletTidspunkt).isEqualTo(ubehandletTidspunkt);
 
     }
 

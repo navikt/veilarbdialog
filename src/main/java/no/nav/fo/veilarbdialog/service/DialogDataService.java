@@ -38,7 +38,7 @@ public class DialogDataService {
     private final DialogFeedDAO dialogFeedDAO;
     private final KvpService kvpService;
     private final UnleashClient unleashClient;
-    private final KafkaDialogService kafkaDialogService;
+    private final KafkaProducerService kafkaProducerService;
     private final AuthService auth;
     private final KladdService kladdService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
@@ -189,7 +189,7 @@ public class DialogDataService {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
         if (unleashClient.isEnabled("veilarbdialog.kafka1")) {
             KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
-            kafkaDialogService.dialogEvent(kafkaDialogMelding);
+            kafkaProducerService.sendDialogMelding(kafkaDialogMelding);
         }
         dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
 
@@ -209,7 +209,7 @@ public class DialogDataService {
 
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
 
-        if (!auth.harTilgangTilPerson(dialogData.getAktorId())) {
+        if (dialogData != null && !auth.harTilgangTilPerson(dialogData.getAktorId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(
                     "%s har ikke lesetilgang til %s",
                     auth.getIdent().orElse(null),

@@ -59,9 +59,10 @@ application:
   dialog:
     url: ${ARBEIDSRETTET_DIALOG_URL}
   kafka:
-    broker:
-      url: ${KAFKA_BROKERS_URL}
-    topic: aapen-fo-endringPaaDialog-v1-${APP_ENVIRONMENT_NAME}
+    brokersUrl: ${KAFKA_BROKERS_URL}
+    endringPaaDialogTopic: ${ENDRING_PAA_DIALOG_TOPIC}
+    oppfolgingAvsluttetTopic: ${OPPFOLGING_AVSLUTTET_TOPIC}
+    kvpAvsluttetTopic: ${KVP_AVSLUTTET_TOPIC}
   kvp:
     url: ${VEILARBOPPFOLGINGAPI_URL}
   mq:
