@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.config;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import lombok.RequiredArgsConstructor;
 import no.nav.common.kafka.consumer.KafkaConsumerClient;
 import no.nav.common.kafka.consumer.TopicConsumer;
 import no.nav.common.kafka.consumer.util.KafkaConsumerClientBuilder;
@@ -25,14 +26,14 @@ import static no.nav.common.kafka.util.KafkaPropertiesPreset.onPremDefaultProduc
 
 @Profile("!local")
 @Configuration
+@RequiredArgsConstructor
 @EnableConfigurationProperties({KafkaProperties.class})
 public class KafkaConfig {
 
     public static final String CONSUMER_GROUP_ID = "veilarbdialog-consumer";
     public static final String PRODUCER_CLIENT_ID = "veilarbdialog-producer";
 
-    @Autowired
-    KafkaConsumerClient<String, String> consumerClient;
+    private final KafkaConsumerClient<String, String> consumerClient;
 
     @Bean
     public Map<String, TopicConsumer<String, String>> topicConsumers(
