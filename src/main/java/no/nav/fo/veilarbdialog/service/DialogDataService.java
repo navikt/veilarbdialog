@@ -10,7 +10,7 @@ import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.*;
-import no.nav.fo.veilarbdialog.feed.KvpService;
+import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;

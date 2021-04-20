@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.feed;
+package no.nav.fo.veilarbdialog.kvp;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +18,12 @@ import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class KvpService {
 
     private final String baseUrl;
+
     private final OkHttpClient client;
     private final SystemUserTokenProvider systemUserTokenProvider;
 

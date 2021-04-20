@@ -8,7 +8,7 @@ import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.*;
-import no.nav.fo.veilarbdialog.feed.KvpService;
+import no.nav.fo.veilarbdialog.kvp.KvpService;
 import org.junit.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;

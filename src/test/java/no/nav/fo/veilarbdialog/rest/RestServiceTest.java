@@ -11,7 +11,7 @@ import no.nav.fo.veilarbdialog.domain.Avsender;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
-import no.nav.fo.veilarbdialog.feed.KvpService;
+import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import org.junit.After;

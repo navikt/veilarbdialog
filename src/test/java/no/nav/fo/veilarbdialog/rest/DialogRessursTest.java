@@ -9,7 +9,7 @@ import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
-import no.nav.fo.veilarbdialog.feed.KvpService;
+import no.nav.fo.veilarbdialog.kvp.KvpService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
