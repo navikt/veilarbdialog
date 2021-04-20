@@ -23,7 +23,6 @@ import static java.util.Optional.ofNullable;
 public class DialogFeedDAO {
 
     private final JdbcTemplate jdbc;
-    private final DateProvider dateProvider;
 
     private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
         return ofNullable(rs.getTimestamp(kolonneNavn))
@@ -54,7 +53,7 @@ public class DialogFeedDAO {
         }
         val dialogAktor = mapTilDialogAktor(dialoger);
         jdbc.update("insert into DIALOG_AKTOR (AKTOR_ID, SISTE_ENDRING, TIDSPUNKT_ELDSTE_VENTENDE, TIDSPUNKT_ELDSTE_UBEHANDLEDE, OPPRETTET_TIDSPUNKT) " +
-                        "values (?, ?, ?, ?, "+dateProvider.getNow()+")",
+                        "values (?, ?, ?, ?, CURRENT_TIMESTAMP)",
                 aktorId,
                 dialogAktor.getSisteEndring(),
                 dialogAktor.getTidspunktEldsteVentende(),

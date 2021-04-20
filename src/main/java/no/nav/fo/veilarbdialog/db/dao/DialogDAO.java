@@ -29,7 +29,6 @@ import static java.util.Optional.ofNullable;
 public class DialogDAO {
 
     private final JdbcTemplate jdbc;
-    private final DateProvider dateProvider;
 
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForAktorId(String aktorId) {
@@ -120,10 +119,9 @@ public class DialogDAO {
         long dialogId = Optional
                 .ofNullable(jdbc.queryForObject("select DIALOG_ID_SEQ.nextval from DUAL", Long.class))
                 .orElseThrow(IllegalStateException::new);
-        log.info("Date provider is {} and value is {}", dateProvider, dateProvider.getNow());
 
         jdbc.update("insert into DIALOG (DIALOG_ID, AKTOR_ID, OPPRETTET_DATO, AKTIVITET_ID, OVERSKRIFT, HISTORISK, KONTORSPERRE_ENHET_ID, OPPDATERT) " +
-                        "values (?, ?, "+dateProvider.getNow()+", ?, ?, ?, ?, " +dateProvider.getNow() +")",
+                        "values (?, ?, CURRENT_TIMESTAMP , ?, ?, ?, ?, CURRENT_TIMESTAMP)",
                 dialogId,
                 dialogData.getAktorId(),
                 dialogData.getAktivitetId(),
@@ -151,7 +149,7 @@ public class DialogDAO {
                 .orElseThrow(IllegalStateException::new);
 
         jdbc.update("insert into HENVENDELSE (HENVENDELSE_ID, DIALOG_ID, SENDT, TEKST, KONTORSPERRE_ENHET_ID, AVSENDER_ID, AVSENDER_TYPE, VIKTIG) " +
-                        "values (?, ?, "+ dateProvider.getNow() +", ?, ?, ?, ?, ?)",
+                        "values (?, ?, CURRENT_TIMESTAMP , ?, ?, ?, ?, ?)",
                 henvendelseId,
                 henvendelseData.dialogId,
                 henvendelseData.tekst,

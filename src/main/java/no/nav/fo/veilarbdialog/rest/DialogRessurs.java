@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
-import no.nav.fo.veilarbdialog.service.KladdService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.lang.Math.toIntExact;
 import static java.util.Collections.singletonList;
@@ -38,14 +34,12 @@ public class DialogRessurs {
     private final HttpServletRequest httpServletRequest;
     private final KontorsperreFilter kontorsperreFilter;
     private final AuthService auth;
-    private final KladdService kladdService;
-    private final FunksjonelleMetrikker funksjonelleMetrikker;
 
     @GetMapping
     public List<DialogDTO> hentDialoger() {
         return dialogDataService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
-                .filter(kontorsperreFilter::filterKontorsperre)
+                .filter(kontorsperreFilter::tilgangTilEnhet)
                 .map(restMapper::somDialogDTO)
                 .collect(toList());
     }
@@ -74,53 +68,28 @@ public class DialogRessurs {
     public DialogDTO hentDialog(@PathVariable String dialogId) {
         return Optional.ofNullable(dialogId)
                 .map(Long::parseLong)
-                .map(dialogDataService::hentDialog)
+                .map(dialogDataService::hentDialogMedTilgangskontroll)
                 .map(restMapper::somDialogDTO)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping
     public DialogDTO nyHenvendelse(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
-        slettUtdattertKladd(nyHenvendelseDTO);
+        Person bruker = getContextUserIdent();
+        DialogData dialogData = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
 
-        long dialogId = finnDialogId(nyHenvendelseDTO);
-        dialogDataService.opprettHenvendelseForDialog(HenvendelseData.builder()
-                .dialogId(dialogId)
-                .avsenderId(auth.getIdent().orElse(null))
-                .viktig(!nyHenvendelseDTO.egenskaper.isEmpty())
-                .avsenderType(auth.erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
-                .tekst(nyHenvendelseDTO.tekst)
-                .build()
-        );
-        DialogData dialogData = markerSomLest(dialogId);
-        dialogDataService.updateDialogAktorFor(dialogData.getAktorId());
-
-        return kontorsperreFilter.filterKontorsperre(dialogData) ?
+        return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
-    }
 
-    private void slettUtdattertKladd(NyHenvendelseDTO nyHenvendelseDTO) {
-        Person person = getContextUserIdent();
-        if (person instanceof Person.Fnr) {
-            kladdService.deleteKladd(person.get(), nyHenvendelseDTO.dialogId, nyHenvendelseDTO.aktivitetId);
-        }
     }
 
     @PutMapping("{dialogId}/les")
     public DialogDTO markerSomLest(@PathVariable String dialogId) {
-        DialogData dialogData = markerSomLest(Long.parseLong(dialogId));
-        return kontorsperreFilter.filterKontorsperre(dialogData) ?
+        DialogData dialogData = dialogDataService.markerDialogSomLest(Long.parseLong(dialogId));
+        return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
-    }
-
-    private DialogData markerSomLest(long dialogId) {
-        if (auth.erEksternBruker()) {
-            return dialogDataService.markerDialogSomLestAvBruker(dialogId);
-        }
-        return dialogDataService.markerDialogSomLestAvVeileder(dialogId);
-
     }
 
     @PutMapping("{dialogId}/venter_pa_svar/{venter}")
@@ -133,7 +102,7 @@ public class DialogRessurs {
                 .build();
 
         DialogData dialog = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
-        dialogDataService.updateDialogAktorFor(dialog.getAktorId());
+        dialogDataService.sendPaaKafka(dialog.getAktorId());
 
         return markerSomLest(dialogId);
     }
@@ -148,54 +117,27 @@ public class DialogRessurs {
                 .build();
 
         DialogData dialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogStatus);
-        dialogDataService.updateDialogAktorFor(dialog.getAktorId());
+        dialogDataService.sendPaaKafka(dialog.getAktorId());
 
         return markerSomLest(dialogId);
     }
 
     @PostMapping("forhandsorientering")
     public DialogDTO forhandsorienteringPaAktivitet(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
+        String aktorId = dialogDataService.hentAktoerIdForPerson(getContextUserIdent());
+        auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
+
         auth.skalVereInternBruker();
 
-        long dialogId = finnDialogId(nyHenvendelseDTO);
+        DialogData dialog = dialogDataService.hentDialogMedTilgangskontroll(nyHenvendelseDTO.dialogId, nyHenvendelseDTO.aktivitetId);
+        if (dialog == null) dialog = dialogDataService.opprettDialog(nyHenvendelseDTO, aktorId);
+
+        long dialogId = dialog.getId();
         dialogDataService.updateDialogEgenskap(EgenskapType.PARAGRAF8, dialogId);
         dialogDataService.markerSomParagra8(dialogId);
         return nyHenvendelse(nyHenvendelseDTO.setEgenskaper(singletonList(Egenskap.PARAGRAF8)));
     }
 
-    private Long finnDialogId(NyHenvendelseDTO nyHenvendelseDTO) {
-        if (!StringUtils.isEmpty(nyHenvendelseDTO.dialogId)) {
-            return Long.parseLong(nyHenvendelseDTO.dialogId);
-        } else {
-            return Optional.ofNullable(nyHenvendelseDTO.aktivitetId)
-                    .filter(StringUtils::isNotEmpty)
-                    .flatMap(dialogDataService::hentDialogForAktivitetId)
-                    .orElseGet(() -> opprettDialog(nyHenvendelseDTO))
-                    .getId();
-        }
-    }
-
-    private DialogData opprettDialog(NyHenvendelseDTO nyHenvendelseDTO) {
-        DialogData dialogData = DialogData.builder()
-                .overskrift(nyHenvendelseDTO.overskrift)
-                .aktorId(dialogDataService.hentAktoerIdForPerson(getContextUserIdent()))
-                .aktivitetId(nyHenvendelseDTO.aktivitetId)
-                .egenskaper(nyHenvendelseDTO.egenskaper
-                        .stream()
-                        .map(egenskap -> EgenskapType.valueOf(egenskap.name()))
-                        .collect(Collectors.toList()))
-                .build();
-        DialogData opprettetDialog = dialogDataService.opprettDialogForAktivitetsplanPaIdent(dialogData);
-
-        if (auth.erEksternBruker()) {
-            funksjonelleMetrikker.nyDialogBruker(opprettetDialog);
-        } else if (auth.erInternBruker()) {
-            funksjonelleMetrikker.nyDialogVeileder(opprettetDialog);
-        }
-
-
-        return opprettetDialog;
-    }
 
     private Person getContextUserIdent() {
         if (auth.erEksternBruker()) {

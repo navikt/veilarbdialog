@@ -15,7 +15,6 @@ import java.util.Optional;
 public class VarselDAO {
 
     private final JdbcTemplate jdbc;
-    private final DateProvider dateProvider;
 
     public List<String> hentAktorerMedUlesteMeldingerEtterSisteVarsel(long graceMillis) {
         final Date grense = new Date(System.currentTimeMillis() - graceMillis);
@@ -35,7 +34,7 @@ public class VarselDAO {
     }
 
     public void oppdaterSisteVarselForBruker(String aktorId) {
-        final int rowsUpdated = jdbc.update("update VARSEL set SENDT = "+dateProvider.getNow()+" where AKTOR_ID = ?" , aktorId);
+        final int rowsUpdated = jdbc.update("update VARSEL set SENDT = CURRENT_TIMESTAMP where AKTOR_ID = ?" , aktorId);
         if (rowsUpdated == 0) {
             opprettVarselForBruker(aktorId);
         }
@@ -85,7 +84,7 @@ public class VarselDAO {
     }
 
     public void insertParagraf8Varsel(String aktorid, String varselUuid) {
-        jdbc.update("insert into PARAGRAF8VARSEL (UUID, AKTORID, SENDT) values (?, ?, " + dateProvider.getNow() + ")",
+        jdbc.update("insert into PARAGRAF8VARSEL (UUID, AKTORID, SENDT) values (?, ?, CURRENT_TIMESTAMP)",
                 varselUuid,
                 aktorid);
     }
@@ -100,12 +99,12 @@ public class VarselDAO {
     }
 
     public void markerSomStoppet(String varselUUID) {
-        jdbc.update("update PARAGRAF8VARSEL set SKALSTOPPES = 0, DEAKTIVERT = "+dateProvider.getNow()+" where UUID = ? ",
+        jdbc.update("update PARAGRAF8VARSEL set SKALSTOPPES = 0, DEAKTIVERT = CURRENT_TIMESTAMP where UUID = ? ",
                 varselUUID);
     }
 
     private void opprettVarselForBruker(String aktorId) {
-        jdbc.update("INSERT INTO VARSEL (AKTOR_ID, SENDT) VALUES (?, "+dateProvider.getNow()+")",
+        jdbc.update("INSERT INTO VARSEL (AKTOR_ID, SENDT) VALUES (?, CURRENT_TIMESTAMP)",
                 aktorId
         );
     }

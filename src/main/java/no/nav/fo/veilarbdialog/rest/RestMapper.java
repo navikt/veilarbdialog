@@ -26,7 +26,7 @@ class RestMapper {
         List<HenvendelseData> henvendelser = dialogData
                 .getHenvendelser()
                 .stream()
-                .filter(kontorsperreFilter::filterKontorsperre)
+                .filter(kontorsperreFilter::tilgangTilEnhet)
                 .collect(toList());
 
         Optional<HenvendelseData> sisteHenvendelse = henvendelser.stream()
