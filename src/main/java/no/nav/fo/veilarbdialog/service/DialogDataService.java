@@ -8,7 +8,6 @@ import no.nav.common.types.identer.Id;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
-import no.nav.fo.veilarbdialog.db.dao.DialogFeedDAO;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
@@ -35,7 +34,6 @@ public class DialogDataService {
     private final DialogDAO dialogDAO;
     private final DialogStatusService dialogStatusService;
     private final DataVarehusDAO dataVarehusDAO;
-    private final DialogFeedDAO dialogFeedDAO;
     private final KvpService kvpService;
     private final UnleashClient unleashClient;
     private final KafkaProducerService kafkaProducerService;
@@ -53,7 +51,7 @@ public class DialogDataService {
 
     public Date hentSistOppdatertForBruker(Person person, String meg) {
         String aktorId = hentAktoerIdForPerson(person);
-        String aktorEllerIdentInnloggetBruker = auth.erEksternBruker()? hentAktoerIdForPerson(Person.fnr(meg)): meg;
+        String aktorEllerIdentInnloggetBruker = auth.erEksternBruker() ? hentAktoerIdForPerson(Person.fnr(meg)) : meg;
         auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
         return dataVarehusDAO.hentSisteEndringSomIkkeErDine(aktorId, aktorEllerIdentInnloggetBruker);
     }
@@ -129,7 +127,7 @@ public class DialogDataService {
     }
 
     public DialogData hentDialogMedTilgangskontroll(String dialogId, String aktivitetId) {
-        if(dialogId == null && aktivitetId == null) return null;
+        if (dialogId == null && aktivitetId == null) return null;
 
         if (dialogId != null && !dialogId.isEmpty()) {
             return hentDialogMedTilgangskontroll(Long.parseLong(dialogId));
@@ -187,12 +185,8 @@ public class DialogDataService {
 
     public void sendPaaKafka(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
-        if (unleashClient.isEnabled("veilarbdialog.kafka1")) {
-            KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
-            kafkaProducerService.sendDialogMelding(kafkaDialogMelding);
-        }
-        dialogFeedDAO.updateDialogAktorFor(aktorId, dialoger);
-
+        KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
+        kafkaProducerService.sendDialogMelding(kafkaDialogMelding);
     }
 
     public void updateDialogEgenskap(EgenskapType type, long dialogId) {
