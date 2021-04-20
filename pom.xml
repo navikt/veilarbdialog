@@ -200,11 +200,6 @@
         </dependency>
         <dependency>
             <groupId>no.nav.common</groupId>
-            <artifactId>feed</artifactId>
-            <version>${common-obsolete.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.common</groupId>
             <artifactId>oidc-security</artifactId>
             <version>${common-obsolete.version}</version>
         </dependency>
