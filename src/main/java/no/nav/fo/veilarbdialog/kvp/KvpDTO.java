@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.domain;
+package no.nav.fo.veilarbdialog.kvp;
 
 
 import lombok.Data;
@@ -8,9 +8,7 @@ import java.util.Date;
 
 @Data
 @Accessors(chain = true)
-public class KvpDTO implements Comparable<KvpDTO> {
-    public static final String FEED_NAME = "kvp";
-
+public class KvpDTO {
     private long kvpId;
     private long serial;
     private String aktorId;
@@ -21,9 +19,4 @@ public class KvpDTO implements Comparable<KvpDTO> {
     private String avsluttetAv;
     private Date avsluttetDato;
     private String avsluttetBegrunnelse;
-
-    @Override
-    public int compareTo(KvpDTO k) {
-        return Long.compare(serial, k.serial);
-    }
 }

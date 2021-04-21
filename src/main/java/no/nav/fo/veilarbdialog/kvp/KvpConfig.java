@@ -1,6 +1,5 @@
-package no.nav.fo.veilarbdialog.feed;
+package no.nav.fo.veilarbdialog.kvp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.common.rest.client.RestClient;
 import no.nav.common.sts.SystemUserTokenProvider;
 import org.springframework.beans.factory.annotation.Value;

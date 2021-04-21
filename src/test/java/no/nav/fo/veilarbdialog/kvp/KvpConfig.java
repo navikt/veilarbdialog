@@ -1,5 +1,6 @@
-package no.nav.fo.veilarbdialog.feed;
+package no.nav.fo.veilarbdialog.kvp;
 
+import no.nav.fo.veilarbdialog.kvp.KvpService;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
