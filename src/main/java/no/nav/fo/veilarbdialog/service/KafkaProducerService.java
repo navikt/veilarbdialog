@@ -43,7 +43,7 @@ public class KafkaProducerService {
         ProducerRecord<String, String> kafkaMelding = new ProducerRecord<>(topic, aktorId, kafkaStringMelding);
         kafkaMelding.headers().add(new RecordHeader(PREFERRED_NAV_CALL_ID_HEADER_NAME, getCallIdOrRandom().getBytes()));
 
-        producerClient.send(kafkaMelding, sendDialogMeldingCallback(aktorId, topic));
+        producerClient.sendSync(kafkaMelding);
     }
 
     public void sendAlleFeilendeMeldinger() {
