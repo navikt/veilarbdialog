@@ -48,9 +48,12 @@ public class DialogDataServiceTest {
     @Autowired
     DialogStatusService dialogStatusService;
 
-
     @MockBean
     DataVarehusDAO dataVarehusDAO;
+
+    //TODO hva burde vi gjøre her
+    @MockBean
+    KafkaProducerService kafkaProducerService;
 
     @MockBean
     KvpService kvpService;
