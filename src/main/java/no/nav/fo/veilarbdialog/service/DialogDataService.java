@@ -82,10 +82,9 @@ public class DialogDataService {
 
     }
 
-    public DialogData oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
-        long dialogId = dialogStatus.dialogId;
+    public DialogData oppdaterFerdigbehandletTidspunkt(long dialogId, boolean ferdigBehandlet) {
         DialogData dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
-        return dialogStatusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
+        return dialogStatusService.oppdaterVenterPaNavSiden(dialogData, ferdigBehandlet);
     }
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {

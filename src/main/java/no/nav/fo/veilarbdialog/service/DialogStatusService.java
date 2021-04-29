@@ -67,19 +67,19 @@ public class DialogStatusService {
         return dialogData.isHarUlestParagraf8Henvendelse() && dialogData.getParagraf8VarselUUID() != null;
     }
 
-    public DialogData oppdaterVenterPaNavSiden(DialogData dialogData, DialogStatus nyDialogstatus) {
-        if (dialogData.erFerdigbehandlet() == nyDialogstatus.ferdigbehandlet) {
+    public DialogData oppdaterVenterPaNavSiden(DialogData dialogData, boolean ferdigBehandlet) {
+        if (dialogData.erFerdigbehandlet() == ferdigBehandlet) {
             return dialogData;
         }
 
-        if (nyDialogstatus.ferdigbehandlet) {
+        if (ferdigBehandlet) {
             statusDAO.setVenterPaNavTilNull(dialogData.getId());
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_NAV);
         } else {
             statusDAO.setVenterPaNavTilNaa(dialogData.getId());
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_NAV);
         }
-        funksjonelleMetrikker.oppdaterFerdigbehandletTidspunkt(dialogData, nyDialogstatus);
+        funksjonelleMetrikker.oppdaterFerdigbehandletTidspunkt(dialogData, ferdigBehandlet);
         return dialogDAO.hentDialog(dialogData.getId());
     }
 

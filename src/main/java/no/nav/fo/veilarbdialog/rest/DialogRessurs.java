@@ -101,7 +101,7 @@ public class DialogRessurs {
                 .venterPaSvar(venter)
                 .build();
 
-        DialogData dialog = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
+        var dialog = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
         dialogDataService.sendPaaKafka(dialog.getAktorId());
 
         return markerSomLest(dialogId);
@@ -111,12 +111,7 @@ public class DialogRessurs {
     public DialogDTO oppdaterFerdigbehandlet(@PathVariable String dialogId, @PathVariable boolean ferdigbehandlet) {
         auth.skalVereInternBruker();
 
-        DialogStatus dialogStatus = DialogStatus.builder()
-                .dialogId(Long.parseLong(dialogId))
-                .ferdigbehandlet(ferdigbehandlet)
-                .build();
-
-        DialogData dialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogStatus);
+        var dialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(Long.parseLong(dialogId), ferdigbehandlet);
         dialogDataService.sendPaaKafka(dialog.getAktorId());
 
         return markerSomLest(dialogId);
