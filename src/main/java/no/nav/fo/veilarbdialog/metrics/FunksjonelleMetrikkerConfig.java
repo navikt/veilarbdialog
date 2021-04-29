@@ -14,13 +14,13 @@ import java.net.UnknownHostException;
 @RequiredArgsConstructor
 public class FunksjonelleMetrikkerConfig {
 
-    @Value("spring.application.name")
+    @Value("${spring.application.name}")
     private String applicationName;
 
-    @Value("application.cluster")
+    @Value("${application.cluster}")
     private String cluster;
 
-    @Value("application.namespace")
+    @Value("${application.namespace}")
     private String namespace;
 
     @Bean
