@@ -119,6 +119,9 @@ public class DialogStatusService {
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_VEILEDER);
 
         Date eldsteUlesteForBruker = getEldsteUlesteForBruker(dialogData, henvendelseData);
+
+        oppdaterVenterPaNavSiden(dialogData, true);
+
         statusDAO.setEldsteUlesteForBruker(dialogData.getId(), eldsteUlesteForBruker);
         funksjonelleMetrikker.nyHenvendelseVeileder(dialogData);
     }
