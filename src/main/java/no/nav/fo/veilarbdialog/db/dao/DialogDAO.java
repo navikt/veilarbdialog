@@ -169,18 +169,6 @@ public class DialogDAO {
                 .orElse(null);
     }
 
-    private static boolean erLest(Date eldsteUleste, Date henvendelseTidspunkt) {
-        return eldsteUleste == null || henvendelseTidspunkt.before(eldsteUleste);
-    }
-
-    private List<HenvendelseData> hentHenvendelser(long dialogId) {
-        return jdbc.query("select * from HENVENDELSE h " +
-                        "left join DIALOG d on d.DIALOG_ID = h.DIALOG_ID " +
-                        "where h.DIALOG_ID = ?",
-                new MapTilHenvendelse(),
-                dialogId);
-    }
-
     private class MapTilDialog implements RowMapper<DialogData> {
 
         @Override
@@ -207,7 +195,7 @@ public class DialogDAO {
                     .venterPaNavSiden(hentDato(rs, "VENTER_PA_NAV_SIDEN"))
                     .venterPaSvarFraBrukerSiden(hentDato(rs, "VENTER_PA_SVAR_FRA_BRUKER"))
                     .eldsteUlesteTidspunktForBruker(hentDato(rs, "ELDSTE_ULESTE_FOR_BRUKER"))
-                    .eldsteUlesteTidspunktForVeileder(hentDato(rs, "ELDSTE_ULESTE_FOR_VEILEDER"))
+                    .sisteUlestAvVeilederTidspunkt(hentDato(rs, "ELDSTE_ULESTE_FOR_VEILEDER"))
                     .oppdatert(hentDato(rs, "OPPDATERT"))
                     .kontorsperreEnhetId(rs.getString("KONTORSPERRE_ENHET_ID"))
                     .egenskaper(egenskaper)
@@ -215,6 +203,14 @@ public class DialogDAO {
                     .paragraf8VarselUUID(rs.getString("PARAGRAF8_VARSEL_UUID"))
                     .build();
 
+        }
+
+        private List<HenvendelseData> hentHenvendelser(long dialogId) {
+            return jdbc.query("select * from HENVENDELSE h " +
+                            "left join DIALOG d on d.DIALOG_ID = h.DIALOG_ID " +
+                            "where h.DIALOG_ID = ?",
+                    new MapTilHenvendelse(),
+                    dialogId);
         }
 
     }
@@ -236,6 +232,10 @@ public class DialogDAO {
                     .kontorsperreEnhetId(rs.getString("KONTORSPERRE_ENHET_ID"))
                     .viktig(rs.getBoolean("VIKTIG"))
                     .build();
+        }
+
+        private static boolean erLest(Date eldsteUleste, Date henvendelseTidspunkt) {
+            return eldsteUleste == null || henvendelseTidspunkt.before(eldsteUleste);
         }
 
     }
