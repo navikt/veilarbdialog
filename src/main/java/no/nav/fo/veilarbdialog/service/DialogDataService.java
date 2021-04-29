@@ -161,9 +161,9 @@ public class DialogDataService {
                     .orElseThrow(RuntimeException::new);
         } else if (person instanceof Person.AktorId) {
             return person.get();
-        } else {
-            throw new RuntimeException("Kan ikke identifisere persontype");
         }
+
+        return null;
     }
 
     public void settKontorsperredeDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {

@@ -169,18 +169,6 @@ public class DialogDAO {
                 .orElse(null);
     }
 
-    private static boolean erLest(Date eldsteUleste, Date henvendelseTidspunkt) {
-        return eldsteUleste == null || henvendelseTidspunkt.before(eldsteUleste);
-    }
-
-    private List<HenvendelseData> hentHenvendelser(long dialogId) {
-        return jdbc.query("select * from HENVENDELSE h " +
-                        "left join DIALOG d on d.DIALOG_ID = h.DIALOG_ID " +
-                        "where h.DIALOG_ID = ?",
-                new MapTilHenvendelse(),
-                dialogId);
-    }
-
     private class MapTilDialog implements RowMapper<DialogData> {
 
         @Override
@@ -217,6 +205,14 @@ public class DialogDAO {
 
         }
 
+        private List<HenvendelseData> hentHenvendelser(long dialogId) {
+            return jdbc.query("select * from HENVENDELSE h " +
+                            "left join DIALOG d on d.DIALOG_ID = h.DIALOG_ID " +
+                            "where h.DIALOG_ID = ?",
+                    new MapTilHenvendelse(),
+                    dialogId);
+        }
+
     }
 
     private static class MapTilHenvendelse implements RowMapper<HenvendelseData> {
@@ -236,6 +232,10 @@ public class DialogDAO {
                     .kontorsperreEnhetId(rs.getString("KONTORSPERRE_ENHET_ID"))
                     .viktig(rs.getBoolean("VIKTIG"))
                     .build();
+        }
+
+        private static boolean erLest(Date eldsteUleste, Date henvendelseTidspunkt) {
+            return eldsteUleste == null || henvendelseTidspunkt.before(eldsteUleste);
         }
 
     }
