@@ -207,7 +207,7 @@ public class DialogDAO {
                     .venterPaNavSiden(hentDato(rs, "VENTER_PA_NAV_SIDEN"))
                     .venterPaSvarFraBrukerSiden(hentDato(rs, "VENTER_PA_SVAR_FRA_BRUKER"))
                     .eldsteUlesteTidspunktForBruker(hentDato(rs, "ELDSTE_ULESTE_FOR_BRUKER"))
-                    .eldsteUlesteTidspunktForVeileder(hentDato(rs, "ELDSTE_ULESTE_FOR_VEILEDER"))
+                    .sisteUlestAvVeilederTidspunkt(hentDato(rs, "ELDSTE_ULESTE_FOR_VEILEDER"))
                     .oppdatert(hentDato(rs, "OPPDATERT"))
                     .kontorsperreEnhetId(rs.getString("KONTORSPERRE_ENHET_ID"))
                     .egenskaper(egenskaper)

@@ -37,7 +37,7 @@ public class DialogStatusService {
     }
 
     public DialogData markerSomLestAvVeileder(DialogData dialogData) {
-        if (dialogData.erLestAvVeileder()) {
+        if (dialogData.erNyesteHenvendelseLestAvVeileder()) {
             return dialogData;
         }
         statusDAO.markerSomLestAvVeileder(dialogData.getId());
@@ -111,7 +111,7 @@ public class DialogStatusService {
         dialogDAO.hentDialog(dialogData.getId());
     }
 
-    public void nyDialog(DialogData oprettet) {
+    public void oppdaterDatavarehus(DialogData oprettet) {
         dataVarehusDAO.insertEvent(oprettet, DatavarehusEvent.DIALOG_OPPRETTET);
     }
 
@@ -130,7 +130,7 @@ public class DialogStatusService {
     private void nyMeldingFraBruker(DialogData dialogData, HenvendelseData henvendelseData) {
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_BRUKER);
 
-        Date eldsteUlesteForVeileder = getEldsteUlesteForVeileder(dialogData, henvendelseData);
+        Date nyesteUlestAvVeileder = hentTidspunktForNyesteUlestAvVeileder(dialogData, henvendelseData);
         Date venterPaNavSiden = dialogData.getVenterPaNavSiden();
 
         if (dialogData.erFerdigbehandlet()) {
@@ -143,14 +143,14 @@ public class DialogStatusService {
 
         statusDAO.setNyMeldingFraBruker(
                 dialogData.getId(),
-                eldsteUlesteForVeileder,
+                nyesteUlestAvVeileder,
                 venterPaNavSiden
         );
         funksjonelleMetrikker.nyHenvendelseBruker(dialogData);
     }
 
-    private Date getEldsteUlesteForVeileder(DialogData dialogData, HenvendelseData henvendelseData) {
-        return dialogData.erLestAvVeileder() ? henvendelseData.getSendt() : dialogData.getEldsteUlesteTidspunktForVeileder();
+    private Date hentTidspunktForNyesteUlestAvVeileder(DialogData dialogData, HenvendelseData henvendelseData) {
+        return dialogData.erNyesteHenvendelseLestAvVeileder() ? henvendelseData.getSendt() : dialogData.getSisteUlestAvVeilederTidspunkt();
     }
 
     public void markerSomParagraf8(long dialogId) {

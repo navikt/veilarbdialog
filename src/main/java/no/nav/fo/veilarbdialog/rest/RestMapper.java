@@ -63,7 +63,7 @@ class RestMapper {
 
 
         } else if (auth.erInternBruker()) {
-            dto.setLest(dialogData.erLestAvVeileder())
+            dto.setLest(dialogData.erNyesteHenvendelseLestAvVeileder())
                     .setLestAvBrukerTidspunkt(dialogData.getLestAvBrukerTidspunkt())
                     .setErLestAvBruker(dialogData.erLestAvBruker())
                     .setFerdigBehandlet(dialogData.erFerdigbehandlet());

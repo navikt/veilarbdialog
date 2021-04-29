@@ -34,7 +34,7 @@ public class DialogData {
 
     String kontorsperreEnhetId;
 
-    Date eldsteUlesteTidspunktForVeileder;
+    Date sisteUlestAvVeilederTidspunkt;
     Date eldsteUlesteTidspunktForBruker;
 
     List<HenvendelseData> henvendelser;
@@ -69,12 +69,12 @@ public class DialogData {
         return eldsteUlesteTidspunktForBruker == null;
     }
 
-    public boolean erLestAvVeileder() {
-        return eldsteUlesteTidspunktForVeileder == null;
+    public boolean erNyesteHenvendelseLestAvVeileder() {
+        return sisteUlestAvVeilederTidspunkt == null;
     }
 
     public boolean erUlestAvVeileder() {
-        return !erLestAvVeileder();
+        return !erNyesteHenvendelseLestAvVeileder();
     }
 }
 

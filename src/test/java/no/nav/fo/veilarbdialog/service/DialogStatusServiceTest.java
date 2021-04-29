@@ -65,16 +65,16 @@ class DialogStatusServiceTest {
     }
 
     @Test
-    public void ny_henvendelse_fra_bruker_skal_ikke_endre_alerede_satt() {
+    public void nyHenvendelse_fraBruker_skal_ikke_endre_alerede_satt() {
         DialogData dialogData = TestDataBuilder.nyDialog()
                 .withVenterPaNavSiden(uniktTidspunkt())
-                .withEldsteUlesteTidspunktForVeileder(uniktTidspunkt());
+                .withSisteUlestAvVeilederTidspunkt(uniktTidspunkt());
 
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt());
 
         dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
 
-        verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), dialogData.getEldsteUlesteTidspunktForVeileder(), dialogData.getVenterPaNavSiden());
+        verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), dialogData.getSisteUlestAvVeilederTidspunkt(), dialogData.getVenterPaNavSiden());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
         verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_BRUKER);
@@ -108,7 +108,7 @@ class DialogStatusServiceTest {
 
     @Test
     public void marker_som_lest_av_veileder_skal_sette_eldste_uleste_for_veileder_til_null() {
-        DialogData dialogData = getDialogData().withEldsteUlesteTidspunktForVeileder(new Date());
+        DialogData dialogData = getDialogData().withSisteUlestAvVeilederTidspunkt(new Date());
 
         dialogStatusService.markerSomLestAvVeileder(dialogData);
 
@@ -133,9 +133,8 @@ class DialogStatusServiceTest {
     @Test
     public void oppdater_venter_pa_nav_siden_med_ferdigbehandlet_skal_sette_venter_pa_nav_siden_til_null() {
         DialogData dialogData = getDialogData().withVenterPaNavSiden(new Date());
-        DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, true);
 
-        dialogStatusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
+        dialogStatusService.oppdaterVenterPaNavSiden(dialogData, true);
 
         verify(statusDAO, only()).setVenterPaNavTilNull(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -147,8 +146,7 @@ class DialogStatusServiceTest {
     public void nar_jeg_setter_venter_pa_nav_forventer_jeg_at_venter_pa_nav_blir_satt() {
         DialogData dialogData = getDialogData().withVenterPaNavSiden(null);
 
-        DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
-        dialogStatusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
+        dialogStatusService.oppdaterVenterPaNavSiden(dialogData, false);
 
         verify(statusDAO, only()).setVenterPaNavTilNaa(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -224,7 +222,7 @@ class DialogStatusServiceTest {
     private DialogData getDialogData() {
         return TestDataBuilder.nyDialog()
                 .withEldsteUlesteTidspunktForBruker(new Date())
-                .withEldsteUlesteTidspunktForVeileder(new Date())
+                .withSisteUlestAvVeilederTidspunkt(new Date())
                 .withVenterPaNavSiden(new Date())
                 .withVenterPaSvarFraBrukerSiden(new Date())
                 .withHistorisk(false);

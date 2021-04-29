@@ -228,7 +228,7 @@ public class DialogDataService {
 
         DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(aktorId));
         DialogData nyDialog = dialogDAO.opprettDialog(kontorsperretDialog);
-        dialogStatusService.nyDialog(nyDialog);
+        dialogStatusService.oppdaterDatavarehus(nyDialog);
 
         if (auth.erEksternBruker()) {
             funksjonelleMetrikker.nyDialogBruker(nyDialog);
