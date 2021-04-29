@@ -106,8 +106,10 @@ public class DialogRessursTest {
 
     @Test
     public void nyHenvendelse_fraVeileder_venterIkkePaaNoen() {
+        //Veileder kan sende en beskjed som bruker ikke trenger å svare på, veileder må eksplisitt markere at dialogen venter på brukeren
         mockErVeileder();
         NyHenvendelseDTO nyHenvendelseDTO = new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift");
+
         DialogDTO dialog = dialogRessurs.nyHenvendelse(nyHenvendelseDTO);
 
         assertThat(dialog.venterPaSvar).isFalse();
@@ -116,19 +118,34 @@ public class DialogRessursTest {
 
     @Test
     public void nyHenvendelse_veilederSvarerPaaBrukersHenvendelse_venterIkkePaaNav() {
-        // Hvis dialogen venter på nav og nav sender en ny melding i dialogen, så skal venter på nav markering fjernes
-        //Det skjer nå i frontend ved kall til /ferdigbehandlet men det skal fjernes
 
         mockErEksternBruker();
         NyHenvendelseDTO brukersHenvendelse = new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift");
         DialogDTO brukersDialog = dialogRessurs.nyHenvendelse(brukersHenvendelse);
 
         mockErVeileder();
-        dialogRessurs.oppdaterFerdigbehandlet(brukersDialog.id, true); //TODO: skal fjernes
         NyHenvendelseDTO veiledersHenvendelse = new NyHenvendelseDTO().setTekst("tekst");
         DialogDTO veiledersDialog = dialogRessurs.nyHenvendelse(veiledersHenvendelse.setDialogId(brukersDialog.id));
 
         assertThat(veiledersDialog.ferdigBehandlet).isTrue();
+    }
+
+    @Test
+    public void nyHenvendelse_brukerSvarerPaaVeiledersHenvendelse_venterPaNav() {
+
+        mockErVeileder();
+        NyHenvendelseDTO veiledersHenvendelse = new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift");
+        DialogDTO veiledersDialog = dialogRessurs.nyHenvendelse(veiledersHenvendelse);
+
+        assertThat(veiledersDialog.ferdigBehandlet).isTrue();
+
+        mockErEksternBruker();
+        NyHenvendelseDTO brukersHenvendelse = new NyHenvendelseDTO().setTekst("tekst");
+        dialogRessurs.nyHenvendelse(brukersHenvendelse.setDialogId(veiledersDialog.id));
+
+        mockErVeileder();
+        veiledersDialog = dialogRessurs.hentDialog(veiledersDialog.id);
+        assertThat(veiledersDialog.ferdigBehandlet).isFalse();
     }
 
     @Test
