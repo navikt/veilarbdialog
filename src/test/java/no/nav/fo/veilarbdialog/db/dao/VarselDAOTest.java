@@ -6,6 +6,7 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Date;
-
-import static java.lang.Thread.sleep;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -51,7 +49,7 @@ public class VarselDAOTest {
     @Test
     public void skalIkkeHenteBrukereSomHarBlittVarsletOmUlesteMeldinger() {
         DialogData dialogId = opprettNyDialog();
-        HenvendelseData henvendelseData = getHenvendelseData(dialogId);
+        HenvendelseData henvendelseData = getHenvendelseData(dialogId, new Date());
         dialogDAO.opprettHenvendelse(henvendelseData);
 
         varselDAO.oppdaterSisteVarselForBruker(AKTOR_ID);
@@ -61,28 +59,9 @@ public class VarselDAOTest {
     }
 
     @Test
-    public void skalHenterukereSomHarUlesteMeldingerEtterTidligereVarsel() throws Exception {
+    public void hentAktorerMedUlesteMeldingerEtterSisteVarsel_returnererIkkeDeUtenforGraceperiode() throws Exception {
         DialogData dialogId = opprettNyDialog();
-
-        dialogDAO.opprettHenvendelse(getHenvendelseData(dialogId));
-        varselDAO.oppdaterSisteVarselForBruker(AKTOR_ID);
-
-        sleep(1);
-
-        dialogDAO.opprettHenvendelse(getHenvendelseData(dialogId));
-
-        sleep(1);
-
-        val aktor = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(0);
-        assertThat(aktor.size(), equalTo(1));
-    }
-
-    @Test
-    public void skalIkkeHentBrukereMedUlesteMeldingerInnenforGracePerioden() throws Exception {
-        DialogData dialogId = opprettNyDialog();
-        dialogDAO.opprettHenvendelse(getHenvendelseData(dialogId));
-
-        sleep(1);
+        dialogDAO.opprettHenvendelse(getHenvendelseData(dialogId, getNowMinusSeconds(10)));
 
         val aktor1 = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(0); // Utenfor grace
         assertThat(aktor1.size(), equalTo(1));
@@ -92,55 +71,39 @@ public class VarselDAOTest {
     }
 
     @Test
-    public void skalHenteBrukereMedUlesteMeldinger() throws Exception {
+    public void skalHenteBrukereMedUlesteMeldinger() {
         DialogData dialogId1 = opprettNyDialog("1111");
-        HenvendelseData henvendelseData1 = getHenvendelseData(dialogId1);
+        HenvendelseData henvendelseData1 = getHenvendelseData(dialogId1, getNowMinusSeconds(30));;
         dialogDAO.opprettHenvendelse(henvendelseData1);
 
         DialogData dialogId2 = opprettNyDialog("2222");
-        HenvendelseData henvendelseData2 = getHenvendelseData(dialogId2);
+        HenvendelseData henvendelseData2 = getHenvendelseData(dialogId2, getNowMinusSeconds(20));
         dialogDAO.opprettHenvendelse(henvendelseData2);
 
-        DialogData dialogId3 = opprettNyDialog("3333");
-        HenvendelseData henvendelseData3 = getHenvendelseData(dialogId3);
-        dialogDAO.opprettHenvendelse(henvendelseData3);
-
-        DialogData dialogId4 = opprettNyDialog("4444");
-        HenvendelseData henvendelseData4 = getHenvendelseData(dialogId4);
-        dialogDAO.opprettHenvendelse(henvendelseData4);
-
-        sleep(1L);
 
         val aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(0);
 
-        assertThat(aktorer, IsIterableContainingInAnyOrder.containsInAnyOrder("1111", "2222", "3333", "4444"));
+        assertThat(aktorer, IsIterableContainingInAnyOrder.containsInAnyOrder("1111", "2222"));
     }
 
     @Test
     public void skalIkkeSendeVarselForHenvendelserSomerLagtInnAvBrukerenSelv() throws Exception {
         DialogData dialogId = opprettNyDialog();
-        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId.getId(), AKTOR_ID, AvsenderType.BRUKER).withSendt(new Date()));
-
-        sleep(1);
+        dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId.getId(), AKTOR_ID, AvsenderType.BRUKER).withSendt(getNowMinusSeconds(30)));
 
         val aktor1 = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(0); // Utenfor grace
         assertThat(aktor1.size(), equalTo(0));
 
     }
 
-    private HenvendelseData getHenvendelseData(DialogData dialogData) {
-        HenvendelseData henvendelseData = nyHenvendelse(dialogData.getId(), AKTOR_ID, AvsenderType.VEILEDER).withSendt(new Date());
+    private HenvendelseData getHenvendelseData(DialogData dialogData, Date sendt) {
+        HenvendelseData henvendelseData = nyHenvendelse(dialogData.getId(), AKTOR_ID, AvsenderType.VEILEDER).withSendt(sendt);
         dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
         return henvendelseData;
     }
-
-    @Test
-    public void sqlForUthentingAvUvarsledeParagraf8SkalIkkeHaSyntaksFeil() {
-        varselDAO.harUlesteUvarsledeParagraf8Henvendelser("123");
+    
+    private Date getNowMinusSeconds(int seconds) {
+        return DateTime.now().minusSeconds(seconds).toDate();
     }
 
-    @Test
-    public void sqlForHentAntallAktiveDialogerForVarselSkalIkkeHaSyntaksFeil() {
-        varselDAO.hentAntallAktiveDialogerForVarsel("uuid");
-    }
 }

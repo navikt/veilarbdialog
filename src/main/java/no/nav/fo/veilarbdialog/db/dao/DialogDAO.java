@@ -121,13 +121,16 @@ public class DialogDAO {
                 .orElseThrow(IllegalStateException::new);
 
         jdbc.update("insert into DIALOG (DIALOG_ID, AKTOR_ID, OPPRETTET_DATO, AKTIVITET_ID, OVERSKRIFT, HISTORISK, KONTORSPERRE_ENHET_ID, OPPDATERT) " +
-                        "values (?, ?, CURRENT_TIMESTAMP , ?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                        "values (?, ?, ? , ?, ?, ?, ?, ?)",
                 dialogId,
                 dialogData.getAktorId(),
+                dialogData.getOpprettetDato(),
                 dialogData.getAktivitetId(),
                 dialogData.getOverskrift(),
                 dialogData.isHistorisk() ? 1 : 0,
-                dialogData.getKontorsperreEnhetId());
+                dialogData.getKontorsperreEnhetId(),
+                dialogData.getOpprettetDato()
+        );
 
         dialogData.getEgenskaper()
                 .forEach(egenskapType -> updateDialogEgenskap(egenskapType, dialogId));
@@ -149,9 +152,10 @@ public class DialogDAO {
                 .orElseThrow(IllegalStateException::new);
 
         jdbc.update("insert into HENVENDELSE (HENVENDELSE_ID, DIALOG_ID, SENDT, TEKST, KONTORSPERRE_ENHET_ID, AVSENDER_ID, AVSENDER_TYPE, VIKTIG) " +
-                        "values (?, ?, CURRENT_TIMESTAMP , ?, ?, ?, ?, ?)",
+                        "values (?, ?, ? , ?, ?, ?, ?, ?)",
                 henvendelseId,
                 henvendelseData.dialogId,
+                henvendelseData.sendt,
                 henvendelseData.tekst,
                 henvendelseData.kontorsperreEnhetId,
                 henvendelseData.avsenderId,
@@ -174,7 +178,7 @@ public class DialogDAO {
         @Override
         public DialogData mapRow(ResultSet rs, int rowNum) throws SQLException {
 
-            long dialogId = rs.getLong("DIALOG_ID");
+            var dialogId = rs.getLong("DIALOG_ID");
             List<EgenskapType> egenskaper =
                     jdbc.query("select d.DIALOG_EGENSKAP_TYPE_KODE from DIALOG_EGENSKAP d where d.DIALOG_ID = ?",
                             (rsInner, rowNumInner) -> Optional

@@ -14,13 +14,15 @@ public class StatusDAO {
 
     private final JdbcTemplate jdbc;
 
-    public void markerSomLestAvVeileder(long dialogId) {
+    public void markerSomLestAvVeileder(long dialogId, Date lestTidspunkt) {
         jdbc.update("update DIALOG set " +
                         "ELDSTE_ULESTE_FOR_VEILEDER = ?, " +
-                        "LEST_AV_VEILEDER_TID = CURRENT_TIMESTAMP , " +
-                        "OPPDATERT = CURRENT_TIMESTAMP " +
+                        "LEST_AV_VEILEDER_TID = ? , " +
+                        "OPPDATERT = ? " +
                         "where DIALOG_ID = ?",
                 null,
+                lestTidspunkt,
+                lestTidspunkt,
                 dialogId
         );
     }

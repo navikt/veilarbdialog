@@ -62,7 +62,7 @@ public class AuthService {
     public void skalVereInternBruker() {
         if (!authContextHolder.erInternBruker()){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Ugyldig bruker type");
-        };
+        }
     }
 
     public boolean erEksternBruker() {
