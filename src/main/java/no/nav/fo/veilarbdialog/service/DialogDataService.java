@@ -82,10 +82,9 @@ public class DialogDataService {
 
     }
 
-    public DialogData oppdaterFerdigbehandletTidspunkt(DialogStatus dialogStatus) {
-        long dialogId = dialogStatus.dialogId;
+    public DialogData oppdaterFerdigbehandletTidspunkt(long dialogId, boolean ferdigBehandlet) {
         DialogData dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
-        return dialogStatusService.oppdaterVenterPaNavSiden(dialogData, dialogStatus);
+        return dialogStatusService.oppdaterVenterPaNavSiden(dialogData, ferdigBehandlet);
     }
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
@@ -162,9 +161,9 @@ public class DialogDataService {
                     .orElseThrow(RuntimeException::new);
         } else if (person instanceof Person.AktorId) {
             return person.get();
-        } else {
-            throw new RuntimeException("Kan ikke identifisere persontype");
         }
+
+        return null;
     }
 
     public void settKontorsperredeDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
@@ -228,7 +227,7 @@ public class DialogDataService {
 
         DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(aktorId));
         DialogData nyDialog = dialogDAO.opprettDialog(kontorsperretDialog);
-        dialogStatusService.nyDialog(nyDialog);
+        dialogStatusService.oppdaterDatavarehus(nyDialog);
 
         if (auth.erEksternBruker()) {
             funksjonelleMetrikker.nyDialogBruker(nyDialog);

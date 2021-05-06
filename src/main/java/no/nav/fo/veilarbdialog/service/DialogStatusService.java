@@ -37,7 +37,7 @@ public class DialogStatusService {
     }
 
     public DialogData markerSomLestAvVeileder(DialogData dialogData) {
-        if (dialogData.erLestAvVeileder()) {
+        if (dialogData.erNyesteHenvendelseLestAvVeileder()) {
             return dialogData;
         }
         statusDAO.markerSomLestAvVeileder(dialogData.getId());
@@ -67,19 +67,19 @@ public class DialogStatusService {
         return dialogData.isHarUlestParagraf8Henvendelse() && dialogData.getParagraf8VarselUUID() != null;
     }
 
-    public DialogData oppdaterVenterPaNavSiden(DialogData dialogData, DialogStatus nyDialogstatus) {
-        if (dialogData.erFerdigbehandlet() == nyDialogstatus.ferdigbehandlet) {
+    public DialogData oppdaterVenterPaNavSiden(DialogData dialogData, boolean ferdigBehandlet) {
+        if (dialogData.erFerdigbehandlet() == ferdigBehandlet) {
             return dialogData;
         }
 
-        if (nyDialogstatus.ferdigbehandlet) {
+        if (ferdigBehandlet) {
             statusDAO.setVenterPaNavTilNull(dialogData.getId());
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_NAV);
         } else {
             statusDAO.setVenterPaNavTilNaa(dialogData.getId());
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_NAV);
         }
-        funksjonelleMetrikker.oppdaterFerdigbehandletTidspunkt(dialogData, nyDialogstatus);
+        funksjonelleMetrikker.oppdaterFerdigbehandletTidspunkt(dialogData, ferdigBehandlet);
         return dialogDAO.hentDialog(dialogData.getId());
     }
 
@@ -111,7 +111,7 @@ public class DialogStatusService {
         dialogDAO.hentDialog(dialogData.getId());
     }
 
-    public void nyDialog(DialogData oprettet) {
+    public void oppdaterDatavarehus(DialogData oprettet) {
         dataVarehusDAO.insertEvent(oprettet, DatavarehusEvent.DIALOG_OPPRETTET);
     }
 
@@ -119,6 +119,9 @@ public class DialogStatusService {
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_VEILEDER);
 
         Date eldsteUlesteForBruker = getEldsteUlesteForBruker(dialogData, henvendelseData);
+
+        oppdaterVenterPaNavSiden(dialogData, true);
+
         statusDAO.setEldsteUlesteForBruker(dialogData.getId(), eldsteUlesteForBruker);
         funksjonelleMetrikker.nyHenvendelseVeileder(dialogData);
     }
@@ -130,7 +133,7 @@ public class DialogStatusService {
     private void nyMeldingFraBruker(DialogData dialogData, HenvendelseData henvendelseData) {
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_BRUKER);
 
-        Date eldsteUlesteForVeileder = getEldsteUlesteForVeileder(dialogData, henvendelseData);
+        Date nyesteUlestAvVeileder = hentTidspunktForNyesteUlestAvVeileder(dialogData, henvendelseData);
         Date venterPaNavSiden = dialogData.getVenterPaNavSiden();
 
         if (dialogData.erFerdigbehandlet()) {
@@ -143,14 +146,14 @@ public class DialogStatusService {
 
         statusDAO.setNyMeldingFraBruker(
                 dialogData.getId(),
-                eldsteUlesteForVeileder,
+                nyesteUlestAvVeileder,
                 venterPaNavSiden
         );
         funksjonelleMetrikker.nyHenvendelseBruker(dialogData);
     }
 
-    private Date getEldsteUlesteForVeileder(DialogData dialogData, HenvendelseData henvendelseData) {
-        return dialogData.erLestAvVeileder() ? henvendelseData.getSendt() : dialogData.getEldsteUlesteTidspunktForVeileder();
+    private Date hentTidspunktForNyesteUlestAvVeileder(DialogData dialogData, HenvendelseData henvendelseData) {
+        return dialogData.erNyesteHenvendelseLestAvVeileder() ? henvendelseData.getSendt() : dialogData.getSisteUlestAvVeilederTidspunkt();
     }
 
     public void markerSomParagraf8(long dialogId) {

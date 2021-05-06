@@ -28,7 +28,7 @@ class StatusDAOTest {
     private DialogDAO dialogDAO;
 
     @Test
-    void markerSomLestAvVeilederSkalSetteLestTidspunkt() {
+    void markerSomLestAvVeileder_SkalSetteLestTidspunkt() {
         DialogData dialogData = oppretDialogMedStatuser();
 
         Date forLest = uniktTidspunkt();
@@ -39,10 +39,10 @@ class StatusDAOTest {
 
         assertThat(lest.getLestAvVeilederTidspunkt()).isBetween(forLest, etterLest);
         assertThat(lest.getOppdatert()).isBetween(forLest, etterLest);
-        assertThat(lest.getEldsteUlesteTidspunktForVeileder()).isNull();
+        assertThat(lest.getSisteUlestAvVeilederTidspunkt()).isNull();
 
         DialogData forventet = dialogData.withOppdatert(lest.getOppdatert())
-                .withEldsteUlesteTidspunktForVeileder(null)
+                .withSisteUlestAvVeilederTidspunkt(null)
                 .withLestAvVeilederTidspunkt(lest.getLestAvVeilederTidspunkt());
 
         assertThat(lest).isEqualTo(forventet);
@@ -176,13 +176,13 @@ class StatusDAOTest {
         assertThat(nyMeldingFraBruker.getOppdatert()).isBetween(venterPaNavSiden, after);
         assertThat(nyMeldingFraBruker.getVenterPaNavSiden()).isEqualTo(venterPaNavSiden);
         assertThat(nyMeldingFraBruker.getVenterPaSvarFraBrukerSiden()).isNull();
-        assertThat(nyMeldingFraBruker.getEldsteUlesteTidspunktForVeileder()).isEqualTo(elsteUlesteForVeileder);
+        assertThat(nyMeldingFraBruker.getSisteUlestAvVeilederTidspunkt()).isEqualTo(elsteUlesteForVeileder);
 
         DialogData forventet = dialogData
                 .withOppdatert(nyMeldingFraBruker.getOppdatert())
                 .withVenterPaNavSiden(venterPaNavSiden)
                 .withVenterPaSvarFraBrukerSiden(null)
-                .withEldsteUlesteTidspunktForVeileder(elsteUlesteForVeileder);
+                .withSisteUlestAvVeilederTidspunkt(elsteUlesteForVeileder);
 
         assertThat(nyMeldingFraBruker).isEqualTo(forventet);
     }

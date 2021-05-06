@@ -16,10 +16,10 @@ public class FunksjonelleMetrikker {
 
     private final MetricsClient client;
 
-    public void oppdaterFerdigbehandletTidspunkt(DialogData dialog, DialogStatus dialogStatus) {
+    public void oppdaterFerdigbehandletTidspunkt(DialogData dialog, boolean ferdigBehandlet) {
         client.report(
                 new Event("dialog.veileder.oppdater.ferdigbehandlet")
-                        .addFieldToReport("ferdigbehandlet", dialogStatus.ferdigbehandlet)
+                        .addFieldToReport("ferdigbehandlet", ferdigBehandlet)
                         .addFieldToReport("behandlingsTid", nullSafeMsSiden(dialog.getVenterPaNavSiden()))
         );
     }
@@ -29,7 +29,7 @@ public class FunksjonelleMetrikker {
     }
 
     public void markerDialogSomLestAvVeileder(DialogData dialogData) {
-        sendMarkerSomLestMetrikk(dialogData.getEldsteUlesteTidspunktForVeileder(), "veileder");
+        sendMarkerSomLestMetrikk(dialogData.getSisteUlestAvVeilederTidspunkt(), "veileder");
     }
 
     public DialogData nyDialogBruker(DialogData dialogData) {
