@@ -151,23 +151,18 @@ public class DialogRessursTest {
     @Test
     public void forhandsorienteringPaAktivitet_dialogFinnes_oppdatererEgenskap() {
         final String aktivitetId = "123";
+        var henvendelse = new NyHenvendelseDTO()
+                .setTekst("tekst")
+                .setAktivitetId(aktivitetId);
 
         mockErEksternBruker();
-        dialogRessurs.nyHenvendelse(
-                new NyHenvendelseDTO()
-                        .setTekst("tekst")
-                        .setAktivitetId(aktivitetId)
-        );
+        dialogRessurs.nyHenvendelse(henvendelse);
 
         val opprettetDialog = dialogRessurs.hentDialoger();
         assertThat(opprettetDialog.get(0).getEgenskaper().isEmpty()).isTrue();
         assertThat(opprettetDialog.size()).isEqualTo(1);
 
-        dialogRessurs.forhandsorienteringPaAktivitet(
-                new NyHenvendelseDTO()
-                        .setTekst("tekst")
-                        .setAktivitetId(aktivitetId)
-        );
+        dialogRessurs.forhandsorienteringPaAktivitet(henvendelse);
 
         val dialogMedParagraf8 = dialogRessurs.hentDialoger();
         assertThat(dialogMedParagraf8.get(0).getEgenskaper()).contains(Egenskap.PARAGRAF8);

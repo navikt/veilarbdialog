@@ -61,12 +61,12 @@ public class DialogDataService {
         String aktorId = hentAktoerIdForPerson(bruker);
         auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
 
-        DialogData dialog = Optional.ofNullable(hentDialogMedTilgangskontroll(henvendelseData.dialogId, henvendelseData.aktivitetId))
+        DialogData dialog = Optional.ofNullable(hentDialogMedTilgangskontroll(henvendelseData.getDialogId(), henvendelseData.getAktivitetId()))
                 .orElseGet(() -> opprettDialog(henvendelseData, aktorId));
 
         slettKladd(henvendelseData, bruker);
 
-        opprettHenvendelseForDialog(dialog, henvendelseData.egenskaper != null && !henvendelseData.egenskaper.isEmpty(), henvendelseData.tekst);
+        opprettHenvendelseForDialog(dialog, henvendelseData.getEgenskaper() != null && !henvendelseData.getEgenskaper().isEmpty(), henvendelseData.getTekst());
         dialog = markerDialogSomLest(dialog.getId());
 
         sendPaaKafka(aktorId);
@@ -216,10 +216,10 @@ public class DialogDataService {
 
     public DialogData opprettDialog(NyHenvendelseDTO nyHenvendelseDTO, String aktorId) {
         var dialogData = DialogData.builder()
-                .overskrift(nyHenvendelseDTO.overskrift)
+                .overskrift(nyHenvendelseDTO.getOverskrift())
                 .aktorId(aktorId)
-                .aktivitetId(nyHenvendelseDTO.aktivitetId)
-                .egenskaper(Optional.ofNullable(nyHenvendelseDTO.egenskaper)
+                .aktivitetId(nyHenvendelseDTO.getAktivitetId())
+                .egenskaper(Optional.ofNullable(nyHenvendelseDTO.getEgenskaper())
                         .orElse(Collections.emptyList())
                         .stream()
                         .map(egenskap -> EgenskapType.valueOf(egenskap.name()))
@@ -243,7 +243,7 @@ public class DialogDataService {
 
     private void slettKladd(NyHenvendelseDTO nyHenvendelseDTO, Person person) {
         if (person instanceof Person.Fnr) {
-            kladdService.deleteKladd(person.get(), nyHenvendelseDTO.dialogId, nyHenvendelseDTO.aktivitetId);
+            kladdService.deleteKladd(person.get(), nyHenvendelseDTO.getDialogId(), nyHenvendelseDTO.getAktivitetId());
         }
     }
 }

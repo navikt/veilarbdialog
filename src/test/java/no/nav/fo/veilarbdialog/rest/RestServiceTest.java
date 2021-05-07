@@ -26,6 +26,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.Timestamp;
@@ -37,15 +38,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
 @ActiveProfiles("local")
+@Sql(
+        scripts = "/db/testdata/slett_alle_dialoger.sql",
+        executionPhase = AFTER_TEST_METHOD
+)
 public class RestServiceTest {
     final static Fnr fnr = Fnr.of("1234");
     final static AktorId aktorId = AktorId.of("4321");
     final static String veilederIdent = "V123456";
-
 
     @LocalServerPort
     private int port;
@@ -79,16 +84,6 @@ public class RestServiceTest {
     public void before() {
         RestAssured.port = port;
         MockitoAnnotations.initMocks(this);
-    }
-
-    @After
-    public void after() {
-        jdbc.update("delete from HENVENDELSE");
-        jdbc.update("delete from DIALOG");
-        jdbc.update("delete from DIALOG_AKTOR");
-        jdbc.update("delete from EVENT");
-
-
     }
 
     @Test
@@ -158,7 +153,7 @@ public class RestServiceTest {
 
         assertThat(resultatDialog).isEqualToIgnoringGivenFields(expected,"opprettetDato", "sisteDato", "henvendelser", "id");
         assertThat(resultatHenvendelse).isEqualToIgnoringGivenFields(henvendelseExpected, "sendt", "id", "dialogId");
-        assertThat(resultatDialog.id).isEqualTo(resultatHenvendelse.dialogId);
+        assertThat(resultatDialog.getId()).isEqualTo(resultatHenvendelse.getDialogId());
 
     }
 
