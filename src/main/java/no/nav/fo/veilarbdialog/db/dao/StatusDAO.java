@@ -10,6 +10,7 @@ import java.util.Date;
 @Component
 @Transactional
 @RequiredArgsConstructor
+@java.lang.SuppressWarnings("squid:S1192")
 public class StatusDAO {
 
     private final JdbcTemplate jdbc;
