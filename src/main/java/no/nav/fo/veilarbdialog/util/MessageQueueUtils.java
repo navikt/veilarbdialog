@@ -17,6 +17,10 @@ import static javax.xml.bind.Marshaller.JAXB_FRAGMENT;
 
 public class MessageQueueUtils {
 
+    private MessageQueueUtils() {
+
+    }
+
     public static MessageCreator messageCreator(final String hendelse, String uuid) {
         return session -> {
             TextMessage msg = session.createTextMessage(hendelse);

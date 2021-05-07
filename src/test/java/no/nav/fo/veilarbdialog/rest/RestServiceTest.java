@@ -120,11 +120,11 @@ public class RestServiceTest {
                 .statusCode(200)
                 .extract()
                 .as(DialogDTO.class);
-        HenvendelseDTO resultatHenvendelse = resultatDialog.henvendelser.get(0);
+        HenvendelseDTO resultatHenvendelse = resultatDialog.getHenvendelser().get(0);
 
         assertThat(resultatDialog).isEqualToIgnoringGivenFields(expected,"opprettetDato", "sisteDato", "henvendelser", "id");
         assertThat(resultatHenvendelse).isEqualToIgnoringGivenFields(henvendelseExpected, "sendt", "id", "dialogId");
-        assertThat(resultatDialog.id).isEqualTo(resultatHenvendelse.dialogId);
+        assertThat(resultatDialog.getId()).isEqualTo(resultatHenvendelse.getDialogId());
 
     }
 
@@ -154,7 +154,7 @@ public class RestServiceTest {
                 .statusCode(200)
                 .extract()
                 .as(DialogDTO.class);
-        HenvendelseDTO resultatHenvendelse = resultatDialog.henvendelser.get(0);
+        HenvendelseDTO resultatHenvendelse = resultatDialog.getHenvendelser().get(0);
 
         assertThat(resultatDialog).isEqualToIgnoringGivenFields(expected,"opprettetDato", "sisteDato", "henvendelser", "id");
         assertThat(resultatHenvendelse).isEqualToIgnoringGivenFields(henvendelseExpected, "sendt", "id", "dialogId");

@@ -12,10 +12,10 @@ import lombok.experimental.Accessors;
 @Builder(toBuilder = true)
 @With
 public class Kladd {
-    public String dialogId;
-    public String aktivitetId;
-    public String aktorId;
-    public String overskrift;
-    public String tekst;
-    public String lagtInnAv;
+    private String dialogId;
+    private String aktivitetId;
+    private String aktorId;
+    private String overskrift;
+    private String tekst;
+    private String lagtInnAv;
 }

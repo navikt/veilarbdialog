@@ -38,7 +38,7 @@ public class KafkaDAOTest {
         kafkaDAO.slettFeiletAktorId("123456789");
         List<String> alleFeilendeAktorId = kafkaDAO.hentAlleFeilendeAktorId();
 
-        assertThat(alleFeilendeAktorId.size()).isEqualTo(0);
+        assertThat(alleFeilendeAktorId.size()).isZero();
     }
 
 }
