@@ -10,7 +10,6 @@ import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
-import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.slf4j.MDC;
@@ -36,7 +35,7 @@ public class KafkaProducerService {
     private final DialogDAO dialogDAO;
 
     public void sendDialogMelding(KafkaDialogMelding kafkaDialogMelding) {
-        String kafkaStringMelding = JsonUtils.toJson(kafkaDialogMelding);
+        var kafkaStringMelding = JsonUtils.toJson(kafkaDialogMelding);
         String aktorId = kafkaDialogMelding.getAktorId();
         String topic = kafkaProperties.getEndringPaaDialogTopic();
 
@@ -55,18 +54,6 @@ public class KafkaProducerService {
                 })
                 .collect(Collectors.toList())
                 .forEach(this::sendDialogMelding);
-    }
-
-    private Callback sendDialogMeldingCallback(String aktorId, String topic) {
-        return (metadata, exception) -> {
-            if (exception == null) {
-                log.info("Bruker {} har lagt på {}-topic", aktorId, kafkaProperties.getEndringPaaDialogTopic());
-                kafkaDAO.slettFeiletAktorId(aktorId);
-            } else {
-                log.error("Kunne ikke publisere melding for bruker {} på {}-topic", aktorId, topic);
-                kafkaDAO.insertFeiletAktorId(aktorId);
-            }
-        };
     }
 
     private static String getCallIdOrRandom() {

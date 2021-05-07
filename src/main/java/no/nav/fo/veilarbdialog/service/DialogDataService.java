@@ -83,13 +83,13 @@ public class DialogDataService {
     }
 
     public DialogData oppdaterFerdigbehandletTidspunkt(long dialogId, boolean ferdigBehandlet) {
-        DialogData dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
+        var dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
         return dialogStatusService.oppdaterVenterPaNavSiden(dialogData, ferdigBehandlet);
     }
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        DialogData dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
+        var dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
         return dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
     }
 
@@ -99,7 +99,7 @@ public class DialogDataService {
 
     @Transactional(readOnly = true)
     public DialogData hentDialogMedTilgangskontroll(long dialogId) {
-        DialogData dialogData = hentDialogUtenTilgangskontroll(dialogId);
+        var dialogData = hentDialogUtenTilgangskontroll(dialogId);
         sjekkLeseTilgangTilDialog(dialogData);
         return dialogData;
     }
@@ -112,13 +112,14 @@ public class DialogDataService {
                 .avsenderType(auth.erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
                 .tekst(tekst)
                 .kontorsperreEnhetId(kvpService.kontorsperreEnhetId(dialogData.getAktorId()))
+                .sendt(new Date())
                 .build());
 
         return dialogStatusService.nyHenvendelse(dialogData, opprettet);
     }
 
     private DialogData hentDialogMedSkrivetilgangskontroll(long id) {
-        DialogData dialogData = hentDialogMedTilgangskontroll(id);
+        var dialogData = hentDialogMedTilgangskontroll(id);
         if (dialogData.isHistorisk()) {
             throw new ResponseStatusException(CONFLICT);
         }
@@ -139,12 +140,12 @@ public class DialogDataService {
     }
 
     private DialogData markerDialogSomLestAvVeileder(long dialogId) {
-        DialogData dialogData = hentDialogMedTilgangskontroll(dialogId);
+        var dialogData = hentDialogMedTilgangskontroll(dialogId);
         return dialogStatusService.markerSomLestAvVeileder(dialogData);
     }
 
     private DialogData markerDialogSomLestAvBruker(long dialogId) {
-        DialogData dialogData = hentDialogMedTilgangskontroll(dialogId);
+        var dialogData = hentDialogMedTilgangskontroll(dialogId);
         return dialogStatusService.markerSomLestAvBruker(dialogData);
     }
 
@@ -184,7 +185,7 @@ public class DialogDataService {
 
     public void sendPaaKafka(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
-        KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
+        var kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
         kafkaProducerService.sendDialogMelding(kafkaDialogMelding);
     }
 
@@ -214,7 +215,7 @@ public class DialogDataService {
     }
 
     public DialogData opprettDialog(NyHenvendelseDTO nyHenvendelseDTO, String aktorId) {
-        DialogData dialogData = DialogData.builder()
+        var dialogData = DialogData.builder()
                 .overskrift(nyHenvendelseDTO.overskrift)
                 .aktorId(aktorId)
                 .aktivitetId(nyHenvendelseDTO.aktivitetId)
@@ -223,9 +224,10 @@ public class DialogDataService {
                         .stream()
                         .map(egenskap -> EgenskapType.valueOf(egenskap.name()))
                         .collect(Collectors.toList()))
+                .opprettetDato(new Date())
                 .build();
 
-        DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(aktorId));
+        var kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(aktorId));
         DialogData nyDialog = dialogDAO.opprettDialog(kontorsperretDialog);
         dialogStatusService.oppdaterDatavarehus(nyDialog);
 

@@ -99,7 +99,7 @@ public class FilterConfig {
     }
 
     @Bean
-    public FilterRegistrationBean pingFilter() {
+    public FilterRegistrationBean<PingFilter> pingFilter() {
         // Veilarbproxy trenger dette endepunktet for å sjekke at tjenesten lever
         // /internal kan ikke brukes siden det blir stoppet før det kommer frem
 
@@ -129,7 +129,7 @@ public class FilterConfig {
     )
     public FilterRegistrationBean<OidcAuthenticationFilter> authenticationFilterRegistrationBean() {
         FilterRegistrationBean<OidcAuthenticationFilter> registration = new FilterRegistrationBean<>();
-        OidcAuthenticationFilter authenticationFilter = new OidcAuthenticationFilter(
+        var authenticationFilter = new OidcAuthenticationFilter(
                 fromConfigs(
                         openAmAuthConfig(),
                         azureAdAuthConfig(),

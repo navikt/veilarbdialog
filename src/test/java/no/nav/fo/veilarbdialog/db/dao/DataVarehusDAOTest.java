@@ -48,11 +48,6 @@ class DataVarehusDAOTest {
 
     }
 
-    @Test
-    void skal_kunne_sette_inn_alle_event_typene() {
-        Arrays.stream(DatavarehusEvent.values()).forEach(event -> dataVarehusDAO.insertEvent(nyDialog(), event));
-    }
-
     @Data
     private static class DatavarehusData {
         long dialogId;

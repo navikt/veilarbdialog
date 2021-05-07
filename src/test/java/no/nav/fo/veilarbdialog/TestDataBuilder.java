@@ -20,6 +20,7 @@ public class TestDataBuilder {
                 .id(new Random().nextLong())
                 .aktorId(aktorId)
                 .henvendelser(emptyList())
+                .opprettetDato(new Date())
                 .build();
     }
 
