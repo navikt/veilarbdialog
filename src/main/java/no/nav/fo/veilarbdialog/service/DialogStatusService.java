@@ -40,7 +40,7 @@ public class DialogStatusService {
         if (dialogData.erNyesteHenvendelseLestAvVeileder()) {
             return dialogData;
         }
-        statusDAO.markerSomLestAvVeileder(dialogData.getId());
+        statusDAO.markerSomLestAvVeileder(dialogData.getId(), new Date());
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.LEST_AV_VEILEDER);
         funksjonelleMetrikker.markerDialogSomLestAvVeileder(dialogData);
         return dialogDAO.hentDialog(dialogData.getId());

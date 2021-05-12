@@ -1,9 +1,9 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
-import lombok.val;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static no.nav.fo.IntegationTest.uniktTidspunkt;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,10 +34,9 @@ public class DialogDAOTest {
     @Test
     public void kan_opprette_dialog() {
         DialogData dialog = nyDialog();
-        Date uniktTidspunkt = uniktTidspunkt();
         DialogData dialogData = dialogDAO.opprettDialog(dialog);
-        assertThat(dialogData.getOppdatert()).isAfter(uniktTidspunkt);
-        assertThat(dialogData.getOpprettetDato()).isAfter(uniktTidspunkt);
+        assertThat(dialogData.getOppdatert()).isNotNull();
+        assertThat(dialogData.getOpprettetDato()).isNotNull();
 
         assertThat(dialogData).isEqualTo(dialog
                 .withId(dialogData.getId())
@@ -86,13 +84,11 @@ public class DialogDAOTest {
         DialogData dialogData = opprettNyDialog(AKTOR_ID_1234);
         HenvendelseData henvendelseData = nyHenvendelse(dialogData.getId(), AKTOR_ID_1234, AvsenderType.BRUKER);
 
-        Date uniktTidspunkt = uniktTidspunkt();
         long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData).getId();
         List<HenvendelseData> henvendelser = dialogDAO.hentDialog(dialogData.getId()).getHenvendelser();
 
         assertThat(henvendelser.size()).isEqualTo(1);
         HenvendelseData opprettet = henvendelser.get(0);
-        assertThat(opprettet.getSendt()).isAfter(uniktTidspunkt);
 
         HenvendelseData forventet = henvendelseData
                 .withId(henvendelseId)
@@ -135,11 +131,12 @@ public class DialogDAOTest {
 
     @Test
     public void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("gammel").build());
+        var dialog = nyDialog(AKTOR_ID_1234).toBuilder().opprettetDato(DateTime.now().minusSeconds(5).toDate()).overskrift("gammel").build();
+        dialogDAO.opprettDialog(dialog);
 
-        Date avslutningsdato = uniktTidspunkt();
+        Date avslutningsdato = new Date();
 
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").build());
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).withOpprettetDato(DateTime.now().plusSeconds(5).toDate()).toBuilder().overskrift("ny").build());
 
         List<DialogData> dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
         assertThat(dialoger).hasSize(1);
@@ -148,10 +145,10 @@ public class DialogDAOTest {
 
     @Test
     public void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("gammel").kontorsperreEnhetId("123").build());
-        Date avslutningsdato = uniktTidspunkt();
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().opprettetDato(DateTime.now().minusSeconds(5).toDate()).overskrift("gammel").kontorsperreEnhetId("123").build());
+        Date avslutningsdato = new Date();
 
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").kontorsperreEnhetId("123").build());
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").opprettetDato(DateTime.now().plusSeconds(5).toDate()).kontorsperreEnhetId("123").build());
 
         List<DialogData> dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
         assertThat(dialoger).hasSize(1);
@@ -161,11 +158,11 @@ public class DialogDAOTest {
 
     @Test
     public void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerSomIkkeErKontorsperret() {
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("med_sperre").kontorsperreEnhetId("123").build());
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("uten_sperre").build());
-        Date avslutningsdato = uniktTidspunkt();
+        var opprettet = DateTime.now().minusSeconds(5).toDate();
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("med_sperre").opprettetDato(opprettet).kontorsperreEnhetId("123").build());
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("uten_sperre").opprettetDato(opprettet).build());
 
-        val dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
+        var dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, new Date());
         assertThat(dialoger).hasSize(1);
         assertThat(dialoger.get(0).getOverskrift()).isEqualTo("med_sperre");
     }

@@ -6,6 +6,6 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class SistOppdatert {
+public class SistOppdatertDTO {
     public final Date sistOppdatert;
 }
