@@ -20,19 +20,19 @@ public class KladdDAO {
     @Transactional
     public void upsertKladd(Kladd kladd) {
 
-        Long id = Optional.ofNullable(kladd.dialogId).map(Long::parseLong).orElse(null);
+        Long id = Optional.ofNullable(kladd.getDialogId()).map(Long::parseLong).orElse(null);
         long kladdSeq = Optional
                 .ofNullable(jdbc.queryForObject("select KLADD_ID_SEQ.nextval from DUAL", Long.class))
                 .orElseThrow(IllegalStateException::new);
 
         jdbc.update("insert into KLADD (AKTOR_ID, DIALOG_ID, AKTIVITET_ID, OVERSKRIFT, TEKST, LAGT_INN_AV, OPPDATERT, UNIQUE_SEQ) " +
                         "values (?, ?, ?, ?, ?, ?, ?, ?)",
-                kladd.aktorId,
+                kladd.getAktorId(),
                 id,
-                kladd.aktivitetId,
-                kladd.overskrift,
-                kladd.tekst,
-                kladd.lagtInnAv,
+                kladd.getAktivitetId(),
+                kladd.getOverskrift(),
+                kladd.getTekst(),
+                kladd.getLagtInnAv(),
                 Timestamp.valueOf(LocalDateTime.now()),
                 kladdSeq);
 
@@ -46,12 +46,12 @@ public class KladdDAO {
                         //henvendelser på eksisterende tråer har ikke aktivitetId
                         " and (DIALOG_ID is not null or (AKTIVITET_ID = ? or (AKTIVITET_ID is null and ? is null)))  ",
                 kladdSeq,
-                kladd.lagtInnAv,
-                kladd.aktorId,
-                kladd.dialogId,
-                kladd.dialogId,
-                kladd.aktivitetId,
-                kladd.aktivitetId
+                kladd.getLagtInnAv(),
+                kladd.getAktorId(),
+                kladd.getDialogId(),
+                kladd.getDialogId(),
+                kladd.getAktivitetId(),
+                kladd.getAktivitetId()
         );
 
     }
@@ -89,10 +89,10 @@ public class KladdDAO {
                         "and (DIALOG_ID = ? or (DIALOG_ID is null and ? is null)) " +
                         //henvendelser på eksisterende tråer har ikke aktivitetId
                         "and (DIALOG_ID is not null or (AKTIVITET_ID = ? or (AKTIVITET_ID is null and ? is null)))",
-                kladd.aktorId,
-                kladd.lagtInnAv,
-                kladd.dialogId, kladd.dialogId,
-                kladd.aktivitetId, kladd.aktivitetId);
+                kladd.getAktorId(),
+                kladd.getLagtInnAv(),
+                kladd.getDialogId(), kladd.getDialogId(),
+                kladd.getAktivitetId(), kladd.getAktivitetId());
     }
 
 }

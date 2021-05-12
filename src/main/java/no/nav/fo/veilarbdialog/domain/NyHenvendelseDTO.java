@@ -10,10 +10,10 @@ import java.util.List;
 @Accessors(chain = true)
 public class NyHenvendelseDTO {
 
-    public String tekst;
-    public String dialogId;
-    public String overskrift;
-    public String aktivitetId;
-    public List<Egenskap> egenskaper = Collections.emptyList();
+    private String tekst;
+    private String dialogId;
+    private String overskrift;
+    private String aktivitetId;
+    private List<Egenskap> egenskaper = Collections.emptyList();
 
 }

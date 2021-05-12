@@ -55,7 +55,7 @@ public class KasserRessurs {
         return kjorHvisTilgang(dialogData.getAktorId(), "dialog", dialogId, () -> {
             int antallHenvendelser = dialogData.getHenvendelser()
                     .stream()
-                    .mapToInt((henvendelse) -> dialogDAO.kasserHenvendelse(henvendelse.id))
+                    .mapToInt(henvendelse -> dialogDAO.kasserHenvendelse(henvendelse.id))
                     .sum();
 
             return dialogDAO.kasserDialog(id) + antallHenvendelser;

@@ -11,21 +11,21 @@ import java.util.List;
 @Accessors(chain = true)
 public class DialogDTO {
 
-    public String id;
-    public String aktivitetId;
-    public String overskrift;
-    public String sisteTekst;
-    public Date sisteDato;
-    public Date opprettetDato;
-    public boolean historisk;
-    public boolean lest;
+    private String id;
+    private String aktivitetId;
+    private String overskrift;
+    private String sisteTekst;
+    private Date sisteDato;
+    private Date opprettetDato;
+    private boolean historisk;
+    private boolean lest;
 
     // veileder-felter
-    public boolean venterPaSvar;
-    public boolean ferdigBehandlet;
-    public Date lestAvBrukerTidspunkt;
-    public boolean erLestAvBruker;
+    private boolean venterPaSvar;
+    private boolean ferdigBehandlet;
+    private Date lestAvBrukerTidspunkt;
+    private boolean erLestAvBruker;
 
-    public List<HenvendelseDTO> henvendelser = new ArrayList<>();
-    public List<Egenskap> egenskaper = new ArrayList<>();
+    private List<HenvendelseDTO> henvendelser = new ArrayList<>();
+    private List<Egenskap> egenskaper = new ArrayList<>();
 }
