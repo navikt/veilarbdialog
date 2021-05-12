@@ -33,7 +33,7 @@ public class RestMapperTest {
         when(filter.tilgangTilEnhet(isA(HenvendelseData.class))).thenReturn(true);
         DialogDTO dialogDto = restMapper.somDialogDTO(nyDialog(nyHenvendelse(1, null)));
 
-        assertThat(dialogDto.henvendelser.size()).isEqualTo(1);
+        assertThat(dialogDto.getHenvendelser().size()).isEqualTo(1);
     }
 
     private DialogData nyDialog(HenvendelseData... henvendelser) {
@@ -50,7 +50,7 @@ public class RestMapperTest {
 
         DialogDTO dialogDto = restMapper.somDialogDTO(nyDialog(nyHenvendelse(1, null)));
 
-        assertThat(dialogDto.henvendelser.size()).isZero();
+        assertThat(dialogDto.getHenvendelser().size()).isZero();
     }
 }
 

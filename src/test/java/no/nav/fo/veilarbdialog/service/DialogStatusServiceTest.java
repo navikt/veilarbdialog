@@ -52,7 +52,7 @@ class DialogStatusServiceTest {
     void ny_henvendelse_fra_bruker_pa_dialog_med_venter_pa_nav_skal_kalle_ny_melding_fra_bruker_med_gammel_venter_pa_nav_tidspunkt() {
         DialogData dialogData = TestDataBuilder.nyDialog().withVenterPaNavSiden(new Date());
         Date uniktTidspunkt = new Date();
-        HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, uniktTidspunkt);
+        HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, new Date());
 
         dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
 
@@ -102,18 +102,6 @@ class DialogStatusServiceTest {
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
         verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_VEILEDER);
-    }
-
-    @Test
-    void marker_som_lest_av_veileder_skal_sette_eldste_uleste_for_veileder_til_null() {
-        DialogData dialogData = getDialogData().withSisteUlestAvVeilederTidspunkt(new Date());
-
-        dialogStatusService.markerSomLestAvVeileder(dialogData);
-
-        verify(statusDAO, only()).markerSomLestAvVeileder(dialogData.getId());
-        verify(dialogDAO, only()).hentDialog(dialogData.getId());
-
-        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.LEST_AV_VEILEDER);
     }
 
     @Test

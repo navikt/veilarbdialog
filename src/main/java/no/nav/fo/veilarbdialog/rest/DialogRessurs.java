@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,10 +44,10 @@ public class DialogRessurs {
     }
 
     @GetMapping("sistOppdatert")
-    public SistOppdatert sistOppdatert() {
+    public SistOppdatertDTO sistOppdatert() {
 
-        Date oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getIdent().orElse(null)); // TODO: This orElse doesn't make sense. Look at the resulting SQL...
-        return new SistOppdatert(oppdatert);
+        var oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getIdent().orElse(null));
+        return new SistOppdatertDTO(oppdatert);
 
     }
 
@@ -76,7 +75,7 @@ public class DialogRessurs {
     @PostMapping
     public DialogDTO nyHenvendelse(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
         Person bruker = getContextUserIdent();
-        DialogData dialogData = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
+        var dialogData = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
 
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
@@ -86,7 +85,7 @@ public class DialogRessurs {
 
     @PutMapping("{dialogId}/les")
     public DialogDTO markerSomLest(@PathVariable String dialogId) {
-        DialogData dialogData = dialogDataService.markerDialogSomLest(Long.parseLong(dialogId));
+        var dialogData = dialogDataService.markerDialogSomLest(Long.parseLong(dialogId));
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
@@ -96,7 +95,7 @@ public class DialogRessurs {
     public DialogDTO oppdaterVenterPaSvar(@PathVariable String dialogId, @PathVariable boolean venter) {
         auth.skalVereInternBruker();
 
-        DialogStatus dialogStatus = DialogStatus.builder()
+        var dialogStatus = DialogStatus.builder()
                 .dialogId(Long.parseLong(dialogId))
                 .venterPaSvar(venter)
                 .build();
@@ -124,7 +123,7 @@ public class DialogRessurs {
 
         auth.skalVereInternBruker();
 
-        DialogData dialog = dialogDataService.hentDialogMedTilgangskontroll(nyHenvendelseDTO.dialogId, nyHenvendelseDTO.aktivitetId);
+        var dialog = dialogDataService.hentDialogMedTilgangskontroll(nyHenvendelseDTO.getDialogId(), nyHenvendelseDTO.getAktivitetId());
         if (dialog == null) dialog = dialogDataService.opprettDialog(nyHenvendelseDTO, aktorId);
 
         long dialogId = dialog.getId();
@@ -144,6 +143,6 @@ public class DialogRessurs {
         Optional<Person> aktorId = Optional
                 .ofNullable(httpServletRequest.getParameter("aktorId"))
                 .map(Person::aktorId);
-        return fnr.orElseGet(() -> aktorId.orElseThrow(RuntimeException::new)); // TODO: Fix error handling (here: missing parameters).
+        return fnr.orElseGet(() -> aktorId.orElseThrow(RuntimeException::new));
     }
 }

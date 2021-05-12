@@ -50,19 +50,19 @@ public class KladdRessurs {
 
     private static KladdDTO somKladdDTO(Kladd kladd) {
         return KladdDTO.builder()
-                .aktivitetId(kladd.aktivitetId)
-                .dialogId(kladd.dialogId)
-                .overskrift(kladd.overskrift)
-                .tekst(kladd.tekst)
+                .aktivitetId(kladd.getAktivitetId())
+                .dialogId(kladd.getDialogId())
+                .overskrift(kladd.getOverskrift())
+                .tekst(kladd.getTekst())
                 .build();
     }
 
     private static Kladd somKladd(KladdDTO dto) {
         return Kladd.builder()
-                .aktivitetId(dto.aktivitetId)
-                .dialogId(dto.dialogId)
-                .overskrift(dto.overskrift)
-                .tekst(dto.tekst)
+                .aktivitetId(dto.getAktivitetId())
+                .dialogId(dto.getDialogId())
+                .overskrift(dto.getOverskrift())
+                .tekst(dto.getTekst())
                 .build();
     }
 

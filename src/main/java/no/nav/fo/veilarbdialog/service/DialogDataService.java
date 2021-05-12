@@ -61,12 +61,12 @@ public class DialogDataService {
         String aktorId = hentAktoerIdForPerson(bruker);
         auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
 
-        DialogData dialog = Optional.ofNullable(hentDialogMedTilgangskontroll(henvendelseData.dialogId, henvendelseData.aktivitetId))
+        DialogData dialog = Optional.ofNullable(hentDialogMedTilgangskontroll(henvendelseData.getDialogId(), henvendelseData.getAktivitetId()))
                 .orElseGet(() -> opprettDialog(henvendelseData, aktorId));
 
         slettKladd(henvendelseData, bruker);
 
-        opprettHenvendelseForDialog(dialog, henvendelseData.egenskaper != null && !henvendelseData.egenskaper.isEmpty(), henvendelseData.tekst);
+        opprettHenvendelseForDialog(dialog, henvendelseData.getEgenskaper() != null && !henvendelseData.getEgenskaper().isEmpty(), henvendelseData.getTekst());
         dialog = markerDialogSomLest(dialog.getId());
 
         sendPaaKafka(aktorId);
@@ -83,13 +83,13 @@ public class DialogDataService {
     }
 
     public DialogData oppdaterFerdigbehandletTidspunkt(long dialogId, boolean ferdigBehandlet) {
-        DialogData dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
+        var dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
         return dialogStatusService.oppdaterVenterPaNavSiden(dialogData, ferdigBehandlet);
     }
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        DialogData dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
+        var dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
         return dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
     }
 
@@ -99,7 +99,7 @@ public class DialogDataService {
 
     @Transactional(readOnly = true)
     public DialogData hentDialogMedTilgangskontroll(long dialogId) {
-        DialogData dialogData = hentDialogUtenTilgangskontroll(dialogId);
+        var dialogData = hentDialogUtenTilgangskontroll(dialogId);
         sjekkLeseTilgangTilDialog(dialogData);
         return dialogData;
     }
@@ -112,13 +112,14 @@ public class DialogDataService {
                 .avsenderType(auth.erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
                 .tekst(tekst)
                 .kontorsperreEnhetId(kvpService.kontorsperreEnhetId(dialogData.getAktorId()))
+                .sendt(new Date())
                 .build());
 
         return dialogStatusService.nyHenvendelse(dialogData, opprettet);
     }
 
     private DialogData hentDialogMedSkrivetilgangskontroll(long id) {
-        DialogData dialogData = hentDialogMedTilgangskontroll(id);
+        var dialogData = hentDialogMedTilgangskontroll(id);
         if (dialogData.isHistorisk()) {
             throw new ResponseStatusException(CONFLICT);
         }
@@ -139,12 +140,12 @@ public class DialogDataService {
     }
 
     private DialogData markerDialogSomLestAvVeileder(long dialogId) {
-        DialogData dialogData = hentDialogMedTilgangskontroll(dialogId);
+        var dialogData = hentDialogMedTilgangskontroll(dialogId);
         return dialogStatusService.markerSomLestAvVeileder(dialogData);
     }
 
     private DialogData markerDialogSomLestAvBruker(long dialogId) {
-        DialogData dialogData = hentDialogMedTilgangskontroll(dialogId);
+        var dialogData = hentDialogMedTilgangskontroll(dialogId);
         return dialogStatusService.markerSomLestAvBruker(dialogData);
     }
 
@@ -184,7 +185,7 @@ public class DialogDataService {
 
     public void sendPaaKafka(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
-        KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
+        var kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
         kafkaProducerService.sendDialogMelding(kafkaDialogMelding);
     }
 
@@ -214,18 +215,19 @@ public class DialogDataService {
     }
 
     public DialogData opprettDialog(NyHenvendelseDTO nyHenvendelseDTO, String aktorId) {
-        DialogData dialogData = DialogData.builder()
-                .overskrift(nyHenvendelseDTO.overskrift)
+        var dialogData = DialogData.builder()
+                .overskrift(nyHenvendelseDTO.getOverskrift())
                 .aktorId(aktorId)
-                .aktivitetId(nyHenvendelseDTO.aktivitetId)
-                .egenskaper(Optional.ofNullable(nyHenvendelseDTO.egenskaper)
+                .aktivitetId(nyHenvendelseDTO.getAktivitetId())
+                .egenskaper(Optional.ofNullable(nyHenvendelseDTO.getEgenskaper())
                         .orElse(Collections.emptyList())
                         .stream()
                         .map(egenskap -> EgenskapType.valueOf(egenskap.name()))
                         .collect(Collectors.toList()))
+                .opprettetDato(new Date())
                 .build();
 
-        DialogData kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(aktorId));
+        var kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(aktorId));
         DialogData nyDialog = dialogDAO.opprettDialog(kontorsperretDialog);
         dialogStatusService.oppdaterDatavarehus(nyDialog);
 
@@ -241,7 +243,7 @@ public class DialogDataService {
 
     private void slettKladd(NyHenvendelseDTO nyHenvendelseDTO, Person person) {
         if (person instanceof Person.Fnr) {
-            kladdService.deleteKladd(person.get(), nyHenvendelseDTO.dialogId, nyHenvendelseDTO.aktivitetId);
+            kladdService.deleteKladd(person.get(), nyHenvendelseDTO.getDialogId(), nyHenvendelseDTO.getAktivitetId());
         }
     }
 }

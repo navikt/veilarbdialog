@@ -29,8 +29,9 @@ public class TestApplication {
             .withEnv("MQ_QMGR_NAME", "QM1")
             .withExposedPorts(1414);
 
-    @Test
     @Sql("/db/testdata/dialog.sql")
+    @Test(expected = Test.None.class)
+    @java.lang.SuppressWarnings("squid:S2925")
     public void main()
         throws InterruptedException {
 

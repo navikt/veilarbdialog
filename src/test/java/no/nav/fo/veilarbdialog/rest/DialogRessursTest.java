@@ -94,14 +94,14 @@ public class DialogRessursTest {
         DialogDTO dialog = dialogRessurs.nyHenvendelse(nyHenvendelseDTO);
 
         //Bruker skal ikke vite om nav har ferdig behandlet dialogen
-        assertThat(dialog.venterPaSvar).isFalse();
-        assertThat(dialog.ferdigBehandlet).isTrue();
+        assertThat(dialog.isVenterPaSvar()).isFalse();
+        assertThat(dialog.isFerdigBehandlet()).isTrue();
 
         mockErVeileder();
-        DialogDTO veiledersDialog = dialogRessurs.hentDialog(dialog.id);
+        DialogDTO veiledersDialog = dialogRessurs.hentDialog(dialog.getId());
 
-        assertThat(veiledersDialog.venterPaSvar).isFalse();
-        assertThat(veiledersDialog.ferdigBehandlet).isFalse();
+        assertThat(veiledersDialog.isVenterPaSvar()).isFalse();
+        assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
     }
 
     @Test
@@ -112,8 +112,8 @@ public class DialogRessursTest {
 
         DialogDTO dialog = dialogRessurs.nyHenvendelse(nyHenvendelseDTO);
 
-        assertThat(dialog.venterPaSvar).isFalse();
-        assertThat(dialog.ferdigBehandlet).isTrue();
+        assertThat(dialog.isVenterPaSvar()).isFalse();
+        assertThat(dialog.isFerdigBehandlet()).isTrue();
     }
 
     @Test
@@ -125,9 +125,9 @@ public class DialogRessursTest {
 
         mockErVeileder();
         NyHenvendelseDTO veiledersHenvendelse = new NyHenvendelseDTO().setTekst("tekst");
-        DialogDTO veiledersDialog = dialogRessurs.nyHenvendelse(veiledersHenvendelse.setDialogId(brukersDialog.id));
+        DialogDTO veiledersDialog = dialogRessurs.nyHenvendelse(veiledersHenvendelse.setDialogId(brukersDialog.getId()));
 
-        assertThat(veiledersDialog.ferdigBehandlet).isTrue();
+        assertThat(veiledersDialog.isFerdigBehandlet()).isTrue();
     }
 
     @Test
@@ -137,37 +137,32 @@ public class DialogRessursTest {
         NyHenvendelseDTO veiledersHenvendelse = new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift");
         DialogDTO veiledersDialog = dialogRessurs.nyHenvendelse(veiledersHenvendelse);
 
-        assertThat(veiledersDialog.ferdigBehandlet).isTrue();
+        assertThat(veiledersDialog.isFerdigBehandlet()).isTrue();
 
         mockErEksternBruker();
         NyHenvendelseDTO brukersHenvendelse = new NyHenvendelseDTO().setTekst("tekst");
-        dialogRessurs.nyHenvendelse(brukersHenvendelse.setDialogId(veiledersDialog.id));
+        dialogRessurs.nyHenvendelse(brukersHenvendelse.setDialogId(veiledersDialog.getId()));
 
         mockErVeileder();
-        veiledersDialog = dialogRessurs.hentDialog(veiledersDialog.id);
-        assertThat(veiledersDialog.ferdigBehandlet).isFalse();
+        veiledersDialog = dialogRessurs.hentDialog(veiledersDialog.getId());
+        assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
     }
 
     @Test
     public void forhandsorienteringPaAktivitet_dialogFinnes_oppdatererEgenskap() {
         final String aktivitetId = "123";
+        var henvendelse = new NyHenvendelseDTO()
+                .setTekst("tekst")
+                .setAktivitetId(aktivitetId);
 
         mockErEksternBruker();
-        dialogRessurs.nyHenvendelse(
-                new NyHenvendelseDTO()
-                        .setTekst("tekst")
-                        .setAktivitetId(aktivitetId)
-        );
+        dialogRessurs.nyHenvendelse(henvendelse);
 
         val opprettetDialog = dialogRessurs.hentDialoger();
         assertThat(opprettetDialog.get(0).getEgenskaper().isEmpty()).isTrue();
         assertThat(opprettetDialog.size()).isEqualTo(1);
 
-        dialogRessurs.forhandsorienteringPaAktivitet(
-                new NyHenvendelseDTO()
-                        .setTekst("tekst")
-                        .setAktivitetId(aktivitetId)
-        );
+        dialogRessurs.forhandsorienteringPaAktivitet(henvendelse);
 
         val dialogMedParagraf8 = dialogRessurs.hentDialoger();
         assertThat(dialogMedParagraf8.get(0).getEgenskaper()).contains(Egenskap.PARAGRAF8);
