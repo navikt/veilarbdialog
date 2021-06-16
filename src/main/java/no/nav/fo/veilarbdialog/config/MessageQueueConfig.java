@@ -1,8 +1,10 @@
 package no.nav.fo.veilarbdialog.config;
 
 import com.ibm.msg.client.jms.JmsConnectionFactory;
+import com.ibm.msg.client.jms.JmsConstants;
 import com.ibm.msg.client.jms.JmsFactoryFactory;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.common.utils.Credentials;
 import no.nav.sbl.dialogarena.types.Pingable;
 import no.nav.sbl.dialogarena.types.Pingable.Ping;
 import no.nav.sbl.dialogarena.types.Pingable.Ping.PingMetadata;
@@ -153,7 +155,7 @@ public class MessageQueueConfig {
     }
 
     @Bean
-    public ConnectionFactory connectionFactory()
+    public ConnectionFactory connectionFactory(Credentials credentials)
             throws JMSException {
 
         JmsConnectionFactory connectionFactory = JmsFactoryFactory
@@ -164,7 +166,10 @@ public class MessageQueueConfig {
         connectionFactory.setStringProperty(WMQ_CHANNEL, mqChannel);
         connectionFactory.setIntProperty(WMQ_CONNECTION_MODE, WMQ_CM_CLIENT);
         connectionFactory.setStringProperty(WMQ_QUEUE_MANAGER, mqGatewayName);
-        connectionFactory.setStringProperty(USERID, mqUserId);
+        connectionFactory.setStringProperty(USERID, credentials.username);
+        connectionFactory.setStringProperty(PASSWORD, credentials.password);
+        connectionFactory.setBooleanProperty(JmsConstants.USER_AUTHENTICATION_MQCSP, true);
+
         return connectionFactory;
 
     }
