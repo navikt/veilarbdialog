@@ -84,7 +84,7 @@ public class DialogStatusService {
     }
 
     public DialogData oppdaterVenterPaSvarFraBrukerSiden(DialogData dialogData, DialogStatus dialogStatus) {
-        if (dialogData.venterPaSvar() == dialogStatus.venterPaSvar) {
+        if (dialogData.venterPaSvarFraBruker() == dialogStatus.venterPaSvar) {
             return dialogData;
         }
 
@@ -104,7 +104,7 @@ public class DialogStatusService {
         if (!dialogData.erFerdigbehandlet()) {
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_NAV);
         }
-        if (dialogData.venterPaSvar()) {
+        if (dialogData.venterPaSvarFraBruker()) {
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
         }
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.SATT_TIL_HISTORISK);
@@ -140,7 +140,7 @@ public class DialogStatusService {
             venterPaNavSiden = henvendelseData.getSendt();
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_NAV);
         }
-        if (dialogData.venterPaSvar()) {
+        if (dialogData.venterPaSvarFraBruker()) {
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
         }
 
