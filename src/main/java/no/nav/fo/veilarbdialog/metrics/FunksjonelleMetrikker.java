@@ -54,7 +54,7 @@ public class FunksjonelleMetrikker {
 
     public void nyHenvendelseBruker(DialogData dialogData) {
         Event event = new Event("henvendelse.bruker.ny")
-                .addFieldToReport("erSvar", dialogData.venterPaSvar());
+                .addFieldToReport("erSvar", dialogData.venterPaSvarFraBruker());
         if (dialogData.getVenterPaSvarFraBrukerSiden() != null) {
             event.addFieldToReport("svartid", nullSafeMsSiden(dialogData.getVenterPaSvarFraBrukerSiden()));
         }

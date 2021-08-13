@@ -36,7 +36,7 @@ class RestMapper {
                 .setId(Long.toString(dialogData.getId()))
                 .setOverskrift(dialogData.getOverskrift())
                 .setAktivitetId(dialogData.getAktivitetId())
-                .setVenterPaSvar(dialogData.venterPaSvar())
+                .setVenterPaSvar(dialogData.venterPaSvarFraBruker())
                 .setOpprettetDato(dialogData.getOpprettetDato())
                 .setEgenskaper(dialogData.getEgenskaper()
                         .stream()
