@@ -19,14 +19,20 @@ public class KafkaDialogMelding {
 
     public static KafkaDialogMelding mapTilDialogData(List<DialogData> dialoger, String aktorId) {
         return KafkaDialogMelding.builder()
+                // Venter på svar fra bruker.
+                // Oversikten bryr seg bare om denne har en dato eller er null
                 .tidspunktEldsteVentende(dialoger.stream()
-                        .filter(DialogData::venterPaSvar)
+                        .filter(dialog -> !dialog.isHistorisk())
+                        .filter(DialogData::venterPaSvarFraBruker)
                         .map(DialogData::getVenterPaSvarFraBrukerSiden)
                         .min(naturalOrder())
                         .map(dato -> LocalDateTime.ofInstant(dato.toInstant(), ZoneId.systemDefault()))
                         .orElse(null)
                 )
+                // Venter på svar fra nav.
+                // Oversikten bryr seg bare om denne har en dato eller er null
                 .tidspunktEldsteUbehandlede(dialoger.stream()
+                        .filter(dialog -> !dialog.isHistorisk())
                         .filter(DialogData::erUbehandlet)
                         .map(DialogData::getVenterPaNavSiden)
                         .min(naturalOrder())

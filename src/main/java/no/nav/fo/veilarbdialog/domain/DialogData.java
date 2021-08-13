@@ -57,7 +57,7 @@ public class DialogData {
         return !erFerdigbehandlet();
     }
 
-    public boolean venterPaSvar() {
+    public boolean venterPaSvarFraBruker() {
         return venterPaSvarFraBrukerSiden != null;
     }
 
