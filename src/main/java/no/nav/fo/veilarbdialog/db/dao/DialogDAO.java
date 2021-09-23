@@ -165,9 +165,7 @@ public class DialogDAO {
 
     @Transactional(readOnly = true)
     public List<String> hentAktorIderTilBrukereMedAktiveDialoger() {
-        return jdbc.query("select distinct AKTOR_ID from DIALOG where HISTORISK = 0",
-                (rs, ignored) -> rs.getString("AKTOR_ID")
-        );
+        return jdbc.queryForList("select distinct AKTOR_ID from DIALOG where HISTORISK = 0", String.class);
     }
 
     private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
