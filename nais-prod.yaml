@@ -49,6 +49,8 @@ spec:
       - kvPath: /kv/prod/fss/veilarbdialog/default
         mountPath: /var/run/secrets/nais.io/vault
   webproxy: true
+  secureLogs:
+    enabled: true
   env:
     - name: APP_ENVIRONMENT_NAME
       value: p
