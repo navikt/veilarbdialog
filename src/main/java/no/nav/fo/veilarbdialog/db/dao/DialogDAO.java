@@ -2,10 +2,7 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.fo.veilarbdialog.domain.AvsenderType;
-import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.EgenskapType;
-import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -164,6 +161,11 @@ public class DialogDAO {
 
         log.info("opprettet henvendelse id:{} data:{}", henvendelseId, henvendelseData);
         return hentHenvendelse(henvendelseId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> hentAktorIderTilBrukereMedAktiveDialoger() {
+        return jdbc.queryForList("select distinct AKTOR_ID from DIALOG where HISTORISK = 0", String.class);
     }
 
     private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {

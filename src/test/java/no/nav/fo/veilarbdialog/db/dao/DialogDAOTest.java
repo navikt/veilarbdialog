@@ -188,8 +188,31 @@ public class DialogDAOTest {
         assertThat(dialogStr).doesNotContain(sensitivtInnhold);
     }
 
+
+    @Test
+    public void skalHenteBrukereMedAktiveDialoger() {
+        opprettNyDialog("1", false);
+        opprettNyDialog("1", false);
+        opprettNyDialog("2", false);
+        opprettNyDialog("2", true);
+        opprettNyDialog("3", true);
+        opprettNyDialog("4", true);
+        opprettNyDialog("4", true);
+        opprettNyDialog("5", false);
+
+        List<String> brukere = dialogDAO.hentAktorIderTilBrukereMedAktiveDialoger();
+
+        assertThat(brukere)
+                .hasSize(3)
+                .containsExactlyInAnyOrder("1", "2", "5");
+    }
+
+    private DialogData opprettNyDialog(String aktorId, boolean historisk) {
+        return dialogDAO.opprettDialog(nyDialog(aktorId).withHistorisk(historisk));
+    }
+
     private DialogData opprettNyDialog(String aktorId) {
-        return dialogDAO.opprettDialog(nyDialog(aktorId));
+        return opprettNyDialog(aktorId, false);
     }
 
 }
