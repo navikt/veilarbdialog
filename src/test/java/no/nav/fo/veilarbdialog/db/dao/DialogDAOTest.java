@@ -202,8 +202,9 @@ public class DialogDAOTest {
 
         List<String> brukere = dialogDAO.hentAktorIderTilBrukereMedAktiveDialoger();
 
-        assertThat(brukere).hasSize(3);
-        assertThat(brukere).containsExactlyInAnyOrder("1", "2", "5");
+        assertThat(brukere)
+                .hasSize(3)
+                .containsExactlyInAnyOrder("1", "2", "5");
     }
 
     private DialogData opprettNyDialog(String aktorId, boolean historisk) {

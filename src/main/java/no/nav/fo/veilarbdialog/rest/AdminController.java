@@ -15,7 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class AdminController {
 
-    public final static String PTO_ADMIN_SERVICE_USER = "srvpto-admin";
+    public static final String PTO_ADMIN_SERVICE_USER = "srvpto-admin";
 
     private final AuthContextHolder authContextHolder;
 
