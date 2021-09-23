@@ -18,12 +18,13 @@ import java.util.List;
 
 import static no.nav.common.auth.Constants.*;
 import static no.nav.common.auth.oidc.filter.OidcAuthenticator.fromConfigs;
+import static no.nav.fo.veilarbdialog.rest.AdminController.PTO_ADMIN_SERVICE_USER;
 
 @Configuration
 public class FilterConfig {
 
     private static final List<String> ALLOWED_SERVICE_USERS = List.of(
-            "srvveilarbportefolje", "srvveilarbdirigent", "srvveilarboppfolging"
+            "srvveilarbportefolje", "srvveilarbdirigent", "srvveilarboppfolging", PTO_ADMIN_SERVICE_USER
     );
 
     @Value("${spring.application.name}")
