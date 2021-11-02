@@ -2,7 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import no.nav.common.kafka.producer.KafkaProducerClient;
 import no.nav.common.kafka.producer.KafkaProducerClientImpl;
-import no.nav.fo.veilarbdialog.config.KafkaProperties;
+import no.nav.fo.veilarbdialog.config.KafkaOnpremProperties;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
@@ -27,7 +27,7 @@ public class KafkaProducerServiceTest {
     public void setup() {
         KafkaProducerClient<String, String> producerClient = new KafkaProducerClientImpl<>(kafkaProducer);
 
-        KafkaProperties kafkaProperties = new KafkaProperties();
+        KafkaOnpremProperties kafkaProperties = new KafkaOnpremProperties();
         kafkaProperties.setEndringPaaDialogTopic("aapen-fo-endringPaaDialog-v1-test");
 
         kafkaProducerService = new KafkaProducerService(kafkaProperties, producerClient, kafkaDAO, mock(DialogDAO.class));

@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.service;
+package no.nav.fo.veilarbdialog.config.kafka.onprem;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -7,9 +7,10 @@ import no.nav.common.kafka.consumer.TopicConsumer;
 import no.nav.common.kafka.consumer.util.KafkaConsumerClientBuilder;
 import no.nav.common.kafka.producer.KafkaProducerClient;
 import no.nav.common.kafka.producer.util.KafkaProducerClientBuilder;
-import no.nav.fo.veilarbdialog.config.KafkaProperties;
+import no.nav.fo.veilarbdialog.config.KafkaOnpremProperties;
 import no.nav.fo.veilarbdialog.domain.kafka.KvpAvsluttetKafkaDTO;
 import no.nav.fo.veilarbdialog.domain.kafka.OppfolgingAvsluttetKafkaDTO;
+import no.nav.fo.veilarbdialog.service.KafkaConsumerService;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -18,7 +19,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
 
-import javax.annotation.PostConstruct;
 import java.util.Map;
 import java.util.Properties;
 
@@ -32,8 +32,8 @@ import static org.apache.kafka.clients.producer.ProducerConfig.*;
 public class KafkaTestConfig {
 
     @Bean
-    public KafkaProperties kafkaProperties(EmbeddedKafkaBroker embeddedKafkaBroker) {
-        KafkaProperties kafkaProperties = new KafkaProperties();
+    public KafkaOnpremProperties kafkaProperties(EmbeddedKafkaBroker embeddedKafkaBroker) {
+        KafkaOnpremProperties kafkaProperties = new KafkaOnpremProperties();
 
         kafkaProperties.setBrokersUrl(embeddedKafkaBroker.getBrokersAsString());
         kafkaProperties.setEndringPaaDialogTopic("aapen-fo-endringPaaDialog-v1-test");
@@ -52,7 +52,7 @@ public class KafkaTestConfig {
     @Bean
     public Map<String, TopicConsumer<String, String>> topicConsumers(
             KafkaConsumerService kafkaConsumerService,
-            KafkaProperties kafkaProperties
+            KafkaOnpremProperties kafkaProperties
     ) {
         return Map.of(
                 kafkaProperties.getOppfolgingAvsluttetTopic(),
@@ -66,7 +66,7 @@ public class KafkaTestConfig {
     @Bean
     public KafkaConsumerClient<String, String> consumerClient(
             Map<String, TopicConsumer<String, String>> topicConsumers,
-            KafkaProperties kafkaProperties,
+            KafkaOnpremProperties kafkaProperties,
             MeterRegistry meterRegistry
     ) {
         return KafkaConsumerClientBuilder.<String, String>builder()
@@ -78,7 +78,7 @@ public class KafkaTestConfig {
     }
 
     @Bean
-    public KafkaProducerClient<String, String> producerClient(KafkaProperties kafkaProperties, MeterRegistry meterRegistry) {
+    public KafkaProducerClient<String, String> producerClient(KafkaOnpremProperties kafkaProperties, MeterRegistry meterRegistry) {
         return KafkaProducerClientBuilder.<String, String>builder()
                 .withMetrics(meterRegistry)
                 .withProperties(kafkaProducerProperties(kafkaProperties.getBrokersUrl()))
