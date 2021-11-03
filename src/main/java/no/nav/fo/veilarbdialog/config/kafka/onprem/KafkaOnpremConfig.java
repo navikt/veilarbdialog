@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.config;
+package no.nav.fo.veilarbdialog.config.kafka.onprem;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.common.kafka.consumer.KafkaConsumerClient;
@@ -25,8 +25,8 @@ import static no.nav.common.kafka.util.KafkaPropertiesPreset.onPremDefaultProduc
 
 @Profile("!local")
 @Configuration
-@EnableConfigurationProperties({KafkaProperties.class})
-public class KafkaConfig {
+@EnableConfigurationProperties({KafkaOnpremProperties.class})
+public class KafkaOnpremConfig {
 
     public static final String CONSUMER_GROUP_ID = "veilarbdialog-consumer";
     public static final String PRODUCER_CLIENT_ID = "veilarbdialog-producer";
@@ -37,7 +37,7 @@ public class KafkaConfig {
     @Bean
     public Map<String, TopicConsumer<String, String>> topicConsumers(
             KafkaConsumerService kafkaConsumerService,
-            KafkaProperties kafkaProperties
+            KafkaOnpremProperties kafkaProperties
     ) {
         return Map.of(
                 kafkaProperties.oppfolgingAvsluttetTopic,
@@ -52,7 +52,7 @@ public class KafkaConfig {
     public KafkaConsumerClient<String, String> consumerClient(
             Map<String, TopicConsumer<String, String>> topicConsumers,
             Credentials credentials,
-            KafkaProperties kafkaProperties,
+            KafkaOnpremProperties kafkaProperties,
             MeterRegistry meterRegistry
     ) {
         return KafkaConsumerClientBuilder.<String, String>builder()
@@ -64,7 +64,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaProducerClient<String, String> producerClient(KafkaProperties kafkaProperties, Credentials credentials, MeterRegistry meterRegistry) {
+    public KafkaProducerClient<String, String> producerClient(KafkaOnpremProperties kafkaProperties, Credentials credentials, MeterRegistry meterRegistry) {
         return KafkaProducerClientBuilder.<String, String>builder()
                 .withMetrics(meterRegistry)
                 .withProperties(onPremDefaultProducerProperties(PRODUCER_CLIENT_ID, kafkaProperties.getBrokersUrl(), credentials))

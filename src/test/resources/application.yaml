@@ -5,6 +5,18 @@ spring:
     enabled: false
   main:
     allow-bean-definition-overriding: true
+  kafka:
+    producer:
+      properties:
+        enable:
+          idempotence: 'true'
+        max:
+          block:
+            ms: '2000'
+      acks: all
+      batch-size: '1'
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
+
 
 server:
   servlet:
@@ -26,7 +38,7 @@ application:
       clientId: LOGINSERVICE_OIDC_CLIENT_ID
       discoveryUrl: http://localhost:8080/AAD_DISCOVERY_URL
   datasource:
-    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1;MODE=Oracle
+    url: jdbc:h2:file:~/database/veilarbdialog;DB_CLOSE_DELAY=-1;MODE=Oracle;AUTO_SERVER=TRUE;
     username: sa
     password: sa
   dialog:
@@ -65,3 +77,7 @@ application:
   veilarboppfolging:
     api:
       url: http://localhost:8080/VEILARBOPPFOLGINGAPI_URL
+  topic:
+    ut:
+      dialog:
+        raw: dialogRawTopic
