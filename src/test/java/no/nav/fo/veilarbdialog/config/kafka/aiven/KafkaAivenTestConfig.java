@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 public class KafkaAivenTestConfig {
 
 
-    // @TODO virker ikke!
     @Bean
     @Primary
     KafkaProperties kafkaProperties(KafkaProperties kafkaProperties, EmbeddedKafkaBroker embeddedKafkaBroker) {

@@ -7,7 +7,6 @@ import no.nav.common.kafka.consumer.TopicConsumer;
 import no.nav.common.kafka.consumer.util.KafkaConsumerClientBuilder;
 import no.nav.common.kafka.producer.KafkaProducerClient;
 import no.nav.common.kafka.producer.util.KafkaProducerClientBuilder;
-import no.nav.fo.veilarbdialog.config.KafkaOnpremProperties;
 import no.nav.fo.veilarbdialog.domain.kafka.KvpAvsluttetKafkaDTO;
 import no.nav.fo.veilarbdialog.domain.kafka.OppfolgingAvsluttetKafkaDTO;
 import no.nav.fo.veilarbdialog.service.KafkaConsumerService;
@@ -29,10 +28,11 @@ import static org.apache.kafka.clients.producer.ProducerConfig.*;
 
 @Configuration
 @Slf4j
-public class KafkaTestConfig {
+public class KafkaOnpremTestConfig {
 
     @Bean
-    public KafkaOnpremProperties kafkaProperties(EmbeddedKafkaBroker embeddedKafkaBroker) {
+    @Primary
+    public KafkaOnpremProperties kafkaOnpremProperties(EmbeddedKafkaBroker embeddedKafkaBroker) {
         KafkaOnpremProperties kafkaProperties = new KafkaOnpremProperties();
 
         kafkaProperties.setBrokersUrl(embeddedKafkaBroker.getBrokersAsString());
@@ -41,12 +41,6 @@ public class KafkaTestConfig {
         kafkaProperties.setOppfolgingAvsluttetTopic("aapen-arbeidsrettetOppfolging-oppfolgingAvsluttet-v1-test");
 
         return kafkaProperties;
-    }
-
-    @Primary
-    @Bean
-    EmbeddedKafkaBroker embeddedKafka() {
-        return new EmbeddedKafkaBroker(1);
     }
 
     @Bean
@@ -78,10 +72,10 @@ public class KafkaTestConfig {
     }
 
     @Bean
-    public KafkaProducerClient<String, String> producerClient(KafkaOnpremProperties kafkaProperties, MeterRegistry meterRegistry) {
+    public KafkaProducerClient<String, String> producerClient(KafkaOnpremProperties kafkaOnpremProperties, MeterRegistry meterRegistry) {
         return KafkaProducerClientBuilder.<String, String>builder()
                 .withMetrics(meterRegistry)
-                .withProperties(kafkaProducerProperties(kafkaProperties.getBrokersUrl()))
+                .withProperties(kafkaProducerProperties(kafkaOnpremProperties.getBrokersUrl()))
                 .build();
     }
 

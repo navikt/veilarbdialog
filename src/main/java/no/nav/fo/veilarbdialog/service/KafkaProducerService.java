@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.common.json.JsonUtils;
 import no.nav.common.kafka.producer.KafkaProducerClient;
 import no.nav.common.utils.IdUtils;
-import no.nav.fo.veilarbdialog.config.KafkaOnpremProperties;
+import no.nav.fo.veilarbdialog.config.kafka.onprem.KafkaOnpremProperties;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;

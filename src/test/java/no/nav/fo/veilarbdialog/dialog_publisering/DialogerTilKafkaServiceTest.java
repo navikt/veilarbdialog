@@ -2,13 +2,11 @@ package no.nav.fo.veilarbdialog.dialog_publisering;
 
 import lombok.Builder;
 import lombok.Data;
-import no.nav.fo.veilarbdialog.config.KafkaJsonTemplate;
-import no.nav.fo.veilarbdialog.config.kafka.aiven.KafkaTestService;
+import no.nav.fo.veilarbdialog.config.kafka.aiven.KafkaJsonTemplate;
+import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.assertj.core.api.Assertions;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.Duration;
+import static org.springframework.kafka.test.utils.KafkaTestUtils.getSingleRecord;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
@@ -40,16 +38,15 @@ public class DialogerTilKafkaServiceTest {
 
 
     @Test
-    @Ignore("Feiler fordi no.nav.fo.veilarbdialog.config.kafka.aiven.KafkaAivenTestConfig.kafkaProperties @Primary annotasjon ikke funker her")
-    public void produceConsume() {
+    public void verifiserKafkaAivenConfig() {
         Consumer<String, TempDto> consumer = kafkaTestService.createStringJsonConsumer(dialogTopic);
 
-        producer.send(dialogTopic, TempDto.builder().dialogId("1").tekst("Tekst").build());
+        TempDto tempDto = TempDto.builder().dialogId("1").tekst("Tekst").build();
+        producer.send(dialogTopic, tempDto);
 
-        ConsumerRecords<String, TempDto> poll = consumer.poll(Duration.ofMillis(100));
+        ConsumerRecord<String, TempDto> singleRecord = getSingleRecord(consumer, dialogTopic, 500);
 
-        Assertions.assertThat(poll.count()).isEqualTo(1);
-
+        Assertions.assertThat(singleRecord.value()).isEqualTo(tempDto);
 
     }
 

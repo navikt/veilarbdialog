@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.config;
+package no.nav.fo.veilarbdialog.config.kafka.onprem;
 
 import lombok.Getter;
 import lombok.Setter;

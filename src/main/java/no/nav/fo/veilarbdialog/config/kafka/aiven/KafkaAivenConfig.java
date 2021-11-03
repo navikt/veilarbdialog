@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.config;
+package no.nav.fo.veilarbdialog.config.kafka.aiven;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;

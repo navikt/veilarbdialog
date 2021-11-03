@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.config.kafka.aiven;
+package no.nav.fo.veilarbdialog.util;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;

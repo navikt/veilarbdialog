@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.config;
+package no.nav.fo.veilarbdialog.config.kafka.onprem;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import no.nav.common.kafka.consumer.KafkaConsumerClient;

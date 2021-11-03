@@ -2,7 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import no.nav.common.kafka.producer.KafkaProducerClient;
 import no.nav.common.kafka.producer.KafkaProducerClientImpl;
-import no.nav.fo.veilarbdialog.config.KafkaOnpremProperties;
+import no.nav.fo.veilarbdialog.config.kafka.onprem.KafkaOnpremProperties;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
