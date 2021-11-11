@@ -56,6 +56,7 @@ public class KafkaOnpremConfig {
     }
 
     @Bean
+    @Profile("!dev")
     public KafkaProducerClient<String, String> producerClient(KafkaOnpremProperties kafkaProperties, Credentials credentials, MeterRegistry meterRegistry) {
         return KafkaProducerClientBuilder.<String, String>builder()
                 .withMetrics(meterRegistry)

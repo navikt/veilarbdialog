@@ -14,8 +14,6 @@ import org.springframework.kafka.test.EmbeddedKafkaBroker;
 
 import java.util.Properties;
 
-import static org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG;
 import static org.apache.kafka.clients.producer.ProducerConfig.*;
 
 @Configuration
@@ -37,6 +35,7 @@ public class KafkaOnpremTestConfig {
 
 
     @Bean
+    @Primary
     public KafkaProducerClient<String, String> producerClient(KafkaOnpremProperties kafkaOnpremProperties, MeterRegistry meterRegistry) {
         return KafkaProducerClientBuilder.<String, String>builder()
                 .withMetrics(meterRegistry)

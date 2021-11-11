@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: dev
   application:
     name: "veilarbdialog"
   flyway:
@@ -47,6 +49,9 @@ application:
     broker:
       url: http://localhost:8080/KAFKA_BROKERS_URL
     topic: aapen-fo-endringPaaDialog-v1-APP_ENVIRONMENT_NAME
+    endringPaaDialogTopic: endringPaaDialogTopic
+    oppfolgingAvsluttetTopic: oppfolgingAvsluttetTopic
+    kvpAvsluttetTopic: kvpAvsluttetTopic
   kvp:
     url: http://localhost:8080/VEILARBOPPFOLGINGAPI_URL
   mq:

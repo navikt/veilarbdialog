@@ -19,7 +19,7 @@ public class BehandleKvpAvsluttetConsumerService extends TopicConsumerConfig<Str
     private final DialogDataService dialogDataService;
 
     @Autowired
-    public BehandleKvpAvsluttetConsumerService(@Lazy DialogDataService dialogDataService, @Value("application.kafka.kvpAvsluttetTopic") String topic) {
+    public BehandleKvpAvsluttetConsumerService(@Lazy DialogDataService dialogDataService, @Value("${application.kafka.kvpAvsluttetTopic}") String topic) {
         this.dialogDataService = dialogDataService;
         this.setTopic(topic);
         this.setKeyDeserializer(Deserializers.stringDeserializer());

@@ -17,7 +17,7 @@ public class BehandleOppfolgingAvsluttetConsumerService extends TopicConsumerCon
 
     private final DialogDataService dialogDataService;
 
-    public BehandleOppfolgingAvsluttetConsumerService(@Value("application.kafka.oppfolgingAvsluttetTopic") String topic, @Lazy DialogDataService dialogDataService) {
+    public BehandleOppfolgingAvsluttetConsumerService(@Value("${application.kafka.oppfolgingAvsluttetTopic}") String topic, @Lazy DialogDataService dialogDataService) {
         this.dialogDataService = dialogDataService;
         this.setTopic(topic);
         this.setKeyDeserializer(Deserializers.stringDeserializer());
