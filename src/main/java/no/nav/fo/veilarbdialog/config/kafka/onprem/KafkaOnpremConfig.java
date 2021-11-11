@@ -31,6 +31,7 @@ public class KafkaOnpremConfig {
     KafkaConsumerClient consumerClient;
 
     @Bean
+    @Profile("!dev")
     public KafkaConsumerClient consumerClient(
             List<TopicConsumerConfig<?,?>> topicConfigs,
             Credentials credentials,

@@ -11,6 +11,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.ZonedDateTime;
@@ -38,10 +41,12 @@ public class BehandleKvpAvsluttetConsumerServiceTest {
     @Value("${application.kafka.kvpAvsluttetTopic}")
     String kvpAvsluttetTopic;
 
+    @Autowired
+    ConsumerFactory consumerFactory;
+
     @SneakyThrows
     @Test
     public void kanari() {
-
         KvpAvsluttetKafkaDTO kvpAvsluttetKafkaDTO = KvpAvsluttetKafkaDTO.builder()
                 .aktorId(AKTORID)
                 .avsluttetAv(SAKSBEHANDLER)
@@ -52,7 +57,7 @@ public class BehandleKvpAvsluttetConsumerServiceTest {
         ProducerRecord<String, String> producerRecord = new ProducerRecord<>(kvpAvsluttetTopic, AKTORID, JsonUtils.toJson(kvpAvsluttetKafkaDTO));
         Future<RecordMetadata> recordMetadataFuture = producerClient.send(producerRecord);
         RecordMetadata recordMetadata = recordMetadataFuture.get(3, TimeUnit.SECONDS);
-
+        Thread.sleep(1000);
     }
 
 }
