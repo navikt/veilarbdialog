@@ -33,7 +33,7 @@ public class DialogerTilKafkaServiceTest {
     @Autowired
     KafkaJsonTemplate<TempDto> producer;
 
-    @Value("topic.ut.dialog.raw")
+    @Value("${application.topic.ut.dialog.raw}")
     String dialogTopic;
 
 
