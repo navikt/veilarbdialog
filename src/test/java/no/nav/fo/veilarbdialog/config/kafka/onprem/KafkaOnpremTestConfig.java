@@ -27,7 +27,7 @@ public class KafkaOnpremTestConfig {
     }
 
     @Bean
-    Properties onPremConsumerProperties(KafkaOnpremProperties kafkaOnpremProperties, EmbeddedKafkaBroker embeddedKafka) {
+    Properties onPremConsumerProperties(EmbeddedKafkaBroker embeddedKafka) {
         return KafkaPropertiesBuilder.consumerBuilder()
                 .withBaseProperties()
                 .withConsumerGroupId(CONSUMER_GROUP_ID)
@@ -38,7 +38,7 @@ public class KafkaOnpremTestConfig {
     }
 
     @Bean
-    Properties onPremProducerProperties(KafkaOnpremProperties kafkaOnpremProperties, EmbeddedKafkaBroker embeddedKafka) {
+    Properties onPremProducerProperties(EmbeddedKafkaBroker embeddedKafka) {
         return KafkaPropertiesBuilder.producerBuilder()
                 .withBaseProperties()
                 .withProducerId(PRODUCER_CLIENT_ID)

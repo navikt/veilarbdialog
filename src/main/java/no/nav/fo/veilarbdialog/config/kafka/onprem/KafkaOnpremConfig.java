@@ -39,9 +39,7 @@ public class KafkaOnpremConfig {
                 .withProperties(onPremConsumerProperties)
                 .withToggle(() -> unleashClient.isEnabled(ONPREM_KAFKA_DISABLED));
 
-        topicConfigs.forEach(it -> {
-            clientBuilder.withTopicConfig(new KafkaConsumerClientBuilder.TopicConfig().withConsumerConfig(it).withMetrics(meterRegistry).withLogging());
-        });
+        topicConfigs.forEach(it -> clientBuilder.withTopicConfig(new KafkaConsumerClientBuilder.TopicConfig().withConsumerConfig(it).withMetrics(meterRegistry).withLogging()));
 
         var client = clientBuilder.build();
 
@@ -59,13 +57,13 @@ public class KafkaOnpremConfig {
     }
 
     @Bean
-    @Profile("!dev")
+    @Profile("!local")
     Properties onPremProducerProperties(KafkaOnpremProperties kafkaOnpremProperties, Credentials credentials) {
         return onPremDefaultProducerProperties(PRODUCER_CLIENT_ID, kafkaOnpremProperties.brokersUrl, credentials);
     }
 
     @Bean
-    @Profile("!dev")
+    @Profile("!local")
     Properties onPremConsumerProperties(KafkaOnpremProperties kafkaOnpremProperties, Credentials credentials) {
         return onPremDefaultConsumerProperties(CONSUMER_GROUP_ID, kafkaOnpremProperties.getBrokersUrl(), credentials);
     }
