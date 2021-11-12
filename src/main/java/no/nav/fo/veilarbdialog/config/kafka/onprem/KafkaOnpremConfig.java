@@ -1,25 +1,24 @@
 package no.nav.fo.veilarbdialog.config.kafka.onprem;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.kafka.consumer.KafkaConsumerClient;
 import no.nav.common.kafka.consumer.util.KafkaConsumerClientBuilder;
 import no.nav.common.kafka.consumer.util.TopicConsumerConfig;
 import no.nav.common.kafka.producer.KafkaProducerClient;
 import no.nav.common.kafka.producer.util.KafkaProducerClientBuilder;
 import no.nav.common.utils.Credentials;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Properties;
 
 import static no.nav.common.kafka.util.KafkaPropertiesPreset.onPremDefaultConsumerProperties;
 import static no.nav.common.kafka.util.KafkaPropertiesPreset.onPremDefaultProducerProperties;
 
-@Profile("!local")
 @Configuration
 @EnableConfigurationProperties({KafkaOnpremProperties.class})
 public class KafkaOnpremConfig {
@@ -27,47 +26,48 @@ public class KafkaOnpremConfig {
     public static final String CONSUMER_GROUP_ID = "veilarbdialog-consumer";
     public static final String PRODUCER_CLIENT_ID = "veilarbdialog-producer";
 
-    @Autowired
-    KafkaConsumerClient consumerClient;
+    private static final String ONPREM_KAFKA_DISABLED = "veilarbaktivitet.kafka.onprem.consumer.disabled";
 
     @Bean
-    @Profile("!dev")
     public KafkaConsumerClient consumerClient(
-            List<TopicConsumerConfig<?,?>> topicConfigs,
-            Credentials credentials,
-            KafkaOnpremProperties kafkaProperties,
-            MeterRegistry meterRegistry
+            List<TopicConsumerConfig<?, ?>> topicConfigs,
+            MeterRegistry meterRegistry,
+            Properties onPremConsumerProperties,
+            UnleashClient unleashClient
     ) {
-        KafkaConsumerClientBuilder clientBuilder = KafkaConsumerClientBuilder.builder()
-                .withProperties(onPremDefaultConsumerProperties(CONSUMER_GROUP_ID, kafkaProperties.getBrokersUrl(), credentials));
+        var clientBuilder = KafkaConsumerClientBuilder.builder()
+                .withProperties(onPremConsumerProperties)
+                .withToggle(() -> unleashClient.isEnabled(ONPREM_KAFKA_DISABLED));
 
-        topicConfigs.forEach(it ->
-            clientBuilder.withTopicConfig(
-                    new KafkaConsumerClientBuilder
-                            .TopicConfig()
-                            .withConsumerConfig(it)
-                            .withMetrics(meterRegistry)
-                            .withLogging()
-            )
-        );
+        topicConfigs.forEach(it -> {
+            clientBuilder.withTopicConfig(new KafkaConsumerClientBuilder.TopicConfig().withConsumerConfig(it).withMetrics(meterRegistry).withLogging());
+        });
+
         var client = clientBuilder.build();
+
         client.start();
 
         return client;
     }
 
     @Bean
-    @Profile("!dev")
-    public KafkaProducerClient<String, String> producerClient(KafkaOnpremProperties kafkaProperties, Credentials credentials, MeterRegistry meterRegistry) {
+    public KafkaProducerClient<String, String> producerClient(Properties onPremProducerProperties, MeterRegistry meterRegistry) {
         return KafkaProducerClientBuilder.<String, String>builder()
                 .withMetrics(meterRegistry)
-                .withProperties(onPremDefaultProducerProperties(PRODUCER_CLIENT_ID, kafkaProperties.getBrokersUrl(), credentials))
+                .withProperties(onPremProducerProperties)
                 .build();
     }
 
-    @PostConstruct
-    public void start() {
-        consumerClient.start();
+    @Bean
+    @Profile("!dev")
+    Properties onPremProducerProperties(KafkaOnpremProperties kafkaOnpremProperties, Credentials credentials) {
+        return onPremDefaultProducerProperties(PRODUCER_CLIENT_ID, kafkaOnpremProperties.brokersUrl, credentials);
+    }
+
+    @Bean
+    @Profile("!dev")
+    Properties onPremConsumerProperties(KafkaOnpremProperties kafkaOnpremProperties, Credentials credentials) {
+        return onPremDefaultConsumerProperties(CONSUMER_GROUP_ID, kafkaOnpremProperties.getBrokersUrl(), credentials);
     }
 
 }
