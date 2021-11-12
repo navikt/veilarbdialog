@@ -26,8 +26,6 @@ public class KafkaOnpremConfig {
     public static final String CONSUMER_GROUP_ID = "veilarbdialog-consumer";
     public static final String PRODUCER_CLIENT_ID = "veilarbdialog-producer";
 
-    private static final String ONPREM_KAFKA_DISABLED = "veilarbaktivitet.kafka.onprem.consumer.disabled";
-
     @Bean
     public KafkaConsumerClient consumerClient(
             List<TopicConsumerConfig<?, ?>> topicConfigs,
@@ -36,10 +34,12 @@ public class KafkaOnpremConfig {
             UnleashClient unleashClient
     ) {
         var clientBuilder = KafkaConsumerClientBuilder.builder()
-                .withProperties(onPremConsumerProperties)
-                .withToggle(() -> unleashClient.isEnabled(ONPREM_KAFKA_DISABLED));
+                .withProperties(onPremConsumerProperties);
 
-        topicConfigs.forEach(it -> clientBuilder.withTopicConfig(new KafkaConsumerClientBuilder.TopicConfig().withConsumerConfig(it).withMetrics(meterRegistry).withLogging()));
+        topicConfigs.forEach(it -> clientBuilder.withTopicConfig(new KafkaConsumerClientBuilder.TopicConfig()
+                .withConsumerConfig(it)
+                .withMetrics(meterRegistry)
+                .withLogging()));
 
         var client = clientBuilder.build();
 
