@@ -1,7 +1,6 @@
 # Veilarbdialog
 Backend applikasjon for aktivitetsplan. Tilbyr REST tjenester for å hente/opprette/endre dialoger.
 
-
 ### Komme i gang
 
 ```sh
