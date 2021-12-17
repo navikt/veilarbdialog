@@ -18,3 +18,4 @@ Opprett en issue i GitHub for eventuelle spørsmål.
 1. Denne kjører opp IBM MQ og Kafka vha. TestContainers og mocker ut noe annet.
 1. Vent på "Application ready" i loggen.
 1. Bruk http://localhost:8080/veilarbdialog/swagger-ui/index.html.
+2. 

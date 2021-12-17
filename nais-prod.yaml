@@ -51,6 +51,8 @@ spec:
   webproxy: true
   secureLogs:
     enabled: true
+  kafka:
+    pool: nav-prod
   env:
     - name: APP_ENVIRONMENT_NAME
       value: p

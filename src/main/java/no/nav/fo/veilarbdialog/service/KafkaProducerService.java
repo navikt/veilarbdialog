@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.common.json.JsonUtils;
 import no.nav.common.kafka.producer.KafkaProducerClient;
 import no.nav.common.utils.IdUtils;
-import no.nav.fo.veilarbdialog.config.KafkaProperties;
+import no.nav.fo.veilarbdialog.config.kafka.onprem.KafkaOnpremProperties;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
@@ -26,7 +26,7 @@ import static no.nav.common.log.LogFilter.PREFERRED_NAV_CALL_ID_HEADER_NAME;
 @Service
 public class KafkaProducerService {
 
-    private final KafkaProperties kafkaProperties;
+    private final KafkaOnpremProperties kafkaProperties;
 
     private final KafkaProducerClient<String, String> producerClient;
 

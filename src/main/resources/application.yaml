@@ -7,6 +7,33 @@ spring:
         enabled: false
   flyway:
     enabled: false
+    ###############################################
+    #                KAFKA AIVEN                  #
+    ###############################################
+  kafka:
+    producer:
+      properties:
+        enable:
+          idempotence: 'true'
+        max:
+          block:
+            ms: '2000'
+      acks: all
+      batch-size: '1'
+    properties:
+      ssl:
+        truststore:
+          type: JKS
+          location: ${KAFKA_TRUSTSTORE_PATH}
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+        key:
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+        keystore:
+          password: ${KAFKA_CREDSTORE_PASSWORD}
+          type: PKCS12
+          location: ${KAFKA_KEYSTORE_PATH}
+      security:
+        protocol: SSL
 
 server:
   servlet:
