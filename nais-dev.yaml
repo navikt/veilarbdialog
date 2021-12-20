@@ -12,6 +12,7 @@ spec:
     - https://veilarbdialog-q1.nais.preprod.local
     - https://app-q1.adeo.no/veilarbdialog
     - https://app-q1.dev.adeo.no/veilarbdialog
+    - https://app.dev.adeo.no/veilarbdialog
   port: 8080
   prometheus:
     enabled: true
