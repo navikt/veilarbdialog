@@ -19,3 +19,4 @@ Opprett en issue i GitHub for eventuelle spørsmål.
 1. Vent på "Application ready" i loggen.
 1. Bruk http://localhost:8080/veilarbdialog/swagger-ui/index.html.
 2. 
+
