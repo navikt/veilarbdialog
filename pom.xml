@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.3.10.RELEASE</version>
+        <version>2.6.1</version>
         <relativePath />
     </parent>
 
@@ -17,12 +17,12 @@
     <version>1</version>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>17</java.version>
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
         <allclient.version>9.2.0.0</allclient.version>
 
-        <common.version>2.2021.09.17_07.09-67428a6422cc</common.version>
+        <common.version>2.2021.12.09_11.56-a71c36a61ba3</common.version>
         <common-obsolete.version>1.2020.02.11-12.17-1a30837bb4f2</common-obsolete.version>
 
         <flyway.version>4.1.1</flyway.version>
@@ -46,19 +46,9 @@
 
         <!-- DB -->
         <dependency>
-            <groupId>com.oracle.ojdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <version>19.3.0.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.oracle.ojdbc</groupId>
-                    <artifactId>simplefan</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.oracle.ojdbc</groupId>
-                    <artifactId>ons</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc11</artifactId>
+            <version>21.3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
@@ -329,6 +319,11 @@
             <version>4.1.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- transitive avhengigheter -->
         <dependency>
@@ -420,7 +415,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.7</version>
             </plugin>
         </plugins>
         <finalName>${project.artifactId}</finalName>

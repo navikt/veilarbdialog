@@ -18,8 +18,9 @@ spring:
       acks: all
       batch-size: '1'
     bootstrap-servers: ${spring.embedded.kafka.brokers}
-
-
+  mvc:
+    pathmatch:
+      matching-strategy: 'ant-path-matcher'
 server:
   servlet:
     context-path: "/veilarbdialog"
@@ -86,3 +87,4 @@ application:
     ut:
       dialog:
         raw: dialogRawTopic
+
