@@ -20,7 +20,7 @@ spring:
     bootstrap-servers: ${spring.embedded.kafka.brokers}
   mvc:
     pathmatch:
-      matching-strategy: 'ant-path-matcher'
+      matching-strategy: ant_path_matcher
 server:
   servlet:
     context-path: "/veilarbdialog"

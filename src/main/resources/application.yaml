@@ -36,7 +36,7 @@ spring:
         protocol: SSL
   mvc:
     pathmatch:
-      matching-strategy: 'ant-path-matcher'
+      matching-strategy: 'ant_path_matcher'
 
 server:
   servlet:

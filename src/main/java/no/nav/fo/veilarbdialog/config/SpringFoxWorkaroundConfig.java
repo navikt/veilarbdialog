@@ -11,13 +11,12 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Configuration
 public class SpringFoxWorkaroundConfig {
 
     @Bean
-    public static BeanPostProcessor springfoxHandlerProviderBeanPostProcessor() {
+    public BeanPostProcessor springfoxHandlerProviderBeanPostProcessor() {
         return new BeanPostProcessor() {
 
             @Override
@@ -31,7 +30,7 @@ public class SpringFoxWorkaroundConfig {
             private <T extends RequestMappingInfoHandlerMapping> void customizeSpringfoxHandlerMappings(List<T> mappings) {
                 List<T> copy = mappings.stream()
                         .filter(mapping -> mapping.getPatternParser() == null)
-                        .collect(Collectors.toList());
+                        .toList();
                 mappings.clear();
                 mappings.addAll(copy);
             }
@@ -40,6 +39,9 @@ public class SpringFoxWorkaroundConfig {
             private List<RequestMappingInfoHandlerMapping> getHandlerMappings(Object bean) {
                 try {
                     Field field = ReflectionUtils.findField(bean.getClass(), "handlerMappings");
+                    if (field == null) {
+                        throw new IllegalStateException("No handlerMappings on bean");
+                    }
                     field.setAccessible(true);
                     return (List<RequestMappingInfoHandlerMapping>) field.get(bean);
                 } catch (IllegalArgumentException | IllegalAccessException e) {
