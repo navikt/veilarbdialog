@@ -23,14 +23,12 @@ public class KvpService {
     private final String baseUrl;
 
     private final OkHttpClient client;
-    private final SystemUserTokenProvider systemUserTokenProvider;
 
     private KvpDTO get(String aktorId) throws IOException {
 
         var uri = String.format("%s/kvp/%s/currentStatus", baseUrl, aktorId);
         var request = new Request.Builder()
                 .url(uri)
-                .header("Authorization", "Bearer " + systemUserTokenProvider.getSystemUserToken())
                 .build();
         try (var response = client.newCall(request).execute()) {
             RestUtils.throwIfNotSuccessful(response);

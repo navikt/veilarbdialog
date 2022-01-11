@@ -34,7 +34,13 @@ spring:
           location: ${KAFKA_KEYSTORE_PATH}
       security:
         protocol: SSL
-
+  mvc:
+    pathmatch:
+      matching-strategy: 'ant_path_matcher'
+  task:
+    scheduling:
+      pool:
+        size: '5'
 server:
   servlet:
     context-path: "/veilarbdialog"
