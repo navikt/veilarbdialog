@@ -37,7 +37,10 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: 'ant_path_matcher'
-
+  task:
+    scheduling:
+      pool:
+        size: '5'
 server:
   servlet:
     context-path: "/veilarbdialog"
