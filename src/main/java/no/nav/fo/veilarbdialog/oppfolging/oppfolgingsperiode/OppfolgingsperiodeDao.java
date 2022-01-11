@@ -76,7 +76,7 @@ public class OppfolgingsperiodeDao {
 
         int antallOppdatert = template.update("""
                     update DIALOG
-                    set OPPFOLGINGSPERIODE_UUID = 'ukjent oppfolginsperiode'
+                    set OPPFOLGINGSPERIODE_UUID = 'ukjent oppfolgingsperiode'
                     where AKTOR_ID = :aktorId
                     and OPPFOLGINGSPERIODE_UUID is null
                     and OPPRETTET_DATO < date '2020-01-01'
