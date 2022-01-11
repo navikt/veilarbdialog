@@ -16,8 +16,7 @@ public class KvpConfig {
     KvpService kvpService(SystemUserTokenProvider systemUserTokenProvider) {
         return new KvpService(
                 kvpServiceUrl,
-                RestClient.baseClient(),
-                systemUserTokenProvider
+                RestClient.baseClient()
         );
     }
 
