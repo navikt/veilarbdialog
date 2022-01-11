@@ -17,7 +17,7 @@ public class OppfolgingsperiodeCron {
 
     @Scheduled(
             initialDelay = 60000,
-            fixedDelay = 300000
+            fixedDelay = 500
     )
     public void addOppfolgingsperioder() {
         if (leaderElectionClient.isLeader()) {
