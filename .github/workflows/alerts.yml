@@ -1,0 +1,41 @@
+name: Deploy alerts
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - 'alerts-prod.yaml'
+      - 'alerts-dev.yaml'
+      - '.github/workflows/alerts.yaml'
+
+concurrency:
+  group: deploy_alerts_prod
+  cancel-in-progress: true
+
+jobs:
+  apply-alerts-dev:
+    name: Apply alerts to dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: deploy to dev
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-fss
+          RESOURCE: alerts-dev.yaml
+
+  apply-alerts-prod:
+    name: Apply alerts to prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: deploy to prod
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-fss
+          RESOURCE: alerts-prod.yaml
