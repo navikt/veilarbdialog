@@ -23,7 +23,6 @@
         <allclient.version>9.2.0.0</allclient.version>
 
         <common.version>2.2021.12.09_11.56-a71c36a61ba3</common.version>
-        <common-obsolete.version>1.2020.02.21_14.01-cdaccec525a6</common-obsolete.version>
 
         <flyway.version>4.1.1</flyway.version>
         <jackson.version>2.11.2</jackson.version>
@@ -187,11 +186,6 @@
             <groupId>no.nav.common</groupId>
             <artifactId>auth</artifactId>
             <version>${common.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>oidc-security</artifactId>
-            <version>${common-obsolete.version}</version>
         </dependency>
 
         <!-- Jackson -->
