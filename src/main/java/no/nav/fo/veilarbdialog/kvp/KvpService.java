@@ -1,12 +1,12 @@
 package no.nav.fo.veilarbdialog.kvp;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.rest.client.RestUtils;
-import no.nav.common.sts.SystemUserTokenProvider;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.ws.rs.ForbiddenException;
@@ -17,15 +17,18 @@ import java.util.Optional;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
-@RequiredArgsConstructor
+@Service
 public class KvpService {
 
     private final String baseUrl;
-
     private final OkHttpClient client;
 
-    private KvpDTO get(String aktorId) throws IOException {
+    public KvpService(@Value("${application.kvp.url}") String baseUrl, OkHttpClient client) {
+        this.baseUrl = baseUrl;
+        this.client = client;
+    }
 
+    private KvpDTO get(String aktorId) throws IOException {
         var uri = String.format("%s/kvp/%s/currentStatus", baseUrl, aktorId);
         var request = new Request.Builder()
                 .url(uri)
