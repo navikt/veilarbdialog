@@ -23,7 +23,6 @@
         <allclient.version>9.2.0.0</allclient.version>
 
         <common.version>2.2021.12.09_11.56-a71c36a61ba3</common.version>
-        <common-obsolete.version>1.2020.02.11-12.17-1a30837bb4f2</common-obsolete.version>
 
         <flyway.version>4.1.1</flyway.version>
         <jackson.version>2.11.2</jackson.version>
@@ -93,10 +92,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
@@ -187,11 +182,6 @@
             <groupId>no.nav.common</groupId>
             <artifactId>auth</artifactId>
             <version>${common.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.common</groupId>
-            <artifactId>oidc-security</artifactId>
-            <version>${common-obsolete.version}</version>
         </dependency>
 
         <!-- Jackson -->
