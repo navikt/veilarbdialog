@@ -22,8 +22,8 @@
 
         <allclient.version>9.2.0.0</allclient.version>
 
-        <common.version>2.2021.12.09_11.56-a71c36a61ba3</common.version>
-        <common-obsolete.version>1.2020.02.11-12.17-1a30837bb4f2</common-obsolete.version>
+        <common.version>2.2021.11.15_15.36-d7a174cfb6a8</common.version>
+        <common-obsolete.version>1.2020.02.21_14.01-cdaccec525a6</common-obsolete.version>
 
         <flyway.version>4.1.1</flyway.version>
         <jackson.version>2.11.2</jackson.version>
