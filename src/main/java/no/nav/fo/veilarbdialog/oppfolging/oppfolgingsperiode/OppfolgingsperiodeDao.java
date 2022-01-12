@@ -79,7 +79,6 @@ public class OppfolgingsperiodeDao {
                     set OPPFOLGINGSPERIODE_UUID = 'ukjent oppfolgingsperiode'
                     where AKTOR_ID = :aktorId
                     and OPPFOLGINGSPERIODE_UUID is null
-                    and OPPRETTET_DATO < date '2020-01-01'
                 """, source);
 
         if(antallOppdatert != 0) {
