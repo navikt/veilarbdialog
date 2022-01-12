@@ -2,6 +2,9 @@ name: Deploy alerts
 on:
   workflow_dispatch:
   push:
+    branches:
+      - dev
+      - master
     paths:
       - 'alerts-prod.yaml'
       - 'alerts-dev.yaml'
