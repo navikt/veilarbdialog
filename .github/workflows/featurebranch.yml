@@ -2,8 +2,7 @@ name: Feature branch workflow
 on:
   push:
     branches-ignore: 
-      - master
-      - dev
+      - main
 
 jobs:
   test:

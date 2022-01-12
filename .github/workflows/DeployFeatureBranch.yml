@@ -1,9 +1,6 @@
-name: Dev branch workflow
+name: Deploy branch to dev
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - dev
 
 env:
   IMAGE_TAG: ${{ github.sha }}
