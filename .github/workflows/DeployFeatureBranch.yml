@@ -7,6 +7,10 @@ env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/veilarbdialog
   PRINT_PAYLOAD: true
 
+concurrency:
+  group: deploy_feature_branch
+  cancel-in-progress: true
+
 jobs:
   test-build-and-push:
     name: Test, build and push
