@@ -28,7 +28,7 @@ spec:
       for: 1s
       severity: danger
       description: Høy feilrate mot veilarbdialog.
-      action: https://grafana.adeo.no/d/z4LNWq-Mz/dab-alarmer \n https://logs.adeo.no/goto/6fc98f8662b9893c80c103ba3a30fbfa
+      action: https://grafana.adeo.no/d/z4LNWq-Mz/dab-alarmer \n https://logs.adeo.no/goto/cdf0a76551d4f4731d872ef702d60ff6
       sla: se på denne så fort som mulig (innefor arbeidstid)
     - alert: Vedvarende feilrate i veilarbdialog
       expr: |
@@ -47,5 +47,5 @@ spec:
       for: 8h
       severity: warning
       description: Vedvarende feilrate i veilarbdialog
-      action: https://grafana.adeo.no/d/z4LNWq-Mz/dab-alarmer \n https://logs.adeo.no/goto/6fc98f8662b9893c80c103ba3a30fbfa
+      action: https://grafana.adeo.no/d/z4LNWq-Mz/dab-alarmer \n https://logs.adeo.no/goto/cdf0a76551d4f4731d872ef702d60ff6
       sla: se på denne i løpet av de neste dagene.

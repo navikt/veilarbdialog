@@ -3,8 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - dev
-      - master
+      - main
     paths:
       - 'alerts-prod.yaml'
       - 'alerts-dev.yaml'
