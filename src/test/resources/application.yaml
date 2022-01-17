@@ -53,6 +53,7 @@ application:
     endringPaaDialogTopic: endringPaaDialogTopic
     oppfolgingAvsluttetTopic: oppfolgingAvsluttetTopic
     kvpAvsluttetTopic: kvpAvsluttetTopic
+    sisteOppfolgingsperiodeTopic: sisteOppfolgingsperiodeTopic
   kvp:
     url: http://localhost:8080/VEILARBOPPFOLGINGAPI_URL
   mq:

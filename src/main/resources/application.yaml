@@ -95,6 +95,7 @@ application:
     brokersUrl: ${KAFKA_BROKERS_URL}
     endringPaaDialogTopic: ${ENDRING_PAA_DIALOG_TOPIC}
     oppfolgingAvsluttetTopic: ${OPPFOLGING_AVSLUTTET_TOPIC}
+    sisteOppfolgingsperiodeTopic: "pto.siste-oppfolgingsperiode-v1"
     kvpAvsluttetTopic: ${KVP_AVSLUTTET_TOPIC}
   kvp:
     url: ${VEILARBOPPFOLGINGAPI_URL}
