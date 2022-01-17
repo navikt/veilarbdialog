@@ -8,6 +8,8 @@ spring:
   main:
     allow-bean-definition-overriding: true
   kafka:
+    consumer:
+      group-id: 'veilarbdialog'
     producer:
       properties:
         enable:
@@ -87,4 +89,5 @@ application:
     ut:
       dialog:
         raw: dialogRawTopic
-
+    inn:
+      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1
