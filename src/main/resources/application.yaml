@@ -1,5 +1,5 @@
 spring:
-  application:
+                                application:
     name: "veilarbdialog"
   data:
     jdbc:
@@ -34,6 +34,10 @@ spring:
           location: ${KAFKA_KEYSTORE_PATH}
       security:
         protocol: SSL
+
+    consumer:
+      group-id: 'veilarbdialog'
+
   mvc:
     pathmatch:
       matching-strategy: 'ant_path_matcher'
@@ -95,7 +99,6 @@ application:
     brokersUrl: ${KAFKA_BROKERS_URL}
     endringPaaDialogTopic: ${ENDRING_PAA_DIALOG_TOPIC}
     oppfolgingAvsluttetTopic: ${OPPFOLGING_AVSLUTTET_TOPIC}
-    sisteOppfolgingsperiodeTopic: "pto.siste-oppfolgingsperiode-v1"
     kvpAvsluttetTopic: ${KVP_AVSLUTTET_TOPIC}
   kvp:
     url: ${VEILARBOPPFOLGINGAPI_URL}
@@ -124,3 +127,6 @@ application:
   veilarboppfolging:
     api:
       url: ${VEILARBOPPFOLGINGAPI_URL}
+  topic:
+    inn:
+      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1

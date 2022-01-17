@@ -8,6 +8,8 @@ spring:
   main:
     allow-bean-definition-overriding: true
   kafka:
+    consumer:
+      group-id: 'veilarbaktivitet'
     producer:
       properties:
         enable:
@@ -53,7 +55,6 @@ application:
     endringPaaDialogTopic: endringPaaDialogTopic
     oppfolgingAvsluttetTopic: oppfolgingAvsluttetTopic
     kvpAvsluttetTopic: kvpAvsluttetTopic
-    sisteOppfolgingsperiodeTopic: sisteOppfolgingsperiodeTopic
   kvp:
     url: http://localhost:8080/VEILARBOPPFOLGINGAPI_URL
   mq:
@@ -88,4 +89,5 @@ application:
     ut:
       dialog:
         raw: dialogRawTopic
-
+    inn:
+      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1

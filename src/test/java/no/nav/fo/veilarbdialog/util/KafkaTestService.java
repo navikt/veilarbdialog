@@ -8,6 +8,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ public class KafkaTestService {
 
     private final ConsumerFactory<String, Object> stringJsonConsumerFactory;
     private final Admin kafkaAdminClient;
+    private @Value("${spring.kafka.consumer.group-id}") String aivenGroupId;
 
     public Consumer createStringJsonConsumer(String topic) {
         String randomGroup = UUID.randomUUID().toString();
@@ -51,7 +53,7 @@ public class KafkaTestService {
         newConsumer.commitSync(Duration.ofSeconds(10));
     }
 
-    public void assertErKonsumertAiven(String topic, String aivenGroupId, long producerOffset, int timeOutSeconds) {
+    public void assertErKonsumertAiven(String topic, long producerOffset, int timeOutSeconds) {
         await().atMost(timeOutSeconds, SECONDS).until(() -> erKonsumert(topic, aivenGroupId, producerOffset));
     }
 
