@@ -9,7 +9,7 @@ spring:
     allow-bean-definition-overriding: true
   kafka:
     consumer:
-      group-id: 'veilarbaktivitet'
+      group-id: 'veilarbdialog'
     producer:
       properties:
         enable:
