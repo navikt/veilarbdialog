@@ -10,6 +10,20 @@ spring:
   kafka:
     consumer:
       group-id: 'veilarbdialog'
+      max-poll-records: 1
+      properties:
+        enable:
+          auto:
+            commit: true
+        retry:
+          backoff:
+            ms: 2000
+        reconnect:
+          backoff:
+            ms: 2000
+      auto-offset-reset: earliest
+    listener:
+      ack-mode=record:
     producer:
       properties:
         enable:
