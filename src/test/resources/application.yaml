@@ -17,10 +17,10 @@ spring:
             commit: true
         retry:
           backoff:
-            ms: 2000
+            ms: '1000'
         reconnect:
           backoff:
-            ms: 2000
+            ms: '1000'
       auto-offset-reset: earliest
     listener:
       ack-mode=record:

@@ -48,7 +48,7 @@ public class BehandleKvpAvsluttetConsumerServiceTest {
 
         ProducerRecord<String, String> producerRecord = new ProducerRecord<>(kvpAvsluttetTopic, AKTORID, JsonUtils.toJson(kvpAvsluttetKafkaDTO));
         RecordMetadata recordMetadata = producerClient.sendSync(producerRecord);
-        Awaitility.await().atMost(Duration.ofSeconds(5)).until(() -> kafkaTestService.erKonsumert(kvpAvsluttetTopic, KafkaOnpremConfig.CONSUMER_GROUP_ID, recordMetadata.offset()));
+        Awaitility.await().atMost(Duration.ofSeconds(5)).until(() -> kafkaTestService.erKonsumert(kvpAvsluttetTopic, KafkaOnpremConfig.CONSUMER_GROUP_ID, recordMetadata.offset(), recordMetadata.partition()));
     }
 
 }

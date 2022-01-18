@@ -53,14 +53,14 @@ public class KafkaTestService {
         newConsumer.commitSync(Duration.ofSeconds(10));
     }
 
-    public void assertErKonsumertAiven(String topic, long producerOffset, int timeOutSeconds) {
-        await().atMost(timeOutSeconds, SECONDS).until(() -> erKonsumert(topic, aivenGroupId, producerOffset));
+    public void assertErKonsumertAiven(String topic, long producerOffset, int partition, int timeOutSeconds) {
+        await().atMost(timeOutSeconds, SECONDS).until(() -> erKonsumert(topic, aivenGroupId, producerOffset,partition));
     }
 
     @SneakyThrows
-    public boolean erKonsumert(String topic, String groupId, long producerOffset) {
+    public boolean erKonsumert(String topic, String groupId, long producerOffset, int partition) {
         Map<TopicPartition, OffsetAndMetadata> topicPartitionOffsetAndMetadataMap = kafkaAdminClient.listConsumerGroupOffsets(groupId).partitionsToOffsetAndMetadata().get();
-        OffsetAndMetadata offsetAndMetadata = topicPartitionOffsetAndMetadataMap.get(new TopicPartition(topic, 0));
+        OffsetAndMetadata offsetAndMetadata = topicPartitionOffsetAndMetadataMap.get(new TopicPartition(topic, partition));
 
         if (offsetAndMetadata == null) {
             return false;
