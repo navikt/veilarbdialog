@@ -9,7 +9,7 @@ public class KafkaTestConfig {
 
     @Bean
     EmbeddedKafkaBroker embeddedKafka() {
-        return new EmbeddedKafkaBroker(1);
+        return new EmbeddedKafkaBroker(1, true, 1);
     }
 
 }
