@@ -57,7 +57,7 @@ spring:
         reconnect:
           backoff:
             ms: 2000
-        auto-offset-reset: earliest
+      auto-offset-reset: earliest
       key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
     listener:
