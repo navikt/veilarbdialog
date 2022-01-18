@@ -34,10 +34,34 @@ spring:
           location: ${KAFKA_KEYSTORE_PATH}
       security:
         protocol: SSL
-
+      schema:
+        registry:
+          url: ${KAFKA_SCHEMA_REGISTRY}
+      basic:
+        auth:
+          credentials:
+            source: USER_INFO
+          user:
+            info: ${KAFKA_SCHEMA_REGISTRY_USER}:${KAFKA_SCHEMA_REGISTRY_PASSWORD}
+    bootstrap-servers: ${KAFKA_BROKERS}
     consumer:
       group-id: 'veilarbdialog'
-
+      max-poll-records: 1
+      properties:
+        enable:
+          auto:
+            commit: true
+        retry:
+          backoff:
+            ms: 2000
+        reconnect:
+          backoff:
+            ms: 2000
+        auto-offset-reset: earliest
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+    listener:
+      ack-mode: record
   mvc:
     pathmatch:
       matching-strategy: 'ant_path_matcher'
