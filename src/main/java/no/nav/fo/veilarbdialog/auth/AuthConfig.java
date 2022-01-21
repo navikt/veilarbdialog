@@ -9,11 +9,13 @@ import no.nav.common.utils.Credentials;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import static no.nav.common.abac.audit.AuditLogFilterUtils.not;
 
 @Configuration
 @Slf4j
+@Profile("!local")
 public class AuthConfig {
 
     @Value("${application.abac.url}")

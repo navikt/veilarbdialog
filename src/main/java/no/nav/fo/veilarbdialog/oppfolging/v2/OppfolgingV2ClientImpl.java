@@ -25,7 +25,7 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
     private final AktorOppslagClient aktorOppslagClient;
 
 
-    @Value("${application.kvp.url}")
+    @Value("${application.veilarboppfolging.api.url}")
     private String baseUrl;
 
     public Optional<OppfolgingV2UnderOppfolgingDTO> fetchUnderoppfolging(AktorId aktorId) {

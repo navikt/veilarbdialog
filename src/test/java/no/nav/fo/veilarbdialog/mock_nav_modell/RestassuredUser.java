@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.mock_nav_modell;
 
 import io.restassured.specification.RequestSpecification;
 import no.nav.common.auth.context.UserRole;
+import no.nav.fo.veilarbdialog.auth.TestAuthContextFilter;
 
 import static io.restassured.RestAssured.given;
 
@@ -17,9 +18,8 @@ public class RestassuredUser {
     public RequestSpecification createRequest() {
         return given()
                 .header("Content-type", "application/json")
-                //TODO fix
-   //             .header(TestAuthContextFilter.identHeder, ident)
-   //             .header(TestAuthContextFilter.typeHeder, userRole)
+                .header(TestAuthContextFilter.identHeder, ident)
+                .header(TestAuthContextFilter.typeHeder, userRole)
       ;
     }
 

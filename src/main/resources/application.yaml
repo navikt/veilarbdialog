@@ -124,8 +124,8 @@ application:
     endringPaaDialogTopic: ${ENDRING_PAA_DIALOG_TOPIC}
     oppfolgingAvsluttetTopic: ${OPPFOLGING_AVSLUTTET_TOPIC}
     kvpAvsluttetTopic: ${KVP_AVSLUTTET_TOPIC}
-  kvp:
-    url: ${VEILARBOPPFOLGINGAPI_URL}
+  aktorRegister:
+    url: ${AKTOERREGISTER_API_V1_URL}
   mq:
     hostname: ${MQGATEWAY03_HOSTNAME}
     port: ${MQGATEWAY03_PORT}

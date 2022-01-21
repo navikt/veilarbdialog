@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@TestConfiguration
+//@TestConfiguration
 public class ServiceConfig {
 
     @MockBean
@@ -38,7 +38,7 @@ public class ServiceConfig {
 
     }
 
-    @Bean
+    //@Bean
     AktorOppslagClient aktorOppslagClient() {
         when(aktorOppslagClient.hentAktorId(Fnr.of("112233456789")))
                 .thenReturn(AktorId.of("12345"));

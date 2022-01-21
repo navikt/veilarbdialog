@@ -69,8 +69,8 @@ application:
     endringPaaDialogTopic: endringPaaDialogTopic
     oppfolgingAvsluttetTopic: oppfolgingAvsluttetTopic
     kvpAvsluttetTopic: kvpAvsluttetTopic
-  kvp:
-    url: http://localhost:8080/VEILARBOPPFOLGINGAPI_URL
+  aktorRegister:
+    url: http://localhost:${wiremock.server.port}/aktorTjeneste
   mq:
     hostname: "localhost"
     port: "1414"
@@ -98,10 +98,13 @@ application:
     url: http://localhost:8080/UNLEASH_API_URL
   veilarboppfolging:
     api:
-      url: http://localhost:8080/VEILARBOPPFOLGINGAPI_URL
+      url: http://localhost:${wiremock.server.port}/veilarboppfolging/api
   topic:
     ut:
       dialog:
         raw: dialogRawTopic
     inn:
       sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1
+wiremock:
+  server:
+    port: 0

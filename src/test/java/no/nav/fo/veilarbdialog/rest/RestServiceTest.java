@@ -13,6 +13,9 @@ import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import org.junit.After;
 import org.junit.Before;
@@ -23,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -42,15 +46,16 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TES
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
+@AutoConfigureWireMock(port = 0)
 @ActiveProfiles("local")
 @Sql(
         scripts = "/db/testdata/slett_alle_dialoger.sql",
         executionPhase = AFTER_TEST_METHOD
 )
 public class RestServiceTest {
-    final static Fnr fnr = Fnr.of("1234");
-    final static AktorId aktorId = AktorId.of("4321");
-    final static String veilederIdent = "V123456";
+
+    MockVeileder veileder;
+    MockBruker bruker;
 
     @LocalServerPort
     private int port;
@@ -60,12 +65,6 @@ public class RestServiceTest {
 
     @Autowired
     KontorsperreFilter kontorsperreFilter;
-
-    @MockBean
-    AuthService authService;
-
-    @MockBean
-    KvpService kvpService;
 
     @Autowired
     RestMapper restMapper;
@@ -83,7 +82,8 @@ public class RestServiceTest {
     @Before
     public void before() {
         RestAssured.port = port;
-        MockitoAnnotations.initMocks(this);
+        bruker = MockNavService.createHappyBruker();
+        veileder = MockNavService.createVeileder(bruker);
     }
 
     @Test
@@ -104,11 +104,8 @@ public class RestServiceTest {
                 .setLest(true)
                 .setAvsender(Avsender.BRUKER);
 
-        mockHappyPathBruker();
-        mockKVPOnUser(null);
 
-        DialogDTO resultatDialog = given()
-                .contentType(ContentType.JSON)
+        DialogDTO resultatDialog = bruker.createRequest()
                 .body(nyHenvendelse)
                 .post("/veilarbdialog/api/dialog")
                 .then()
@@ -138,13 +135,10 @@ public class RestServiceTest {
                 .setTekst(tekst)
                 .setAvsender(Avsender.VEILEDER);
 
-        mockHappyPathVeileder();
-        mockKVPOnUser(null);
 
-        DialogDTO resultatDialog = given()
-                .contentType(ContentType.JSON)
+        DialogDTO resultatDialog = veileder.createRequest()
                 .body(nyHenvendelse)
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", aktorId.get())
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -159,9 +153,8 @@ public class RestServiceTest {
 
     @Test
     public void sistOppdatert_brukerInnlogget_kunBrukerHarLest_returnererNull() {
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", aktorId.get(), aktorId.get());
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), bruker.getAktorId());
 
-        mockHappyPathBruker();
         fetchSistOppdatert()
                 .then()
                 .assertThat()
@@ -174,9 +167,8 @@ public class RestServiceTest {
     @Test
     public void sistOppdatert_veilederInnlogget_kunVeilederHarLest_returnererNull() {
 
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", aktorId.get(), veilederIdent);
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), veileder.getNavIdent());
 
-        mockHappyPathVeileder();
         fetchSistOppdatert()
                 .then()
                 .assertThat()
@@ -191,10 +183,9 @@ public class RestServiceTest {
         Timestamp brukerLest = Timestamp.valueOf(LocalDateTime.now().minusHours(1));
         Timestamp veilederLest = Timestamp.valueOf(LocalDateTime.now());
 
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", aktorId.get(), aktorId.get(), brukerLest);
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", aktorId.get(), veilederIdent, veilederLest);
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), bruker.getAktorId(), brukerLest);
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), veileder.getNavIdent(), veilederLest);
 
-        mockHappyPathBruker();
 
         fetchSistOppdatert()
                 .then()
@@ -210,10 +201,9 @@ public class RestServiceTest {
         Timestamp veilederLest = Timestamp.valueOf(LocalDateTime.now().minusHours(1));
         Timestamp brukerLest = Timestamp.valueOf(LocalDateTime.now());
 
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", aktorId.get(), aktorId.get(), brukerLest);
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", aktorId.get(), veilederIdent, veilederLest);
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), bruker.getAktorId(), brukerLest);
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), veileder.getNavIdent(), veilederLest);
 
-        mockHappyPathBruker();
 
         fetchSistOppdatert()
                 .then()
@@ -226,33 +216,7 @@ public class RestServiceTest {
 
     private Response fetchSistOppdatert() {
         return given()
-                .param("aktorId", aktorId.get())
+                .param("aktorId", bruker.getAktorId())
                 .get("/veilarbdialog/api/dialog/sistOppdatert");
-    }
-
-    private void mockHappyPathVeileder(){
-        when(authService.erEksternBruker()).thenReturn(false);
-        when(authService.getIdent()).thenReturn(Optional.of(veilederIdent));
-
-        mockAuthOK();
-    }
-
-    private void mockHappyPathBruker(){
-        when(authService.erEksternBruker()).thenReturn(true);
-        when(authService.getIdent()).thenReturn(Optional.of(fnr.get()));
-        mockAuthOK();
-    }
-
-    private void mockAuthOK() {
-
-        when(authService.harTilgangTilPerson(aktorId.get())).thenReturn(true);
-        when(aktorOppslagClient.hentAktorId(fnr)).thenReturn(aktorId);
-
-    }
-
-    private void mockKVPOnUser(String unit) {
-
-        when(kvpService.kontorsperreEnhetId(anyString())).thenReturn(unit);
-        when(kvpService.kontorsperreEnhetId(anyString())).thenReturn(unit);
     }
 }
