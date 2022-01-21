@@ -129,12 +129,15 @@ public class RestServiceTest {
 
         final DialogDTO expected = new DialogDTO()
                 .setOverskrift(overskrift)
-                .setSisteTekst(tekst);
+                .setSisteTekst(tekst)
+                .setLest(true)
+                .setFerdigBehandlet(true);
 
         final HenvendelseDTO henvendelseExpected = new HenvendelseDTO()
                 .setTekst(tekst)
-                .setAvsender(Avsender.VEILEDER);
-
+                .setAvsender(Avsender.VEILEDER)
+                .setAvsenderId(veileder.getNavIdent())
+                .setLest(true);
 
         DialogDTO resultatDialog = veileder.createRequest()
                 .body(nyHenvendelse)
@@ -148,34 +151,34 @@ public class RestServiceTest {
         assertThat(resultatDialog).isEqualToIgnoringGivenFields(expected,"opprettetDato", "sisteDato", "henvendelser", "id");
         assertThat(resultatHenvendelse).isEqualToIgnoringGivenFields(henvendelseExpected, "sendt", "id", "dialogId");
         assertThat(resultatDialog.getId()).isEqualTo(resultatHenvendelse.getDialogId());
-
     }
 
     @Test
     public void sistOppdatert_brukerInnlogget_kunBrukerHarLest_returnererNull() {
         jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), bruker.getAktorId());
 
-        fetchSistOppdatert()
+        bruker.createRequest()
+                .param("aktorId", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog/sistOppdatert")
                 .then()
                 .assertThat()
                 .statusCode(200)
                 .contentType(equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .body("sistOppdatert", equalTo(null));
-
     }
 
     @Test
     public void sistOppdatert_veilederInnlogget_kunVeilederHarLest_returnererNull() {
-
         jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), veileder.getNavIdent());
 
-        fetchSistOppdatert()
+        veileder.createRequest()
+                .param("aktorId", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog/sistOppdatert")
                 .then()
                 .assertThat()
                 .statusCode(200)
                 .contentType(equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .body("sistOppdatert", equalTo(null));
-
     }
 
     @Test
@@ -186,14 +189,14 @@ public class RestServiceTest {
         jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), bruker.getAktorId(), brukerLest);
         jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), veileder.getNavIdent(), veilederLest);
 
-
-        fetchSistOppdatert()
+        bruker.createRequest()
+                .param("aktorId", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog/sistOppdatert")
                 .then()
                 .assertThat()
                 .statusCode(200)
                 .contentType(equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .body("sistOppdatert", equalTo(veilederLest.getTime()));
-
     }
 
     @Test
@@ -201,22 +204,16 @@ public class RestServiceTest {
         Timestamp veilederLest = Timestamp.valueOf(LocalDateTime.now().minusHours(1));
         Timestamp brukerLest = Timestamp.valueOf(LocalDateTime.now());
 
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), bruker.getAktorId(), brukerLest);
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), veileder.getNavIdent(), veilederLest);
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), veileder.getNavIdent(), veilederLest);
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), bruker.getAktorId(), brukerLest);
 
-
-        fetchSistOppdatert()
+        veileder.createRequest()
+                .param("aktorId", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog/sistOppdatert")
                 .then()
                 .assertThat()
                 .statusCode(200)
                 .contentType(equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .body("sistOppdatert", equalTo(veilederLest.getTime()));
-
-    }
-
-    private Response fetchSistOppdatert() {
-        return given()
-                .param("aktorId", bruker.getAktorId())
-                .get("/veilarbdialog/api/dialog/sistOppdatert");
+                .body("sistOppdatert", equalTo(brukerLest.getTime()));
     }
 }

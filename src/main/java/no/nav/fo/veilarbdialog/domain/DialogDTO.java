@@ -18,7 +18,7 @@ public class DialogDTO {
     private Date sisteDato;
     private Date opprettetDato;
     private boolean historisk;
-    private boolean lest;
+    private boolean lest; // lest av brukertype som gjør kall
 
     // veileder-felter
     private boolean venterPaSvar;
