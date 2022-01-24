@@ -6,6 +6,7 @@ import lombok.experimental.Accessors;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Accessors(chain = true)
@@ -25,6 +26,8 @@ public class DialogDTO {
     private boolean ferdigBehandlet;
     private Date lestAvBrukerTidspunkt;
     private boolean erLestAvBruker;
+
+    private UUID oppfolgingsperiode;
 
     private List<HenvendelseDTO> henvendelser = new ArrayList<>();
     private List<Egenskap> egenskaper = new ArrayList<>();

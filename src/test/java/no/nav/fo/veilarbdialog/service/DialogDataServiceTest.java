@@ -8,6 +8,7 @@ import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KvpService;
+import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import org.junit.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
@@ -50,6 +51,9 @@ public class DialogDataServiceTest {
 
     @MockBean
     DataVarehusDAO dataVarehusDAO;
+
+    @MockBean
+    SistePeriodeService sistePeriodeService;
 
     //TODO hva burde vi gjøre her
     @MockBean

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -16,6 +17,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 
@@ -117,8 +119,8 @@ public class DialogDAO {
                 .ofNullable(jdbc.queryForObject("select DIALOG_ID_SEQ.nextval from DUAL", Long.class))
                 .orElseThrow(IllegalStateException::new);
 
-        jdbc.update("insert into DIALOG (DIALOG_ID, AKTOR_ID, OPPRETTET_DATO, AKTIVITET_ID, OVERSKRIFT, HISTORISK, KONTORSPERRE_ENHET_ID, OPPDATERT) " +
-                        "values (?, ?, ? , ?, ?, ?, ?, ?)",
+        jdbc.update("insert into DIALOG (DIALOG_ID, AKTOR_ID, OPPRETTET_DATO, AKTIVITET_ID, OVERSKRIFT, HISTORISK, KONTORSPERRE_ENHET_ID, OPPDATERT, OPPFOLGINGSPERIODE_UUID) " +
+                        "values (?, ?, ? , ?, ?, ?, ?, ?, ?)",
                 dialogId,
                 dialogData.getAktorId(),
                 dialogData.getOpprettetDato(),
@@ -126,7 +128,8 @@ public class DialogDAO {
                 dialogData.getOverskrift(),
                 dialogData.isHistorisk() ? 1 : 0,
                 dialogData.getKontorsperreEnhetId(),
-                dialogData.getOpprettetDato()
+                dialogData.getOpprettetDato(),
+                dialogData.getOppfolgingsperiode()
         );
 
         dialogData.getEgenskaper()
@@ -175,6 +178,20 @@ public class DialogDAO {
                 .orElse(null);
     }
 
+    private static UUID hentMaybeUUID(ResultSet rs, String kolonneNavn) throws SQLException {
+        String uuid = rs.getString(kolonneNavn);
+
+        if (StringUtils.isEmpty(uuid)) {
+            return null;
+        }
+
+        try {
+            return UUID.fromString(uuid);
+        } catch (IllegalArgumentException e) {
+            return  null;
+        }
+    }
+
     private class MapTilDialog implements RowMapper<DialogData> {
 
         @Override
@@ -207,6 +224,7 @@ public class DialogDAO {
                     .egenskaper(egenskaper)
                     .harUlestParagraf8Henvendelse(rs.getBoolean("ULESTPARAGRAF8VARSEL"))
                     .paragraf8VarselUUID(rs.getString("PARAGRAF8_VARSEL_UUID"))
+                    .oppfolgingsperiode(hentMaybeUUID(rs, "OPPFOLGINGSPERIODE_UUID"))
                     .build();
 
         }

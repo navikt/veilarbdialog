@@ -53,7 +53,8 @@ class RestMapper {
                 )
                 .setSisteTekst(sisteHenvendelse
                         .map(HenvendelseData::getTekst)
-                        .orElse(null));
+                        .orElse(null))
+                .setOppfolgingsperiode(dialogData.getOppfolgingsperiode());
 
         if (auth.erEksternBruker()) {
             dto.setLest(dialogData.erLestAvBruker())

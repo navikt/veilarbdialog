@@ -94,6 +94,7 @@ public class RestServiceTest {
                 .setOverskrift(overskrift);
 
         final DialogDTO expected = new DialogDTO()
+                .setOppfolgingsperiode(bruker.getOppfolgingsperiode())
                 .setOverskrift(overskrift)
                 .setSisteTekst(tekst)
                 .setLest(true)
@@ -128,6 +129,7 @@ public class RestServiceTest {
                 .setOverskrift(overskrift);
 
         final DialogDTO expected = new DialogDTO()
+                .setOppfolgingsperiode(bruker.getOppfolgingsperiode())
                 .setOverskrift(overskrift)
                 .setSisteTekst(tekst)
                 .setLest(true)

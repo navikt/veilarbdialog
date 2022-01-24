@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.service;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.featuretoggle.UnleashClient;
+import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
 import no.nav.fo.veilarbdialog.auth.AuthService;
@@ -11,16 +12,14 @@ import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
+import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
@@ -40,6 +39,7 @@ public class DialogDataService {
     private final AuthService auth;
     private final KladdService kladdService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
+    private final SistePeriodeService sistePeriodeService;
 
 
     @Transactional(readOnly = true)
@@ -215,7 +215,9 @@ public class DialogDataService {
     }
 
     public DialogData opprettDialog(NyHenvendelseDTO nyHenvendelseDTO, String aktorId) {
+        UUID gjeldendeOppfolgingsperiode = sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(AktorId.of(aktorId));
         var dialogData = DialogData.builder()
+                .oppfolgingsperiode(gjeldendeOppfolgingsperiode)
                 .overskrift(nyHenvendelseDTO.getOverskrift())
                 .aktorId(aktorId)
                 .aktivitetId(nyHenvendelseDTO.getAktivitetId())
