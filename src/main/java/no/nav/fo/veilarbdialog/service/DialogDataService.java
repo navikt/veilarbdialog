@@ -226,11 +226,11 @@ public class DialogDataService {
                         .stream()
                         .map(egenskap -> EgenskapType.valueOf(egenskap.name()))
                         .collect(Collectors.toList()))
+                .kontorsperreEnhetId(kvpService.kontorsperreEnhetId(aktorId))
                 .opprettetDato(new Date())
                 .build();
 
-        var kontorsperretDialog = dialogData.withKontorsperreEnhetId(kvpService.kontorsperreEnhetId(aktorId));
-        DialogData nyDialog = dialogDAO.opprettDialog(kontorsperretDialog);
+        DialogData nyDialog = dialogDAO.opprettDialog(dialogData);
         dialogStatusService.oppdaterDatavarehus(nyDialog);
 
         if (auth.erEksternBruker()) {

@@ -25,7 +25,7 @@ public class WireMockUtil {
 
         oppfolging(fnr, underOppfolging, oppfolgingFeiler, mockBruker.getOppfolgingsperiode());
         manuell(fnr, erManuell, erReservertKrr, kanVarsles);
-        kvp(aktorId, erUnderKvp);
+        kvp(aktorId, erUnderKvp, mockBruker.getBrukerOptions().getKontorsperreEnhet());
         aktor(fnr, aktorId);
         nivaa4(fnr, harBruktNivaa4);
     }
@@ -88,19 +88,19 @@ public class WireMockUtil {
                         .withBody("{\"erUnderManuellOppfolging\":" + erManuell + ",\"krrStatus\":{\"kanVarsles\":" + kanVarsles + ",\"erReservert\":" + erReservertKrr + "}}")));
     }
 
-    private static void kvp(String aktorId, boolean erUnderKvp) {
+    private static void kvp(String aktorId, boolean erUnderKvp, String enhet) {
         if (erUnderKvp) {
             stubFor(get("/veilarboppfolging/api/v2/kvp?aktorId=" + aktorId)
                     .willReturn(ok()
                             .withHeader("Content-Type", "text/json")
-                            .withBody("{\"enhet\":\"9999\"}")));
+                            .withBody("{\"enhet\":\"" + enhet + "\"}")));
         } else {
             stubFor(get("/veilarboppfolging/api/v2/kvp?aktorId=" + aktorId)
                     .willReturn(aResponse().withStatus(204)));
         }
     }
 
-    public static void aktorUtenGjeldende(String fnr, String aktorId) {
+    public static void aktorUtenGjeldendeIdent(String fnr, String aktorId) {
         stubFor(get("/aktorTjeneste/identer?gjeldende=true&identgruppe=AktoerId")
                 .withHeader("Nav-Personidenter", equalTo(fnr))
                 .willReturn(ok().withBody("" +

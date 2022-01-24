@@ -18,7 +18,7 @@ public class MockNavService {
     public static MockBruker createBruker(BrukerOptions brukerOptions) {
         String fnr = generateFnr();
         String aktorId = aktorIdFromFnr(aktorIdFromFnr(fnr));
-        MockBruker mockBruker = new MockBruker(fnr, aktorId, generateEnhet(), brukerOptions);
+        MockBruker mockBruker = new MockBruker(fnr, aktorId, brukerOptions);
         fnrBruker.put(fnr, mockBruker);
         aktorIdBruker.put(aktorId, mockBruker);
         WireMockUtil.stubBruker(mockBruker);
@@ -42,10 +42,6 @@ public class MockNavService {
         MockVeileder mockVeileder = new MockVeileder(genereteVeilederIdent());
         veleder.put(mockVeileder.getNavIdent(), mockVeileder);
         return mockVeileder;
-    }
-
-    private static String generateEnhet() {
-        return null; //TODO fiks
     }
 
     private static String genereteVeilederIdent() {
