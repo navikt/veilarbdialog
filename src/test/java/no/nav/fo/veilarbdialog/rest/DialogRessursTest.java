@@ -1,35 +1,33 @@
 package no.nav.fo.veilarbdialog.rest;
 
+import io.restassured.RestAssured;
 import lombok.val;
-import no.nav.common.client.aktoroppslag.AktorOppslagClient;
-import no.nav.common.types.identer.AktorId;
-import no.nav.common.types.identer.Fnr;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
-import no.nav.fo.veilarbdialog.kvp.KvpService;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
+import org.apache.commons.compress.utils.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureWireMock(port = 0)
 @RunWith(SpringRunner.class)
 @ActiveProfiles("local")
 @Sql(
@@ -37,65 +35,66 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TES
         executionPhase = AFTER_TEST_METHOD
 )
 public class DialogRessursTest {
-    final static String fnr = "12345";
-    final static String aktorId = "54321";
-    final static String veilederIdent = "V123";
 
-    @MockBean
-    private AuthService authService;
+    @LocalServerPort
+    private int port;
 
     @Autowired
     JdbcTemplate jdbc;
 
-    @MockBean
-    private KvpService kvpService;
-
     @Autowired
-    private AktorOppslagClient aktorOppslagClient;
+    DialogRessurs dialogRessurs;
 
-    @Autowired
-    private DialogRessurs dialogRessurs;
+    private MockBruker bruker;
+    private MockVeileder veileder;
 
     @Before
-    public void before() {
-        when(kvpService.kontorsperreEnhetId(anyString())).thenReturn(null);
-        when(aktorOppslagClient.hentAktorId(Fnr.of(fnr))).thenReturn(AktorId.of(aktorId));
-        when(authService.harTilgangTilPerson(anyString())).thenReturn(true);
-    }
-
-    private void mockErEksternBruker() {
-        when(authService.erEksternBruker()).thenReturn(true);
-        when(authService.getIdent()).thenReturn(Optional.of(fnr));
-
-
-    }
-    private void mockErVeileder() {
-        when(authService.erInternBruker()).thenReturn(true);
-        when(authService.erEksternBruker()).thenReturn(false);
-        when(authService.getIdent()).thenReturn(Optional.of(veilederIdent));
-
+    public void setup() {
+        RestAssured.port = port;
+        bruker = MockNavService.createHappyBruker();
+        veileder = MockNavService.createVeileder(bruker);
     }
 
     @Test
-    public void hentDialoger() {
-        mockErEksternBruker();
-        dialogRessurs.nyHenvendelse(new NyHenvendelseDTO().setTekst("tekst"));
-        List<DialogDTO> dialoger = dialogRessurs.hentDialoger();
+    public void hentDialoger_bruker() {
+        veileder.createRequest()
+                .body(new NyHenvendelseDTO().setTekst("tekst"))
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .then()
+                .statusCode(200);
+
+        List<DialogDTO> dialoger = Lists.newArrayList();
+        dialoger = bruker.createRequest()
+                .get("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(dialoger.getClass());
+
         assertThat(dialoger.size()).isEqualTo(1);
     }
 
     @Test
     public void nyHenvendelse_fraBruker_venterPaaNav() {
-        mockErEksternBruker();
-        NyHenvendelseDTO nyHenvendelseDTO = new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift");
-        DialogDTO dialog = dialogRessurs.nyHenvendelse(nyHenvendelseDTO);
+        DialogDTO dialog = bruker.createRequest()
+                .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
 
         //Bruker skal ikke vite om nav har ferdig behandlet dialogen
         assertThat(dialog.isVenterPaSvar()).isFalse();
         assertThat(dialog.isFerdigBehandlet()).isTrue();
 
-        mockErVeileder();
-        DialogDTO veiledersDialog = dialogRessurs.hentDialog(dialog.getId());
+        DialogDTO veiledersDialog = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog/{dialogId}", dialog.getId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
 
         assertThat(veiledersDialog.isVenterPaSvar()).isFalse();
         assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
@@ -104,10 +103,13 @@ public class DialogRessursTest {
     @Test
     public void nyHenvendelse_fraVeileder_venterIkkePaaNoen() {
         //Veileder kan sende en beskjed som bruker ikke trenger å svare på, veileder må eksplisitt markere at dialogen venter på brukeren
-        mockErVeileder();
-        NyHenvendelseDTO nyHenvendelseDTO = new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift");
-
-        DialogDTO dialog = dialogRessurs.nyHenvendelse(nyHenvendelseDTO);
+        DialogDTO dialog = veileder.createRequest()
+                .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
 
         assertThat(dialog.isVenterPaSvar()).isFalse();
         assertThat(dialog.isFerdigBehandlet()).isTrue();
@@ -116,13 +118,23 @@ public class DialogRessursTest {
     @Test
     public void nyHenvendelse_veilederSvarerPaaBrukersHenvendelse_venterIkkePaaNav() {
 
-        mockErEksternBruker();
-        NyHenvendelseDTO brukersHenvendelse = new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift");
-        DialogDTO brukersDialog = dialogRessurs.nyHenvendelse(brukersHenvendelse);
+        DialogDTO brukersDialog = bruker.createRequest()
+                .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
 
-        mockErVeileder();
-        NyHenvendelseDTO veiledersHenvendelse = new NyHenvendelseDTO().setTekst("tekst");
-        DialogDTO veiledersDialog = dialogRessurs.nyHenvendelse(veiledersHenvendelse.setDialogId(brukersDialog.getId()));
+        NyHenvendelseDTO veiledersHenvendelse = new NyHenvendelseDTO().setTekst("tekst").setDialogId(brukersDialog.getId());
+
+        DialogDTO veiledersDialog = veileder.createRequest()
+                .body(veiledersHenvendelse)
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
 
         assertThat(veiledersDialog.isFerdigBehandlet()).isTrue();
     }
@@ -130,18 +142,30 @@ public class DialogRessursTest {
     @Test
     public void nyHenvendelse_brukerSvarerPaaVeiledersHenvendelse_venterPaNav() {
 
-        mockErVeileder();
         NyHenvendelseDTO veiledersHenvendelse = new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift");
-        DialogDTO veiledersDialog = dialogRessurs.nyHenvendelse(veiledersHenvendelse);
+        DialogDTO veiledersDialog = veileder.createRequest()
+                .body(veiledersHenvendelse)
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
 
         assertThat(veiledersDialog.isFerdigBehandlet()).isTrue();
 
-        mockErEksternBruker();
-        NyHenvendelseDTO brukersHenvendelse = new NyHenvendelseDTO().setTekst("tekst");
-        dialogRessurs.nyHenvendelse(brukersHenvendelse.setDialogId(veiledersDialog.getId()));
+        NyHenvendelseDTO brukersHenvendelse = new NyHenvendelseDTO().setTekst("tekst").setDialogId(veiledersDialog.getId());
+        bruker.createRequest()
+                .body(brukersHenvendelse)
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(200);
 
-        mockErVeileder();
-        veiledersDialog = dialogRessurs.hentDialog(veiledersDialog.getId());
+        veiledersDialog = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog/{dialogId}", veiledersDialog.getId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
         assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
     }
 
@@ -152,30 +176,61 @@ public class DialogRessursTest {
                 .setTekst("tekst")
                 .setAktivitetId(aktivitetId);
 
-        mockErEksternBruker();
-        dialogRessurs.nyHenvendelse(henvendelse);
+        veileder.createRequest()
+                .body(henvendelse)
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .then()
+                .statusCode(200);
 
-        val opprettetDialog = dialogRessurs.hentDialoger();
+        List<DialogDTO> opprettetDialog = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getList(".", DialogDTO.class);
+
+
         assertThat(opprettetDialog.get(0).getEgenskaper().isEmpty()).isTrue();
         assertThat(opprettetDialog.size()).isEqualTo(1);
 
-        dialogRessurs.forhandsorienteringPaAktivitet(henvendelse);
+//forhandsorientering
+        veileder.createRequest()
+                .body(henvendelse)
+                .post("/veilarbdialog/api/dialog/forhandsorientering?aktorId={aktorId}", bruker.getAktorId())
+                .then()
+                .statusCode(200);
 
-        val dialogMedParagraf8 = dialogRessurs.hentDialoger();
+        List<DialogDTO> dialogMedParagraf8 = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getList(".", DialogDTO.class);
+
         assertThat(dialogMedParagraf8.get(0).getEgenskaper()).contains(Egenskap.PARAGRAF8);
         assertThat(dialogMedParagraf8.size()).isEqualTo(1);
     }
 
     @Test
     public void forhandsorienteringPaAktivitet_dialogFinnesIkke_oppdatererEgenskap() {
-        mockErEksternBruker();
-        dialogRessurs.forhandsorienteringPaAktivitet(
-                new NyHenvendelseDTO()
-                        .setTekst("tekst")
-                        .setAktivitetId("123")
-        );
 
-        val hentedeDialoger = dialogRessurs.hentDialoger();
+        veileder.createRequest()
+                .body(new NyHenvendelseDTO()
+                        .setTekst("tekst")
+                        .setAktivitetId("123"))
+                .post("/veilarbdialog/api/dialog/forhandsorientering?aktorId={aktorId}", bruker.getAktorId())
+                .then()
+                .statusCode(200);
+
+        val hentedeDialoger = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getList(".", DialogDTO.class);
         assertThat(hentedeDialoger.size()).isEqualTo(1);
         assertThat(hentedeDialoger.get(0).getEgenskaper()).contains(Egenskap.PARAGRAF8);
     }

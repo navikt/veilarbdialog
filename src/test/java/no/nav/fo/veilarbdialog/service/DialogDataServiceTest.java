@@ -58,7 +58,7 @@ public class DialogDataServiceTest {
     @MockBean
     KvpService kvpService;
 
-    @Autowired
+    @MockBean
     AktorOppslagClient aktorOppslagClient;
 
     @Autowired
