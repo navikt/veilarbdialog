@@ -129,7 +129,7 @@ public class DialogDAO {
                 dialogData.isHistorisk() ? 1 : 0,
                 dialogData.getKontorsperreEnhetId(),
                 dialogData.getOpprettetDato(),
-                dialogData.getOppfolgingsperiode()
+                dialogData.getOppfolgingsperiode().toString()
         );
 
         dialogData.getEgenskaper()
