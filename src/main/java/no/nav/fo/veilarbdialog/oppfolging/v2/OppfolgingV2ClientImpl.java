@@ -1,11 +1,13 @@
 package no.nav.fo.veilarbdialog.oppfolging.v2;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.rest.client.RestUtils;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
+import no.nav.fo.veilarbdialog.oppfolging.siste_periode.GjeldendePeriodeMetrikk;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -23,7 +25,7 @@ import java.util.Optional;
 public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
     private final OkHttpClient client;
     private final AktorOppslagClient aktorOppslagClient;
-
+    private final GjeldendePeriodeMetrikk gjeldendePeriodeMetrikk;
 
     @Value("${application.veilarboppfolging.api.url}")
     private String baseUrl;
@@ -44,6 +46,7 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
     }
 
     @Override
+    @Timed
     public Optional<OppfolgingPeriodeMinimalDTO> fetchGjeldendePeriode(AktorId aktorId) {
         Fnr fnr = aktorOppslagClient.hentFnr(aktorId);
 
@@ -54,14 +57,17 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
         try (Response response = client.newCall(request).execute()) {
             RestUtils.throwIfNotSuccessful(response);
             if (response.code() == HttpStatus.NO_CONTENT.value()) {
+                gjeldendePeriodeMetrikk.tellKallTilEksternOppfolgingsperiode(false);
                 return Optional.empty();
             }
+            gjeldendePeriodeMetrikk.tellKallTilEksternOppfolgingsperiode(true);
             return RestUtils.parseJsonResponse(response, OppfolgingPeriodeMinimalDTO.class);
         } catch (Exception e) {
             throw internalServerError(e, request.url().toString());
         }
     }
 
+    @Timed
     @Override
     public Optional<List<OppfolgingPeriodeMinimalDTO>> hentOppfolgingsperioder(AktorId aktorId) {
         Fnr fnr = aktorOppslagClient.hentFnr(aktorId);

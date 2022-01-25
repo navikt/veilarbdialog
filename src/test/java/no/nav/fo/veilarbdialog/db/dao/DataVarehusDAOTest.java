@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.db.dao;
 import lombok.Data;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.Date;
 
-import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -30,6 +29,11 @@ class DataVarehusDAOTest {
 
     @Autowired
     private JdbcTemplate jdbc;
+
+    @BeforeEach
+    public void setup() {
+        jdbc.update("DELETE FROM EVENT");
+    }
 
     @Test
     void insertEvent() {

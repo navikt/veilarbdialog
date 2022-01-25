@@ -123,6 +123,7 @@ public class DialogDataServiceTest {
                 .setTekst("tekst")
                 .setOverskrift("overskrift");
 
+
         tilfeldigVeileder.createRequest()
                 .body(nyHenvendelse)
                 .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
