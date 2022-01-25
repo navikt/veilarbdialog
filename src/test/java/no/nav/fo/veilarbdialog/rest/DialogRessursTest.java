@@ -63,15 +63,15 @@ public class DialogRessursTest {
                 .then()
                 .statusCode(200);
 
-        List<DialogDTO> dialoger = Lists.newArrayList();
-        dialoger = bruker.createRequest()
+        List<DialogDTO> dialoger = bruker.createRequest()
                 .get("/veilarbdialog/api/dialog")
                 .then()
                 .statusCode(200)
                 .extract()
-                .as(dialoger.getClass());
+                .jsonPath()
+                .getList(".", DialogDTO.class);
 
-        assertThat(dialoger.size()).isEqualTo(1);
+        assertThat(dialoger).hasSize(1);
     }
 
     @Test
@@ -191,8 +191,8 @@ public class DialogRessursTest {
                 .getList(".", DialogDTO.class);
 
 
-        assertThat(opprettetDialog.get(0).getEgenskaper().isEmpty()).isTrue();
-        assertThat(opprettetDialog.size()).isEqualTo(1);
+        assertThat(opprettetDialog.get(0).getEgenskaper()).isEmpty();
+        assertThat(opprettetDialog).hasSize(1);
 
 //forhandsorientering
         veileder.createRequest()
@@ -210,7 +210,7 @@ public class DialogRessursTest {
                 .getList(".", DialogDTO.class);
 
         assertThat(dialogMedParagraf8.get(0).getEgenskaper()).contains(Egenskap.PARAGRAF8);
-        assertThat(dialogMedParagraf8.size()).isEqualTo(1);
+        assertThat(dialogMedParagraf8).hasSize(1);
     }
 
     @Test
