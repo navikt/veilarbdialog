@@ -23,13 +23,13 @@ public class KvpService {
     private final String baseUrl;
     private final OkHttpClient client;
 
-    public KvpService(@Value("${application.kvp.url}") String baseUrl, OkHttpClient client) {
+    public KvpService(@Value("${application.veilarboppfolging.api.url}") String baseUrl, OkHttpClient client) {
         this.baseUrl = baseUrl;
         this.client = client;
     }
 
     private KvpDTO get(String aktorId) throws IOException {
-        var uri = String.format("%s/kvp/%s/currentStatus", baseUrl, aktorId);
+        var uri = String.format("%s/v2/kvp?aktorId=%s", baseUrl, aktorId);
         var request = new Request.Builder()
                 .url(uri)
                 .build();

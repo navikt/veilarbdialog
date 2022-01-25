@@ -1,28 +1,23 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
-import no.nav.common.types.identer.AktorId;
-import no.nav.common.types.identer.Fnr;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.Avsender;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
-import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -31,26 +26,23 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
+@AutoConfigureWireMock(port = 0)
 @ActiveProfiles("local")
 @Sql(
         scripts = "/db/testdata/slett_alle_dialoger.sql",
         executionPhase = AFTER_TEST_METHOD
 )
 public class RestServiceTest {
-    final static Fnr fnr = Fnr.of("1234");
-    final static AktorId aktorId = AktorId.of("4321");
-    final static String veilederIdent = "V123456";
+
+    MockVeileder veileder;
+    MockBruker bruker;
 
     @LocalServerPort
     private int port;
@@ -60,12 +52,6 @@ public class RestServiceTest {
 
     @Autowired
     KontorsperreFilter kontorsperreFilter;
-
-    @MockBean
-    AuthService authService;
-
-    @MockBean
-    KvpService kvpService;
 
     @Autowired
     RestMapper restMapper;
@@ -83,7 +69,8 @@ public class RestServiceTest {
     @Before
     public void before() {
         RestAssured.port = port;
-        MockitoAnnotations.initMocks(this);
+        bruker = MockNavService.createHappyBruker();
+        veileder = MockNavService.createVeileder(bruker);
     }
 
     @Test
@@ -94,6 +81,7 @@ public class RestServiceTest {
                 .setOverskrift(overskrift);
 
         final DialogDTO expected = new DialogDTO()
+                .setOppfolgingsperiode(bruker.getOppfolgingsperiode())
                 .setOverskrift(overskrift)
                 .setSisteTekst(tekst)
                 .setLest(true)
@@ -104,11 +92,8 @@ public class RestServiceTest {
                 .setLest(true)
                 .setAvsender(Avsender.BRUKER);
 
-        mockHappyPathBruker();
-        mockKVPOnUser(null);
 
-        DialogDTO resultatDialog = given()
-                .contentType(ContentType.JSON)
+        DialogDTO resultatDialog = bruker.createRequest()
                 .body(nyHenvendelse)
                 .post("/veilarbdialog/api/dialog")
                 .then()
@@ -131,20 +116,21 @@ public class RestServiceTest {
                 .setOverskrift(overskrift);
 
         final DialogDTO expected = new DialogDTO()
+                .setOppfolgingsperiode(bruker.getOppfolgingsperiode())
                 .setOverskrift(overskrift)
-                .setSisteTekst(tekst);
+                .setSisteTekst(tekst)
+                .setLest(true)
+                .setFerdigBehandlet(true);
 
         final HenvendelseDTO henvendelseExpected = new HenvendelseDTO()
                 .setTekst(tekst)
-                .setAvsender(Avsender.VEILEDER);
+                .setAvsender(Avsender.VEILEDER)
+                .setAvsenderId(veileder.getNavIdent())
+                .setLest(true);
 
-        mockHappyPathVeileder();
-        mockKVPOnUser(null);
-
-        DialogDTO resultatDialog = given()
-                .contentType(ContentType.JSON)
+        DialogDTO resultatDialog = veileder.createRequest()
                 .body(nyHenvendelse)
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", aktorId.get())
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -154,36 +140,34 @@ public class RestServiceTest {
         assertThat(resultatDialog).isEqualToIgnoringGivenFields(expected,"opprettetDato", "sisteDato", "henvendelser", "id");
         assertThat(resultatHenvendelse).isEqualToIgnoringGivenFields(henvendelseExpected, "sendt", "id", "dialogId");
         assertThat(resultatDialog.getId()).isEqualTo(resultatHenvendelse.getDialogId());
-
     }
 
     @Test
     public void sistOppdatert_brukerInnlogget_kunBrukerHarLest_returnererNull() {
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", aktorId.get(), aktorId.get());
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), bruker.getAktorId());
 
-        mockHappyPathBruker();
-        fetchSistOppdatert()
+        bruker.createRequest()
+                .param("aktorId", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog/sistOppdatert")
                 .then()
                 .assertThat()
                 .statusCode(200)
                 .contentType(equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .body("sistOppdatert", equalTo(null));
-
     }
 
     @Test
     public void sistOppdatert_veilederInnlogget_kunVeilederHarLest_returnererNull() {
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), veileder.getNavIdent());
 
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", aktorId.get(), veilederIdent);
-
-        mockHappyPathVeileder();
-        fetchSistOppdatert()
+        veileder.createRequest()
+                .param("aktorId", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog/sistOppdatert")
                 .then()
                 .assertThat()
                 .statusCode(200)
                 .contentType(equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .body("sistOppdatert", equalTo(null));
-
     }
 
     @Test
@@ -191,18 +175,17 @@ public class RestServiceTest {
         Timestamp brukerLest = Timestamp.valueOf(LocalDateTime.now().minusHours(1));
         Timestamp veilederLest = Timestamp.valueOf(LocalDateTime.now());
 
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", aktorId.get(), aktorId.get(), brukerLest);
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", aktorId.get(), veilederIdent, veilederLest);
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), bruker.getAktorId(), brukerLest);
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), veileder.getNavIdent(), veilederLest);
 
-        mockHappyPathBruker();
-
-        fetchSistOppdatert()
+        bruker.createRequest()
+                .param("aktorId", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog/sistOppdatert")
                 .then()
                 .assertThat()
                 .statusCode(200)
                 .contentType(equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .body("sistOppdatert", equalTo(veilederLest.getTime()));
-
     }
 
     @Test
@@ -210,49 +193,16 @@ public class RestServiceTest {
         Timestamp veilederLest = Timestamp.valueOf(LocalDateTime.now().minusHours(1));
         Timestamp brukerLest = Timestamp.valueOf(LocalDateTime.now());
 
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", aktorId.get(), aktorId.get(), brukerLest);
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", aktorId.get(), veilederIdent, veilederLest);
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), veileder.getNavIdent(), veilederLest);
+        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), bruker.getAktorId(), brukerLest);
 
-        mockHappyPathBruker();
-
-        fetchSistOppdatert()
+        veileder.createRequest()
+                .param("aktorId", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog/sistOppdatert")
                 .then()
                 .assertThat()
                 .statusCode(200)
                 .contentType(equalTo(MediaType.APPLICATION_JSON_VALUE))
-                .body("sistOppdatert", equalTo(veilederLest.getTime()));
-
-    }
-
-    private Response fetchSistOppdatert() {
-        return given()
-                .param("aktorId", aktorId.get())
-                .get("/veilarbdialog/api/dialog/sistOppdatert");
-    }
-
-    private void mockHappyPathVeileder(){
-        when(authService.erEksternBruker()).thenReturn(false);
-        when(authService.getIdent()).thenReturn(Optional.of(veilederIdent));
-
-        mockAuthOK();
-    }
-
-    private void mockHappyPathBruker(){
-        when(authService.erEksternBruker()).thenReturn(true);
-        when(authService.getIdent()).thenReturn(Optional.of(fnr.get()));
-        mockAuthOK();
-    }
-
-    private void mockAuthOK() {
-
-        when(authService.harTilgangTilPerson(aktorId.get())).thenReturn(true);
-        when(aktorOppslagClient.hentAktorId(fnr)).thenReturn(aktorId);
-
-    }
-
-    private void mockKVPOnUser(String unit) {
-
-        when(kvpService.kontorsperreEnhetId(anyString())).thenReturn(unit);
-        when(kvpService.kontorsperreEnhetId(anyString())).thenReturn(unit);
+                .body("sistOppdatert", equalTo(brukerLest.getTime()));
     }
 }

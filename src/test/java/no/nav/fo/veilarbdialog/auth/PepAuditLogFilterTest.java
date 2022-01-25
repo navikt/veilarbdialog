@@ -43,7 +43,6 @@ public class PepAuditLogFilterTest {
     @Before
     public void setup() {
         System.setProperty(NAIS_APP_NAME_PROPERTY_NAME, "test");
-        AuthConfig authConfig = new AuthConfig();
         String url = "http://localhost:" + wireMockRule.port();
         pep = VeilarbPepFactory.get(
                 url,
