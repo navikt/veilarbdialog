@@ -21,7 +21,7 @@ public class InternDialogMapper {
         return Dialog.builder()
                 .aktivitetId(dialogData.getAktivitetId())
                 .overskrift(dialogData.getOverskrift())
-                .venterSvarNav(!dialogData.venterPaSvarFraBruker())
+                .venterSvarNav(dialogData.erUbehandlet())
                 .venterSvarBruker(dialogData.venterPaSvarFraBruker())
                 .opprettetDato(dialogData.getOpprettetDato().toInstant().atOffset(ZoneOffset.UTC))
                 .henvendelser(henvendelser)
