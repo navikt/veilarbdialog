@@ -1,0 +1,104 @@
+openapi: 3.0.2
+info:
+  title: Dialog API
+  version: '1.0'
+servers:
+  - url: https://veilarbdialog
+components:
+  schemas:
+    dialog:
+      type: object
+      properties:
+        aktivitet_id:
+          type: string
+        overskrift:
+          type: string
+        venter_svar_nav:
+          type: boolean
+        venter_svar_bruker:
+          type: boolean
+        opprettet_dato:
+          type: string
+          format: date-time
+        henvendelser:
+          type: array
+          items:
+            $ref: '#/components/schemas/henvendelse'
+    henvendelse:
+      type: object
+      properties:
+        avsender_type:
+          type: string
+          enum:
+            - VEILEDER
+            - BRUKER
+        sendt_dato:
+          type: string
+          format: date-time
+        lest_av_bruker:
+          type: boolean
+        lest_av_veileder:
+          type: boolean
+        tekst:
+          type: string
+
+paths:
+  /internal/api/v1/dialog:
+    get:
+      operationId: hentDialoger
+      tags:
+        - Dialoger
+      description: ''
+      parameters:
+        - name: aktorId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: AktørID til personen man ønsker å hente ut dialogene til
+        - name: oppfolgingsperiodeId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Uuid til oppfolgingsperioden
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/dialog'
+        '204':
+          description: Ingen dialoger for aktorId/oppfolgingsperiodeId
+        '400':
+          description: Trenger aktorId eller/og oppfolgingsperiodeId
+        '401':
+          description: Ikke logget inn
+        '403':
+          description: Ingen tilgang
+        '404':
+          description: Finner ikke aktorId/oppfolgingsperiodeId
+  /internal/api/v1/dialog/{dialogId}:
+    get:
+      operationId: hentDialog
+      tags:
+        - Dialoger
+      description: ''
+      parameters:
+        - name: dialogId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Numerisk id til dialogen
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/dialog'
