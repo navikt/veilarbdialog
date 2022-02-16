@@ -90,9 +90,11 @@ public class OppfolgingsperiodeDao {
     public void setIngenPerioder(AktorId aktorId) {
         MapSqlParameterSource source = new MapSqlParameterSource()
                 .addValue("aktorId", aktorId.get());
-        template.update("""
+        int oppdatert = template.update("""
                 update DIALOG set OPPFOLGINGSPERIODE_UUID = 'ingenPeriode' where AKTOR_ID = :aktorid;
                 """, source);
+
+        log.info("opptertert med ingen peropde: {} for aktorid", oppdatert, aktorId.get());
     }
 
     public void setAlleTilPeriode(AktorId aktorId, UUID oppfolingsperiode) {
@@ -100,8 +102,10 @@ public class OppfolgingsperiodeDao {
                 .addValue("aktorId", aktorId.get())
                 .addValue("periode", oppfolingsperiode.toString());
 
-        template.update("""
+        int oppdatert = template.update("""
                 update DIALOG set OPPFOLGINGSPERIODE_UUID = :periode where AKTOR_ID = :aktorId;
                 """, source);
+
+        log.info("opptertert med ensete priode: {} for aktorid", oppdatert, aktorId.get());
     }
 }

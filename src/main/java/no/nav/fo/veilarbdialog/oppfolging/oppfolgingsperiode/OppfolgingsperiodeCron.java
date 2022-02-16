@@ -17,10 +17,11 @@ public class OppfolgingsperiodeCron {
 
     @Scheduled(
             initialDelay = 60000,
-            fixedDelay = 500
+            fixedDelay = 5000
     )
     public void addOppfolgingsperioder() {
         if (leaderElectionClient.isLeader()) {
+            log.info("starter add oppfolgingsperioder");
             while (oppfolgingsperiodeServiceAdder.addOppfolgingsperioderForEnBruker());
             log.info("ferdig med aa legge til alle oppfolgingsperioder");
         }
