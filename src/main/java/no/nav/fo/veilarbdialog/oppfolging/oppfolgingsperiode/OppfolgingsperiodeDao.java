@@ -101,7 +101,7 @@ public class OppfolgingsperiodeDao {
                 .addValue("periode", oppfolingsperiode.toString());
 
         template.update("""
-                update DIALOG set OPPFOLGINGSPERIODE_UUID = :periode where AKTOR_ID = :aktorId;
+                update DIALOG set OPPFOLGINGSPERIODE_UUID = :periode where AKTOR_ID = :aktorId
                 """, source);
     }
 }
