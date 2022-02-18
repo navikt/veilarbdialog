@@ -91,7 +91,7 @@ public class OppfolgingsperiodeDao {
         MapSqlParameterSource source = new MapSqlParameterSource()
                 .addValue("aktorId", aktorId.get());
         template.update("""
-                update DIALOG set OPPFOLGINGSPERIODE_UUID = 'ingenPeriode' where AKTOR_ID = :aktorid
+                update DIALOG set OPPFOLGINGSPERIODE_UUID = 'ingenPeriode' where AKTOR_ID = :aktorId
                 """, source);
     }
 
