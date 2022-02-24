@@ -1,0 +1,1 @@
+create index avsendertype_sendt_id_idx on HENVENDELSE("AVSENDER_TYPE","SENDT","DIALOG_ID");
