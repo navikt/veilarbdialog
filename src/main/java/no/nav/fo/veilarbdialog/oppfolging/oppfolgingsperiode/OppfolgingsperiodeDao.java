@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.oppfolging.oppfolgingsperiode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.types.identer.AktorId;
+import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingPeriodeMinimalDTO;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -76,13 +77,31 @@ public class OppfolgingsperiodeDao {
 
         int antallOppdatert = template.update("""
                     update DIALOG
-                    set OPPFOLGINGSPERIODE_UUID = 'ukjent oppfolgingsperiode'
+                    set OPPFOLGINGSPERIODE_UUID = 'ukjent_oppfolgingsperiode'
                     where AKTOR_ID = :aktorId
                     and OPPFOLGINGSPERIODE_UUID is null
                 """, source);
 
-        if(antallOppdatert != 0) {
-            log.warn("Oppdaterete aktivitere med ukjent oppfolgingsperiode for aktorid {} antall: {}", aktorId.get(),  antallOppdatert);
+        if (antallOppdatert != 0) {
+            log.warn("Oppdaterete aktivitere med ukjent oppfolgingsperiode for aktorid {} antall: {}", aktorId.get(), antallOppdatert);
         }
+    }
+
+    public void setIngenPerioder(AktorId aktorId) {
+        MapSqlParameterSource source = new MapSqlParameterSource()
+                .addValue("aktorId", aktorId.get());
+        template.update("""
+                update DIALOG set OPPFOLGINGSPERIODE_UUID = 'ingenPeriode' where AKTOR_ID = :aktorId
+                """, source);
+    }
+
+    public void setAlleTilPeriode(AktorId aktorId, UUID oppfolingsperiode) {
+        MapSqlParameterSource source = new MapSqlParameterSource()
+                .addValue("aktorId", aktorId.get())
+                .addValue("periode", oppfolingsperiode.toString());
+
+        template.update("""
+                update DIALOG set OPPFOLGINGSPERIODE_UUID = :periode where AKTOR_ID = :aktorId
+                """, source);
     }
 }
