@@ -37,6 +37,13 @@ public class DialogDAO {
     }
 
     @Transactional(readOnly = true)
+    public List<DialogData> hentDialogerForOppfolgingsperiodeId(UUID oppfolgingsperiodeId) {
+        return jdbc.query("select * from DIALOG where OPPFOLGINGSPERIODE_UUID = ?",
+                new MapTilDialog(),
+                oppfolgingsperiodeId.toString());
+    }
+
+    @Transactional(readOnly = true)
     public List<DialogData> hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(String aktorId, Date avsluttetDato) {
         return jdbc.query("select * from DIALOG where " +
                         "AKTOR_ID = ? and " +
