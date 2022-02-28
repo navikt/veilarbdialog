@@ -32,6 +32,8 @@ components:
           enum:
             - VEILEDER
             - BRUKER
+        avsender_id:
+          type: string
         sendt_dato:
           type: string
           format: date-time

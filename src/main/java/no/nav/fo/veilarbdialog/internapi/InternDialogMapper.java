@@ -31,6 +31,7 @@ public class InternDialogMapper {
     public static Henvendelse mapTilHenvendelse(HenvendelseData henvendelseData) {
         return Henvendelse.builder()
                 .avsenderType(Henvendelse.AvsenderTypeEnum.valueOf(henvendelseData.getAvsenderType().name()))
+                .avsenderId(henvendelseData.getAvsenderId())
                 .sendtDato(henvendelseData.getSendt().toInstant().atOffset(ZoneOffset.UTC))
                 .lestAvBruker(henvendelseData.isLestAvBruker())
                 .lestAvVeileder(henvendelseData.isLestAvVeileder())
