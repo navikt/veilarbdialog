@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'alerts-prod.yaml'
-      - 'alerts-dev.yaml'
+      - 'nais/alerts-prod.yaml'
+      - 'nais/alerts-dev.yaml'
       - '.github/workflows/alerts.yaml'
 
 concurrency:
