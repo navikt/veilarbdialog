@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.config;
 
 import no.nav.common.auth.context.UserRole;
+import no.nav.common.auth.oidc.filter.AzureAdUserRoleResolver;
 import no.nav.common.auth.oidc.filter.OidcAuthenticationFilter;
 import no.nav.common.auth.oidc.filter.OidcAuthenticatorConfig;
 import no.nav.common.auth.utils.ServiceUserTokenFinder;
@@ -45,11 +46,14 @@ public class FilterConfig {
     @Value("${application.sts.discovery.url}")
     private String naisStsDiscoveryUrl;
 
-    @Value("${application.azure.ad.clientId}")
-    private String azureAdClientId;
+    @Value("${application.azure.ad.loginservice.clientId}")
+    private String azureAdLoginServiceClientId;
 
     @Value("${application.azure.ad.discoveryUrl}")
     private String azureAdDiscoveryUrl;
+
+    @Value("${application.azure.ad.clientId}")
+    private String azureAdClientId;
 
     @Value("${application.loginservice.idporten.audience}")
     private String loginserviceIdportenAudience;
@@ -86,7 +90,7 @@ public class FilterConfig {
     private OidcAuthenticatorConfig azureAdAuthConfig() {
         return new OidcAuthenticatorConfig()
                 .withDiscoveryUrl(azureAdDiscoveryUrl)
-                .withClientId(azureAdClientId)
+                .withClientId(azureAdLoginServiceClientId)
                 .withIdTokenCookieName(AZURE_AD_ID_TOKEN_COOKIE_NAME)
                 .withUserRole(UserRole.INTERN);
     }
@@ -97,6 +101,13 @@ public class FilterConfig {
                 .withClientId(loginserviceIdportenAudience)
                 .withIdTokenCookieName(AZURE_AD_B2C_ID_TOKEN_COOKIE_NAME)
                 .withUserRole(UserRole.EKSTERN);
+    }
+
+    private OidcAuthenticatorConfig naisAzureAdConfig() {
+        return new OidcAuthenticatorConfig()
+                .withDiscoveryUrl(azureAdDiscoveryUrl)
+                .withClientId(azureAdClientId)
+                .withUserRoleResolver(new AzureAdUserRoleResolver());
     }
 
     @Bean
@@ -136,7 +147,8 @@ public class FilterConfig {
                         azureAdAuthConfig(),
                         loginserviceIdportenConfig(),
                         openAmStsAuthConfig(),
-                        naisStsAuthConfig()
+                        naisStsAuthConfig(),
+                        naisAzureAdConfig()
                 )
         );
         registration.setFilter(authenticationFilter);
