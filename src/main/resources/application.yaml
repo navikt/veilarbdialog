@@ -108,8 +108,10 @@ application:
     url: ${AKTOERREGISTER_API_V1_URL}
   azure:
     ad:
-      clientId: ${VEILARBLOGIN_AAD_CLIENT_ID}
-      discoveryUrl: ${AAD_DISCOVERY_URL}
+      clientId: ${AZURE_APP_CLIENT_ID}
+      discoveryUrl: ${AZURE_APP_WELL_KNOWN_URL}
+      loginservice:
+        clientId: ${VEILARBLOGIN_AAD_CLIENT_ID}
     b2c:
       clientId: ${AAD_B2C_CLIENTID_USERNAME}
       discoveryUrl: ${AAD_B2C_DISCOVERY_URL}
