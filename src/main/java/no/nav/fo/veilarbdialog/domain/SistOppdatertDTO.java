@@ -7,5 +7,5 @@ import java.util.Date;
 
 @Data
 public class SistOppdatertDTO {
-    public final Date sistOppdatert;
+    public final long sistOppdatert;
 }

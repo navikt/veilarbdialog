@@ -47,7 +47,7 @@ public class DialogRessurs {
     public SistOppdatertDTO sistOppdatert() {
 
         var oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getIdent().orElse(null));
-        return new SistOppdatertDTO(oppdatert);
+        return new SistOppdatertDTO(oppdatert.getTime());
 
     }
 
