@@ -11,6 +11,9 @@ components:
       properties:
         aktivitet_id:
           type: string
+        oppfolgingsperiode_id:
+          type: string
+          format: uuid
         overskrift:
           type: string
         venter_svar_nav:

@@ -20,6 +20,7 @@ public class InternDialogMapper {
 
         return Dialog.builder()
                 .aktivitetId(dialogData.getAktivitetId())
+                .oppfolgingsperiodeId(dialogData.getOppfolgingsperiode())
                 .overskrift(dialogData.getOverskrift())
                 .venterSvarNav(dialogData.erUbehandlet())
                 .venterSvarBruker(dialogData.venterPaSvarFraBruker())
