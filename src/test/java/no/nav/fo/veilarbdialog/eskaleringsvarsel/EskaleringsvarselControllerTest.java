@@ -4,6 +4,8 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
+import no.nav.fo.veilarbdialog.domain.DialogDTO;
+import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
@@ -73,6 +75,19 @@ public class EskaleringsvarselControllerTest {
         EskaleringsvarselDto gjeldende = hentGjeldende(veileder, bruker);
 
         assertThat(startEskalering).isEqualTo(gjeldende);
+
+
+        DialogDTO dialogDTO = dialogTestService.hentDialog(port, veileder, gjeldende.tilhorendeDialogId());
+        SoftAssertions.assertSoftly(
+                assertions -> {
+                    assertions.assertThat(dialogDTO.isFerdigBehandlet()).isTrue();
+                    assertions.assertThat(dialogDTO.isVenterPaSvar()).isTrue();
+                    HenvendelseDTO henvendelseDTO = dialogDTO.getHenvendelser().get(0);
+                    assertions.assertThat(henvendelseDTO.getTekst()).isEqualTo(tekst);
+                    assertions.assertThat(henvendelseDTO.getAvsenderId()).isEqualTo(veileder.getNavIdent());
+                }
+        );
+
 
         ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonConsumer, brukernotifikasjonUtTopic, 5000L);
 

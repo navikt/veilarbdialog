@@ -22,6 +22,15 @@ public class DialogTestService {
         return opprettDialog(port, veileder, bruker, nyHenvendelseDTO);
     }
 
+    public DialogDTO hentDialog(int port, RestassuredUser restassuredUser, long dialogId) {
+        return restassuredUser.createRequest()
+                .get("/veilarbdialog/api/dialog/{dialogId}", dialogId)
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+    }
+
     private DialogDTO opprettDialog(int port, RestassuredUser restassuredUser, MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
         Response response = restassuredUser.createRequest()
                 .port(port)
