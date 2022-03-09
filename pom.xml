@@ -41,6 +41,13 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <dependencies>
 
         <!-- DB -->
@@ -230,6 +237,11 @@
             <groupId>no.nav.tjenestespesifikasjoner</groupId>
             <artifactId>nav-virksomhet-opprettOppgavehenvendelse-v1-meldingsdefinisjon</artifactId>
             <version>${tjenestespesifikasjoner.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.navikt</groupId>
+            <artifactId>brukernotifikasjon-schemas</artifactId>
+            <version>v2.5.1</version>
         </dependency>
 
         <!-- EXTERNAL DEPENDENCIES -->
