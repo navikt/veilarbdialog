@@ -7,6 +7,7 @@ import no.nav.common.abac.domain.request.ActionId;
 import no.nav.common.auth.context.AuthContextHolder;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.EnhetId;
+import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.NavIdent;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,10 @@ public class AuthService {
                 ActionId.READ,
                 AktorId.of(aktorId)
         );
+    }
+
+    public boolean harTilgangTilPerson(Fnr fnr) {
+        return pep.harTilgangTilPerson(getInnloggetBrukerToken(), ActionId.READ, fnr);
     }
 
     public void harTilgangTilPersonEllerKastIngenTilgang(String aktorId) {

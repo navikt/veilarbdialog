@@ -1,18 +1,18 @@
-package no.nav.fo.veilarbdialog.brukernotifikasjon.oppgave;
+package no.nav.fo.veilarbdialog.brukernotifikasjon;
 
 import lombok.Builder;
 import lombok.Getter;
 
+import java.net.URL;
+
 @Getter
 @Builder
 class OppgaveInfo {
-    private final long id;
     private final String brukernotifikasjonId;
-    private final long aktivitetId;
     private final String melding;
     private final String oppfolgingsperiode;
-    private final String aktorId;
     private final String epostTitel;
     private final String epostBody;
     private final String smsTekst;
+    private final URL link;
 }

@@ -1,8 +1,10 @@
 package no.nav.fo.veilarbdialog.eskaleringsvarsel.dto;
 
 
+import no.nav.common.types.identer.Fnr;
+
 public record StopEskaleringDto(
-        String fnr,
+        Fnr fnr,
         String begrunnelse,
         String tekst
 ) {

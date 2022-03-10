@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -52,11 +53,11 @@ public class EskaleringsvarselRepository {
         return new EskaleringsvarselEntity(
                 key,
                 tilhorendeDialogId,
+                0,
                 aktorId,
                 opprettetAv,
                 opprettetDato,
                 opprettetBegrunnelse,
-                null,
                 null,
                 null,
                 null
@@ -67,8 +68,8 @@ public class EskaleringsvarselRepository {
 
     }
 
-    public EskaleringsvarselEntity hentGjeldende(AktorId aktorId) {
-        return null;
+    public Optional<EskaleringsvarselEntity> hentGjeldende(AktorId aktorId) {
+        return Optional.empty();
     }
 
     public List<EskaleringsvarselEntity> hentHistorikk(AktorId aktorId) {
