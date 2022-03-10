@@ -25,7 +25,6 @@
         <common.version>2.2021.12.09_11.56-a71c36a61ba3</common.version>
 
         <flyway.version>4.1.1</flyway.version>
-        <jackson.version>2.11.2</jackson.version>
         <javax.activation.version>1.1.1</javax.activation.version>
         <jersey.version>2.27</jersey.version>
         <rest-assured.version>4.2.0</rest-assured.version>
@@ -199,7 +198,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
         <!-- JAXB -->

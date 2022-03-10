@@ -21,7 +21,7 @@ import java.time.ZoneOffset;
 @Service
 public class OppgaveProducer {
     private final KafkaTemplate<NokkelInput, OppgaveInput> kafkaOppgaveProducer;
-    @Value("${topic.ut.brukernotifikasjon.oppgave}")
+    @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
     private String oppgaveToppic;
 
     @SneakyThrows

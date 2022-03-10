@@ -113,7 +113,8 @@ application:
       url: http://localhost:${wiremock.server.port}/veilarboppfolging/api
   topic:
     ut:
-      brukernotifikasjon: min-side.aapen-brukernotifikasjon-oppgave-v1
+      brukernotifikasjon:
+        oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
       dialog:
         raw: dialogRawTopic
     inn:
