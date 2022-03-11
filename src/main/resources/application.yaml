@@ -153,6 +153,9 @@ application:
   veilarboppfolging:
     api:
       url: ${VEILARBOPPFOLGINGAPI_URL}
+  veilarbperson:
+    api:
+      url: ${VEILARBPERSONAPI_URL}
   topic:
     inn:
       sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1

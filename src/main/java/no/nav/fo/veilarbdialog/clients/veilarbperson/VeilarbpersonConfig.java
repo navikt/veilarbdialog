@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class VeilarbpersonConfig {
 
-    @Value("${VEILARBPERSON_URL}")
+    @Value("${application.veilarbperson.api.url}")
     private String baseUrl;
 
     @Bean

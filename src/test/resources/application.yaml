@@ -111,6 +111,9 @@ application:
   veilarboppfolging:
     api:
       url: http://localhost:${wiremock.server.port}/veilarboppfolging/api
+  veilarbperson:
+    api:
+      url: http://localhost:${wiremock.server.port}/veilarbperson/api
   topic:
     ut:
       brukernotifikasjon:

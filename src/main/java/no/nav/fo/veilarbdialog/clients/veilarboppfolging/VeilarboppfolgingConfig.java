@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class VeilarboppfolgingConfig {
 
-    @Value("${VEILARBOPPFOLGING_URL}")
+    @Value("${application.veilarboppfolging.api.url}")
     private String baseUrl;
 
     @Bean
