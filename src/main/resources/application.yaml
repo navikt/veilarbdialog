@@ -43,6 +43,9 @@ spring:
             source: USER_INFO
           user:
             info: ${KAFKA_SCHEMA_REGISTRY_USER}:${KAFKA_SCHEMA_REGISTRY_PASSWORD}
+      specific:
+        avro:
+          reader: true
     bootstrap-servers: ${KAFKA_BROKERS}
     consumer:
       group-id: 'veilarbdialog'

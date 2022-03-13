@@ -29,8 +29,8 @@ public class BrukernotifikasjonRepository {
 
         jdbcTemplate.update("" +
                         " INSERT INTO brukernotifikasjon " +
-                        "        ( brukernotifikasjon_id,  DIALOG_ID,  foedselsnummer,  oppfolgingsperiode,  type,  status,  varsel_kvittering_status, opprettet,          melding,  smsTekst,  epostTittel,  epostBody) " +
-                        " VALUES (:brukernotifikasjon_id, :aktivitet_id, :opprettet_paa_aktivitet_version, :foedselsnummer, :oppfolgingsperiode, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :smsTekst, :epostTittel, :epostBody) ",
+                        "        ( brukernotifikasjon_id, DIALOG_ID, foedselsnummer, oppfolgingsperiode, type, status, varsel_kvittering_status, opprettet, melding, smsTekst,  epostTittel, epostBody) " +
+                        " VALUES (:brukernotifikasjon_id, :dialog_id, :foedselsnummer, :oppfolgingsperiode, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :smsTekst, :epostTittel, :epostBody) ",
                 params);
 
         return null;

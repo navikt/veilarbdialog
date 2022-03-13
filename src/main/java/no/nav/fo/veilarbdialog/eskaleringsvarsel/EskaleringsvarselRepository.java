@@ -3,6 +3,10 @@ package no.nav.fo.veilarbdialog.eskaleringsvarsel;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
+import no.nav.fo.veilarbdialog.util.DatabaseUtils;
+import org.apache.commons.lang3.NotImplementedException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -18,6 +22,19 @@ import java.util.Optional;
 public class EskaleringsvarselRepository {
 
     private final NamedParameterJdbcTemplate jdbc;
+
+    RowMapper<EskaleringsvarselEntity> rowMapper = (rs, rowNum) -> new EskaleringsvarselEntity(
+            rs.getLong("id"),
+            rs.getLong("tilhorende_dialog_id"),
+            rs.getLong("tilhorende_brukernotifikasjon_id"),
+            rs.getString("aktor_id"),
+            rs.getString("opprettet_av"),
+            DatabaseUtils.hentZonedDateTime(rs, "opprettet_dato"),
+            rs.getString("opprettet_begrunnelse"),
+            DatabaseUtils.hentZonedDateTime(rs, "avsluttet_dato"),
+            rs.getString("avsluttet_av"),
+            rs.getString("avsluttet_begrunnelse")
+    );
 
     public EskaleringsvarselEntity opprett(long tilhorendeDialogId, String aktorId, String opprettetAv, String opprettetBegrunnelse) {
         ZonedDateTime opprettetDato = ZonedDateTime.now();
@@ -48,7 +65,7 @@ public class EskaleringsvarselRepository {
                     :begrunnelse)
                 """;
 
-        int update = jdbc.update(sql, params, keyHolder);
+        jdbc.update(sql, params, keyHolder);
         long key = keyHolder.getKey().longValue();
         return new EskaleringsvarselEntity(
                 key,
@@ -65,11 +82,20 @@ public class EskaleringsvarselRepository {
     }
 
     public void stopp(long varselId, String avsluttetAv, String avsluttetBegrunnelse) {
-
+        throw new NotImplementedException();
     }
 
     public Optional<EskaleringsvarselEntity> hentGjeldende(AktorId aktorId) {
-        return Optional.empty();
+        String sql = """
+                SELECT * FROM ESKALERINGSVARSEL WHERE AKTOR_ID = :aktor_id
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("aktor_id", aktorId.get());
+        try {
+            return Optional.of(jdbc.queryForObject(sql, params, rowMapper));
+        } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
+            return Optional.empty();
+        }
     }
 
     public List<EskaleringsvarselEntity> hentHistorikk(AktorId aktorId) {

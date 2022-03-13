@@ -43,6 +43,9 @@ public class EskaleringsvarselControllerTest {
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
     private String brukernotifikasjonUtTopic;
 
+    @Value("${application.dialog.url}")
+    private String dialogUrl;
+
 
 
     @Autowired
@@ -101,8 +104,8 @@ public class EskaleringsvarselControllerTest {
            assertions.assertThat(nokkelInput.getGrupperingsId()).isNotEmpty(); // TODO sjekk
 
             assertions.assertThat(oppgaveInput.getEksternVarsling()).isTrue();
-            assertions.assertThat(oppgaveInput.getLink()).isEqualTo("https://www.nav.no/arbeid/dialog/something");
-            assertions.assertThat(oppgaveInput.getTekst()).isEqualTo(overskrift);
+            assertions.assertThat(oppgaveInput.getLink()).isEqualTo(dialogUrl + "/" + dialogDTO.getId());
+            assertions.assertThat(oppgaveInput.getTekst()).isEqualTo(tekst);
             assertions.assertAll();
         });
 
@@ -124,7 +127,7 @@ public class EskaleringsvarselControllerTest {
 
     private EskaleringsvarselDto hentGjeldende(MockVeileder veileder, MockBruker mockBruker) {
         Response response =  veileder.createRequest()
-                .param("aktorId", mockBruker.getAktorId())
+                .param("fnr", mockBruker.getFnr())
                 .when()
                 .get("/veilarbdialog/api/eskaleringsvarsel/gjeldende")
                 .then()

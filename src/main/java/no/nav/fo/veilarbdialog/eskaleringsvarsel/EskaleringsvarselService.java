@@ -15,6 +15,7 @@ import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,9 @@ public class EskaleringsvarselService {
     private final AktorOppslagClient aktorOppslagClient;
     private final VeilarboppfolgingClient veilarboppfolgingClient;
     private final SistePeriodeService sistePeriodeService;
+
+    @Value("${application.dialog.url}")
+    private String dialogUrl;
 
     @Transactional
     public EskaleringsvarselEntity start(Fnr fnr, String begrunnelse, String overskrift, String tekst) {
@@ -93,8 +97,8 @@ public class EskaleringsvarselService {
                 VarselType.ESKALERINGSVARSEL,
                 overskrift, // Riktig?
                 tekst, // Riktig?
-                "", // TODO
-                utledEskaleringsvarselLink() // TODO
+                null, // TODO
+                utledEskaleringsvarselLink(dialogData.getId()) // TODO
         );
 
         brukernotifikasjonService.sendBrukernotifikasjon(brukernotifikasjon);
@@ -125,8 +129,9 @@ public class EskaleringsvarselService {
     }
 
     @SneakyThrows
-    private URL utledEskaleringsvarselLink() {
-        return new URL("");
+    private URL utledEskaleringsvarselLink(long id) {
+        // TODO fix
+        return new URL(String.format("%s/%s", dialogUrl, id));
     }
 
 }
