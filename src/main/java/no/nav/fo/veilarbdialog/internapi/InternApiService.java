@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -17,6 +18,7 @@ public class InternApiService {
 
     private final AuthService authService;
     private final DialogDAO dialogDAO;
+    private final KontorsperreFilter kontorsperreFilter;
 
     public DialogData hentDialog(Integer dialogId) {
         if (authService.erEksternBruker()) {
@@ -26,7 +28,7 @@ public class InternApiService {
         DialogData dialogData = dialogDAO.hentDialog(dialogId);
         authService.harTilgangTilPersonEllerKastIngenTilgang(dialogData.getAktorId());
 
-        return dialogData.getKontorsperreEnhetId() == null ? dialogData : null;
+        return filtrerKontorsperret(dialogData);
     }
 
    public List<DialogData> hentDialoger(String aktorId, UUID oppfolgingsperiodeId) {
@@ -67,7 +69,17 @@ public class InternApiService {
     private List<DialogData> filtrerKontorsperret(List<DialogData> dialoger) {
         return dialoger
                 .stream()
-                .filter(d -> d.getKontorsperreEnhetId() == null)
-                .toList();
+                .filter(kontorsperreFilter::tilgangTilEnhet)
+                .map(dialog ->
+                        dialog.withHenvendelser(
+                                dialog.getHenvendelser().stream().filter(
+                                        kontorsperreFilter::tilgangTilEnhet
+                                ).toList()
+                        )
+                ).toList();
+    }
+
+    private DialogData filtrerKontorsperret(DialogData dialog) {
+        return filtrerKontorsperret(List.of(dialog)).stream().findFirst().orElse(null);
     }
 }
