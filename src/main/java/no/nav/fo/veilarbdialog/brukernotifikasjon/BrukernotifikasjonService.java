@@ -38,6 +38,8 @@ public class BrukernotifikasjonService {
 
     private final KafkaTemplate<NokkelInput, OppgaveInput> kafkaOppgaveProducer;
 
+    private final KafkaTemplate<NokkelInput, DoneInput> kafkaDoneProducer;
+
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
     private String oppgaveTopic;
 
@@ -124,6 +126,7 @@ public class BrukernotifikasjonService {
         return brukernotifikasjonRepository.hentBrukernotifikasjon(brukernotifikasjonId).orElseThrow();
     }
 
+    @SneakyThrows
     public void sendDone(Fnr fnr, DoneInfo doneInfo) {
         NokkelInput nokkel = NokkelInput.newBuilder()
                 .setAppnavn(applicationName)
@@ -132,8 +135,12 @@ public class BrukernotifikasjonService {
                 .setGrupperingsId(doneInfo.getOppfolgingsperiode())
                 .setEventId(doneInfo.getEventId())
                 .build();
+
         DoneInput done = new DoneInputBuilder().withTidspunkt(LocalDateTime.now()).build();
+
         final ProducerRecord<NokkelInput, DoneInput> kafkaMelding = new ProducerRecord<>(doneTopic, nokkel, done);
+
+        kafkaDoneProducer.send(kafkaMelding).get();
     }
 
 }

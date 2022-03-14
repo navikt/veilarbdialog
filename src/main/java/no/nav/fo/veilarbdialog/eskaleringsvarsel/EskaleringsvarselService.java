@@ -141,7 +141,6 @@ public class EskaleringsvarselService {
                 .build();
 
         brukernotifikasjonService.sendDone(fnr, doneInfo);
-        // sende done til brukernotifikasjon
     }
 
     public Optional<EskaleringsvarselEntity> hentGjeldende(Fnr fnr) {

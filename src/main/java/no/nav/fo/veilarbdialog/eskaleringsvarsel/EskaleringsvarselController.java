@@ -5,6 +5,7 @@ import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.GjeldendeEskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
@@ -52,14 +53,14 @@ public class EskaleringsvarselController {
     }
 
     @GetMapping(value = "/gjeldende", params = "fnr")
-    public ResponseEntity<EskaleringsvarselDto> hentGjeldende(@RequestParam Fnr fnr) {
+    public ResponseEntity<GjeldendeEskaleringsvarselDto> hentGjeldende(@RequestParam Fnr fnr) {
         authService.skalVereInternBruker();
         authService.harTilgangTilPerson(fnr);
 
         Optional<EskaleringsvarselEntity> maybeGjeldende = eskaleringsvarselService.hentGjeldende(fnr);
 
         return maybeGjeldende
-                .map((g) -> ResponseEntity.ok(eskaleringsvarselEntity2Dto(g)))
+                .map((g) -> ResponseEntity.ok(gjeldendeEskaleringsvarselDto(g)))
                 .orElse(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
     }
 
@@ -77,6 +78,10 @@ public class EskaleringsvarselController {
 
     public static EskaleringsvarselDto eskaleringsvarselEntity2Dto(EskaleringsvarselEntity entity) {
         return new EskaleringsvarselDto(entity.varselId(), entity.tilhorendeDialogId(), entity.opprettetAv(), entity.opprettetDato(), entity.opprettetBegrunnelse(), entity.avsluttetDato(), entity.avsluttetAv(), entity.avsluttetBegrunnelse());
+    }
+
+    public static GjeldendeEskaleringsvarselDto gjeldendeEskaleringsvarselDto(EskaleringsvarselEntity entity) {
+        return new GjeldendeEskaleringsvarselDto(entity.varselId(), entity.tilhorendeDialogId(), entity.opprettetAv(), entity.opprettetDato(), entity.opprettetBegrunnelse());
     }
 
 }

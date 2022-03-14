@@ -23,7 +23,7 @@ public class BrukernotifikasjonRepository {
             new BrukernotifikasjonEntity(
                     rs.getLong("id"),
                     DatabaseUtils.hentMaybeUUID(rs, "event_id"),
-                    DatabaseUtils.hentMaybeUUID(rs, "oppfolgingsperiodeId")
+                    DatabaseUtils.hentMaybeUUID(rs, "oppfolgingsperiode_id")
             );
 
     Long opprettBrukernotifikasjon(BrukernotifikasjonInsert insert) {
@@ -43,11 +43,11 @@ public class BrukernotifikasjonRepository {
 
         jdbcTemplate.update("" +
                         " INSERT INTO brukernotifikasjon " +
-                        "        ( event_id, DIALOG_ID, foedselsnummer, oppfolgingsperiode_id, type, status, varsel_kvittering_status, opprettet, melding, smsTekst,  epostTittel, epostBody) " +
+                        "        (event_id, DIALOG_ID, foedselsnummer, oppfolgingsperiode_id, type, status, varsel_kvittering_status, opprettet, melding, smsTekst,  epostTittel, epostBody) " +
                         " VALUES (:event_id, :dialog_id, :foedselsnummer, :oppfolgingsperiode_id, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :smsTekst, :epostTittel, :epostBody) ",
                 params, keyHolder);
 
-        return keyHolder.getKeyAs(Long.class);
+        return keyHolder.getKey().longValue();
     }
 
     public Optional<BrukernotifikasjonEntity> hentBrukernotifikasjon(long id) {

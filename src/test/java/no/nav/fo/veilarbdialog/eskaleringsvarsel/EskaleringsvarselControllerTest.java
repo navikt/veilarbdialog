@@ -2,13 +2,16 @@ package no.nav.fo.veilarbdialog.eskaleringsvarsel;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.GjeldendeEskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
@@ -17,6 +20,7 @@ import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.data.Offset;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +32,9 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.time.ZonedDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
@@ -42,6 +49,9 @@ public class EskaleringsvarselControllerTest {
 
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
     private String brukernotifikasjonUtTopic;
+
+    @Value("${application.topic.ut.brukernotifikasjon.done}")
+    private String brukernotifikasjonDoneTopic;
 
     @Value("${application.dialog.url}")
     private String dialogUrl;
@@ -58,18 +68,19 @@ public class EskaleringsvarselControllerTest {
     @Autowired
     KafkaTestService kafkaTestService;
 
+    Consumer<NokkelInput, OppgaveInput> brukerNotifikasjonOppgaveConsumer;
 
-    Consumer<NokkelInput, OppgaveInput> brukerNotifikasjonConsumer;
-
+    Consumer<NokkelInput, DoneInput> brukerNotifikasjonDoneConsumer;
 
     @Before
     public void setup() {
         RestAssured.port = port;
-        brukerNotifikasjonConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonUtTopic);
+        brukerNotifikasjonOppgaveConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonUtTopic);
+        brukerNotifikasjonDoneConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonDoneTopic);
     }
 
     @Test
-    public void happyCase() {
+    public void start_eskalering_happy_case() {
 
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
@@ -112,11 +123,15 @@ public class EskaleringsvarselControllerTest {
                 }
         );
 
-        EskaleringsvarselDto gjeldende = hentGjeldende(veileder, bruker);
+        GjeldendeEskaleringsvarselDto gjeldende = requireGjeldende(veileder, bruker);
 
-        assertThat(startEskalering).isEqualTo(gjeldende);
+        assertThat(startEskalering.id()).isEqualTo(gjeldende.id());
+        assertThat(startEskalering.tilhorendeDialogId()).isEqualTo(gjeldende.tilhorendeDialogId());
+        assertThat(startEskalering.opprettetAv()).isEqualTo(gjeldende.opprettetAv());
+        assertThat(startEskalering.opprettetDato()).isEqualTo(gjeldende.opprettetDato());
+        assertThat(startEskalering.opprettetBegrunnelse()).isEqualTo(gjeldende.opprettetBegrunnelse());
 
-        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonConsumer, brukernotifikasjonUtTopic, 5000L);
+        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonUtTopic, 5000L);
 
         NokkelInput nokkelInput = brukernotifikasjonRecord.key();
         OppgaveInput oppgaveInput = brukernotifikasjonRecord.value();
@@ -138,8 +153,54 @@ public class EskaleringsvarselControllerTest {
             assertions.assertThat(oppgaveInput.getSmsVarslingstekst()).isEqualTo(brukernotifikasjonSmsVarslingTekst);
             assertions.assertAll();
         });
+    }
+
+    @Test
+    public void stop_eskalering_happy_case() {
+        MockBruker bruker = MockNavService.createHappyBruker();
+        MockVeileder veileder = MockNavService.createVeileder(bruker);
+        String avsluttBegrunnelse = "Fordi ...";
+        Fnr brukerFnr = Fnr.of(bruker.getFnr());
+
+        StartEskaleringDto startEskaleringDto = new StartEskaleringDto(brukerFnr, "begrunnelse", "overskrift", "tekst");
+        EskaleringsvarselDto eskaleringsvarsel = startEskalering(veileder, startEskaleringDto);
+
+        StopEskaleringDto stopEskaleringDto = new StopEskaleringDto(brukerFnr, avsluttBegrunnelse);
+        stopEskalering(veileder, stopEskaleringDto);
+
+        DialogDTO dialogDTO = dialogTestService.hentDialog(port, veileder, eskaleringsvarsel.tilhorendeDialogId());
+
+        SoftAssertions.assertSoftly(
+                assertions -> {
+                    List<HenvendelseDTO> hendvendelser = dialogDTO.getHenvendelser();
+
+                    assertions.assertThat(hendvendelser).hasSize(2);
+
+                    HenvendelseDTO stopEskaleringHendvendelse = dialogDTO.getHenvendelser().get(1);
+                    assertions.assertThat(stopEskaleringHendvendelse.getTekst()).isEqualTo(avsluttBegrunnelse);
+                    assertions.assertThat(stopEskaleringHendvendelse.getAvsenderId()).isEqualTo(veileder.getNavIdent());
+                }
+        );
+
+        ingenGjeldende(veileder, bruker);
 
 
+        ConsumerRecord<NokkelInput, DoneInput> brukernotifikasjonRecord =
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+
+        NokkelInput nokkelInput = brukernotifikasjonRecord.key();
+        DoneInput doneInput = brukernotifikasjonRecord.value();
+
+        SoftAssertions.assertSoftly(assertions -> {
+            assertions.assertThat(nokkelInput.getFodselsnummer()).isEqualTo(bruker.getFnr());
+            assertions.assertThat(nokkelInput.getAppnavn()).isEqualTo(applicationName);
+            assertions.assertThat(nokkelInput.getNamespace()).isEqualTo(namespace);
+            assertions.assertThat(nokkelInput.getEventId()).isNotEmpty();
+            assertions.assertThat(nokkelInput.getGrupperingsId()).isEqualTo(dialogDTO.getOppfolgingsperiode().toString());
+
+            assertions.assertThat(doneInput.getTidspunkt()).isCloseTo(ZonedDateTime.now().toInstant().toEpochMilli(), Offset.offset(10 * 1000L));
+            assertions.assertAll();
+        });
     }
 
     private EskaleringsvarselDto startEskalering(MockVeileder veileder, StartEskaleringDto startEskaleringDto) {
@@ -155,7 +216,17 @@ public class EskaleringsvarselControllerTest {
         return eskaleringsvarselDto;
     }
 
-    private EskaleringsvarselDto hentGjeldende(MockVeileder veileder, MockBruker mockBruker) {
+    private void stopEskalering(MockVeileder veileder, StopEskaleringDto stopEskaleringDto) {
+        veileder.createRequest()
+                .body(stopEskaleringDto)
+                .when()
+                .patch("/veilarbdialog/api/eskaleringsvarsel/stop")
+                .then()
+                .assertThat().statusCode(HttpStatus.OK.value())
+                .extract().response();
+    }
+
+    private GjeldendeEskaleringsvarselDto requireGjeldende(MockVeileder veileder, MockBruker mockBruker) {
         Response response = veileder.createRequest()
                 .param("fnr", mockBruker.getFnr())
                 .when()
@@ -164,8 +235,19 @@ public class EskaleringsvarselControllerTest {
                 .assertThat().statusCode(HttpStatus.OK.value())
                 .extract()
                 .response();
-        return response.as(EskaleringsvarselDto.class);
 
+        return response.as(GjeldendeEskaleringsvarselDto.class);
+    }
+
+    private void ingenGjeldende(MockVeileder veileder, MockBruker mockBruker) {
+        veileder.createRequest()
+                .param("fnr", mockBruker.getFnr())
+                .when()
+                .get("/veilarbdialog/api/eskaleringsvarsel/gjeldende")
+                .then()
+                .assertThat().statusCode(HttpStatus.NO_CONTENT.value())
+                .extract()
+                .response();
     }
 
 }
