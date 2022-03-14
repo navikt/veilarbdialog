@@ -2,9 +2,11 @@ package no.nav.fo.veilarbdialog.brukernotifikasjon;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import no.nav.brukernotifikasjon.schemas.builders.DoneInputBuilder;
 import no.nav.brukernotifikasjon.schemas.builders.NokkelInputBuilder;
 import no.nav.brukernotifikasjon.schemas.builders.OppgaveInputBuilder;
 import no.nav.brukernotifikasjon.schemas.builders.domain.PreferertKanal;
+import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
 import no.nav.common.types.identer.Fnr;
@@ -37,7 +39,10 @@ public class BrukernotifikasjonService {
     private final KafkaTemplate<NokkelInput, OppgaveInput> kafkaOppgaveProducer;
 
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
-    private String oppgaveToppic;
+    private String oppgaveTopic;
+
+    @Value("${application.topic.ut.brukernotifikasjon.done}")
+    private String doneTopic;
 
     @Value("${spring.application.name}")
     String applicationName;
@@ -47,9 +52,9 @@ public class BrukernotifikasjonService {
 
     public BrukernotifikasjonEntity sendBrukernotifikasjon(Brukernotifikasjon brukernotifikasjon) {
         OppgaveInfo oppgaveInfo = new OppgaveInfo(
-                brukernotifikasjon.brukernotifikasjonId().toString(),
+                brukernotifikasjon.eventId().toString(),
                 brukernotifikasjon.melding(),
-                brukernotifikasjon.oppfolgingsperiode().toString(),
+                brukernotifikasjon.oppfolgingsperiodeId().toString(),
                 brukernotifikasjon.epostTitel(),
                 brukernotifikasjon.epostBody(),
                 brukernotifikasjon.smsTekst(),
@@ -59,11 +64,11 @@ public class BrukernotifikasjonService {
         sendOppgave(brukernotifikasjon.foedselsnummer(), oppgaveInfo);
 
         BrukernotifikasjonInsert insert = new BrukernotifikasjonInsert(
-                brukernotifikasjon.brukernotifikasjonId(),
+                brukernotifikasjon.eventId(),
                 brukernotifikasjon.dialogId(),
                 brukernotifikasjon.foedselsnummer(),
                 brukernotifikasjon.melding(),
-                brukernotifikasjon.oppfolgingsperiode(),
+                brukernotifikasjon.oppfolgingsperiodeId(),
                 brukernotifikasjon.type(),
                 VarselStatus.SENDT,
                 brukernotifikasjon.epostTitel(),
@@ -72,7 +77,8 @@ public class BrukernotifikasjonService {
                 brukernotifikasjon.link()
         );
 
-        return brukernotifikasjonRepository.opprettBrukernotifikasjon(insert);
+        Long id = brukernotifikasjonRepository.opprettBrukernotifikasjon(insert);
+        return hentBrukernotifikasjon(id);
     }
 
     public boolean kanVarsles(Fnr fnr) {
@@ -109,9 +115,25 @@ public class BrukernotifikasjonService {
                 .withEpostVarslingstekst(oppgaveInfo.getEpostBody())
                 .build();
 
-        final ProducerRecord<NokkelInput, OppgaveInput> kafkaMelding = new ProducerRecord<>(oppgaveToppic, nokkel, oppgave);
+        final ProducerRecord<NokkelInput, OppgaveInput> kafkaMelding = new ProducerRecord<>(oppgaveTopic, nokkel, oppgave);
 
         kafkaOppgaveProducer.send(kafkaMelding).get();
+    }
+
+    public BrukernotifikasjonEntity hentBrukernotifikasjon(long brukernotifikasjonId) {
+        return brukernotifikasjonRepository.hentBrukernotifikasjon(brukernotifikasjonId).orElseThrow();
+    }
+
+    public void sendDone(Fnr fnr, DoneInfo doneInfo) {
+        NokkelInput nokkel = NokkelInput.newBuilder()
+                .setAppnavn(applicationName)
+                .setNamespace(namespace)
+                .setFodselsnummer(fnr.get())
+                .setGrupperingsId(doneInfo.getOppfolgingsperiode())
+                .setEventId(doneInfo.getEventId())
+                .build();
+        DoneInput done = new DoneInputBuilder().withTidspunkt(LocalDateTime.now()).build();
+        final ProducerRecord<NokkelInput, DoneInput> kafkaMelding = new ProducerRecord<>(doneTopic, nokkel, done);
     }
 
 }

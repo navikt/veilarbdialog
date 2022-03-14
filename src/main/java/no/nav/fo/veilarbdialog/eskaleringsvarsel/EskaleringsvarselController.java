@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.eskaleringsvarsel;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.Fnr;
+import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
@@ -45,8 +46,9 @@ public class EskaleringsvarselController {
     public void stop(@RequestBody StopEskaleringDto stopEskaleringDto) {
         authService.skalVereInternBruker();
         authService.harTilgangTilPerson(stopEskaleringDto.fnr());
+        NavIdent navIdent = authService.getNavIdent();
 
-        eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), stopEskaleringDto.tekst());
+        eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), navIdent);
     }
 
     @GetMapping(value = "/gjeldende", params = "fnr")

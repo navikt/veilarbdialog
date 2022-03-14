@@ -6,11 +6,11 @@ import java.net.URL;
 import java.util.UUID;
 
 public record Brukernotifikasjon(
-        UUID brukernotifikasjonId,
+        UUID eventId,
         long dialogId,
         Fnr foedselsnummer,
         String melding,
-        UUID oppfolgingsperiode,
+        UUID oppfolgingsperiodeId,
         VarselType type,
         String epostTitel,
         String epostBody,

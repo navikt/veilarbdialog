@@ -6,7 +6,7 @@ import java.net.URL;
 import java.util.UUID;
 
 public record BrukernotifikasjonInsert(
-        UUID brukernotifikasjonId,
+        UUID eventId,
         long dialogId,
         Fnr foedselsnummer,
         String melding,

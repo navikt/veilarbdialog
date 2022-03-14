@@ -2,9 +2,9 @@ package no.nav.fo.veilarbdialog.eskaleringsvarsel;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.AktorId;
+import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -36,14 +37,15 @@ public class EskaleringsvarselRepository {
             rs.getString("avsluttet_begrunnelse")
     );
 
-    public EskaleringsvarselEntity opprett(long tilhorendeDialogId, String aktorId, String opprettetAv, String opprettetBegrunnelse) {
+    public EskaleringsvarselEntity opprett(long tilhorendeDialogId, long tilhorendeBrukernotifikasjonsId, String aktorId, String opprettetAv, String opprettetBegrunnelse) {
         ZonedDateTime opprettetDato = ZonedDateTime.now();
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("aktorId", aktorId)
                 .addValue("opprettetAv", opprettetAv)
                 .addValue("opprettetDato", opprettetDato)
                 .addValue("dialogId", tilhorendeDialogId)
-                .addValue("begrunnelse", opprettetBegrunnelse);
+                .addValue("begrunnelse", opprettetBegrunnelse)
+                .addValue("brukernotifikasjonsId", tilhorendeBrukernotifikasjonsId);
 
         // TODO skal vi ha med brukernotifikasjons eventid?
 
@@ -55,6 +57,7 @@ public class EskaleringsvarselRepository {
                     OPPRETTET_AV,
                     OPPRETTET_DATO,
                     TILHORENDE_DIALOG_ID,
+                    TILHORENDE_BRUKERNOTIFIKASJON_ID,
                     OPPRETTET_BEGRUNNELSE
                     )
                 VALUES (
@@ -62,6 +65,7 @@ public class EskaleringsvarselRepository {
                     :opprettetAv,
                     :opprettetDato,
                     :dialogId,
+                    :brukernotifikasjonsId,
                     :begrunnelse)
                 """;
 
@@ -70,7 +74,7 @@ public class EskaleringsvarselRepository {
         return new EskaleringsvarselEntity(
                 key,
                 tilhorendeDialogId,
-                0,
+                tilhorendeBrukernotifikasjonsId,
                 aktorId,
                 opprettetAv,
                 opprettetDato,
@@ -81,18 +85,28 @@ public class EskaleringsvarselRepository {
                 );
     }
 
-    public void stopp(long varselId, String avsluttetAv, String avsluttetBegrunnelse) {
-        throw new NotImplementedException();
+    public void stop(long varselId, String begrunnelse, NavIdent avsluttetAv) {
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("avsluttetDato", Instant.now())
+                .addValue("avsluttetAv", avsluttetAv.get())
+                .addValue("avsluttetBegrunnelse", begrunnelse)
+                .addValue("varselId", varselId);
+        String sql = """
+                UPDATE ESKALERINGSVARSEL SET AVSLUTTET_DATO = :avsluttetDato, AVSLUTTET_AV = :avsluttetAv, AVSLUTTET_BEGRUNNELSE = :avsluttetBegrunnelse
+                WHERE ID = :varselId
+                """;
+        int update = jdbc.update(sql, params);
+        assert update == 1;
     }
 
     public Optional<EskaleringsvarselEntity> hentGjeldende(AktorId aktorId) {
         String sql = """
-                SELECT * FROM ESKALERINGSVARSEL WHERE AKTOR_ID = :aktor_id
+                SELECT * FROM ESKALERINGSVARSEL WHERE AKTOR_ID = :aktor_id AND AVSLUTTET_DATO IS NULL
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("aktor_id", aktorId.get());
         try {
-            return Optional.of(jdbc.queryForObject(sql, params, rowMapper));
+            return Optional.ofNullable(jdbc.queryForObject(sql, params, rowMapper));
         } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
             return Optional.empty();
         }

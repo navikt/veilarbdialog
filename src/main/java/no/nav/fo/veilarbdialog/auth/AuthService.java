@@ -30,6 +30,14 @@ public class AuthService {
         }
     }
 
+    public NavIdent getNavIdent() {
+        if (erInternBruker()) {
+            return authContextHolder.getNavIdent().orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Kan ikke hente navident."));
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Ikke pålogget som internbruker");
+        }
+    }
+
     public boolean harVeilederTilgangTilEnhet(String ident, String enhet) {
         return pep.harVeilederTilgangTilEnhet(NavIdent.of(ident), EnhetId.of(enhet));
     }

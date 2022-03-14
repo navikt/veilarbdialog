@@ -121,10 +121,11 @@ application:
     ut:
       brukernotifikasjon:
         oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
+        done: min-side.aapen-brukernotifikasjon-done-v1
       dialog:
         raw: dialogRawTopic
     inn:
-      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1
+      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiodeId-v1
 wiremock:
   server:
     port: 0

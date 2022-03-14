@@ -7,7 +7,6 @@ import no.nav.common.client.aktorregister.IngenGjeldendeIdentException;
 import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingPeriodeMinimalDTO;
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +52,7 @@ public class OppfolgingsperiodeService {
 
         for (OppfolgingPeriodeMinimalDTO oppfolgingsperiode : oppfolgingperioder) {
             long raderOppdatert = dao.oppdaterAktiviteterForPeriode(aktorId, oppfolgingsperiode.getStartDato(), oppfolgingsperiode.getSluttDato(), oppfolgingsperiode.getUuid());
-            log.info("lagt til oppfolgingsperiode={} i {} antall aktivitetsversjoner for aktorid={}", oppfolgingsperiode.getUuid(), raderOppdatert, aktorId.get());
+            log.info("lagt til oppfolgingsperiodeId={} i {} antall aktivitetsversjoner for aktorid={}", oppfolgingsperiode.getUuid(), raderOppdatert, aktorId.get());
         }
 
         dao.setOppfolgingsperiodeTilUkjentForGamleAktiviteterUtenOppfolgingsperiode(aktorId);
