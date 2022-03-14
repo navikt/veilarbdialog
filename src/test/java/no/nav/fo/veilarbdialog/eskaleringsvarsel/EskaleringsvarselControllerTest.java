@@ -46,7 +46,11 @@ public class EskaleringsvarselControllerTest {
     @Value("${application.dialog.url}")
     private String dialogUrl;
 
+    @Value("${spring.application.name}")
+    private String applicationName;
 
+    @Value("${application.namespace}")
+    private String namespace;
 
     @Autowired
     DialogTestService dialogTestService;
@@ -70,20 +74,40 @@ public class EskaleringsvarselControllerTest {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
         String begrunnelse = "Fordi ...";
-        String overskrift = "Du har fått en viktig beskjed fra Nav";
-        String tekst = "Bla bla bla, du må ...";
+        String overskrift = "Dialog tittel";
+        String henvendelseTekst = "Henvendelsestekst... lang tekst";
+
+        // TODO fix disse. Epostvarsel skal sannsynligvis ikke inneholde de samme tekstene som dialogen.
+        // TODO Hvis tekstene inneholder mulig sensitiv info, må påloggingsnivå settes til 4.
+
+        // Tekst som brukes i eventet på DittNav. Påkrevd, ingen default
+        String brukernotifikasjonEventTekst = henvendelseTekst;
+        // Påloggingsnivå for å lese eventet på DittNav. Dersom eventteksten er sensitiv, må denne være 4.
+        int sikkerhetsNivaa = 3;
+        // Lenke som blir aktivert når bruker klikker på eventet
+        String eventLink;
+        // Hvis null, default "Hei! Du har fått en ny beskjed på Ditt NAV. Logg inn og se hva beskjeden gjelder. Vennlig hilsen NAV"
+        String brukernotifikasjonSmsVarslingTekst = null;
+        // Hvis null, default "Beskjed fra NAV"
+        String brukernotifikasjonEpostVarslingTittel = overskrift;
+        // Hvis null, default "<!DOCTYPE html><html><head><title>Melding</title></head><body><p>Hei!</p><p>Du har fått en ny beskjed på Ditt NAV. Logg inn og se hva beskjeden gjelder.</p><p>Vennlig hilsen</p><p>NAV</p></body></html>"
+        String brukernotifikasjonEpostVarslingTekst = henvendelseTekst;
+
+
         StartEskaleringDto startEskaleringDto =
-                new StartEskaleringDto(Fnr.of(bruker.getFnr()), begrunnelse, overskrift, tekst);
+                new StartEskaleringDto(Fnr.of(bruker.getFnr()), begrunnelse, overskrift, henvendelseTekst);
         EskaleringsvarselDto startEskalering = startEskalering(veileder, startEskaleringDto);
 
 
         DialogDTO dialogDTO = dialogTestService.hentDialog(port, veileder, startEskalering.tilhorendeDialogId());
+
+        eventLink = dialogUrl + "/" + dialogDTO.getId();
         SoftAssertions.assertSoftly(
                 assertions -> {
                     assertions.assertThat(dialogDTO.isFerdigBehandlet()).isTrue();
                     assertions.assertThat(dialogDTO.isVenterPaSvar()).isTrue();
                     HenvendelseDTO henvendelseDTO = dialogDTO.getHenvendelser().get(0);
-                    assertions.assertThat(henvendelseDTO.getTekst()).isEqualTo(tekst);
+                    assertions.assertThat(henvendelseDTO.getTekst()).isEqualTo(henvendelseTekst);
                     assertions.assertThat(henvendelseDTO.getAvsenderId()).isEqualTo(veileder.getNavIdent());
                 }
         );
@@ -98,14 +122,20 @@ public class EskaleringsvarselControllerTest {
         OppgaveInput oppgaveInput = brukernotifikasjonRecord.value();
 
         SoftAssertions.assertSoftly(assertions -> {
-           assertions.assertThat(nokkelInput.getFodselsnummer()).isEqualTo(bruker.getFnr());
-           assertions.assertThat(nokkelInput.getAppnavn()).isEqualTo("veilarbdialog"); // TODO sjekk
-           assertions.assertThat(nokkelInput.getEventId()).isNotEmpty();
-           assertions.assertThat(nokkelInput.getGrupperingsId()).isNotEmpty(); // TODO sjekk
+            assertions.assertThat(nokkelInput.getFodselsnummer()).isEqualTo(bruker.getFnr());
+            assertions.assertThat(nokkelInput.getAppnavn()).isEqualTo(applicationName);
+            assertions.assertThat(nokkelInput.getNamespace()).isEqualTo(namespace);
+            assertions.assertThat(nokkelInput.getEventId()).isNotEmpty();
+            assertions.assertThat(nokkelInput.getGrupperingsId()).isEqualTo(dialogDTO.getOppfolgingsperiode().toString());
 
             assertions.assertThat(oppgaveInput.getEksternVarsling()).isTrue();
-            assertions.assertThat(oppgaveInput.getLink()).isEqualTo(dialogUrl + "/" + dialogDTO.getId());
-            assertions.assertThat(oppgaveInput.getTekst()).isEqualTo(tekst);
+            assertions.assertThat(oppgaveInput.getSikkerhetsnivaa()).isEqualTo(sikkerhetsNivaa);
+            assertions.assertThat(oppgaveInput.getLink()).isEqualTo(eventLink);
+            assertions.assertThat(oppgaveInput.getTekst()).isEqualTo(brukernotifikasjonEventTekst);
+
+            assertions.assertThat(oppgaveInput.getEpostVarslingstittel()).isEqualTo(brukernotifikasjonEpostVarslingTittel);
+            assertions.assertThat(oppgaveInput.getEpostVarslingstekst()).isEqualTo(brukernotifikasjonEpostVarslingTekst);
+            assertions.assertThat(oppgaveInput.getSmsVarslingstekst()).isEqualTo(brukernotifikasjonSmsVarslingTekst);
             assertions.assertAll();
         });
 
@@ -126,7 +156,7 @@ public class EskaleringsvarselControllerTest {
     }
 
     private EskaleringsvarselDto hentGjeldende(MockVeileder veileder, MockBruker mockBruker) {
-        Response response =  veileder.createRequest()
+        Response response = veileder.createRequest()
                 .param("fnr", mockBruker.getFnr())
                 .when()
                 .get("/veilarbdialog/api/eskaleringsvarsel/gjeldende")

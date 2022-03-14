@@ -55,7 +55,8 @@ server:
 
 application:
   cluster: TEST
-  namespace: APP_ENVIRONMENT_NAME
+  namespace: APP_NAMESPACE_NAME
+  environment: APP_ENVIRONMENT_NAME
   loginservice:
     idporten:
       audience: IDPORTEN_CLIENTID_USERNAME

@@ -39,6 +39,12 @@ public class BrukernotifikasjonService {
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
     private String oppgaveToppic;
 
+    @Value("${spring.application.name}")
+    String applicationName;
+
+    @Value("${application.namespace}")
+    String namespace;
+
     public BrukernotifikasjonEntity sendBrukernotifikasjon(Brukernotifikasjon brukernotifikasjon) {
         OppgaveInfo oppgaveInfo = new OppgaveInfo(
                 brukernotifikasjon.brukernotifikasjonId().toString(),
@@ -85,8 +91,8 @@ public class BrukernotifikasjonService {
         NokkelInput nokkel = new NokkelInputBuilder()
                 .withFodselsnummer(fnr.get())
                 .withEventId(oppgaveInfo.getBrukernotifikasjonId())
-                .withAppnavn("veilarbdialog")
-                .withNamespace("pto")
+                .withAppnavn(applicationName)
+                .withNamespace(namespace)
                 .withGrupperingsId(oppgaveInfo.getOppfolgingsperiode())
                 .build();
 
