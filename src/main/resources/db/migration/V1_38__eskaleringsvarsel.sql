@@ -10,7 +10,6 @@ CREATE TABLE ESKALERINGSVARSEL
     avsluttet_dato                   TIMESTAMP,
     avsluttet_av                     NVARCHAR2(255),
     avsluttet_begrunnelse            CLOB,
-    PRIMARY KEY (id),
     constraint tilhorende_dialog_id_fk foreign key (tilhorende_dialog_id) references DIALOG (DIALOG_ID),
     constraint tilhorende_brukernotifikasjon_id_fk foreign key (tilhorende_brukernotifikasjon_id) references BRUKERNOTIFIKASJON (ID)
 );
