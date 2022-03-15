@@ -164,5 +164,6 @@ application:
     inn:
       sisteOppfolgingsperiode: pto.siste-oppfolgingsperiodeId-v1
     ut:
-      brukernotifikasjon: min-side.aapen-brukernotifikasjon-oppgave-v1
-      done: min-side.aapen-brukernotifikasjon-done-v1
+      brukernotifikasjon:
+        oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
+        done: min-side.aapen-brukernotifikasjon-done-v1
