@@ -16,6 +16,9 @@ import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntit
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.VeilarboppfolgingClient;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerIkkeUnderOppfolgingException;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,15 +53,15 @@ public class EskaleringsvarselService {
     public EskaleringsvarselEntity start(Fnr fnr, String begrunnelse, String overskrift, String tekst) {
 
         if (hentGjeldende(fnr).isPresent()) {
-            throw new RuntimeException("TODO");
+            throw new AktivEskaleringException();
         }
 
         if (!brukernotifikasjonService.kanVarsles(fnr)) {
-            throw new RuntimeException("TODO");
+            throw new BrukerKanIkkeVarslesException();
         }
 
         if (!veilarboppfolgingClient.erUnderOppfolging(fnr)) {
-            throw new RuntimeException("TODO");
+            throw new BrukerIkkeUnderOppfolgingException();
         }
 
         NyHenvendelseDTO nyHenvendelseDTO = new NyHenvendelseDTO()

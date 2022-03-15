@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.eskaleringsvarsel;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.auth.AuthService;
@@ -9,6 +10,9 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.GjeldendeEskaleringsvarselD
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerIkkeUnderOppfolgingException;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
         value = "/api/eskaleringsvarsel",
         produces = MediaType.APPLICATION_JSON_VALUE
 )
+@Slf4j
 public class EskaleringsvarselController {
 
     private final EskaleringsvarselService eskaleringsvarselService;
@@ -73,6 +78,13 @@ public class EskaleringsvarselController {
                 .stream()
                 .map(EskaleringsvarselController::eskaleringsvarselEntity2Dto)
                 .collect(Collectors.toList());
+    }
+
+    @ExceptionHandler({BrukerKanIkkeVarslesException.class, BrukerIkkeUnderOppfolgingException.class, AktivEskaleringException.class})
+    public ResponseEntity<String> handleExceptions(Exception e) {
+        log.warn("Funksjonell feil under behandling", e);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body("Funksjonell feil under behandling");
+
     }
 
 

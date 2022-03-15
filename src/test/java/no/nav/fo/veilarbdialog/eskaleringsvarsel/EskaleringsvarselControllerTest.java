@@ -12,6 +12,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.GjeldendeEskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto;
+import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
@@ -206,6 +207,51 @@ public class EskaleringsvarselControllerTest {
         });
     }
 
+    @Test
+    public void bruker_kan_ikke_varsles() {
+        MockBruker bruker = MockNavService.createHappyBruker();
+        BrukerOptions reservertKrr = bruker.getBrukerOptions().toBuilder().erReservertKrr(true).build() ;
+        MockNavService.updateBruker(bruker, reservertKrr);
+
+        MockVeileder veileder = MockNavService.createVeileder(bruker);
+
+        StartEskaleringDto startEskaleringDto =
+                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
+        Response response = tryStartEskalering(veileder, startEskaleringDto);
+
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value());
+
+        ingenGjeldende(veileder, bruker);
+    }
+
+    @Test
+    public void bruker_ikke_under_oppfolging() {
+        MockBruker bruker = MockNavService.createHappyBruker();
+        BrukerOptions reservertKrr = bruker.getBrukerOptions().toBuilder().underOppfolging(false).build() ;
+        MockNavService.updateBruker(bruker, reservertKrr);
+
+        MockVeileder veileder = MockNavService.createVeileder(bruker);
+
+        StartEskaleringDto startEskaleringDto =
+                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
+        Response response = tryStartEskalering(veileder, startEskaleringDto);
+
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value());
+
+        ingenGjeldende(veileder, bruker);
+    }
+
+    @Test
+    public void bruker_har_allerede_aktiv_eskalering() {
+        MockBruker bruker = MockNavService.createHappyBruker();
+        MockVeileder veileder = MockNavService.createVeileder(bruker);
+        StartEskaleringDto startEskaleringDto =
+                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
+        startEskalering(veileder, startEskaleringDto);
+        Response response = tryStartEskalering(veileder, startEskaleringDto);
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value());
+    }
+
     private EskaleringsvarselDto startEskalering(MockVeileder veileder, StartEskaleringDto startEskaleringDto) {
         Response response = veileder.createRequest()
                 .body(startEskaleringDto)
@@ -217,6 +263,15 @@ public class EskaleringsvarselControllerTest {
         EskaleringsvarselDto eskaleringsvarselDto = response.as(EskaleringsvarselDto.class);
         assertNotNull(eskaleringsvarselDto);
         return eskaleringsvarselDto;
+    }
+
+    private Response tryStartEskalering(MockVeileder veileder, StartEskaleringDto startEskaleringDto) {
+        return veileder.createRequest()
+                .body(startEskaleringDto)
+                .when()
+                .post("/veilarbdialog/api/eskaleringsvarsel/start")
+                .then()
+                .extract().response();
     }
 
     private void stopEskalering(MockVeileder veileder, StopEskaleringDto stopEskaleringDto) {

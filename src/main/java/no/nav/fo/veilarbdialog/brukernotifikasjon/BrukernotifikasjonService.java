@@ -18,7 +18,9 @@ import no.nav.fo.veilarbdialog.clients.veilarbperson.VeilarbpersonClient;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -119,7 +121,9 @@ public class BrukernotifikasjonService {
 
         final ProducerRecord<NokkelInput, OppgaveInput> kafkaMelding = new ProducerRecord<>(oppgaveTopic, nokkel, oppgave);
 
-        kafkaOppgaveProducer.send(kafkaMelding).get();
+        ListenableFuture<SendResult<NokkelInput, OppgaveInput>> future = kafkaOppgaveProducer.send(kafkaMelding);
+        kafkaDoneProducer.flush();
+        future.get();
     }
 
     public BrukernotifikasjonEntity hentBrukernotifikasjon(long brukernotifikasjonId) {
@@ -141,7 +145,9 @@ public class BrukernotifikasjonService {
 
         final ProducerRecord<NokkelInput, DoneInput> kafkaMelding = new ProducerRecord<>(doneTopic, nokkel, done);
 
-        kafkaDoneProducer.send(kafkaMelding).get();
+        ListenableFuture<SendResult<NokkelInput, DoneInput>> future = kafkaDoneProducer.send(kafkaMelding);
+        kafkaDoneProducer.flush();
+        future.get();
     }
 
 }
