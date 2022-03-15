@@ -26,18 +26,16 @@ import static org.awaitility.Awaitility.await;
 @RequiredArgsConstructor
 public class KafkaTestService {
 
-    private final ConsumerFactory<String, Object> stringJsonConsumerFactory;
+    private final ConsumerFactory<Object, Object> avroAvroConsumerFactory;
     private final Admin kafkaAdminClient;
     private @Value("${spring.kafka.consumer.group-id}") String aivenGroupId;
 
-    public Consumer createStringJsonConsumer(String topic) {
+    public Consumer createAvroAvroConsumer(String topic) {
         String randomGroup = UUID.randomUUID().toString();
         Properties modifisertConfig = new Properties();
         modifisertConfig.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
-
-        Consumer newConsumer = stringJsonConsumerFactory.createConsumer(randomGroup, null, null, modifisertConfig);
+        Consumer newConsumer = avroAvroConsumerFactory.createConsumer(randomGroup, null, null, modifisertConfig);
         seekToEnd(topic, newConsumer);
-
         return newConsumer;
     }
 

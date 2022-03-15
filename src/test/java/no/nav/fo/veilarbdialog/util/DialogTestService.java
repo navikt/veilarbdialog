@@ -22,11 +22,21 @@ public class DialogTestService {
         return opprettDialog(port, veileder, bruker, nyHenvendelseDTO);
     }
 
+    public DialogDTO hentDialog(int port, RestassuredUser restassuredUser, long dialogId) {
+        return restassuredUser.createRequest()
+                .get("/veilarbdialog/api/dialog/{dialogId}", dialogId)
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+    }
+
     private DialogDTO opprettDialog(int port, RestassuredUser restassuredUser, MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
         Response response = restassuredUser.createRequest()
+                .port(port)
                 .body(nyHenvendelseDTO)
                 .when()
-                .post("http://localhost:" + port + "/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
                 .then()
                 .assertThat().statusCode(HttpStatus.OK.value())
                 .extract().response();
@@ -36,4 +46,6 @@ public class DialogTestService {
         assertNotNull(dialog.getId());
         return dialog;
     }
+
+
 }

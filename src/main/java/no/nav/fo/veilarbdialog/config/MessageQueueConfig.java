@@ -32,8 +32,8 @@ public class MessageQueueConfig {
     @Value("${spring.application.name}")
     private String applicationName;
 
-    @Value("${application.namespace}")
-    private String namespace;
+    @Value("${application.environment}")
+    private String environment;
 
     @Value("${application.mq.hostname}")
     private String mqGatewayHostname;
@@ -72,7 +72,7 @@ public class MessageQueueConfig {
 
         // Fallback to autoconfigured channel name.
         if (mqChannel.isEmpty()) {
-            String env = namespace.equals("default") ? "p" : namespace;
+            String env = environment.equals("default") ? "p" : environment;
             mqChannel = String.format("%s_%s", env, applicationName).toUpperCase();
             log.info("Using implicit channel {}", mqChannel);
         } else {

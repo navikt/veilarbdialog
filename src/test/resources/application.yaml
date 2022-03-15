@@ -22,6 +22,8 @@ spring:
           backoff:
             ms: '1000'
       auto-offset-reset: earliest
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
     listener:
       ack-mode=record:
     producer:
@@ -34,16 +36,27 @@ spring:
       acks: all
       batch-size: '1'
     bootstrap-servers: ${spring.embedded.kafka.brokers}
+    properties:
+      schema:
+        registry:
+          url: mock://something
+      specific:
+        avro:
+          reader: true
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  batch:
+    jdbc:
+      initialize-schema:
 server:
   servlet:
     context-path: "/veilarbdialog"
 
 application:
   cluster: TEST
-  namespace: APP_ENVIRONMENT_NAME
+  namespace: APP_NAMESPACE_NAME
+  environment: APP_ENVIRONMENT_NAME
   loginservice:
     idporten:
       audience: IDPORTEN_CLIENTID_USERNAME
@@ -101,12 +114,18 @@ application:
   veilarboppfolging:
     api:
       url: http://localhost:${wiremock.server.port}/veilarboppfolging/api
+  veilarbperson:
+    api:
+      url: http://localhost:${wiremock.server.port}/veilarbperson/api
   topic:
     ut:
+      brukernotifikasjon:
+        oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
+        done: min-side.aapen-brukernotifikasjon-done-v1
       dialog:
         raw: dialogRawTopic
     inn:
-      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1
+      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiodeId-v1
 wiremock:
   server:
     port: 0
