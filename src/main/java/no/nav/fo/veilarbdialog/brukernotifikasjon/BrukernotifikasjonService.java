@@ -30,7 +30,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BrukernotifikasjonService {
 
-    private final int OPPGAVE_SIKKERHETSNIVAA = 3;
+    private static final int OPPGAVE_SIKKERHETSNIVAA = 3;
 
     private final VeilarboppfolgingClient veilarboppfolgingClient;
 

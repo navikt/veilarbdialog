@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -65,7 +64,7 @@ public class EskaleringsvarselController {
         Optional<EskaleringsvarselEntity> maybeGjeldende = eskaleringsvarselService.hentGjeldende(fnr);
 
         return maybeGjeldende
-                .map((g) -> ResponseEntity.ok(gjeldendeEskaleringsvarselDto(g)))
+                .map(g -> ResponseEntity.ok(gjeldendeEskaleringsvarselDto(g)))
                 .orElse(ResponseEntity.status(HttpStatus.NO_CONTENT).build());
     }
 
@@ -77,7 +76,7 @@ public class EskaleringsvarselController {
         return eskaleringsvarselService.historikk(fnr)
                 .stream()
                 .map(EskaleringsvarselController::eskaleringsvarselEntity2Dto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @ExceptionHandler({BrukerKanIkkeVarslesException.class, BrukerIkkeUnderOppfolgingException.class, AktivEskaleringException.class})

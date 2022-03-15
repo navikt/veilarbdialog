@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.brukernotifikasjon;
 import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -47,7 +48,12 @@ public class BrukernotifikasjonRepository {
                         " VALUES (:event_id, :dialog_id, :foedselsnummer, :oppfolgingsperiode_id, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :smsTekst, :epostTittel, :epostBody) ",
                 params, keyHolder);
 
-        return keyHolder.getKey().longValue();
+        Number generatedKey = keyHolder.getKey();
+        if (generatedKey == null) {
+            throw new DataAccessResourceFailureException("Generated key not present");
+        } else {
+            return generatedKey.longValue();
+        }
     }
 
     public Optional<BrukernotifikasjonEntity> hentBrukernotifikasjon(long id) {

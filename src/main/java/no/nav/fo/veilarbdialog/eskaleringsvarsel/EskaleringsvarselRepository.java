@@ -5,6 +5,7 @@ import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -47,8 +48,6 @@ public class EskaleringsvarselRepository {
                 .addValue("begrunnelse", opprettetBegrunnelse)
                 .addValue("brukernotifikasjonsId", tilhorendeBrukernotifikasjonsId);
 
-        // TODO skal vi ha med brukernotifikasjons eventid?
-
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
         String sql = """
@@ -70,7 +69,12 @@ public class EskaleringsvarselRepository {
                 """;
 
         jdbc.update(sql, params, keyHolder);
-        long key = keyHolder.getKey().longValue();
+
+        Number generatedKey = keyHolder.getKey();
+        if (generatedKey == null) {
+            throw new DataAccessResourceFailureException("Generated key not present");
+        }
+        long key = generatedKey.longValue();
         return new EskaleringsvarselEntity(
                 key,
                 tilhorendeDialogId,
