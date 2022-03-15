@@ -153,7 +153,8 @@ public class EskaleringsvarselService {
     }
 
     public List<EskaleringsvarselEntity> historikk(Fnr fnr) {
-        return null;
+        AktorId aktorId = aktorOppslagClient.hentAktorId(fnr);
+        return eskaleringsvarselRepository.hentHistorikk(aktorId);
     }
 
     @SneakyThrows

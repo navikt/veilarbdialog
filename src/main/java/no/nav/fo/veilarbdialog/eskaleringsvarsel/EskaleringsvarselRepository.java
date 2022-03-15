@@ -15,7 +15,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -117,7 +116,13 @@ public class EskaleringsvarselRepository {
     }
 
     public List<EskaleringsvarselEntity> hentHistorikk(AktorId aktorId) {
-        return Collections.emptyList();
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("aktor_id", aktorId.get());
+        String sql = """
+                SELECT * FROM ESKALERINGSVARSEL WHERE AKTOR_ID = :aktor_id
+                ORDER BY OPPRETTET_DATO DESC
+                """;
+        return  jdbc.query(sql, params, rowMapper);
     }
 
 }

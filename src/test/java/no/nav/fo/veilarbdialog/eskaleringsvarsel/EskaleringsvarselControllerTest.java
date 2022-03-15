@@ -36,6 +36,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -250,6 +251,46 @@ public class EskaleringsvarselControllerTest {
         startEskalering(veileder, startEskaleringDto);
         Response response = tryStartEskalering(veileder, startEskaleringDto);
         assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value());
+    }
+
+    @Test
+    public void test_historikk() {
+        MockBruker bruker = MockNavService.createHappyBruker();
+        MockVeileder veileder = MockNavService.createVeileder(bruker);
+        StartEskaleringDto startEskaleringDto =
+                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
+        startEskalering(veileder, startEskaleringDto);
+        StopEskaleringDto stopEskaleringDto =
+                new StopEskaleringDto(Fnr.of(bruker.getFnr()), "avsluttbegrunnelse");
+        stopEskalering(veileder, stopEskaleringDto);
+        startEskalering(veileder, startEskaleringDto);
+
+        List<EskaleringsvarselDto> eskaleringsvarselDtos = hentHistorikk(veileder, bruker);
+        assertThat(eskaleringsvarselDtos).hasSize(2);
+        EskaleringsvarselDto eldste = eskaleringsvarselDtos.get(1);
+
+        SoftAssertions.assertSoftly( assertions -> {
+            assertions.assertThat(eldste.tilhorendeDialogId()).isNotNull();
+            assertions.assertThat(eldste.id()).isNotNull();
+            assertions.assertThat(eldste.opprettetAv()).isEqualTo(veileder.getNavIdent());
+            assertions.assertThat(eldste.opprettetBegrunnelse()).isEqualTo("begrunnelse");
+            assertions.assertThat(eldste.avsluttetBegrunnelse()).isEqualTo("avsluttbegrunnelse");
+            assertions.assertThat(eldste.avsluttetAv()).isEqualTo(veileder.getNavIdent());
+            assertions.assertThat(eldste.opprettetDato()).isCloseTo(ZonedDateTime.now(), within(5, ChronoUnit.SECONDS));
+            assertions.assertThat(eldste.avsluttetDato()).isCloseTo(ZonedDateTime.now(), within(5, ChronoUnit.SECONDS));
+
+        });
+
+    }
+
+    private List<EskaleringsvarselDto> hentHistorikk(MockVeileder veileder, MockBruker mockBruker) {
+        return veileder.createRequest()
+                .param("fnr", mockBruker.getFnr())
+                .when()
+                .get("/veilarbdialog/api/eskaleringsvarsel/historikk")
+                .then()
+                .assertThat().statusCode(HttpStatus.OK.value())
+                .extract().jsonPath().getList(".", EskaleringsvarselDto.class);
     }
 
     private EskaleringsvarselDto startEskalering(MockVeileder veileder, StartEskaleringDto startEskaleringDto) {
