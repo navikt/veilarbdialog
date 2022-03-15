@@ -136,7 +136,8 @@ public class BrukernotifikasjonService {
                 .setEventId(doneInfo.getEventId())
                 .build();
 
-        DoneInput done = new DoneInputBuilder().withTidspunkt(LocalDateTime.now()).build();
+        // Tidspunkt skal ifølge doc være UTC
+        DoneInput done = new DoneInputBuilder().withTidspunkt(LocalDateTime.now(ZoneOffset.UTC)).build();
 
         final ProducerRecord<NokkelInput, DoneInput> kafkaMelding = new ProducerRecord<>(doneTopic, nokkel, done);
 

@@ -20,7 +20,6 @@ import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.assertj.core.api.SoftAssertions;
-import org.assertj.core.data.Offset;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,10 +32,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -198,7 +201,7 @@ public class EskaleringsvarselControllerTest {
             assertions.assertThat(nokkelInput.getEventId()).isNotEmpty();
             assertions.assertThat(nokkelInput.getGrupperingsId()).isEqualTo(dialogDTO.getOppfolgingsperiode().toString());
 
-            assertions.assertThat(doneInput.getTidspunkt()).isCloseTo(ZonedDateTime.now().toInstant().toEpochMilli(), Offset.offset(10 * 1000L));
+            assertions.assertThat(LocalDateTime.ofInstant(Instant.ofEpochMilli(doneInput.getTidspunkt()), ZoneOffset.UTC)).isCloseTo(LocalDateTime.now(ZoneOffset.UTC), within(10, ChronoUnit.SECONDS));
             assertions.assertAll();
         });
     }

@@ -9,7 +9,6 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import no.nav.fo.veilarbdialog.util.DialogTestService;
 import no.nav.veilarbdialog.internapi.model.Dialog;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +17,22 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
 @AutoConfigureWireMock(port = 0)
+@Sql(
+        scripts = "/db/testdata/slett_alle_dialoger.sql",
+        executionPhase = AFTER_TEST_METHOD
+)
 public class InternApiControllerTest {
 
     @LocalServerPort
@@ -38,12 +43,6 @@ public class InternApiControllerTest {
 
     @Autowired
     DialogTestService dialogTestService;
-
-    @After
-    public void cleanUp() {
-        jdbcTemplate.update("delete from HENVENDELSE");
-        jdbcTemplate.update("delete from DIALOG");
-    }
 
     @Test
     public void hentDialoger() {
