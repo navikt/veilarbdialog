@@ -132,7 +132,7 @@ public class EskaleringsvarselControllerTest {
         assertThat(startEskalering.id()).isEqualTo(gjeldende.id());
         assertThat(startEskalering.tilhorendeDialogId()).isEqualTo(gjeldende.tilhorendeDialogId());
         assertThat(startEskalering.opprettetAv()).isEqualTo(gjeldende.opprettetAv());
-        assertThat(startEskalering.opprettetDato()).isEqualTo(gjeldende.opprettetDato());
+        assertThat(startEskalering.opprettetDato()).isEqualToIgnoringNanos(gjeldende.opprettetDato());
         assertThat(startEskalering.opprettetBegrunnelse()).isEqualTo(gjeldende.opprettetBegrunnelse());
 
         ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonUtTopic, 5000L);
