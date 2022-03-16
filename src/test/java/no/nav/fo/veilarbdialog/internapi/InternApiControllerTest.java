@@ -19,6 +19,7 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
@@ -39,13 +40,6 @@ public class InternApiControllerTest {
 
     @Autowired
     DialogTestService dialogTestService;
-
-    @After
-    public void cleanUp() {
-        jdbcTemplate.update("delete from HENVENDELSE");
-        jdbcTemplate.update("delete from DIALOG");
-        jdbcTemplate.update("delete from DIALOG_AKTOR");
-    }
 
     @Test
     public void hentDialoger() {

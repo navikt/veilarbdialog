@@ -43,6 +43,9 @@ spring:
             source: USER_INFO
           user:
             info: ${KAFKA_SCHEMA_REGISTRY_USER}:${KAFKA_SCHEMA_REGISTRY_PASSWORD}
+      specific:
+        avro:
+          reader: true
     bootstrap-servers: ${KAFKA_BROKERS}
     consumer:
       group-id: 'veilarbdialog'
@@ -101,7 +104,8 @@ application:
       discoveryUrl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
       audience: ${LOGINSERVICE_IDPORTEN_AUDIENCE}
   cluster: ${APP_CLUSTER_NAME}
-  namespace: ${APP_ENVIRONMENT_NAME}
+  namespace: ${NAIS_NAMESPACE}
+  environment: ${APP_ENVIRONMENT_NAME}
   abac:
     url: ${ABAC_PDP_ENDPOINT_URL}
   aktorregister:
@@ -153,6 +157,13 @@ application:
   veilarboppfolging:
     api:
       url: ${VEILARBOPPFOLGINGAPI_URL}
+  veilarbperson:
+    api:
+      url: ${VEILARBPERSONAPI_URL}
   topic:
     inn:
       sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1
+    ut:
+      brukernotifikasjon:
+        oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
+        done: min-side.aapen-brukernotifikasjon-done-v1

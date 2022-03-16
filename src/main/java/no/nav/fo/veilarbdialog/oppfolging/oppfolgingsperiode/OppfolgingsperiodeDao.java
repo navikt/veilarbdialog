@@ -3,7 +3,6 @@ package no.nav.fo.veilarbdialog.oppfolging.oppfolgingsperiode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.types.identer.AktorId;
-import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingPeriodeMinimalDTO;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -83,7 +82,7 @@ public class OppfolgingsperiodeDao {
                 """, source);
 
         if (antallOppdatert != 0) {
-            log.warn("Oppdaterete aktivitere med ukjent oppfolgingsperiode for aktorid {} antall: {}", aktorId.get(), antallOppdatert);
+            log.warn("Oppdaterete aktivitere med ukjent oppfolgingsperiodeId for aktorid {} antall: {}", aktorId.get(), antallOppdatert);
         }
     }
 

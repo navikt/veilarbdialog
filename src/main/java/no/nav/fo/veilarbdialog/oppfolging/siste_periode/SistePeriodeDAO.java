@@ -3,7 +3,6 @@ package no.nav.fo.veilarbdialog.oppfolging.siste_periode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -64,6 +63,6 @@ class SistePeriodeDAO {
                 VALUES (:periode, :aktorId, :startTid, :sluttTid)
                 """, params);
 
-        log.info("opprettet oppfolgingsperiode {}", oppfolgingsperiode);
+        log.info("opprettet oppfolgingsperiodeId {}", oppfolgingsperiode);
     }
 }

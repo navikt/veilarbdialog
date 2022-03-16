@@ -1,17 +1,14 @@
 package no.nav.fo.veilarbdialog.config.kafka.aiven;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.SeekToCurrentErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
@@ -26,26 +23,35 @@ import static org.springframework.util.backoff.FixedBackOff.UNLIMITED_ATTEMPTS;
 @EnableKafka
 @Configuration
 public class KafkaAivenConfig {
-
     @Bean
-    <V> ProducerFactory<String, V> jsonProducerFactory(KafkaProperties kafkaProperties) {
+    void kafkaListenerContainerFactory() {
+        // org.springframework.boot.autoconfigure.kafka.KafkaAnnotationDrivenConfiguration.kafkaListenerContainerFactory
+        // For aa override spring default config
+    }
+
+
+    // *********** produser brukernotifikasjoner START ****************
+    @Bean
+    <K extends SpecificRecordBase,V extends SpecificRecordBase> ProducerFactory<K, V> avroAvroProducerFactory(KafkaProperties kafkaProperties) {
         Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties();
         producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
-        producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);
-        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.springframework.kafka.support.serializer.JsonSerializer.class);
+        producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
+        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
         return new DefaultKafkaProducerFactory<>(producerProperties);
     }
 
     @Bean
-    <V> KafkaJsonTemplate<V> kafkaJsonTemplate(ProducerFactory<String, V> jsonProducerFactory) {
-        return new KafkaJsonTemplate<>(jsonProducerFactory);
+    <K,V> KafkaTemplate<K,V> kafkaAvroAvroTemplate(ProducerFactory<K,V> avroAvroProducerFactory) {
+        return new KafkaTemplate<>(avroAvroProducerFactory);
     }
+    // *********** produser brukernotifikasjoner SLUTT ****************
 
+    // ************ konsumer siste_oppfolgings_periode START ***************
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, String> stringStringKafkaListenerContainerFactory(
-            ConsumerFactory<String, String> kafkaConsumerFactory) {
+            ConsumerFactory<String, String> stringStringConsumerFactory) {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(kafkaConsumerFactory);
+        factory.setConsumerFactory(stringStringConsumerFactory);
         factory.getContainerProperties()
                 .setAuthExceptionRetryInterval(Duration.ofSeconds(10L));
 
@@ -64,7 +70,6 @@ public class KafkaAivenConfig {
     }
 
     @Bean
-    @Profile("!local")
     ConsumerFactory<String, String> stringStringConsumerFactory(KafkaProperties kafkaProperties) {
         Map<String, Object> consumerProperties = kafkaProperties.buildConsumerProperties();
         consumerProperties.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, org.apache.kafka.common.serialization.StringDeserializer.class);
@@ -72,4 +77,7 @@ public class KafkaAivenConfig {
 
         return new DefaultKafkaConsumerFactory<>(consumerProperties);
     }
+
+    // ************ konsumer siste_oppfolgings_periode SLUTT ***************
+
 }
