@@ -125,7 +125,7 @@ application:
       dialog:
         raw: dialogRawTopic
     inn:
-      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiodeId-v1
+      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1
 wiremock:
   server:
     port: 0

@@ -162,7 +162,7 @@ application:
       url: ${VEILARBPERSONAPI_URL}
   topic:
     inn:
-      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiodeId-v1
+      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1
     ut:
       brukernotifikasjon:
         oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
