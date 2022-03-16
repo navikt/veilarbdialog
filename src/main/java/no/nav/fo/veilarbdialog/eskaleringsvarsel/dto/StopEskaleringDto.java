@@ -6,6 +6,6 @@ import no.nav.common.types.identer.Fnr;
 public record StopEskaleringDto(
         Fnr fnr,
         String begrunnelse,
-        String henvendelseText
+        boolean skalSendeHenvendelse
 ) {
 }

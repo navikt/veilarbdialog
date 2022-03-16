@@ -164,14 +164,13 @@ public class EskaleringsvarselControllerTest {
     public void stop_eskalering_med_henvendelse() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
-        String avsluttBegrunnelse = "Fordi ...";
-        String henvendelseTekst = "Du har gjort aktiviteten vi ba om.";
+        String avsluttBegrunnelse = "Du har gjort aktiviteten vi ba om.";
         Fnr brukerFnr = Fnr.of(bruker.getFnr());
 
         StartEskaleringDto startEskaleringDto = new StartEskaleringDto(brukerFnr, "begrunnelse", "overskrift", "tekst");
         EskaleringsvarselDto eskaleringsvarsel = startEskalering(veileder, startEskaleringDto);
 
-        StopEskaleringDto stopEskaleringDto = new StopEskaleringDto(brukerFnr, avsluttBegrunnelse, henvendelseTekst);
+        StopEskaleringDto stopEskaleringDto = new StopEskaleringDto(brukerFnr, avsluttBegrunnelse, true);
         stopEskalering(veileder, stopEskaleringDto);
 
         DialogDTO dialogDTO = dialogTestService.hentDialog(port, veileder, eskaleringsvarsel.tilhorendeDialogId());
@@ -183,7 +182,7 @@ public class EskaleringsvarselControllerTest {
                     assertions.assertThat(henvendelser).hasSize(2);
 
                     HenvendelseDTO stopEskaleringHendvendelse = dialogDTO.getHenvendelser().get(1);
-                    assertions.assertThat(stopEskaleringHendvendelse.getTekst()).isEqualTo(henvendelseTekst);
+                    assertions.assertThat(stopEskaleringHendvendelse.getTekst()).isEqualTo(avsluttBegrunnelse);
                     assertions.assertThat(stopEskaleringHendvendelse.getAvsenderId()).isEqualTo(veileder.getNavIdent());
                 }
         );
@@ -219,7 +218,7 @@ public class EskaleringsvarselControllerTest {
         StartEskaleringDto startEskaleringDto = new StartEskaleringDto(brukerFnr, "begrunnelse", "overskrift", "tekst");
         EskaleringsvarselDto eskaleringsvarsel = startEskalering(veileder, startEskaleringDto);
 
-        StopEskaleringDto stopEskaleringDto = new StopEskaleringDto(brukerFnr, avsluttBegrunnelse, null);
+        StopEskaleringDto stopEskaleringDto = new StopEskaleringDto(brukerFnr, avsluttBegrunnelse, false);
         stopEskalering(veileder, stopEskaleringDto);
 
         DialogDTO dialogDTO = dialogTestService.hentDialog(port, veileder, eskaleringsvarsel.tilhorendeDialogId());
@@ -305,7 +304,7 @@ public class EskaleringsvarselControllerTest {
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
         startEskalering(veileder, startEskaleringDto);
         StopEskaleringDto stopEskaleringDto =
-                new StopEskaleringDto(Fnr.of(bruker.getFnr()), "avsluttbegrunnelse", null);
+                new StopEskaleringDto(Fnr.of(bruker.getFnr()), "avsluttbegrunnelse", false);
         stopEskalering(veileder, stopEskaleringDto);
         startEskalering(veileder, startEskaleringDto);
 

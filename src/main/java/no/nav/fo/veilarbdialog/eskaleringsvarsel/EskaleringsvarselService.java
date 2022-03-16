@@ -7,7 +7,6 @@ import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.NavIdent;
-import no.nav.common.utils.StringUtils;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.Brukernotifikasjon;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
@@ -120,14 +119,14 @@ public class EskaleringsvarselService {
         return eskaleringsvarselEntity;
     }
 
-    public void stop(Fnr fnr, String begrunnelse, String henvendelseTekst, NavIdent avsluttetAv) {
+    public void stop(Fnr fnr, String begrunnelse, boolean skalSendeHenvendelse, NavIdent avsluttetAv) {
         EskaleringsvarselEntity eskaleringsvarsel = hentGjeldende(fnr)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ingen gjeldende eskaleringsvarsel"));
 
-        if (StringUtils.notNullOrEmpty(henvendelseTekst)) {
+        if (skalSendeHenvendelse) {
             NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
                     .setDialogId(Long.toString(eskaleringsvarsel.tilhorendeDialogId()))
-                    .setTekst(henvendelseTekst);
+                    .setTekst(begrunnelse);
             dialogDataService.opprettHenvendelse(nyHenvendelse, Person.fnr(fnr.get()));
         }
         eskaleringsvarselRepository.stop(eskaleringsvarsel.varselId(), begrunnelse, avsluttetAv);

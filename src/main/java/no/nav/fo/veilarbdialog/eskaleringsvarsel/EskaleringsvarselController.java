@@ -50,7 +50,7 @@ public class EskaleringsvarselController {
         authService.harTilgangTilPerson(stopEskaleringDto.fnr());
         NavIdent navIdent = authService.getNavIdent();
 
-        eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), stopEskaleringDto.henvendelseText(), navIdent);
+        eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), stopEskaleringDto.skalSendeHenvendelse(), navIdent);
     }
 
     @GetMapping(value = "/gjeldende", params = "fnr")
