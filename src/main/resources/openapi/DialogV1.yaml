@@ -9,7 +9,14 @@ components:
     dialog:
       type: object
       properties:
+        dialog_id:
+          type: string
         aktivitet_id:
+          type: string
+        oppfolgingsperiode_id:
+          type: string
+          format: uuid
+        kontorsperre_enhet_id:
           type: string
         overskrift:
           type: string
@@ -27,11 +34,15 @@ components:
     henvendelse:
       type: object
       properties:
+        dialog_id:
+          type: string
         avsender_type:
           type: string
           enum:
             - VEILEDER
             - BRUKER
+        kontorsperre_enhet_id:
+          type: string
         avsender_id:
           type: string
         sendt_dato:
