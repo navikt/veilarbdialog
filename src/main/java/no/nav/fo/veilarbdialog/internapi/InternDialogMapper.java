@@ -19,7 +19,10 @@ public class InternDialogMapper {
                 .toList();
 
         return Dialog.builder()
+                .dialogId(Long.toString(dialogData.getId()))
                 .aktivitetId(dialogData.getAktivitetId())
+                .oppfolgingsperiodeId(dialogData.getOppfolgingsperiode())
+                .kontorsperreEnhetId(dialogData.getKontorsperreEnhetId())
                 .overskrift(dialogData.getOverskrift())
                 .venterSvarNav(dialogData.erUbehandlet())
                 .venterSvarBruker(dialogData.venterPaSvarFraBruker())
@@ -30,6 +33,8 @@ public class InternDialogMapper {
 
     public static Henvendelse mapTilHenvendelse(HenvendelseData henvendelseData) {
         return Henvendelse.builder()
+                .dialogId(Long.toString(henvendelseData.getDialogId()))
+                .kontorsperreEnhetId(henvendelseData.getKontorsperreEnhetId())
                 .avsenderType(Henvendelse.AvsenderTypeEnum.valueOf(henvendelseData.getAvsenderType().name()))
                 .avsenderId(henvendelseData.getAvsenderId())
                 .sendtDato(henvendelseData.getSendt().toInstant().atOffset(ZoneOffset.UTC))

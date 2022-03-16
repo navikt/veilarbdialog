@@ -9,6 +9,8 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import no.nav.fo.veilarbdialog.util.DialogTestService;
 import no.nav.veilarbdialog.internapi.model.Dialog;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +26,10 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
 @AutoConfigureWireMock(port = 0)
-@Sql(
-        scripts = "/db/testdata/slett_alle_dialoger.sql",
-        executionPhase = AFTER_TEST_METHOD
-)
 public class InternApiControllerTest {
 
     @LocalServerPort
@@ -68,13 +65,17 @@ public class InternApiControllerTest {
             d.assertAll();
         });
 
-        dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setTekst("tekst2"));
+        DialogDTO opprettetDialog2 = dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setTekst("tekst2"));
 
         // Sett bruker under KVP
-        BrukerOptions kvpOptions = mockBruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
+        BrukerOptions kvpOptions = mockBruker.getBrukerOptions().toBuilder().erUnderKvp(true).kontorsperreEnhet("123").build();
         MockNavService.updateBruker(mockBruker, kvpOptions);
         dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setTekst("tekst3"));
 
+        // Opprett henvendelse/melding med kontorsperre på en dialog uten kontorsperre
+        dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setTekst("tekst4").setDialogId(opprettetDialog2.getId()));
+
+        // Veileder med tilgang til mockbrukers enhet
         List<Dialog> dialoger = mockVeileder.createRequest()
                 .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}", mockBruker.getAktorId())
                 .then()
@@ -82,9 +83,33 @@ public class InternApiControllerTest {
                 .extract()
                 .response()
                 .jsonPath().getList(".", Dialog.class);
-        assertThat(dialoger).hasSize(2);
+        assertThat(dialoger).hasSize(3);
+        assertThat(dialoger.get(1).getHenvendelser()).hasSize(2);
 
-        List<Dialog> dialoger2 = mockVeileder.createRequest()
+        // Veileder uten tilgang til mockbrukers enhet
+        MockVeileder mockVeileder2 = MockNavService.createVeileder();
+        mockVeileder2.setNasjonalTilgang(true);
+        List<Dialog> dialoger2 = mockVeileder2.createRequest()
+                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .response()
+                .jsonPath().getList(".", Dialog.class);
+        assertThat(dialoger2).hasSize(2);
+        assertThat(dialoger2.get(1).getHenvendelser()).hasSize(1);
+
+        Dialog dialog2 = mockVeileder2.createRequest()
+                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog/{dialogId}", opprettetDialog2.getId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .response()
+                .as(Dialog.class);
+        assertThat(dialog2.getHenvendelser()).hasSize(1);
+
+        // Test request parameter(e)
+        List<Dialog> dialoger3 = mockVeileder.createRequest()
                 .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?oppfolgingsperiodeId={oppfolgingsperiodeId}",
                         mockBruker.getOppfolgingsperiode().toString())
                 .then()
@@ -92,9 +117,9 @@ public class InternApiControllerTest {
                 .extract()
                 .response()
                 .jsonPath().getList(".", Dialog.class);
-        assertThat(dialoger2).hasSameElementsAs(dialoger);
+        assertThat(dialoger3).hasSameElementsAs(dialoger);
 
-        List<Dialog> dialoger3 = mockVeileder.createRequest()
+        List<Dialog> dialoger4 = mockVeileder.createRequest()
                 .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}&oppfolgingsperiodeId={oppfolgingsperiodeId}",
                         mockBruker.getAktorId(),
                         mockBruker.getOppfolgingsperiode().toString())
@@ -103,7 +128,7 @@ public class InternApiControllerTest {
                 .extract()
                 .response()
                 .jsonPath().getList(".", Dialog.class);
-        assertThat(dialoger3).hasSameElementsAs(dialoger);
+        assertThat(dialoger4).hasSameElementsAs(dialoger);
     }
 
     @Test
