@@ -161,7 +161,55 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void stop_eskalering_happy_case() {
+    public void stop_eskalering_med_henvendelse() {
+        MockBruker bruker = MockNavService.createHappyBruker();
+        MockVeileder veileder = MockNavService.createVeileder(bruker);
+        String avsluttBegrunnelse = "Du har gjort aktiviteten vi ba om.";
+        Fnr brukerFnr = Fnr.of(bruker.getFnr());
+
+        StartEskaleringDto startEskaleringDto = new StartEskaleringDto(brukerFnr, "begrunnelse", "overskrift", "tekst");
+        EskaleringsvarselDto eskaleringsvarsel = startEskalering(veileder, startEskaleringDto);
+
+        StopEskaleringDto stopEskaleringDto = new StopEskaleringDto(brukerFnr, avsluttBegrunnelse, true);
+        stopEskalering(veileder, stopEskaleringDto);
+
+        DialogDTO dialogDTO = dialogTestService.hentDialog(port, veileder, eskaleringsvarsel.tilhorendeDialogId());
+
+        SoftAssertions.assertSoftly(
+                assertions -> {
+                    List<HenvendelseDTO> henvendelser = dialogDTO.getHenvendelser();
+
+                    assertions.assertThat(henvendelser).hasSize(2);
+
+                    HenvendelseDTO stopEskaleringHendvendelse = dialogDTO.getHenvendelser().get(1);
+                    assertions.assertThat(stopEskaleringHendvendelse.getTekst()).isEqualTo(avsluttBegrunnelse);
+                    assertions.assertThat(stopEskaleringHendvendelse.getAvsenderId()).isEqualTo(veileder.getNavIdent());
+                }
+        );
+
+        ingenGjeldende(veileder, bruker);
+
+
+        ConsumerRecord<NokkelInput, DoneInput> brukernotifikasjonRecord =
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+
+        NokkelInput nokkelInput = brukernotifikasjonRecord.key();
+        DoneInput doneInput = brukernotifikasjonRecord.value();
+
+        SoftAssertions.assertSoftly(assertions -> {
+            assertions.assertThat(nokkelInput.getFodselsnummer()).isEqualTo(bruker.getFnr());
+            assertions.assertThat(nokkelInput.getAppnavn()).isEqualTo(applicationName);
+            assertions.assertThat(nokkelInput.getNamespace()).isEqualTo(namespace);
+            assertions.assertThat(nokkelInput.getEventId()).isNotEmpty();
+            assertions.assertThat(nokkelInput.getGrupperingsId()).isEqualTo(dialogDTO.getOppfolgingsperiode().toString());
+
+            assertions.assertThat(LocalDateTime.ofInstant(Instant.ofEpochMilli(doneInput.getTidspunkt()), ZoneOffset.UTC)).isCloseTo(LocalDateTime.now(ZoneOffset.UTC), within(10, ChronoUnit.SECONDS));
+            assertions.assertAll();
+        });
+    }
+
+    @Test
+    public void stop_eskalering_uten_henvendelse() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
         String avsluttBegrunnelse = "Fordi ...";
@@ -170,7 +218,7 @@ public class EskaleringsvarselControllerTest {
         StartEskaleringDto startEskaleringDto = new StartEskaleringDto(brukerFnr, "begrunnelse", "overskrift", "tekst");
         EskaleringsvarselDto eskaleringsvarsel = startEskalering(veileder, startEskaleringDto);
 
-        StopEskaleringDto stopEskaleringDto = new StopEskaleringDto(brukerFnr, avsluttBegrunnelse);
+        StopEskaleringDto stopEskaleringDto = new StopEskaleringDto(brukerFnr, avsluttBegrunnelse, false);
         stopEskalering(veileder, stopEskaleringDto);
 
         DialogDTO dialogDTO = dialogTestService.hentDialog(port, veileder, eskaleringsvarsel.tilhorendeDialogId());
@@ -178,12 +226,7 @@ public class EskaleringsvarselControllerTest {
         SoftAssertions.assertSoftly(
                 assertions -> {
                     List<HenvendelseDTO> hendvendelser = dialogDTO.getHenvendelser();
-
-                    assertions.assertThat(hendvendelser).hasSize(2);
-
-                    HenvendelseDTO stopEskaleringHendvendelse = dialogDTO.getHenvendelser().get(1);
-                    assertions.assertThat(stopEskaleringHendvendelse.getTekst()).isEqualTo(avsluttBegrunnelse);
-                    assertions.assertThat(stopEskaleringHendvendelse.getAvsenderId()).isEqualTo(veileder.getNavIdent());
+                    assertions.assertThat(hendvendelser).hasSize(1);
                 }
         );
 
@@ -261,7 +304,7 @@ public class EskaleringsvarselControllerTest {
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
         startEskalering(veileder, startEskaleringDto);
         StopEskaleringDto stopEskaleringDto =
-                new StopEskaleringDto(Fnr.of(bruker.getFnr()), "avsluttbegrunnelse");
+                new StopEskaleringDto(Fnr.of(bruker.getFnr()), "avsluttbegrunnelse", false);
         stopEskalering(veileder, stopEskaleringDto);
         startEskalering(veileder, startEskaleringDto);
 

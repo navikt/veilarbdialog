@@ -116,23 +116,19 @@ public class EskaleringsvarselService {
 
         log.info("Eskaleringsvarsel sendt eventId={}", brukernotifikasjonId);
 
-        /*
-        opprett henvendelse                                 v
-        sett ferdigbehandlet og venter på svar fra bruker   v
-        lagre eskaleringsvarselet                           v
-        bestille brukernotifikasjon
-         */
         return eskaleringsvarselEntity;
     }
 
-    public void stop(Fnr fnr, String begrunnelse, NavIdent avsluttetAv) {
+    public void stop(Fnr fnr, String begrunnelse, boolean skalSendeHenvendelse, NavIdent avsluttetAv) {
         EskaleringsvarselEntity eskaleringsvarsel = hentGjeldende(fnr)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ingen gjeldende eskaleringsvarsel"));
 
-        NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
-                .setDialogId(Long.toString(eskaleringsvarsel.tilhorendeDialogId()))
-                .setTekst(begrunnelse);
-        dialogDataService.opprettHenvendelse(nyHenvendelse, Person.fnr(fnr.get()));
+        if (skalSendeHenvendelse) {
+            NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
+                    .setDialogId(Long.toString(eskaleringsvarsel.tilhorendeDialogId()))
+                    .setTekst(begrunnelse);
+            dialogDataService.opprettHenvendelse(nyHenvendelse, Person.fnr(fnr.get()));
+        }
         eskaleringsvarselRepository.stop(eskaleringsvarsel.varselId(), begrunnelse, avsluttetAv);
 
         BrukernotifikasjonEntity brukernotifikasjonEntity = brukernotifikasjonService.hentBrukernotifikasjon(eskaleringsvarsel.tilhorendeBrukernotifikasjonId());
