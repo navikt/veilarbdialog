@@ -78,8 +78,9 @@ public class EskaleringsvarselController {
 
     @ExceptionHandler({BrukerKanIkkeVarslesException.class, BrukerIkkeUnderOppfolgingException.class, AktivEskaleringException.class})
     public ResponseEntity<String> handleExceptions(Exception e) {
-        log.warn("Funksjonell feil under behandling", e);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("Funksjonell feil under behandling");
+        String feilmelding = String.format("Funksjonell feil under behandling: %s - %s ", e.getClass().getSimpleName(), e.getMessage());
+        log.warn(feilmelding);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(feilmelding);
 
     }
 
