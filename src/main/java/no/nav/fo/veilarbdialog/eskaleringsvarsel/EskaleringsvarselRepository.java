@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -64,7 +66,8 @@ public class EskaleringsvarselRepository {
                     :opprettetDato,
                     :dialogId,
                     :brukernotifikasjonsId,
-                    :begrunnelse)
+                    :begrunnelse
+                    )
                 """;
 
         jdbc.update(sql, params, keyHolder);
@@ -74,6 +77,21 @@ public class EskaleringsvarselRepository {
             throw new DataAccessResourceFailureException("Generated key not present");
         }
         long key = generatedKey.longValue();
+
+        MapSqlParameterSource gjeldendeParam = new MapSqlParameterSource()
+                .addValue("aktorId", aktorId)
+                .addValue("varselId", key);
+        String insertGjeldende = """
+            INSERT INTO ESKALERINGSVARSEL_GJELDENDE (AKTOR_ID, VARSEL_ID)
+            VALUES (:aktorId, :varselId);
+            """;
+
+        try {
+            jdbc.update(insertGjeldende, gjeldendeParam);
+        } catch (DuplicateKeyException dke) {
+            throw new AktivEskaleringException("Pågående start-eksalering.");
+        }
+
         return new EskaleringsvarselEntity(
                 key,
                 tilhorendeDialogId,
@@ -95,11 +113,20 @@ public class EskaleringsvarselRepository {
                 .addValue("avsluttetBegrunnelse", begrunnelse)
                 .addValue("varselId", varselId);
         String sql = """
-                UPDATE ESKALERINGSVARSEL SET AVSLUTTET_DATO = :avsluttetDato, AVSLUTTET_AV = :avsluttetAv, AVSLUTTET_BEGRUNNELSE = :avsluttetBegrunnelse
+                UPDATE ESKALERINGSVARSEL SET 
+                    AVSLUTTET_DATO = :avsluttetDato,
+                    AVSLUTTET_AV = :avsluttetAv,
+                    AVSLUTTET_BEGRUNNELSE = :avsluttetBegrunnelse
                 WHERE ID = :varselId
                 """;
         int update = jdbc.update(sql, params);
         assert update == 1;
+        MapSqlParameterSource gjeldendeParam = new MapSqlParameterSource("varselId", varselId);
+        String gjeldendeSql = """
+                DELETE FROM ESKALERINGSVARSEL_GJELDENDE 
+                 WHERE VARSEL_ID = :varselId; 
+                """;
+        jdbc.update(gjeldendeSql, gjeldendeParam);
     }
 
     public Optional<EskaleringsvarselEntity> hentGjeldende(AktorId aktorId) {

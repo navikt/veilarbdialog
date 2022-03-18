@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.eskaleringsvarsel;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
@@ -39,6 +40,9 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -47,6 +51,7 @@ import static org.junit.Assert.assertNotNull;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
 @AutoConfigureWireMock(port = 0)
+@Slf4j
 public class EskaleringsvarselControllerTest {
 
     @LocalServerPort
@@ -307,10 +312,15 @@ public class EskaleringsvarselControllerTest {
                 new StopEskaleringDto(Fnr.of(bruker.getFnr()), "avsluttbegrunnelse", false);
         stopEskalering(veileder, stopEskaleringDto);
         startEskalering(veileder, startEskaleringDto);
+        stopEskalering(veileder, stopEskaleringDto);
+        startEskalering(veileder, startEskaleringDto);
+        stopEskalering(veileder, stopEskaleringDto);
+        startEskalering(veileder, startEskaleringDto);
+
 
         List<EskaleringsvarselDto> eskaleringsvarselDtos = hentHistorikk(veileder, bruker);
-        assertThat(eskaleringsvarselDtos).hasSize(2);
-        EskaleringsvarselDto eldste = eskaleringsvarselDtos.get(1);
+        assertThat(eskaleringsvarselDtos).hasSize(4);
+        EskaleringsvarselDto eldste = eskaleringsvarselDtos.get(3);
 
         SoftAssertions.assertSoftly( assertions -> {
             assertions.assertThat(eldste.tilhorendeDialogId()).isNotNull();
@@ -324,6 +334,41 @@ public class EskaleringsvarselControllerTest {
 
         });
 
+    }
+
+    @Test
+    public void skal_kun_prosessere_en_ved_samtidige_kall() throws Exception {
+        int antallKall = 10;
+        ExecutorService bakgrunnService = Executors.newFixedThreadPool(3);
+        CountDownLatch latch = new CountDownLatch(antallKall);
+
+        MockBruker bruker = MockNavService.createHappyBruker();
+        MockVeileder veileder = MockNavService.createVeileder(bruker);
+
+        StartEskaleringDto startEskaleringDto =
+                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "Dialog overskrift", "henvendelseTekst");
+        final EskaleringsvarselDto[] startEskalering = new EskaleringsvarselDto[1];
+
+
+        for (int i = 0; i < antallKall; i++) {
+            bakgrunnService.submit(() -> {
+                    try {
+                        startEskalering[0] = startEskalering(veileder, startEskaleringDto);
+                    } catch (Exception e) {
+                        log.warn("Feil i tråd.", e);
+                    } finally {
+                        latch.countDown();
+                    }
+                });
+            };
+        latch.await();
+
+        EskaleringsvarselDto eskaleringsvarselDto = startEskalering[0];
+
+        requireGjeldende(veileder, bruker);
+
+        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonUtTopic, 5000L);
+        kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonUtTopic, brukerNotifikasjonOppgaveConsumer);
     }
 
     private List<EskaleringsvarselDto> hentHistorikk(MockVeileder veileder, MockBruker mockBruker) {
