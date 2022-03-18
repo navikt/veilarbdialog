@@ -34,6 +34,7 @@ spec:
   ingresses:
     - https://veilarbdialog.nais.adeo.no
     - https://app.adeo.no/veilarbdialog
+    - https://veilarbpersonflate.intern.nav.no/veilarbdialog
   envFrom:
     - configmap: pto-config
     - configmap: loginservice-idporten

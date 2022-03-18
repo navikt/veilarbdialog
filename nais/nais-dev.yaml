@@ -13,6 +13,7 @@ spec:
     - https://app-q1.adeo.no/veilarbdialog
     - https://app-q1.dev.adeo.no/veilarbdialog
     - https://app.dev.adeo.no/veilarbdialog
+    - https://veilarbpersonflate.dev.intern.nav.no/veilarbdialog
   port: 8080
   prometheus:
     enabled: true
