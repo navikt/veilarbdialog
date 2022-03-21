@@ -6,7 +6,6 @@ import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -72,15 +71,12 @@ public class EskaleringsvarselRepository {
 
         jdbc.update(sql, params, keyHolder);
 
-        Number generatedKey = keyHolder.getKey();
-        if (generatedKey == null) {
-            throw new DataAccessResourceFailureException("Generated key not present");
-        }
-        long key = generatedKey.longValue();
+        long key = DatabaseUtils.getGeneratedKey(keyHolder);
 
         MapSqlParameterSource gjeldendeParam = new MapSqlParameterSource()
                 .addValue("aktorId", aktorId)
                 .addValue("varselId", key);
+
         String insertGjeldende = """
             INSERT INTO ESKALERINGSVARSEL_GJELDENDE (AKTOR_ID, VARSEL_ID)
             VALUES (:aktorId, :varselId);
