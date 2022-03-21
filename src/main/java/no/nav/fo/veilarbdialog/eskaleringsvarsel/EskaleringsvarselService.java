@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URL;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +54,7 @@ public class EskaleringsvarselService {
     public EskaleringsvarselEntity start(Fnr fnr, String begrunnelse, String overskrift, String tekst) {
 
         if (hentGjeldende(fnr).isPresent()) {
-            throw new AktivEskaleringException();
+            throw new AktivEskaleringException("Brukeren har allerede en aktiv eskalering.");
         }
 
         if (!brukernotifikasjonService.kanVarsles(fnr)) {
@@ -101,7 +102,7 @@ public class EskaleringsvarselService {
                 overskrift, // Riktig?
                 tekst, // Riktig?
                 null, // TODO
-                utledEskaleringsvarselLink(dialogData.getId()) // TODO
+                utledEskaleringsvarselLink(dialogData.getId())
         );
 
         BrukernotifikasjonEntity brukernotifikasjonEntity = brukernotifikasjonService.sendBrukernotifikasjon(brukernotifikasjon);
@@ -116,29 +117,26 @@ public class EskaleringsvarselService {
 
         log.info("Eskaleringsvarsel sendt eventId={}", brukernotifikasjonId);
 
-        /*
-        opprett henvendelse                                 v
-        sett ferdigbehandlet og venter på svar fra bruker   v
-        lagre eskaleringsvarselet                           v
-        bestille brukernotifikasjon
-         */
         return eskaleringsvarselEntity;
     }
 
-    public void stop(Fnr fnr, String begrunnelse, NavIdent avsluttetAv) {
+    @Transactional
+    public void stop(Fnr fnr, String begrunnelse, boolean skalSendeHenvendelse, NavIdent avsluttetAv) {
         EskaleringsvarselEntity eskaleringsvarsel = hentGjeldende(fnr)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ingen gjeldende eskaleringsvarsel"));
 
-        NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
-                .setDialogId(Long.toString(eskaleringsvarsel.tilhorendeDialogId()))
-                .setTekst(begrunnelse);
-        dialogDataService.opprettHenvendelse(nyHenvendelse, Person.fnr(fnr.get()));
+        if (skalSendeHenvendelse) {
+            NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
+                    .setDialogId(Long.toString(eskaleringsvarsel.tilhorendeDialogId()))
+                    .setTekst(begrunnelse);
+            dialogDataService.opprettHenvendelse(nyHenvendelse, Person.fnr(fnr.get()));
+        }
         eskaleringsvarselRepository.stop(eskaleringsvarsel.varselId(), begrunnelse, avsluttetAv);
 
         BrukernotifikasjonEntity brukernotifikasjonEntity = brukernotifikasjonService.hentBrukernotifikasjon(eskaleringsvarsel.tilhorendeBrukernotifikasjonId());
 
         DoneInfo doneInfo = DoneInfo.builder()
-                .avsluttetTidspunkt(ZonedDateTime.now())
+                .avsluttetTidspunkt(ZonedDateTime.now(ZoneOffset.UTC))
                 .eventId(brukernotifikasjonEntity.eventId().toString())
                 .oppfolgingsperiode(brukernotifikasjonEntity.oppfolgingsPeriodeId().toString())
                 .build();

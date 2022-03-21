@@ -35,9 +35,6 @@ public class EskaleringsvarselController {
     private final AuthService authService;
 
     @PostMapping(value = "/start")
-    /**
-     * Returnerer henvendelsesId til tilhørende dialog
-     */
     public EskaleringsvarselDto start(@RequestBody StartEskaleringDto startEskaleringDto) {
         authService.skalVereInternBruker();
         authService.harTilgangTilPerson(startEskaleringDto.fnr());
@@ -53,7 +50,7 @@ public class EskaleringsvarselController {
         authService.harTilgangTilPerson(stopEskaleringDto.fnr());
         NavIdent navIdent = authService.getNavIdent();
 
-        eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), navIdent);
+        eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), stopEskaleringDto.skalSendeHenvendelse(), navIdent);
     }
 
     @GetMapping(value = "/gjeldende", params = "fnr")
@@ -81,8 +78,9 @@ public class EskaleringsvarselController {
 
     @ExceptionHandler({BrukerKanIkkeVarslesException.class, BrukerIkkeUnderOppfolgingException.class, AktivEskaleringException.class})
     public ResponseEntity<String> handleExceptions(Exception e) {
-        log.warn("Funksjonell feil under behandling", e);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("Funksjonell feil under behandling");
+        String feilmelding = String.format("Funksjonell feil under behandling: %s - %s ", e.getClass().getSimpleName(), e.getMessage());
+        log.warn(feilmelding);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(feilmelding);
 
     }
 
