@@ -105,7 +105,7 @@ public class EskaleringsvarselService {
                 utledEskaleringsvarselLink(dialogData.getId())
         );
 
-        BrukernotifikasjonEntity brukernotifikasjonEntity = brukernotifikasjonService.sendBrukernotifikasjon(brukernotifikasjon);
+        BrukernotifikasjonEntity brukernotifikasjonEntity = brukernotifikasjonService.bestillBrukernotifikasjon(brukernotifikasjon);
 
         EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselRepository.opprett(
                 dialogData.getId(),

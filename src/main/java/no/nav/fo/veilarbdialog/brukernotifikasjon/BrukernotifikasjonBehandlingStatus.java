@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.brukernotifikasjon;
 
-public enum VarselStatus {
+public enum BrukernotifikasjonBehandlingStatus {
     PENDING,
     SENDT,
     SKAL_AVSLUTTES,

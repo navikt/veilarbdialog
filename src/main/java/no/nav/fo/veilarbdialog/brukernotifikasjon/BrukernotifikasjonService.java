@@ -2,6 +2,8 @@ package no.nav.fo.veilarbdialog.brukernotifikasjon;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import no.nav.brukernotifikasjon.schemas.builders.DoneInputBuilder;
 import no.nav.brukernotifikasjon.schemas.builders.NokkelInputBuilder;
 import no.nav.brukernotifikasjon.schemas.builders.OppgaveInputBuilder;
@@ -9,6 +11,7 @@ import no.nav.brukernotifikasjon.schemas.builders.domain.PreferertKanal;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
+import no.nav.common.job.leader_election.LeaderElectionClient;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
@@ -19,14 +22,17 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class BrukernotifikasjonService {
 
@@ -42,6 +48,8 @@ public class BrukernotifikasjonService {
 
     private final KafkaTemplate<NokkelInput, DoneInput> kafkaDoneProducer;
 
+    private final LeaderElectionClient leaderElectionClient;
+
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
     private String oppgaveTopic;
 
@@ -54,19 +62,7 @@ public class BrukernotifikasjonService {
     @Value("${application.namespace}")
     String namespace;
 
-    public BrukernotifikasjonEntity sendBrukernotifikasjon(Brukernotifikasjon brukernotifikasjon) {
-        OppgaveInfo oppgaveInfo = new OppgaveInfo(
-                brukernotifikasjon.eventId().toString(),
-                brukernotifikasjon.melding(),
-                brukernotifikasjon.oppfolgingsperiodeId().toString(),
-                brukernotifikasjon.epostTitel(),
-                brukernotifikasjon.epostBody(),
-                brukernotifikasjon.smsTekst(),
-                brukernotifikasjon.link()
-        );
-
-        sendOppgave(brukernotifikasjon.foedselsnummer(), oppgaveInfo);
-
+    public BrukernotifikasjonEntity bestillBrukernotifikasjon(Brukernotifikasjon brukernotifikasjon) {
         BrukernotifikasjonInsert insert = new BrukernotifikasjonInsert(
                 brukernotifikasjon.eventId(),
                 brukernotifikasjon.dialogId(),
@@ -74,7 +70,7 @@ public class BrukernotifikasjonService {
                 brukernotifikasjon.melding(),
                 brukernotifikasjon.oppfolgingsperiodeId(),
                 brukernotifikasjon.type(),
-                VarselStatus.SENDT,
+                BrukernotifikasjonBehandlingStatus.PENDING,
                 brukernotifikasjon.epostTitel(),
                 brukernotifikasjon.epostBody(),
                 brukernotifikasjon.smsTekst(),
@@ -83,6 +79,31 @@ public class BrukernotifikasjonService {
 
         Long id = brukernotifikasjonRepository.opprettBrukernotifikasjon(insert);
         return hentBrukernotifikasjon(id);
+    }
+
+
+    @Scheduled(
+            initialDelay = 60000,
+            fixedDelay = 5000
+    )
+    @SchedulerLock(name = "brukernotifikasjon_oppgave_kafka_scheduledTask", lockAtMostFor = "PT2M")
+    public void sendPendingBrukernotifikasjoner() {
+        List<BrukernotifikasjonEntity> pendingBrukernotifikasjoner = brukernotifikasjonRepository.hentPendingBrukernotifikasjoner();
+        pendingBrukernotifikasjoner.stream().forEach(
+                brukernotifikasjonEntity ->  {
+                    OppgaveInfo oppgaveInfo = new OppgaveInfo(
+                            brukernotifikasjonEntity.eventId().toString(),
+                            brukernotifikasjonEntity.melding(),
+                            brukernotifikasjonEntity.oppfolgingsPeriodeId().toString(),
+                            brukernotifikasjonEntity.epostTittel(),
+                            brukernotifikasjonEntity.epostBody(),
+                            brukernotifikasjonEntity.smsText(),
+                            brukernotifikasjonEntity.lenke()
+                    );
+                    sendOppgave(brukernotifikasjonEntity.fnr(), oppgaveInfo);
+                    brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.id(), BrukernotifikasjonBehandlingStatus.SENDT);
+                }
+        );
     }
 
     public boolean kanVarsles(Fnr fnr) {
@@ -124,6 +145,7 @@ public class BrukernotifikasjonService {
         ListenableFuture<SendResult<NokkelInput, OppgaveInput>> future = kafkaOppgaveProducer.send(kafkaMelding);
         kafkaDoneProducer.flush();
         future.get();
+        log.info("Sendt oppgave med brukernotifikasjonsid: {}", oppgaveInfo.getBrukernotifikasjonId());
     }
 
     public BrukernotifikasjonEntity hentBrukernotifikasjon(long brukernotifikasjonId) {
