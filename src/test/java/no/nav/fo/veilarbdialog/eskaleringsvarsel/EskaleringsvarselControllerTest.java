@@ -409,12 +409,14 @@ public class EskaleringsvarselControllerTest {
     }
 
     private Response tryStartEskalering(MockVeileder veileder, StartEskaleringDto startEskaleringDto) {
-        return veileder.createRequest()
+        Response response = veileder.createRequest()
                 .body(startEskaleringDto)
                 .when()
                 .post("/veilarbdialog/api/eskaleringsvarsel/start")
                 .then()
                 .extract().response();
+        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
+        return response;
     }
 
     private void stopEskalering(MockVeileder veileder, StopEskaleringDto stopEskaleringDto) {
@@ -425,6 +427,7 @@ public class EskaleringsvarselControllerTest {
                 .then()
                 .assertThat().statusCode(HttpStatus.OK.value())
                 .extract().response();
+        brukernotifikasjonService.sendDoneBrukernotifikasjoner();
     }
 
     private GjeldendeEskaleringsvarselDto requireGjeldende(MockVeileder veileder, MockBruker mockBruker) {

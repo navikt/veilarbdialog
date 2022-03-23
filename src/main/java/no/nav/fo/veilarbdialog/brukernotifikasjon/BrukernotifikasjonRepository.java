@@ -95,6 +95,16 @@ public class BrukernotifikasjonRepository {
         return jdbcTemplate.query(sql, params, rowmapper);
     }
 
+    List<BrukernotifikasjonEntity> hentPendingDoneBrukernotifikasjoner() {
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("skal_avsluttes", BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES.name());
+        String sql = """
+            SELECT * FROM BRUKERNOTIFIKASJON WHERE STATUS = :skal_avsluttes;
+                """;
+        return jdbcTemplate.query(sql, params, rowmapper);
+
+    }
+
     void updateStatus(@NonNull Long id, @NonNull BrukernotifikasjonBehandlingStatus status) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id)

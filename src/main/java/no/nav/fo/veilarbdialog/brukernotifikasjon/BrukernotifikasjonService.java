@@ -28,6 +28,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,6 +82,9 @@ public class BrukernotifikasjonService {
         return hentBrukernotifikasjon(id);
     }
 
+    public void bestillDone(long brukernotifikasjonId) {
+        brukernotifikasjonRepository.updateStatus(brukernotifikasjonId, BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES);
+    }
 
     @Scheduled(
             initialDelay = 60000,
@@ -102,6 +106,26 @@ public class BrukernotifikasjonService {
                     );
                     sendOppgave(brukernotifikasjonEntity.fnr(), oppgaveInfo);
                     brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.id(), BrukernotifikasjonBehandlingStatus.SENDT);
+                }
+        );
+    }
+
+    @Scheduled(
+            initialDelay = 60000,
+            fixedDelay = 5000
+    )
+    @SchedulerLock(name = "brukernotifikasjon_done_kafka_scheduledTask", lockAtMostFor = "PT2M")
+public void sendDoneBrukernotifikasjoner() {
+        List<BrukernotifikasjonEntity> skalAvsluttesNotifikasjoner = brukernotifikasjonRepository.hentPendingDoneBrukernotifikasjoner();
+        skalAvsluttesNotifikasjoner.stream().forEach(
+                brukernotifikasjonEntity ->  {
+                    DoneInfo doneInfo = new DoneInfo(
+                            ZonedDateTime.now(ZoneOffset.UTC),
+                            brukernotifikasjonEntity.eventId().toString(),
+                            brukernotifikasjonEntity.oppfolgingsPeriodeId().toString()
+                    );
+                    sendDone(brukernotifikasjonEntity.fnr(), doneInfo);
+                    brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.id(), BrukernotifikasjonBehandlingStatus.AVSLUTTET);
                 }
         );
     }
@@ -162,14 +186,18 @@ public class BrukernotifikasjonService {
                 .setEventId(doneInfo.getEventId())
                 .build();
 
+        // TODO set tidspunkt på DoneInput til denne?
+        LocalDateTime localUTCtime = doneInfo.avsluttetTidspunkt.toLocalDateTime().atZone(ZoneOffset.UTC).toLocalDateTime();
+
         // Tidspunkt skal ifølge doc være UTC
-        DoneInput done = new DoneInputBuilder().withTidspunkt(LocalDateTime.now(ZoneOffset.UTC)).build();
+        DoneInput done = new DoneInputBuilder().withTidspunkt(localUTCtime).build();
 
         final ProducerRecord<NokkelInput, DoneInput> kafkaMelding = new ProducerRecord<>(doneTopic, nokkel, done);
 
         ListenableFuture<SendResult<NokkelInput, DoneInput>> future = kafkaDoneProducer.send(kafkaMelding);
         kafkaDoneProducer.flush();
         future.get();
+        log.info("Sendt done for brukernotifikasjonsid: {}", doneInfo.getEventId());
     }
 
 }

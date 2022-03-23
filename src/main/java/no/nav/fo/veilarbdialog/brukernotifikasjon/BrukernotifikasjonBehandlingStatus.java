@@ -4,6 +4,5 @@ public enum BrukernotifikasjonBehandlingStatus {
     PENDING,
     SENDT,
     SKAL_AVSLUTTES,
-    AVSLUTTET,
-    AVBRUTT
+    AVSLUTTET
 }

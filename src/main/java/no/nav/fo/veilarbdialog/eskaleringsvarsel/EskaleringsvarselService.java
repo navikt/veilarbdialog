@@ -10,7 +10,6 @@ import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.Brukernotifikasjon;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.DoneInfo;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselType;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.VeilarboppfolgingClient;
@@ -28,8 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.net.URL;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -133,15 +130,7 @@ public class EskaleringsvarselService {
         }
         eskaleringsvarselRepository.stop(eskaleringsvarsel.varselId(), begrunnelse, avsluttetAv);
 
-        BrukernotifikasjonEntity brukernotifikasjonEntity = brukernotifikasjonService.hentBrukernotifikasjon(eskaleringsvarsel.tilhorendeBrukernotifikasjonId());
-
-        DoneInfo doneInfo = DoneInfo.builder()
-                .avsluttetTidspunkt(ZonedDateTime.now(ZoneOffset.UTC))
-                .eventId(brukernotifikasjonEntity.eventId().toString())
-                .oppfolgingsperiode(brukernotifikasjonEntity.oppfolgingsPeriodeId().toString())
-                .build();
-
-        brukernotifikasjonService.sendDone(fnr, doneInfo);
+        brukernotifikasjonService.bestillDone(eskaleringsvarsel.tilhorendeBrukernotifikasjonId());
     }
 
     public Optional<EskaleringsvarselEntity> hentGjeldende(Fnr fnr) {
