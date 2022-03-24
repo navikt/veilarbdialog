@@ -127,7 +127,9 @@ public class EskaleringsvarselService {
         EskaleringsvarselEntity eskaleringsvarsel = hentGjeldende(fnr)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ingen gjeldende eskaleringsvarsel"));
 
+        log.info("skalsendeHenvendelse: {}, avsluttetAv: {}", skalSendeHenvendelse, avsluttetAv);
         if (skalSendeHenvendelse) {
+            log.info("Skal sende henvendelse ved stop eskalering");
             NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
                     .setDialogId(Long.toString(eskaleringsvarsel.tilhorendeDialogId()))
                     .setTekst(begrunnelse);

@@ -46,6 +46,7 @@ public class EskaleringsvarselController {
 
     @PatchMapping("/stop")
     public void stop(@RequestBody StopEskaleringDto stopEskaleringDto) {
+        log.info("StopEskalering: {}", stopEskaleringDto);
         authService.skalVereInternBruker();
         authService.harTilgangTilPerson(stopEskaleringDto.fnr());
         NavIdent navIdent = authService.getNavIdent();

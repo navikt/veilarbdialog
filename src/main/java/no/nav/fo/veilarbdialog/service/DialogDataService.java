@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.types.identer.AktorId;
@@ -27,6 +28,7 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class DialogDataService {
 
     private final AktorOppslagClient aktorOppslagClient;
@@ -63,10 +65,12 @@ public class DialogDataService {
 
         DialogData dialog = Optional.ofNullable(hentDialogMedTilgangskontroll(henvendelseData.getDialogId(), henvendelseData.getAktivitetId()))
                 .orElseGet(() -> opprettDialog(henvendelseData, aktorId));
-
+        log.info("opprettHenvendelse");
         slettKladd(henvendelseData, bruker);
 
         opprettHenvendelseForDialog(dialog, henvendelseData.getEgenskaper() != null && !henvendelseData.getEgenskaper().isEmpty(), henvendelseData.getTekst());
+
+        log.info("opprettet Henvendelse");
         dialog = markerDialogSomLest(dialog.getId());
 
         sendPaaKafka(aktorId);
@@ -114,7 +118,7 @@ public class DialogDataService {
                 .kontorsperreEnhetId(kvpService.kontorsperreEnhetId(dialogData.getAktorId()))
                 .sendt(new Date())
                 .build());
-
+        log.info("opprettHenvendelseForDialog");
         return dialogStatusService.nyHenvendelse(dialogData, opprettet);
     }
 
