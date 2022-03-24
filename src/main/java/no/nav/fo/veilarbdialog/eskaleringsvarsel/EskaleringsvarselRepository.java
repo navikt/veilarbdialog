@@ -15,7 +15,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -108,7 +107,7 @@ public class EskaleringsvarselRepository {
 
     public void stop(long varselId, String begrunnelse, NavIdent avsluttetAv) {
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("avsluttetDato", Instant.now())
+                .addValue("avsluttetDato", ZonedDateTime.now())
                 .addValue("avsluttetAv", avsluttetAv.get())
                 .addValue("avsluttetBegrunnelse", begrunnelse)
                 .addValue("varselId", varselId);
