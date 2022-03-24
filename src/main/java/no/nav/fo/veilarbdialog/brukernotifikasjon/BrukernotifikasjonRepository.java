@@ -1,8 +1,11 @@
 package no.nav.fo.veilarbdialog.brukernotifikasjon;
 
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
+import no.nav.fo.veilarbdialog.util.EnumUtils;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
@@ -12,6 +15,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -24,7 +28,18 @@ public class BrukernotifikasjonRepository {
             new BrukernotifikasjonEntity(
                     rs.getLong("id"),
                     DatabaseUtils.hentMaybeUUID(rs, "event_id"),
-                    DatabaseUtils.hentMaybeUUID(rs, "oppfolgingsperiode_id")
+                    rs.getLong("dialog_id"),
+                    Fnr.of(rs.getString("foedselsnummer")),
+                    DatabaseUtils.hentMaybeUUID(rs, "oppfolgingsperiode_id"),
+                    EnumUtils.valueOf(BrukernotifikasjonsType.class, rs.getString("type")),
+                    EnumUtils.valueOf(BrukernotifikasjonBehandlingStatus.class, rs.getString("status")),
+                    DatabaseUtils.hentLocalDateTime(rs, "opprettet"),
+                    DatabaseUtils.hentLocalDateTime(rs, "forsokt_sendt"),
+                    rs.getString("melding"),
+                    rs.getString("smstekst"),
+                    rs.getString("eposttittel"),
+                    rs.getString("epostbody"),
+                    DatabaseUtils.hentMaybeURL(rs, "lenke")
             );
 
     Long opprettBrukernotifikasjon(BrukernotifikasjonInsert insert) {
@@ -40,12 +55,13 @@ public class BrukernotifikasjonRepository {
                 .addValue("epostTittel", insert.epostTitel())
                 .addValue("epostBody", insert.epostBody())
                 .addValue("smsTekst", insert.smsTekst())
-                .addValue("melding", insert.melding());
+                .addValue("melding", insert.melding())
+                .addValue("lenke", insert.link().toExternalForm());
 
         jdbcTemplate.update("" +
                         " INSERT INTO brukernotifikasjon " +
-                        "        (event_id, DIALOG_ID, foedselsnummer, oppfolgingsperiode_id, type, status, varsel_kvittering_status, opprettet, melding, smsTekst,  epostTittel, epostBody) " +
-                        " VALUES (:event_id, :dialog_id, :foedselsnummer, :oppfolgingsperiode_id, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :smsTekst, :epostTittel, :epostBody) ",
+                        "        (event_id, DIALOG_ID, foedselsnummer, oppfolgingsperiode_id, type, status, varsel_kvittering_status, opprettet, melding, smsTekst,  epostTittel, epostBody, lenke) " +
+                        " VALUES (:event_id, :dialog_id, :foedselsnummer, :oppfolgingsperiode_id, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :smsTekst, :epostTittel, :epostBody, :lenke) ",
                 params, keyHolder);
 
         Number generatedKey = keyHolder.getKey();
@@ -56,7 +72,7 @@ public class BrukernotifikasjonRepository {
         }
     }
 
-    public Optional<BrukernotifikasjonEntity> hentBrukernotifikasjon(long id) {
+    Optional<BrukernotifikasjonEntity> hentBrukernotifikasjon(long id) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id);
         String sql = """
@@ -70,4 +86,32 @@ public class BrukernotifikasjonRepository {
 
     }
 
+    List<BrukernotifikasjonEntity> hentPendingBrukernotifikasjoner() {
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("pending", BrukernotifikasjonBehandlingStatus.PENDING.name());
+        String sql = """
+                SELECT * FROM BRUKERNOTIFIKASJON WHERE STATUS = :pending;
+                """;
+        return jdbcTemplate.query(sql, params, rowmapper);
+    }
+
+    List<BrukernotifikasjonEntity> hentPendingDoneBrukernotifikasjoner() {
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("skal_avsluttes", BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES.name());
+        String sql = """
+            SELECT * FROM BRUKERNOTIFIKASJON WHERE STATUS = :skal_avsluttes;
+                """;
+        return jdbcTemplate.query(sql, params, rowmapper);
+
+    }
+
+    void updateStatus(@NonNull Long id, @NonNull BrukernotifikasjonBehandlingStatus status) {
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("status", status.name());
+        String sql = """
+                UPDATE BRUKERNOTIFIKASJON SET STATUS = :status WHERE id = :id;
+                """;
+        jdbcTemplate.update(sql, params);
+    }
 }

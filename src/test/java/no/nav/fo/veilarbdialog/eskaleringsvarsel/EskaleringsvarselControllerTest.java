@@ -3,10 +3,13 @@ package no.nav.fo.veilarbdialog.eskaleringsvarsel;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.core.LockProvider;
+import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
 import no.nav.common.types.identer.Fnr;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
@@ -78,16 +81,25 @@ public class EskaleringsvarselControllerTest {
     @Autowired
     KafkaTestService kafkaTestService;
 
+    @Autowired
+    BrukernotifikasjonService brukernotifikasjonService;
+
+    @Autowired
+    LockProvider lockProvider;
+
     Consumer<NokkelInput, OppgaveInput> brukerNotifikasjonOppgaveConsumer;
 
     Consumer<NokkelInput, DoneInput> brukerNotifikasjonDoneConsumer;
 
     @Before
     public void setup() {
+        JdbcTemplateLockProvider l = (JdbcTemplateLockProvider) lockProvider;
+        l.clearCache();
         RestAssured.port = port;
         brukerNotifikasjonOppgaveConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonUtTopic);
         brukerNotifikasjonDoneConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonDoneTopic);
     }
+
 
     @Test
     public void start_eskalering_happy_case() {
@@ -391,16 +403,20 @@ public class EskaleringsvarselControllerTest {
                 .extract().response();
         EskaleringsvarselDto eskaleringsvarselDto = response.as(EskaleringsvarselDto.class);
         assertNotNull(eskaleringsvarselDto);
+        // Scheduled task
+        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
         return eskaleringsvarselDto;
     }
 
     private Response tryStartEskalering(MockVeileder veileder, StartEskaleringDto startEskaleringDto) {
-        return veileder.createRequest()
+        Response response = veileder.createRequest()
                 .body(startEskaleringDto)
                 .when()
                 .post("/veilarbdialog/api/eskaleringsvarsel/start")
                 .then()
                 .extract().response();
+        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
+        return response;
     }
 
     private void stopEskalering(MockVeileder veileder, StopEskaleringDto stopEskaleringDto) {
@@ -411,6 +427,7 @@ public class EskaleringsvarselControllerTest {
                 .then()
                 .assertThat().statusCode(HttpStatus.OK.value())
                 .extract().response();
+        brukernotifikasjonService.sendDoneBrukernotifikasjoner();
     }
 
     private GjeldendeEskaleringsvarselDto requireGjeldende(MockVeileder veileder, MockBruker mockBruker) {

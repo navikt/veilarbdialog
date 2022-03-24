@@ -12,7 +12,7 @@ public record BrukernotifikasjonInsert(
         String melding,
         UUID oppfolgingsperiodeId,
         VarselType type,
-        VarselStatus status,
+        BrukernotifikasjonBehandlingStatus status,
         String epostTitel,
         String epostBody,
         String smsTekst,
