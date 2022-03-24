@@ -110,21 +110,18 @@ public class EskaleringsvarselControllerTest {
         String overskrift = "Dialog tittel";
         String henvendelseTekst = "Henvendelsestekst... lang tekst";
 
-        // TODO fix disse. Epostvarsel skal sannsynligvis ikke inneholde de samme tekstene som dialogen.
-        // TODO Hvis tekstene inneholder mulig sensitiv info, må påloggingsnivå settes til 4.
-
         // Tekst som brukes i eventet på DittNav. Påkrevd, ingen default
-        String brukernotifikasjonEventTekst = henvendelseTekst;
+        String brukernotifikasjonEventTekst = "Viktig oppgave. NAV vurderer å stanse pengene dine. Se hva du må gjøre.";
         // Påloggingsnivå for å lese eventet på DittNav. Dersom eventteksten er sensitiv, må denne være 4.
-        int sikkerhetsNivaa = 3;
+        int sikkerhetsNivaa = 4;
         // Lenke som blir aktivert når bruker klikker på eventet
         String eventLink;
         // Hvis null, default "Hei! Du har fått en ny beskjed på Ditt NAV. Logg inn og se hva beskjeden gjelder. Vennlig hilsen NAV"
-        String brukernotifikasjonSmsVarslingTekst = null;
+        String brukernotifikasjonSmsVarslingTekst = "Hei! Du har fått en ny viktig oppgave på Ditt NAV. Logg inn og se hva oppgaven gjelder. Vennlig hilsen NAV";
         // Hvis null, default "Beskjed fra NAV"
-        String brukernotifikasjonEpostVarslingTittel = overskrift;
+        String brukernotifikasjonEpostVarslingTittel = "Viktig oppgave";
         // Hvis null, default "<!DOCTYPE html><html><head><title>Melding</title></head><body><p>Hei!</p><p>Du har fått en ny beskjed på Ditt NAV. Logg inn og se hva beskjeden gjelder.</p><p>Vennlig hilsen</p><p>NAV</p></body></html>"
-        String brukernotifikasjonEpostVarslingTekst = henvendelseTekst;
+        String brukernotifikasjonEpostVarslingTekst = "Du har fått en ny viktig oppgave fra NAV. Logg inn og se hva oppgaven gjelder. Vennlig hilsen NAV";
 
 
         StartEskaleringDto startEskaleringDto =
