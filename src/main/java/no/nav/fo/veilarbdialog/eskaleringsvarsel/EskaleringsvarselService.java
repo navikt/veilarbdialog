@@ -89,16 +89,21 @@ public class EskaleringsvarselService {
 
         UUID gjeldendeOppfolgingsperiodeId = sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(AktorId.of(dialogData.getAktorId()));
 
+        String smsTekst = "Hei! Du har fått en ny viktig oppgave på Ditt NAV. Logg inn og se hva oppgaven gjelder. Vennlig hilsen NAV";
+        String epostTittel = "Viktig oppgave";
+        String epostBody = "Du har fått en ny viktig oppgave fra NAV. Logg inn og se hva oppgaven gjelder. Vennlig hilsen NAV";
+        String brukernotifikasjonTekst = "Viktig oppgave. NAV vurderer å stanse pengene dine. Se hva du må gjøre.";
+
         Brukernotifikasjon brukernotifikasjon = new Brukernotifikasjon(
                 brukernotifikasjonId,
                 dialogData.getId(),
                 fnr,
-                tekst,
+                brukernotifikasjonTekst,
                 gjeldendeOppfolgingsperiodeId,
                 VarselType.ESKALERINGSVARSEL,
-                overskrift, // Riktig?
-                tekst, // Riktig?
-                null, // TODO
+                epostTittel,
+                epostBody,
+                smsTekst,
                 utledEskaleringsvarselLink(dialogData.getId())
         );
 
