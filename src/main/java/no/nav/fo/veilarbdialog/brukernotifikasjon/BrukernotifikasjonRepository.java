@@ -90,7 +90,7 @@ public class BrukernotifikasjonRepository {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("pending", BrukernotifikasjonBehandlingStatus.PENDING.name());
         String sql = """
-                SELECT * FROM BRUKERNOTIFIKASJON WHERE STATUS = :pending;
+                SELECT * FROM BRUKERNOTIFIKASJON WHERE STATUS = :pending
                 """;
         return jdbcTemplate.query(sql, params, rowmapper);
     }
@@ -99,7 +99,7 @@ public class BrukernotifikasjonRepository {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("skal_avsluttes", BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES.name());
         String sql = """
-            SELECT * FROM BRUKERNOTIFIKASJON WHERE STATUS = :skal_avsluttes;
+            SELECT * FROM BRUKERNOTIFIKASJON WHERE STATUS = :skal_avsluttes
                 """;
         return jdbcTemplate.query(sql, params, rowmapper);
 
@@ -110,7 +110,7 @@ public class BrukernotifikasjonRepository {
                 .addValue("id", id)
                 .addValue("status", status.name());
         String sql = """
-                UPDATE BRUKERNOTIFIKASJON SET STATUS = :status WHERE id = :id;
+                UPDATE BRUKERNOTIFIKASJON SET STATUS = :status WHERE id = :id
                 """;
         jdbcTemplate.update(sql, params);
     }

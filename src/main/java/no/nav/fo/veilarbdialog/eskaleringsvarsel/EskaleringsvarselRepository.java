@@ -83,7 +83,7 @@ public class EskaleringsvarselRepository {
                 .addValue("varselId", key);
         String insertGjeldende = """
             INSERT INTO ESKALERINGSVARSEL_GJELDENDE (AKTOR_ID, VARSEL_ID)
-            VALUES (:aktorId, :varselId);
+            VALUES (:aktorId, :varselId)
             """;
 
         try {
@@ -124,7 +124,7 @@ public class EskaleringsvarselRepository {
         MapSqlParameterSource gjeldendeParam = new MapSqlParameterSource("varselId", varselId);
         String gjeldendeSql = """
                 DELETE FROM ESKALERINGSVARSEL_GJELDENDE 
-                 WHERE VARSEL_ID = :varselId; 
+                 WHERE VARSEL_ID = :varselId
                 """;
         jdbc.update(gjeldendeSql, gjeldendeParam);
     }
