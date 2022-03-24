@@ -62,7 +62,7 @@ public class BrukernotifikasjonRepository {
                         " INSERT INTO brukernotifikasjon " +
                         "        (event_id, DIALOG_ID, foedselsnummer, oppfolgingsperiode_id, type, status, varsel_kvittering_status, opprettet, melding, smsTekst,  epostTittel, epostBody, lenke) " +
                         " VALUES (:event_id, :dialog_id, :foedselsnummer, :oppfolgingsperiode_id, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :smsTekst, :epostTittel, :epostBody, :lenke) ",
-                params, keyHolder);
+                params, keyHolder, new String[]{"id"});
 
         Number generatedKey = keyHolder.getKey();
         if (generatedKey == null) {
