@@ -76,7 +76,7 @@ application:
     username: sa
     password: sa
   dialog:
-    url: http://localhost:8080/ARBEIDSRETTET_DIALOG_URL
+    url: http://localhost:8080/DIALOG_EKSTERN_URL
   kafka:
     broker:
       url: http://localhost:8080/KAFKA_BROKERS_URL

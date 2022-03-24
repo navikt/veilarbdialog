@@ -79,3 +79,5 @@ spec:
       value: aapen-arbeidsrettetOppfolging-oppfolgingAvsluttet-v1-q1
     - name: KVP_AVSLUTTET_TOPIC
       value: aapen-arbeidsrettetOppfolging-kvpAvsluttet-v1-q1
+    - name: DIALOG_EKSTERN_URL
+      value: https://pto.dev.nav.no/arbeid/dialog

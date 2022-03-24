@@ -124,7 +124,7 @@ application:
     username: ${JDBC_USERNAME}
     password: ${JDBC_PASSWORD}
   dialog:
-    url: ${ARBEIDSRETTET_DIALOG_URL}
+    url: ${DIALOG_EKSTERN_URL}
   kafka:
     brokersUrl: ${KAFKA_BROKERS_URL}
     endringPaaDialogTopic: ${ENDRING_PAA_DIALOG_TOPIC}
