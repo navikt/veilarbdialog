@@ -70,7 +70,7 @@ public class EskaleringsvarselRepository {
                     )
                 """;
 
-        jdbc.update(sql, params, keyHolder);
+        jdbc.update(sql, params, keyHolder, new String[]{"id"});
 
         Number generatedKey = keyHolder.getKey();
         if (generatedKey == null) {
