@@ -57,14 +57,14 @@ public class EskaleringsvarselController {
     @GetMapping(value = "/gjeldende")
     public ResponseEntity<GjeldendeEskaleringsvarselDto> hentGjeldende(@RequestParam(required = false) Fnr fnr) {
         Fnr fodselsnummer;
-        if (fnr == null) {
+        if (fnr == null) { // eksternbruker
             if (authService.erEksternBruker()) {
                 fodselsnummer = Fnr.of(authService.getIdent().orElseThrow());
             }
             else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Internbruker må sende med fnr som parameter");
             }
-        } else {
+        } else { // internbruker
             fodselsnummer = fnr;
         }
         authService.harTilgangTilPerson(fodselsnummer);
