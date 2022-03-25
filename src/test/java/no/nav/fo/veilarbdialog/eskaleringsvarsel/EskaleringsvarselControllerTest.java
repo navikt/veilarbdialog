@@ -369,7 +369,7 @@ public class EskaleringsvarselControllerTest {
                         latch.countDown();
                     }
                 });
-            };
+            }
         latch.await();
 
         EskaleringsvarselDto eskaleringsvarselDto = startEskalering[0];
@@ -378,6 +378,38 @@ public class EskaleringsvarselControllerTest {
 
         ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonUtTopic, 5000L);
         kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonUtTopic, brukerNotifikasjonOppgaveConsumer);
+    }
+
+    @Test
+    public void hentGjeldendeSomEksternbruker() {
+        MockBruker bruker = MockNavService.createHappyBruker();
+        MockVeileder veileder = MockNavService.createVeileder(bruker);
+        StartEskaleringDto startEskaleringDto =
+                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
+        startEskalering(veileder, startEskaleringDto);
+
+        Response response = bruker.createRequest()
+                .when()
+                .get("/veilarbdialog/api/eskaleringsvarsel/gjeldende")
+                .then()
+                .assertThat().statusCode(HttpStatus.OK.value())
+                .extract()
+                .response();
+    }
+
+    @Test
+    public void hentGjeldendeSomVeilederUtenFnrParam() {
+        MockBruker bruker = MockNavService.createHappyBruker();
+        MockVeileder veileder = MockNavService.createVeileder(bruker);
+        StartEskaleringDto startEskaleringDto =
+                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
+        startEskalering(veileder, startEskaleringDto);
+
+        veileder.createRequest()
+                .when()
+                .get("/veilarbdialog/api/eskaleringsvarsel/gjeldende")
+                .then()
+                .assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     private List<EskaleringsvarselDto> hentHistorikk(MockVeileder veileder, MockBruker mockBruker) {
@@ -439,6 +471,7 @@ public class EskaleringsvarselControllerTest {
 
         return response.as(GjeldendeEskaleringsvarselDto.class);
     }
+
 
     private void ingenGjeldende(MockVeileder veileder, MockBruker mockBruker) {
         veileder.createRequest()
