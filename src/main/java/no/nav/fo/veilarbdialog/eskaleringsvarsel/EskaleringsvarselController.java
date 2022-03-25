@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,12 +54,22 @@ public class EskaleringsvarselController {
         eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), stopEskaleringDto.skalSendeHenvendelse(), navIdent);
     }
 
-    @GetMapping(value = "/gjeldende", params = "fnr")
-    public ResponseEntity<GjeldendeEskaleringsvarselDto> hentGjeldende(@RequestParam Fnr fnr) {
-        authService.skalVereInternBruker();
-        authService.harTilgangTilPerson(fnr);
+    @GetMapping(value = "/gjeldende")
+    public ResponseEntity<GjeldendeEskaleringsvarselDto> hentGjeldende(@RequestParam(required = false) Fnr fnr) {
+        Fnr fodselsnummer;
+        if (fnr == null) {
+            if (authService.erEksternBruker()) {
+                fodselsnummer = Fnr.of(authService.getIdent().orElseThrow());
+            }
+            else {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Internbruker må sende med fnr som parameter");
+            }
+        } else {
+            fodselsnummer = fnr;
+        }
+        authService.harTilgangTilPerson(fodselsnummer);
 
-        Optional<EskaleringsvarselEntity> maybeGjeldende = eskaleringsvarselService.hentGjeldende(fnr);
+        Optional<EskaleringsvarselEntity> maybeGjeldende = eskaleringsvarselService.hentGjeldende(fodselsnummer);
 
         return maybeGjeldende
                 .map(g -> ResponseEntity.ok(gjeldendeEskaleringsvarselDto(g)))
