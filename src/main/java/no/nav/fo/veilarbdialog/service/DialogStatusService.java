@@ -1,6 +1,8 @@
 package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
+import no.nav.common.types.identer.AktorId;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
@@ -9,6 +11,7 @@ import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +26,8 @@ public class DialogStatusService {
     private final DataVarehusDAO dataVarehusDAO;
     private final VarselDAO varselDAO;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
+    private final EskaleringsvarselRepository eskaleringsvarselRepository;
+    private final BrukernotifikasjonService brukernotifikasjonService;
 
     public DialogData nyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
         if (henvendelseData.getSendt() == null) {
@@ -50,6 +55,15 @@ public class DialogStatusService {
         if (dialogData.erLestAvBruker()) {
             return dialogData;
         }
+
+        eskaleringsvarselRepository.hentGjeldende(AktorId.of(dialogData.getAktorId())).ifPresent(
+                eskaleringsvarselEntity -> {
+                    if (eskaleringsvarselEntity.tilhorendeDialogId() == dialogData.getId()) {
+                        brukernotifikasjonService.bestillDone(eskaleringsvarselEntity.tilhorendeBrukernotifikasjonId());
+                    }
+                }
+        );
+
         if (harAktivtparagraf8Varsel(dialogData)) {
             int antall = varselDAO.hentAntallAktiveDialogerForVarsel(dialogData.getParagraf8VarselUUID());
             if (antall == 1) {
