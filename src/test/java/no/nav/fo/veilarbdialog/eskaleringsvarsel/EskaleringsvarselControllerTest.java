@@ -412,6 +412,29 @@ public class EskaleringsvarselControllerTest {
                 .assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
+    @Test
+    public void send_done_naar_eskalering_lest_av_bruker() {
+
+        MockBruker bruker = MockNavService.createHappyBruker();
+        MockVeileder veileder = MockNavService.createVeileder(bruker);
+        String begrunnelse = "Fordi ...";
+        String overskrift = "Dialog tittel";
+        String henvendelseTekst = "Henvendelsestekst... lang tekst";
+
+        StartEskaleringDto startEskaleringDto =
+                new StartEskaleringDto(Fnr.of(bruker.getFnr()), begrunnelse, overskrift, henvendelseTekst);
+        EskaleringsvarselDto startEskalering = startEskalering(veileder, startEskaleringDto);
+
+        lesHenvendelse(bruker, startEskalering.tilhorendeDialogId());
+
+        ConsumerRecord<NokkelInput, DoneInput> brukernotifikasjonRecord =
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+
+        NokkelInput nokkel = brukernotifikasjonRecord.key();
+
+        assertThat(bruker.getFnr()).isEqualTo(nokkel.getFodselsnummer());
+    }
+
     private List<EskaleringsvarselDto> hentHistorikk(MockVeileder veileder, MockBruker mockBruker) {
         return veileder.createRequest()
                 .param("fnr", mockBruker.getFnr())
@@ -457,6 +480,18 @@ public class EskaleringsvarselControllerTest {
                 .assertThat().statusCode(HttpStatus.OK.value())
                 .extract().response();
         brukernotifikasjonService.sendDoneBrukernotifikasjoner();
+    }
+
+    private DialogDTO lesHenvendelse(MockBruker bruker, long dialogId) {
+        DialogDTO dialog = bruker.createRequest()
+                .put("/veilarbdialog/api/dialog/{dialogId}/les", dialogId)
+                .then()
+                .assertThat().statusCode(HttpStatus.OK.value())
+                .extract()
+                .response()
+                .as(DialogDTO.class);
+        brukernotifikasjonService.sendDoneBrukernotifikasjoner();
+        return dialog;
     }
 
     private GjeldendeEskaleringsvarselDto requireGjeldende(MockVeileder veileder, MockBruker mockBruker) {

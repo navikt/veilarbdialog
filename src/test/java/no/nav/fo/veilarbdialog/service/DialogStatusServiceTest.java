@@ -1,11 +1,13 @@
 package no.nav.fo.veilarbdialog.service;
 
 import no.nav.fo.veilarbdialog.TestDataBuilder;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -25,12 +27,16 @@ class DialogStatusServiceTest {
     private final DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
     private final VarselDAO varselDao = mock(VarselDAO.class);
     private final FunksjonelleMetrikker funksjonelleMetrikker = mock(FunksjonelleMetrikker.class);
+    private final EskaleringsvarselRepository eskaleringsvarselRepository = mock(EskaleringsvarselRepository.class);
+    private final BrukernotifikasjonService brukernotifikasjonService = mock(BrukernotifikasjonService.class);
     private final DialogStatusService dialogStatusService = new DialogStatusService(
             statusDAO,
             dialogDAO,
             dataVarehusDAO,
             varselDao,
-            funksjonelleMetrikker
+            funksjonelleMetrikker,
+            eskaleringsvarselRepository,
+            brukernotifikasjonService
     );
 
     @Test
