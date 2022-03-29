@@ -6,14 +6,26 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
+import no.nav.common.client.aktoroppslag.AktorOppslagClient;
+import no.nav.common.types.identer.AktorId;
+import no.nav.common.types.identer.Fnr;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.Brukernotifikasjon;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
+import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
+import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
+import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
 
@@ -22,8 +34,10 @@ import static java.util.UUID.randomUUID;
 @Slf4j
 public class ScheduleRessurs {
 
+    private final DialogDAO dialogDAO;
     private final VarselDAO varselDAO;
     private final KladdService kladdService;
+    private final DialogDataService dialogDataService;
     private final ServiceMeldingService serviceMeldingService;
     private final OppgaveService oppgaveService;
     private final StopRevarslingService stopRevarslingService;
@@ -32,6 +46,9 @@ public class ScheduleRessurs {
     private final KafkaProducerService kafkaProducerService;
     private final MeterRegistry registry;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
+    private final BrukernotifikasjonService brukernotifikasjonService;
+    private final SistePeriodeService sistePeriodeService;
+    private final AktorOppslagClient aktorOppslagClient;
 
     @Scheduled(cron = "0 0/10 * * * *")
     public void slettGamleKladder() {
@@ -45,12 +62,62 @@ public class ScheduleRessurs {
     }
 
     @Scheduled(cron = "0 0/2 * * * *")
-    public void sjekkForVarsel() {
+    @Transactional
+    public void sendBrukernotifikasjonerForUlesteDialoger() {
         lockingTaskExecutor.executeWithLock(
-                (Runnable) this::sjekkForVarselWithLock,
+                (Runnable) this::sendBrukernotifikasjonerForUlesteDialogerWithLock,
                 new LockConfiguration(Instant.now(), "varsel", Duration.ofMinutes(30), Duration.ZERO)
         );
     }
+
+//    @Scheduled(cron = "0 0/2 * * * *")
+//    public void sjekkForVarsel() {
+//        lockingTaskExecutor.executeWithLock(
+//                (Runnable) this::sjekkForVarselWithLock,
+//                new LockConfiguration(Instant.now(), "varsel", Duration.ofMinutes(30), Duration.ZERO)
+//        );
+//    }
+
+    private void sendBrukernotifikasjonerForUlesteDialogerWithLock() {
+        List<Long> dialogIder = varselDAO.hentDialogerMedUlesteMeldingerEtterSisteVarsel(Duration.ofMinutes(30).toMillis());
+
+        log.info("Varsler (beskjed): {} brukere", dialogIder.size());
+
+        dialogIder.forEach(
+                dialogId -> {
+                    DialogData dialogData = dialogDAO.hentDialog(dialogId);
+                    Fnr fnr = aktorOppslagClient.hentFnr(AktorId.of(dialogData.getAktorId()));
+
+                    boolean kanVarsles = brukernotifikasjonService.kanVarsles(fnr);
+                    if (!kanVarsles) {
+                        log.warn("Kan ikke varsle bruker: {}", dialogData.getAktorId());
+                        funksjonelleMetrikker.nyBrukernotifikasjon(false, BrukernotifikasjonsType.BESKJED);
+                        return;
+                    }
+
+                    UUID oppfolgingsperiode = dialogData.getOppfolgingsperiode();
+
+                    Brukernotifikasjon brukernotifikasjon = new Brukernotifikasjon(
+                            UUID.randomUUID(),
+                            dialogData.getId(),
+                            fnr,
+                            BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST,
+                            oppfolgingsperiode,
+                            BrukernotifikasjonsType.BESKJED,
+                            BrukernotifikasjonTekst.BESKJED_EPOST_TITTEL,
+                            BrukernotifikasjonTekst.BESKJED_EPOST_BODY,
+                            BrukernotifikasjonTekst.BESKJED_SMS_TEKST,
+                            dialogDataService.utledDialogLink(dialogId)
+                    );
+
+                    brukernotifikasjonService.bestillBrukernotifikasjon(brukernotifikasjon);
+                    varselDAO.oppdaterSisteVarselForBruker(dialogData.getAktorId());
+                    funksjonelleMetrikker.nyBrukernotifikasjon(true, BrukernotifikasjonsType.BESKJED);
+                }
+        );
+    }
+
+
 
     private void sjekkForVarselWithLock() {
 

@@ -166,4 +166,5 @@ application:
     ut:
       brukernotifikasjon:
         oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
+        beskjed: min-side.aapen-brukernotifikasjon-beskjed-v1
         done: min-side.aapen-brukernotifikasjon-done-v1

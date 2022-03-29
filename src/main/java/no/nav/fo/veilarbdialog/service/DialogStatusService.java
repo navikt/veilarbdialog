@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.AktorId;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
@@ -16,6 +17,7 @@ import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +27,9 @@ public class DialogStatusService {
     private final DialogDAO dialogDAO;
     private final DataVarehusDAO dataVarehusDAO;
     private final VarselDAO varselDAO;
-    private final FunksjonelleMetrikker funksjonelleMetrikker;
+    private final BrukernotifikasjonRepository brukernotifikasjonRepository;
     private final EskaleringsvarselRepository eskaleringsvarselRepository;
+    private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final BrukernotifikasjonService brukernotifikasjonService;
 
     public DialogData nyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
@@ -56,6 +59,10 @@ public class DialogStatusService {
             return dialogData;
         }
 
+        brukernotifikasjonRepository
+                .hentBrukernotifikasjonBeskjedForDialogId(dialogData.getId())
+                .ifPresent(brukernotifikasjon -> brukernotifikasjonService.bestillDone(brukernotifikasjon.id()));
+
         eskaleringsvarselRepository.hentGjeldende(AktorId.of(dialogData.getAktorId())).ifPresent(
                 eskaleringsvarselEntity -> {
                     if (eskaleringsvarselEntity.tilhorendeDialogId() == dialogData.getId()) {
@@ -63,13 +70,12 @@ public class DialogStatusService {
                     }
                 }
         );
-
-        if (harAktivtparagraf8Varsel(dialogData)) {
-            int antall = varselDAO.hentAntallAktiveDialogerForVarsel(dialogData.getParagraf8VarselUUID());
-            if (antall == 1) {
-                varselDAO.revarslingSkalAvsluttes(dialogData.getParagraf8VarselUUID());
-            }
-        }
+//        if (harAktivtparagraf8Varsel(dialogData)) { // todo - antar vi ikke skal fjerne det her før vi finner ut av hva vi skal med aktive gamle forhåndsvarsler
+//            int antall = varselDAO.hentAntallAktiveDialogerForVarsel(dialogData.getParagraf8VarselUUID());
+//            if (antall == 1) {
+//                varselDAO.revarslingSkalAvsluttes(dialogData.getParagraf8VarselUUID());
+//            }
+//        }
         statusDAO.markerSomLestAvBruker(dialogData.getId());
 
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.LEST_AV_BRUKER);

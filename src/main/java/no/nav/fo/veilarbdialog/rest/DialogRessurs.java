@@ -82,6 +82,7 @@ public class DialogRessurs {
     }
 
     @PutMapping("{dialogId}/les")
+    @Transactional
     public DialogDTO markerSomLest(@PathVariable String dialogId) {
         var dialogData = dialogDataService.markerDialogSomLest(Long.parseLong(dialogId));
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?

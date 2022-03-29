@@ -11,7 +11,7 @@ public record BrukernotifikasjonInsert(
         Fnr foedselsnummer,
         String melding,
         UUID oppfolgingsperiodeId,
-        VarselType type,
+        BrukernotifikasjonsType type,
         BrukernotifikasjonBehandlingStatus status,
         String epostTitel,
         String epostBody,

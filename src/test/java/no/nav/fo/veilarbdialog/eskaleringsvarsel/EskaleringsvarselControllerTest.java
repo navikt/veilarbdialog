@@ -61,7 +61,7 @@ public class EskaleringsvarselControllerTest {
     protected int port;
 
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
-    private String brukernotifikasjonUtTopic;
+    private String brukernotifikasjonOppgaveTopic;
 
     @Value("${application.topic.ut.brukernotifikasjon.done}")
     private String brukernotifikasjonDoneTopic;
@@ -96,7 +96,7 @@ public class EskaleringsvarselControllerTest {
         JdbcTemplateLockProvider l = (JdbcTemplateLockProvider) lockProvider;
         l.clearCache();
         RestAssured.port = port;
-        brukerNotifikasjonOppgaveConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonUtTopic);
+        brukerNotifikasjonOppgaveConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonOppgaveTopic);
         brukerNotifikasjonDoneConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonDoneTopic);
     }
 
@@ -150,7 +150,7 @@ public class EskaleringsvarselControllerTest {
         assertThat(startEskalering.opprettetDato()).isEqualToIgnoringNanos(gjeldende.opprettetDato());
         assertThat(startEskalering.opprettetBegrunnelse()).isEqualTo(gjeldende.opprettetBegrunnelse());
 
-        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonUtTopic, 5000L);
+        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 5000L);
 
         NokkelInput nokkelInput = brukernotifikasjonRecord.key();
         OppgaveInput oppgaveInput = brukernotifikasjonRecord.value();
@@ -268,7 +268,7 @@ public class EskaleringsvarselControllerTest {
     @Test
     public void bruker_kan_ikke_varsles() {
         MockBruker bruker = MockNavService.createHappyBruker();
-        BrukerOptions reservertKrr = bruker.getBrukerOptions().toBuilder().erReservertKrr(true).build() ;
+        BrukerOptions reservertKrr = bruker.getBrukerOptions().toBuilder().erReservertKrr(true).build();
         MockNavService.updateBruker(bruker, reservertKrr);
 
         MockVeileder veileder = MockNavService.createVeileder(bruker);
@@ -376,8 +376,8 @@ public class EskaleringsvarselControllerTest {
 
         requireGjeldende(veileder, bruker);
 
-        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonUtTopic, 5000L);
-        kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonUtTopic, brukerNotifikasjonOppgaveConsumer);
+        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 5000L);
+        kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonOppgaveTopic, brukerNotifikasjonOppgaveConsumer);
     }
 
     @Test
