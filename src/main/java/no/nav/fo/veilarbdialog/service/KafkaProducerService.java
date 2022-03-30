@@ -34,9 +34,7 @@ public class KafkaProducerService {
 
     private final DialogDAO dialogDAO;
 
-    // KafkaProducerClientWithMetrics kan få ConcurrentModificationException ved mange samtidige sendSync
-    // no.nav.common.kafka.producer.util.KafkaProducerClientWithMetrics.incrementRecordCount
-    public synchronized void sendDialogMelding(KafkaDialogMelding kafkaDialogMelding) {
+    public void sendDialogMelding(KafkaDialogMelding kafkaDialogMelding) {
         var kafkaStringMelding = JsonUtils.toJson(kafkaDialogMelding);
         String aktorId = kafkaDialogMelding.getAktorId();
         String topic = kafkaProperties.getEndringPaaDialogTopic();
