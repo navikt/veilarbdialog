@@ -168,3 +168,7 @@ application:
         oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
         beskjed: min-side.aapen-brukernotifikasjon-beskjed-v1
         done: min-side.aapen-brukernotifikasjon-done-v1
+  brukernotifikasjon:
+    grace:
+      periode:
+        ms: 1800000

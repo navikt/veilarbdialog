@@ -18,6 +18,7 @@ import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +51,9 @@ public class ScheduleRessurs {
     private final SistePeriodeService sistePeriodeService;
     private final AktorOppslagClient aktorOppslagClient;
 
+    @Value("${application.brukernotifikasjon.grace.periode.ms}")
+    private Long brukernotifikasjonGracePeriode;
+
     @Scheduled(cron = "0 0/10 * * * *")
     public void slettGamleKladder() {
         kladdService.slettGamleKladder();
@@ -79,7 +83,7 @@ public class ScheduleRessurs {
 //    }
 
     private void sendBrukernotifikasjonerForUlesteDialogerWithLock() {
-        List<Long> dialogIder = varselDAO.hentDialogerMedUlesteMeldingerEtterSisteVarsel(Duration.ofMinutes(30).toMillis());
+        List<Long> dialogIder = varselDAO.hentDialogerMedUlesteMeldingerEtterSisteVarsel(brukernotifikasjonGracePeriode);
 
         log.info("Varsler (beskjed): {} brukere", dialogIder.size());
 

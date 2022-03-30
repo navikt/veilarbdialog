@@ -16,9 +16,10 @@ public class VarselDAO {
 
     private final JdbcTemplate jdbc;
 
+
     public List<Long> hentDialogerMedUlesteMeldingerEtterSisteVarsel(long graceMillis) {
         final Date grense = new Date(System.currentTimeMillis() - graceMillis);
-        return jdbc.queryForList("select d.DIALOG_ID " +
+        return jdbc.queryForList("select DISTINCT d.DIALOG_ID " +
                         "from DIALOG d " +
                         "left join HENVENDELSE h on h.DIALOG_ID = d.DIALOG_ID " +
                         "left join VARSEL v on v.AKTOR_ID = d.AKTOR_ID " +

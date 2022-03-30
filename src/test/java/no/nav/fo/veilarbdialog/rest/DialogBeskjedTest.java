@@ -18,6 +18,7 @@ import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.assertj.core.api.SoftAssertions;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -191,5 +192,226 @@ public class DialogBeskjedTest {
 
         boolean harKonsumertAlleMeldinger = kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer);
         assertThat(harKonsumertAlleMeldinger).isTrue();
+    }
+
+    @Test
+    public void dobleNotifikasjonerPaaSammeDialog() {
+
+        MockBruker mockBruker = MockNavService.createHappyBruker();
+        MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
+
+        DialogDTO dialog = mockVeileder.createRequest()
+                .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        // Hy henvendelse samme dialog
+        mockVeileder.createRequest()
+                .body(new NyHenvendelseDTO().setTekst("tekst2").setDialogId(dialog.getId()))
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        // Setter sendt til å være 30 minutter tidligere pga. grace period
+        Date nySendt = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
+        jdbcTemplate.update("""
+                UPDATE HENVENDELSE 
+                SET SENDT = ?
+                WHERE DIALOG_ID = ?
+        """,
+                nySendt,
+                dialog.getId());
+
+        scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
+        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
+
+        ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
+
+        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
+
+        assertThat(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST).isEqualTo(brukernotifikasjonRecord.value().getTekst());
+
+
+
+
+        BrukernotifikasjonEntity brukernotifikasjonEntity =
+                brukernotifikasjonRepository.hentBrukernotifikasjonBeskjedForDialogId(Long.parseLong(dialog.getId())).orElseThrow();
+
+        SoftAssertions.assertSoftly(
+                assertions -> {
+                    assertions.assertThat(brukernotifikasjonEntity.dialogId()).isEqualTo(Long.valueOf(dialog.getId()));
+                    assertions.assertThat(brukernotifikasjonEntity.type()).isEqualTo(BrukernotifikasjonsType.BESKJED);
+                    assertions.assertThat(brukernotifikasjonEntity.status()).isEqualTo(BrukernotifikasjonBehandlingStatus.SENDT);
+                }
+        );
+
+        mockBruker.createRequest()
+                .put("/veilarbdialog/api/dialog/{dialogId}/les", dialog.getId())
+                .then()
+                .statusCode(200);
+
+        brukernotifikasjonService.sendDoneBrukernotifikasjoner();
+
+        ConsumerRecord<NokkelInput, DoneInput> doneRecord =
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+
+        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
+
+        NokkelInput nokkel = doneRecord.key();
+
+        assertThat(mockBruker.getFnr()).isEqualTo(nokkel.getFodselsnummer());
+
+    }
+
+    @Test
+    public void ingenDobleNotifikasjonerPaaSammeDialogMedIntervall() {
+
+        MockBruker mockBruker = MockNavService.createHappyBruker();
+        MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
+
+        DialogDTO dialog = mockVeileder.createRequest()
+                .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+
+
+        // Setter sendt til å være 30 minutter tidligere pga. grace period
+        Date nySendt = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
+        jdbcTemplate.update("""
+                UPDATE HENVENDELSE 
+                SET SENDT = ?
+                WHERE DIALOG_ID = ?
+        """,
+                nySendt,
+                dialog.getId());
+
+        scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
+        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
+
+        ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
+
+        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
+
+        assertThat(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST).isEqualTo(brukernotifikasjonRecord.value().getTekst());
+
+
+        // Hy henvendelse samme dialog
+        mockVeileder.createRequest()
+                .body(new NyHenvendelseDTO().setTekst("tekst2").setDialogId(dialog.getId()))
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+
+        // Setter sendt til å være 30 minutter tidligere pga. grace period
+        Date nySendt2 = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
+        jdbcTemplate.update("""
+                UPDATE HENVENDELSE 
+                SET SENDT = ?
+                WHERE DIALOG_ID = ?
+        """,
+                nySendt2,
+                dialog.getId());
+
+        scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
+        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
+
+        // Ingen nye beskjeder siden forrige henvendelse ikke er lest
+
+        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
+
+        mockBruker.createRequest()
+                .put("/veilarbdialog/api/dialog/{dialogId}/les", dialog.getId())
+                .then()
+                .statusCode(200);
+
+        brukernotifikasjonService.sendDoneBrukernotifikasjoner();
+
+        ConsumerRecord<NokkelInput, DoneInput> doneRecord =
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+
+        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
+
+        NokkelInput nokkel = doneRecord.key();
+
+        assertThat(mockBruker.getFnr()).isEqualTo(nokkel.getFodselsnummer());
+
+    }
+
+
+    @Test
+    public void nyNotifikasjonPaaSammeDialogNaarFoersteErLest() throws InterruptedException {
+
+        MockBruker mockBruker = MockNavService.createHappyBruker();
+        MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
+
+        DialogDTO dialog = mockVeileder.createRequest()
+                .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        Thread.sleep(1000L);
+        scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
+        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
+
+
+        ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
+
+        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
+
+        assertThat(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST).isEqualTo(brukernotifikasjonRecord.value().getTekst());
+
+
+
+        mockBruker.createRequest()
+                .put("/veilarbdialog/api/dialog/{dialogId}/les", dialog.getId())
+                .then()
+                .statusCode(200);
+
+        brukernotifikasjonService.sendDoneBrukernotifikasjoner();
+
+        ConsumerRecord<NokkelInput, DoneInput> doneRecord =
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+
+        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
+
+
+
+        // Hy henvendelse samme dialog
+        mockVeileder.createRequest()
+                .body(new NyHenvendelseDTO().setTekst("tekst2").setDialogId(dialog.getId()))
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        Thread.sleep(1000L);
+
+        scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
+        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
+
+        // Ny beskjed siden forrige henvendelse er lest
+
+        Assert.assertFalse(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
+
+
     }
 }
