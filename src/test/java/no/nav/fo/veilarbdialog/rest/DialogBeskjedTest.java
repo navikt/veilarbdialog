@@ -100,7 +100,7 @@ public class DialogBeskjedTest {
         // Setter sendt til å være 30 minutter tidligere pga. grace period
         Date nySendt = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
         jdbcTemplate.update("""
-                UPDATE HENVENDELSE 
+                UPDATE HENVENDELSE
                 SET SENDT = ?
                 WHERE HENVENDELSE_ID = ?
         """,
@@ -113,7 +113,7 @@ public class DialogBeskjedTest {
         ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
                 KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
 
-        assertThat(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST).isEqualTo(brukernotifikasjonRecord.value().getTekst());
+        assertThat(brukernotifikasjonRecord.value().getTekst()).isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST);
 
         BrukernotifikasjonEntity brukernotifikasjonEntity =
                 brukernotifikasjonRepository.hentBrukernotifikasjonBeskjedForDialogId(Long.parseLong(dialog.getId())).get(0);
@@ -180,7 +180,7 @@ public class DialogBeskjedTest {
         // Setter sendt til å være 30 minutter tidligere pga. grace period
         Date nySendt = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
         jdbcTemplate.update("""
-                UPDATE HENVENDELSE 
+                UPDATE HENVENDELSE
                 SET SENDT = ?
                 WHERE HENVENDELSE_ID = ?
         """,
@@ -220,7 +220,7 @@ public class DialogBeskjedTest {
         // Setter sendt til å være 30 minutter tidligere pga. grace period
         Date nySendt = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
         jdbcTemplate.update("""
-                UPDATE HENVENDELSE 
+                UPDATE HENVENDELSE
                 SET SENDT = ?
                 WHERE DIALOG_ID = ?
         """,
@@ -235,7 +235,7 @@ public class DialogBeskjedTest {
 
         Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
-        assertThat(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST).isEqualTo(brukernotifikasjonRecord.value().getTekst());
+        assertThat(brukernotifikasjonRecord.value().getTekst()).isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST);
 
 
 
@@ -288,7 +288,7 @@ public class DialogBeskjedTest {
         // Setter sendt til å være 30 minutter tidligere pga. grace period
         Date nySendt = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
         jdbcTemplate.update("""
-                UPDATE HENVENDELSE 
+                UPDATE HENVENDELSE
                 SET SENDT = ?
                 WHERE DIALOG_ID = ?
         """,
@@ -319,7 +319,7 @@ public class DialogBeskjedTest {
         // Setter sendt til å være 30 minutter tidligere pga. grace period
         Date nySendt2 = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
         jdbcTemplate.update("""
-                UPDATE HENVENDELSE 
+                UPDATE HENVENDELSE
                 SET SENDT = ?
                 WHERE DIALOG_ID = ?
         """,
@@ -376,7 +376,7 @@ public class DialogBeskjedTest {
 
         Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
-        assertThat(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST).isEqualTo(brukernotifikasjonRecord.value().getTekst());
+        assertThat(brukernotifikasjonRecord.value().getTekst()).isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST);
 
 
 
