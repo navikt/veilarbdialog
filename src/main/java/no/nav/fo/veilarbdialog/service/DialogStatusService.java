@@ -17,7 +17,6 @@ import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -60,8 +59,9 @@ public class DialogStatusService {
         }
 
         brukernotifikasjonRepository
-                .hentBrukernotifikasjonBeskjedForDialogId(dialogData.getId())
-                .ifPresent(brukernotifikasjon -> brukernotifikasjonService.bestillDone(brukernotifikasjon.id()));
+                .hentBrukernotifikasjonBeskjedForDialogId(dialogData.getId()).forEach(
+                        brukernotifikasjon -> brukernotifikasjonService.bestillDone(brukernotifikasjon.id())
+                );
 
         eskaleringsvarselRepository.hentGjeldende(AktorId.of(dialogData.getAktorId())).ifPresent(
                 eskaleringsvarselEntity -> {

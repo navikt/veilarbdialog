@@ -85,7 +85,7 @@ public class BrukernotifikasjonRepository {
         }
     }
 
-    public Optional<BrukernotifikasjonEntity> hentBrukernotifikasjonBeskjedForDialogId(long dialogId) {
+    public List<BrukernotifikasjonEntity> hentBrukernotifikasjonBeskjedForDialogId(long dialogId) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("dialogId", dialogId)
                 .addValue("type", BrukernotifikasjonsType.BESKJED.name());
@@ -96,9 +96,9 @@ public class BrukernotifikasjonRepository {
             TYPE = :type
             """;
         try {
-            return Optional.of(jdbcTemplate.queryForObject(sql, params, rowmapper));
+            return jdbcTemplate.query(sql, params, rowmapper);
         } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
+            return List.of();
         }
     }
 

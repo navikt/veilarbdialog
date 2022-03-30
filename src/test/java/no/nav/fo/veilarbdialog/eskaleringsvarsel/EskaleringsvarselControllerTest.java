@@ -46,7 +46,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -459,7 +458,7 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void unngaaDobleNotifikasjonerPaaEskaleringsvarsel() {
+    public void unngaaDobleNotifikasjonerPaaEskaleringsvarsel() throws InterruptedException {
 
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
@@ -470,16 +469,8 @@ public class EskaleringsvarselControllerTest {
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
         EskaleringsvarselDto startEskalering = startEskalering(veileder, startEskaleringDto);
 
-        // Setter sendt til å være 30 minutter tidligere pga. grace period
-        Date nySendt = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
-        jdbcTemplate.update("""
-                UPDATE HENVENDELSE 
-                SET SENDT = ?
-                WHERE DIALOG_ID = ?
-        """,
-                nySendt,
-                startEskalering.tilhorendeDialogId());
-        // Batchen bestiller beskjeder ved nye dialoger (etter 30 min)
+        Thread.sleep(1000L);
+        // Batchen bestiller beskjeder ved nye dialoger (etter 1000 ms)
         scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
 
         brukernotifikasjonService.sendPendingBrukernotifikasjoner();
