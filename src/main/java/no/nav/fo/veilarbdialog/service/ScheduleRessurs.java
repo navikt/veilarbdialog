@@ -110,7 +110,7 @@ public class ScheduleRessurs {
                             dialogDataService.utledDialogLink(dialogId)
                     );
 
-                    brukernotifikasjonService.bestillBrukernotifikasjon(brukernotifikasjon);
+                    brukernotifikasjonService.bestillBrukernotifikasjon(brukernotifikasjon, AktorId.of(dialogData.getAktorId()));
                     varselDAO.oppdaterSisteVarselForBruker(dialogData.getAktorId());
                     funksjonelleMetrikker.nyBrukernotifikasjon(true, BrukernotifikasjonsType.BESKJED);
                 }

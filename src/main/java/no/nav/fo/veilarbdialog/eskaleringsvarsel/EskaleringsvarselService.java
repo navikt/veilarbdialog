@@ -67,8 +67,6 @@ public class EskaleringsvarselService {
 
         DialogData dialogData = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, Person.fnr(fnr.get()));
 
-        // TODO filtrer kontorsperre før retur
-
         var dialogStatus = DialogStatus.builder()
                 .dialogId(dialogData.getId())
                 .venterPaSvar(true)
@@ -101,7 +99,7 @@ public class EskaleringsvarselService {
         );
 
 
-        BrukernotifikasjonEntity brukernotifikasjonEntity = brukernotifikasjonService.bestillBrukernotifikasjon(brukernotifikasjon);
+        BrukernotifikasjonEntity brukernotifikasjonEntity = brukernotifikasjonService.bestillBrukernotifikasjon(brukernotifikasjon, AktorId.of(dialogData.getAktorId()));
 
         EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselRepository.opprett(
                 dialogData.getId(),

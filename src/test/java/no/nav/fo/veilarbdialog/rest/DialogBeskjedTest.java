@@ -1,19 +1,14 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import io.restassured.RestAssured;
-import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import no.nav.brukernotifikasjon.schemas.input.BeskjedInput;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
-import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
-import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.*;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
-import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
@@ -31,7 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.jdbc.Sql;
@@ -42,7 +36,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
@@ -50,7 +44,7 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TES
 @Slf4j
 @Sql(
         scripts = "/db/testdata/slett_alle_dialoger.sql",
-        executionPhase = AFTER_TEST_METHOD
+        executionPhase = BEFORE_TEST_METHOD
 )
 public class DialogBeskjedTest {
 

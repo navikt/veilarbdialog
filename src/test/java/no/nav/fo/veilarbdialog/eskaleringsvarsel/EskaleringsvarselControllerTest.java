@@ -5,6 +5,7 @@ import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
+import no.nav.brukernotifikasjon.schemas.input.BeskjedInput;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
@@ -20,6 +21,7 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
+import no.nav.fo.veilarbdialog.service.ScheduleRessurs;
 import no.nav.fo.veilarbdialog.util.DialogTestService;
 import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -34,7 +36,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Instant;
@@ -42,6 +46,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -50,11 +55,17 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
 @AutoConfigureWireMock(port = 0)
 @Slf4j
+@Sql(
+        scripts = "/db/testdata/slett_alle_dialoger.sql",
+        executionPhase = BEFORE_TEST_METHOD
+)
 public class EskaleringsvarselControllerTest {
 
     @LocalServerPort
@@ -62,6 +73,9 @@ public class EskaleringsvarselControllerTest {
 
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
     private String brukernotifikasjonOppgaveTopic;
+
+    @Value("${application.topic.ut.brukernotifikasjon.beskjed}")
+    private String brukernotifikasjonBeskjedTopic;
 
     @Value("${application.topic.ut.brukernotifikasjon.done}")
     private String brukernotifikasjonDoneTopic;
@@ -85,9 +99,17 @@ public class EskaleringsvarselControllerTest {
     BrukernotifikasjonService brukernotifikasjonService;
 
     @Autowired
+    ScheduleRessurs scheduleRessurs;
+
+    @Autowired
     LockProvider lockProvider;
 
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
     Consumer<NokkelInput, OppgaveInput> brukerNotifikasjonOppgaveConsumer;
+
+    Consumer<NokkelInput, BeskjedInput> brukerNotifikasjonBeskjedConsumer;
 
     Consumer<NokkelInput, DoneInput> brukerNotifikasjonDoneConsumer;
 
@@ -97,6 +119,7 @@ public class EskaleringsvarselControllerTest {
         l.clearCache();
         RestAssured.port = port;
         brukerNotifikasjonOppgaveConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonOppgaveTopic);
+        brukerNotifikasjonBeskjedConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonBeskjedTopic);
         brukerNotifikasjonDoneConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonDoneTopic);
     }
 
@@ -433,6 +456,42 @@ public class EskaleringsvarselControllerTest {
         NokkelInput nokkel = brukernotifikasjonRecord.key();
 
         assertThat(bruker.getFnr()).isEqualTo(nokkel.getFodselsnummer());
+    }
+
+    @Test
+    public void unngaaDobleNotifikasjonerPaaEskaleringsvarsel() {
+
+        MockBruker bruker = MockNavService.createHappyBruker();
+        MockVeileder veileder = MockNavService.createVeileder(bruker);
+
+
+
+        StartEskaleringDto startEskaleringDto =
+                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
+        EskaleringsvarselDto startEskalering = startEskalering(veileder, startEskaleringDto);
+
+        // Setter sendt til å være 30 minutter tidligere pga. grace period
+        Date nySendt = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
+        jdbcTemplate.update("""
+                UPDATE HENVENDELSE 
+                SET SENDT = ?
+                WHERE DIALOG_ID = ?
+        """,
+                nySendt,
+                startEskalering.tilhorendeDialogId());
+        // Batchen bestiller beskjeder ved nye dialoger (etter 30 min)
+        scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
+
+        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
+
+        requireGjeldende(veileder, bruker);
+
+        KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 5000L);
+        // sjekk at det ikke ble sendt beskjed på dialogmelding
+        assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
+
+
+
     }
 
     private List<EskaleringsvarselDto> hentHistorikk(MockVeileder veileder, MockBruker mockBruker) {

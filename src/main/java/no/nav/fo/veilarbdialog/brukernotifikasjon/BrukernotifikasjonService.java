@@ -14,12 +14,14 @@ import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
 import no.nav.common.job.leader_election.LeaderElectionClient;
+import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.VeilarboppfolgingClient;
 import no.nav.fo.veilarbdialog.clients.veilarbperson.Nivaa4DTO;
 import no.nav.fo.veilarbdialog.clients.veilarbperson.VeilarbpersonClient;
+import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -54,6 +56,8 @@ public class BrukernotifikasjonService {
 
     private final KafkaTemplate<NokkelInput, DoneInput> kafkaDoneProducer;
 
+    private final VarselDAO varselDAO;
+
     private final LeaderElectionClient leaderElectionClient;
 
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
@@ -71,7 +75,7 @@ public class BrukernotifikasjonService {
     @Value("${application.namespace}")
     String namespace;
 
-    public BrukernotifikasjonEntity bestillBrukernotifikasjon(Brukernotifikasjon brukernotifikasjon) {
+    public BrukernotifikasjonEntity bestillBrukernotifikasjon(Brukernotifikasjon brukernotifikasjon, AktorId aktorId) {
         BrukernotifikasjonInsert insert = new BrukernotifikasjonInsert(
                 brukernotifikasjon.eventId(),
                 brukernotifikasjon.dialogId(),
@@ -87,6 +91,7 @@ public class BrukernotifikasjonService {
         );
 
         Long id = brukernotifikasjonRepository.opprettBrukernotifikasjon(insert);
+        varselDAO.oppdaterSisteVarselForBruker(aktorId.get());
         return hentBrukernotifikasjon(id);
     }
 
@@ -239,7 +244,6 @@ public class BrukernotifikasjonService {
                 .setEventId(doneInfo.getEventId())
                 .build();
 
-        // TODO set tidspunkt på DoneInput til denne?
         LocalDateTime localUTCtime = doneInfo.avsluttetTidspunkt.toLocalDateTime().atZone(ZoneOffset.UTC).toLocalDateTime();
 
         // Tidspunkt skal ifølge doc være UTC
