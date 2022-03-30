@@ -161,6 +161,7 @@ public class EskaleringsvarselControllerTest {
                     HenvendelseDTO henvendelseDTO = dialogDTO.getHenvendelser().get(0);
                     assertions.assertThat(henvendelseDTO.getTekst()).isEqualTo(henvendelseTekst);
                     assertions.assertThat(henvendelseDTO.getAvsenderId()).isEqualTo(veileder.getNavIdent());
+                    assertions.assertAll();
                 }
         );
 

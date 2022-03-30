@@ -70,21 +70,12 @@ public class DialogStatusService {
                     }
                 }
         );
-//        if (harAktivtparagraf8Varsel(dialogData)) { // todo - antar vi ikke skal fjerne det her før vi finner ut av hva vi skal med aktive gamle forhåndsvarsler
-//            int antall = varselDAO.hentAntallAktiveDialogerForVarsel(dialogData.getParagraf8VarselUUID());
-//            if (antall == 1) {
-//                varselDAO.revarslingSkalAvsluttes(dialogData.getParagraf8VarselUUID());
-//            }
-//        }
+
         statusDAO.markerSomLestAvBruker(dialogData.getId());
 
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.LEST_AV_BRUKER);
         funksjonelleMetrikker.markerDialogSomLestAvBruker(dialogData);
         return dialogDAO.hentDialog(dialogData.getId());
-    }
-
-    private boolean harAktivtparagraf8Varsel(DialogData dialogData) {
-        return dialogData.isHarUlestParagraf8Henvendelse() && dialogData.getParagraf8VarselUUID() != null;
     }
 
     public DialogData oppdaterVenterPaNavSiden(DialogData dialogData, boolean ferdigBehandlet) {

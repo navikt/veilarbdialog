@@ -1,7 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockConfiguration;
@@ -27,8 +26,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-
-import static java.util.UUID.randomUUID;
 
 @Component
 @RequiredArgsConstructor
@@ -74,14 +71,6 @@ public class ScheduleRessurs {
         );
     }
 
-//    @Scheduled(cron = "0 0/2 * * * *")
-//    public void sjekkForVarsel() {
-//        lockingTaskExecutor.executeWithLock(
-//                (Runnable) this::sjekkForVarselWithLock,
-//                new LockConfiguration(Instant.now(), "varsel", Duration.ofMinutes(30), Duration.ZERO)
-//        );
-//    }
-
     private void sendBrukernotifikasjonerForUlesteDialogerWithLock() {
         List<Long> dialogIder = varselDAO.hentDialogerMedUlesteMeldingerEtterSisteVarsel(brukernotifikasjonGracePeriode);
 
@@ -119,58 +108,6 @@ public class ScheduleRessurs {
                     funksjonelleMetrikker.nyBrukernotifikasjon(true, BrukernotifikasjonsType.BESKJED);
                 }
         );
-    }
-
-
-
-    private void sjekkForVarselWithLock() {
-
-        Timer timer = registry.timer("dialog.varsel.timer");
-        timer.record(() -> {
-
-            List<String> varselUUIDer = varselDAO.hentRevarslerSomSkalStoppes();
-            log.info("Stopper {} revarsler", varselUUIDer.size());
-            varselUUIDer.forEach(stopRevarslingService::stopRevarsel);
-            funksjonelleMetrikker.stoppetRevarsling(varselUUIDer.size());
-
-            List<String> aktorer = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(Duration.ofMinutes(30).toMillis());
-
-            log.info("Varsler {} brukere", aktorer.size());
-            log.info("Varsler aktorer: " + aktorer);
-            long paragraf8Varsler = aktorer
-                    .stream()
-                    .map(this::sendVarsel)
-                    .filter(varselType -> varselType == VarselType.PARAGRAF8)
-                    .count();
-
-            log.info("Varsler sendt, {} paragraf8", paragraf8Varsler);
-            funksjonelleMetrikker.nyeVarsler(aktorer.size(), paragraf8Varsler);
-
-        });
-
-    }
-
-
-    private VarselType sendVarsel(String aktorId) {
-        boolean paragraf8 = varselDAO.harUlesteUvarsledeParagraf8Henvendelser(aktorId);
-        if (paragraf8) {
-            String varselBestillingId = randomUUID().toString();
-
-            varselMedHandlingService.send(aktorId, varselBestillingId);
-            oppgaveService.send(aktorId, varselBestillingId);
-
-            varselDAO.insertParagraf8Varsel(aktorId, varselBestillingId);
-            varselDAO.setVarselUUIDForParagraf8Dialoger(aktorId, varselBestillingId);
-        } else {
-            serviceMeldingService.sendVarsel(aktorId);
-        }
-        varselDAO.oppdaterSisteVarselForBruker(aktorId);
-        return paragraf8 ? VarselType.PARAGRAF8 : VarselType.DIALOG;
-    }
-
-    private enum VarselType {
-        PARAGRAF8,
-        DIALOG
     }
 
 }
