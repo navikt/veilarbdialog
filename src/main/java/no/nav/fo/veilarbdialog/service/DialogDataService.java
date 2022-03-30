@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.types.identer.AktorId;
@@ -14,11 +15,13 @@ import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,6 +43,9 @@ public class DialogDataService {
     private final KladdService kladdService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final SistePeriodeService sistePeriodeService;
+
+    @Value("${application.dialog.url}")
+    private String dialogUrl;
 
 
     @Transactional(readOnly = true)
@@ -247,5 +253,10 @@ public class DialogDataService {
         if (person instanceof Person.Fnr) {
             kladdService.deleteKladd(person.get(), nyHenvendelseDTO.getDialogId(), nyHenvendelseDTO.getAktivitetId());
         }
+    }
+
+    @SneakyThrows
+    public URL utledDialogLink(long id) {
+        return new URL(String.format("%s/%s", dialogUrl, id));
     }
 }

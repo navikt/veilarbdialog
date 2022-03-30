@@ -5,6 +5,7 @@ import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
+import no.nav.brukernotifikasjon.schemas.input.BeskjedInput;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
@@ -20,6 +21,7 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
+import no.nav.fo.veilarbdialog.service.ScheduleRessurs;
 import no.nav.fo.veilarbdialog.util.DialogTestService;
 import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -34,7 +36,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Instant;
@@ -50,18 +54,27 @@ import java.util.concurrent.Executors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
 @AutoConfigureWireMock(port = 0)
 @Slf4j
+@Sql(
+        scripts = "/db/testdata/slett_alle_dialoger.sql",
+        executionPhase = BEFORE_TEST_METHOD
+)
 public class EskaleringsvarselControllerTest {
 
     @LocalServerPort
     protected int port;
 
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
-    private String brukernotifikasjonUtTopic;
+    private String brukernotifikasjonOppgaveTopic;
+
+    @Value("${application.topic.ut.brukernotifikasjon.beskjed}")
+    private String brukernotifikasjonBeskjedTopic;
 
     @Value("${application.topic.ut.brukernotifikasjon.done}")
     private String brukernotifikasjonDoneTopic;
@@ -85,9 +98,17 @@ public class EskaleringsvarselControllerTest {
     BrukernotifikasjonService brukernotifikasjonService;
 
     @Autowired
+    ScheduleRessurs scheduleRessurs;
+
+    @Autowired
     LockProvider lockProvider;
 
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
     Consumer<NokkelInput, OppgaveInput> brukerNotifikasjonOppgaveConsumer;
+
+    Consumer<NokkelInput, BeskjedInput> brukerNotifikasjonBeskjedConsumer;
 
     Consumer<NokkelInput, DoneInput> brukerNotifikasjonDoneConsumer;
 
@@ -96,7 +117,8 @@ public class EskaleringsvarselControllerTest {
         JdbcTemplateLockProvider l = (JdbcTemplateLockProvider) lockProvider;
         l.clearCache();
         RestAssured.port = port;
-        brukerNotifikasjonOppgaveConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonUtTopic);
+        brukerNotifikasjonOppgaveConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonOppgaveTopic);
+        brukerNotifikasjonBeskjedConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonBeskjedTopic);
         brukerNotifikasjonDoneConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonDoneTopic);
     }
 
@@ -139,6 +161,7 @@ public class EskaleringsvarselControllerTest {
                     HenvendelseDTO henvendelseDTO = dialogDTO.getHenvendelser().get(0);
                     assertions.assertThat(henvendelseDTO.getTekst()).isEqualTo(henvendelseTekst);
                     assertions.assertThat(henvendelseDTO.getAvsenderId()).isEqualTo(veileder.getNavIdent());
+                    assertions.assertAll();
                 }
         );
 
@@ -150,7 +173,7 @@ public class EskaleringsvarselControllerTest {
         assertThat(startEskalering.opprettetDato()).isEqualToIgnoringNanos(gjeldende.opprettetDato());
         assertThat(startEskalering.opprettetBegrunnelse()).isEqualTo(gjeldende.opprettetBegrunnelse());
 
-        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonUtTopic, 5000L);
+        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 5000L);
 
         NokkelInput nokkelInput = brukernotifikasjonRecord.key();
         OppgaveInput oppgaveInput = brukernotifikasjonRecord.value();
@@ -268,7 +291,7 @@ public class EskaleringsvarselControllerTest {
     @Test
     public void bruker_kan_ikke_varsles() {
         MockBruker bruker = MockNavService.createHappyBruker();
-        BrukerOptions reservertKrr = bruker.getBrukerOptions().toBuilder().erReservertKrr(true).build() ;
+        BrukerOptions reservertKrr = bruker.getBrukerOptions().toBuilder().erReservertKrr(true).build();
         MockNavService.updateBruker(bruker, reservertKrr);
 
         MockVeileder veileder = MockNavService.createVeileder(bruker);
@@ -376,8 +399,8 @@ public class EskaleringsvarselControllerTest {
 
         requireGjeldende(veileder, bruker);
 
-        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonUtTopic, 5000L);
-        kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonUtTopic, brukerNotifikasjonOppgaveConsumer);
+        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 5000L);
+        kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonOppgaveTopic, brukerNotifikasjonOppgaveConsumer);
     }
 
     @Test
@@ -433,6 +456,34 @@ public class EskaleringsvarselControllerTest {
         NokkelInput nokkel = brukernotifikasjonRecord.key();
 
         assertThat(bruker.getFnr()).isEqualTo(nokkel.getFodselsnummer());
+    }
+
+    @Test
+    public void unngaaDobleNotifikasjonerPaaEskaleringsvarsel() throws InterruptedException {
+
+        MockBruker bruker = MockNavService.createHappyBruker();
+        MockVeileder veileder = MockNavService.createVeileder(bruker);
+
+
+
+        StartEskaleringDto startEskaleringDto =
+                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
+        EskaleringsvarselDto startEskalering = startEskalering(veileder, startEskaleringDto);
+
+        Thread.sleep(1000L);
+        // Batchen bestiller beskjeder ved nye dialoger (etter 1000 ms)
+        scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
+
+        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
+
+        requireGjeldende(veileder, bruker);
+
+        KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 5000L);
+        // sjekk at det ikke ble sendt beskjed på dialogmelding
+        assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
+
+
+
     }
 
     private List<EskaleringsvarselDto> hentHistorikk(MockVeileder veileder, MockBruker mockBruker) {

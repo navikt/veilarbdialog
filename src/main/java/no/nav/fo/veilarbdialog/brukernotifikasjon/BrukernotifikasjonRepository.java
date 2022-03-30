@@ -83,7 +83,23 @@ public class BrukernotifikasjonRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
 
+    public List<BrukernotifikasjonEntity> hentBrukernotifikasjonBeskjedForDialogId(long dialogId) {
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("dialogId", dialogId)
+                .addValue("type", BrukernotifikasjonsType.BESKJED.name());
+        String sql = """
+            SELECT *
+            FROM BRUKERNOTIFIKASJON 
+            WHERE DIALOG_ID = :dialogId AND
+            TYPE = :type
+            """;
+        try {
+            return jdbcTemplate.query(sql, params, rowmapper);
+        } catch (EmptyResultDataAccessException e) {
+            return List.of();
+        }
     }
 
     List<BrukernotifikasjonEntity> hentPendingBrukernotifikasjoner() {

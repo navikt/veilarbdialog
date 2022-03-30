@@ -22,7 +22,7 @@
 
         <allclient.version>9.2.0.0</allclient.version>
 
-        <common.version>2.2021.12.09_11.56-a71c36a61ba3</common.version>
+        <common.version>2.2022.03.29_08.56-50f8b7377a46</common.version>
 
         <flyway.version>4.1.1</flyway.version>
         <javax.activation.version>1.1.1</javax.activation.version>

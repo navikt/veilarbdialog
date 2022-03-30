@@ -16,6 +16,23 @@ public class VarselDAO {
 
     private final JdbcTemplate jdbc;
 
+
+    public List<Long> hentDialogerMedUlesteMeldingerEtterSisteVarsel(long graceMillis) {
+        final Date grense = new Date(System.currentTimeMillis() - graceMillis);
+        return jdbc.queryForList("select DISTINCT d.DIALOG_ID " +
+                        "from DIALOG d " +
+                        "left join HENVENDELSE h on h.DIALOG_ID = d.DIALOG_ID " +
+                        "left join VARSEL v on v.AKTOR_ID = d.AKTOR_ID " +
+                        "where h.AVSENDER_TYPE = ? " +
+                        "and (d.LEST_AV_BRUKER_TID is null or h.SENDT > d.LEST_AV_BRUKER_TID) " +
+                        "and (v.SENDT is null or h.SENDT > v.SENDT) " +
+                        "and h.SENDT < ? ",
+                Long.class,
+                AvsenderType.VEILEDER.name(),
+                grense
+        );
+    }
+
     public List<String> hentAktorerMedUlesteMeldingerEtterSisteVarsel(long graceMillis) {
         final Date grense = new Date(System.currentTimeMillis() - graceMillis);
         return jdbc.queryForList("select d.AKTOR_ID " +

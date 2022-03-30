@@ -4,20 +4,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import no.nav.brukernotifikasjon.schemas.builders.BeskjedInputBuilder;
 import no.nav.brukernotifikasjon.schemas.builders.DoneInputBuilder;
 import no.nav.brukernotifikasjon.schemas.builders.NokkelInputBuilder;
 import no.nav.brukernotifikasjon.schemas.builders.OppgaveInputBuilder;
 import no.nav.brukernotifikasjon.schemas.builders.domain.PreferertKanal;
+import no.nav.brukernotifikasjon.schemas.input.BeskjedInput;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
 import no.nav.common.job.leader_election.LeaderElectionClient;
+import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.VeilarboppfolgingClient;
 import no.nav.fo.veilarbdialog.clients.veilarbperson.Nivaa4DTO;
 import no.nav.fo.veilarbdialog.clients.veilarbperson.VeilarbpersonClient;
+import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -38,6 +42,7 @@ import java.util.Optional;
 public class BrukernotifikasjonService {
 
     private static final int OPPGAVE_SIKKERHETSNIVAA = 4;
+    private static final int BESKJED_SIKKERHETSNIVAA = 3;
 
     private final VeilarboppfolgingClient veilarboppfolgingClient;
 
@@ -47,12 +52,19 @@ public class BrukernotifikasjonService {
 
     private final KafkaTemplate<NokkelInput, OppgaveInput> kafkaOppgaveProducer;
 
+    private final KafkaTemplate<NokkelInput, BeskjedInput> kafkaBeskjedProducer;
+
     private final KafkaTemplate<NokkelInput, DoneInput> kafkaDoneProducer;
+
+    private final VarselDAO varselDAO;
 
     private final LeaderElectionClient leaderElectionClient;
 
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
     private String oppgaveTopic;
+
+    @Value("${application.topic.ut.brukernotifikasjon.beskjed}")
+    private String beskjedTopic;
 
     @Value("${application.topic.ut.brukernotifikasjon.done}")
     private String doneTopic;
@@ -63,7 +75,7 @@ public class BrukernotifikasjonService {
     @Value("${application.namespace}")
     String namespace;
 
-    public BrukernotifikasjonEntity bestillBrukernotifikasjon(Brukernotifikasjon brukernotifikasjon) {
+    public BrukernotifikasjonEntity bestillBrukernotifikasjon(Brukernotifikasjon brukernotifikasjon, AktorId aktorId) {
         BrukernotifikasjonInsert insert = new BrukernotifikasjonInsert(
                 brukernotifikasjon.eventId(),
                 brukernotifikasjon.dialogId(),
@@ -79,6 +91,7 @@ public class BrukernotifikasjonService {
         );
 
         Long id = brukernotifikasjonRepository.opprettBrukernotifikasjon(insert);
+        varselDAO.oppdaterSisteVarselForBruker(aktorId.get());
         return hentBrukernotifikasjon(id);
     }
 
@@ -95,16 +108,32 @@ public class BrukernotifikasjonService {
         List<BrukernotifikasjonEntity> pendingBrukernotifikasjoner = brukernotifikasjonRepository.hentPendingBrukernotifikasjoner();
         pendingBrukernotifikasjoner.stream().forEach(
                 brukernotifikasjonEntity ->  {
-                    OppgaveInfo oppgaveInfo = new OppgaveInfo(
-                            brukernotifikasjonEntity.eventId().toString(),
-                            brukernotifikasjonEntity.melding(),
-                            brukernotifikasjonEntity.oppfolgingsPeriodeId().toString(),
-                            brukernotifikasjonEntity.epostTittel(),
-                            brukernotifikasjonEntity.epostBody(),
-                            brukernotifikasjonEntity.smsText(),
-                            brukernotifikasjonEntity.lenke()
-                    );
-                    sendOppgave(brukernotifikasjonEntity.fnr(), oppgaveInfo);
+                    switch (brukernotifikasjonEntity.type()) {
+                        case OPPGAVE -> {
+                            OppgaveInfo oppgaveInfo = new OppgaveInfo(
+                                    brukernotifikasjonEntity.eventId().toString(),
+                                    brukernotifikasjonEntity.melding(),
+                                    brukernotifikasjonEntity.oppfolgingsPeriodeId().toString(),
+                                    brukernotifikasjonEntity.epostTittel(),
+                                    brukernotifikasjonEntity.epostBody(),
+                                    brukernotifikasjonEntity.smsText(),
+                                    brukernotifikasjonEntity.lenke()
+                            );
+                            sendOppgave(brukernotifikasjonEntity.fnr(), oppgaveInfo);
+                        }
+                        case BESKJED -> {
+                            BeskjedInfo beskjedInfo = new BeskjedInfo(
+                                    brukernotifikasjonEntity.eventId().toString(),
+                                    brukernotifikasjonEntity.melding(),
+                                    brukernotifikasjonEntity.oppfolgingsPeriodeId().toString(),
+                                    brukernotifikasjonEntity.epostTittel(),
+                                    brukernotifikasjonEntity.epostBody(),
+                                    brukernotifikasjonEntity.smsText(),
+                                    brukernotifikasjonEntity.lenke()
+                            );
+                            sendBeskjed(brukernotifikasjonEntity.fnr(), beskjedInfo);
+                        }
+                    }
                     brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.id(), BrukernotifikasjonBehandlingStatus.SENDT);
                 }
         );
@@ -115,7 +144,7 @@ public class BrukernotifikasjonService {
             fixedDelay = 5000
     )
     @SchedulerLock(name = "brukernotifikasjon_done_kafka_scheduledTask", lockAtMostFor = "PT2M")
-public void sendDoneBrukernotifikasjoner() {
+    public void sendDoneBrukernotifikasjoner() {
         List<BrukernotifikasjonEntity> skalAvsluttesNotifikasjoner = brukernotifikasjonRepository.hentPendingDoneBrukernotifikasjoner();
         skalAvsluttesNotifikasjoner.stream().forEach(
                 brukernotifikasjonEntity ->  {
@@ -139,6 +168,35 @@ public void sendDoneBrukernotifikasjoner() {
         boolean harBruktNivaa4 = nivaa4DTO.map(Nivaa4DTO::isHarbruktnivaa4).orElse(false);
 
         return !erManuell && !erReservertIKrr && harBruktNivaa4;
+    }
+
+    @SneakyThrows
+    private void sendBeskjed(Fnr fnr, BeskjedInfo beskjedInfo) {
+        NokkelInput nokkel = new NokkelInputBuilder()
+                .withFodselsnummer(fnr.get())
+                .withEventId(beskjedInfo.getBrukernotifikasjonId())
+                .withAppnavn(applicationName)
+                .withNamespace(namespace)
+                .withGrupperingsId(beskjedInfo.getOppfolgingsperiode())
+                .build();
+
+        BeskjedInput beskjed = new BeskjedInputBuilder()
+                .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
+                .withTekst(beskjedInfo.getMelding())
+                .withLink(beskjedInfo.getLink())
+                .withSikkerhetsnivaa(BESKJED_SIKKERHETSNIVAA)
+                .withEksternVarsling(true)
+                .withPrefererteKanaler(PreferertKanal.SMS)
+                .withSmsVarslingstekst(beskjedInfo.getSmsTekst())
+                .withEpostVarslingstittel(beskjedInfo.getEpostTitel())
+                .withEpostVarslingstekst(beskjedInfo.getEpostBody())
+                .build();
+
+        final ProducerRecord<NokkelInput, BeskjedInput> kafkaMelding = new ProducerRecord<>(beskjedTopic, nokkel, beskjed);
+
+        ListenableFuture<SendResult<NokkelInput, BeskjedInput>> future = kafkaBeskjedProducer.send(kafkaMelding);
+        kafkaDoneProducer.flush();
+        future.get();
     }
 
     @SneakyThrows
@@ -186,7 +244,6 @@ public void sendDoneBrukernotifikasjoner() {
                 .setEventId(doneInfo.getEventId())
                 .build();
 
-        // TODO set tidspunkt på DoneInput til denne?
         LocalDateTime localUTCtime = doneInfo.avsluttetTidspunkt.toLocalDateTime().atZone(ZoneOffset.UTC).toLocalDateTime();
 
         // Tidspunkt skal ifølge doc være UTC

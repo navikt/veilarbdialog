@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.metrics;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.metrics.Event;
 import no.nav.common.metrics.MetricsClient;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 
@@ -67,6 +68,14 @@ public class FunksjonelleMetrikker {
                 new Event("dialog.varsel")
                         .addFieldToReport("antall", antall)
                         .addFieldToReport("antallParagraf8", paragraf8Varsler)
+        );
+    }
+
+    public void nyBrukernotifikasjon(boolean kanVarsles, BrukernotifikasjonsType brukernotifikasjonsType) {
+        client.report(
+                new Event("dialog.brukernotifikasjon")
+                        .addFieldToReport("type", brukernotifikasjonsType.name())
+                        .addFieldToReport("kanVarsles", kanVarsles)
         );
     }
 

@@ -11,7 +11,7 @@ public record Brukernotifikasjon(
         Fnr foedselsnummer,
         String melding,
         UUID oppfolgingsperiodeId,
-        VarselType type,
+        BrukernotifikasjonsType type,
         String epostTitel,
         String epostBody,
         String smsTekst,

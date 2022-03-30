@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.AktorId;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
@@ -25,8 +26,9 @@ public class DialogStatusService {
     private final DialogDAO dialogDAO;
     private final DataVarehusDAO dataVarehusDAO;
     private final VarselDAO varselDAO;
-    private final FunksjonelleMetrikker funksjonelleMetrikker;
+    private final BrukernotifikasjonRepository brukernotifikasjonRepository;
     private final EskaleringsvarselRepository eskaleringsvarselRepository;
+    private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final BrukernotifikasjonService brukernotifikasjonService;
 
     public DialogData nyHenvendelse(DialogData dialogData, HenvendelseData henvendelseData) {
@@ -56,6 +58,11 @@ public class DialogStatusService {
             return dialogData;
         }
 
+        brukernotifikasjonRepository
+                .hentBrukernotifikasjonBeskjedForDialogId(dialogData.getId()).forEach(
+                        brukernotifikasjon -> brukernotifikasjonService.bestillDone(brukernotifikasjon.id())
+                );
+
         eskaleringsvarselRepository.hentGjeldende(AktorId.of(dialogData.getAktorId())).ifPresent(
                 eskaleringsvarselEntity -> {
                     if (eskaleringsvarselEntity.tilhorendeDialogId() == dialogData.getId()) {
@@ -64,21 +71,11 @@ public class DialogStatusService {
                 }
         );
 
-        if (harAktivtparagraf8Varsel(dialogData)) {
-            int antall = varselDAO.hentAntallAktiveDialogerForVarsel(dialogData.getParagraf8VarselUUID());
-            if (antall == 1) {
-                varselDAO.revarslingSkalAvsluttes(dialogData.getParagraf8VarselUUID());
-            }
-        }
         statusDAO.markerSomLestAvBruker(dialogData.getId());
 
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.LEST_AV_BRUKER);
         funksjonelleMetrikker.markerDialogSomLestAvBruker(dialogData);
         return dialogDAO.hentDialog(dialogData.getId());
-    }
-
-    private boolean harAktivtparagraf8Varsel(DialogData dialogData) {
-        return dialogData.isHarUlestParagraf8Henvendelse() && dialogData.getParagraf8VarselUUID() != null;
     }
 
     public DialogData oppdaterVenterPaNavSiden(DialogData dialogData, boolean ferdigBehandlet) {
