@@ -23,6 +23,8 @@ import no.nav.fo.veilarbdialog.clients.veilarbperson.Nivaa4DTO;
 import no.nav.fo.veilarbdialog.clients.veilarbperson.VeilarbpersonClient;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -40,6 +42,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class BrukernotifikasjonService {
+    private final Logger secureLogs = LoggerFactory.getLogger("SecureLog");
 
     private static final int OPPGAVE_SIKKERHETSNIVAA = 4;
     private static final int BESKJED_SIKKERHETSNIVAA = 3;
@@ -167,7 +170,13 @@ public class BrukernotifikasjonService {
         boolean erReservertIKrr = manuellStatusResponse.map(ManuellStatusV2DTO::getKrrStatus).map(ManuellStatusV2DTO.KrrStatus::isErReservert).orElse(true);
         boolean harBruktNivaa4 = nivaa4DTO.map(Nivaa4DTO::isHarbruktnivaa4).orElse(false);
 
-        return !erManuell && !erReservertIKrr && harBruktNivaa4;
+        boolean kanVarsles = !erManuell && !erReservertIKrr && harBruktNivaa4;
+
+        if(!kanVarsles) {
+            secureLogs.warn("bruker med fnr: {} kan ikke varsles, statuser erManuell: {}, erReservertIKrr: {}, harBruktNivaa4: {}", fnr, erManuell, erReservertIKrr, harBruktNivaa4);
+        }
+
+        return kanVarsles;
     }
 
     @SneakyThrows
