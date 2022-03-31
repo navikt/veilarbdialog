@@ -104,7 +104,6 @@ public class ScheduleRessurs {
                     );
 
                     brukernotifikasjonService.bestillBrukernotifikasjon(brukernotifikasjon, AktorId.of(dialogData.getAktorId()));
-                    varselDAO.oppdaterSisteVarselForBruker(dialogData.getAktorId());
                     funksjonelleMetrikker.nyBrukernotifikasjon(true, BrukernotifikasjonsType.BESKJED);
                 }
         );
