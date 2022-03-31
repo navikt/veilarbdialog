@@ -199,6 +199,7 @@ public class BrukernotifikasjonService {
                 .withSmsVarslingstekst(beskjedInfo.getSmsTekst())
                 .withEpostVarslingstittel(beskjedInfo.getEpostTitel())
                 .withEpostVarslingstekst(beskjedInfo.getEpostBody())
+                .withSynligFremTil(LocalDateTime.now(ZoneOffset.UTC).plusMonths(1))
                 .build();
 
         final ProducerRecord<NokkelInput, BeskjedInput> kafkaMelding = new ProducerRecord<>(beskjedTopic, nokkel, beskjed);
@@ -229,6 +230,7 @@ public class BrukernotifikasjonService {
                 .withSmsVarslingstekst(oppgaveInfo.getSmsTekst())
                 .withEpostVarslingstittel(oppgaveInfo.getEpostTitel())
                 .withEpostVarslingstekst(oppgaveInfo.getEpostBody())
+                .withSynligFremTil(LocalDateTime.now(ZoneOffset.UTC).plusMonths(1))
                 .build();
 
         final ProducerRecord<NokkelInput, OppgaveInput> kafkaMelding = new ProducerRecord<>(oppgaveTopic, nokkel, oppgave);
