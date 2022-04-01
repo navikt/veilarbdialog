@@ -132,16 +132,6 @@ application:
     kvpAvsluttetTopic: ${KVP_AVSLUTTET_TOPIC}
   aktorRegister:
     url: ${AKTOERREGISTER_API_V1_URL}
-  mq:
-    hostname: ${MQGATEWAY03_HOSTNAME}
-    port: ${MQGATEWAY03_PORT}
-    name: ${MQGATEWAY03_NAME}
-    queues:
-      oppgaveHenvendelse: ${HENVENDELSE_OPPGAVE_HENVENDELSE_QUEUENAME}
-      stoppVarslinger: ${VARSELPRODUKSJON_STOPP_VARSEL_UTSENDING_QUEUENAME}
-      varselHandling: ${VARSELPRODUKSJON_BEST_VARSEL_M_HANDLING_QUEUENAME}
-      varslinger: ${VARSELPRODUKSJON_VARSLINGER_QUEUENAME}
-    userid: srvappserver
   openam:
     clientId: ${VEILARBLOGIN_OPENAM_CLIENT_ID}
     discoveryUrl: ${OPENAM_DISCOVERY_URL}

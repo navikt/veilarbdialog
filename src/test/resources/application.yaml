@@ -86,17 +86,6 @@ application:
     kvpAvsluttetTopic: kvpAvsluttetTopic
   aktorRegister:
     url: http://localhost:${wiremock.server.port}/aktorTjeneste
-  mq:
-    hostname: "localhost"
-    port: "1414"
-    name: "QM1"
-    channel: "DEV.APP.SVRCONN"
-    userid: "app"
-    queues:
-      oppgaveHenvendelse: "DEV.QUEUE.1"
-      stoppVarslinger: "DEV.QUEUE.1"
-      varselHandling: "DEV.QUEUE.1"
-      varslinger: "DEV.QUEUE.1"
   oidc:
     disabled: true
   openam:
