@@ -20,18 +20,14 @@
         <java.version>17</java.version>
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
-        <allclient.version>9.2.0.0</allclient.version>
-
         <common.version>2.2022.03.29_08.56-50f8b7377a46</common.version>
 
         <flyway.version>4.1.1</flyway.version>
-        <javax.activation.version>1.1.1</javax.activation.version>
         <jersey.version>2.27</jersey.version>
         <rest-assured.version>4.2.0</rest-assured.version>
         <shedlock.version>4.14.0</shedlock.version>
         <swagger.version>3.0.0</swagger.version>
         <testcontainers-kafka.version>1.15.1</testcontainers-kafka.version>
-        <tjenestespesifikasjoner.version>1.2019.09.25-00.21-49b69f0625e0</tjenestespesifikasjoner.version>
         <unleash-client-java.version>3.3.3</unleash-client-java.version>
 
 
@@ -200,42 +196,7 @@
             <artifactId>jackson-jaxrs-json-provider</artifactId>
         </dependency>
 
-        <!-- JAXB -->
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-            <version>${javax.activation.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
-        </dependency>
-
         <!--Tjenester-->
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>varsel-inn</artifactId>
-            <version>${tjenestespesifikasjoner.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-virksomhet-varselMedHandling-v1-meldingsdefinisjon</artifactId>
-            <version>${tjenestespesifikasjoner.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-virksomhet-stoppReVarsel-v1-meldingsdefinisjon</artifactId>
-            <version>${tjenestespesifikasjoner.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-virksomhet-opprettOppgavehenvendelse-v1-meldingsdefinisjon</artifactId>
-            <version>${tjenestespesifikasjoner.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.github.navikt</groupId>
             <artifactId>brukernotifikasjon-schemas</artifactId>
@@ -247,14 +208,6 @@
             <groupId>no.finn.unleash</groupId>
             <artifactId>unleash-client-java</artifactId>
             <version>${unleash-client-java.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.jms</groupId>
-            <artifactId>javax.jms-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jms</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -269,13 +222,6 @@
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
             <version>${jersey.version}</version>
-        </dependency>
-
-        <!-- IBM MQ -->
-        <dependency>
-            <groupId>com.ibm.mq</groupId>
-            <artifactId>com.ibm.mq.allclient</artifactId>
-            <version>${allclient.version}</version>
         </dependency>
 
         <!-- LOGGING -->

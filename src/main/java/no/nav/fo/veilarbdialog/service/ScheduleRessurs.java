@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog.service;
 
-import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockConfiguration;
@@ -16,7 +15,6 @@ import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
-import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -36,16 +34,10 @@ public class ScheduleRessurs {
     private final VarselDAO varselDAO;
     private final KladdService kladdService;
     private final DialogDataService dialogDataService;
-    private final ServiceMeldingService serviceMeldingService;
-    private final OppgaveService oppgaveService;
-    private final StopRevarslingService stopRevarslingService;
-    private final VarselMedHandlingService varselMedHandlingService;
     private final LockingTaskExecutor lockingTaskExecutor;
     private final KafkaProducerService kafkaProducerService;
-    private final MeterRegistry registry;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final BrukernotifikasjonService brukernotifikasjonService;
-    private final SistePeriodeService sistePeriodeService;
     private final AktorOppslagClient aktorOppslagClient;
 
     @Value("${application.brukernotifikasjon.grace.periode.ms}")
@@ -83,7 +75,7 @@ public class ScheduleRessurs {
 
                     boolean kanVarsles = brukernotifikasjonService.kanVarsles(fnr);
                     if (!kanVarsles) {
-                        log.warn("Kan ikke varsle bruker: {}", dialogData.getAktorId());
+                        log.warn("Kan ikke varsle bruker: {}. Se årsak i SecureLog", dialogData.getAktorId());
                         funksjonelleMetrikker.nyBrukernotifikasjon(false, BrukernotifikasjonsType.BESKJED);
                         return;
                     }
