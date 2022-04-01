@@ -76,6 +76,8 @@ public class FunksjonelleMetrikker {
                 new Event("dialog.brukernotifikasjon")
                         .addTagToReport("type", brukernotifikasjonsType.name())
                         .addTagToReport("kanVarsles", Boolean.toString(kanVarsles))
+                        .addFieldToReport("brukernotifikasjonstype", brukernotifikasjonsType.name())
+                        .addFieldToReport("brukerKanVarsles", Boolean.toString(kanVarsles))
         );
     }
 
