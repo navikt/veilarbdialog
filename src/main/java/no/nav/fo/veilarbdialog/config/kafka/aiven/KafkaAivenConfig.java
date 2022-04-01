@@ -80,4 +80,39 @@ public class KafkaAivenConfig {
 
     // ************ konsumer siste_oppfolgings_periode SLUTT ***************
 
+
+    // ************ konsumer ekstern-varsel-kvittering START ***************
+
+    @Bean
+    <V extends SpecificRecordBase> ConsumerFactory<String, V> stringAvroConsumerFactory(KafkaProperties kafkaProperties) {
+        Map<String, Object> consumerProperties = kafkaProperties.buildConsumerProperties();
+        consumerProperties.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, org.apache.kafka.common.serialization.StringDeserializer.class);
+        consumerProperties.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, io.confluent.kafka.serializers.KafkaAvroDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(consumerProperties);
+    }
+
+    @Bean
+    <V extends SpecificRecordBase> ConcurrentKafkaListenerContainerFactory<String, V> stringAvroKafkaListenerContainerFactory(
+            ConsumerFactory<String, V> kafkaConsumerFactory) {
+        ConcurrentKafkaListenerContainerFactory<String, V> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(kafkaConsumerFactory);
+        factory.getContainerProperties()
+                .setAuthExceptionRetryInterval(Duration.ofSeconds(10L));
+
+        factory.setConcurrency(3);
+        factory.setErrorHandler(new SeekToCurrentErrorHandler(
+                (rec, thr) -> log.error("Exception={} oppstått i kafka-consumer record til topic={}, partition={}, offset={}, bestillingsId={} feilmelding={}",
+                        thr.getClass().getSimpleName(),
+                        rec.topic(),
+                        rec.partition(),
+                        rec.offset(),
+                        rec.key(),
+                        thr.getCause()
+                ),
+                new FixedBackOff(DEFAULT_INTERVAL, UNLIMITED_ATTEMPTS)));
+        return factory;
+    }
+
+    // ************ konsumer ekstern-varsel-kvittering SLUTT ***************
+
 }
