@@ -76,7 +76,7 @@ public class EksternVarslingKvitteringConsumer {
                 throw new IllegalArgumentException("ukjent status for melding");
         }
 
-        List<Kvittering> kvitterings = kvitteringDAO.hentKvitteringer(melding.getBestillingsId());
+        List<Kvittering> kvitterings = kvitteringDAO.hentKvitteringer(bestillingsId);
         log.info("EksternVarsel Kvitteringshistorikk {}", kvitterings);
 
         kvitteringMetrikk.incrementBrukernotifikasjonKvitteringMottatt(status);

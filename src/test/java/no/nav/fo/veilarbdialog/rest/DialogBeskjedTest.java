@@ -116,7 +116,7 @@ public class DialogBeskjedTest {
         assertThat(brukernotifikasjonRecord.value().getTekst()).isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST);
 
         BrukernotifikasjonEntity brukernotifikasjonEntity =
-                brukernotifikasjonRepository.hentBrukernotifikasjonBeskjedForDialogId(Long.parseLong(dialog.getId())).get(0);
+                brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(Long.parseLong(dialog.getId()), BrukernotifikasjonsType.BESKJED).get(0);
 
         SoftAssertions.assertSoftly(
                 assertions -> {
@@ -241,7 +241,7 @@ public class DialogBeskjedTest {
 
 
         BrukernotifikasjonEntity brukernotifikasjonEntity =
-                brukernotifikasjonRepository.hentBrukernotifikasjonBeskjedForDialogId(Long.parseLong(dialog.getId())).get(0);
+                brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(Long.parseLong(dialog.getId()), BrukernotifikasjonsType.BESKJED).get(0);
 
         SoftAssertions.assertSoftly(
                 assertions -> {

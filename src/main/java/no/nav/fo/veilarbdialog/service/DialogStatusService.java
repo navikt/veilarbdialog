@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
@@ -59,7 +60,7 @@ public class DialogStatusService {
         }
 
         brukernotifikasjonRepository
-                .hentBrukernotifikasjonBeskjedForDialogId(dialogData.getId()).forEach(
+                .hentBrukernotifikasjonForDialogId(dialogData.getId(), BrukernotifikasjonsType.BESKJED).forEach(
                         brukernotifikasjon -> brukernotifikasjonService.bestillDone(brukernotifikasjon.id())
                 );
 
