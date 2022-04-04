@@ -2,105 +2,94 @@ package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.doknotifikasjon.schemas.DoknotifikasjonStatus;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
 public class KvitteringDAO {
     private final NamedParameterJdbcTemplate jdbc;
 
-/*    RowMapper<BrukernotifikasjonAktivitetIder> rowmapper = (rs, rowNum) ->
-            BrukernotifikasjonAktivitetIder.builder()
-                    .id(rs.getLong("ID"))
-                    .aktivitetId(rs.getLong("AKTIVITET_ID"))
-                    .build();
+    private static final RowMapper<Kvittering> rowMapper = (rs, rowNum) -> new Kvittering(
+            rs.getTimestamp("TIDSPUNKT").toLocalDateTime(),
+            rs.getString("BRUKERNOTIFIKASJON_BESTILLING_ID"),
+            rs.getString("DOKNOTIFIKASJON_STATUS"),
+            rs.getString("MELDING"),
+            rs.getLong("DISTRIBUSJON_ID")
+    );
 
-    public void setFeilet(String bestillingsId) {
+    public void setEksternVarselFeilet(String bestillingsId) {
         MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("brukernotifikasjonId", bestillingsId)
+                .addValue("bestillingsId", bestillingsId)
                 .addValue("varselKvitteringStatus", VarselKvitteringStatus.FEILET.toString());
-        jdbc.update("" +
-                " update BRUKERNOTIFIKASJON " +
-                " set VARSEL_FEILET = current_timestamp, VARSEL_KVITTERING_STATUS = :varselKvitteringStatus " +
-                " where BRUKERNOTIFIKASJON_ID = :brukernotifikasjonId ", param);
+        jdbc.update("""
+             update BRUKERNOTIFIKASJON
+               set
+                VARSEL_FEILET = current_timestamp,
+                VARSEL_KVITTERING_STATUS = :varselKvitteringStatus
+                    where EVENT_ID = :bestillingsId
+                 """, param);
     }
 
-    public void setFullfortForGyldige(String bestillingsId) {
+    public void setEksternVarselSendtOk(String bestillingsId) {
         MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("brukernotifikasjonId", bestillingsId)
-                .addValue("varselKvitteringStatus", VarselKvitteringStatus.OK.toString());
+                .addValue("bestillingsId", bestillingsId)
+                .addValue("varselKvitteringStatusOk", VarselKvitteringStatus.OK.name())
+                .addValue("varselKvitteringStatusFeilet", VarselKvitteringStatus.FEILET.name())
+                .addValue("brukernotifikasjonBehandlingStatusAvsluttet", BrukernotifikasjonBehandlingStatus.AVSLUTTET.name());
 
-        jdbc.update("" +
-                        " update BRUKERNOTIFIKASJON " +
-                        " set" +
-                        " BEKREFTET_SENDT = CURRENT_TIMESTAMP, " +
-                        " VARSEL_KVITTERING_STATUS = :varselKvitteringStatus" +
-                        " where BRUKERNOTIFIKASJON.VARSEL_KVITTERING_STATUS != 'FEILET' " +
-                        " and STATUS != 'AVSLUTTET'" +
-                        " and BRUKERNOTIFIKASJON_ID = :brukernotifikasjonId"
+        jdbc.update("""
+                   update BRUKERNOTIFIKASJON
+                    set
+                       BEKREFTET_SENDT = CURRENT_TIMESTAMP,
+                       VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
+                       where BRUKERNOTIFIKASJON.VARSEL_KVITTERING_STATUS != :varselKvitteringStatusFeilet
+                       and STATUS != :brukernotifikasjonBehandlingStatusAvsluttet
+                       and EVENT_ID = :bestillingsId
+                       """
                 , param
         );
     }
 
-    public void setFerdigBehandlet(long id) {
-        MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("id", id);
 
-        int update = jdbc.update("" +
-                        " update BRUKERNOTIFIKASJON " +
-                        " set FERDIG_BEHANDLET = CURRENT_TIMESTAMP " +
-                        " where id = :id "
-                , param);
-
-        Assert.isTrue(update == 1, "Forventet en rad oppdatert, id=" + id);
-    }
-
-    public List<BrukernotifikasjonAktivitetIder> hentFullfortIkkeBehandletForAktiviteter(int maksAntall, VarselType type) {
+    public void lagreKvittering(String bestillingsId, DoknotifikasjonStatus melding) {
         SqlParameterSource parameterSource = new MapSqlParameterSource()
-                .addValue("type", type.name())
-                .addValue("limit", maksAntall);
-
-        return jdbc.query(
-                """
-                        SELECT id, ab.AKTIVITET_ID FROM BRUKERNOTIFIKASJON
-                        inner join AKTIVITET_BRUKERNOTIFIKASJON ab on BRUKERNOTIFIKASJON.ID = ab.BRUKERNOTIFIKASJON_ID
-                         WHERE FERDIG_BEHANDLET IS NULL
-                         AND VARSEL_KVITTERING_STATUS = 'OK'
-                         AND TYPE = :type
-                         FETCH FIRST :limit ROWS ONLY
-                        """, parameterSource, rowmapper);
-    }
-
-    public List<BrukernotifikasjonAktivitetIder> hentFeiletIkkeBehandlet(int maksAntall, VarselType type) {
-        SqlParameterSource parameterSource = new MapSqlParameterSource()
-                .addValue("type", type.name())
-                .addValue("limit", maksAntall);
-
-        return jdbc.query("""
-                SELECT id, ab.AKTIVITET_ID FROM BRUKERNOTIFIKASJON
-                inner join AKTIVITET_BRUKERNOTIFIKASJON ab on BRUKERNOTIFIKASJON.ID = ab.BRUKERNOTIFIKASJON_ID
-                 WHERE FERDIG_BEHANDLET IS NULL
-                 AND VARSEL_KVITTERING_STATUS = 'FEILET'
-                 AND TYPE = :type
-                 FETCH FIRST :limit ROWS ONLY
-                """, parameterSource, rowmapper);
-    }*/
-
-
-    public void lagreKvitering(String bestillingsId, DoknotifikasjonStatus melding) {
-        SqlParameterSource parameterSource = new MapSqlParameterSource()
-                .addValue("BRUKERNOTIFIKASJON_ID", bestillingsId)
-                .addValue("STATUS", melding.getStatus())
-                .addValue("MELDING", melding.getMelding())
-                .addValue("distribusjonId", melding.getDistribusjonId())
-                .addValue("BESKJED",melding.toString());
+                .addValue("brukernotifikasjon_bestilling_id", bestillingsId)
+                .addValue("doknotifikasjon_status", melding.getStatus())
+                .addValue("melding", melding.getMelding())
+                .addValue("distribusjon_id", melding.getDistribusjonId())
+                .addValue("json_payload",melding.toString());
         jdbc.update("""
                 insert into  EKSTERN_VARSEL_KVITTERING
-                        (  BRUKERNOTIFIKASJON_ID,  STATUS,  MELDING,  distribusjonId,  BESKJED )
-                VALUES  ( :BRUKERNOTIFIKASJON_ID, :STATUS, :MELDING, :distribusjonId, :BESKJED )
+                        (
+                        TIDSPUNKT,
+                        BRUKERNOTIFIKASJON_BESTILLING_ID,
+                        DOKNOTIFIKASJON_STATUS,
+                        MELDING,
+                        DISTRIBUSJON_ID,
+                        JSON_PAYLOAD
+                        )
+                VALUES  ( CURRENT_TIMESTAMP, :brukernotifikasjon_bestilling_id, :doknotifikasjon_status, :melding, :distribusjon_id, :json_payload )
                 """, parameterSource);
+    }
+
+    public List<Kvittering> hentKvitteringer(String bestillingsId) {
+        SqlParameterSource parms = new MapSqlParameterSource()
+                .addValue("bestillingsId", bestillingsId);
+
+        String sql = """
+                SELECT * FROM EKSTERN_VARSEL_KVITTERING
+                WHERE BRUKERNOTIFIKASJON_BESTILLING_ID = :bestillingsId
+                ORDER BY TIDSPUNKT
+                """;
+        return jdbc.query(sql, parms, rowMapper);
+
     }
 }

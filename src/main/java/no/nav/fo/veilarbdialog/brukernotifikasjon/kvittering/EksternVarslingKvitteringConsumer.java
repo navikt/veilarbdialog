@@ -8,6 +8,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class EksternVarslingKvitteringConsumer {
@@ -48,34 +50,35 @@ public class EksternVarslingKvitteringConsumer {
         }
         String bestillingsId = brukernotifikasjonBestillingsId.substring(oppgavePrefix.length()); // Fjerner O eller B + - + srv + - som legges til av brukernotifikajson
 
-        kvitteringDAO.lagreKvitering(bestillingsId, melding);
+        kvitteringDAO.lagreKvittering(bestillingsId, melding);
 
         String status = melding.getStatus();
 
-//        switch (status) {
-//            case INFO:
-//            case OVERSENDT:
-//                break;
-//            case FEILET:
-//                log.error("varsel feilet for notifikasjon bestillingsId={} med melding {}", brukernotifikasjonBestillingsId, melding.getMelding());
-//                kvitteringDAO.setFeilet(bestillingsId);
-//                break;
-//            case FERDIGSTILT:
-//                if (melding.getDistribusjonId() != null) {
-//                    // Kan komme første gang og på resendinger
-//                    kvitteringDAO.setFullfortForGyldige(bestillingsId);
-//                    log.info("Brukernotifikasjon fullført for bestillingsId={}", brukernotifikasjonBestillingsId);
-//                } else {
-//                    log.info("Hele bestillingen inkludert revarsling er ferdig, bestillingsId={}", brukernotifikasjonBestillingsId);
-//                }
-//                break;
-//            default:
-//                log.error("ukjent status for melding {}", melding);
-//                throw new IllegalArgumentException("ukjent status for melding");
-//        }
-
-        if (melding.getDistribusjonId() == null) {
-            kvitteringMetrikk.incrementBrukernotifikasjonKvitteringMottatt(status);
+        switch (status) {
+            case INFO:
+            case OVERSENDT:
+                break;
+            case FEILET:
+                log.error("varsel feilet for notifikasjon bestillingsId={} med melding {}", brukernotifikasjonBestillingsId, melding.getMelding());
+                kvitteringDAO.setEksternVarselFeilet(bestillingsId);
+                break;
+            case FERDIGSTILT:
+                if (melding.getDistribusjonId() != null) {
+                    // Kan komme første gang og på resendinger
+                    kvitteringDAO.setEksternVarselSendtOk(bestillingsId);
+                    log.info("Brukernotifikasjon fullført for bestillingsId={}", brukernotifikasjonBestillingsId);
+                } else {
+                    log.info("Hele bestillingen inkludert revarsling er ferdig, bestillingsId={}", brukernotifikasjonBestillingsId);
+                }
+                break;
+            default:
+                log.error("ukjent status for melding {}", melding);
+                throw new IllegalArgumentException("ukjent status for melding");
         }
+
+        List<Kvittering> kvitterings = kvitteringDAO.hentKvitteringer(melding.getBestillingsId());
+        log.info("EksternVarsel Kvitteringshistorikk {}", kvitterings);
+
+        kvitteringMetrikk.incrementBrukernotifikasjonKvitteringMottatt(status);
     }
 }

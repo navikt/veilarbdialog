@@ -1,8 +1,9 @@
-create table EKSTERN_VARSEL_KVITTERING
+CREATE TABLE EKSTERN_VARSEL_KVITTERING
 (
-    BRUKERNOTIFIKASJON_ID varchar2(255) not null,
-    status varchar2(255) not null,
-    melding varchar2(255) not null,
-    distribusjonId number,
-    beskjed clob not null
+    TIDSPUNKT TIMESTAMP not null,
+    BRUKERNOTIFIKASJON_BESTILLING_ID varchar2(255) not null,
+    DOKNOTIFIKASJON_STATUS varchar2(255) not null,
+    MELDING varchar2(255) not null,
+    DISTRIBUSJON_ID number,
+    JSON_PAYLOAD clob not null
 );
