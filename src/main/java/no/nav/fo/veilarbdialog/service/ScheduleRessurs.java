@@ -43,18 +43,23 @@ public class ScheduleRessurs {
     @Value("${application.brukernotifikasjon.grace.periode.ms}")
     private Long brukernotifikasjonGracePeriode;
 
-    @Scheduled(cron = "0 0/10 * * * *")
+    @Value("${application.brukernotifikasjon.henvendelse.maksalder.ms}")
+    private Long brukernotifikasjonHenvendelseMaksAlder;
+
+    // Ti min
+    @Scheduled(fixedDelay = 600000)
     public void slettGamleKladder() {
         kladdService.slettGamleKladder();
     }
 
     //5MIN ER VALGT ARBITRÆRT
-    @Scheduled(cron = "0 0/5 * * * *")
+    @Scheduled(fixedDelay = 300000)
     public void sendFeilendeKafkaMeldinger() {
         kafkaProducerService.sendAlleFeilendeMeldinger();
     }
 
-    @Scheduled(cron = "0 0/2 * * * *")
+    // To minutter mellom hver kjøring
+    @Scheduled(fixedDelay = 120000)
     @Transactional
     public void sendBrukernotifikasjonerForUlesteDialoger() {
         lockingTaskExecutor.executeWithLock(
@@ -64,7 +69,7 @@ public class ScheduleRessurs {
     }
 
     private void sendBrukernotifikasjonerForUlesteDialogerWithLock() {
-        List<Long> dialogIder = varselDAO.hentDialogerMedUlesteMeldingerEtterSisteVarsel(brukernotifikasjonGracePeriode);
+        List<Long> dialogIder = varselDAO.hentDialogerMedUlesteMeldingerEtterSisteVarsel(brukernotifikasjonGracePeriode, brukernotifikasjonHenvendelseMaksAlder);
 
         log.info("Varsler (beskjed): {} brukere", dialogIder.size());
 

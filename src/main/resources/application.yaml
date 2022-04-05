@@ -163,3 +163,6 @@ application:
     grace:
       periode:
         ms: 1800000
+    henvendelse:
+      maksalder:
+        ms: 172800000

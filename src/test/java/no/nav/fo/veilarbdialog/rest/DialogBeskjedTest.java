@@ -97,8 +97,8 @@ public class DialogBeskjedTest {
                 .extract()
                 .as(DialogDTO.class);
 
-        // Setter sendt til å være 30 minutter tidligere pga. grace period
-        Date nySendt = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
+        // Setter sendt til å være 1 sekund tidligere pga. grace period
+        Date nySendt = Date.from(Instant.now().minus(1, ChronoUnit.SECONDS));
         jdbcTemplate.update("""
                 UPDATE HENVENDELSE
                 SET SENDT = ?
@@ -142,7 +142,7 @@ public class DialogBeskjedTest {
     }
 
     @Test
-    public void ikke_beskjed_foer_30_min() {
+    public void ikke_beskjed_foer_grace_periode_utlopt() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
 
@@ -153,6 +153,36 @@ public class DialogBeskjedTest {
                 .statusCode(200)
                 .extract()
                 .as(DialogDTO.class);
+
+        scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
+        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
+
+        boolean harKonsumertAlleMeldinger = kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer);
+        assertThat(harKonsumertAlleMeldinger).isTrue();
+    }
+
+    @Test
+    public void ikke_beskjed_naar_maxalder_er_passert() {
+        MockBruker mockBruker = MockNavService.createHappyBruker();
+        MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
+
+        DialogDTO dialog = mockVeileder.createRequest()
+                .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        // Setter sendt til å være 3 sekund tidligere pga. max alder
+        Date nySendt = Date.from(Instant.now().minus(3, ChronoUnit.SECONDS));
+        jdbcTemplate.update("""
+                UPDATE HENVENDELSE
+                SET SENDT = ?
+                WHERE HENVENDELSE_ID = ?
+        """,
+                nySendt,
+                dialog.getHenvendelser().get(0).getId());
 
         scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
         brukernotifikasjonService.sendPendingBrukernotifikasjoner();
@@ -177,8 +207,8 @@ public class DialogBeskjedTest {
                 .extract()
                 .as(DialogDTO.class);
 
-        // Setter sendt til å være 30 minutter tidligere pga. grace period
-        Date nySendt = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
+        // Setter sendt til å være 1 sekund tidligere pga. grace period
+        Date nySendt = Date.from(Instant.now().minus(1, ChronoUnit.SECONDS));
         jdbcTemplate.update("""
                 UPDATE HENVENDELSE
                 SET SENDT = ?
@@ -217,8 +247,8 @@ public class DialogBeskjedTest {
                 .extract()
                 .as(DialogDTO.class);
 
-        // Setter sendt til å være 30 minutter tidligere pga. grace period
-        Date nySendt = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
+        // Setter sendt til å være 1 sekund tidligere pga. grace period
+        Date nySendt = Date.from(Instant.now().minus(1, ChronoUnit.SECONDS));
         jdbcTemplate.update("""
                 UPDATE HENVENDELSE
                 SET SENDT = ?
@@ -285,8 +315,8 @@ public class DialogBeskjedTest {
 
 
 
-        // Setter sendt til å være 30 minutter tidligere pga. grace period
-        Date nySendt = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
+        // Setter sendt til å være 1 sekund tidligere pga. grace period
+        Date nySendt = Date.from(Instant.now().minus(1, ChronoUnit.SECONDS));
         jdbcTemplate.update("""
                 UPDATE HENVENDELSE
                 SET SENDT = ?
@@ -303,7 +333,7 @@ public class DialogBeskjedTest {
 
         Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
-        assertThat(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST).isEqualTo(brukernotifikasjonRecord.value().getTekst());
+        assertThat(brukernotifikasjonRecord.value().getTekst()).isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST);
 
 
         // Hy henvendelse samme dialog
@@ -316,8 +346,8 @@ public class DialogBeskjedTest {
                 .as(DialogDTO.class);
 
 
-        // Setter sendt til å være 30 minutter tidligere pga. grace period
-        Date nySendt2 = Date.from(Instant.now().minus(30, ChronoUnit.MINUTES));
+        // Setter sendt til å være 1 sekund tidligere pga. grace period
+        Date nySendt2 = Date.from(Instant.now().minus(1, ChronoUnit.SECONDS));
         jdbcTemplate.update("""
                 UPDATE HENVENDELSE
                 SET SENDT = ?
