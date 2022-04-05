@@ -120,6 +120,9 @@ application:
     grace:
       periode:
         ms: 1000
+    henvendelse:
+      maksalder:
+        ms: 2000
 wiremock:
   server:
     port: 0
