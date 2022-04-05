@@ -43,6 +43,9 @@ public class ScheduleRessurs {
     @Value("${application.brukernotifikasjon.grace.periode.ms}")
     private Long brukernotifikasjonGracePeriode;
 
+    @Value("${application.brukernotifikasjon.henvendelse.maksalder.ms}")
+    private Long brukernotifikasjonHenvendelseMaksAlder;
+
     @Scheduled(cron = "0 0/10 * * * *")
     public void slettGamleKladder() {
         kladdService.slettGamleKladder();
@@ -64,7 +67,7 @@ public class ScheduleRessurs {
     }
 
     private void sendBrukernotifikasjonerForUlesteDialogerWithLock() {
-        List<Long> dialogIder = varselDAO.hentDialogerMedUlesteMeldingerEtterSisteVarsel(brukernotifikasjonGracePeriode);
+        List<Long> dialogIder = varselDAO.hentDialogerMedUlesteMeldingerEtterSisteVarsel(brukernotifikasjonGracePeriode, brukernotifikasjonHenvendelseMaksAlder);
 
         log.info("Varsler (beskjed): {} brukere", dialogIder.size());
 
