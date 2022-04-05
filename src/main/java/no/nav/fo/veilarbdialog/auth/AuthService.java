@@ -23,11 +23,7 @@ public class AuthService {
     private final AuthContextHolder authContextHolder;
 
     public Optional<String> getIdent() {
-        if (erInternBruker()) {
-            return authContextHolder.getNavIdent().map(NavIdent::get);
-        } else {
-            return authContextHolder.getSubject();
-        }
+        return authContextHolder.getUid();
     }
 
     public NavIdent getNavIdent() {
