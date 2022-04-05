@@ -31,7 +31,10 @@ public class AdminController {
     }
 
     private void sjekkTilgangTilAdmin() {
-        String subject = authContextHolder.getSubject()
+        if (!authContextHolder.erSystemBruker()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+        String subject = authContextHolder.getUid()
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
         if (!PTO_ADMIN_SERVICE_USER.equals(subject)) {
