@@ -17,7 +17,8 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import no.nav.fo.veilarbdialog.util.DialogTestService;
 import no.nav.fo.veilarbdialog.util.KafkaTestService;
-import org.assertj.core.api.Assertions;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.assertj.core.api.SoftAssertions;
 import org.awaitility.Awaitility;
 import org.junit.After;
 import org.junit.Before;
@@ -40,11 +41,10 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
-import static no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarslingKvitteringConsumer.FERDIGSTILT;
-import static no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarslingKvitteringConsumer.OVERSENDT;
+import static no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarslingKvitteringConsumer.*;
 import static org.junit.Assert.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -69,6 +69,9 @@ public class EksternVarslingKvitteringTest {
 
     @Value("${application.topic.inn.eksternVarselKvittering}")
     String kvitteringsTopic;
+
+    @Value("${spring.application.name}")
+    String appname;
 
     @Autowired
     KafkaTemplate<String, DoknotifikasjonStatus> kvitteringsProducer;
@@ -139,120 +142,86 @@ public class EksternVarslingKvitteringTest {
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
         EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(veileder, startEskaleringDto);
 
-        BrukernotifikasjonEntity brukernotifikasjonEntity = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(startEskalering.tilhorendeDialogId(), BrukernotifikasjonsType.OPPGAVE).get(0);
+        BrukernotifikasjonEntity opprinneligBrukernotifikasjon = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(startEskalering.tilhorendeDialogId(), BrukernotifikasjonsType.OPPGAVE).get(0);
 
-        String brukernotifikasjonId = OPPGAVE_KVITTERINGS_PREFIX + brukernotifikasjonEntity.eventId();
+        DoknotifikasjonStatus infoMelding = infoStatus(opprinneligBrukernotifikasjon.eventId());
+        RecordMetadata infoRecordMetadata = sendKvitteringsMelding(infoMelding);
+        assertExpectedBrukernotifikasjonStatus(startEskalering.tilhorendeDialogId(), opprinneligBrukernotifikasjon, infoRecordMetadata, VarselKvitteringStatus.IKKE_SATT);
 
-        DoknotifikasjonStatus melding = lagMelding(brukernotifikasjonId, FERDIGSTILT);
+        DoknotifikasjonStatus oversendtMelding = oversendtStatus(opprinneligBrukernotifikasjon.eventId());
+        RecordMetadata oversendtRecordMetadata = sendKvitteringsMelding(oversendtMelding);
+        assertExpectedBrukernotifikasjonStatus(startEskalering.tilhorendeDialogId(), opprinneligBrukernotifikasjon, oversendtRecordMetadata, VarselKvitteringStatus.IKKE_SATT);
 
+        DoknotifikasjonStatus ferdigstiltMelding = ferdigstiltStatus(opprinneligBrukernotifikasjon.eventId());
+        RecordMetadata ferdigstiltRecordMetadata = sendKvitteringsMelding(ferdigstiltMelding);
+        assertExpectedBrukernotifikasjonStatus(startEskalering.tilhorendeDialogId(), opprinneligBrukernotifikasjon, ferdigstiltRecordMetadata, VarselKvitteringStatus.OK);
+
+        DoknotifikasjonStatus feiletMelding = feiletStatus(opprinneligBrukernotifikasjon.eventId());
+        RecordMetadata feiletRecordMetadata = sendKvitteringsMelding(feiletMelding);
+        assertExpectedBrukernotifikasjonStatus(startEskalering.tilhorendeDialogId(), opprinneligBrukernotifikasjon, feiletRecordMetadata, VarselKvitteringStatus.FEILET);
+
+    }
+
+    @Test
+    public void feilPrefix() {
+
+
+    }
+
+    @Test
+    public void feilAppname() {
+
+    }
+    
+    private RecordMetadata sendKvitteringsMelding(DoknotifikasjonStatus melding) throws ExecutionException, InterruptedException {
         ListenableFuture<SendResult<String, DoknotifikasjonStatus>> send = kvitteringsProducer.send(kvitteringsTopic, melding);
         kvitteringsProducer.flush();
-        send.get();
 
-        long offset = send.get().getRecordMetadata().offset();
-        int partition = send.get().getRecordMetadata().partition();
+        return send.get().getRecordMetadata();
+    }
+
+    private void assertExpectedBrukernotifikasjonStatus(Long dialogId, BrukernotifikasjonEntity opprinneligBrukernotifikasjon, RecordMetadata recordMetadata, VarselKvitteringStatus expectedStatus) {
+        long offset = recordMetadata.offset();
+        int partition = recordMetadata.partition();
 
         Awaitility.await().atMost(Duration.ofSeconds(5)).until(() -> kafkaTestService.erKonsumert(kvitteringsTopic, "veilarbdialog", offset, partition));
 
-        BrukernotifikasjonEntity brukernotifikasjonFerdigstilt = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(startEskalering.tilhorendeDialogId(), BrukernotifikasjonsType.OPPGAVE).get(0);
+        BrukernotifikasjonEntity brukernotifikasjonEtterProsessering = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(dialogId, BrukernotifikasjonsType.OPPGAVE).get(0);
 
-        Assertions.assertThat(brukernotifikasjonFerdigstilt.varselKvitteringStatus()).isEqualTo(VarselKvitteringStatus.OK);
+        SoftAssertions.assertSoftly( assertions -> {
+            assertions.assertThat(brukernotifikasjonEtterProsessering.eventId()).isEqualTo(opprinneligBrukernotifikasjon.eventId());
+            assertions.assertThat(brukernotifikasjonEtterProsessering.varselKvitteringStatus()).isEqualTo(expectedStatus);
+            assertions.assertAll();
+        });
     }
 
-    private static DoknotifikasjonStatus lagMelding(String brukernotifikasjonId, String status) {
+
+    private DoknotifikasjonStatus lagDoknotifikasjonStatusMelding(UUID eventId, String status) {
+        String bestillingsId = OPPGAVE_KVITTERINGS_PREFIX + eventId;
         return DoknotifikasjonStatus
                 .newBuilder()
                 .setStatus(status)
-                .setBestillingsId(brukernotifikasjonId)
-                .setBestillerId("veilarbdialog")
-                .setMelding("Melding")
+                .setBestillingsId(bestillingsId)
+                .setBestillerId(appname)
+                .setMelding("her er en melding")
                 .setDistribusjonId(1L)
                 .build();
     }
 
-//    private void infoOgOVersendtSkalIkkeEndreStatus(String eventId, VarselKvitteringStatus expectedVarselKvitteringStatus) {
-//        consumAndAssertStatus(eventId, infoStatus(eventId), expectedVarselKvitteringStatus);
-//        consumAndAssertStatus(eventId, oversendtStatus(eventId), expectedVarselKvitteringStatus);
-//    }
-//
-//    private void skalIkkeBehandleMedAnnenBestillingsId(String eventId) {
-//        DoknotifikasjonStatus statusMedAnnenBestillerId = okStatus(eventId);
-//        statusMedAnnenBestillerId.setBestillerId("annen_bestillerid");
-//
-//        consumAndAssertStatus(eventId, statusMedAnnenBestillerId, VarselKvitteringStatus.IKKE_SATT);
-//    }
-//
-//
-//    private void consumAndAssertStatus(String eventId, DoknotifikasjonStatus message, VarselKvitteringStatus expectedEksternVarselStatus) {
-//        String brukernotifikasjonId = BESSKJED_KVOTERINGS_PREFIX + eventId;
-//        eksternVarslingKvitteringConsumer.consume(new ConsumerRecord<>("VarselKviteringToppic", 1, 1, brukernotifikasjonId, message));
-//
-//        assertVarselStatusErSendt(eventId);
-//        assertEksternVarselStatus(eventId, expectedEksternVarselStatus);
-//    }
-//
-//    private void assertVarselStatusErSendt(String eventId) {
-//        MapSqlParameterSource param = new MapSqlParameterSource()
-//                .addValue("eventId", eventId);
-//        String status = jdbc.queryForObject("SELECT STATUS from BRUKERNOTIFIKASJON where BRUKERNOTIFIKASJON_ID = :eventId", param, String.class);//TODO fiks denne når vi eksponerer det ut til apiet
-//        assertEquals(VarselStatus.SENDT.name(), status);
-//    }
-//
-//    private void assertEksternVarselStatus(String eventId, VarselKvitteringStatus expectedVarselStatus) {
-//        MapSqlParameterSource param = new MapSqlParameterSource()
-//                .addValue("eventId", eventId);
-//        String status = jdbc.queryForObject("SELECT VARSEL_KVITTERING_STATUS from BRUKERNOTIFIKASJON where BRUKERNOTIFIKASJON_ID = :eventId", param, String.class);//TODO fiks denne når vi eksponerer det ut til apiet
-//        assertEquals(expectedVarselStatus.name(), status);
-//    }
-//
-//    private DoknotifikasjonStatus status(String eventId, String status) {
-//        String bestillingsId = BESSKJED_KVOTERINGS_PREFIX + eventId;
-//        return DoknotifikasjonStatus
-//                .newBuilder()
-//                .setStatus(status)
-//                .setBestillingsId(bestillingsId)
-//                .setBestillerId("veilarbaktivitet")
-//                .setMelding("her er en melding")
-//                .setDistribusjonId(1L)
-//                .build();
-//    }
-//
-//    private DoknotifikasjonStatus okStatus(String bestillingsId) {
-//        return status(bestillingsId, FERDIGSTILT);
-//    }
-//
-//    private DoknotifikasjonStatus feiletStatus(String bestillingsId) {
-//        return status(bestillingsId, FEILET);
-//    }
-//
-//    private DoknotifikasjonStatus infoStatus(String bestillingsId) {
-//        return status(bestillingsId, INFO);
-//    }
-//
-//    private DoknotifikasjonStatus oversendtStatus(String eventId) {
-//        return status(eventId, OVERSENDT);
-//    }
-//
-//    private ConsumerRecord<NokkelInput, OppgaveInput> opprettOppgave(MockBruker mockBruker, AktivitetDTO aktivitetDTO) {
-//        brukernotifikasjonAktivitetService.opprettVarselPaaAktivitet(
-//                Long.parseLong(aktivitetDTO.getId()),
-//                Long.parseLong(aktivitetDTO.getVersjon()),
-//                Person.aktorId(mockBruker.getAktorId()),
-//                "Testvarsel",
-//                VarselType.STILLING_FRA_NAV
-//        );
-//
-//        sendOppgaveCron.sendBrukernotifikasjoner();
-//        avsluttBrukernotifikasjonCron.avsluttBrukernotifikasjoner();
-//
-//        assertTrue("Skal ikke produsert done meldinger", kafkaTestService.harKonsumertAlleMeldinger(doneTopic, doneConsumer));
-//        final ConsumerRecord<NokkelInput, OppgaveInput> oppgaveRecord = getSingleRecord(oppgaveConsumer, oppgaveTopic, 5000);
-//        NokkelInput nokkel = oppgaveRecord.key();
-//        OppgaveInput oppgave = oppgaveRecord.value();
-//
-//        assertEquals(mockBruker.getOppfolgingsperiode().toString(), nokkel.getGrupperingsId());
-//        assertEquals(mockBruker.getFnr(), nokkel.getFodselsnummer());
-//        assertEquals(basepath + "/aktivitet/vis/" + aktivitetDTO.getId(), oppgave.getLink());
-//        return oppgaveRecord;
-//    }
+    private DoknotifikasjonStatus ferdigstiltStatus(UUID bestillingsId) {
+        return lagDoknotifikasjonStatusMelding(bestillingsId, FERDIGSTILT);
+    }
+
+    private DoknotifikasjonStatus feiletStatus(UUID bestillingsId) {
+        return lagDoknotifikasjonStatusMelding(bestillingsId, FEILET);
+    }
+
+    private DoknotifikasjonStatus infoStatus(UUID bestillingsId) {
+        return lagDoknotifikasjonStatusMelding(bestillingsId, INFO);
+    }
+
+    private DoknotifikasjonStatus oversendtStatus(UUID eventId) {
+        return lagDoknotifikasjonStatusMelding(eventId, OVERSENDT);
+    }
+
 }
