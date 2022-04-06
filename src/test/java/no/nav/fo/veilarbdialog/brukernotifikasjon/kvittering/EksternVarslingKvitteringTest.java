@@ -119,7 +119,7 @@ public class EksternVarslingKvitteringTest {
                     .addValue("bestillingId", uuid);
             try {
                 status = jdbc.queryForObject("""
-                        SELECT DOKNOTIFIKASJON_STATUS 
+                        SELECT DOKNOTIFIKASJON_STATUS
                         FROM EKSTERN_VARSEL_KVITTERING
                         WHERE BRUKERNOTIFIKASJON_BESTILLING_ID = :bestillingId
                         """, params, String.class);
@@ -159,17 +159,6 @@ public class EksternVarslingKvitteringTest {
         DoknotifikasjonStatus feiletMelding = feiletStatus(opprinneligBrukernotifikasjon.eventId());
         RecordMetadata feiletRecordMetadata = sendKvitteringsMelding(feiletMelding);
         assertExpectedBrukernotifikasjonStatus(startEskalering.tilhorendeDialogId(), opprinneligBrukernotifikasjon, feiletRecordMetadata, VarselKvitteringStatus.FEILET);
-
-    }
-
-    @Test
-    public void feilPrefix() {
-
-
-    }
-
-    @Test
-    public void feilAppname() {
 
     }
     

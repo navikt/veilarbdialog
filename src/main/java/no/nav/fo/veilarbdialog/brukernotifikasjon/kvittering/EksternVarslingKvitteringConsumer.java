@@ -55,8 +55,7 @@ public class EksternVarslingKvitteringConsumer {
         String status = melding.getStatus();
 
         switch (status) {
-            case INFO:
-            case OVERSENDT:
+            case INFO, OVERSENDT:
                 break;
             case FEILET:
                 log.error("varsel feilet for notifikasjon bestillingsId={} med melding {}", brukernotifikasjonBestillingsId, melding.getMelding());
