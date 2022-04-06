@@ -33,6 +33,7 @@ public class BrukernotifikasjonRepository {
                     DatabaseUtils.hentMaybeUUID(rs, "oppfolgingsperiode_id"),
                     EnumUtils.valueOf(BrukernotifikasjonsType.class, rs.getString("type")),
                     EnumUtils.valueOf(BrukernotifikasjonBehandlingStatus.class, rs.getString("status")),
+                    EnumUtils.valueOf(VarselKvitteringStatus.class, rs.getString("varsel_kvittering_status")),
                     DatabaseUtils.hentLocalDateTime(rs, "opprettet"),
                     DatabaseUtils.hentLocalDateTime(rs, "forsokt_sendt"),
                     rs.getString("melding"),
@@ -85,10 +86,10 @@ public class BrukernotifikasjonRepository {
         }
     }
 
-    public List<BrukernotifikasjonEntity> hentBrukernotifikasjonBeskjedForDialogId(long dialogId) {
+    public List<BrukernotifikasjonEntity> hentBrukernotifikasjonForDialogId(long dialogId, BrukernotifikasjonsType type) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("dialogId", dialogId)
-                .addValue("type", BrukernotifikasjonsType.BESKJED.name());
+                .addValue("type", type.name());
         String sql = """
             SELECT *
             FROM BRUKERNOTIFIKASJON 

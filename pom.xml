@@ -34,6 +34,8 @@
         <sonar.projectKey>navikt_veilarbdialog</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
+        <doknotifikasjon-schemas-version>1.2021.06.22-11.27-265ce1fe1ab4</doknotifikasjon-schemas-version>
     </properties>
 
     <repositories>
@@ -201,6 +203,13 @@
             <groupId>com.github.navikt</groupId>
             <artifactId>brukernotifikasjon-schemas</artifactId>
             <version>v2.5.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.navikt</groupId>
+            <artifactId>doknotifikasjon-schemas</artifactId>
+            <version>${doknotifikasjon-schemas-version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <!-- EXTERNAL DEPENDENCIES -->

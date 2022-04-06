@@ -1,40 +1,35 @@
 package no.nav.fo.veilarbdialog.service;
 
 import io.restassured.RestAssured;
-import no.nav.common.client.aktoroppslag.AktorOppslagClient;
-import no.nav.common.types.identer.AktorId;
-import no.nav.common.types.identer.Fnr;
-import no.nav.fo.veilarbdialog.auth.AuthService;
-import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
-import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
-import no.nav.fo.veilarbdialog.domain.*;
-import no.nav.fo.veilarbdialog.kvp.KvpService;
-import no.nav.fo.veilarbdialog.mock_nav_modell.*;
-import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
-import org.assertj.core.api.Assertions;
-import org.junit.*;
+import no.nav.fo.veilarbdialog.domain.DialogDTO;
+import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
 @RunWith(SpringRunner.class)
+@Sql(
+        scripts = "/db/testdata/slett_alle_dialoger.sql",
+        executionPhase = BEFORE_TEST_METHOD
+)
 public class DialogDataServiceTest {
 
     @LocalServerPort
@@ -58,13 +53,6 @@ public class DialogDataServiceTest {
         veilederNasjonalTilgang.setNasjonalTilgang(true);
         tilfeldigVeileder = MockNavService.createVeileder();
 
-    }
-
-    @After
-    public void cleanUp() {
-        jdbcTemplate.update("delete from HENVENDELSE");
-        jdbcTemplate.update("delete from DIALOG");
-        jdbcTemplate.update("delete from DIALOG_AKTOR");
     }
 
     @Test

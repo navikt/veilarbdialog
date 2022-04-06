@@ -1,11 +1,16 @@
 package no.nav.fo.veilarbdialog.util;
 
 import io.restassured.response.Response;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselControllerTest;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import no.nav.fo.veilarbdialog.mock_nav_modell.RestassuredUser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +18,9 @@ import static org.junit.Assert.assertNotNull;
 
 @Service
 public class DialogTestService {
+
+    @Autowired
+    BrukernotifikasjonService brukernotifikasjonService;
 
     public DialogDTO opprettDialogSomBruker(int port, MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
         return opprettDialog(port, bruker, bruker, nyHenvendelseDTO);
@@ -47,5 +55,18 @@ public class DialogTestService {
         return dialog;
     }
 
-
+    public EskaleringsvarselDto startEskalering(MockVeileder veileder, StartEskaleringDto startEskaleringDto) {
+        Response response = veileder.createRequest()
+                .body(startEskaleringDto)
+                .when()
+                .post("/veilarbdialog/api/eskaleringsvarsel/start")
+                .then()
+                .assertThat().statusCode(HttpStatus.OK.value())
+                .extract().response();
+        EskaleringsvarselDto eskaleringsvarselDto = response.as(EskaleringsvarselDto.class);
+        assertNotNull(eskaleringsvarselDto);
+        // Scheduled task
+        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
+        return eskaleringsvarselDto;
+    }
 }

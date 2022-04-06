@@ -49,6 +49,21 @@ spring:
   batch:
     jdbc:
       initialize-schema:
+management:
+  endpoint:
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+      base-path: "/internal"
+  metrics:
+    export:
+      prometheus:
+        enabled: true
 server:
   servlet:
     context-path: "/veilarbdialog"
@@ -116,6 +131,7 @@ application:
         raw: dialogRawTopic
     inn:
       sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1
+      eksternVarselKvittering: teamdokumenthandtering.aapen-dok-notifikasjon-status
   brukernotifikasjon:
     grace:
       periode:

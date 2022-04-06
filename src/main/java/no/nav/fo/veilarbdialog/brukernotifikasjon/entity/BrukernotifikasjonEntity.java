@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.brukernotifikasjon.entity;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus;
 
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ public record BrukernotifikasjonEntity(
         UUID oppfolgingsPeriodeId,
         BrukernotifikasjonsType type,
         BrukernotifikasjonBehandlingStatus status,
+        VarselKvitteringStatus varselKvitteringStatus,
         LocalDateTime opprettet,
         LocalDateTime forsoktSendt,
         String melding,
