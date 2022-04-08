@@ -10,6 +10,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -91,5 +93,20 @@ public class KvitteringDAO {
                 """;
         return jdbc.query(sql, parms, rowMapper);
 
+    }
+
+    public int hentAntallUkvitterteVarslerForsoktSendt(long timerForsinkelse) {
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+                .addValue("date", new Date(Instant.now().minusSeconds(60 * 60 * timerForsinkelse).toEpochMilli()));
+
+        // language=SQL
+        String sql = "" +
+                " select count(*) " +
+                " from BRUKERNOTIFIKASJON " +
+                " where VARSEL_KVITTERING_STATUS = 'IKKE_SATT' " +
+                " and STATUS = 'SENDT' " +
+                " and FORSOKT_SENDT < :date ";
+
+        return jdbc.queryForObject(sql, parameterSource, int.class);
     }
 }
