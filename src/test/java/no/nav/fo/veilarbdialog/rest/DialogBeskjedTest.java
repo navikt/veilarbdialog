@@ -261,7 +261,7 @@ public class DialogBeskjedTest {
         brukernotifikasjonService.sendPendingBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 10000L);
 
         Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
