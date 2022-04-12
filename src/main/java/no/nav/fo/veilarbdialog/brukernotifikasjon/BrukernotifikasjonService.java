@@ -13,10 +13,11 @@ import no.nav.brukernotifikasjon.schemas.input.BeskjedInput;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
-import no.nav.common.job.leader_election.LeaderElectionClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringDAO;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringMetrikk;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.VeilarboppfolgingClient;
 import no.nav.fo.veilarbdialog.clients.veilarbperson.Nivaa4DTO;
@@ -61,7 +62,9 @@ public class BrukernotifikasjonService {
 
     private final VarselDAO varselDAO;
 
-    private final LeaderElectionClient leaderElectionClient;
+    private final KvitteringDAO kvitteringDAO;
+
+    private final KvitteringMetrikk kvitteringMetrikk;
 
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
     private String oppgaveTopic;
@@ -160,6 +163,16 @@ public class BrukernotifikasjonService {
                     brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.id(), BrukernotifikasjonBehandlingStatus.AVSLUTTET);
                 }
         );
+    }
+
+    @Scheduled(
+            initialDelay = 60000,
+            fixedDelay = 30000
+    )
+    @SchedulerLock(name = "brukernotifikasjon_ekstern_kvittering_forsinket", lockAtMostFor = "PT2M")
+    public void countForsinkedeVarslerSisteDognet() {
+        int antall = kvitteringDAO.hentAntallUkvitterteVarslerForsoktSendt(20);
+        kvitteringMetrikk.countForsinkedeVarslerSisteDognet(antall);
     }
 
     public boolean kanVarsles(Fnr fnr) {
