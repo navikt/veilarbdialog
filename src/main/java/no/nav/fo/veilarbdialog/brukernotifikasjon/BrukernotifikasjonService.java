@@ -149,6 +149,7 @@ public class BrukernotifikasjonService {
             initialDelay = 60000,
             fixedDelay = 5000
     )
+    @SchedulerLock(name = "brukernotifikasjon_done_kafka_scheduledTask", lockAtMostFor = "PT2M")
     public void sendDoneBrukernotifikasjoner() {
         List<BrukernotifikasjonEntity> skalAvsluttesNotifikasjoner = brukernotifikasjonRepository.hentPendingDoneBrukernotifikasjoner();
         skalAvsluttesNotifikasjoner.stream().forEach(
