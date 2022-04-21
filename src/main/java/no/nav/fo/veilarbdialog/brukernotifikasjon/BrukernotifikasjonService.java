@@ -149,7 +149,6 @@ public class BrukernotifikasjonService {
             initialDelay = 60000,
             fixedDelay = 5000
     )
-    @SchedulerLock(name = "brukernotifikasjon_done_kafka_scheduledTask", lockAtMostFor = "PT2M")
     public void sendDoneBrukernotifikasjoner() {
         List<BrukernotifikasjonEntity> skalAvsluttesNotifikasjoner = brukernotifikasjonRepository.hentPendingDoneBrukernotifikasjoner();
         skalAvsluttesNotifikasjoner.stream().forEach(
@@ -169,7 +168,6 @@ public class BrukernotifikasjonService {
             initialDelay = 60000,
             fixedDelay = 30000
     )
-    @SchedulerLock(name = "brukernotifikasjon_ekstern_kvittering_forsinket", lockAtMostFor = "PT2M")
     public void countForsinkedeVarslerSisteDognet() {
         int antall = kvitteringDAO.hentAntallUkvitterteVarslerForsoktSendt(20);
         kvitteringMetrikk.countForsinkedeVarslerSisteDognet(antall);

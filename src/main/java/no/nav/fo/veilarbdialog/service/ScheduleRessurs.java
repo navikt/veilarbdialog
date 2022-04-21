@@ -2,8 +2,8 @@ package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.core.LockConfiguration;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
@@ -20,8 +20,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,16 +57,10 @@ public class ScheduleRessurs {
     }
 
     // To minutter mellom hver kjøring
-    @Scheduled(fixedDelay = 120000)
+    @Scheduled(initialDelay = 60000, fixedDelay = 120000)
     @Transactional
+    @SchedulerLock(name = "brukernotifikasjon_beskjed_kafka_scheduledTask", lockAtMostFor = "PT2M")
     public void sendBrukernotifikasjonerForUlesteDialoger() {
-        lockingTaskExecutor.executeWithLock(
-                (Runnable) this::sendBrukernotifikasjonerForUlesteDialogerWithLock,
-                new LockConfiguration(Instant.now(), "varsel", Duration.ofMinutes(30), Duration.ZERO)
-        );
-    }
-
-    private void sendBrukernotifikasjonerForUlesteDialogerWithLock() {
         List<Long> dialogIder = varselDAO.hentDialogerMedUlesteMeldingerEtterSisteVarsel(brukernotifikasjonGracePeriode, brukernotifikasjonHenvendelseMaksAlder);
 
         log.info("Varsler (beskjed): {} brukere", dialogIder.size());
