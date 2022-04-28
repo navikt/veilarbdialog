@@ -49,31 +49,20 @@ public class EskaleringsvarselRepository {
                 .addValue("brukernotifikasjonsId", tilhorendeBrukernotifikasjonsId);
 
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-
+        Long key;
         String sql = """
           INSERT INTO ESKALERINGSVARSEL (
                     AKTOR_ID, GJELDENDE, OPPRETTET_AV, OPPRETTET_DATO, TILHORENDE_DIALOG_ID, TILHORENDE_BRUKERNOTIFIKASJON_ID, OPPRETTET_BEGRUNNELSE)
           VALUES ( :aktorId, :aktorId,   :opprettetAv, :opprettetDato, :dialogId,            :brukernotifikasjonsId,           :begrunnelse)
                 """;
-
-        jdbc.update(sql, params, keyHolder, new String[]{"id"});
-
-        Number generatedKey = keyHolder.getKey();
-        if (generatedKey == null) {
-            throw new DataAccessResourceFailureException("Generated key not present");
-        }
-        long key = generatedKey.longValue();
-
-        MapSqlParameterSource gjeldendeParam = new MapSqlParameterSource()
-                .addValue("aktorId", aktorId)
-                .addValue("varselId", key);
-        String insertGjeldende = """
-            INSERT INTO ESKALERINGSVARSEL_GJELDENDE (AKTOR_ID, VARSEL_ID)
-            VALUES (:aktorId, :varselId)
-            """;
-
         try {
-            jdbc.update(insertGjeldende, gjeldendeParam);
+            jdbc.update(sql, params, keyHolder, new String[]{"id"});
+
+            Number generatedKey = keyHolder.getKey();
+            if (generatedKey == null) {
+                throw new DataAccessResourceFailureException("Generated key not present");
+            }
+            key = generatedKey.longValue();
         } catch (DuplicateKeyException dke) {
             throw new AktivEskaleringException("Pågående start-eksalering.");
         }
@@ -108,12 +97,6 @@ public class EskaleringsvarselRepository {
                 """;
         int update = jdbc.update(sql, params);
         assert update == 1;
-        MapSqlParameterSource gjeldendeParam = new MapSqlParameterSource("varselId", varselId);
-        String gjeldendeSql = """
-                DELETE FROM ESKALERINGSVARSEL_GJELDENDE
-                 WHERE VARSEL_ID = :varselId
-                """;
-        jdbc.update(gjeldendeSql, gjeldendeParam);
     }
 
     public Optional<EskaleringsvarselEntity> hentGjeldende(AktorId aktorId) {
