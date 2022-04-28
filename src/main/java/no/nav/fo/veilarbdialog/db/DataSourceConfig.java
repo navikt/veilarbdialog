@@ -43,6 +43,7 @@ public class DataSourceConfig {
         log.info("Explicitly migrating {} using Flyway", dataSource);
         Flyway flyway = new Flyway();
         flyway.setDataSource(dataSource);
+        flyway.clean();
         flyway.migrate();
         return dataSource;
     }
