@@ -51,22 +51,9 @@ public class EskaleringsvarselRepository {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
         String sql = """
-                INSERT INTO ESKALERINGSVARSEL (
-                    AKTOR_ID,
-                    OPPRETTET_AV,
-                    OPPRETTET_DATO,
-                    TILHORENDE_DIALOG_ID,
-                    TILHORENDE_BRUKERNOTIFIKASJON_ID,
-                    OPPRETTET_BEGRUNNELSE
-                    )
-                VALUES (
-                    :aktorId,
-                    :opprettetAv,
-                    :opprettetDato,
-                    :dialogId,
-                    :brukernotifikasjonsId,
-                    :begrunnelse
-                    )
+          INSERT INTO ESKALERINGSVARSEL (
+                    AKTOR_ID, GJELDENDE, OPPRETTET_AV, OPPRETTET_DATO, TILHORENDE_DIALOG_ID, TILHORENDE_BRUKERNOTIFIKASJON_ID, OPPRETTET_BEGRUNNELSE)
+          VALUES ( :aktorId, :aktorId,   :opprettetAv, :opprettetDato, :dialogId,            :brukernotifikasjonsId,           :begrunnelse)
                 """;
 
         jdbc.update(sql, params, keyHolder, new String[]{"id"});
@@ -112,17 +99,18 @@ public class EskaleringsvarselRepository {
                 .addValue("avsluttetBegrunnelse", begrunnelse)
                 .addValue("varselId", varselId);
         String sql = """
-                UPDATE ESKALERINGSVARSEL SET 
+                UPDATE ESKALERINGSVARSEL SET
                     AVSLUTTET_DATO = :avsluttetDato,
                     AVSLUTTET_AV = :avsluttetAv,
-                    AVSLUTTET_BEGRUNNELSE = :avsluttetBegrunnelse
+                    AVSLUTTET_BEGRUNNELSE = :avsluttetBegrunnelse,
+                    GJELDENDE = null
                 WHERE ID = :varselId
                 """;
         int update = jdbc.update(sql, params);
         assert update == 1;
         MapSqlParameterSource gjeldendeParam = new MapSqlParameterSource("varselId", varselId);
         String gjeldendeSql = """
-                DELETE FROM ESKALERINGSVARSEL_GJELDENDE 
+                DELETE FROM ESKALERINGSVARSEL_GJELDENDE
                  WHERE VARSEL_ID = :varselId
                 """;
         jdbc.update(gjeldendeSql, gjeldendeParam);
