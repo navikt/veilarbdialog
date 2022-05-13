@@ -52,8 +52,8 @@ public class EskaleringsvarselController {
         authService.harTilgangTilPerson(stopEskaleringDto.fnr());
         NavIdent navIdent = authService.getNavIdent();
 
-
-        eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), stopEskaleringDto.skalSendeHenvendelse(), navIdent);
+        eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), stopEskaleringDto.skalSendeHenvendelse(), navIdent)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "Ingen gjeldende eskaleringsvarsel"));
     }
 
     @GetMapping(value = "/gjeldende")

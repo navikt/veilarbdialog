@@ -32,6 +32,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.time.LocalDateTime;
@@ -39,6 +40,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -108,6 +110,11 @@ public class BrukernotifikasjonService {
 
     public void bestillDone(long brukernotifikasjonId) {
         brukernotifikasjonRepository.updateStatus(brukernotifikasjonId, BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES);
+    }
+
+    @Transactional
+    public void bestillDoneForOppfolgingsperiode(UUID oppfolgingsperiode) {
+        brukernotifikasjonRepository.bestillDoneForPeriode(oppfolgingsperiode);
     }
 
     @Scheduled(

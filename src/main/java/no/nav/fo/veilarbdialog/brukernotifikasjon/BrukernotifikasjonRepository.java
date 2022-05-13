@@ -17,6 +17,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -130,5 +131,22 @@ public class BrukernotifikasjonRepository {
                 UPDATE BRUKERNOTIFIKASJON SET STATUS = :status WHERE id = :id
                 """;
         jdbcTemplate.update(sql, params);
+    }
+
+    void bestillDoneForPeriode(UUID oppfolgingsperiodeUuid) {
+        MapSqlParameterSource skalAvsluttes = new MapSqlParameterSource()
+                .addValue("oppfolgingsperiode", oppfolgingsperiodeUuid.toString())
+                .addValue("fra_status", BrukernotifikasjonBehandlingStatus.SENDT.name())
+                .addValue("til_status", BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES.name());
+        MapSqlParameterSource skalAvbrytes = new MapSqlParameterSource()
+                .addValue("oppfolgingsperiode", oppfolgingsperiodeUuid.toString())
+                .addValue("fra_status", BrukernotifikasjonBehandlingStatus.PENDING.name())
+                .addValue("til_status", BrukernotifikasjonBehandlingStatus.AVSLUTTET.name());
+        String sql = """
+                UPDATE BRUKERNOTIFIKASJON SET STATUS = :til_status WHERE OPPFOLGINGSPERIODE_ID = :oppfolgingsperiode and status = :fra_status
+                """;
+
+        jdbcTemplate.update(sql, skalAvbrytes);
+        jdbcTemplate.update(sql, skalAvsluttes);
     }
 }
