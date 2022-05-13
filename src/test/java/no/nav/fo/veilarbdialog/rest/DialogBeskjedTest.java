@@ -192,22 +192,12 @@ public class DialogBeskjedTest {
 
         MockVeileder veileder = MockNavService.createVeileder(bruker);
 
-        DialogDTO dialog = veileder.createRequest()
+        veileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
                 .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
                 .then()
-                .statusCode(200)
-                .extract()
-                .as(DialogDTO.class);
+                .statusCode(409);
 
-        // Setter sendt til å være 1 sekund tidligere pga. grace period
-        settHenvendelseSendtForNSekundSiden(dialog.getHenvendelser().get(0).getId(), 1);
-
-        scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
-        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
-
-        boolean harKonsumertAlleMeldinger = kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer);
-        assertThat(harKonsumertAlleMeldinger).isTrue();
     }
 
     @Test

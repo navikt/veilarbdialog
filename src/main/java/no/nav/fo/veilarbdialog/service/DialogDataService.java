@@ -8,6 +8,7 @@ import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
 import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.*;
@@ -44,6 +45,8 @@ public class DialogDataService {
     private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final SistePeriodeService sistePeriodeService;
 
+    private final BrukernotifikasjonService brukernotifikasjonService;
+
     @Value("${application.dialog.url}")
     private String dialogUrl;
 
@@ -66,6 +69,10 @@ public class DialogDataService {
     public DialogData opprettHenvendelse(NyHenvendelseDTO henvendelseData, Person bruker) {
         String aktorId = hentAktoerIdForPerson(bruker);
         auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
+        Fnr fnr = hentFnrForPerson(bruker);
+        if (!brukernotifikasjonService.kanVarsles(fnr)) {
+            throw new ResponseStatusException(CONFLICT, "Bruker kan ikke varsles.");
+        }
 
         DialogData dialog = Optional.ofNullable(hentDialogMedTilgangskontroll(henvendelseData.getDialogId(), henvendelseData.getAktivitetId()))
                 .orElseGet(() -> opprettDialog(henvendelseData, aktorId));
@@ -170,6 +177,16 @@ public class DialogDataService {
             return person.get();
         }
 
+        return null;
+    }
+    public Fnr hentFnrForPerson(Person person) {
+        if (person instanceof Person.AktorId) {
+            return Optional
+                    .ofNullable(aktorOppslagClient.hentFnr(AktorId.of(person.get())))
+                    .orElseThrow(RuntimeException::new);
+        } else if (person instanceof Person.Fnr) {
+            return Fnr.of(person.get());
+        }
         return null;
     }
 

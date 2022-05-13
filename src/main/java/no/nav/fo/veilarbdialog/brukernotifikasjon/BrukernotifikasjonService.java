@@ -23,6 +23,7 @@ import no.nav.fo.veilarbdialog.clients.veilarboppfolging.VeilarboppfolgingClient
 import no.nav.fo.veilarbdialog.clients.veilarbperson.Nivaa4DTO;
 import no.nav.fo.veilarbdialog.clients.veilarbperson.VeilarbpersonClient;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,6 +96,10 @@ public class BrukernotifikasjonService {
                 brukernotifikasjon.smsTekst(),
                 brukernotifikasjon.link()
         );
+        if (!kanVarsles(brukernotifikasjon.foedselsnummer())) {
+            log.warn("Kan ikke varsle bruker: {}. Se årsak i SecureLog", aktorId.get());
+            throw new BrukerKanIkkeVarslesException();
+        }
 
         Long id = brukernotifikasjonRepository.opprettBrukernotifikasjon(insert);
         varselDAO.oppdaterSisteVarselForBruker(aktorId.get());
