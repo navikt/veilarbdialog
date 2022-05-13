@@ -14,6 +14,7 @@ import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -70,13 +71,6 @@ public class ScheduleRessurs {
                     DialogData dialogData = dialogDAO.hentDialog(dialogId);
                     Fnr fnr = aktorOppslagClient.hentFnr(AktorId.of(dialogData.getAktorId()));
 
-                    boolean kanVarsles = brukernotifikasjonService.kanVarsles(fnr);
-                    if (!kanVarsles) {
-                        log.warn("Kan ikke varsle bruker: {}. Se årsak i SecureLog", dialogData.getAktorId());
-                        funksjonelleMetrikker.nyBrukernotifikasjon(false, BrukernotifikasjonsType.BESKJED);
-                        return;
-                    }
-
                     UUID oppfolgingsperiode = dialogData.getOppfolgingsperiode();
 
                     Brukernotifikasjon brukernotifikasjon = new Brukernotifikasjon(
@@ -92,7 +86,12 @@ public class ScheduleRessurs {
                             dialogDataService.utledDialogLink(dialogId)
                     );
 
-                    brukernotifikasjonService.bestillBrukernotifikasjon(brukernotifikasjon, AktorId.of(dialogData.getAktorId()));
+                    try {
+                        brukernotifikasjonService.bestillBrukernotifikasjon(brukernotifikasjon, AktorId.of(dialogData.getAktorId()));
+                    } catch (BrukerKanIkkeVarslesException e) {
+                        log.warn("Bruker kan ikke varsles.");
+                        funksjonelleMetrikker.nyBrukernotifikasjon(false, BrukernotifikasjonsType.BESKJED);
+                    }
                     funksjonelleMetrikker.nyBrukernotifikasjon(true, BrukernotifikasjonsType.BESKJED);
                 }
         );
