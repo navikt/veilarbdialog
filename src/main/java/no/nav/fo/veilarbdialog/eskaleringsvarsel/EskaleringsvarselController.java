@@ -52,8 +52,10 @@ public class EskaleringsvarselController {
         authService.harTilgangTilPerson(stopEskaleringDto.fnr());
         NavIdent navIdent = authService.getNavIdent();
 
-        eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), stopEskaleringDto.skalSendeHenvendelse(), navIdent)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT, "Ingen gjeldende eskaleringsvarsel"));
+        Optional<EskaleringsvarselEntity> eskaleringsvarselEntity = eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), stopEskaleringDto.skalSendeHenvendelse(), navIdent);
+        if (eskaleringsvarselEntity.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ingen gjeldende eskaleringsvarsel");
+        }
     }
 
     @GetMapping(value = "/gjeldende")
@@ -62,8 +64,7 @@ public class EskaleringsvarselController {
         if (fnr == null) { // eksternbruker
             if (authService.erEksternBruker()) {
                 fodselsnummer = Fnr.of(authService.getIdent().orElseThrow());
-            }
-            else {
+            } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Internbruker må sende med fnr som parameter");
             }
         } else { // internbruker
