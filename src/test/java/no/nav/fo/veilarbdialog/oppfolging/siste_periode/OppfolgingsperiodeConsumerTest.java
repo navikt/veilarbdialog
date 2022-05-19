@@ -32,13 +32,13 @@ import java.util.concurrent.TimeoutException;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-public class SisteOppfolgingsperiodeConsumerTest extends SpringBootTestBase {
+public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
     @Autowired
     KafkaTemplate<String, String> producer;
 
-    @Value("${application.topic.inn.sisteOppfolgingsperiode}")
-    String oppfolgingSistePeriodeTopic;
+    @Value("${application.topic.inn.oppfolgingsperiode}")
+    String oppfolgingsperiodeTopic;
 
     @Autowired
     private SistePeriodeDAO sistePeriodeDAO;
@@ -59,13 +59,13 @@ public class SisteOppfolgingsperiodeConsumerTest extends SpringBootTestBase {
         String aktorId = mockBruker.getAktorId();
 
 
-        SisteOppfolgingsperiodeV1 startOppfolgiong = SisteOppfolgingsperiodeV1.builder()
+        OppfolgingsperiodeV1 startOppfolgiong = OppfolgingsperiodeV1.builder()
                 .uuid(oppfolgingsId)
                 .aktorId(aktorId)
                 .startDato(ZonedDateTime.now().minusHours(1).truncatedTo(MILLIS))
                 .build();
-        SendResult<String, String> sendResult = producer.send(oppfolgingSistePeriodeTopic, aktorId, JsonUtils.toJson(startOppfolgiong)).get(1, SECONDS);
-        kafkaTestService.assertErKonsumertAiven(oppfolgingSistePeriodeTopic, sendResult.getRecordMetadata().offset(),  sendResult.getRecordMetadata().partition(),10);
+        SendResult<String, String> sendResult = producer.send(oppfolgingsperiodeTopic, aktorId, JsonUtils.toJson(startOppfolgiong)).get(1, SECONDS);
+        kafkaTestService.assertErKonsumertAiven(oppfolgingsperiodeTopic, sendResult.getRecordMetadata().offset(),  sendResult.getRecordMetadata().partition(),10);
 
 
         Oppfolgingsperiode oppfolgingsperiode = sistePeriodeDAO.hentSisteOppfolgingsPeriode(aktorId).orElseThrow();
@@ -75,10 +75,10 @@ public class SisteOppfolgingsperiodeConsumerTest extends SpringBootTestBase {
         Assertions.assertThat(oppfolgingsperiode.sluttTid()).isNull();
 
 
-        SisteOppfolgingsperiodeV1 avsluttetOppfolgingsperide = startOppfolgiong.withSluttDato(ZonedDateTime.now().truncatedTo(MILLIS));
-        SendResult<String, String> avsluttetSendResult = producer.send(oppfolgingSistePeriodeTopic, aktorId, JsonUtils.toJson(avsluttetOppfolgingsperide)).get(1, SECONDS);
+        OppfolgingsperiodeV1 avsluttetOppfolgingsperide = startOppfolgiong.withSluttDato(ZonedDateTime.now().truncatedTo(MILLIS));
+        SendResult<String, String> avsluttetSendResult = producer.send(oppfolgingsperiodeTopic, aktorId, JsonUtils.toJson(avsluttetOppfolgingsperide)).get(1, SECONDS);
 
-        kafkaTestService.assertErKonsumertAiven(oppfolgingSistePeriodeTopic, avsluttetSendResult.getRecordMetadata().offset(), sendResult.getRecordMetadata().partition(),10);
+        kafkaTestService.assertErKonsumertAiven(oppfolgingsperiodeTopic, avsluttetSendResult.getRecordMetadata().offset(), sendResult.getRecordMetadata().partition(),10);
 
         Oppfolgingsperiode oppfolgingsperiodeAvsluttet = sistePeriodeDAO.hentSisteOppfolgingsPeriode(aktorId).orElseThrow();
         Assertions.assertThat(oppfolgingsperiodeAvsluttet.oppfolgingsperiode()).isEqualTo(oppfolgingsId);
@@ -94,7 +94,7 @@ public class SisteOppfolgingsperiodeConsumerTest extends SpringBootTestBase {
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
         String aktorId = mockBruker.getAktorId();
 
-        SisteOppfolgingsperiodeV1 startOppfolging = SisteOppfolgingsperiodeV1.builder()
+        OppfolgingsperiodeV1 startOppfolging = OppfolgingsperiodeV1.builder()
                 .uuid(mockBruker.getOppfolgingsperiode())
                 .aktorId(aktorId)
                 .startDato(ZonedDateTime.now().minusDays(5).truncatedTo(MILLIS))
@@ -106,7 +106,7 @@ public class SisteOppfolgingsperiodeConsumerTest extends SpringBootTestBase {
                 new StartEskaleringDto(Fnr.of(mockBruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
         EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(mockVeileder, startEskaleringDto);
 
-        SisteOppfolgingsperiodeV1 stopOppfolging = SisteOppfolgingsperiodeV1.builder()
+        OppfolgingsperiodeV1 stopOppfolging = OppfolgingsperiodeV1.builder()
                 .uuid(mockBruker.getOppfolgingsperiode())
                 .aktorId(aktorId)
                 .startDato(startOppfolging.getStartDato())
@@ -127,9 +127,9 @@ public class SisteOppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
     }
 
-    private void opprettEllerEndreOppfolgingsperiodeForBruker(SisteOppfolgingsperiodeV1 oppfolgingsperiode) throws ExecutionException, InterruptedException, TimeoutException {
-        SendResult<String, String> sendResult = producer.send(oppfolgingSistePeriodeTopic, oppfolgingsperiode.getAktorId(), JsonUtils.toJson(oppfolgingsperiode)).get(1, SECONDS);
-        kafkaTestService.assertErKonsumertAiven(oppfolgingSistePeriodeTopic, sendResult.getRecordMetadata().offset(),  sendResult.getRecordMetadata().partition(),10);
+    private void opprettEllerEndreOppfolgingsperiodeForBruker(OppfolgingsperiodeV1 oppfolgingsperiode) throws ExecutionException, InterruptedException, TimeoutException {
+        SendResult<String, String> sendResult = producer.send(oppfolgingsperiodeTopic, oppfolgingsperiode.getAktorId(), JsonUtils.toJson(oppfolgingsperiode)).get(1, SECONDS);
+        kafkaTestService.assertErKonsumertAiven(oppfolgingsperiodeTopic, sendResult.getRecordMetadata().offset(),  sendResult.getRecordMetadata().partition(),10);
     }
 
 }

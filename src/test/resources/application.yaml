@@ -130,7 +130,7 @@ application:
       dialog:
         raw: dialogRawTopic
     inn:
-      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1
+      oppfolgingsperiode: pto.oppfolgingsperiode-v1
       eksternVarselKvittering: teamdokumenthandtering.aapen-dok-notifikasjon-status
   brukernotifikasjon:
     grace:
