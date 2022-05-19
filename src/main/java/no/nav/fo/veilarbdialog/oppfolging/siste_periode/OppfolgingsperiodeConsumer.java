@@ -27,7 +27,7 @@ class OppfolgingsperiodeConsumer {
         }
 
         log.info("Siste oppfølgingsperiode: {}", oppfolgingsperiodeV1);
-        sistePeriodeDAO.uppsertOppfolingsperide(
+        sistePeriodeDAO.upsertOppfolgingsperiode(
                 new Oppfolgingsperiode(
                         oppfolgingsperiodeV1.aktorId,
                         oppfolgingsperiodeV1.uuid,

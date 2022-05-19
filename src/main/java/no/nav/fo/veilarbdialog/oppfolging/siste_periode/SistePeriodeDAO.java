@@ -17,7 +17,7 @@ import java.util.Optional;
 class SistePeriodeDAO {
     private final NamedParameterJdbcTemplate jdbc;
 
-    private RowMapper<Oppfolgingsperiode> rowmapper= (rs, rowNum) -> new Oppfolgingsperiode(
+    private final RowMapper<Oppfolgingsperiode> rowmapper = (rs, rowNum) -> new Oppfolgingsperiode(
             rs.getString("AKTORID"),
             DatabaseUtils.hentMaybeUUID(rs, "PERIODE_UUID"),
             DatabaseUtils.hentZonedDateTime(rs, "STARTDATO"),
@@ -28,7 +28,7 @@ class SistePeriodeDAO {
         MapSqlParameterSource params = new MapSqlParameterSource().addValue("aktorId", aktorId);
         Oppfolgingsperiode oppfolgingsperiode;
         try {
-            oppfolgingsperiode= jdbc.queryForObject(
+            oppfolgingsperiode = jdbc.queryForObject(
                     "SELECT * FROM siste_oppfolgingsperiode WHERE aktorid=:aktorId",
                     params,
                     rowmapper);
@@ -38,31 +38,36 @@ class SistePeriodeDAO {
         }
     }
 
-    void uppsertOppfolingsperide(Oppfolgingsperiode oppfolgingsperiode) {
+    void upsertOppfolgingsperiode(Oppfolgingsperiode oppfolgingsperiode) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("aktorId", oppfolgingsperiode.aktorid())
                 .addValue("periode", oppfolgingsperiode.oppfolgingsperiode().toString())
                 .addValue("startTid", oppfolgingsperiode.startTid())
                 .addValue("sluttTid", oppfolgingsperiode.sluttTid());
 
-        int antallOppdatert = jdbc.update("""
+        Optional<Oppfolgingsperiode> gammelOppfolgingsperiode = hentSisteOppfolgingsPeriode(oppfolgingsperiode.aktorid());
+
+        if (gammelOppfolgingsperiode.isEmpty()) {
+            jdbc.update("""
+                    insert into SISTE_OPPFOLGINGSPERIODE
+                    (PERIODE_UUID, AKTORID, STARTDATO, SLUTTDATO)
+                    VALUES (:periode, :aktorId, :startTid, :sluttTid)
+                    """, params);
+            log.info("opprettet oppfolgingsperiodeId {}", oppfolgingsperiode);
+
+        } else if (!gammelOppfolgingsperiode.get().startTid().isAfter(oppfolgingsperiode.startTid())) {
+            int antallOppdatert = jdbc.update("""
                 update SISTE_OPPFOLGINGSPERIODE
                 set PERIODE_UUID = :periode,
                 STARTDATO = :startTid,
                 SLUTTDATO = :sluttTid
                 where AKTORID = :aktorId
                 """, params);
-        if (antallOppdatert == 1) {
-            log.info("oppdatert oppfolgignsperiode {}", oppfolgingsperiode);
-            return;
+                if (antallOppdatert == 1) {
+                    log.info("oppdatert oppfolgingsperiode {}", oppfolgingsperiode);
+                }
+        } else {
+            log.info("ignorerer oppfolgingsperiode {} fordi den er eldre enn eksisterende {}", oppfolgingsperiode, gammelOppfolgingsperiode.get());
         }
-
-        jdbc.update("""
-                insert into SISTE_OPPFOLGINGSPERIODE
-                (PERIODE_UUID, AKTORID, STARTDATO, SLUTTDATO)
-                VALUES (:periode, :aktorId, :startTid, :sluttTid)
-                """, params);
-
-        log.info("opprettet oppfolgingsperiodeId {}", oppfolgingsperiode);
     }
 }
