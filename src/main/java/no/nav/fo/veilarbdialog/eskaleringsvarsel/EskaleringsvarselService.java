@@ -116,9 +116,12 @@ public class EskaleringsvarselService {
     }
 
     @Transactional
-    public void stop(Fnr fnr, String begrunnelse, boolean skalSendeHenvendelse, NavIdent avsluttetAv) {
-        EskaleringsvarselEntity eskaleringsvarsel = hentGjeldende(fnr)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ingen gjeldende eskaleringsvarsel"));
+    public Optional<EskaleringsvarselEntity> stop(Fnr fnr, String begrunnelse, boolean skalSendeHenvendelse, NavIdent avsluttetAv) {
+        EskaleringsvarselEntity eskaleringsvarsel = hentGjeldende(fnr).orElse(null);
+
+        if (eskaleringsvarsel == null) {
+            return Optional.empty();
+        }
 
         if (skalSendeHenvendelse) {
             NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
@@ -129,6 +132,13 @@ public class EskaleringsvarselService {
         eskaleringsvarselRepository.stop(eskaleringsvarsel.varselId(), begrunnelse, avsluttetAv);
 
         brukernotifikasjonService.bestillDone(eskaleringsvarsel.tilhorendeBrukernotifikasjonId());
+
+        return eskaleringsvarselRepository.hentVarsel(eskaleringsvarsel.varselId());
+    }
+
+    @Transactional
+    public boolean stop(UUID oppfolgingsperiode) {
+        return eskaleringsvarselRepository.stopPeriode(oppfolgingsperiode);
     }
 
     public Optional<EskaleringsvarselEntity> hentGjeldende(Fnr fnr) {
@@ -136,6 +146,7 @@ public class EskaleringsvarselService {
 
         return eskaleringsvarselRepository.hentGjeldende(aktorId);
     }
+
 
     public List<EskaleringsvarselEntity> historikk(Fnr fnr) {
         AktorId aktorId = aktorOppslagClient.hentAktorId(fnr);

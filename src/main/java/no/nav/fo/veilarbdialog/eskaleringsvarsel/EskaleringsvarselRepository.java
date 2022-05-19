@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -111,6 +112,38 @@ public class EskaleringsvarselRepository {
             return Optional.empty();
         }
     }
+
+    public boolean stopPeriode(UUID oppfolgingsperiodeUuid) {
+        String sql = """
+                UPDATE ESKALERINGSVARSEL
+                set avsluttet_av = 'SYSTEM', 
+                    avsluttet_dato = current_timestamp , 
+                    avsluttet_begrunnelse = 'Oppfolging avsluttet',
+                    gjeldende = NULL
+                WHERE avsluttet_dato is null 
+                    and exists(select * from dialog 
+                               where tilhorende_dialog_id = dialog_id 
+                               and oppfolgingsperiode_uuid = :oppfolgingsperiode)
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("oppfolgingsperiode", oppfolgingsperiodeUuid.toString());
+        int rowsUpdated = jdbc.update(sql, params);
+        return rowsUpdated != 0;
+    }
+
+    public Optional<EskaleringsvarselEntity> hentVarsel(long varselId) {
+        String sql = """
+                SELECT * FROM ESKALERINGSVARSEL WHERE ID = :varselId
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("varselId", varselId);
+        try {
+            return Optional.ofNullable(jdbc.queryForObject(sql, params, rowMapper));
+        } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
+            return Optional.empty();
+        }
+    }
+
 
     public List<EskaleringsvarselEntity> hentHistorikk(AktorId aktorId) {
         MapSqlParameterSource params = new MapSqlParameterSource()
