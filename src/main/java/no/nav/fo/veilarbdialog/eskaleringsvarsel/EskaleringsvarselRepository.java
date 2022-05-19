@@ -118,7 +118,8 @@ public class EskaleringsvarselRepository {
                 UPDATE ESKALERINGSVARSEL
                 set avsluttet_av = 'SYSTEM', 
                     avsluttet_dato = current_timestamp , 
-                    avsluttet_begrunnelse = 'Oppfolging avsluttet'
+                    avsluttet_begrunnelse = 'Oppfolging avsluttet',
+                    gjeldende = NULL
                 WHERE avsluttet_dato is null 
                     and exists(select * from dialog 
                                where tilhorende_dialog_id = dialog_id 
