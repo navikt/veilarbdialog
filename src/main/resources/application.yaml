@@ -128,7 +128,7 @@ application:
   kafka:
     brokersUrl: ${KAFKA_BROKERS_URL}
     endringPaaDialogTopic: ${ENDRING_PAA_DIALOG_TOPIC}
-    oppfolgingAvsluttetTopic: ${OPPFOLGING_AVSLUTTET_TOPIC}
+
     kvpAvsluttetTopic: ${KVP_AVSLUTTET_TOPIC}
   aktorRegister:
     url: ${AKTOERREGISTER_API_V1_URL}

@@ -97,7 +97,7 @@ application:
       url: http://localhost:8080/KAFKA_BROKERS_URL
     topic: aapen-fo-endringPaaDialog-v1-APP_ENVIRONMENT_NAME
     endringPaaDialogTopic: endringPaaDialogTopic
-    oppfolgingAvsluttetTopic: oppfolgingAvsluttetTopic
+
     kvpAvsluttetTopic: kvpAvsluttetTopic
   aktorRegister:
     url: http://localhost:${wiremock.server.port}/aktorTjeneste
@@ -128,7 +128,7 @@ application:
         beskjed: min-side.aapen-brukernotifikasjon-beskjed-v1
         done: min-side.aapen-brukernotifikasjon-done-v1
       dialog:
-        raw: dialogRawTopic
+        raw: dialogRawTopi
     inn:
       oppfolgingsperiode: pto.oppfolgingsperiode-v1
       eksternVarselKvittering: teamdokumenthandtering.aapen-dok-notifikasjon-status

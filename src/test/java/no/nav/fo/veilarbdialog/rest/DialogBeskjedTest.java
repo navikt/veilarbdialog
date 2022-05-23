@@ -22,6 +22,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,56 +90,6 @@ public class DialogBeskjedTest {
         RestAssured.port = port;
         brukerNotifikasjonBeskjedConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonBeskjedTopic);
         brukerNotifikasjonDoneConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonDoneTopic);
-    }
-
-    @Test
-    public void beskjed_happy_case() {
-        MockBruker mockBruker = MockNavService.createHappyBruker();
-        MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
-
-        DialogDTO dialog = mockVeileder.createRequest()
-                .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
-                .then()
-                .statusCode(200)
-                .extract()
-                .as(DialogDTO.class);
-
-        // Setter sendt til å være 1 sekund tidligere pga. grace period
-        settHenvendelseSendtForNSekundSiden(dialog.getHenvendelser().get(0).getId(), 1);
-
-        scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
-        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
-
-        ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
-
-        assertThat(brukernotifikasjonRecord.value().getTekst()).isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST);
-
-        BrukernotifikasjonEntity brukernotifikasjonEntity =
-                brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(Long.parseLong(dialog.getId()), BrukernotifikasjonsType.BESKJED).get(0);
-
-        SoftAssertions.assertSoftly(
-                assertions -> {
-                    assertions.assertThat(brukernotifikasjonEntity.dialogId()).isEqualTo(Long.valueOf(dialog.getId()));
-                    assertions.assertThat(brukernotifikasjonEntity.type()).isEqualTo(BrukernotifikasjonsType.BESKJED);
-                    assertions.assertThat(brukernotifikasjonEntity.status()).isEqualTo(BrukernotifikasjonBehandlingStatus.SENDT);
-                }
-        );
-
-        mockBruker.createRequest()
-                .put("/veilarbdialog/api/dialog/{dialogId}/les", dialog.getId())
-                .then()
-                .statusCode(200);
-
-        brukernotifikasjonService.sendDoneBrukernotifikasjoner();
-
-        ConsumerRecord<NokkelInput, DoneInput> doneRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
-
-        NokkelInput nokkel = doneRecord.key();
-
-        assertThat(mockBruker.getFnr()).isEqualTo(nokkel.getFodselsnummer());
     }
 
     @Test

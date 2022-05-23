@@ -9,6 +9,8 @@ import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
+import no.nav.fo.veilarbdialog.domain.DialogDTO;
+import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
@@ -16,12 +18,18 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
+import no.nav.fo.veilarbdialog.util.DialogTestService;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.assertj.core.api.Assertions;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -37,8 +45,16 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
     @Autowired
     KafkaTemplate<String, String> producer;
 
+    Consumer<String, String> endringPaaDialogConsumer;
+
+    @Value("${application.kafka.endringPaaDialogTopic}")
+    String endringPaaDialogTopic;
+
     @Value("${application.topic.inn.oppfolgingsperiode}")
     String oppfolgingsperiodeTopic;
+
+    @LocalServerPort
+    private int port;
 
     @Autowired
     private SistePeriodeDAO sistePeriodeDAO;
@@ -52,11 +68,17 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
     @Autowired
     EskaleringsvarselService eskaleringsvarselService;
 
+
+    @Before
+    public void setup() {
+        this.endringPaaDialogConsumer = kafkaTestService.createStringStringConsumer(endringPaaDialogTopic);
+    }
+
     @Test
     public void skal_opprette_siste_oppfolgingsperiode() throws InterruptedException, ExecutionException, TimeoutException {
         MockBruker mockBruker = MockNavService.createHappyBruker();
-        UUID oppfolgingsId = mockBruker.getOppfolgingsperiode();
         String aktorId = mockBruker.getAktorId();
+        UUID oppfolgingsId = mockBruker.getOppfolgingsperiode();
 
 
         OppfolgingsperiodeV1 startOppfolgiong = OppfolgingsperiodeV1.builder()
@@ -65,7 +87,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
                 .startDato(ZonedDateTime.now().minusHours(1).truncatedTo(MILLIS))
                 .build();
         SendResult<String, String> sendResult = producer.send(oppfolgingsperiodeTopic, aktorId, JsonUtils.toJson(startOppfolgiong)).get(1, SECONDS);
-        kafkaTestService.assertErKonsumertAiven(oppfolgingsperiodeTopic, sendResult.getRecordMetadata().offset(),  sendResult.getRecordMetadata().partition(),10);
+        kafkaTestService.assertErKonsumertAiven(oppfolgingsperiodeTopic, sendResult.getRecordMetadata().offset(), sendResult.getRecordMetadata().partition(), 10);
 
 
         Oppfolgingsperiode oppfolgingsperiode = sistePeriodeDAO.hentSisteOppfolgingsPeriode(aktorId).orElseThrow();
@@ -78,7 +100,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
         OppfolgingsperiodeV1 avsluttetOppfolgingsperide = startOppfolgiong.withSluttDato(ZonedDateTime.now().truncatedTo(MILLIS));
         SendResult<String, String> avsluttetSendResult = producer.send(oppfolgingsperiodeTopic, aktorId, JsonUtils.toJson(avsluttetOppfolgingsperide)).get(1, SECONDS);
 
-        kafkaTestService.assertErKonsumertAiven(oppfolgingsperiodeTopic, avsluttetSendResult.getRecordMetadata().offset(), sendResult.getRecordMetadata().partition(),10);
+        kafkaTestService.assertErKonsumertAiven(oppfolgingsperiodeTopic, avsluttetSendResult.getRecordMetadata().offset(), sendResult.getRecordMetadata().partition(), 10);
 
         Oppfolgingsperiode oppfolgingsperiodeAvsluttet = sistePeriodeDAO.hentSisteOppfolgingsPeriode(aktorId).orElseThrow();
         Assertions.assertThat(oppfolgingsperiodeAvsluttet.oppfolgingsperiode()).isEqualTo(oppfolgingsId);
@@ -91,8 +113,8 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
     @SneakyThrows
     public void skal_avslutte_gjeldende_varsler_og_notifikasjoner() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
-        MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
         String aktorId = mockBruker.getAktorId();
+        MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
 
         OppfolgingsperiodeV1 startOppfolging = OppfolgingsperiodeV1.builder()
                 .uuid(mockBruker.getOppfolgingsperiode())
@@ -127,9 +149,41 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
     }
 
+    @Test
+    public void skal_sette_dialoger_til_historisk() throws ExecutionException, InterruptedException, TimeoutException {
+        MockBruker mockBruker = MockNavService.createHappyBruker();
+        String aktorId = mockBruker.getAktorId();
+
+        OppfolgingsperiodeV1 startOppfolging = OppfolgingsperiodeV1.builder()
+                .uuid(mockBruker.getOppfolgingsperiode())
+                .aktorId(aktorId)
+                .startDato(ZonedDateTime.now().minusDays(5).truncatedTo(MILLIS))
+                .build();
+
+        opprettEllerEndreOppfolgingsperiodeForBruker(startOppfolging);
+
+        DialogDTO dialogDTO = dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setOverskrift("The Three Trials").setTekst("Defeat the Sword Master of Melee Island"));
+
+        OppfolgingsperiodeV1 stopOppfolging = OppfolgingsperiodeV1.builder()
+                .uuid(mockBruker.getOppfolgingsperiode())
+                .aktorId(aktorId)
+                .startDato(startOppfolging.getStartDato())
+                .sluttDato(ZonedDateTime.now().truncatedTo(MILLIS))
+                .build();
+
+        opprettEllerEndreOppfolgingsperiodeForBruker(stopOppfolging);
+
+        KafkaTestUtils.getSingleRecord(endringPaaDialogConsumer, endringPaaDialogTopic, 10000);
+
+
+//        DialogDTO hentDialog = dialogTestService.hentDialog(port, mockBruker, Long.parseLong(dialogDTO.getId()));
+//
+//        Assertions.assertThat(hentDialog.isHistorisk()).isTrue();
+    }
+
     private void opprettEllerEndreOppfolgingsperiodeForBruker(OppfolgingsperiodeV1 oppfolgingsperiode) throws ExecutionException, InterruptedException, TimeoutException {
         SendResult<String, String> sendResult = producer.send(oppfolgingsperiodeTopic, oppfolgingsperiode.getAktorId(), JsonUtils.toJson(oppfolgingsperiode)).get(1, SECONDS);
-        kafkaTestService.assertErKonsumertAiven(oppfolgingsperiodeTopic, sendResult.getRecordMetadata().offset(),  sendResult.getRecordMetadata().partition(),10);
+        kafkaTestService.assertErKonsumertAiven(oppfolgingsperiodeTopic, sendResult.getRecordMetadata().offset(), sendResult.getRecordMetadata().partition(), 10);
     }
 
 }
