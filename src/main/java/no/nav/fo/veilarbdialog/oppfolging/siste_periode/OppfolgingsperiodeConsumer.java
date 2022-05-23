@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.oppfolging.siste_periode;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.json.JsonUtils;
@@ -22,6 +23,7 @@ class OppfolgingsperiodeConsumer {
     private final DialogDataService dialogDataService;
 
     @KafkaListener(topics = "${application.topic.inn.oppfolgingsperiode}", containerFactory = "stringStringKafkaListenerContainerFactory")
+    @Timed
     void opprettEllerOppdaterSistePeriode(ConsumerRecord<String, String> consumerRecord) {
         OppfolgingsperiodeV1 oppfolgingsperiodeV1 = JsonUtils.fromJson(consumerRecord.value(), OppfolgingsperiodeV1.class);
 
@@ -30,7 +32,6 @@ class OppfolgingsperiodeConsumer {
             settDialogerTilHistorisk(oppfolgingsperiodeV1);
         }
 
-        log.info("Siste oppfølgingsperiode: {}", oppfolgingsperiodeV1);
         sistePeriodeDAO.upsertOppfolgingsperiode(
                 new Oppfolgingsperiode(
                         oppfolgingsperiodeV1.aktorId,

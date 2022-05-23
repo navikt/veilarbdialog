@@ -173,7 +173,7 @@ public class EskaleringsvarselControllerTest {
         assertThat(startEskalering.opprettetDato()).isEqualToIgnoringNanos(gjeldende.opprettetDato());
         assertThat(startEskalering.opprettetBegrunnelse()).isEqualTo(gjeldende.opprettetBegrunnelse());
 
-        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 5000L);
+        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 10000L);
 
         NokkelInput nokkelInput = brukernotifikasjonRecord.key();
         OppgaveInput oppgaveInput = brukernotifikasjonRecord.value();
@@ -228,7 +228,7 @@ public class EskaleringsvarselControllerTest {
 
 
         ConsumerRecord<NokkelInput, DoneInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 10000L);
 
         NokkelInput nokkelInput = brukernotifikasjonRecord.key();
         DoneInput doneInput = brukernotifikasjonRecord.value();
@@ -271,7 +271,7 @@ public class EskaleringsvarselControllerTest {
 
 
         ConsumerRecord<NokkelInput, DoneInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 10000L);
 
         NokkelInput nokkelInput = brukernotifikasjonRecord.key();
         DoneInput doneInput = brukernotifikasjonRecord.value();
@@ -399,7 +399,7 @@ public class EskaleringsvarselControllerTest {
 
         requireGjeldende(veileder, bruker);
 
-        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 5000L);
+        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 10000L);
         kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonOppgaveTopic, brukerNotifikasjonOppgaveConsumer);
     }
 
@@ -451,7 +451,7 @@ public class EskaleringsvarselControllerTest {
         lesHenvendelse(bruker, startEskalering.tilhorendeDialogId());
 
         ConsumerRecord<NokkelInput, DoneInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 10000L);
 
         NokkelInput nokkel = brukernotifikasjonRecord.key();
 
@@ -478,7 +478,7 @@ public class EskaleringsvarselControllerTest {
 
         requireGjeldende(veileder, bruker);
 
-        KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 5000L);
+        KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 10000L);
         // sjekk at det ikke ble sendt beskjed på dialogmelding
         assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
