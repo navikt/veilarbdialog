@@ -4,7 +4,6 @@ import io.restassured.response.Response;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
-import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselControllerTest;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
@@ -32,6 +31,7 @@ public class DialogTestService {
 
     public DialogDTO hentDialog(int port, RestassuredUser restassuredUser, long dialogId) {
         return restassuredUser.createRequest()
+                .port(port)
                 .get("/veilarbdialog/api/dialog/{dialogId}", dialogId)
                 .then()
                 .statusCode(200)

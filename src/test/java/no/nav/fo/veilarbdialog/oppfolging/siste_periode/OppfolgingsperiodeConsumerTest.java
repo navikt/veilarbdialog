@@ -18,9 +18,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
-import no.nav.fo.veilarbdialog.util.DialogTestService;
 import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -176,9 +174,9 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
         KafkaTestUtils.getSingleRecord(endringPaaDialogConsumer, endringPaaDialogTopic, 10000);
 
 
-//        DialogDTO hentDialog = dialogTestService.hentDialog(port, mockBruker, Long.parseLong(dialogDTO.getId()));
-//
-//        Assertions.assertThat(hentDialog.isHistorisk()).isTrue();
+        DialogDTO hentDialog = dialogTestService.hentDialog(port, mockBruker, Long.parseLong(dialogDTO.getId()));
+
+        Assertions.assertThat(hentDialog.isHistorisk()).isTrue();
     }
 
     private void opprettEllerEndreOppfolgingsperiodeForBruker(OppfolgingsperiodeV1 oppfolgingsperiode) throws ExecutionException, InterruptedException, TimeoutException {
