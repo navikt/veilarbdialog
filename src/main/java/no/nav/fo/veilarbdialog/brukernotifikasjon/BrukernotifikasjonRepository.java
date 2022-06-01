@@ -87,6 +87,17 @@ public class BrukernotifikasjonRepository {
         }
     }
 
+    public boolean finnesBrukernotifikasjon(String eventId) {
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("brukernotifikasjon_id", eventId);
+        String sql = """
+            SELECT COUNT(*) FROM BRUKERNOTIFIKASJON
+            WHERE EVENT_ID=:brukernotifikasjon_id
+        """;
+        int antall = jdbcTemplate.queryForObject(sql, params, int.class);
+        return antall > 0;
+    }
+
     public List<BrukernotifikasjonEntity> hentBrukernotifikasjonForDialogId(long dialogId, BrukernotifikasjonsType type) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("dialogId", dialogId)
