@@ -2,8 +2,6 @@ package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.doknotifikasjon.schemas.DoknotifikasjonStatus;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -26,40 +24,6 @@ public class KvitteringDAO {
             rs.getString("MELDING"),
             rs.getLong("DISTRIBUSJON_ID")
     );
-
-    public void setEksternVarselFeilet(String bestillingsId) {
-        MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("bestillingsId", bestillingsId)
-                .addValue("varselKvitteringStatus", VarselKvitteringStatus.FEILET.toString());
-        jdbc.update("""
-             update BRUKERNOTIFIKASJON
-               set
-                VARSEL_FEILET = current_timestamp,
-                VARSEL_KVITTERING_STATUS = :varselKvitteringStatus
-                    where EVENT_ID = :bestillingsId
-                 """, param);
-    }
-
-    public void setEksternVarselSendtOk(String bestillingsId) {
-        MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("bestillingsId", bestillingsId)
-                .addValue("varselKvitteringStatusOk", VarselKvitteringStatus.OK.name())
-                .addValue("varselKvitteringStatusFeilet", VarselKvitteringStatus.FEILET.name())
-                .addValue("brukernotifikasjonBehandlingStatusAvsluttet", BrukernotifikasjonBehandlingStatus.AVSLUTTET.name());
-
-        jdbc.update("""
-                   update BRUKERNOTIFIKASJON
-                    set
-                       BEKREFTET_SENDT = CURRENT_TIMESTAMP,
-                       VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
-                       where BRUKERNOTIFIKASJON.VARSEL_KVITTERING_STATUS != :varselKvitteringStatusFeilet
-                       and STATUS != :brukernotifikasjonBehandlingStatusAvsluttet
-                       and EVENT_ID = :bestillingsId
-                       """
-                , param
-        );
-    }
-
 
     public void lagreKvittering(String bestillingsId, DoknotifikasjonStatus melding) {
         SqlParameterSource parameterSource = new MapSqlParameterSource()
