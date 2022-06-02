@@ -55,8 +55,9 @@ public class DialogTestService {
         return dialog;
     }
 
-    public EskaleringsvarselDto startEskalering(MockVeileder veileder, StartEskaleringDto startEskaleringDto) {
+    public EskaleringsvarselDto startEskalering(int port, MockVeileder veileder, StartEskaleringDto startEskaleringDto) {
         Response response = veileder.createRequest()
+                .port(port)
                 .body(startEskaleringDto)
                 .when()
                 .post("/veilarbdialog/api/eskaleringsvarsel/start")

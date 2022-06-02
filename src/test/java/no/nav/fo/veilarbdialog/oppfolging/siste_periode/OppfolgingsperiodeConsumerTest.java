@@ -24,7 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
@@ -51,8 +50,6 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
     @Value("${application.topic.inn.oppfolgingsperiode}")
     String oppfolgingsperiodeTopic;
 
-    @LocalServerPort
-    private int port;
 
     @Autowired
     private SistePeriodeDAO sistePeriodeDAO;
@@ -124,7 +121,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
         StartEskaleringDto startEskaleringDto =
                 new StartEskaleringDto(Fnr.of(mockBruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
-        EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(mockVeileder, startEskaleringDto);
+        EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(port, mockVeileder, startEskaleringDto);
 
         OppfolgingsperiodeV1 stopOppfolging = OppfolgingsperiodeV1.builder()
                 .uuid(mockBruker.getOppfolgingsperiode())
