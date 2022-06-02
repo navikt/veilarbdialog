@@ -25,7 +25,7 @@ spring:
       key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
     listener:
-      ack-mode=record:
+      ack-mode: record
     producer:
       properties:
         enable:
@@ -127,8 +127,6 @@ application:
         oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
         beskjed: min-side.aapen-brukernotifikasjon-beskjed-v1
         done: min-side.aapen-brukernotifikasjon-done-v1
-      dialog:
-        raw: dialogRawTopic
     inn:
       oppfolgingsperiode: pto.oppfolgingsperiode-v1
       eksternVarselKvittering: teamdokumenthandtering.aapen-dok-notifikasjon-status
