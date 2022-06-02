@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -41,6 +40,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -97,43 +97,6 @@ public class EksternVarslingKvitteringTest {
 
     @SneakyThrows
     @Test
-    public void skal_lagre_kvittering() {
-        UUID uuid = UUID.randomUUID();
-        String brukernotifikasjonId = BESKJED_KVITTERINGS_PREFIX + uuid;
-
-        DoknotifikasjonStatus melding = DoknotifikasjonStatus
-                .newBuilder()
-                .setStatus(OVERSENDT)
-                .setBestillingsId(brukernotifikasjonId)
-                .setBestillerId("veilarbdialog")
-                .setMelding("Melding")
-                .setDistribusjonId(1L)
-                .build();
-        ListenableFuture<SendResult<String, DoknotifikasjonStatus>> send = kvitteringsProducer.send(kvitteringsTopic, melding);
-        kvitteringsProducer.flush();
-        send.get();
-
-        Awaitility.await().atMost(Duration.of(10, ChronoUnit.SECONDS)).until( () -> {
-            String status = null;
-            SqlParameterSource params = new MapSqlParameterSource()
-                    .addValue("bestillingId", uuid);
-            try {
-                status = jdbc.queryForObject("""
-                        SELECT DOKNOTIFIKASJON_STATUS
-                        FROM EKSTERN_VARSEL_KVITTERING
-                        WHERE BRUKERNOTIFIKASJON_BESTILLING_ID = :bestillingId
-                        """, params, String.class);
-
-            } catch (EmptyResultDataAccessException e) {
-                // ignore
-            }
-            return "OVERSENDT".equals(status);
-        });
-
-    }
-
-    @SneakyThrows
-    @Test
     public void skal_oppdatere_brukernotifikasjon() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
@@ -147,6 +110,7 @@ public class EksternVarslingKvitteringTest {
         DoknotifikasjonStatus infoMelding = infoStatus(opprinneligBrukernotifikasjon.eventId());
         RecordMetadata infoRecordMetadata = sendKvitteringsMelding(infoMelding);
         assertExpectedBrukernotifikasjonStatus(startEskalering.tilhorendeDialogId(), opprinneligBrukernotifikasjon, infoRecordMetadata, VarselKvitteringStatus.IKKE_SATT);
+        assertKvitteringLagret(opprinneligBrukernotifikasjon.eventId());
 
         DoknotifikasjonStatus oversendtMelding = oversendtStatus(opprinneligBrukernotifikasjon.eventId());
         RecordMetadata oversendtRecordMetadata = sendKvitteringsMelding(oversendtMelding);
@@ -195,6 +159,21 @@ public class EksternVarslingKvitteringTest {
                 .setMelding("her er en melding")
                 .setDistribusjonId(1L)
                 .build();
+    }
+
+    private void assertKvitteringLagret(UUID bestillingsId) {
+        Awaitility.await().atMost(Duration.of(10, ChronoUnit.SECONDS)).until( () -> {
+            String status = null;
+            SqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("bestillingId", bestillingsId.toString());
+            List<String> list = jdbc.queryForList("""
+                    SELECT DOKNOTIFIKASJON_STATUS
+                    FROM EKSTERN_VARSEL_KVITTERING
+                    WHERE BRUKERNOTIFIKASJON_BESTILLING_ID = :bestillingId
+                    """, params, String.class);
+
+            return list.size() > 0;
+        });
     }
 
     private DoknotifikasjonStatus ferdigstiltStatus(UUID bestillingsId) {
