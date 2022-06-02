@@ -22,7 +22,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -232,7 +231,7 @@ public class DialogBeskjedTest {
         brukernotifikasjonService.sendPendingBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 20000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
 
         Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
@@ -260,7 +259,7 @@ public class DialogBeskjedTest {
         brukernotifikasjonService.sendDoneBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, DoneInput> doneRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 10000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
 
         Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
 
@@ -293,7 +292,7 @@ public class DialogBeskjedTest {
         brukernotifikasjonService.sendPendingBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 20000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
 
         Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
@@ -328,7 +327,7 @@ public class DialogBeskjedTest {
         brukernotifikasjonService.sendDoneBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, DoneInput> doneRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 10000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
 
         Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
 
@@ -359,7 +358,7 @@ public class DialogBeskjedTest {
 
 
         ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 10000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
 
         Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
@@ -373,7 +372,7 @@ public class DialogBeskjedTest {
         brukernotifikasjonService.sendDoneBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, DoneInput> doneRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 10000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
 
         Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
 
