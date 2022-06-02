@@ -82,7 +82,6 @@ public class EksternVarslingKvitteringTest {
     @LocalServerPort
     private int port;
 
-    private final static String BESKJED_KVITTERINGS_PREFIX = "B-veilarbdialog-";
     private final static String OPPGAVE_KVITTERINGS_PREFIX = "O-veilarbdialog-";
 
     @Before
@@ -150,7 +149,7 @@ public class EksternVarslingKvitteringTest {
 
 
     private DoknotifikasjonStatus lagDoknotifikasjonStatusMelding(UUID eventId, String status) {
-        String bestillingsId = OPPGAVE_KVITTERINGS_PREFIX + eventId;
+        String bestillingsId = eventId.toString();
         return DoknotifikasjonStatus
                 .newBuilder()
                 .setStatus(status)

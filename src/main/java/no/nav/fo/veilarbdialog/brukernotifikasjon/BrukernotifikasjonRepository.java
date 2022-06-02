@@ -144,6 +144,40 @@ public class BrukernotifikasjonRepository {
         jdbcTemplate.update(sql, params);
     }
 
+    public void setEksternVarselFeilet(String bestillingsId) {
+        MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("bestillingsId", bestillingsId)
+                .addValue("varselKvitteringStatus", VarselKvitteringStatus.FEILET.toString());
+        jdbcTemplate.update("""
+             update BRUKERNOTIFIKASJON
+               set
+                VARSEL_FEILET = current_timestamp,
+                VARSEL_KVITTERING_STATUS = :varselKvitteringStatus
+                    where EVENT_ID = :bestillingsId
+                 """, param);
+    }
+
+    public void setEksternVarselSendtOk(String bestillingsId) {
+        MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("bestillingsId", bestillingsId)
+                .addValue("varselKvitteringStatusOk", VarselKvitteringStatus.OK.name())
+                .addValue("varselKvitteringStatusFeilet", VarselKvitteringStatus.FEILET.name())
+                .addValue("brukernotifikasjonBehandlingStatusAvsluttet", BrukernotifikasjonBehandlingStatus.AVSLUTTET.name());
+
+        jdbcTemplate.update("""
+                   update BRUKERNOTIFIKASJON
+                    set
+                       BEKREFTET_SENDT = CURRENT_TIMESTAMP,
+                       VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
+                       where BRUKERNOTIFIKASJON.VARSEL_KVITTERING_STATUS != :varselKvitteringStatusFeilet
+                       and STATUS != :brukernotifikasjonBehandlingStatusAvsluttet
+                       and EVENT_ID = :bestillingsId
+                       """
+                , param
+        );
+    }
+
+
     void bestillDoneForPeriode(UUID oppfolgingsperiodeUuid) {
         MapSqlParameterSource skalAvsluttes = new MapSqlParameterSource()
                 .addValue("oppfolgingsperiode", oppfolgingsperiodeUuid.toString())

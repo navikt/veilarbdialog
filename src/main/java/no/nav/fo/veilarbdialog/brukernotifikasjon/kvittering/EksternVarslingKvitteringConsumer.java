@@ -64,12 +64,12 @@ public class EksternVarslingKvitteringConsumer {
                 break;
             case FEILET:
                 log.error("varsel feilet for notifikasjon bestillingsId={} med melding {}", brukernotifikasjonBestillingsId, melding.getMelding());
-                kvitteringDAO.setEksternVarselFeilet(bestillingsId);
+                brukernotifikasjonRepository.setEksternVarselFeilet(bestillingsId);
                 break;
             case FERDIGSTILT:
                 if (melding.getDistribusjonId() != null) {
                     // Kan komme første gang og på resendinger
-                    kvitteringDAO.setEksternVarselSendtOk(bestillingsId);
+                    brukernotifikasjonRepository.setEksternVarselSendtOk(bestillingsId);
                     log.info("Brukernotifikasjon fullført for bestillingsId={}", brukernotifikasjonBestillingsId);
                 } else {
                     log.info("Hele bestillingen inkludert revarsling er ferdig, bestillingsId={}", brukernotifikasjonBestillingsId);
