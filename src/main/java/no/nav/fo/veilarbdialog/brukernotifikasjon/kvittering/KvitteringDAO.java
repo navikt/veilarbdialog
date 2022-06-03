@@ -64,12 +64,13 @@ public class KvitteringDAO {
                 .addValue("date", new Date(Instant.now().minusSeconds(60 * 60 * timerForsinkelse).toEpochMilli()));
 
         // language=SQL
-        String sql = "" +
-                " select count(*) " +
-                " from BRUKERNOTIFIKASJON " +
-                " where VARSEL_KVITTERING_STATUS = 'IKKE_SATT' " +
-                " and STATUS = 'SENDT' " +
-                " and FORSOKT_SENDT < :date ";
+        String sql = """
+             select count(*)
+             from BRUKERNOTIFIKASJON
+             where VARSEL_KVITTERING_STATUS = 'IKKE_SATT'
+             and STATUS = 'SENDT'
+             and FORSOKT_SENDT < :date
+            """;
 
         return jdbc.queryForObject(sql, parameterSource, int.class);
     }
