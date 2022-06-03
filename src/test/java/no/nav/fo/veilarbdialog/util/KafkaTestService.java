@@ -27,8 +27,10 @@ import static org.awaitility.Awaitility.await;
 public class KafkaTestService {
 
     private final ConsumerFactory<Object, Object> avroAvroConsumerFactory;
+    private final ConsumerFactory<String, String> stringStringConsumerFactory;
     private final Admin kafkaAdminClient;
     private @Value("${spring.kafka.consumer.group-id}") String aivenGroupId;
+
 
     public Consumer createAvroAvroConsumer(String topic) {
         String randomGroup = UUID.randomUUID().toString();
@@ -38,6 +40,17 @@ public class KafkaTestService {
         seekToEnd(topic, newConsumer);
         return newConsumer;
     }
+
+    public Consumer createStringStringConsumer(String topic) {
+        String randomGroup = UUID.randomUUID().toString();
+        Properties modifisertConfig = new Properties();
+        modifisertConfig.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        Consumer newConsumer = stringStringConsumerFactory.createConsumer(randomGroup, null, null, modifisertConfig);
+        seekToEnd(topic, newConsumer);
+        return newConsumer;
+    }
+
+
 
     public void seekToEnd(String topic, Consumer newConsumer) {
         List<PartitionInfo> partitionInfos = newConsumer.partitionsFor(topic);

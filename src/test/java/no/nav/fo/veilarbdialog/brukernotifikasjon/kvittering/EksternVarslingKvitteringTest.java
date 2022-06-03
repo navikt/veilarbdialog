@@ -102,7 +102,7 @@ public class EksternVarslingKvitteringTest {
 
         StartEskaleringDto startEskaleringDto =
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
-        EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(veileder, startEskaleringDto);
+        EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(port, veileder, startEskaleringDto);
 
         BrukernotifikasjonEntity opprinneligBrukernotifikasjon = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(startEskalering.tilhorendeDialogId(), BrukernotifikasjonsType.OPPGAVE).get(0);
 

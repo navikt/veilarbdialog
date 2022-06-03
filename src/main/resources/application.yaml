@@ -128,7 +128,7 @@ application:
   kafka:
     brokersUrl: ${KAFKA_BROKERS_URL}
     endringPaaDialogTopic: ${ENDRING_PAA_DIALOG_TOPIC}
-    oppfolgingAvsluttetTopic: ${OPPFOLGING_AVSLUTTET_TOPIC}
+
     kvpAvsluttetTopic: ${KVP_AVSLUTTET_TOPIC}
   aktorRegister:
     url: ${AKTOERREGISTER_API_V1_URL}
@@ -152,7 +152,7 @@ application:
       url: ${VEILARBPERSONAPI_URL}
   topic:
     inn:
-      sisteOppfolgingsperiode: pto.siste-oppfolgingsperiode-v1
+      oppfolgingsperiode: pto.oppfolgingsperiode-v1
       eksternVarselKvittering: teamdokumenthandtering.aapen-dok-notifikasjon-status
     ut:
       brukernotifikasjon:
