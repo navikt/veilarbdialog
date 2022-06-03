@@ -10,7 +10,7 @@ import java.util.UUID;
 @Builder
 @Data
 @With
-public class SisteOppfolgingsperiodeV1 {
+public class OppfolgingsperiodeV1 {
     UUID uuid;
     String aktorId;
     ZonedDateTime startDato;

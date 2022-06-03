@@ -32,7 +32,7 @@ public class SistePeriodeServiceTest {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         UUID oppfolgingsperiodeId = UUID.randomUUID();
         Oppfolgingsperiode oppfolgingsperiode = new Oppfolgingsperiode(mockBruker.getAktorId(), oppfolgingsperiodeId, ZonedDateTime.now().minusDays(5), null);
-        sistePeriodeDAO.uppsertOppfolingsperide(oppfolgingsperiode);
+        sistePeriodeDAO.upsertOppfolgingsperiode(oppfolgingsperiode);
         UUID fraBasen = sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(mockBruker.getAktorIdAsAktorId());
         assertThat(fraBasen).isEqualTo(oppfolgingsperiodeId);
     }
@@ -42,7 +42,7 @@ public class SistePeriodeServiceTest {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         UUID oppfolgingsperiodeId = UUID.randomUUID();
         Oppfolgingsperiode avsluttet = new Oppfolgingsperiode(mockBruker.getAktorId(), oppfolgingsperiodeId, ZonedDateTime.now().minusDays(5), ZonedDateTime.now());
-        sistePeriodeDAO.uppsertOppfolingsperide(avsluttet);
+        sistePeriodeDAO.upsertOppfolgingsperiode(avsluttet);
         UUID fraVeilarbOppfolging = sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(mockBruker.getAktorIdAsAktorId());
         assertThat(fraVeilarbOppfolging).isEqualTo(mockBruker.getOppfolgingsperiode());
 
