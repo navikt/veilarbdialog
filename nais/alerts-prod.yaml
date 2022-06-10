@@ -11,7 +11,7 @@ spec:
       channel: '#team_dab_alerts'
       prependText: '<!here> | '
   alerts:
-    - alert: Høy feilrate veilarbdialog
+    - alert: Høy feilrate i veilarbdialog
       expr: |
         (((
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http",code!~'(^[23].*)'}[5m] ) ) /
@@ -19,11 +19,18 @@ spec:
         and ( (
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http",code!~'(^[23].*)'}[1h] ) ) /
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[1h] ) ) )  > (14.4*0.001) ))
-        or ( ( (
-        sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http",code!~'(^[23].*)'}[30m] ) ) /
+      for: 1s
+      severity: danger
+      description: Høy feilrate mot veilarbdialog.
+      action: https://logs.adeo.no/goto/3e24330cd8dbe344a1b5d0c4e1cb4d48   https://grefana.nais.io/d/000000283/nais-app-dashbord?orgId=1&var-interval=$__auto_interval_interval&var-datasource=prod-fss&var-team=pto&var-app=veilarbdialog&var-namespace=All&var-docker_image=5e399fce17a0617acda62a3b4c969210d05abc17&var-ingress_url=All&from=now-6h&to=now
+      sla: se på denne så fort som mulig (innefor arbeidstid)
+    - alert: Høy 3-dagers 5** feilrate i veilarbdialog
+      expr: |
+        ( ( (
+        sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http",code!~'(^[234].*)'}[30m] ) ) /
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[30m] ) ) )  > (6*0.001) )
         and ( (
-        sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http",code!~'(^[23].*)'}[6h] ) ) /
+        sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http",code!~'(^[234].*)'}[6h] ) ) /
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[6h] ) ) )  > (6*0.001)))
       for: 1s
       severity: danger
