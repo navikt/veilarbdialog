@@ -13,7 +13,7 @@ spec:
     - https://app-q1.adeo.no/veilarbdialog
     - https://app-q1.dev.adeo.no/veilarbdialog
     - https://app.dev.adeo.no/veilarbdialog
-    - https://veilarbpersonflate.dev.intern.nav.no/veilarbdialog
+    - https://veilarbdialog.dev-fss-pub.nais.io
   port: 8080
   prometheus:
     enabled: true
@@ -67,6 +67,9 @@ spec:
       rules:
         - application: veilarbapi
           namespace: pto
+          cluster: dev-gcp
+        - application: veilarbpersonflate
+          namespace: poao
           cluster: dev-gcp
   env:
     - name: APP_ENVIRONMENT_NAME

@@ -34,7 +34,7 @@ spec:
   ingresses:
     - https://veilarbdialog.nais.adeo.no
     - https://app.adeo.no/veilarbdialog
-    - https://veilarbpersonflate.intern.nav.no/veilarbdialog
+    - https://veilarbdialog.prod-fss-pub.nais.io
   envFrom:
     - configmap: pto-config
     - configmap: loginservice-idporten
@@ -65,6 +65,9 @@ spec:
       rules:
         - application: veilarbapi
           namespace: pto
+          cluster: prod-gcp
+        - application: veilarbpersonflate
+          namespace: poao
           cluster: prod-gcp
   env:
     - name: APP_ENVIRONMENT_NAME
