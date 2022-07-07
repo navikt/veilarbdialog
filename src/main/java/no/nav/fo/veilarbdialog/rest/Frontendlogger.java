@@ -3,7 +3,6 @@ package no.nav.fo.veilarbdialog.rest;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
-import lombok.extern.slf4j.Slf4j;
 import no.nav.common.metrics.Event;
 import no.nav.common.metrics.MetricsClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +14,6 @@ import java.util.Map;
 
 import static no.nav.common.utils.EnvironmentUtils.isProduction;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/logger")
