@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.rest;
+package no.nav.fo.veilarbdialog.metrics;
 
 import no.nav.common.metrics.Event;
 import no.nav.common.metrics.MetricsClient;

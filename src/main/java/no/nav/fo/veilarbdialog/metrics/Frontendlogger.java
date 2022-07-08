@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.rest;
+package no.nav.fo.veilarbdialog.metrics;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class Frontendlogger {
 
     @Data
     @Accessors(chain = true)
-    static class FrontendEvent {
+    public static class FrontendEvent {
         String name;
         Map<String, Object> fields;
         Map<String, String> tags;

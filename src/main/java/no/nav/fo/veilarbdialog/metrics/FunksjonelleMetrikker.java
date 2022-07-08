@@ -6,12 +6,14 @@ import no.nav.common.metrics.MetricsClient;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
+import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
 import static no.nav.fo.veilarbdialog.util.DateUtils.nullSafeMsSiden;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+@Service
 @RequiredArgsConstructor
 public class FunksjonelleMetrikker {
 
