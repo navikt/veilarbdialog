@@ -40,4 +40,5 @@ public class ApplicationConfig {
     public LeaderElectionClient leaderElectionClient(LockProvider lockProvider) {
         return new ShedLockLeaderElectionClient(lockProvider);
     }
+
 }
