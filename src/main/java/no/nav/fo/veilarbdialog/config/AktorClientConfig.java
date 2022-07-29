@@ -16,7 +16,7 @@ public class AktorClientConfig {
     @Bean
     @Profile("!local")
     public String pdlUrl() {
-        return createServiceUrl("pdl-api", "default", false);
+        return createServiceUrl("pdl-api", "pdl", false);
     }
 
     @Bean
