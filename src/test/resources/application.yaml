@@ -78,8 +78,6 @@ application:
       discoveryUrl: http://localhost:8080/IDPORTEN_DISCOVERY_URL
   abac:
     url: http://localhost:8080/ABAC_PDP_ENDPOINT_URL
-  aktorregister:
-    url: http://localhost:8080/AKTOERREGISTER_API_V1_URL
   azure:
     ad:
       clientId: VEILARBDIALOG_OIDC_CLIENT_ID
@@ -97,10 +95,7 @@ application:
       url: http://localhost:8080/KAFKA_BROKERS_URL
     topic: aapen-fo-endringPaaDialog-v1-APP_ENVIRONMENT_NAME
     endringPaaDialogTopic: endringPaaDialogTopic
-
     kvpAvsluttetTopic: kvpAvsluttetTopic
-  aktorRegister:
-    url: http://localhost:${wiremock.server.port}/aktorTjeneste
   oidc:
     disabled: true
   openam:
@@ -121,6 +116,9 @@ application:
   veilarbperson:
     api:
       url: http://localhost:${wiremock.server.port}/veilarbperson/api
+  pdl:
+    api:
+      url: http://localhost:${wiremock.server.port}/pdl
   topic:
     ut:
       brukernotifikasjon:

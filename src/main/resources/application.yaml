@@ -108,8 +108,6 @@ application:
   environment: ${APP_ENVIRONMENT_NAME}
   abac:
     url: ${ABAC_PDP_ENDPOINT_URL}
-  aktorregister:
-    url: ${AKTOERREGISTER_API_V1_URL}
   azure:
     ad:
       clientId: ${AZURE_APP_CLIENT_ID}
@@ -130,8 +128,6 @@ application:
     endringPaaDialogTopic: ${ENDRING_PAA_DIALOG_TOPIC}
 
     kvpAvsluttetTopic: ${KVP_AVSLUTTET_TOPIC}
-  aktorRegister:
-    url: ${AKTOERREGISTER_API_V1_URL}
   openam:
     clientId: ${VEILARBLOGIN_OPENAM_CLIENT_ID}
     discoveryUrl: ${OPENAM_DISCOVERY_URL}
