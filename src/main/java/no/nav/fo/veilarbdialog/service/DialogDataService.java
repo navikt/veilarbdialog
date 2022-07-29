@@ -3,7 +3,6 @@ package no.nav.fo.veilarbdialog.service;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
-import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
@@ -38,7 +37,6 @@ public class DialogDataService {
     private final DialogStatusService dialogStatusService;
     private final DataVarehusDAO dataVarehusDAO;
     private final KvpService kvpService;
-    private final UnleashClient unleashClient;
     private final KafkaProducerService kafkaProducerService;
     private final AuthService auth;
     private final KladdService kladdService;

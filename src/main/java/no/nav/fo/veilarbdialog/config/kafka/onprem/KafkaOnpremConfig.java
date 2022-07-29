@@ -1,7 +1,6 @@
 package no.nav.fo.veilarbdialog.config.kafka.onprem;
 
 import io.micrometer.core.instrument.MeterRegistry;
-import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.kafka.consumer.KafkaConsumerClient;
 import no.nav.common.kafka.consumer.util.KafkaConsumerClientBuilder;
 import no.nav.common.kafka.consumer.util.TopicConsumerConfig;
@@ -30,8 +29,7 @@ public class KafkaOnpremConfig {
     public KafkaConsumerClient consumerClient(
             List<TopicConsumerConfig<?, ?>> topicConfigs,
             MeterRegistry meterRegistry,
-            Properties onPremConsumerProperties,
-            UnleashClient unleashClient
+            Properties onPremConsumerProperties
     ) {
         var clientBuilder = KafkaConsumerClientBuilder.builder()
                 .withProperties(onPremConsumerProperties);
