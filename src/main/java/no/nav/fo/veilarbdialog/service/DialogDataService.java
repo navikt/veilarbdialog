@@ -54,8 +54,6 @@ public class DialogDataService {
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person) {
         String aktorId = hentAktoerIdForPerson(person);
-        // TODO fjern
-        log.info("Hentet aktorid {} for person {}", aktorId, person.get());
         auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
         return dialogDAO.hentDialogerForAktorId(aktorId);
     }
