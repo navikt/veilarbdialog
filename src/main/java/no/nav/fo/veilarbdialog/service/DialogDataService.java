@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
@@ -30,6 +31,7 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class DialogDataService {
 
     private final AktorOppslagClient aktorOppslagClient;
@@ -52,6 +54,8 @@ public class DialogDataService {
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person) {
         String aktorId = hentAktoerIdForPerson(person);
+        // TODO fjern
+        log.info("Hentet aktorid {} for person {}", aktorId, person.get());
         auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
         return dialogDAO.hentDialogerForAktorId(aktorId);
     }
