@@ -11,9 +11,9 @@ spec:
       channel: '#team_dab_alerts'
       prependText: '<!here> | '
   alerts:
-    - alert: Høy feilrate veilarbdialog
+    - alert: Høy feilrate veilarbdialog dagtid
       expr: |
-        (((
+        ((((
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http",code!~'(^[23].*)'}[5m] ) ) /
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[5m]) ) )  > (14.4*0.001))
         and ( (
@@ -24,7 +24,8 @@ spec:
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[30m] ) ) )  > (6*0.001) )
         and ( (
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http",code!~'(^[23].*)'}[6h] ) ) /
-        sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[6h] ) ) )  > (6*0.001)))
+        sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[6h] ) ) )  > (6*0.001))))        
+        and ( hour(vector(time())) >= 06 and hour(vector(time())) <= 23 )
       for: 1m
       severity: danger
       description: Høy feilrate mot veilarbdialog.

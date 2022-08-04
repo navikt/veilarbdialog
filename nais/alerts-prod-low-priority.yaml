@@ -17,9 +17,11 @@ spec:
         (((
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http",code!~'(^[23].*)'}[24h]    )  )  /
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[24h]    )    ) )  > (3*0.001) )
-        and  (  (
+        and  ((
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http",code!~'(^[23].*)'}[2h]    )  )  /
-        sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[2h]    )    ) )  > (3*0.001) ) )
+        sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[2h]    )    ) )  > (3*0.001) 
+            and ( hour(vector(time())) >= 06 and hour(vector(time())) <= 23 
+        )))
       for: 8h
       severity: warning
       description: Vedvarende 500 feilrate i veilarbdialog
