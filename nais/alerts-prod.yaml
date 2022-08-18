@@ -25,7 +25,7 @@ spec:
         and ( (
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http",code!~'(^[23].*)'}[6h] ) ) /
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[6h] ) ) )  > (6*0.001))))        
-        and ( hour(vector(time())) >= 6 and hour(vector(time())) <= 22 )
+        and (sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[15m]) ) > 30)
       for: 1m
       severity: danger
       description: Høy feilrate mot veilarbdialog.
