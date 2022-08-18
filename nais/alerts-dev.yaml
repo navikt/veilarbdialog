@@ -28,5 +28,5 @@ spec:
       for: 1s
       severity: danger
       description: Høy feilrate mot veilarbdialog.
-      action: https://grefana.nais.io/d/z4LNWq-Mz/dab-alarmer \n https://logs.adeo.no/goto/cdf0a76551d4f4731d872ef702d60ff6
+      action: https://grafana.nais.io/d/z4LNWq-Mz/dab-alarmer \n https://logs.adeo.no/goto/cdf0a76551d4f4731d872ef702d60ff6
       sla: se på denne så fort som mulig (innefor arbeidstid)

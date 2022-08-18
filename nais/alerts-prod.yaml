@@ -25,11 +25,11 @@ spec:
         and ( (
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http",code!~'(^[23].*)'}[6h] ) ) /
         sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[6h] ) ) )  > (6*0.001))))        
-        and ( hour(vector(time())) >= 6 and hour(vector(time())) <= 22 )
+        and (sum(rate(traefik_backend_requests_total{backend=~"^app.adeo.no/veilarbdialog|^veilarbdialog.nais.adeo.no/",protocol="http"}[15m]) ) > 30)
       for: 1m
       severity: danger
       description: Høy feilrate mot veilarbdialog.
-      action: https://logs.adeo.no/goto/3e24330cd8dbe344a1b5d0c4e1cb4d48   https://grefana.nais.io/d/000000283/nais-app-dashbord?orgId=1&var-interval=$__auto_interval_interval&var-datasource=prod-fss&var-team=pto&var-app=veilarbdialog&var-namespace=All&var-docker_image=5e399fce17a0617acda62a3b4c969210d05abc17&var-ingress_url=All&from=now-6h&to=now
+      action: https://logs.adeo.no/goto/3e24330cd8dbe344a1b5d0c4e1cb4d48   https://grafana.nais.io/d/000000283/nais-app-dashbord?orgId=1&var-interval=$__auto_interval_interval&var-datasource=prod-fss&var-team=pto&var-app=veilarbdialog&var-namespace=All&var-docker_image=5e399fce17a0617acda62a3b4c969210d05abc17&var-ingress_url=All&from=now-6h&to=now
       sla: se på denne så fort som mulig (innefor arbeidstid)
     - alert: feil ved deploy?
       expr: 'kube_deployment_status_replicas_unavailable{deployment="veilarbdialog"} > 0'
