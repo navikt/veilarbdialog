@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
 
-@Profile("!local")
 @Service
 @RequiredArgsConstructor
 public class SecureRequestLoggerFilter implements Filter {
