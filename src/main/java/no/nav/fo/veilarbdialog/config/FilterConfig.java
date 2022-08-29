@@ -159,10 +159,19 @@ public class FilterConfig {
     }
 
     @Bean
+    public FilterRegistrationBean<SecureRequestLoggerFilter> secureRequestLoggerFilterFilterRegistrationBean(SecureRequestLoggerFilter filter) {
+        FilterRegistrationBean<SecureRequestLoggerFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(filter);
+        registration.addUrlPatterns("/api/*");
+        registration.setOrder(4);
+        return registration;
+    }
+
+    @Bean
     public FilterRegistrationBean<SetStandardHttpHeadersFilter> setStandardHeadersFilterRegistrationBean() {
         FilterRegistrationBean<SetStandardHttpHeadersFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new SetStandardHttpHeadersFilter());
-        registration.setOrder(4);
+        registration.setOrder(5);
         registration.addUrlPatterns("/*");
         return registration;
     }
