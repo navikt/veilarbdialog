@@ -69,6 +69,9 @@ spec:
         - application: veilarbpersonflate
           namespace: poao
           cluster: prod-gcp
+        - application: mulighetsrommet-api
+          namespace: team-mulighetsrommet
+          cluster: prod-gcp
   env:
     - name: APP_ENVIRONMENT_NAME
       value: p
