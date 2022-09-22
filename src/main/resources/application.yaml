@@ -112,8 +112,6 @@ application:
     ad:
       clientId: ${AZURE_APP_CLIENT_ID}
       discoveryUrl: ${AZURE_APP_WELL_KNOWN_URL}
-      loginservice:
-        clientId: ${VEILARBLOGIN_AAD_CLIENT_ID}
     b2c:
       clientId: ${AAD_B2C_CLIENTID_USERNAME}
       discoveryUrl: ${AAD_B2C_DISCOVERY_URL}
@@ -131,7 +129,6 @@ application:
   openam:
     clientId: ${VEILARBLOGIN_OPENAM_CLIENT_ID}
     discoveryUrl: ${OPENAM_DISCOVERY_URL}
-    refreshUrl: ${VEILARBLOGIN_OPENAM_REFRESH_URL}
   serviceuser:
     username: ${SERVICEUSER_USERNAME}
     password: ${SERVICEUSER_PASSWORD}
