@@ -68,8 +68,8 @@ public class KafkaProducerService {
 
 
     @SneakyThrows
-    private void sendSync(ProducerRecord<String, String> record) {
-        stringStringKafkaTemplate.send(record).get();
+    private void sendSync(ProducerRecord<String, String> producerRecord) {
+        stringStringKafkaTemplate.send(producerRecord).get();
     }
 
     private ProducerRecord<String, String> opprettKafkaMelding(String topic, String key, String value) {
