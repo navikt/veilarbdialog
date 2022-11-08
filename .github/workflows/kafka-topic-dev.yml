@@ -18,7 +18,7 @@ jobs:
       - name: Deploy kafka topics
         uses: nais/deploy/actions/deploy@v1
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          APIKEY: ${{ secrets.DAB_NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: ${{ env.RESOURCE_FILES }}
           PRINT_PAYLOAD: true
