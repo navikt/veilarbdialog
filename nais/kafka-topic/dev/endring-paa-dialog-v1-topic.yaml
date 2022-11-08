@@ -15,7 +15,7 @@ spec:
     partitions: 2
     replication: 2
   acl:
-    - team: dab
+    - team: pto
       application: veilarbdialog
       access: write
     - team: pto
