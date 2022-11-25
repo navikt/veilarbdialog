@@ -51,6 +51,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst.OPPGAVE_SMS_TEKST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertTrue;
@@ -123,6 +124,7 @@ public class EskaleringsvarselControllerTest {
 
 
     @Test
+    @SuppressWarnings("java:S5961")
     public void start_eskalering_happy_case() {
 
         MockBruker bruker = MockNavService.createHappyBruker();
@@ -137,8 +139,6 @@ public class EskaleringsvarselControllerTest {
         int sikkerhetsNivaa = 4;
         // Lenke som blir aktivert når bruker klikker på eventet
         String eventLink;
-        // Hvis null, default "Hei! Du har fått en ny beskjed på Ditt NAV. Logg inn og se hva beskjeden gjelder. Vennlig hilsen NAV"
-        String brukernotifikasjonSmsVarslingTekst = "Hei! Du har fått en ny viktig oppgave på Ditt NAV. Logg inn og se hva oppgaven gjelder. Vennlig hilsen NAV";
         // Hvis null, default "Beskjed fra NAV"
         String brukernotifikasjonEpostVarslingTittel = "Viktig oppgave";
         // Hvis null, default "<!DOCTYPE html><html><head><title>Melding</title></head><body><p>Hei!</p><p>Du har fått en ny beskjed på Ditt NAV. Logg inn og se hva beskjeden gjelder.</p><p>Vennlig hilsen</p><p>NAV</p></body></html>"
@@ -191,7 +191,7 @@ public class EskaleringsvarselControllerTest {
 
             assertions.assertThat(oppgaveInput.getEpostVarslingstittel()).isEqualTo(brukernotifikasjonEpostVarslingTittel);
             assertions.assertThat(oppgaveInput.getEpostVarslingstekst()).isEqualTo(brukernotifikasjonEpostVarslingTekst);
-            assertions.assertThat(oppgaveInput.getSmsVarslingstekst()).isEqualTo(brukernotifikasjonSmsVarslingTekst);
+            assertions.assertThat(oppgaveInput.getSmsVarslingstekst()).isEqualTo(OPPGAVE_SMS_TEKST);
             assertions.assertAll();
         });
     }
@@ -307,7 +307,7 @@ public class EskaleringsvarselControllerTest {
     @Test
     public void bruker_ikke_under_oppfolging() {
         MockBruker bruker = MockNavService.createHappyBruker();
-        BrukerOptions reservertKrr = bruker.getBrukerOptions().toBuilder().underOppfolging(false).build() ;
+        BrukerOptions reservertKrr = bruker.getBrukerOptions().toBuilder().underOppfolging(false).build();
         MockNavService.updateBruker(bruker, reservertKrr);
 
         MockVeileder veileder = MockNavService.createVeileder(bruker);
@@ -353,7 +353,7 @@ public class EskaleringsvarselControllerTest {
         assertThat(eskaleringsvarselDtos).hasSize(4);
         EskaleringsvarselDto eldste = eskaleringsvarselDtos.get(3);
 
-        SoftAssertions.assertSoftly( assertions -> {
+        SoftAssertions.assertSoftly(assertions -> {
             assertions.assertThat(eldste.tilhorendeDialogId()).isNotNull();
             assertions.assertThat(eldste.id()).isNotNull();
             assertions.assertThat(eldste.opprettetAv()).isEqualTo(veileder.getNavIdent());
@@ -378,27 +378,23 @@ public class EskaleringsvarselControllerTest {
 
         StartEskaleringDto startEskaleringDto =
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "Dialog overskrift", "henvendelseTekst");
-        final EskaleringsvarselDto[] startEskalering = new EskaleringsvarselDto[1];
-
 
         for (int i = 0; i < antallKall; i++) {
             bakgrunnService.submit(() -> {
-                    try {
-                        startEskalering[0] = dialogTestService.startEskalering(port, veileder, startEskaleringDto);
-                    } catch (Exception e) {
-                        log.warn("Feil i tråd.", e);
-                    } finally {
-                        latch.countDown();
-                    }
-                });
-            }
+                try {
+                    dialogTestService.startEskalering(port, veileder, startEskaleringDto);
+                } catch (Exception e) {
+                    log.warn("Feil i tråd.", e);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
         latch.await();
-
-        EskaleringsvarselDto eskaleringsvarselDto = startEskalering[0];
 
         requireGjeldende(veileder, bruker);
 
-        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 10000L);
+        KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 10000L);
         kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonOppgaveTopic, brukerNotifikasjonOppgaveConsumer);
     }
 
@@ -410,7 +406,7 @@ public class EskaleringsvarselControllerTest {
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
         dialogTestService.startEskalering(port, veileder, startEskaleringDto);
 
-        Response response = bruker.createRequest()
+        bruker.createRequest()
                 .when()
                 .get("/veilarbdialog/api/eskaleringsvarsel/gjeldende")
                 .then()
@@ -464,10 +460,9 @@ public class EskaleringsvarselControllerTest {
         MockVeileder veileder = MockNavService.createVeileder(bruker);
 
 
-
         StartEskaleringDto startEskaleringDto =
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
-        EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(port, veileder, startEskaleringDto);
+        dialogTestService.startEskalering(port, veileder, startEskaleringDto);
 
         Thread.sleep(1000L);
         // Batchen bestiller beskjeder ved nye dialoger (etter 1000 ms)
@@ -480,7 +475,6 @@ public class EskaleringsvarselControllerTest {
         KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 10000L);
         // sjekk at det ikke ble sendt beskjed på dialogmelding
         assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
-
 
 
     }
@@ -517,8 +511,8 @@ public class EskaleringsvarselControllerTest {
         brukernotifikasjonService.sendDoneBrukernotifikasjoner();
     }
 
-    private DialogDTO lesHenvendelse(MockBruker bruker, long dialogId) {
-        DialogDTO dialog = bruker.createRequest()
+    private void lesHenvendelse(MockBruker bruker, long dialogId) {
+        bruker.createRequest()
                 .put("/veilarbdialog/api/dialog/{dialogId}/les", dialogId)
                 .then()
                 .assertThat().statusCode(HttpStatus.OK.value())
@@ -526,7 +520,6 @@ public class EskaleringsvarselControllerTest {
                 .response()
                 .as(DialogDTO.class);
         brukernotifikasjonService.sendDoneBrukernotifikasjoner();
-        return dialog;
     }
 
     private GjeldendeEskaleringsvarselDto requireGjeldende(MockVeileder veileder, MockBruker mockBruker) {
