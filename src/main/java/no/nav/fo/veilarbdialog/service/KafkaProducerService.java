@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.json.JsonUtils;
-import no.nav.common.kafka.producer.KafkaProducerClient;
 import no.nav.common.utils.IdUtils;
-import no.nav.fo.veilarbdialog.config.kafka.onprem.KafkaOnpremProperties;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static no.nav.common.log.LogFilter.PREFERRED_NAV_CALL_ID_HEADER_NAME;
 
@@ -28,10 +25,6 @@ import static no.nav.common.log.LogFilter.PREFERRED_NAV_CALL_ID_HEADER_NAME;
 @RequiredArgsConstructor
 @Service
 public class KafkaProducerService {
-
-    private final KafkaOnpremProperties kafkaProperties;
-
-    private final KafkaProducerClient<String, String> producerClient;
 
     private final KafkaDAO kafkaDAO;
 
@@ -45,9 +38,7 @@ public class KafkaProducerService {
     public void sendDialogMelding(KafkaDialogMelding kafkaDialogMelding) {
         var kafkaStringMelding = JsonUtils.toJson(kafkaDialogMelding);
         String aktorId = kafkaDialogMelding.getAktorId();
-        String onpremTopic = kafkaProperties.getEndringPaaDialogTopic();
 
-        producerClient.sendSync(opprettKafkaMelding(onpremTopic, aktorId, kafkaStringMelding));
         sendSync(opprettKafkaMelding(endringPaaDialogTopic, aktorId, kafkaStringMelding));
     }
 
