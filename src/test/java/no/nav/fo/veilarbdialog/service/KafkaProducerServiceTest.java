@@ -11,7 +11,6 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -29,7 +28,7 @@ public class KafkaProducerServiceTest {
     @Value("${application.topic.ut.endringPaaDialog}")
     private String aivenEndringPaaDialogTopic;
 
-    @Value("${application.kafka.endringPaaDialogTopic}")
+    @Value("${application.topic.ut.endringPaaDialog}")
     private String onPremEndringPaaDialogTopic;
 
     @Test

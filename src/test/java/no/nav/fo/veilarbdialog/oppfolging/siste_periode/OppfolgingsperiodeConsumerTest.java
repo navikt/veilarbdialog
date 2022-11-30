@@ -44,7 +44,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
     Consumer<String, String> endringPaaDialogConsumer;
 
-    @Value("${application.kafka.endringPaaDialogTopic}")
+    @Value("${application.topic.ut.endringPaaDialog}")
     String endringPaaDialogTopic;
 
     @Value("${application.topic.inn.oppfolgingsperiode}")
