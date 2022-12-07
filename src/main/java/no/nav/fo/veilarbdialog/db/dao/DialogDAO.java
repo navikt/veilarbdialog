@@ -214,6 +214,7 @@ public class DialogDAO {
                             dialogId);
             return DialogData.builder()
                     .id(dialogId)
+                    .arenaId(ArenaId.of(rs.getString("ARENA_ID")))
                     .aktorId(rs.getString("AKTOR_ID"))
                     .aktivitetId(rs.getString("AKTIVITET_ID"))
                     .overskrift(rs.getString("OVERSKRIFT"))
