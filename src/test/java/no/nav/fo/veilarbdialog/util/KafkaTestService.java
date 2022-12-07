@@ -64,6 +64,14 @@ public class KafkaTestService {
         newConsumer.commitSync(Duration.ofSeconds(10));
     }
 
+    public void assertHasNewRecord(String topic, Consumer consumer) {
+        await().atMost(10, SECONDS).until(() -> {
+            var records = consumer.poll(Duration.ofMillis(10));
+            return records.records(topic).iterator().hasNext();
+        });
+    }
+
+
     public void assertErKonsumertAiven(String topic, long producerOffset, int partition, int timeOutSeconds) {
         await().atMost(timeOutSeconds, SECONDS).until(() -> erKonsumert(topic, aivenGroupId, producerOffset,partition));
     }

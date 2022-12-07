@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.config;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.core.LockingTaskExecutor;
@@ -8,6 +9,7 @@ import no.nav.common.auth.context.AuthContextHolder;
 import no.nav.common.auth.context.AuthContextHolderThreadLocal;
 import no.nav.common.job.leader_election.LeaderElectionClient;
 import no.nav.common.job.leader_election.ShedLockLeaderElectionClient;
+import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -40,4 +42,10 @@ public class ApplicationConfig {
     public LeaderElectionClient leaderElectionClient(LockProvider lockProvider) {
         return new ShedLockLeaderElectionClient(lockProvider);
     }
+
+    @Bean
+    MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
+        return registry -> registry.config().commonTags("application", "veilarbdialog");
+    }
+
 }

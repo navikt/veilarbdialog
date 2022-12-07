@@ -1,0 +1,26 @@
+apiVersion: kafka.nais.io/v1
+kind: Topic
+metadata:
+  name: endring-paa-dialog-v1
+  namespace: dab
+  labels:
+    team: dab
+
+spec:
+  pool: nav-prod
+  config:
+    cleanupPolicy: delete
+    retentionHours: 168 # 7 dager
+    minimumInSyncReplicas: 2
+    partitions: 2
+    replication: 3
+  acl:
+    - team: pto
+      application: veilarbdialog
+      access: write
+    - team: pto
+      application: veilarbportefolje
+      access: read
+    - team: pto
+      application: pto-kafka-manager
+      access: read

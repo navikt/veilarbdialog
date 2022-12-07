@@ -1,27 +1,33 @@
 package no.nav.fo.veilarbdialog.config;
 
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
-import no.nav.common.client.aktoroppslag.AktorregisterHttpClient;
 import no.nav.common.client.aktoroppslag.CachedAktorOppslagClient;
-import no.nav.common.client.aktorregister.AktorregisterClient;
-import no.nav.common.sts.SystemUserTokenProvider;
-import org.springframework.beans.factory.annotation.Value;
+import no.nav.common.client.aktoroppslag.PdlAktorOppslagClient;
+import no.nav.common.token_client.client.MachineToMachineTokenClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+
+import static no.nav.common.utils.EnvironmentUtils.isProduction;
+import static no.nav.common.utils.UrlUtils.createServiceUrl;
 
 @Configuration
 public class AktorClientConfig {
-    @Value("${application.aktorRegister.url}")
-    private String aktorRegisterUrl;
-    @Value("${spring.application.name}")
-    private String applicationName;
 
     @Bean
-    public AktorOppslagClient aktorOppslagClient(SystemUserTokenProvider tokenProvider) {
-        AktorregisterClient aktorregisterClient = new AktorregisterHttpClient(
-            aktorRegisterUrl, applicationName, tokenProvider::getSystemUserToken
-        );
+    @Profile("!local")
+    public String pdlUrl() {
+        return createServiceUrl("pdl-api", "pdl", false);
+    }
 
-        return new CachedAktorOppslagClient(aktorregisterClient);
+    @Bean
+    public AktorOppslagClient aktorClient(String pdlUrl, MachineToMachineTokenClient tokenClient) {
+        String tokenScop = String.format("api://%s-fss.pdl.pdl-api/.default",
+                isProduction().orElse(false) ? "prod" : "dev"
+        );
+        return new CachedAktorOppslagClient(new PdlAktorOppslagClient(
+                pdlUrl,
+                () -> tokenClient.createMachineToMachineToken(tokenScop))
+        );
     }
 }

@@ -108,14 +108,10 @@ application:
   environment: ${APP_ENVIRONMENT_NAME}
   abac:
     url: ${ABAC_PDP_ENDPOINT_URL}
-  aktorregister:
-    url: ${AKTOERREGISTER_API_V1_URL}
   azure:
     ad:
       clientId: ${AZURE_APP_CLIENT_ID}
       discoveryUrl: ${AZURE_APP_WELL_KNOWN_URL}
-      loginservice:
-        clientId: ${VEILARBLOGIN_AAD_CLIENT_ID}
     b2c:
       clientId: ${AAD_B2C_CLIENTID_USERNAME}
       discoveryUrl: ${AAD_B2C_DISCOVERY_URL}
@@ -130,12 +126,9 @@ application:
     endringPaaDialogTopic: ${ENDRING_PAA_DIALOG_TOPIC}
 
     kvpAvsluttetTopic: ${KVP_AVSLUTTET_TOPIC}
-  aktorRegister:
-    url: ${AKTOERREGISTER_API_V1_URL}
   openam:
     clientId: ${VEILARBLOGIN_OPENAM_CLIENT_ID}
     discoveryUrl: ${OPENAM_DISCOVERY_URL}
-    refreshUrl: ${VEILARBLOGIN_OPENAM_REFRESH_URL}
   serviceuser:
     username: ${SERVICEUSER_USERNAME}
     password: ${SERVICEUSER_PASSWORD}
@@ -159,6 +152,7 @@ application:
         oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
         beskjed: min-side.aapen-brukernotifikasjon-beskjed-v1
         done: min-side.aapen-brukernotifikasjon-done-v1
+      endringPaaDialog: dab.endring-paa-dialog-v1
   brukernotifikasjon:
     grace:
       periode:

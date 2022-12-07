@@ -115,4 +115,21 @@ public class KafkaAivenConfig {
 
     // ************ konsumer ekstern-varsel-kvittering SLUTT ***************
 
+
+    // ************ produser endring-paa-dialog-v1 START ***************
+    @Bean
+    KafkaTemplate<String, String> kafkaStringStringTemplate(ProducerFactory<String, String> stringStringProducerFactory) {
+        return new KafkaTemplate<>(stringStringProducerFactory);
+    }
+
+    @Bean
+    ProducerFactory<String,String> stringStringProducerFactory(KafkaProperties kafkaProperties) {
+        Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties();
+        producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
+        producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);
+        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);
+        return new DefaultKafkaProducerFactory<>(producerProperties);
+    }
+
+    // ************ produser endring-paa-dialog-v1 SLUTT ***************
 }

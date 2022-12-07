@@ -40,14 +40,8 @@ public class FilterConfig {
     @Value("${application.openam.discoveryUrl}")
     private String openAmDiscoveryUrl;
 
-    @Value("${application.openam.refreshUrl}")
-    private String openAmRefreshUrl;
-
     @Value("${application.sts.discovery.url}")
     private String naisStsDiscoveryUrl;
-
-    @Value("${application.azure.ad.loginservice.clientId}")
-    private String azureAdLoginServiceClientId;
 
     @Value("${application.azure.ad.discoveryUrl}")
     private String azureAdDiscoveryUrl;
@@ -74,25 +68,6 @@ public class FilterConfig {
                 .withDiscoveryUrl(naisStsDiscoveryUrl)
                 .withClientIds(ALLOWED_SERVICE_USERS)
                 .withUserRole(UserRole.SYSTEM);
-    }
-
-    private OidcAuthenticatorConfig openAmAuthConfig() {
-        return new OidcAuthenticatorConfig()
-                .withDiscoveryUrl(openAmDiscoveryUrl)
-                .withClientId(openAmClientId)
-                .withIdTokenCookieName(OPEN_AM_ID_TOKEN_COOKIE_NAME)
-                .withRefreshTokenCookieName(REFRESH_TOKEN_COOKIE_NAME)
-                .withIdTokenFinder(new UserTokenFinder())
-                .withRefreshUrl(openAmRefreshUrl)
-                .withUserRole(UserRole.INTERN);
-    }
-
-    private OidcAuthenticatorConfig azureAdAuthConfig() {
-        return new OidcAuthenticatorConfig()
-                .withDiscoveryUrl(azureAdDiscoveryUrl)
-                .withClientId(azureAdLoginServiceClientId)
-                .withIdTokenCookieName(AZURE_AD_ID_TOKEN_COOKIE_NAME)
-                .withUserRole(UserRole.INTERN);
     }
 
     private OidcAuthenticatorConfig loginserviceIdportenConfig() {
@@ -132,6 +107,14 @@ public class FilterConfig {
         registration.addUrlPatterns("/*");
         return registration;
     }
+    @Bean
+    public FilterRegistrationBean<SecureRequestLoggerFilter> secureRequestLoggerFilterFilterRegistrationBean(SecureRequestLoggerFilter filter) {
+        FilterRegistrationBean<SecureRequestLoggerFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(filter);
+        registration.addUrlPatterns("/api/*");
+        registration.setOrder(3);
+        return registration;
+    }
 
     @Bean
     @ConditionalOnProperty(
@@ -143,8 +126,6 @@ public class FilterConfig {
         FilterRegistrationBean<OidcAuthenticationFilter> registration = new FilterRegistrationBean<>();
         var authenticationFilter = new OidcAuthenticationFilter(
                 fromConfigs(
-                        openAmAuthConfig(),
-                        azureAdAuthConfig(),
                         loginserviceIdportenConfig(),
                         openAmStsAuthConfig(),
                         naisStsAuthConfig(),
@@ -152,7 +133,7 @@ public class FilterConfig {
                 )
         );
         registration.setFilter(authenticationFilter);
-        registration.setOrder(3);
+        registration.setOrder(4);
         registration.addUrlPatterns("/api/*");
         registration.addUrlPatterns(("/internal/api/*"));
         return registration;
@@ -162,7 +143,7 @@ public class FilterConfig {
     public FilterRegistrationBean<SetStandardHttpHeadersFilter> setStandardHeadersFilterRegistrationBean() {
         FilterRegistrationBean<SetStandardHttpHeadersFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new SetStandardHttpHeadersFilter());
-        registration.setOrder(4);
+        registration.setOrder(5);
         registration.addUrlPatterns("/*");
         return registration;
     }
