@@ -5,6 +5,7 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ public class TestDataBuilder {
     public static DialogData nyDialog(String aktorId) {
         return DialogData.builder()
                 .id(new Random().nextLong())
+                .arenaId(Optional.empty())
                 .oppfolgingsperiode(UUID.randomUUID())
                 .aktorId(aktorId)
                 .henvendelser(emptyList())
