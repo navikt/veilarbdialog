@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
+import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
@@ -108,7 +109,7 @@ public class DialogDAOTest {
 
     @Test
     public void kanHenteDialogPaaAktivitetId() {
-        String aktivitetId = "aktivitetId";
+        var aktivitetId = AktivitetId.of("aktivitetId");
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isEmpty();
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().aktivitetId(aktivitetId).build());
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isPresent();

@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.domain;
 
 import lombok.Builder;
+import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.With;
 
@@ -14,10 +15,9 @@ import static java.util.Optional.ofNullable;
 public class DialogData {
 
     long id;
-    Optional<ArenaId> arenaId;
     String aktorId;
     String overskrift;
-    String aktivitetId;
+    AktivitetId aktivitetId;
 
     Date lestAvBrukerTidspunkt;
     Date lestAvVeilederTidspunkt;

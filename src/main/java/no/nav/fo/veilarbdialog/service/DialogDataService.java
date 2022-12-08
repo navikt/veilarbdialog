@@ -67,6 +67,7 @@ public class DialogDataService {
 
     @Transactional
     public DialogData opprettHenvendelse(NyHenvendelseDTO henvendelseData, Person bruker) {
+        var aktivitetsId = AktivitetId.of(henvendelseData.getAktivitetId());
         String aktorId = hentAktoerIdForPerson(bruker);
         auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
         Fnr fnr = hentFnrForPerson(bruker);
@@ -74,7 +75,7 @@ public class DialogDataService {
             throw new ResponseStatusException(CONFLICT, "Bruker kan ikke varsles.");
         }
 
-        DialogData dialog = Optional.ofNullable(hentDialogMedTilgangskontroll(henvendelseData.getDialogId(), henvendelseData.getAktivitetId()))
+        DialogData dialog = Optional.ofNullable(hentDialogMedTilgangskontroll(henvendelseData.getDialogId(), aktivitetsId))
                 .orElseGet(() -> opprettDialog(henvendelseData, aktorId));
 
         slettKladd(henvendelseData, bruker);
@@ -139,14 +140,14 @@ public class DialogDataService {
         return dialogData;
     }
 
-    public DialogData hentDialogMedTilgangskontroll(String dialogId, String aktivitetId) {
+    public DialogData hentDialogMedTilgangskontroll(String dialogId, AktivitetId aktivitetId) {
         if (dialogId == null && aktivitetId == null) return null;
 
         if (dialogId != null && !dialogId.isEmpty()) {
             return hentDialogMedTilgangskontroll(Long.parseLong(dialogId));
         } else {
             return Optional.ofNullable(aktivitetId)
-                    .filter(StringUtils::isNotEmpty)
+                    .filter(a -> StringUtils.isNotEmpty(a.getId()))
                     .flatMap(this::hentDialogForAktivitetId)
                     .orElse(null);
         }
@@ -163,7 +164,7 @@ public class DialogDataService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
+    public Optional<DialogData> hentDialogForAktivitetId(AktivitetId aktivitetId) {
         return dialogDAO.hentDialogForAktivitetId(aktivitetId).map(this::sjekkLeseTilgangTilDialog);
     }
 
@@ -243,7 +244,7 @@ public class DialogDataService {
                 .oppfolgingsperiode(gjeldendeOppfolgingsperiode)
                 .overskrift(nyHenvendelseDTO.getOverskrift())
                 .aktorId(aktorId)
-                .aktivitetId(nyHenvendelseDTO.getAktivitetId())
+                .aktivitetId(AktivitetId.of(nyHenvendelseDTO.getAktivitetId()))
                 .egenskaper(Optional.ofNullable(nyHenvendelseDTO.getEgenskaper())
                         .orElse(Collections.emptyList())
                         .stream()
