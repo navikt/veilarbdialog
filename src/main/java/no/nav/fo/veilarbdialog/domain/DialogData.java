@@ -1,7 +1,6 @@
 package no.nav.fo.veilarbdialog.domain;
 
 import lombok.Builder;
-import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.With;
 
