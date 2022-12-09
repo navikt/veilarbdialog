@@ -122,7 +122,8 @@ public class DialogRessurs {
 
         auth.skalVereInternBruker();
 
-        var dialog = dialogDataService.hentDialogMedTilgangskontroll(nyHenvendelseDTO.getDialogId(), nyHenvendelseDTO.getAktivitetId());
+        var dialog = dialogDataService.hentDialogMedTilgangskontroll(nyHenvendelseDTO.getDialogId(),
+               AktivitetId.of(nyHenvendelseDTO.getAktivitetId()));
         if (dialog == null) dialog = dialogDataService.opprettDialog(nyHenvendelseDTO, aktorId);
 
         long dialogId = dialog.getId();

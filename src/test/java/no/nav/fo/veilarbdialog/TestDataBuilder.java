@@ -20,7 +20,6 @@ public class TestDataBuilder {
     public static DialogData nyDialog(String aktorId) {
         return DialogData.builder()
                 .id(new Random().nextLong())
-                .arenaId(Optional.empty())
                 .oppfolgingsperiode(UUID.randomUUID())
                 .aktorId(aktorId)
                 .henvendelser(emptyList())

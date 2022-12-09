@@ -14,10 +14,9 @@ import static java.util.Optional.ofNullable;
 public class DialogData {
 
     long id;
-    Optional<ArenaId> arenaId;
     String aktorId;
     String overskrift;
-    String aktivitetId;
+    AktivitetId aktivitetId;
 
     Date lestAvBrukerTidspunkt;
     Date lestAvVeilederTidspunkt;

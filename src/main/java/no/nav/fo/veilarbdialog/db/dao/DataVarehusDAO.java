@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -30,7 +31,7 @@ public class DataVarehusDAO {
                 dialogData.getId(),
                 datavarehusEvent.toString(),
                 dialogData.getAktorId(),
-                dialogData.getAktivitetId(),
+                Optional.ofNullable(dialogData.getAktivitetId()).map(AktivitetId::getId).orElse(null),
                 auth.getIdent().orElse("SYSTEM"));
     }
 

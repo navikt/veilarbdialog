@@ -96,7 +96,7 @@ public class FunksjonelleMetrikker {
 
     private Event addDialogMetadata(Event event, DialogData dialog) {
         return event
-                .addFieldToReport("paaAktivitet", isNotEmpty(dialog.getAktivitetId()))
+                .addFieldToReport("paaAktivitet", dialog.getAktivitetId() != null)
                 .addFieldToReport("kontorsperre", isNotEmpty(dialog.getKontorsperreEnhetId()));
 
     }

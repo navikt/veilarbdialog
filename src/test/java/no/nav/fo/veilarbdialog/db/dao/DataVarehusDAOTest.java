@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.Data;
+import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +39,7 @@ class DataVarehusDAOTest {
     @Test
     void insertEvent() {
 
-        DialogData dialog = DialogData.builder().id(1).aktivitetId("aktivitet").aktorId("aktor").build();
+        DialogData dialog = DialogData.builder().id(1).aktivitetId(AktivitetId.of("aktivitet")).aktorId("aktor").build();
         dataVarehusDAO.insertEvent(dialog, DatavarehusEvent.VENTER_PAA_BRUKER);
 
         DatavarehusData data = jdbc.queryForObject("select * from event", new BeanPropertyRowMapper<>(DatavarehusData.class));
@@ -47,7 +48,7 @@ class DataVarehusDAOTest {
         assertThat(data.dialogId).isEqualTo(dialog.getId());
         assertThat(data.tidspunkt).isNotNull();
         assertThat(data.aktorId).isEqualTo(dialog.getAktorId());
-        assertThat(data.aktivitetId).isEqualTo(dialog.getAktivitetId());
+        assertThat(data.aktivitetId).isEqualTo(dialog.getAktivitetId().getId());
         assertThat(data.event).isEqualTo(DatavarehusEvent.VENTER_PAA_BRUKER.toString());
 
     }
