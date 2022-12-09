@@ -94,7 +94,7 @@ public class DialogDAOTest {
         long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData).getId();
         List<HenvendelseData> henvendelser = dialogDAO.hentDialog(dialogData.getId()).getHenvendelser();
 
-        assertThat(henvendelser.size()).isEqualTo(1);
+        assertThat(henvendelser).hasSize(1);
         HenvendelseData opprettet = henvendelser.get(0);
 
         HenvendelseData forventet = henvendelseData
@@ -110,6 +110,14 @@ public class DialogDAOTest {
     @Test
     public void kanHenteDialogPaaAktivitetId() {
         var aktivitetId = AktivitetId.of("aktivitetId");
+        assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isEmpty();
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().aktivitetId(aktivitetId).build());
+        assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isPresent();
+    }
+
+    @Test
+    public void kanHenteDialogPaaArenaAktivitetId() {
+        var aktivitetId = AktivitetId.of("ARENATA123");
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isEmpty();
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().aktivitetId(aktivitetId).build());
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isPresent();
