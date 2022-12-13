@@ -18,6 +18,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
+
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
 @Service
@@ -26,6 +29,7 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
     private final OkHttpClient client;
     private final AktorOppslagClient aktorOppslagClient;
     private final GjeldendePeriodeMetrikk gjeldendePeriodeMetrikk;
+    private final Supplier<String> machineToMachineTokenProvider;
 
     @Value("${application.veilarboppfolging.api.url}")
     private String baseUrl;
@@ -34,9 +38,12 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
         Fnr fnr = aktorOppslagClient.hentFnr(aktorId);
 
         String uri = String.format("%s/v2/oppfolging?fnr=%s", baseUrl, fnr.get());
+
         Request request = new Request.Builder()
                 .url(uri)
+                .header(AUTHORIZATION, "Bearer " + machineToMachineTokenProvider.get())
                 .build();
+
         try (Response response = client.newCall(request).execute()) {
             RestUtils.throwIfNotSuccessful(response);
             return RestUtils.parseJsonResponse(response, OppfolgingV2UnderOppfolgingDTO.class);
@@ -53,7 +60,9 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
         String uri = String.format("%s/v2/oppfolging/periode/gjeldende?fnr=%s", baseUrl, fnr.get());
         Request request = new Request.Builder()
                 .url(uri)
+                .header(AUTHORIZATION, "Bearer " + machineToMachineTokenProvider.get())
                 .build();
+
         try (Response response = client.newCall(request).execute()) {
             RestUtils.throwIfNotSuccessful(response);
             if (response.code() == HttpStatus.NO_CONTENT.value()) {
@@ -75,7 +84,9 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
         String uri = String.format("%s/v2/oppfolging/perioder?fnr=%s", baseUrl, fnr.get());
         Request request = new Request.Builder()
                 .url(uri)
+                .header(AUTHORIZATION, "Bearer " + machineToMachineTokenProvider.get())
                 .build();
+
         try (Response response = client.newCall(request).execute()) {
             RestUtils.throwIfNotSuccessful(response);
             if (response.code() == HttpStatus.NO_CONTENT.value()) {

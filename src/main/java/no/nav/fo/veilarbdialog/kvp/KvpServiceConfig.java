@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.clients.veilarboppfolging;
+package no.nav.fo.veilarbdialog.kvp;
 
 import no.nav.common.rest.client.RestClient;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
@@ -10,13 +10,13 @@ import org.springframework.context.annotation.Configuration;
 import static no.nav.common.utils.EnvironmentUtils.isProduction;
 
 @Configuration
-public class VeilarboppfolgingConfig {
+public class KvpServiceConfig {
 
     @Value("${application.veilarboppfolging.api.url}")
     private String baseUrl;
 
     @Bean
-    public VeilarboppfolgingClient veilarboppfolgingClient(AzureAdMachineToMachineTokenClient tokenClient) {
+    public KvpService kvpService(AzureAdMachineToMachineTokenClient tokenClient) {
         String tokenScope = String.format(
                 "api://%s-fss.pto.veilarboppfolging/.default",
                 isProduction().orElse(false) ? "prod" : "dev"
@@ -24,7 +24,6 @@ public class VeilarboppfolgingConfig {
 
         OkHttpClient okHttpClient = RestClient.baseClient();
 
-        return new VeilarboppfolgingClientImpl(baseUrl, okHttpClient, () -> tokenClient.createMachineToMachineToken(tokenScope));
+        return new KvpService(baseUrl, okHttpClient, () -> tokenClient.createMachineToMachineToken(tokenScope));
     }
-
 }

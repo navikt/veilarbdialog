@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.function.Supplier;
+
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -20,11 +23,14 @@ public class VeilarboppfolgingClientImpl implements VeilarboppfolgingClient {
 
     private final OkHttpClient client;
 
+    private final Supplier<String> machineToMachineTokenProvider;
+
     public Optional<ManuellStatusV2DTO> hentManuellStatus(Fnr fnr) {
         String uri = String.format("%s/v2/manuell/status?fnr=%s", baseUrl, fnr.get());
 
         Request request = new Request.Builder()
                 .url(uri)
+                .header(AUTHORIZATION, "Bearer " + machineToMachineTokenProvider.get())
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
@@ -41,6 +47,7 @@ public class VeilarboppfolgingClientImpl implements VeilarboppfolgingClient {
 
         Request request = new Request.Builder()
                 .url(uri)
+                .header(AUTHORIZATION, "Bearer " + machineToMachineTokenProvider.get())
                 .build();
 
         try (Response response = client.newCall(request).execute()) {

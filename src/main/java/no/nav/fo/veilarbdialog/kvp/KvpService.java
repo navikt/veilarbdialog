@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.kvp;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.rest.client.RestUtils;
 import okhttp3.OkHttpClient;
@@ -13,25 +14,26 @@ import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.InternalServerErrorException;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.function.Supplier;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class KvpService {
 
     private final String baseUrl;
     private final OkHttpClient client;
 
-    public KvpService(@Value("${application.veilarboppfolging.api.url}") String baseUrl, OkHttpClient client) {
-        this.baseUrl = baseUrl;
-        this.client = client;
-    }
+    private final Supplier<String> machineToMachineTokenProvider;
 
     private KvpDTO get(String aktorId) throws IOException {
         var uri = String.format("%s/v2/kvp?aktorId=%s", baseUrl, aktorId);
-        var request = new Request.Builder()
+        Request request = new Request.Builder()
                 .url(uri)
+                .header(AUTHORIZATION, "Bearer " + machineToMachineTokenProvider.get())
                 .build();
         try (var response = client.newCall(request).execute()) {
             RestUtils.throwIfNotSuccessful(response);
