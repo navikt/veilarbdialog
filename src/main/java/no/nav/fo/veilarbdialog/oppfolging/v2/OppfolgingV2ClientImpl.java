@@ -23,7 +23,6 @@ import java.util.function.Supplier;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
     private final OkHttpClient client;
