@@ -134,6 +134,7 @@ application:
   veilarboppfolging:
     api:
       url: ${VEILARBOPPFOLGINGAPI_URL}
+      scope: ${VEILARBOPPFOLGINGAPI_SCOPE}
   veilarbperson:
     api:
       url: ${VEILARBPERSONAPI_URL}

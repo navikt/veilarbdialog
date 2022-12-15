@@ -15,15 +15,13 @@ public class KvpServiceConfig {
     @Value("${application.veilarboppfolging.api.url}")
     private String baseUrl;
 
+    @Value("${application.veilarboppfolging.api.scope}")
+    private String veilarboppfolgingapi_scope;
+
     @Bean
     public KvpService kvpService(AzureAdMachineToMachineTokenClient tokenClient) {
-        String tokenScope = String.format(
-                "api://%s-fss.pto.veilarboppfolging/.default",
-                isProduction().orElse(false) ? "prod" : "dev"
-        );
-
         OkHttpClient okHttpClient = RestClient.baseClient();
 
-        return new KvpService(baseUrl, okHttpClient, () -> tokenClient.createMachineToMachineToken(tokenScope));
+        return new KvpService(baseUrl, okHttpClient, () -> tokenClient.createMachineToMachineToken(veilarboppfolgingapi_scope));
     }
 }
