@@ -51,7 +51,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst.OPPGAVE_SMS_TEKST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.Assert.assertTrue;
@@ -139,11 +138,6 @@ public class EskaleringsvarselControllerTest {
         int sikkerhetsNivaa = 4;
         // Lenke som blir aktivert når bruker klikker på eventet
         String eventLink;
-        // Hvis null, default "Beskjed fra NAV"
-        String brukernotifikasjonEpostVarslingTittel = "Viktig oppgave";
-        // Hvis null, default "<!DOCTYPE html><html><head><title>Melding</title></head><body><p>Hei!</p><p>Du har fått en ny beskjed på Ditt NAV. Logg inn og se hva beskjeden gjelder.</p><p>Vennlig hilsen</p><p>NAV</p></body></html>"
-        String brukernotifikasjonEpostVarslingTekst = "Du har fått en ny viktig oppgave fra NAV. Logg inn og se hva oppgaven gjelder. Vennlig hilsen NAV";
-
 
         StartEskaleringDto startEskaleringDto =
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), begrunnelse, overskrift, henvendelseTekst);
@@ -189,9 +183,9 @@ public class EskaleringsvarselControllerTest {
             assertions.assertThat(oppgaveInput.getLink()).isEqualTo(eventLink);
             assertions.assertThat(oppgaveInput.getTekst()).isEqualTo(brukernotifikasjonEventTekst);
 
-            assertions.assertThat(oppgaveInput.getEpostVarslingstittel()).isEqualTo(brukernotifikasjonEpostVarslingTittel);
-            assertions.assertThat(oppgaveInput.getEpostVarslingstekst()).isEqualTo(brukernotifikasjonEpostVarslingTekst);
-            assertions.assertThat(oppgaveInput.getSmsVarslingstekst()).isEqualTo(OPPGAVE_SMS_TEKST);
+            assertions.assertThat(oppgaveInput.getEpostVarslingstittel()).isNull();
+            assertions.assertThat(oppgaveInput.getEpostVarslingstekst()).isNull();
+            assertions.assertThat(oppgaveInput.getSmsVarslingstekst()).isNull();
             assertions.assertAll();
         });
     }

@@ -93,9 +93,6 @@ public class BrukernotifikasjonService {
                 brukernotifikasjon.oppfolgingsperiodeId(),
                 brukernotifikasjon.type(),
                 BrukernotifikasjonBehandlingStatus.PENDING,
-                brukernotifikasjon.epostTitel(),
-                brukernotifikasjon.epostBody(),
-                brukernotifikasjon.smsTekst(),
                 brukernotifikasjon.link()
         );
         if (!kanVarsles(brukernotifikasjon.foedselsnummer())) {

@@ -21,10 +21,8 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarsles
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -92,9 +90,6 @@ public class EskaleringsvarselService {
                 BrukernotifikasjonTekst.OPPGAVE_BRUKERNOTIFIKASJON_TEKST,
                 gjeldendeOppfolgingsperiodeId,
                 BrukernotifikasjonsType.OPPGAVE,
-                BrukernotifikasjonTekst.OPPGAVE_EPOST_TITTEL,
-                BrukernotifikasjonTekst.OPPGAVE_EPOST_BODY,
-                BrukernotifikasjonTekst.OPPGAVE_SMS_TEKST,
                 dialogDataService.utledDialogLink(dialogData.getId())
         );
 

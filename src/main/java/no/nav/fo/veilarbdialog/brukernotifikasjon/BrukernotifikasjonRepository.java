@@ -54,16 +54,13 @@ public class BrukernotifikasjonRepository {
                 .addValue("type", insert.type().name())
                 .addValue("status", insert.status().name())
                 .addValue("varsel_kvittering_status", VarselKvitteringStatus.IKKE_SATT.name())
-                .addValue("epostTittel", insert.epostTitel())
-                .addValue("epostBody", insert.epostBody())
-                .addValue("smsTekst", insert.smsTekst())
                 .addValue("melding", insert.melding())
                 .addValue("lenke", insert.link().toExternalForm());
 
         jdbcTemplate.update("" +
                         " INSERT INTO brukernotifikasjon " +
-                        "        (event_id, DIALOG_ID, foedselsnummer, oppfolgingsperiode_id, type, status, varsel_kvittering_status, opprettet, melding, smsTekst,  epostTittel, epostBody, lenke) " +
-                        " VALUES (:event_id, :dialog_id, :foedselsnummer, :oppfolgingsperiode_id, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :smsTekst, :epostTittel, :epostBody, :lenke) ",
+                        "        (event_id, DIALOG_ID, foedselsnummer, oppfolgingsperiode_id, type, status, varsel_kvittering_status, opprettet, melding, lenke) " +
+                        " VALUES (:event_id, :dialog_id, :foedselsnummer, :oppfolgingsperiode_id, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :lenke) ",
                 params, keyHolder, new String[]{"id"});
 
         Number generatedKey = keyHolder.getKey();

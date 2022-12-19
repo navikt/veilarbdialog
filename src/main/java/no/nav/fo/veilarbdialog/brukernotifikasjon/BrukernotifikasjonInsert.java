@@ -13,8 +13,5 @@ public record BrukernotifikasjonInsert(
         UUID oppfolgingsperiodeId,
         BrukernotifikasjonsType type,
         BrukernotifikasjonBehandlingStatus status,
-        String epostTitel,
-        String epostBody,
-        String smsTekst,
         URL link) {
 }
