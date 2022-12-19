@@ -28,7 +28,7 @@ public class KafkaAivenTestConfig {
         return kafkaProperties;
     }
 
-    // ******* Skrive til siste_oppfolginsperiode_topic i test START ***********
+    // ******* Skrive til siste_oppfolginsperiode_topic og aktivitetskort-idmappinger i test START ***********
     @Bean
     KafkaTemplate<String, String> kafkaStringStringTemplate(ProducerFactory<String, String> stringStringProducerFactory) {
         return new KafkaTemplate<>(stringStringProducerFactory);
@@ -42,7 +42,7 @@ public class KafkaAivenTestConfig {
         producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);
         return new DefaultKafkaProducerFactory<>(producerProperties);
     }
-    // ******* Skrive til siste_oppfolginsperiode_topic i test SLUTT ***********
+    // ******* Skrive til siste_oppfolginsperiode_topic og aktivitetskort-idmappinger i test SLUTT ***********
 
 
     // ******* Lese fra brukernotifikasjons topics i test START ***********
