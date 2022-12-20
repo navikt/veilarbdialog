@@ -112,11 +112,21 @@ public class DialogDAO {
                 id);
     }
 
+    private String getIdQuery(AktivitetId aktivitetId) {
+        if (aktivitetId instanceof TekniskId) {
+            return "select * from DIALOG where AKTIVITET_ID = ?";
+        } else if (aktivitetId instanceof Arenaid) {
+            return "select * from DIALOG where ARENA_ID = ?";
+        } else {
+            throw new UnsupportedOperationException("Uknown id-type");
+        }
+    }
     @Transactional(readOnly = true)
-    public Optional<DialogData> hentDialogForAktivitetId(String aktivitetId) {
-        return jdbc.query("select * from DIALOG where AKTIVITET_ID = ?",
+    public Optional<DialogData> hentDialogForAktivitetId(AktivitetId aktivitetId) {
+        if (aktivitetId == null) return Optional.empty();
+        return jdbc.query(getIdQuery(aktivitetId),
                 new MapTilDialog(),
-                aktivitetId)
+                aktivitetId.getId())
                 .stream()
                 .findFirst();
     }
@@ -126,12 +136,18 @@ public class DialogDAO {
                 .ofNullable(jdbc.queryForObject("select DIALOG_ID_SEQ.nextval from DUAL", Long.class))
                 .orElseThrow(IllegalStateException::new);
 
-        jdbc.update("insert into DIALOG (DIALOG_ID, AKTOR_ID, OPPRETTET_DATO, AKTIVITET_ID, OVERSKRIFT, HISTORISK, KONTORSPERRE_ENHET_ID, OPPDATERT, OPPFOLGINGSPERIODE_UUID) " +
-                        "values (?, ?, ? , ?, ?, ?, ?, ?, ?)",
+        var hasId = dialogData.getAktivitetId() != null;
+        var isTekniskId = dialogData.getAktivitetId() instanceof TekniskId;
+        var arenaId = hasId && !isTekniskId  ? dialogData.getAktivitetId().getId() : null;
+        var tekniskId = hasId && isTekniskId ? dialogData.getAktivitetId().getId() : null;
+
+        jdbc.update("insert into DIALOG (DIALOG_ID, AKTOR_ID, OPPRETTET_DATO, AKTIVITET_ID, ARENA_ID, OVERSKRIFT, HISTORISK, KONTORSPERRE_ENHET_ID, OPPDATERT, OPPFOLGINGSPERIODE_UUID) " +
+                        "values (?, ?, ? , ?, ?, ?, ?, ?, ?, ?)",
                 dialogId,
                 dialogData.getAktorId(),
                 dialogData.getOpprettetDato(),
-                dialogData.getAktivitetId(),
+                tekniskId,
+                arenaId,
                 dialogData.getOverskrift(),
                 dialogData.isHistorisk() ? 1 : 0,
                 dialogData.getKontorsperreEnhetId(),
@@ -212,10 +228,13 @@ public class DialogDAO {
                                     .map(EgenskapType::valueOf)
                                     .orElse(null),
                             dialogId);
+            var aktivitetId = Optional.ofNullable(rs.getString("AKTIVITET_ID"))
+                    .orElse(rs.getString("ARENA_ID"));
+
             return DialogData.builder()
                     .id(dialogId)
                     .aktorId(rs.getString("AKTOR_ID"))
-                    .aktivitetId(rs.getString("AKTIVITET_ID"))
+                    .aktivitetId(AktivitetId.of(aktivitetId))
                     .overskrift(rs.getString("OVERSKRIFT"))
                     .lestAvBrukerTidspunkt(hentDato(rs, "LEST_AV_BRUKER_TID"))
                     .lestAvVeilederTidspunkt(hentDato(rs, "LEST_AV_VEILEDER_TID"))

@@ -35,7 +35,7 @@ class RestMapper {
         DialogDTO dto = new DialogDTO()
                 .setId(Long.toString(dialogData.getId()))
                 .setOverskrift(dialogData.getOverskrift())
-                .setAktivitetId(dialogData.getAktivitetId())
+                .setAktivitetId(Optional.ofNullable(dialogData.getAktivitetId()).map(AktivitetId::getId).orElse(null))
                 .setVenterPaSvar(dialogData.venterPaSvarFraBruker())
                 .setOpprettetDato(dialogData.getOpprettetDato())
                 .setEgenskaper(dialogData.getEgenskaper()

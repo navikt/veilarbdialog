@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.internapi;
 
+import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.veilarbdialog.internapi.model.Dialog;
@@ -7,6 +8,7 @@ import no.nav.veilarbdialog.internapi.model.Henvendelse;
 
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Optional;
 
 public class InternDialogMapper {
 
@@ -20,7 +22,7 @@ public class InternDialogMapper {
 
         return Dialog.builder()
                 .dialogId(Long.toString(dialogData.getId()))
-                .aktivitetId(dialogData.getAktivitetId())
+                .aktivitetId(Optional.ofNullable(dialogData.getAktivitetId()).map(AktivitetId::getId).orElse(null))
                 .oppfolgingsperiodeId(dialogData.getOppfolgingsperiode())
                 .kontorsperreEnhetId(dialogData.getKontorsperreEnhetId())
                 .overskrift(dialogData.getOverskrift())

@@ -4,10 +4,7 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.With;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static java.util.Optional.ofNullable;
 
@@ -19,7 +16,7 @@ public class DialogData {
     long id;
     String aktorId;
     String overskrift;
-    String aktivitetId;
+    AktivitetId aktivitetId;
 
     Date lestAvBrukerTidspunkt;
     Date lestAvVeilederTidspunkt;
