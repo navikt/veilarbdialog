@@ -46,7 +46,7 @@ public class InternApiControllerTest {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
 
-        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomVeileder(port, mockVeileder, mockBruker, new NyHenvendelseDTO().setTekst("tekst"));
+        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomVeileder(mockVeileder, mockBruker, new NyHenvendelseDTO().setTekst("tekst"));
 
         Dialog dialog = mockVeileder.createRequest()
                 .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog/{dialogId}", opprettetDialog.getId())
@@ -65,15 +65,15 @@ public class InternApiControllerTest {
             d.assertAll();
         });
 
-        DialogDTO opprettetDialog2 = dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setTekst("tekst2"));
+        DialogDTO opprettetDialog2 = dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst2"));
 
         // Sett bruker under KVP
         BrukerOptions kvpOptions = mockBruker.getBrukerOptions().toBuilder().erUnderKvp(true).kontorsperreEnhet("123").build();
         MockNavService.updateBruker(mockBruker, kvpOptions);
-        dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setTekst("tekst3"));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst3"));
 
         // Opprett henvendelse/melding med kontorsperre på en dialog uten kontorsperre
-        dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setTekst("tekst4").setDialogId(opprettetDialog2.getId()));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst4").setDialogId(opprettetDialog2.getId()));
 
         // Veileder med tilgang til mockbrukers enhet
         List<Dialog> dialoger = mockVeileder.createRequest()
@@ -156,7 +156,7 @@ public class InternApiControllerTest {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeilederUtenBruker = MockNavService.createVeileder();
 
-        dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setTekst("tekst"));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst"));
 
         mockVeilederUtenBruker.createRequest()
                 .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}",
