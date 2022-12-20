@@ -127,6 +127,7 @@ application:
       endringPaaDialog: dab.endring-paa-dialog-v1
     inn:
       oppfolgingsperiode: pto.oppfolgingsperiode-v1
+      kvpavsluttet: pto.kvp-avsluttet-v1
       eksternVarselKvittering: teamdokumenthandtering.aapen-dok-notifikasjon-status
   brukernotifikasjon:
     grace:

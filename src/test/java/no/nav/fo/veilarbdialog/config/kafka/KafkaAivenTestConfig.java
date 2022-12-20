@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.config.kafka.aiven;
+package no.nav.fo.veilarbdialog.config.kafka;
 
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.admin.Admin;

@@ -1,40 +1,44 @@
-package no.nav.fo.veilarbdialog.service;
+package no.nav.fo.veilarbdialog.kvp;
 
 import lombok.SneakyThrows;
 import no.nav.common.json.JsonUtils;
-import no.nav.common.kafka.producer.KafkaProducerClient;
-import no.nav.fo.veilarbdialog.config.kafka.onprem.KafkaOnpremConfig;
+import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.kafka.KvpAvsluttetKafkaDTO;
-import no.nav.fo.veilarbdialog.util.KafkaTestService;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.awaitility.Awaitility;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class BehandleKvpAvsluttetConsumerServiceTest {
+public class KvpConsumerTest extends SpringBootTestBase {
+
     private static final String AKTORID = "4321";
     private static final String SAKSBEHANDLER = "Z99999";
     private static final String BEGRUNNELSE = "Derfor";
     private static final ZonedDateTime AVSLUTTETDATO = ZonedDateTime.now();
 
     @Autowired
-    KafkaProducerClient<String, String> producerClient;
+    KafkaTemplate<String, String> producer;
 
-    @Value("${application.kafka.kvpAvsluttetTopic}")
+    Consumer<String, String> springKvpAvsluttetConsumer;
+
+    @Value("${application.topic.inn.kvpavsluttet}")
     String kvpAvsluttetTopic;
 
-    @Autowired
-    KafkaTestService kafkaTestService;
+    @Before
+    public void setup() {
+        this.springKvpAvsluttetConsumer = kafkaTestService.createStringStringConsumer(kvpAvsluttetTopic);
+    }
 
     @SneakyThrows
     @Test
@@ -46,9 +50,8 @@ public class BehandleKvpAvsluttetConsumerServiceTest {
                 .avsluttetDato(AVSLUTTETDATO)
                 .build();
 
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(kvpAvsluttetTopic, AKTORID, JsonUtils.toJson(kvpAvsluttetKafkaDTO));
-        RecordMetadata recordMetadata = producerClient.sendSync(producerRecord);
-        Awaitility.await().atMost(Duration.ofSeconds(5)).until(() -> kafkaTestService.erKonsumert(kvpAvsluttetTopic, KafkaOnpremConfig.CONSUMER_GROUP_ID, recordMetadata.offset(), recordMetadata.partition()));
-    }
+        SendResult<String, String> sendResult = producer.send(kvpAvsluttetTopic, kvpAvsluttetKafkaDTO.getAktorId(), JsonUtils.toJson(kvpAvsluttetKafkaDTO)).get();
 
+        kafkaTestService.assertErKonsumertAiven(kvpAvsluttetTopic, sendResult.getRecordMetadata().offset(), sendResult.getRecordMetadata().partition(), 10);
+    }
 }
