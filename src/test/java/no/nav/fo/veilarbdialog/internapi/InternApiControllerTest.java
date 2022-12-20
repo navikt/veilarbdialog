@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.internapi;
 
+import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
@@ -27,29 +28,17 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@RunWith(SpringRunner.class)
-@AutoConfigureWireMock(port = 0)
-public class InternApiControllerTest {
-
-    @LocalServerPort
-    protected int port;
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    DialogTestService dialogTestService;
-
+public class InternApiControllerTest extends SpringBootTestBase {
+    
     @Test
     public void hentDialoger() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
 
-        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomVeileder(port, mockVeileder, mockBruker, new NyHenvendelseDTO().setTekst("tekst"));
+        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomVeileder(mockVeileder, mockBruker, new NyHenvendelseDTO().setTekst("tekst"));
 
         Dialog dialog = mockVeileder.createRequest()
-                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog/{dialogId}", opprettetDialog.getId())
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog/{dialogId}", opprettetDialog.getId())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -65,19 +54,19 @@ public class InternApiControllerTest {
             d.assertAll();
         });
 
-        DialogDTO opprettetDialog2 = dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setTekst("tekst2"));
+        DialogDTO opprettetDialog2 = dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst2"));
 
         // Sett bruker under KVP
         BrukerOptions kvpOptions = mockBruker.getBrukerOptions().toBuilder().erUnderKvp(true).kontorsperreEnhet("123").build();
         MockNavService.updateBruker(mockBruker, kvpOptions);
-        dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setTekst("tekst3"));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst3"));
 
         // Opprett henvendelse/melding med kontorsperre på en dialog uten kontorsperre
-        dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setTekst("tekst4").setDialogId(opprettetDialog2.getId()));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst4").setDialogId(opprettetDialog2.getId()));
 
         // Veileder med tilgang til mockbrukers enhet
         List<Dialog> dialoger = mockVeileder.createRequest()
-                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}", mockBruker.getAktorId())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -90,7 +79,7 @@ public class InternApiControllerTest {
         MockVeileder mockVeileder2 = MockNavService.createVeileder();
         mockVeileder2.setNasjonalTilgang(true);
         List<Dialog> dialoger2 = mockVeileder2.createRequest()
-                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}", mockBruker.getAktorId())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -100,7 +89,7 @@ public class InternApiControllerTest {
         assertThat(dialoger2.get(1).getHenvendelser()).hasSize(1);
 
         Dialog dialog2 = mockVeileder2.createRequest()
-                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog/{dialogId}", opprettetDialog2.getId())
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog/{dialogId}", opprettetDialog2.getId())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -110,7 +99,7 @@ public class InternApiControllerTest {
 
         // Test request parameter(e)
         List<Dialog> dialoger3 = mockVeileder.createRequest()
-                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?oppfolgingsperiodeId={oppfolgingsperiodeId}",
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog?oppfolgingsperiodeId={oppfolgingsperiodeId}",
                         mockBruker.getOppfolgingsperiode().toString())
                 .then()
                 .statusCode(200)
@@ -120,7 +109,7 @@ public class InternApiControllerTest {
         assertThat(dialoger3).hasSameElementsAs(dialoger);
 
         List<Dialog> dialoger4 = mockVeileder.createRequest()
-                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}&oppfolgingsperiodeId={oppfolgingsperiodeId}",
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}&oppfolgingsperiodeId={oppfolgingsperiodeId}",
                         mockBruker.getAktorId(),
                         mockBruker.getOppfolgingsperiode().toString())
                 .then()
@@ -136,7 +125,7 @@ public class InternApiControllerTest {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
         mockVeileder.createRequest()
-                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog")
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog")
                 .then()
                 .assertThat().statusCode(HttpStatus.BAD_REQUEST.value());
     }
@@ -145,7 +134,7 @@ public class InternApiControllerTest {
     public void skalFeilNaarEksternBruker() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         mockBruker.createRequest()
-                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}",
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}",
                         mockBruker.getAktorId())
                 .then()
                 .assertThat().statusCode(HttpStatus.FORBIDDEN.value());
@@ -156,22 +145,22 @@ public class InternApiControllerTest {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeilederUtenBruker = MockNavService.createVeileder();
 
-        dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setTekst("tekst"));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst"));
 
         mockVeilederUtenBruker.createRequest()
-                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}",
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}",
                         mockBruker.getAktorId())
                 .then()
                 .assertThat().statusCode(HttpStatus.FORBIDDEN.value());
 
         mockVeilederUtenBruker.createRequest()
-                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?oppfolgingsperiodeId={oppfolgingsperiodeId}",
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog?oppfolgingsperiodeId={oppfolgingsperiodeId}",
                         mockBruker.getOppfolgingsperiode().toString())
                 .then()
                 .assertThat().statusCode(HttpStatus.FORBIDDEN.value());
 
         mockVeilederUtenBruker.createRequest()
-                .get("http://localhost:" + port + "/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}&oppfolgingsperiodeId={oppfolgingsperiodeId}",
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}&oppfolgingsperiodeId={oppfolgingsperiodeId}",
                         mockBruker.getAktorId(),
                         mockBruker.getOppfolgingsperiode().toString())
                 .then()
