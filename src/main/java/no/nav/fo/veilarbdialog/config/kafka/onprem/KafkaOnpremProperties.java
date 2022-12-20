@@ -9,8 +9,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "application.kafka")
 public class KafkaOnpremProperties {
     String brokersUrl;
-    String endringPaaDialogTopic;
-    String oppfolgingAvsluttetTopic;
     String kvpAvsluttetTopic;
 }
 
