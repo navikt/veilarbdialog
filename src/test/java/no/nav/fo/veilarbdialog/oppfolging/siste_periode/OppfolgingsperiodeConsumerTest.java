@@ -121,7 +121,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
         StartEskaleringDto startEskaleringDto =
                 new StartEskaleringDto(Fnr.of(mockBruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
-        EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(port, mockVeileder, startEskaleringDto);
+        EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(mockVeileder, startEskaleringDto);
 
         OppfolgingsperiodeV1 stopOppfolging = OppfolgingsperiodeV1.builder()
                 .uuid(mockBruker.getOppfolgingsperiode())
@@ -157,7 +157,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
         opprettEllerEndreOppfolgingsperiodeForBruker(startOppfolging);
 
-        DialogDTO dialogDTO = dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setOverskrift("The Three Trials").setTekst("Defeat the Sword Master of Melee Island"));
+        DialogDTO dialogDTO = dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setOverskrift("The Three Trials").setTekst("Defeat the Sword Master of Melee Island"));
 
         OppfolgingsperiodeV1 stopOppfolging = OppfolgingsperiodeV1.builder()
                 .uuid(mockBruker.getOppfolgingsperiode())
@@ -171,7 +171,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
         KafkaTestUtils.getSingleRecord(endringPaaDialogConsumer, endringPaaDialogTopic, 10000);
 
 
-        DialogDTO hentDialog = dialogTestService.hentDialog(port, mockBruker, Long.parseLong(dialogDTO.getId()));
+        DialogDTO hentDialog = dialogTestService.hentDialog(mockBruker, Long.parseLong(dialogDTO.getId()));
 
         Assertions.assertThat(hentDialog.isHistorisk()).isTrue();
     }

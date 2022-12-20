@@ -21,17 +21,16 @@ public class DialogTestService {
     @Autowired
     BrukernotifikasjonService brukernotifikasjonService;
 
-    public DialogDTO opprettDialogSomBruker(int port, MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
-        return opprettDialog(port, bruker, bruker, nyHenvendelseDTO);
+    public DialogDTO opprettDialogSomBruker(MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
+        return opprettDialog(bruker, bruker, nyHenvendelseDTO);
     }
 
-    public DialogDTO opprettDialogSomVeileder(int port, MockVeileder veileder, MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
-        return opprettDialog(port, veileder, bruker, nyHenvendelseDTO);
+    public DialogDTO opprettDialogSomVeileder(MockVeileder veileder, MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
+        return opprettDialog(veileder, bruker, nyHenvendelseDTO);
     }
 
-    public DialogDTO hentDialog(int port, RestassuredUser restassuredUser, long dialogId) {
+    public DialogDTO hentDialog(RestassuredUser restassuredUser, long dialogId) {
         return restassuredUser.createRequest()
-                .port(port)
                 .get("/veilarbdialog/api/dialog/{dialogId}", dialogId)
                 .then()
                 .statusCode(200)
@@ -39,9 +38,8 @@ public class DialogTestService {
                 .as(DialogDTO.class);
     }
 
-    private DialogDTO opprettDialog(int port, RestassuredUser restassuredUser, MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
+    private DialogDTO opprettDialog(RestassuredUser restassuredUser, MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
         Response response = restassuredUser.createRequest()
-                .port(port)
                 .body(nyHenvendelseDTO)
                 .when()
                 .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
@@ -55,9 +53,8 @@ public class DialogTestService {
         return dialog;
     }
 
-    public EskaleringsvarselDto startEskalering(int port, MockVeileder veileder, StartEskaleringDto startEskaleringDto) {
+    public EskaleringsvarselDto startEskalering(MockVeileder veileder, StartEskaleringDto startEskaleringDto) {
         Response response = veileder.createRequest()
-                .port(port)
                 .body(startEskaleringDto)
                 .when()
                 .post("/veilarbdialog/api/eskaleringsvarsel/start")
