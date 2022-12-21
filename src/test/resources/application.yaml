@@ -97,10 +97,6 @@ application:
     kvpAvsluttetTopic: kvpAvsluttetTopic
   oidc:
     disabled: true
-  openam:
-    clientId: VEILARBLOGIN_OPENAM_CLIENT_ID
-    discoveryUrl: http://localhost:8080/OPENAM_DISCOVERY_URL
-    refreshUrl: http://localhost:8080/VEILARBLOGIN_OPENAM_REFRESH_URL
   serviceuser:
     username: SERVICEUSER_USERNAME
     password: SERVICEUSER_PASSWORD

@@ -123,11 +123,7 @@ application:
     url: ${DIALOG_EKSTERN_URL}
   kafka:
     brokersUrl: ${KAFKA_BROKERS_URL}
-
     kvpAvsluttetTopic: ${KVP_AVSLUTTET_TOPIC}
-  openam:
-    clientId: ${VEILARBLOGIN_OPENAM_CLIENT_ID}
-    discoveryUrl: ${OPENAM_DISCOVERY_URL}
   serviceuser:
     username: ${SERVICEUSER_USERNAME}
     password: ${SERVICEUSER_PASSWORD}

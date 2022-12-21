@@ -4,8 +4,6 @@ import no.nav.common.auth.context.UserRole;
 import no.nav.common.auth.oidc.filter.AzureAdUserRoleResolver;
 import no.nav.common.auth.oidc.filter.OidcAuthenticationFilter;
 import no.nav.common.auth.oidc.filter.OidcAuthenticatorConfig;
-import no.nav.common.auth.utils.ServiceUserTokenFinder;
-import no.nav.common.auth.utils.UserTokenFinder;
 import no.nav.common.log.LogFilter;
 import no.nav.common.rest.filter.SetStandardHttpHeadersFilter;
 import no.nav.fo.veilarbdialog.util.PingFilter;
@@ -34,12 +32,6 @@ public class FilterConfig {
     @Value("${application.cluster}")
     private String applicationCluster;
 
-    @Value("${application.openam.clientId}")
-    private String openAmClientId;
-
-    @Value("${application.openam.discoveryUrl}")
-    private String openAmDiscoveryUrl;
-
     @Value("${application.sts.discovery.url}")
     private String naisStsDiscoveryUrl;
 
@@ -54,14 +46,6 @@ public class FilterConfig {
 
     @Value("${application.loginservice.idporten.discoveryUrl}")
     private String loginserviceIdportenDiscoveryUrl;
-
-    private OidcAuthenticatorConfig openAmStsAuthConfig() {
-        return new OidcAuthenticatorConfig()
-                .withDiscoveryUrl(openAmDiscoveryUrl)
-                .withClientId(openAmClientId)
-                .withIdTokenFinder(new ServiceUserTokenFinder())
-                .withUserRole(UserRole.SYSTEM);
-    }
 
     private OidcAuthenticatorConfig naisStsAuthConfig() {
         return new OidcAuthenticatorConfig()
@@ -127,7 +111,6 @@ public class FilterConfig {
         var authenticationFilter = new OidcAuthenticationFilter(
                 fromConfigs(
                         loginserviceIdportenConfig(),
-                        openAmStsAuthConfig(),
                         naisStsAuthConfig(),
                         naisAzureAdConfig()
                 )
