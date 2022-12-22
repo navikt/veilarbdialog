@@ -11,9 +11,8 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -22,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -32,14 +30,13 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@RunWith(SpringRunner.class)
 @AutoConfigureWireMock(port = 0)
 @ActiveProfiles("local")
 @Sql(
         scripts = "/db/testdata/slett_alle_dialoger.sql",
         executionPhase = AFTER_TEST_METHOD
 )
-public class RestServiceTest {
+class RestServiceTest {
 
     MockVeileder veileder;
     MockBruker bruker;
@@ -66,7 +63,7 @@ public class RestServiceTest {
     DialogRessurs dialogRessurs;
 
 
-    @Before
+    @BeforeEach
     public void before() {
         RestAssured.port = port;
         bruker = MockNavService.createHappyBruker();
@@ -74,7 +71,7 @@ public class RestServiceTest {
     }
 
     @Test
-    public void nyHenvendelse_dialogFinnesIkke_bruker() {
+    void nyHenvendelse_dialogFinnesIkke_bruker() {
         String tekst = "tekst", overskrift = "overskrift";
         final NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
                 .setTekst(tekst)
@@ -102,14 +99,14 @@ public class RestServiceTest {
                 .as(DialogDTO.class);
         HenvendelseDTO resultatHenvendelse = resultatDialog.getHenvendelser().get(0);
 
-        assertThat(resultatDialog).isEqualToIgnoringGivenFields(expected,"opprettetDato", "sisteDato", "henvendelser", "id");
+        assertThat(resultatDialog).isEqualToIgnoringGivenFields(expected, "opprettetDato", "sisteDato", "henvendelser", "id");
         assertThat(resultatHenvendelse).isEqualToIgnoringGivenFields(henvendelseExpected, "sendt", "id", "dialogId");
         assertThat(resultatDialog.getId()).isEqualTo(resultatHenvendelse.getDialogId());
 
     }
 
     @Test
-    public void nyHenvendelse_dialogFinnesIkke_veileder() {
+    void nyHenvendelse_dialogFinnesIkke_veileder() {
         String tekst = "tekst", overskrift = "overskrift";
         final NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
                 .setTekst(tekst)
@@ -137,13 +134,13 @@ public class RestServiceTest {
                 .as(DialogDTO.class);
         HenvendelseDTO resultatHenvendelse = resultatDialog.getHenvendelser().get(0);
 
-        assertThat(resultatDialog).isEqualToIgnoringGivenFields(expected,"opprettetDato", "sisteDato", "henvendelser", "id");
+        assertThat(resultatDialog).isEqualToIgnoringGivenFields(expected, "opprettetDato", "sisteDato", "henvendelser", "id");
         assertThat(resultatHenvendelse).isEqualToIgnoringGivenFields(henvendelseExpected, "sendt", "id", "dialogId");
         assertThat(resultatDialog.getId()).isEqualTo(resultatHenvendelse.getDialogId());
     }
 
     @Test
-    public void sistOppdatert_brukerInnlogget_kunBrukerHarLest_returnererNull() {
+    void sistOppdatert_brukerInnlogget_kunBrukerHarLest_returnererNull() {
         jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), bruker.getAktorId());
 
         bruker.createRequest()
@@ -157,7 +154,7 @@ public class RestServiceTest {
     }
 
     @Test
-    public void sistOppdatert_veilederInnlogget_kunVeilederHarLest_returnererNull() {
+    void sistOppdatert_veilederInnlogget_kunVeilederHarLest_returnererNull() {
         jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), veileder.getNavIdent());
 
         veileder.createRequest()
@@ -171,7 +168,7 @@ public class RestServiceTest {
     }
 
     @Test
-    public void sistOppdatert_brukerInnlogget_veilederEndretSist_returnererTidspunkt() {
+    void sistOppdatert_brukerInnlogget_veilederEndretSist_returnererTidspunkt() {
         Timestamp brukerLest = Timestamp.valueOf(LocalDateTime.now().minusHours(1));
         Timestamp veilederLest = Timestamp.valueOf(LocalDateTime.now());
 
@@ -189,7 +186,7 @@ public class RestServiceTest {
     }
 
     @Test
-    public void sistOppdatert_veilederInnlogget_brukerEndretSist_returnererTidspunkt() {
+    void sistOppdatert_veilederInnlogget_brukerEndretSist_returnererTidspunkt() {
         Timestamp veilederLest = Timestamp.valueOf(LocalDateTime.now().minusHours(1));
         Timestamp brukerLest = Timestamp.valueOf(LocalDateTime.now());
 

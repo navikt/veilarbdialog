@@ -8,10 +8,8 @@ import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
-import org.apache.commons.compress.utils.Lists;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -19,7 +17,6 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
@@ -28,13 +25,12 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TES
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
-@RunWith(SpringRunner.class)
 @ActiveProfiles("local")
 @Sql(
         scripts = "/db/testdata/slett_alle_dialoger.sql",
         executionPhase = AFTER_TEST_METHOD
 )
-public class DialogRessursTest {
+class DialogRessursTest {
 
     @LocalServerPort
     private int port;
@@ -48,15 +44,15 @@ public class DialogRessursTest {
     private MockBruker bruker;
     private MockVeileder veileder;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         RestAssured.port = port;
         bruker = MockNavService.createHappyBruker();
         veileder = MockNavService.createVeileder(bruker);
     }
 
     @Test
-    public void hentDialoger_bruker() {
+    void hentDialoger_bruker() {
         veileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst"))
                 .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
@@ -75,7 +71,7 @@ public class DialogRessursTest {
     }
 
     @Test
-    public void nyHenvendelse_fraBruker_venterPaaNav() {
+    void nyHenvendelse_fraBruker_venterPaaNav() {
         DialogDTO dialog = bruker.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
                 .post("/veilarbdialog/api/dialog")
@@ -101,7 +97,7 @@ public class DialogRessursTest {
     }
 
     @Test
-    public void nyHenvendelse_fraVeileder_venterIkkePaaNoen() {
+    void nyHenvendelse_fraVeileder_venterIkkePaaNoen() {
         //Veileder kan sende en beskjed som bruker ikke trenger å svare på, veileder må eksplisitt markere at dialogen venter på brukeren
         DialogDTO dialog = veileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
@@ -116,7 +112,7 @@ public class DialogRessursTest {
     }
 
     @Test
-    public void nyHenvendelse_veilederSvarerPaaBrukersHenvendelse_venterIkkePaaNav() {
+    void nyHenvendelse_veilederSvarerPaaBrukersHenvendelse_venterIkkePaaNav() {
 
         DialogDTO brukersDialog = bruker.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
@@ -140,7 +136,7 @@ public class DialogRessursTest {
     }
 
     @Test
-    public void nyHenvendelse_brukerSvarerPaaVeiledersHenvendelse_venterPaNav() {
+    void nyHenvendelse_brukerSvarerPaaVeiledersHenvendelse_venterPaNav() {
 
         NyHenvendelseDTO veiledersHenvendelse = new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift");
         DialogDTO veiledersDialog = veileder.createRequest()
@@ -170,7 +166,7 @@ public class DialogRessursTest {
     }
 
     @Test
-    public void forhandsorienteringPaAktivitet_dialogFinnes_oppdatererEgenskap() {
+    void forhandsorienteringPaAktivitet_dialogFinnes_oppdatererEgenskap() {
         final String aktivitetId = "123";
         var henvendelse = new NyHenvendelseDTO()
                 .setTekst("tekst")
@@ -214,7 +210,7 @@ public class DialogRessursTest {
     }
 
     @Test
-    public void forhandsorienteringPaAktivitet_dialogFinnesIkke_oppdatererEgenskap() {
+    void forhandsorienteringPaAktivitet_dialogFinnesIkke_oppdatererEgenskap() {
 
         veileder.createRequest()
                 .body(new NyHenvendelseDTO()

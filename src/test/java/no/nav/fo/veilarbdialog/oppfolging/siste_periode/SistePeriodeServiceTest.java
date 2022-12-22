@@ -4,9 +4,8 @@ import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
@@ -19,16 +18,15 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@RunWith(SpringRunner.class)
 @AutoConfigureWireMock(port = 0)
-public class SistePeriodeServiceTest {
+class SistePeriodeServiceTest {
     @Autowired
     SistePeriodeDAO sistePeriodeDAO;
     @Autowired
     SistePeriodeService sistePeriodeService;
 
     @Test
-    public void skalHenteOgBrukeSistePeriodeFraDao() {
+    void skalHenteOgBrukeSistePeriodeFraDao() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         UUID oppfolgingsperiodeId = UUID.randomUUID();
         Oppfolgingsperiode oppfolgingsperiode = new Oppfolgingsperiode(mockBruker.getAktorId(), oppfolgingsperiodeId, ZonedDateTime.now().minusDays(5), null);
@@ -38,7 +36,7 @@ public class SistePeriodeServiceTest {
     }
 
     @Test
-    public void fallBackHvisPeriodeAvsluttet() {
+    void fallBackHvisPeriodeAvsluttet() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         UUID oppfolgingsperiodeId = UUID.randomUUID();
         Oppfolgingsperiode avsluttet = new Oppfolgingsperiode(mockBruker.getAktorId(), oppfolgingsperiodeId, ZonedDateTime.now().minusDays(5), ZonedDateTime.now());
@@ -49,20 +47,18 @@ public class SistePeriodeServiceTest {
     }
 
     @Test
-    public void oppfolgingFeiler() {
+    void oppfolgingFeiler() {
         BrukerOptions oppfolgingFeiler = BrukerOptions.happyBrukerBuilder().oppfolgingFeiler(true).build();
         MockBruker bruker = MockNavService.createBruker(oppfolgingFeiler);
         AktorId aktorId = bruker.getAktorIdAsAktorId();
-        Assert.assertThrows(ResponseStatusException.class, () -> sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(aktorId));
+        Assertions.assertThrows(ResponseStatusException.class, () -> sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(aktorId));
     }
 
     @Test
-    public void ikkeUnderOppfolging() {
+    void ikkeUnderOppfolging() {
         BrukerOptions ikkeUnderOppfolging = BrukerOptions.happyBrukerBuilder().underOppfolging(false).build();
         MockBruker bruker = MockNavService.createBruker(ikkeUnderOppfolging);
         AktorId aktorId = bruker.getAktorIdAsAktorId();
-        Assert.assertThrows(IngenGjeldendePeriodeException.class, () -> sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(aktorId));
+        Assertions.assertThrows(IngenGjeldendePeriodeException.class, () -> sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(aktorId));
     }
-
-
 }

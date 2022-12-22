@@ -27,9 +27,8 @@ import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -57,14 +56,13 @@ import static org.junit.Assert.assertTrue;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@RunWith(SpringRunner.class)
 @AutoConfigureWireMock(port = 0)
 @Slf4j
 @Sql(
         scripts = "/db/testdata/slett_alle_dialoger.sql",
         executionPhase = BEFORE_TEST_METHOD
 )
-public class EskaleringsvarselControllerTest {
+class EskaleringsvarselControllerTest {
 
     @LocalServerPort
     protected int port;
@@ -111,8 +109,8 @@ public class EskaleringsvarselControllerTest {
 
     Consumer<NokkelInput, DoneInput> brukerNotifikasjonDoneConsumer;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         JdbcTemplateLockProvider l = (JdbcTemplateLockProvider) lockProvider;
         l.clearCache();
         RestAssured.port = port;
@@ -123,7 +121,7 @@ public class EskaleringsvarselControllerTest {
 
 
     @Test
-    public void start_eskalering_happy_case() {
+    void start_eskalering_happy_case() {
 
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
@@ -197,7 +195,7 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void stop_eskalering_med_henvendelse() {
+    void stop_eskalering_med_henvendelse() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
         String avsluttBegrunnelse = "Du har gjort aktiviteten vi ba om.";
@@ -245,7 +243,7 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void stop_eskalering_uten_henvendelse() {
+    void stop_eskalering_uten_henvendelse() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
         String avsluttBegrunnelse = "Fordi ...";
@@ -288,7 +286,7 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void bruker_kan_ikke_varsles() {
+    void bruker_kan_ikke_varsles() {
         MockBruker bruker = MockNavService.createHappyBruker();
         BrukerOptions reservertKrr = bruker.getBrukerOptions().toBuilder().erReservertKrr(true).build();
         MockNavService.updateBruker(bruker, reservertKrr);
@@ -305,9 +303,9 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void bruker_ikke_under_oppfolging() {
+    void bruker_ikke_under_oppfolging() {
         MockBruker bruker = MockNavService.createHappyBruker();
-        BrukerOptions reservertKrr = bruker.getBrukerOptions().toBuilder().underOppfolging(false).build() ;
+        BrukerOptions reservertKrr = bruker.getBrukerOptions().toBuilder().underOppfolging(false).build();
         MockNavService.updateBruker(bruker, reservertKrr);
 
         MockVeileder veileder = MockNavService.createVeileder(bruker);
@@ -322,7 +320,7 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void bruker_har_allerede_aktiv_eskalering() {
+    void bruker_har_allerede_aktiv_eskalering() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
         StartEskaleringDto startEskaleringDto =
@@ -333,7 +331,7 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void test_historikk() {
+    void test_historikk() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
         StartEskaleringDto startEskaleringDto =
@@ -353,7 +351,7 @@ public class EskaleringsvarselControllerTest {
         assertThat(eskaleringsvarselDtos).hasSize(4);
         EskaleringsvarselDto eldste = eskaleringsvarselDtos.get(3);
 
-        SoftAssertions.assertSoftly( assertions -> {
+        SoftAssertions.assertSoftly(assertions -> {
             assertions.assertThat(eldste.tilhorendeDialogId()).isNotNull();
             assertions.assertThat(eldste.id()).isNotNull();
             assertions.assertThat(eldste.opprettetAv()).isEqualTo(veileder.getNavIdent());
@@ -368,7 +366,7 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void skal_kun_prosessere_en_ved_samtidige_kall() throws Exception {
+    void skal_kun_prosessere_en_ved_samtidige_kall() throws Exception {
         int antallKall = 10;
         ExecutorService bakgrunnService = Executors.newFixedThreadPool(3);
         CountDownLatch latch = new CountDownLatch(antallKall);
@@ -383,15 +381,15 @@ public class EskaleringsvarselControllerTest {
 
         for (int i = 0; i < antallKall; i++) {
             bakgrunnService.submit(() -> {
-                    try {
-                        startEskalering[0] = dialogTestService.startEskalering(veileder, startEskaleringDto);
-                    } catch (Exception e) {
-                        log.warn("Feil i tråd.", e);
-                    } finally {
-                        latch.countDown();
-                    }
-                });
-            }
+                try {
+                    startEskalering[0] = dialogTestService.startEskalering(veileder, startEskaleringDto);
+                } catch (Exception e) {
+                    log.warn("Feil i tråd.", e);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
         latch.await();
 
         EskaleringsvarselDto eskaleringsvarselDto = startEskalering[0];
@@ -403,7 +401,7 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void hentGjeldendeSomEksternbruker() {
+    void hentGjeldendeSomEksternbruker() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
         StartEskaleringDto startEskaleringDto =
@@ -420,7 +418,7 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void hentGjeldendeSomVeilederUtenFnrParam() {
+    void hentGjeldendeSomVeilederUtenFnrParam() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
         StartEskaleringDto startEskaleringDto =
@@ -435,7 +433,7 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void send_done_naar_eskalering_lest_av_bruker() {
+    void send_done_naar_eskalering_lest_av_bruker() {
 
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
@@ -458,11 +456,10 @@ public class EskaleringsvarselControllerTest {
     }
 
     @Test
-    public void unngaaDobleNotifikasjonerPaaEskaleringsvarsel() throws InterruptedException {
+    void unngaaDobleNotifikasjonerPaaEskaleringsvarsel() throws InterruptedException {
 
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
-
 
 
         StartEskaleringDto startEskaleringDto =
@@ -480,7 +477,6 @@ public class EskaleringsvarselControllerTest {
         KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 10000L);
         // sjekk at det ikke ble sendt beskjed på dialogmelding
         assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
-
 
 
     }

@@ -20,10 +20,9 @@ import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.assertj.core.api.SoftAssertions;
 import org.awaitility.Awaitility;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +34,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.time.Duration;
@@ -48,9 +46,8 @@ import static no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarsl
 import static org.junit.Assert.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@RunWith(SpringRunner.class)
 @AutoConfigureWireMock(port = 0)
-public class EksternVarslingKvitteringTest {
+class EksternVarslingKvitteringTest {
 
     @Autowired
     BrukernotifikasjonRepository brukernotifikasjonRepository;
@@ -84,19 +81,19 @@ public class EksternVarslingKvitteringTest {
 
     private final static String OPPGAVE_KVITTERINGS_PREFIX = "O-veilarbdialog-";
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         RestAssured.port = port;
     }
 
-    @After
-    public void assertNoUnkowns() {
+    @AfterEach
+    void assertNoUnkowns() {
         assertTrue(WireMock.findUnmatchedRequests().isEmpty());
     }
 
     @SneakyThrows
     @Test
-    public void skal_oppdatere_brukernotifikasjon() {
+    void skal_oppdatere_brukernotifikasjon() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
 
@@ -124,7 +121,7 @@ public class EksternVarslingKvitteringTest {
         assertExpectedBrukernotifikasjonStatus(startEskalering.tilhorendeDialogId(), opprinneligBrukernotifikasjon, feiletRecordMetadata, VarselKvitteringStatus.FEILET);
 
     }
-    
+
     private RecordMetadata sendKvitteringsMelding(DoknotifikasjonStatus melding) throws ExecutionException, InterruptedException {
         ListenableFuture<SendResult<String, DoknotifikasjonStatus>> send = kvitteringsProducer.send(kvitteringsTopic, melding);
         kvitteringsProducer.flush();
@@ -140,7 +137,7 @@ public class EksternVarslingKvitteringTest {
 
         BrukernotifikasjonEntity brukernotifikasjonEtterProsessering = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(dialogId, BrukernotifikasjonsType.OPPGAVE).get(0);
 
-        SoftAssertions.assertSoftly( assertions -> {
+        SoftAssertions.assertSoftly(assertions -> {
             assertions.assertThat(brukernotifikasjonEtterProsessering.eventId()).isEqualTo(opprinneligBrukernotifikasjon.eventId());
             assertions.assertThat(brukernotifikasjonEtterProsessering.varselKvitteringStatus()).isEqualTo(expectedStatus);
             assertions.assertAll();
@@ -161,7 +158,7 @@ public class EksternVarslingKvitteringTest {
     }
 
     private void assertKvitteringLagret(UUID bestillingsId) {
-        Awaitility.await().atMost(Duration.of(10, ChronoUnit.SECONDS)).until( () -> {
+        Awaitility.await().atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
             String status = null;
             SqlParameterSource params = new MapSqlParameterSource()
                     .addValue("bestillingId", bestillingsId.toString());
