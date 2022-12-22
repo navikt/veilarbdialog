@@ -2,7 +2,6 @@ package no.nav.fo.veilarbdialog.eskaleringsvarsel;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.auth.AuthService;
@@ -39,7 +38,7 @@ public class EskaleringsvarselController {
     @PostMapping(value = "/start")
     public EskaleringsvarselDto start(@RequestBody StartEskaleringDto startEskaleringDto) {
         authService.skalVereInternBruker();
-        authService.harTilgangTilPerson(startEskaleringDto.fnr());
+        authService.harTilgangTilPersonEllerKastIngenTilgang(startEskaleringDto.fnr());
 
         EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselService.start(startEskaleringDto.fnr(), startEskaleringDto.begrunnelse(), startEskaleringDto.overskrift(), startEskaleringDto.tekst());
 
@@ -49,7 +48,7 @@ public class EskaleringsvarselController {
     @PatchMapping("/stop")
     public void stop(@RequestBody StopEskaleringDto stopEskaleringDto) {
         authService.skalVereInternBruker();
-        authService.harTilgangTilPerson(stopEskaleringDto.fnr());
+        authService.harTilgangTilPersonEllerKastIngenTilgang(stopEskaleringDto.fnr());
         NavIdent navIdent = authService.getNavIdent();
 
         Optional<EskaleringsvarselEntity> eskaleringsvarselEntity = eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), stopEskaleringDto.skalSendeHenvendelse(), navIdent);
@@ -70,7 +69,7 @@ public class EskaleringsvarselController {
         } else { // internbruker
             fodselsnummer = fnr;
         }
-        authService.harTilgangTilPerson(fodselsnummer);
+        authService.harTilgangTilPersonEllerKastIngenTilgang(fodselsnummer);
 
         Optional<EskaleringsvarselEntity> maybeGjeldende = eskaleringsvarselService.hentGjeldende(fodselsnummer);
 
@@ -82,7 +81,7 @@ public class EskaleringsvarselController {
     @GetMapping(value = "/historikk", params = "fnr")
     public List<EskaleringsvarselDto> historikk(@RequestParam Fnr fnr) {
         authService.skalVereInternBruker();
-        authService.harTilgangTilPerson(fnr);
+        authService.harTilgangTilPersonEllerKastIngenTilgang(fnr);
 
         return eskaleringsvarselService.historikk(fnr)
                 .stream()
