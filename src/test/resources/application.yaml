@@ -112,6 +112,7 @@ application:
   veilarbperson:
     api:
       url: http://localhost:${wiremock.server.port}/veilarbperson/api
+      scope: api://test.pto.veilarbperson/.default
   pdl:
     api:
       url: http://localhost:${wiremock.server.port}/pdl

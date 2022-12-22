@@ -138,6 +138,8 @@ application:
   veilarbperson:
     api:
       url: ${VEILARBPERSONAPI_URL}
+      scope: api://${APP_CLUSTER_NAME}.pto.veilarbperson/.default
+  veilarbperson:
   topic:
     inn:
       oppfolgingsperiode: pto.oppfolgingsperiode-v1

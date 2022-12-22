@@ -19,20 +19,21 @@ import java.util.function.Supplier;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Service
-public class PortefoljeClient {
+public class VeilarboppfolgingClient {
     private final Supplier<String> machineToMachineTokenProvider;
     private final String baseUrl;
     private final OkHttpClient client;
 
-    public PortefoljeClient(
-            @Value("${application.veilarboppfolging.api.scope}") String veilarboppfolgingapi_scope,
+    public VeilarboppfolgingClient(
+            @Value("${application.veilarboppfolging.api.scope}") String veilarboppfolgingapiScope,
             AzureAdMachineToMachineTokenClient tokenClient,
             @Value("${application.veilarboppfolging.api.url}") String baseUrl,
             OkHttpClient client) {
-        this.machineToMachineTokenProvider = () -> tokenClient.createMachineToMachineToken(veilarboppfolgingapi_scope);
+        this.machineToMachineTokenProvider = () -> tokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
         this.baseUrl = baseUrl;
         this.client = client;
     }
+
     @NotNull
     private Request buildRequest(String path) {
         String uri = UrlUtils.joinPaths(baseUrl, path);

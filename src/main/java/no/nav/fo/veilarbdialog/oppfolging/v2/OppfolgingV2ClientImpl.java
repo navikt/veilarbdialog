@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
-import no.nav.fo.veilarbdialog.config.PortefoljeClient;
+import no.nav.fo.veilarbdialog.config.VeilarboppfolgingClient;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.GjeldendePeriodeMetrikk;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -18,12 +18,12 @@ import java.util.Optional;
 public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
     private final AktorOppslagClient aktorOppslagClient;
     private final GjeldendePeriodeMetrikk gjeldendePeriodeMetrikk;
-    private final PortefoljeClient portefoljeClient;
+    private final VeilarboppfolgingClient veilarboppfolgingClient;
 
     public Optional<OppfolgingV2UnderOppfolgingDTO> fetchUnderoppfolging(AktorId aktorId) {
         var fnr = aktorOppslagClient.hentFnr(aktorId);
         var uri = String.format("/v2/oppfolging?fnr=%s", fnr.get());
-        return portefoljeClient.request(uri, OppfolgingV2UnderOppfolgingDTO.class);
+        return veilarboppfolgingClient.request(uri, OppfolgingV2UnderOppfolgingDTO.class);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
     public Optional<OppfolgingPeriodeMinimalDTO> fetchGjeldendePeriode(AktorId aktorId) {
         Fnr fnr = aktorOppslagClient.hentFnr(aktorId);
         String uri = String.format("/v2/oppfolging/periode/gjeldende?fnr=%s", fnr.get());
-        var response = portefoljeClient.request(uri, OppfolgingPeriodeMinimalDTO.class);
+        var response = veilarboppfolgingClient.request(uri, OppfolgingPeriodeMinimalDTO.class);
         gjeldendePeriodeMetrikk.tellKallTilEksternOppfolgingsperiode(response.isPresent());
         return response;
     }
@@ -41,6 +41,6 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
     public Optional<List<OppfolgingPeriodeMinimalDTO>> hentOppfolgingsperioder(AktorId aktorId) {
         Fnr fnr = aktorOppslagClient.hentFnr(aktorId);
         String uri = String.format("/v2/oppfolging/perioder?fnr=%s", fnr.get());
-        return portefoljeClient.requestArrayData(uri, OppfolgingPeriodeMinimalDTO.class);
+        return veilarboppfolgingClient.requestArrayData(uri, OppfolgingPeriodeMinimalDTO.class);
     }
 }
