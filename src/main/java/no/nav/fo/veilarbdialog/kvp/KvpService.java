@@ -20,7 +20,6 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class KvpService {
 
