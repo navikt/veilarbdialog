@@ -60,16 +60,13 @@ public class AuthService {
         }
     }
 
-    public boolean harTilgangTilPerson(Fnr fnr) {
-        // TODO: Sjekk opp denne asap etter opanAM er ute
-        return pep.harTilgangTilPerson(getInnloggetBrukerToken(), ActionId.READ, fnr);
-        /* Bruk dette istedet:
-        if (pep.harTilgangTilPerson(getInnloggetBrukerToken(), ActionId.READ, fnr)) {
+    public void harTilgangTilPersonEllerKastIngenTilgang(Fnr fnr) {
+        if (!pep.harTilgangTilPerson(getInnloggetBrukerToken(), ActionId.READ, fnr)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(
                 "%s har ikke lesetilgang til person",
                 getIdent().orElse("null")
             ));
-        }*/
+        }
     }
 
     public void harTilgangTilPersonEllerKastIngenTilgang(String aktorId) {
