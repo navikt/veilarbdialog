@@ -43,7 +43,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import static no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarslingKvitteringConsumer.*;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
@@ -78,8 +78,6 @@ class EksternVarslingKvitteringTest {
 
     @LocalServerPort
     private int port;
-
-    private final static String OPPGAVE_KVITTERINGS_PREFIX = "O-veilarbdialog-";
 
     @BeforeEach
     void setUp() {
@@ -159,7 +157,6 @@ class EksternVarslingKvitteringTest {
 
     private void assertKvitteringLagret(UUID bestillingsId) {
         Awaitility.await().atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
-            String status = null;
             SqlParameterSource params = new MapSqlParameterSource()
                     .addValue("bestillingId", bestillingsId.toString());
             List<String> list = jdbc.queryForList("""
@@ -171,19 +168,15 @@ class EksternVarslingKvitteringTest {
             return list.size() > 0;
         });
     }
-
     private DoknotifikasjonStatus ferdigstiltStatus(UUID bestillingsId) {
         return lagDoknotifikasjonStatusMelding(bestillingsId, FERDIGSTILT);
     }
-
     private DoknotifikasjonStatus feiletStatus(UUID bestillingsId) {
         return lagDoknotifikasjonStatusMelding(bestillingsId, FEILET);
     }
-
     private DoknotifikasjonStatus infoStatus(UUID bestillingsId) {
         return lagDoknotifikasjonStatusMelding(bestillingsId, INFO);
     }
-
     private DoknotifikasjonStatus oversendtStatus(UUID eventId) {
         return lagDoknotifikasjonStatusMelding(eventId, OVERSENDT);
     }

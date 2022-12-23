@@ -38,8 +38,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -52,7 +50,7 @@ import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -376,13 +374,11 @@ class EskaleringsvarselControllerTest {
 
         StartEskaleringDto startEskaleringDto =
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "Dialog overskrift", "henvendelseTekst");
-        final EskaleringsvarselDto[] startEskalering = new EskaleringsvarselDto[1];
-
 
         for (int i = 0; i < antallKall; i++) {
             bakgrunnService.submit(() -> {
                 try {
-                    startEskalering[0] = dialogTestService.startEskalering(veileder, startEskaleringDto);
+                    dialogTestService.startEskalering(veileder, startEskaleringDto);
                 } catch (Exception e) {
                     log.warn("Feil i tråd.", e);
                 } finally {
@@ -392,11 +388,9 @@ class EskaleringsvarselControllerTest {
         }
         latch.await();
 
-        EskaleringsvarselDto eskaleringsvarselDto = startEskalering[0];
-
         requireGjeldende(veileder, bruker);
 
-        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 10000L);
+        KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 10000L);
         kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonOppgaveTopic, brukerNotifikasjonOppgaveConsumer);
     }
 
@@ -408,7 +402,7 @@ class EskaleringsvarselControllerTest {
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
         dialogTestService.startEskalering(veileder, startEskaleringDto);
 
-        Response response = bruker.createRequest()
+        bruker.createRequest()
                 .when()
                 .get("/veilarbdialog/api/eskaleringsvarsel/gjeldende")
                 .then()
@@ -464,7 +458,7 @@ class EskaleringsvarselControllerTest {
 
         StartEskaleringDto startEskaleringDto =
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
-        EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(veileder, startEskaleringDto);
+        dialogTestService.startEskalering(veileder, startEskaleringDto);
 
         Thread.sleep(1000L);
         // Batchen bestiller beskjeder ved nye dialoger (etter 1000 ms)
@@ -513,8 +507,8 @@ class EskaleringsvarselControllerTest {
         brukernotifikasjonService.sendDoneBrukernotifikasjoner();
     }
 
-    private DialogDTO lesHenvendelse(MockBruker bruker, long dialogId) {
-        DialogDTO dialog = bruker.createRequest()
+    private void lesHenvendelse(MockBruker bruker, long dialogId) {
+        bruker.createRequest()
                 .put("/veilarbdialog/api/dialog/{dialogId}/les", dialogId)
                 .then()
                 .assertThat().statusCode(HttpStatus.OK.value())
@@ -522,7 +516,6 @@ class EskaleringsvarselControllerTest {
                 .response()
                 .as(DialogDTO.class);
         brukernotifikasjonService.sendDoneBrukernotifikasjoner();
-        return dialog;
     }
 
     private GjeldendeEskaleringsvarselDto requireGjeldende(MockVeileder veileder, MockBruker mockBruker) {
