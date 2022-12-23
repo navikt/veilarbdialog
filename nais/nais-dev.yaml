@@ -82,7 +82,5 @@ spec:
       value: q1
     - name: APP_CLUSTER_NAME
       value: dev-fss
-    - name: KVP_AVSLUTTET_TOPIC
-      value: aapen-arbeidsrettetOppfolging-kvpAvsluttet-v1-q1
     - name: DIALOG_EKSTERN_URL
       value: https://pto.dev.nav.no/arbeid/dialog
