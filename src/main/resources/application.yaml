@@ -123,7 +123,6 @@ application:
     url: ${DIALOG_EKSTERN_URL}
   kafka:
     brokersUrl: ${KAFKA_BROKERS_URL}
-    kvpAvsluttetTopic: ${KVP_AVSLUTTET_TOPIC}
   serviceuser:
     username: ${SERVICEUSER_USERNAME}
     password: ${SERVICEUSER_PASSWORD}
