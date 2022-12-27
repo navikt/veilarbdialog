@@ -28,8 +28,6 @@ public class VeilarboppfolgingClient {
     private final String baseUrl;
     private final OkHttpClient client;
 
-    private final AuthContextHolder authContextHolder;
-
     private String getInnloggetBrukerToken() {
         return AuthContextHolderThreadLocal.instance().getIdTokenString().orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fant ikke token for innlogget bruker"));
     }
