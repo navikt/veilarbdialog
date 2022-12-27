@@ -35,10 +35,10 @@ public class VeilarboppfolgingClient {
             UnleashClient unleashClient) {
         // this.machineToMachineTokenProvider = () -> tokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
         this.machineToMachineTokenProvider = () -> {
-          if (unleashClient.isEnabled("useAzureAuthForVeilarboppfolging")) {
-              return systemUserTokenProvider.getSystemUserToken();
-          } else {
+          if (unleashClient.isEnabled("veilarbdialog.useAzureAuthForVeilarboppfolging")) {
               return tokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
+          } else {
+              return systemUserTokenProvider.getSystemUserToken();
           }
         };
         this.baseUrl = baseUrl;
