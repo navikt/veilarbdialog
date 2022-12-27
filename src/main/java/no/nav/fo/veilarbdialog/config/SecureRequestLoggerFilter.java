@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.config;
 
 import lombok.RequiredArgsConstructor;
+import no.nav.common.log.MarkerBuilder;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
-
-import static java.lang.String.format;
 
 @Service
 @RequiredArgsConstructor
@@ -35,16 +34,15 @@ public class SecureRequestLoggerFilter implements Filter {
 
         Optional<String> innloggetBrukerIdent = authService.getIdent();
 
-        String msg = format("status=%s method=%s host=%s path=%s erInternBruker=%s innloggetIdent=%s queryString=%s",
-                httpResponse.getStatus(),
-                httpRequest.getMethod(),
-                httpRequest.getServerName(),
-                httpRequest.getRequestURI(),
-                authService.erInternBruker(),
-                innloggetBrukerIdent.orElse(null),
-                httpRequest.getQueryString()
-        );
-        log.info(msg);
+        new MarkerBuilder()
+                .field("status", httpResponse.getStatus())
+                .field("method", httpRequest.getMethod())
+                .field("host", httpRequest.getServerName())
+                .field("path", httpRequest.getRequestURI())
+                .field("erInternBruker", ""+ authService.erInternBruker())
+                .field("innloggetIdent", innloggetBrukerIdent.orElse(null))
+                .field("queryString", httpRequest.getQueryString())
+                .log(log::info);
 
     }
 

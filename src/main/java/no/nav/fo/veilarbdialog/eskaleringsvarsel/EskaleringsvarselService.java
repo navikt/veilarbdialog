@@ -12,7 +12,7 @@ import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
-import no.nav.fo.veilarbdialog.clients.veilarboppfolging.OppfolgingClient;
+import no.nav.fo.veilarbdialog.clients.veilarboppfolging.VeilarboppfolgingClient;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
@@ -21,8 +21,10 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarsles
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +40,7 @@ public class EskaleringsvarselService {
     private final DialogDataService dialogDataService;
     private final AuthService authService;
     private final AktorOppslagClient aktorOppslagClient;
-    private final OppfolgingClient oppfolgingClient;
+    private final VeilarboppfolgingClient veilarboppfolgingClient;
     private final SistePeriodeService sistePeriodeService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
 
@@ -54,7 +56,7 @@ public class EskaleringsvarselService {
             throw new BrukerKanIkkeVarslesException();
         }
 
-        if (!oppfolgingClient.erUnderOppfolging(fnr)) {
+        if (!veilarboppfolgingClient.erUnderOppfolging(fnr)) {
             throw new BrukerIkkeUnderOppfolgingException();
         }
 
