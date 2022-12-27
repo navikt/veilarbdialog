@@ -9,7 +9,6 @@ import no.nav.common.abac.VeilarbPepFactory;
 import no.nav.common.abac.audit.AuditLogFilterUtils;
 import no.nav.common.abac.audit.SpringAuditRequestInfoSupplier;
 import no.nav.common.abac.domain.request.ActionId;
-import no.nav.common.rest.filter.LogRequestFilter;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.utils.Credentials;
 import org.junit.Before;
@@ -28,6 +27,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static no.nav.common.abac.audit.AuditLogFilterUtils.not;
+import static no.nav.common.log.LogFilter.CONSUMER_ID_HEADER_NAME;
 import static no.nav.common.utils.EnvironmentUtils.NAIS_APP_NAME_PROPERTY_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -72,7 +72,7 @@ public class PepAuditLogFilterTest {
 
     private void mockRequestContextHolder(String requestUri) {
         HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-        when(httpServletRequest.getHeader(LogRequestFilter.NAV_CONSUMER_ID_HEADER_NAME)).thenReturn("123");
+        when(httpServletRequest.getHeader(CONSUMER_ID_HEADER_NAME)).thenReturn("123");
         when(httpServletRequest.getMethod()).thenReturn("GET");
         when(httpServletRequest.getRequestURI()).thenReturn(requestUri);
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpServletRequest));
