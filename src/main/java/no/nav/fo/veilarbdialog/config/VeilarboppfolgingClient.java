@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.config;
 
 import no.nav.common.rest.client.RestUtils;
-import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
+import no.nav.common.sts.SystemUserTokenProvider;
 import no.nav.common.utils.UrlUtils;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -25,11 +25,13 @@ public class VeilarboppfolgingClient {
     private final OkHttpClient client;
 
     public VeilarboppfolgingClient(
-            @Value("${application.veilarboppfolging.api.scope}") String veilarboppfolgingapiScope,
-            AzureAdMachineToMachineTokenClient tokenClient,
+            // @Value("${application.veilarboppfolging.api.scope}") String veilarboppfolgingapiScope,
+            // AzureAdMachineToMachineTokenClient tokenClient,
+            SystemUserTokenProvider systemUserTokenProvider, // NaisStsTokenProvider
             @Value("${application.veilarboppfolging.api.url}") String baseUrl,
             OkHttpClient client) {
-        this.machineToMachineTokenProvider = () -> tokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
+        // this.machineToMachineTokenProvider = () -> tokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
+        this.machineToMachineTokenProvider = systemUserTokenProvider::getSystemUserToken;
         this.baseUrl = baseUrl;
         this.client = client;
     }
