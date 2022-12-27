@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.config;
 
 import no.nav.common.auth.context.AuthContextHolder;
+import no.nav.common.auth.context.AuthContextHolderThreadLocal;
 import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.rest.client.RestUtils;
 import no.nav.common.sts.SystemUserTokenProvider;
@@ -30,7 +31,7 @@ public class VeilarboppfolgingClient {
     private final AuthContextHolder authContextHolder;
 
     private String getInnloggetBrukerToken() {
-        return authContextHolder.getIdTokenString().orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fant ikke token for innlogget bruker"));
+        return AuthContextHolderThreadLocal.instance().getIdTokenString().orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fant ikke token for innlogget bruker"));
     }
 
     public VeilarboppfolgingClient(
@@ -49,7 +50,6 @@ public class VeilarboppfolgingClient {
               return systemUserTokenProvider.getSystemUserToken();
           }
         };
-        this.authContextHolder = authContextHolder;
         this.baseUrl = baseUrl;
         this.client = client;
     }
