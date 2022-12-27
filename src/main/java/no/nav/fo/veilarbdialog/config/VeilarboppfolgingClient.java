@@ -1,9 +1,10 @@
 package no.nav.fo.veilarbdialog.config;
 
+import no.nav.common.auth.context.AuthContextHolder;
 import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.rest.client.RestUtils;
 import no.nav.common.sts.SystemUserTokenProvider;
-import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
+import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 import no.nav.common.utils.UrlUtils;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -26,9 +27,16 @@ public class VeilarboppfolgingClient {
     private final String baseUrl;
     private final OkHttpClient client;
 
+    private final AuthContextHolder authContextHolder;
+
+    private String getInnloggetBrukerToken() {
+        return authContextHolder.getIdTokenString().orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fant ikke token for innlogget bruker"));
+    }
+
     public VeilarboppfolgingClient(
+            AuthContextHolder authContextHolder,
             @Value("${application.veilarboppfolging.api.scope}") String veilarboppfolgingapiScope,
-            AzureAdMachineToMachineTokenClient tokenClient,
+            AzureAdOnBehalfOfTokenClient azureAdOnBehalfOfTokenClient,
             SystemUserTokenProvider systemUserTokenProvider, // NaisStsTokenProvider
             @Value("${application.veilarboppfolging.api.url}") String baseUrl,
             OkHttpClient client,
@@ -36,11 +44,12 @@ public class VeilarboppfolgingClient {
         // this.machineToMachineTokenProvider = () -> tokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
         this.machineToMachineTokenProvider = () -> {
           if (unleashClient.isEnabled("veilarbdialog.useAzureAuthForVeilarboppfolging")) {
-              return tokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
+              return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, getInnloggetBrukerToken());
           } else {
               return systemUserTokenProvider.getSystemUserToken();
           }
         };
+        this.authContextHolder = authContextHolder;
         this.baseUrl = baseUrl;
         this.client = client;
     }
