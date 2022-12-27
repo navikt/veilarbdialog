@@ -10,6 +10,7 @@ import no.nav.common.abac.VeilarbPepFactory;
 import no.nav.common.abac.audit.AuditLogFilterUtils;
 import no.nav.common.abac.audit.SpringAuditRequestInfoSupplier;
 import no.nav.common.abac.domain.request.ActionId;
+import no.nav.common.rest.filter.LogRequestFilter;
 import no.nav.common.types.identer.Fnr;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +27,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static no.nav.common.abac.audit.AuditLogFilterUtils.not;
-import static no.nav.common.log.LogFilter.CONSUMER_ID_HEADER_NAME;
 import static no.nav.common.utils.EnvironmentUtils.NAIS_APP_NAME_PROPERTY_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -76,7 +76,7 @@ class PepAuditLogFilterTest {
 
     private void mockRequestContextHolder(String requestUri) {
         HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-        when(httpServletRequest.getHeader(CONSUMER_ID_HEADER_NAME)).thenReturn("123");
+        when(httpServletRequest.getHeader(LogRequestFilter.NAV_CONSUMER_ID_HEADER_NAME)).thenReturn("123");
         when(httpServletRequest.getMethod()).thenReturn("GET");
         when(httpServletRequest.getRequestURI()).thenReturn(requestUri);
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(httpServletRequest));

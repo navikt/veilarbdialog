@@ -20,7 +20,7 @@
         <java.version>17</java.version>
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
-        <common.version>2.2022.09.15_07.46-e4fa96eb6813</common.version>
+        <common.version>2.2022.11.16_15.18-421ec713e2a0</common.version>
 
         <flyway.version>4.1.1</flyway.version>
         <jersey.version>2.27</jersey.version>
@@ -421,6 +421,7 @@
                                 <openApiNullable>false</openApiNullable>
                                 <interfaceOnly>true</interfaceOnly>
                                 <skipDefaultInterface>true</skipDefaultInterface>
+                                <!--suppress UnresolvedMavenProperty -->
                                 <additionalModelTypeAnnotations>@lombok.experimental.SuperBuilder @lombok.NoArgsConstructor</additionalModelTypeAnnotations>
                             </configOptions>
                         </configuration>

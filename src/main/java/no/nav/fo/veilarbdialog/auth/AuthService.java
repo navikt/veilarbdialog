@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.auth;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.common.abac.Pep;
 import no.nav.common.abac.domain.request.ActionId;
 import no.nav.common.auth.context.AuthContextHolder;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import static no.nav.fo.veilarbdialog.util.AuthUtils.erSystemkallFraAzureAd;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class AuthService {
 
@@ -89,14 +91,16 @@ public class AuthService {
         return authContextHolder.erEksternBruker();
     }
 
+    public boolean erSystemBruker() {
+        return authContextHolder.erSystemBruker();
+    }
+
     public boolean erInternBruker() {
         return authContextHolder.erInternBruker();
     }
 
     public String getInnloggetBrukerToken() {
-        return authContextHolder.getIdTokenString()
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fant ikke token for innlogget bruker"));
+        return authContextHolder.requireIdTokenString();
     }
 
 }
