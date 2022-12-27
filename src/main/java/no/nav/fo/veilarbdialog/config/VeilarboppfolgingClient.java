@@ -35,7 +35,6 @@ public class VeilarboppfolgingClient {
     }
 
     public VeilarboppfolgingClient(
-            AuthContextHolder authContextHolder,
             @Value("${application.veilarboppfolging.api.scope}") String veilarboppfolgingapiScope,
             AzureAdOnBehalfOfTokenClient azureAdOnBehalfOfTokenClient,
             SystemUserTokenProvider systemUserTokenProvider, // NaisStsTokenProvider
