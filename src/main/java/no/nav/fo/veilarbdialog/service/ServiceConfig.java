@@ -1,6 +1,8 @@
 package no.nav.fo.veilarbdialog.service;
 
 import lombok.Getter;
+import no.nav.common.featuretoggle.UnleashClient;
+import no.nav.common.featuretoggle.UnleashClientImpl;
 import no.nav.common.sts.NaisSystemUserTokenProvider;
 import no.nav.common.sts.SystemUserTokenProvider;
 import no.nav.common.token_client.builder.AzureAdTokenClientBuilder;
@@ -41,6 +43,12 @@ public class ServiceConfig {
         return AzureAdTokenClientBuilder.builder()
                 .withNaisDefaults()
                 .buildMachineToMachineTokenClient();
+    }
+
+    @Profile("!local")
+    @Bean
+    public UnleashClient unleashClient() {
+        return new UnleashClientImpl(unleashUrl, "veilarbdialog");
     }
 
 }
