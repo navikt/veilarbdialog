@@ -4,7 +4,7 @@ import no.nav.common.types.identer.Fnr;
 
 import java.util.Optional;
 
-public interface VeilarboppfolgingClient {
+public interface OppfolgingClient {
 
     Optional<ManuellStatusV2DTO> hentManuellStatus(Fnr fnr);
 
