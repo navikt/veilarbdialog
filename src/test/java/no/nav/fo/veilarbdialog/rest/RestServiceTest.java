@@ -99,8 +99,14 @@ class RestServiceTest {
                 .as(DialogDTO.class);
         HenvendelseDTO resultatHenvendelse = resultatDialog.getHenvendelser().get(0);
 
-        assertThat(resultatDialog).isEqualToIgnoringGivenFields(expected, "opprettetDato", "sisteDato", "henvendelser", "id");
-        assertThat(resultatHenvendelse).isEqualToIgnoringGivenFields(henvendelseExpected, "sendt", "id", "dialogId");
+        assertThat(resultatDialog)
+                .usingRecursiveComparison()
+                .ignoringFields("opprettetDato", "sisteDato", "henvendelser", "id")
+                .isEqualTo(expected);
+        assertThat(resultatHenvendelse)
+                .usingRecursiveComparison()
+                .ignoringFields("sendt", "id", "dialogId")
+                .isEqualTo(henvendelseExpected);
         assertThat(resultatDialog.getId()).isEqualTo(resultatHenvendelse.getDialogId());
 
     }
@@ -134,8 +140,15 @@ class RestServiceTest {
                 .as(DialogDTO.class);
         HenvendelseDTO resultatHenvendelse = resultatDialog.getHenvendelser().get(0);
 
-        assertThat(resultatDialog).isEqualToIgnoringGivenFields(expected, "opprettetDato", "sisteDato", "henvendelser", "id");
-        assertThat(resultatHenvendelse).isEqualToIgnoringGivenFields(henvendelseExpected, "sendt", "id", "dialogId");
+        assertThat(resultatDialog)
+                .usingRecursiveComparison()
+                .ignoringFields("opprettetDato", "sisteDato", "henvendelser", "id")
+                .isEqualTo(expected);
+        assertThat(resultatHenvendelse)
+                .usingRecursiveComparison()
+                .ignoringFields("sendt", "id", "dialogId")
+                .isEqualTo(henvendelseExpected);
+
         assertThat(resultatDialog.getId()).isEqualTo(resultatHenvendelse.getDialogId());
     }
 

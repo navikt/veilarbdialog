@@ -234,7 +234,6 @@ class DialogBeskjedTest {
 
         assertThat(brukernotifikasjonRecord.value().getTekst()).isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST);
 
-
         BrukernotifikasjonEntity brukernotifikasjonEntity =
                 brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(Long.parseLong(dialog.getId()), BrukernotifikasjonsType.BESKJED).get(0);
 
