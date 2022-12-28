@@ -10,6 +10,7 @@ import no.nav.common.sts.SystemUserTokenProvider;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 import no.nav.common.utils.UrlUtils;
+import no.nav.fo.veilarbdialog.auth.AuthService;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -32,16 +33,6 @@ public class VeilarboppfolgingClient {
     private final Supplier<String> tokenProvider;
     private final OkHttpClient client;
 
-
-    private String getInnloggetBrukerToken() {
-        var token = AuthContextHolderThreadLocal.instance().getIdTokenString();
-        if (token.isEmpty()) {
-            log.error("Fant ikke token for innlogget bruker");
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fant ikke token for innlogget bruker");
-        }
-        return token.get();
-    }
-
     @Value("${application.veilarboppfolging.api.url}")
     private String baseUrl;
     private VeilarboppfolgingClient(
@@ -50,19 +41,18 @@ public class VeilarboppfolgingClient {
             AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient,
             SystemUserTokenProvider systemUserTokenProvider,
             OkHttpClient client,
-            AuthContextHolder authContextHolder,
+            AuthService auth,
             UnleashClient unleashClient) {
         this.tokenProvider = () -> {
             if (unleashClient.isEnabled("veilarbdialog.useAzureAuthForVeilarboppfolging")) {
-                var role = authContextHolder.getRole();
-                if (role.isPresent() && role.get() == UserRole.INTERN) {
-                    return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, getInnloggetBrukerToken());
-                } else if (role.isPresent() && role.get() == UserRole.SYSTEM) {
-                    return azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
-                } else if (role.isPresent() && role.get() == UserRole.EKSTERN) {
+                if (auth.erInternBruker()) {
+                    return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
+                } else if (auth.erEksternBruker()) {
                     return systemUserTokenProvider.getSystemUserToken();
+                } else if (auth.erSystemBruker()) {
+                    return azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
                 } else {
-                    throw new IllegalStateException("Could not resolve user role: " + role.toString());
+                    throw new IllegalStateException("Feil brukertype, må være ekstern, intern eller system bruker ");
                 }
             } else {
                 return systemUserTokenProvider.getSystemUserToken();

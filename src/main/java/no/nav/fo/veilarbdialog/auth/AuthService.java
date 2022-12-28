@@ -89,6 +89,10 @@ public class AuthService {
         return authContextHolder.erEksternBruker();
     }
 
+    public boolean erSystemBruker() {
+        return authContextHolder.erSystemBruker();
+    }
+
     public boolean erInternBruker() {
         return authContextHolder.erInternBruker();
     }
