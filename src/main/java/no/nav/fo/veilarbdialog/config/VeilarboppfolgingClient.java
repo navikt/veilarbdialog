@@ -52,10 +52,8 @@ public class VeilarboppfolgingClient {
                     return oboToken;
                 } else if (auth.erEksternBruker()) {
                     return systemUserTokenProvider.getSystemUserToken();
-                } else if (auth.erSystemBruker()) {
-                    return azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
                 } else {
-                    throw new IllegalStateException("Feil brukertype, må være ekstern, intern eller system bruker ");
+                    return azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
                 }
             } else {
                 return systemUserTokenProvider.getSystemUserToken();
