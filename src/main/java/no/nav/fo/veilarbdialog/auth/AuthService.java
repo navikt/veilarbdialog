@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.auth;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.common.abac.Pep;
 import no.nav.common.abac.domain.request.ActionId;
 import no.nav.common.auth.context.AuthContextHolder;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import static no.nav.fo.veilarbdialog.util.AuthUtils.erSystemkallFraAzureAd;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class AuthService {
 
@@ -61,6 +63,12 @@ public class AuthService {
     }
 
     public void harTilgangTilPersonEllerKastIngenTilgang(Fnr fnr) {
+        var token = getInnloggetBrukerToken();
+        if (token.isEmpty()) {
+            log.info("Fant ikke idtoken på innlogget bruker");
+        } else {
+            log.info("Fant idtoken på innlogget bruker");
+        }
         if (!pep.harTilgangTilPerson(getInnloggetBrukerToken(), ActionId.READ, fnr)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(
                 "%s har ikke lesetilgang til person",
@@ -98,9 +106,7 @@ public class AuthService {
     }
 
     public String getInnloggetBrukerToken() {
-        return authContextHolder.getIdTokenString()
-                .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fant ikke token for innlogget bruker"));
+        return authContextHolder.requireIdTokenString();
     }
 
 }
