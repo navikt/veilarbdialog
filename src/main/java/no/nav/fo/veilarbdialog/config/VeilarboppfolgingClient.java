@@ -9,6 +9,7 @@ import no.nav.common.rest.client.RestUtils;
 import no.nav.common.sts.SystemUserTokenProvider;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
+import no.nav.common.utils.EnvironmentUtils;
 import no.nav.common.utils.UrlUtils;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import okhttp3.OkHttpClient;
@@ -49,6 +50,9 @@ public class VeilarboppfolgingClient {
                 if (auth.erInternBruker()) {
                     var oboToken = azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
                     log.info("Successfully exchanged to on-behalf-of token");
+                    if (EnvironmentUtils.isDevelopment().orElse(false)) {
+                        log.debug("dev oboToken:" + oboToken);
+                    }
                     return oboToken;
                 } else {
                     return systemUserTokenProvider.getSystemUserToken();
