@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.config;
 
+import lombok.extern.slf4j.Slf4j;
 import no.nav.common.auth.context.AuthContextHolder;
 import no.nav.common.auth.context.AuthContextHolderThreadLocal;
 import no.nav.common.featuretoggle.UnleashClient;
@@ -23,13 +24,19 @@ import java.util.function.Supplier;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Service
+@Slf4j
 public class VeilarboppfolgingClient {
     private final Supplier<String> machineToMachineTokenProvider;
     private final String baseUrl;
     private final OkHttpClient client;
 
     private String getInnloggetBrukerToken() {
-        return AuthContextHolderThreadLocal.instance().getIdTokenString().orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fant ikke token for innlogget bruker"));
+        var token = AuthContextHolderThreadLocal.instance().getIdTokenString();
+        if (token.isEmpty()) {
+            log.error("Fant ikke token for innlogget bruker");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Fant ikke token for innlogget bruker");
+        }
+        return token.get();
     }
 
     public VeilarboppfolgingClient(
