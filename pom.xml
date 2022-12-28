@@ -281,11 +281,6 @@
             <version>4.1.0</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
@@ -380,6 +375,12 @@
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.mkammerer.wiremock-junit5</groupId>
+            <artifactId>wiremock-junit5</artifactId>
+            <version>1.1.0</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

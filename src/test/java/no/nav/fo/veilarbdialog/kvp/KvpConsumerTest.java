@@ -4,23 +4,17 @@ import lombok.SneakyThrows;
 import no.nav.common.json.JsonUtils;
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.kafka.KvpAvsluttetKafkaDTO;
-import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
-import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
-import org.awaitility.Awaitility;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 
-import java.time.Duration;
 import java.time.ZonedDateTime;
 
-public class KvpConsumerTest extends SpringBootTestBase {
+class KvpConsumerTest extends SpringBootTestBase {
 
     private static final String AKTORID = "4321";
     private static final String SAKSBEHANDLER = "Z99999";
@@ -35,14 +29,14 @@ public class KvpConsumerTest extends SpringBootTestBase {
     @Value("${application.topic.inn.kvpavsluttet}")
     String kvpAvsluttetTopic;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setupConsumer() {
         this.springKvpAvsluttetConsumer = kafkaTestService.createStringStringConsumer(kvpAvsluttetTopic);
     }
 
     @SneakyThrows
     @Test
-    public void behandleKvpAvsluttetConsumerService_spiser_meldinger_fra_kvpAvsluttetTopic() {
+    void behandleKvpAvsluttetConsumerService_spiser_meldinger_fra_kvpAvsluttetTopic() {
         KvpAvsluttetKafkaDTO kvpAvsluttetKafkaDTO = KvpAvsluttetKafkaDTO.builder()
                 .aktorId(AKTORID)
                 .avsluttetAv(SAKSBEHANDLER)

@@ -2,28 +2,26 @@ package no.nav.fo.veilarbdialog.metrics;
 
 import no.nav.common.metrics.Event;
 import no.nav.common.metrics.MetricsClient;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FrontendloggerTest {
+@ExtendWith(MockitoExtension.class)
+class FrontendloggerTest {
     @Captor
     ArgumentCaptor<Event> eventCaptor;
     MetricsClient metricsClient = mock(MetricsClient.class);
     Frontendlogger frontendlogger = new Frontendlogger(metricsClient);
 
     @Test
-    public void loggerSkalLeggePaTagsOgFields() {
+    void loggerSkalLeggePaTagsOgFields() {
         HashMap<String, String> tags = new HashMap<>();
         tags.put("test", "test_value");
         HashMap<String, Object> fields = new HashMap<>();
@@ -43,7 +41,7 @@ public class FrontendloggerTest {
     }
 
     @Test
-    public void loggerSkalLeggeHandtereNull() {
+    void loggerSkalLeggeHandtereNull() {
         frontendlogger.skrivEventTilInflux(new Frontendlogger.FrontendEvent("test"));
 
         Event expected = new Event("test.event");

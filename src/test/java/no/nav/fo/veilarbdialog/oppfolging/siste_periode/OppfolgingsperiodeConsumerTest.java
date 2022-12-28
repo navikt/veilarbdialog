@@ -20,8 +20,8 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -37,7 +37,7 @@ import java.util.concurrent.TimeoutException;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
+class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
     @Autowired
     KafkaTemplate<String, String> producer;
@@ -64,13 +64,13 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
     EskaleringsvarselService eskaleringsvarselService;
 
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setupConsumer() {
         this.endringPaaDialogConsumer = kafkaTestService.createStringStringConsumer(endringPaaDialogTopic);
     }
 
     @Test
-    public void skal_opprette_siste_oppfolgingsperiode() throws InterruptedException, ExecutionException, TimeoutException {
+    void skal_opprette_siste_oppfolgingsperiode() throws InterruptedException, ExecutionException, TimeoutException {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         String aktorId = mockBruker.getAktorId();
         UUID oppfolgingsId = mockBruker.getOppfolgingsperiode();
@@ -106,7 +106,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
     @Test
     @SneakyThrows
-    public void skal_avslutte_gjeldende_varsler_og_notifikasjoner() {
+    void skal_avslutte_gjeldende_varsler_og_notifikasjoner() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         String aktorId = mockBruker.getAktorId();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
@@ -145,7 +145,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
     }
 
     @Test
-    public void skal_sette_dialoger_til_historisk() throws ExecutionException, InterruptedException, TimeoutException {
+    void skal_sette_dialoger_til_historisk() throws ExecutionException, InterruptedException, TimeoutException {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         String aktorId = mockBruker.getAktorId();
 

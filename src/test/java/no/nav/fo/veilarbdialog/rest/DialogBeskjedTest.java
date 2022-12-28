@@ -20,10 +20,9 @@ import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,7 +31,6 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -42,14 +40,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@RunWith(SpringRunner.class)
 @AutoConfigureWireMock(port = 0)
 @Slf4j
 @Sql(
         scripts = "/db/testdata/slett_alle_dialoger.sql",
         executionPhase = BEFORE_TEST_METHOD
 )
-public class DialogBeskjedTest {
+class DialogBeskjedTest {
 
     @LocalServerPort
     protected int port;
@@ -82,7 +79,7 @@ public class DialogBeskjedTest {
 
     Consumer<NokkelInput, DoneInput> brukerNotifikasjonDoneConsumer;
 
-    @Before
+    @BeforeEach
     public void setup() {
         JdbcTemplateLockProvider l = (JdbcTemplateLockProvider) lockProvider;
         l.clearCache();
@@ -92,7 +89,7 @@ public class DialogBeskjedTest {
     }
 
     @Test
-    public void beskjed_happy_case() {
+    void beskjed_happy_case() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
 
@@ -142,7 +139,7 @@ public class DialogBeskjedTest {
     }
 
     @Test
-    public void ikke_beskjed_foer_grace_periode_utlopt() {
+    void ikke_beskjed_foer_grace_periode_utlopt() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
 
@@ -162,7 +159,7 @@ public class DialogBeskjedTest {
     }
 
     @Test
-    public void ikke_beskjed_naar_maxalder_er_passert() {
+    void ikke_beskjed_naar_maxalder_er_passert() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
 
@@ -185,7 +182,7 @@ public class DialogBeskjedTest {
     }
 
     @Test
-    public void kan_ikke_varsles() {
+    void kan_ikke_varsles() {
         MockBruker bruker = MockNavService.createHappyBruker();
         BrukerOptions reservertKrr = bruker.getBrukerOptions().toBuilder().erReservertKrr(true).build();
         MockNavService.updateBruker(bruker, reservertKrr);
@@ -201,7 +198,7 @@ public class DialogBeskjedTest {
     }
 
     @Test
-    public void ikkeDobleNotifikasjonerPaaSammeDialog() {
+    void ikkeDobleNotifikasjonerPaaSammeDialog() {
 
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
@@ -233,12 +230,9 @@ public class DialogBeskjedTest {
         ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
                 KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
 
-        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
+        Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
         assertThat(brukernotifikasjonRecord.value().getTekst()).isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST);
-
-
-
 
         BrukernotifikasjonEntity brukernotifikasjonEntity =
                 brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(Long.parseLong(dialog.getId()), BrukernotifikasjonsType.BESKJED).get(0);
@@ -261,7 +255,7 @@ public class DialogBeskjedTest {
         ConsumerRecord<NokkelInput, DoneInput> doneRecord =
                 KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
 
-        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
+        Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
 
         NokkelInput nokkel = doneRecord.key();
 
@@ -270,7 +264,7 @@ public class DialogBeskjedTest {
     }
 
     @Test
-    public void ingenDobleNotifikasjonerPaaSammeDialogMedIntervall() {
+    void ingenDobleNotifikasjonerPaaSammeDialogMedIntervall() {
 
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
@@ -284,7 +278,6 @@ public class DialogBeskjedTest {
                 .as(DialogDTO.class);
 
 
-
         // Setter sendt til å være 1 sekund tidligere pga. grace period
         settHenvendelseSendtForNSekundSiden(dialog.getHenvendelser().get(0).getId(), 1);
 
@@ -294,7 +287,7 @@ public class DialogBeskjedTest {
         ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
                 KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
 
-        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
+        Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
         assertThat(brukernotifikasjonRecord.value().getTekst()).isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST);
 
@@ -317,7 +310,7 @@ public class DialogBeskjedTest {
 
         // Ingen nye beskjeder siden forrige henvendelse ikke er lest
 
-        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
+        Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
         mockBruker.createRequest()
                 .put("/veilarbdialog/api/dialog/{dialogId}/les", dialog.getId())
@@ -329,7 +322,7 @@ public class DialogBeskjedTest {
         ConsumerRecord<NokkelInput, DoneInput> doneRecord =
                 KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
 
-        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
+        Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
 
         NokkelInput nokkel = doneRecord.key();
 
@@ -339,7 +332,7 @@ public class DialogBeskjedTest {
 
 
     @Test
-    public void nyNotifikasjonPaaSammeDialogNaarFoersteErLest() throws InterruptedException {
+    void nyNotifikasjonPaaSammeDialogNaarFoersteErLest() throws InterruptedException {
 
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
@@ -360,7 +353,7 @@ public class DialogBeskjedTest {
         ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
                 KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
 
-        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
+        Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
         assertThat(brukernotifikasjonRecord.value().getTekst()).isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST);
 
@@ -374,8 +367,7 @@ public class DialogBeskjedTest {
         ConsumerRecord<NokkelInput, DoneInput> doneRecord =
                 KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
 
-        Assert.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
-
+        Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
 
 
         // Hy henvendelse samme dialog
@@ -393,9 +385,7 @@ public class DialogBeskjedTest {
 
         // Ny beskjed siden forrige henvendelse er lest
 
-        Assert.assertFalse(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
-
-
+        Assertions.assertFalse(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
     }
 
     // Setter sendt til å være N sekund tidligere pga. grace period

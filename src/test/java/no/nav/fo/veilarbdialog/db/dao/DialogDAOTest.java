@@ -5,13 +5,11 @@ import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import org.joda.time.DateTime;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -24,14 +22,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
 @ActiveProfiles("local")
 @Transactional
 @Sql(
         scripts = "/db/testdata/slett_alle_dialoger.sql",
         executionPhase = BEFORE_TEST_METHOD
 )
-public class DialogDAOTest {
+ class DialogDAOTest {
 
     private static final String AKTOR_ID_1234 = "1234";
 
@@ -39,7 +36,7 @@ public class DialogDAOTest {
     private DialogDAO dialogDAO;
 
     @Test
-    public void kan_opprette_dialog() {
+     void kan_opprette_dialog() {
         DialogData dialog = nyDialog();
         DialogData dialogData = dialogDAO.opprettDialog(dialog);
         assertThat(dialogData.getOppdatert()).isNotNull();
@@ -53,7 +50,7 @@ public class DialogDAOTest {
     }
 
     @Test
-    public void kanHenteDialogerPaaAktorId() {
+     void kanHenteDialogerPaaAktorId() {
         DialogData dialogData = nyDialog(AKTOR_ID_1234);
         dialogDAO.opprettDialog(dialogData);
 
@@ -72,7 +69,7 @@ public class DialogDAOTest {
     }
 
     @Test
-    public void kanHentDialogPaDialogId() {
+     void kanHentDialogPaDialogId() {
         DialogData dialogData = nyDialog(AKTOR_ID_1234);
         DialogData opprettDialog = dialogDAO.opprettDialog(dialogData);
 
@@ -87,7 +84,7 @@ public class DialogDAOTest {
     }
 
     @Test
-    public void kanOppretteHenvendelse() {
+     void kanOppretteHenvendelse() {
         DialogData dialogData = opprettNyDialog(AKTOR_ID_1234);
         HenvendelseData henvendelseData = nyHenvendelse(dialogData.getId(), AKTOR_ID_1234, AvsenderType.BRUKER);
 
@@ -108,7 +105,7 @@ public class DialogDAOTest {
 
 
     @Test
-    public void kanHenteDialogPaaAktivitetId() {
+     void kanHenteDialogPaaAktivitetId() {
         var aktivitetId = AktivitetId.of("aktivitetId");
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isEmpty();
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().aktivitetId(aktivitetId).build());
@@ -116,7 +113,7 @@ public class DialogDAOTest {
     }
 
     @Test
-    public void kanHenteDialogPaaArenaAktivitetId() {
+     void kanHenteDialogPaaArenaAktivitetId() {
         var aktivitetId = AktivitetId.of("ARENATA123");
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isEmpty();
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().aktivitetId(aktivitetId).build());
@@ -124,7 +121,7 @@ public class DialogDAOTest {
     }
 
     @Test
-    public void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedAlleredeHistoriske() {
+     void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedAlleredeHistoriske() {
         DialogData dialog = nyDialog(AKTOR_ID_1234)
                 .toBuilder()
                 .overskrift("ny")
@@ -145,7 +142,7 @@ public class DialogDAOTest {
     }
 
     @Test
-    public void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
+     void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
         var dialog = nyDialog(AKTOR_ID_1234).toBuilder().opprettetDato(DateTime.now().minusSeconds(5).toDate()).overskrift("gammel").build();
         dialogDAO.opprettDialog(dialog);
 
@@ -159,7 +156,7 @@ public class DialogDAOTest {
     }
 
     @Test
-    public void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
+     void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().opprettetDato(DateTime.now().minusSeconds(5).toDate()).overskrift("gammel").kontorsperreEnhetId("123").build());
         Date avslutningsdato = new Date();
 
@@ -172,7 +169,7 @@ public class DialogDAOTest {
     }
 
     @Test
-    public void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerSomIkkeErKontorsperret() {
+     void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerSomIkkeErKontorsperret() {
         var opprettet = DateTime.now().minusSeconds(5).toDate();
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("med_sperre").opprettetDato(opprettet).kontorsperreEnhetId("123").build());
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("uten_sperre").opprettetDato(opprettet).build());
@@ -183,7 +180,7 @@ public class DialogDAOTest {
     }
 
     @Test
-    public void skalIkkeLoggeTekstInnhold() {
+     void skalIkkeLoggeTekstInnhold() {
         String sensitivtInnhold = "Sensitivt innhold";
 
         List<HenvendelseData> henvendelser = asList(
@@ -205,7 +202,7 @@ public class DialogDAOTest {
 
 
     @Test
-    public void skalHenteBrukereMedAktiveDialoger() {
+     void skalHenteBrukereMedAktiveDialoger() {
         opprettNyDialog("1", false);
         opprettNyDialog("1", false);
         opprettNyDialog("2", false);
