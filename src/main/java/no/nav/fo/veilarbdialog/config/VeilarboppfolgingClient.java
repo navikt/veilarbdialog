@@ -3,9 +3,11 @@ package no.nav.fo.veilarbdialog.config;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.auth.context.AuthContextHolder;
 import no.nav.common.auth.context.AuthContextHolderThreadLocal;
+import no.nav.common.auth.context.UserRole;
 import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.rest.client.RestUtils;
 import no.nav.common.sts.SystemUserTokenProvider;
+import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 import no.nav.common.utils.UrlUtils;
 import okhttp3.OkHttpClient;
@@ -13,6 +15,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -26,9 +29,9 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @Service
 @Slf4j
 public class VeilarboppfolgingClient {
-    private final Supplier<String> machineToMachineTokenProvider;
-    private final String baseUrl;
+    private final Supplier<String> tokenProvider;
     private final OkHttpClient client;
+
 
     private String getInnloggetBrukerToken() {
         var token = AuthContextHolderThreadLocal.instance().getIdTokenString();
@@ -39,22 +42,32 @@ public class VeilarboppfolgingClient {
         return token.get();
     }
 
-    public VeilarboppfolgingClient(
+    @Value("${application.veilarboppfolging.api.url}")
+    private String baseUrl;
+    private VeilarboppfolgingClient(
             @Value("${application.veilarboppfolging.api.scope}") String veilarboppfolgingapiScope,
             AzureAdOnBehalfOfTokenClient azureAdOnBehalfOfTokenClient,
-            SystemUserTokenProvider systemUserTokenProvider, // NaisStsTokenProvider
-            @Value("${application.veilarboppfolging.api.url}") String baseUrl,
+            AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient,
+            SystemUserTokenProvider systemUserTokenProvider,
             OkHttpClient client,
+            AuthContextHolder authContextHolder,
             UnleashClient unleashClient) {
-        // this.machineToMachineTokenProvider = () -> tokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
-        this.machineToMachineTokenProvider = () -> {
-          if (unleashClient.isEnabled("veilarbdialog.useAzureAuthForVeilarboppfolging")) {
-              return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, getInnloggetBrukerToken());
-          } else {
-              return systemUserTokenProvider.getSystemUserToken();
-          }
+        this.tokenProvider = () -> {
+            if (unleashClient.isEnabled("veilarbdialog.useAzureAuthForVeilarboppfolging")) {
+                var role = authContextHolder.getRole();
+                if (role.isPresent() && role.get() == UserRole.INTERN) {
+                    return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, getInnloggetBrukerToken());
+                } else if (role.isPresent() && role.get() == UserRole.SYSTEM) {
+                    return azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
+                } else if (role.isPresent() && role.get() == UserRole.EKSTERN) {
+                    return systemUserTokenProvider.getSystemUserToken();
+                } else {
+                    throw new IllegalStateException("Could not resolve user role: " + role.toString());
+                }
+            } else {
+                return systemUserTokenProvider.getSystemUserToken();
+            }
         };
-        this.baseUrl = baseUrl;
         this.client = client;
     }
 
@@ -63,7 +76,7 @@ public class VeilarboppfolgingClient {
         String uri = UrlUtils.joinPaths(baseUrl, path);
         return new Request.Builder()
                 .url(uri)
-                .header(AUTHORIZATION, "Bearer " + machineToMachineTokenProvider.get())
+                .header(AUTHORIZATION, "Bearer " + tokenProvider.get())
                 .build();
     }
 
