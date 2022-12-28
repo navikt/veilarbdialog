@@ -62,6 +62,12 @@ public class EskaleringsvarselController {
         Fnr fodselsnummer;
         if (fnr == null) { // eksternbruker
             if (authService.erEksternBruker()) {
+                var token = authService.getInnloggetBrukerToken();
+                if (token.isEmpty()) {
+                    log.info("Fant ikke idtoken på innlogget bruker");
+                } else {
+                    log.info("Fant idtoken på innlogget bruker");
+                }
                 fodselsnummer = Fnr.of(authService.getIdent().orElseThrow());
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Internbruker må sende med fnr som parameter");
