@@ -50,10 +50,8 @@ public class VeilarboppfolgingClient {
                     var oboToken = azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
                     log.info("Successfully exchanged to on-behalf-of token");
                     return oboToken;
-                } else if (auth.erEksternBruker()) {
-                    return systemUserTokenProvider.getSystemUserToken();
                 } else {
-                    return azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
+                    return systemUserTokenProvider.getSystemUserToken();
                 }
             } else {
                 return systemUserTokenProvider.getSystemUserToken();
