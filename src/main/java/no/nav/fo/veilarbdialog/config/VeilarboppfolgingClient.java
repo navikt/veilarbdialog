@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static no.nav.common.utils.EnvironmentUtils.isProduction;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Service
@@ -50,7 +51,8 @@ public class VeilarboppfolgingClient {
                 if (auth.erInternBruker()) {
                     var oboToken = azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
                     log.info("Successfully exchanged to on-behalf-of token");
-                    if (EnvironmentUtils.isDevelopment().orElse(false)) {
+                    var isProdOrUnknown = isProduction().orElse(true);
+                    if (!isProdOrUnknown) {
                         log.debug("dev oboToken:" + oboToken);
                     }
                     return oboToken;
