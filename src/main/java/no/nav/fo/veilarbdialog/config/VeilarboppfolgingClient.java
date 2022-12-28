@@ -51,8 +51,8 @@ public class VeilarboppfolgingClient {
                 if (auth.erInternBruker()) {
                     var oboToken = azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
                     log.info("Successfully exchanged to on-behalf-of token");
-                    var isProdOrUnknown = isProduction().orElse(true);
-                    if (!isProdOrUnknown) {
+                    var isProd = isProduction().orElse(false);
+                    if (!isProd) {
                         log.debug("dev oboToken:" + oboToken);
                     }
                     return oboToken;
