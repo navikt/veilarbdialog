@@ -35,7 +35,8 @@ public class VeilarboppfolgingClient {
 
     @Value("${application.veilarboppfolging.api.url}")
     private String baseUrl;
-    private VeilarboppfolgingClient(
+
+    public VeilarboppfolgingClient(
             @Value("${application.veilarboppfolging.api.scope}") String veilarboppfolgingapiScope,
             AzureAdOnBehalfOfTokenClient azureAdOnBehalfOfTokenClient,
             AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient,
@@ -46,7 +47,9 @@ public class VeilarboppfolgingClient {
         this.tokenProvider = () -> {
             if (unleashClient.isEnabled("veilarbdialog.useAzureAuthForVeilarboppfolging")) {
                 if (auth.erInternBruker()) {
-                    return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
+                    var oboToken = azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
+                    log.info("Successfully exchanged to on-behalf-of token");
+                    return oboToken;
                 } else if (auth.erEksternBruker()) {
                     return systemUserTokenProvider.getSystemUserToken();
                 } else if (auth.erSystemBruker()) {
@@ -64,9 +67,11 @@ public class VeilarboppfolgingClient {
     @NotNull
     private Request buildRequest(String path) {
         String uri = UrlUtils.joinPaths(baseUrl, path);
+        var token = tokenProvider.get();
+        if (token == null) throw new IllegalStateException("Token can not be null");
         return new Request.Builder()
                 .url(uri)
-                .header(AUTHORIZATION, "Bearer " + tokenProvider.get())
+                .header(AUTHORIZATION, "Bearer " + token)
                 .build();
     }
 
