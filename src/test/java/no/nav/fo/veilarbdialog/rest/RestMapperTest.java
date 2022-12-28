@@ -6,8 +6,8 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.auth.AuthService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
@@ -15,25 +15,25 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class RestMapperTest {
+class RestMapperTest {
 
     private RestMapper restMapper;
     private KontorsperreFilter filter;
     private AuthService auth;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         filter = mock(KontorsperreFilter.class);
         auth = mock(AuthService.class);
         restMapper = new RestMapper(filter, auth);
     }
 
     @Test
-    public void somDialogDTO_henvendelseUtenKontorsperre_skalReturnereHenvendelse() {
+    void somDialogDTO_henvendelseUtenKontorsperre_skalReturnereHenvendelse() {
         when(filter.tilgangTilEnhet(isA(HenvendelseData.class))).thenReturn(true);
         DialogDTO dialogDto = restMapper.somDialogDTO(nyDialog(nyHenvendelse(1, null)));
 
-        assertThat(dialogDto.getHenvendelser().size()).isEqualTo(1);
+        assertThat(dialogDto.getHenvendelser()).hasSize(1);
     }
 
     private DialogData nyDialog(HenvendelseData... henvendelser) {
@@ -45,12 +45,12 @@ public class RestMapperTest {
     }
 
     @Test
-    public void somDialogDTO_manglerTilgang_skalIkkeReturnereHenvendelse() {
+    void somDialogDTO_manglerTilgang_skalIkkeReturnereHenvendelse() {
         when(filter.tilgangTilEnhet(isA(HenvendelseData.class))).thenReturn(false);
 
         DialogDTO dialogDto = restMapper.somDialogDTO(nyDialog(nyHenvendelse(1, null)));
 
-        assertThat(dialogDto.getHenvendelser().size()).isZero();
+        assertThat(dialogDto.getHenvendelser()).isEmpty();
     }
 }
 

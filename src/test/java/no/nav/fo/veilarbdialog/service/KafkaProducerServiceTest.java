@@ -2,8 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
 import no.nav.fo.veilarbdialog.util.KafkaTestService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,9 +14,8 @@ import java.time.LocalDateTime;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
-@RunWith(SpringRunner.class)
 @ActiveProfiles("local")
-public class KafkaProducerServiceTest {
+class KafkaProducerServiceTest {
 
     @Autowired
     private KafkaProducerService kafkaProducerService;
@@ -32,7 +30,7 @@ public class KafkaProducerServiceTest {
     private String onPremEndringPaaDialogTopic;
 
     @Test
-    public void sendDialogMelding_skalSendeTilOnPremOgAiven() {
+    void sendDialogMelding_skalSendeTilOnPremOgAiven() {
         KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding
                 .builder()
                 .aktorId("123")
@@ -40,7 +38,7 @@ public class KafkaProducerServiceTest {
                 .tidspunktEldsteUbehandlede(LocalDateTime.now())
                 .build();
 
-        var aivenConsumer  = kafkaTestService.createStringStringConsumer(aivenEndringPaaDialogTopic);
+        var aivenConsumer = kafkaTestService.createStringStringConsumer(aivenEndringPaaDialogTopic);
         var onPremConsumer = kafkaTestService.createStringStringConsumer(onPremEndringPaaDialogTopic);
 
         kafkaProducerService.sendDialogMelding(kafkaDialogMelding);

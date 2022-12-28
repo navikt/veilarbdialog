@@ -7,31 +7,20 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
-import no.nav.fo.veilarbdialog.util.DialogTestService;
 import no.nav.veilarbdialog.internapi.model.Dialog;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InternApiControllerTest extends SpringBootTestBase {
-    
+class InternApiControllerTest extends SpringBootTestBase {
+
     @Test
-    public void hentDialoger() {
+    void hentDialoger() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
 
@@ -121,7 +110,7 @@ public class InternApiControllerTest extends SpringBootTestBase {
     }
 
     @Test
-    public void skalFeilNaarManglerParameter() {
+    void skalFeilNaarManglerParameter() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
         mockVeileder.createRequest()
@@ -131,7 +120,7 @@ public class InternApiControllerTest extends SpringBootTestBase {
     }
 
     @Test
-    public void skalFeilNaarEksternBruker() {
+    void skalFeilNaarEksternBruker() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         mockBruker.createRequest()
                 .get("http://localhost/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}",
@@ -141,7 +130,7 @@ public class InternApiControllerTest extends SpringBootTestBase {
     }
 
     @Test
-    public void skalFeileNaarManglerTilgang() {
+    void skalFeileNaarManglerTilgang() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeilederUtenBruker = MockNavService.createVeileder();
 
