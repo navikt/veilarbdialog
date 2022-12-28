@@ -50,8 +50,7 @@ public class VeilarboppfolgingClient {
             if (unleashClient.isEnabled("veilarbdialog.useAzureAuthForVeilarboppfolging")) {
                 if (auth.erInternBruker()) {
                     var oboToken = azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
-                    log.info("Successfully exchanged to on-behalf-of token");
-                    log.debug("dev oboToken:" + oboToken);
+                    log.info("Successfully exchanged to on-behalf-of token " + oboToken);
                     return oboToken;
                 } else {
                     return systemUserTokenProvider.getSystemUserToken();
