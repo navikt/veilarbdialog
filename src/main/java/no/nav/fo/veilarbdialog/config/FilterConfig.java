@@ -113,8 +113,8 @@ public class FilterConfig {
         var authenticationFilter = new OidcAuthenticationFilter(
                 fromConfigs(
                         loginserviceIdportenConfig(),
-                        naisStsAuthConfig(),
-                        naisAzureAdConfig()
+                        naisAzureAdConfig(),
+                        naisStsAuthConfig()
                 )
         );
         registration.setFilter(authenticationFilter);
