@@ -6,14 +6,12 @@ import no.nav.common.auth.oidc.filter.OidcAuthenticationFilter;
 import no.nav.common.auth.oidc.filter.OidcAuthenticatorConfig;
 import no.nav.common.rest.filter.LogRequestFilter;
 import no.nav.common.rest.filter.SetStandardHttpHeadersFilter;
-import no.nav.common.token_client.builder.AzureAdTokenClientBuilder;
 import no.nav.fo.veilarbdialog.util.PingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 
 import java.util.List;
 
