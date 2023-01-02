@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.config;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.rest.client.RestUtils;
 import no.nav.common.sts.SystemUserTokenProvider;
+import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 import no.nav.common.utils.UrlUtils;
 import no.nav.fo.veilarbdialog.auth.AuthService;
@@ -34,14 +35,16 @@ public class VeilarboppfolgingClient {
     public VeilarboppfolgingClient(
             @Value("${application.veilarboppfolging.api.scope}") String veilarboppfolgingapiScope,
             AzureAdOnBehalfOfTokenClient azureAdOnBehalfOfTokenClient,
-            SystemUserTokenProvider systemUserTokenProvider,
+            AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient,
+            // SystemUserTokenProvider systemUserTokenProvider,
             OkHttpClient client,
             AuthService auth) {
         this.tokenProvider = (Boolean useSystemTokenOverride) -> {
             if (!useSystemTokenOverride && auth.erInternBruker()) {
                 return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
             } else {
-                return systemUserTokenProvider.getSystemUserToken();
+                return azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
+                // return systemUserTokenProvider.getSystemUserToken();
             }
         };
         this.client = client;
@@ -67,7 +70,7 @@ public class VeilarboppfolgingClient {
     }
 
     public <T> Optional<T> request(String path, Class<T> classOfT, boolean useSystemTokenOverride) {
-        Request request = buildRequest(path);
+        Request request = buildRequest(path, useSystemTokenOverride);
         try (Response response = client.newCall(request).execute()) {
             RestUtils.throwIfNotSuccessful(response);
             return RestUtils.parseJsonResponse(response, classOfT);
