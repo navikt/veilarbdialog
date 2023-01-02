@@ -7,13 +7,11 @@ import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.joda.time.DateTime;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
 
@@ -24,13 +22,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
 @ActiveProfiles("local")
 @Sql(
         scripts = "/db/testdata/slett_alle_dialoger.sql",
         executionPhase = BEFORE_TEST_METHOD
 )
-public class VarselDAOTest {
+class VarselDAOTest {
 
     private static final String AKTOR_ID = "1234";
     private static final long TI_MINUTTER = 1000 * 60 * 10;
@@ -53,7 +50,7 @@ public class VarselDAOTest {
     }
 
     @Test
-    public void skalIkkeHenteBrukereSomHarBlittVarsletOmUlesteMeldinger() {
+    void skalIkkeHenteBrukereSomHarBlittVarsletOmUlesteMeldinger() {
         DialogData dialogId = opprettNyDialog();
         HenvendelseData henvendelseData = getHenvendelseData(dialogId, new Date());
         dialogDAO.opprettHenvendelse(henvendelseData);
@@ -65,7 +62,7 @@ public class VarselDAOTest {
     }
 
     @Test
-    public void hentAktorerMedUlesteMeldingerEtterSisteVarsel_returnererIkkeDeUtenforGraceperiode() throws Exception {
+    void hentAktorerMedUlesteMeldingerEtterSisteVarsel_returnererIkkeDeUtenforGraceperiode() throws Exception {
         DialogData dialogId = opprettNyDialog();
         dialogDAO.opprettHenvendelse(getHenvendelseData(dialogId, getNowMinusSeconds(10)));
 
@@ -77,9 +74,10 @@ public class VarselDAOTest {
     }
 
     @Test
-    public void skalHenteBrukereMedUlesteMeldinger() {
+    void skalHenteBrukereMedUlesteMeldinger() {
         DialogData dialogId1 = opprettNyDialog("1111");
-        HenvendelseData henvendelseData1 = getHenvendelseData(dialogId1, getNowMinusSeconds(30));;
+        HenvendelseData henvendelseData1 = getHenvendelseData(dialogId1, getNowMinusSeconds(30));
+        ;
         dialogDAO.opprettHenvendelse(henvendelseData1);
 
         DialogData dialogId2 = opprettNyDialog("2222");
@@ -93,7 +91,7 @@ public class VarselDAOTest {
     }
 
     @Test
-    public void skalIkkeSendeVarselForHenvendelserSomerLagtInnAvBrukerenSelv() throws Exception {
+    void skalIkkeSendeVarselForHenvendelserSomerLagtInnAvBrukerenSelv() throws Exception {
         DialogData dialogId = opprettNyDialog();
         dialogDAO.opprettHenvendelse(nyHenvendelse(dialogId.getId(), AKTOR_ID, AvsenderType.BRUKER).withSendt(getNowMinusSeconds(30)));
 
@@ -107,7 +105,7 @@ public class VarselDAOTest {
         dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
         return henvendelseData;
     }
-    
+
     private Date getNowMinusSeconds(int seconds) {
         return DateTime.now().minusSeconds(seconds).toDate();
     }

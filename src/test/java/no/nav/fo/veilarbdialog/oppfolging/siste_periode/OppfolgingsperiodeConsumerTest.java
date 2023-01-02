@@ -20,8 +20,8 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -37,14 +37,14 @@ import java.util.concurrent.TimeoutException;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
+class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
     @Autowired
     KafkaTemplate<String, String> producer;
 
     Consumer<String, String> endringPaaDialogConsumer;
 
-    @Value("${application.kafka.endringPaaDialogTopic}")
+    @Value("${application.topic.ut.endringPaaDialog}")
     String endringPaaDialogTopic;
 
     @Value("${application.topic.inn.oppfolgingsperiode}")
@@ -64,13 +64,13 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
     EskaleringsvarselService eskaleringsvarselService;
 
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setupConsumer() {
         this.endringPaaDialogConsumer = kafkaTestService.createStringStringConsumer(endringPaaDialogTopic);
     }
 
     @Test
-    public void skal_opprette_siste_oppfolgingsperiode() throws InterruptedException, ExecutionException, TimeoutException {
+    void skal_opprette_siste_oppfolgingsperiode() throws InterruptedException, ExecutionException, TimeoutException {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         String aktorId = mockBruker.getAktorId();
         UUID oppfolgingsId = mockBruker.getOppfolgingsperiode();
@@ -106,7 +106,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
     @Test
     @SneakyThrows
-    public void skal_avslutte_gjeldende_varsler_og_notifikasjoner() {
+    void skal_avslutte_gjeldende_varsler_og_notifikasjoner() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         String aktorId = mockBruker.getAktorId();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
@@ -121,7 +121,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
         StartEskaleringDto startEskaleringDto =
                 new StartEskaleringDto(Fnr.of(mockBruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
-        EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(port, mockVeileder, startEskaleringDto);
+        EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(mockVeileder, startEskaleringDto);
 
         OppfolgingsperiodeV1 stopOppfolging = OppfolgingsperiodeV1.builder()
                 .uuid(mockBruker.getOppfolgingsperiode())
@@ -145,7 +145,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
     }
 
     @Test
-    public void skal_sette_dialoger_til_historisk() throws ExecutionException, InterruptedException, TimeoutException {
+    void skal_sette_dialoger_til_historisk() throws ExecutionException, InterruptedException, TimeoutException {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         String aktorId = mockBruker.getAktorId();
 
@@ -157,7 +157,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
         opprettEllerEndreOppfolgingsperiodeForBruker(startOppfolging);
 
-        DialogDTO dialogDTO = dialogTestService.opprettDialogSomBruker(port, mockBruker, new NyHenvendelseDTO().setOverskrift("The Three Trials").setTekst("Defeat the Sword Master of Melee Island"));
+        DialogDTO dialogDTO = dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setOverskrift("The Three Trials").setTekst("Defeat the Sword Master of Melee Island"));
 
         OppfolgingsperiodeV1 stopOppfolging = OppfolgingsperiodeV1.builder()
                 .uuid(mockBruker.getOppfolgingsperiode())
@@ -171,7 +171,7 @@ public class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
         KafkaTestUtils.getSingleRecord(endringPaaDialogConsumer, endringPaaDialogTopic, 10000);
 
 
-        DialogDTO hentDialog = dialogTestService.hentDialog(port, mockBruker, Long.parseLong(dialogDTO.getId()));
+        DialogDTO hentDialog = dialogTestService.hentDialog(mockBruker, Long.parseLong(dialogDTO.getId()));
 
         Assertions.assertThat(hentDialog.isHistorisk()).isTrue();
     }

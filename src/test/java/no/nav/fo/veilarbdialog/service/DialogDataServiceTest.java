@@ -7,16 +7,14 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 
@@ -25,12 +23,11 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWireMock(port = 0)
-@RunWith(SpringRunner.class)
 @Sql(
         scripts = "/db/testdata/slett_alle_dialoger.sql",
         executionPhase = BEFORE_TEST_METHOD
 )
-public class DialogDataServiceTest {
+class DialogDataServiceTest {
 
     @LocalServerPort
     private int port;
@@ -44,8 +41,8 @@ public class DialogDataServiceTest {
     MockVeileder veilederNasjonalTilgang;
     MockVeileder tilfeldigVeileder;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         RestAssured.port = port;
         bruker = MockNavService.createHappyBruker();
         brukersVeileder = MockNavService.createVeileder(bruker);
@@ -56,7 +53,7 @@ public class DialogDataServiceTest {
     }
 
     @Test
-    public void opprettDialog_kontorsperrePaBruker_returnererKontorsperretDialogAvhengigAvTilgang() {
+    void opprettDialog_kontorsperrePaBruker_returnererKontorsperretDialogAvhengigAvTilgang() {
 
         NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
                 .setTekst("tekst")
@@ -102,7 +99,7 @@ public class DialogDataServiceTest {
     }
 
     @Test
-    public void opprettHenvendelse_brukerManglerTilgangTilPerson_Forbidden403() {
+    void opprettHenvendelse_brukerManglerTilgangTilPerson_Forbidden403() {
 
         BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).kontorsperreEnhet("1234").build();
         MockNavService.updateBruker(bruker, brukerOptionsKvp);
@@ -120,7 +117,7 @@ public class DialogDataServiceTest {
     }
 
     @Test
-    public void publicMetoder_sjekkerOmBrukerHarTilgang() {
+    void publicMetoder_sjekkerOmBrukerHarTilgang() {
 
         BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).kontorsperreEnhet("1234").build();
         MockNavService.updateBruker(bruker, brukerOptionsKvp);

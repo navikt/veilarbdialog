@@ -4,9 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.json.JsonUtils;
-import no.nav.common.kafka.producer.KafkaProducerClient;
+import no.nav.common.rest.filter.LogRequestFilter;
 import no.nav.common.utils.IdUtils;
-import no.nav.fo.veilarbdialog.config.kafka.onprem.KafkaOnpremProperties;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
@@ -20,18 +19,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import static no.nav.common.log.LogFilter.PREFERRED_NAV_CALL_ID_HEADER_NAME;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class KafkaProducerService {
-
-    private final KafkaOnpremProperties kafkaProperties;
-
-    private final KafkaProducerClient<String, String> producerClient;
 
     private final KafkaDAO kafkaDAO;
 
@@ -45,9 +38,7 @@ public class KafkaProducerService {
     public void sendDialogMelding(KafkaDialogMelding kafkaDialogMelding) {
         var kafkaStringMelding = JsonUtils.toJson(kafkaDialogMelding);
         String aktorId = kafkaDialogMelding.getAktorId();
-        String onpremTopic = kafkaProperties.getEndringPaaDialogTopic();
 
-        producerClient.sendSync(opprettKafkaMelding(onpremTopic, aktorId, kafkaStringMelding));
         sendSync(opprettKafkaMelding(endringPaaDialogTopic, aktorId, kafkaStringMelding));
     }
 
@@ -62,7 +53,7 @@ public class KafkaProducerService {
     }
 
     private static String getCallIdOrRandom() {
-        return Optional.ofNullable(MDC.get(PREFERRED_NAV_CALL_ID_HEADER_NAME))
+        return Optional.ofNullable(MDC.get(LogRequestFilter.NAV_CALL_ID_HEADER_NAME))
                 .orElse(IdUtils.generateId());
     }
 
@@ -74,7 +65,7 @@ public class KafkaProducerService {
 
     private ProducerRecord<String, String> opprettKafkaMelding(String topic, String key, String value) {
         ProducerRecord<String, String> kafkaMelding = new ProducerRecord<>(topic, key, value);
-        kafkaMelding.headers().add(new RecordHeader(PREFERRED_NAV_CALL_ID_HEADER_NAME, getCallIdOrRandom().getBytes()));
+        kafkaMelding.headers().add(new RecordHeader(LogRequestFilter.NAV_CALL_ID_HEADER_NAME, getCallIdOrRandom().getBytes()));
         return kafkaMelding;
     }
 

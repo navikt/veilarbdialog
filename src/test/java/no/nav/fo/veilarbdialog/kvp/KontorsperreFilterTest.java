@@ -4,21 +4,21 @@ package no.nav.fo.veilarbdialog.kvp;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
-public class KontorsperreFilterTest {
+class KontorsperreFilterTest {
 
     private KontorsperreFilter filter;
     private AuthService auth;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
 
         auth = mock(AuthService.class);
         filter = new KontorsperreFilter(auth);
@@ -26,7 +26,7 @@ public class KontorsperreFilterTest {
     }
 
     @Test
-    public void tilgangTilEnhet_kontorsperreEnhetErNull_returnererTrue() {
+    void tilgangTilEnhet_kontorsperreEnhetErNull_returnererTrue() {
 
         assertThat(filter.tilgangTilEnhet(HenvendelseData.builder().kontorsperreEnhetId(null).build())).isTrue();
         assertThat(filter.tilgangTilEnhet(DialogData.builder().kontorsperreEnhetId(null).build())).isTrue();
@@ -34,7 +34,7 @@ public class KontorsperreFilterTest {
     }
 
     @Test
-    public void tilgangTilEnhet_kontorsperreEnhetErTom_returnererTrue() {
+    void tilgangTilEnhet_kontorsperreEnhetErTom_returnererTrue() {
 
         assertThat(filter.tilgangTilEnhet(HenvendelseData.builder().kontorsperreEnhetId("").build())).isTrue();
         assertThat(filter.tilgangTilEnhet(DialogData.builder().kontorsperreEnhetId("").build())).isTrue();
@@ -42,7 +42,7 @@ public class KontorsperreFilterTest {
     }
 
     @Test
-    public void tilgangTilEnhet_veilederHarTilgangIABAC_skalReturnereTrue() {
+    void tilgangTilEnhet_veilederHarTilgangIABAC_skalReturnereTrue() {
         String enhet = "enhet";
         String veileder = "veileder";
 
@@ -56,7 +56,7 @@ public class KontorsperreFilterTest {
     }
 
     @Test
-    public void tilgangTilEnhet_veilederHarIkkeTilgangIABAC_skalReturnereFalse() {
+    void tilgangTilEnhet_veilederHarIkkeTilgangIABAC_skalReturnereFalse() {
         String enhet = "enhet";
         String veileder = "veileder";
 

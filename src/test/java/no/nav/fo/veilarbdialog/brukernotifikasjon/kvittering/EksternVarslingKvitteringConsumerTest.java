@@ -3,22 +3,22 @@ package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering;
 import no.nav.doknotifikasjon.schemas.DoknotifikasjonStatus;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
 /**
  * Tester noen caser som er vrien å teste med integrasjonstester (typisk async feilhåndtering)
  */
-public class EksternVarslingKvitteringConsumerTest {
+@ExtendWith(MockitoExtension.class)
+class EksternVarslingKvitteringConsumerTest {
 
     private static final String APP_NAME = "veilarbdialog";
 
@@ -32,13 +32,13 @@ public class EksternVarslingKvitteringConsumerTest {
     @Mock
     private KvitteringMetrikk kvitteringMetrikk;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         eksternVarslingKvitteringConsumer = new EksternVarslingKvitteringConsumer(kvitteringDAO, brukernotifikasjonRepository, kvitteringMetrikk, APP_NAME);
     }
 
     @Test
-    public void skalIgnorereMeldingerMedAnnenBestillerid() {
+    void skalIgnorereMeldingerMedAnnenBestillerid() {
         String feilApp = "annen-app";
         String bestillingsId = UUID.randomUUID().toString();
         DoknotifikasjonStatus doknotifikasjonStatus = DoknotifikasjonStatus
@@ -57,15 +57,15 @@ public class EksternVarslingKvitteringConsumerTest {
     }
 
     @Test
-    public void skalFeileVedUkjentStatus() {
+    void skalFeileVedUkjentStatus() {
         String bestillingsId = UUID.randomUUID().toString();
         DoknotifikasjonStatus doknotifikasjonStatus = createDoknotifikasjonStatus(bestillingsId, "RUBBISH");
 
         when(brukernotifikasjonRepository.finnesBrukernotifikasjon(bestillingsId)).thenReturn(true);
 
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> eksternVarslingKvitteringConsumer.consume(createConsumerRecord(doknotifikasjonStatus)));
-
+        ConsumerRecord consumerRecord = createConsumerRecord(doknotifikasjonStatus);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> eksternVarslingKvitteringConsumer.consume(consumerRecord));
 
         verify(kvitteringDAO).lagreKvittering(bestillingsId, doknotifikasjonStatus);
 
@@ -74,14 +74,16 @@ public class EksternVarslingKvitteringConsumerTest {
     }
 
     @Test
-    public void skalFeileVedUkjentBestillingsId() {
+    void skalFeileVedUkjentBestillingsId() {
         String bestillingsId = UUID.randomUUID().toString();
         DoknotifikasjonStatus doknotifikasjonStatus = createDoknotifikasjonStatus(bestillingsId, "OVERSENDT");
 
         when(brukernotifikasjonRepository.finnesBrukernotifikasjon(bestillingsId)).thenReturn(false);
 
-        Assert.assertThrows(IllegalArgumentException.class,
-                () -> eksternVarslingKvitteringConsumer.consume(createConsumerRecord(doknotifikasjonStatus)));
+
+        ConsumerRecord consumerRecord = createConsumerRecord(doknotifikasjonStatus);
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> eksternVarslingKvitteringConsumer.consume(consumerRecord));
         verify(brukernotifikasjonRepository).finnesBrukernotifikasjon(bestillingsId);
         verifyNoMoreInteractions(brukernotifikasjonRepository);
     }

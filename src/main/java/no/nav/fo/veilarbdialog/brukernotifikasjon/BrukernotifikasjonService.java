@@ -19,7 +19,7 @@ import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntit
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringDAO;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringMetrikk;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
-import no.nav.fo.veilarbdialog.clients.veilarboppfolging.VeilarboppfolgingClient;
+import no.nav.fo.veilarbdialog.clients.veilarboppfolging.OppfolgingClient;
 import no.nav.fo.veilarbdialog.clients.veilarbperson.Nivaa4DTO;
 import no.nav.fo.veilarbdialog.clients.veilarbperson.VeilarbpersonClient;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
@@ -51,7 +51,7 @@ public class BrukernotifikasjonService {
     private static final int OPPGAVE_SIKKERHETSNIVAA = 4;
     private static final int BESKJED_SIKKERHETSNIVAA = 3;
 
-    private final VeilarboppfolgingClient veilarboppfolgingClient;
+    private final OppfolgingClient oppfolgingClient;
 
     private final VeilarbpersonClient veilarbpersonClient;
 
@@ -184,7 +184,7 @@ public class BrukernotifikasjonService {
     }
 
     public boolean kanVarsles(Fnr fnr) {
-        Optional<ManuellStatusV2DTO> manuellStatusResponse = veilarboppfolgingClient.hentManuellStatus(fnr);
+        Optional<ManuellStatusV2DTO> manuellStatusResponse = oppfolgingClient.hentManuellStatus(fnr);
         Optional<Nivaa4DTO> nivaa4DTO = veilarbpersonClient.hentNiva4(fnr);
 
         boolean erManuell = manuellStatusResponse.map(ManuellStatusV2DTO::isErUnderManuellOppfolging).orElse(true);

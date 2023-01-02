@@ -94,14 +94,9 @@ application:
     broker:
       url: http://localhost:8080/KAFKA_BROKERS_URL
     topic: aapen-fo-endringPaaDialog-v1-APP_ENVIRONMENT_NAME
-    endringPaaDialogTopic: endringPaaDialogTopic
     kvpAvsluttetTopic: kvpAvsluttetTopic
   oidc:
     disabled: true
-  openam:
-    clientId: VEILARBLOGIN_OPENAM_CLIENT_ID
-    discoveryUrl: http://localhost:8080/OPENAM_DISCOVERY_URL
-    refreshUrl: http://localhost:8080/VEILARBLOGIN_OPENAM_REFRESH_URL
   serviceuser:
     username: SERVICEUSER_USERNAME
     password: SERVICEUSER_PASSWORD
@@ -113,9 +108,11 @@ application:
   veilarboppfolging:
     api:
       url: http://localhost:${wiremock.server.port}/veilarboppfolging/api
+      scope: api://test.pto.veilarboppfolging/.default
   veilarbperson:
     api:
       url: http://localhost:${wiremock.server.port}/veilarbperson/api
+      scope: api://test.pto.veilarbperson/.default
   pdl:
     api:
       url: http://localhost:${wiremock.server.port}/pdl
@@ -128,6 +125,7 @@ application:
       endringPaaDialog: dab.endring-paa-dialog-v1
     inn:
       oppfolgingsperiode: pto.oppfolgingsperiode-v1
+      kvpavsluttet: pto.kvp-avsluttet-v1
       eksternVarselKvittering: teamdokumenthandtering.aapen-dok-notifikasjon-status
   brukernotifikasjon:
     grace:

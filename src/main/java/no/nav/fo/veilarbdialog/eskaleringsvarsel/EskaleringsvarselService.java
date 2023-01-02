@@ -12,7 +12,7 @@ import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
-import no.nav.fo.veilarbdialog.clients.veilarboppfolging.VeilarboppfolgingClient;
+import no.nav.fo.veilarbdialog.clients.veilarboppfolging.OppfolgingClient;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
@@ -38,7 +38,7 @@ public class EskaleringsvarselService {
     private final DialogDataService dialogDataService;
     private final AuthService authService;
     private final AktorOppslagClient aktorOppslagClient;
-    private final VeilarboppfolgingClient veilarboppfolgingClient;
+    private final OppfolgingClient oppfolgingClient;
     private final SistePeriodeService sistePeriodeService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
 
@@ -54,7 +54,7 @@ public class EskaleringsvarselService {
             throw new BrukerKanIkkeVarslesException();
         }
 
-        if (!veilarboppfolgingClient.erUnderOppfolging(fnr)) {
+        if (!oppfolgingClient.erUnderOppfolging(fnr)) {
             throw new BrukerIkkeUnderOppfolgingException();
         }
 

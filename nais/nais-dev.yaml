@@ -74,16 +74,13 @@ spec:
         - application: mulighetsrommet-api
           namespace: team-mulighetsrommet
           cluster: dev-gcp
+        - application: veilarbdirigent
+          namespace: pto
+          cluster: dev-fss
   env:
     - name: APP_ENVIRONMENT_NAME
       value: q1
     - name: APP_CLUSTER_NAME
       value: dev-fss
-    - name: ENDRING_PAA_DIALOG_TOPIC
-      value: aapen-fo-endringPaaDialog-v1-q1
-    - name: OPPFOLGING_AVSLUTTET_TOPIC
-      value: aapen-arbeidsrettetOppfolging-oppfolgingAvsluttet-v1-q1
-    - name: KVP_AVSLUTTET_TOPIC
-      value: aapen-arbeidsrettetOppfolging-kvpAvsluttet-v1-q1
     - name: DIALOG_EKSTERN_URL
       value: https://pto.dev.nav.no/arbeid/dialog

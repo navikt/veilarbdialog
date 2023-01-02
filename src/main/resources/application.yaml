@@ -123,12 +123,6 @@ application:
     url: ${DIALOG_EKSTERN_URL}
   kafka:
     brokersUrl: ${KAFKA_BROKERS_URL}
-    endringPaaDialogTopic: ${ENDRING_PAA_DIALOG_TOPIC}
-
-    kvpAvsluttetTopic: ${KVP_AVSLUTTET_TOPIC}
-  openam:
-    clientId: ${VEILARBLOGIN_OPENAM_CLIENT_ID}
-    discoveryUrl: ${OPENAM_DISCOVERY_URL}
   serviceuser:
     username: ${SERVICEUSER_USERNAME}
     password: ${SERVICEUSER_PASSWORD}
@@ -140,12 +134,15 @@ application:
   veilarboppfolging:
     api:
       url: ${VEILARBOPPFOLGINGAPI_URL}
+      scope: api://${APP_CLUSTER_NAME}.pto.veilarboppfolging/.default
   veilarbperson:
     api:
       url: ${VEILARBPERSONAPI_URL}
+      scope: api://${APP_CLUSTER_NAME}.pto.veilarbperson/.default
   topic:
     inn:
       oppfolgingsperiode: pto.oppfolgingsperiode-v1
+      kvpavsluttet: pto.kvp-avsluttet-v1
       eksternVarselKvittering: teamdokumenthandtering.aapen-dok-notifikasjon-status
     ut:
       brukernotifikasjon:
