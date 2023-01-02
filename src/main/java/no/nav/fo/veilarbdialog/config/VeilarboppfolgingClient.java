@@ -3,8 +3,12 @@ package no.nav.fo.veilarbdialog.config;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.rest.client.RestUtils;
 import no.nav.common.sts.SystemUserTokenProvider;
+import no.nav.common.sts.TokenProvider;
+import no.nav.common.token_client.builder.TokenXTokenClientBuilder;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
+import no.nav.common.token_client.client.TokenXOnBehalfOfTokenClient;
+import no.nav.common.token_client.utils.env.TokenXEnvironmentvariables;
 import no.nav.common.utils.UrlUtils;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import okhttp3.OkHttpClient;
@@ -12,6 +16,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -36,12 +41,15 @@ public class VeilarboppfolgingClient {
             @Value("${application.veilarboppfolging.api.scope}") String veilarboppfolgingapiScope,
             AzureAdOnBehalfOfTokenClient azureAdOnBehalfOfTokenClient,
             AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient,
+            TokenXOnBehalfOfTokenClient tokenXOnBehalfOfTokenClient,
             // SystemUserTokenProvider systemUserTokenProvider,
             OkHttpClient client,
             AuthService auth) {
         this.tokenProvider = (Boolean useSystemTokenOverride) -> {
             if (!useSystemTokenOverride && auth.erInternBruker()) {
                 return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
+            } else if (!useSystemTokenOverride && auth.erInternBruker()) {
+                return tokenXOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
             } else {
                 return azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
                 // return systemUserTokenProvider.getSystemUserToken();

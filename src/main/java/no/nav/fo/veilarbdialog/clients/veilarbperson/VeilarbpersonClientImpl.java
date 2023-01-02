@@ -1,8 +1,6 @@
 package no.nav.fo.veilarbdialog.clients.veilarbperson;
 
-import no.nav.common.rest.client.RestClient;
 import no.nav.common.rest.client.RestUtils;
-import no.nav.common.sts.SystemUserTokenProvider;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.types.identer.Fnr;
 import okhttp3.OkHttpClient;
