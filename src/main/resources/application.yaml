@@ -135,7 +135,7 @@ application:
     api:
       url: ${VEILARBOPPFOLGINGAPI_URL}
       azureScope: api://${APP_CLUSTER_NAME}.pto.veilarboppfolging/.default
-      tokenXScope: {APP_CLUSTER_NAME}:pto:veilarboppfolging
+      tokenXScope: ${APP_CLUSTER_NAME}:pto:veilarboppfolging
   veilarbperson:
     api:
       url: ${VEILARBPERSONAPI_URL}
