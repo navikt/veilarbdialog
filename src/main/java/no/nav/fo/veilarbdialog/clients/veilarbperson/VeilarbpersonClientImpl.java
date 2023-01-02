@@ -29,13 +29,12 @@ public class VeilarbpersonClientImpl implements VeilarbpersonClient {
 
     public VeilarbpersonClientImpl(
             @Value("${application.veilarbperson.api.url}") String baseUrl,
-            SystemUserTokenProvider tokenClient,
+            @Value("${application.veilarbperson.api.scope}") String scope,
+            AzureAdMachineToMachineTokenClient tokenClient,
             OkHttpClient client
-            // @Value("${application.veilarbperson.api.scope}") String scope,
-            // AzureAdMachineToMachineTokenClient tokenClient,
     ) {
         this.baseUrl = baseUrl;
-        this.machineToMachineTokenProvider = () -> tokenClient.getSystemUserToken(); // tokenClient.createMachineToMachineToken(scope);
+        this.machineToMachineTokenProvider = () -> tokenClient.createMachineToMachineToken(scope);
         this.client = client;
     }
 
