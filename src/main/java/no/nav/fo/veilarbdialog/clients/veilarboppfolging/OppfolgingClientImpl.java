@@ -20,7 +20,6 @@ public class OppfolgingClientImpl implements OppfolgingClient {
     @Override
     public Optional<ManuellStatusV2DTO> hentManuellStatus(Fnr fnr) {
         String uri = String.format("/v2/manuell/status?fnr=%s", fnr.get());
-
         return veilarboppfolgingClient.request(uri, ManuellStatusV2DTO.class);
     }
 

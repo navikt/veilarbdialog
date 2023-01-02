@@ -31,7 +31,7 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
     public Optional<OppfolgingPeriodeMinimalDTO> fetchGjeldendePeriode(AktorId aktorId) {
         Fnr fnr = aktorOppslagClient.hentFnr(aktorId);
         String uri = String.format("/v2/oppfolging/periode/gjeldende?fnr=%s", fnr.get());
-        var response = veilarboppfolgingClient.request(uri, OppfolgingPeriodeMinimalDTO.class);
+        var response = veilarboppfolgingClient.request(uri, OppfolgingPeriodeMinimalDTO.class, true);
         gjeldendePeriodeMetrikk.tellKallTilEksternOppfolgingsperiode(response.isPresent());
         return response;
     }

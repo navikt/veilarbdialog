@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.clients.veilarbperson;
 
 import no.nav.common.rest.client.RestClient;
 import no.nav.common.rest.client.RestUtils;
+import no.nav.common.sts.SystemUserTokenProvider;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.types.identer.Fnr;
 import okhttp3.OkHttpClient;
@@ -28,12 +29,13 @@ public class VeilarbpersonClientImpl implements VeilarbpersonClient {
 
     public VeilarbpersonClientImpl(
             @Value("${application.veilarbperson.api.url}") String baseUrl,
-            @Value("${application.veilarbperson.api.scope}") String scope,
-            AzureAdMachineToMachineTokenClient tokenClient,
+            SystemUserTokenProvider tokenClient,
             OkHttpClient client
+            // @Value("${application.veilarbperson.api.scope}") String scope,
+            // AzureAdMachineToMachineTokenClient tokenClient,
     ) {
         this.baseUrl = baseUrl;
-        this.machineToMachineTokenProvider = () -> tokenClient.createMachineToMachineToken(scope);
+        this.machineToMachineTokenProvider = () -> tokenClient.getSystemUserToken(); // tokenClient.createMachineToMachineToken(scope);
         this.client = client;
     }
 

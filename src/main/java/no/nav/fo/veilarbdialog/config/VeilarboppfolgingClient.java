@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -24,7 +25,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @Service
 @Slf4j
 public class VeilarboppfolgingClient {
-    private final Supplier<String> tokenProvider;
+    private final Function<Boolean, String> tokenProvider;
     private final OkHttpClient client;
 
     @Value("${application.veilarboppfolging.api.url}")
@@ -36,8 +37,8 @@ public class VeilarboppfolgingClient {
             SystemUserTokenProvider systemUserTokenProvider,
             OkHttpClient client,
             AuthService auth) {
-        this.tokenProvider = () -> {
-            if (auth.erInternBruker()) {
+        this.tokenProvider = (Boolean useSystemTokenOverride) -> {
+            if (!useSystemTokenOverride && auth.erInternBruker()) {
                 return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
             } else {
                 return systemUserTokenProvider.getSystemUserToken();
@@ -46,10 +47,14 @@ public class VeilarboppfolgingClient {
         this.client = client;
     }
 
-    @NotNull
     private Request buildRequest(String path) {
+        return buildRequest(path, false);
+    }
+
+        @NotNull
+    private Request buildRequest(String path, Boolean useSystemTokenOverride) {
         String uri = UrlUtils.joinPaths(baseUrl, path);
-        var token = tokenProvider.get();
+        var token = tokenProvider.apply(useSystemTokenOverride);
         if (token == null) throw new IllegalStateException("Token can not be null");
         return new Request.Builder()
                 .url(uri)
@@ -58,6 +63,10 @@ public class VeilarboppfolgingClient {
     }
 
     public <T> Optional<T> request(String path, Class<T> classOfT) {
+            return request(path, classOfT, false);
+    }
+
+    public <T> Optional<T> request(String path, Class<T> classOfT, boolean useSystemTokenOverride) {
         Request request = buildRequest(path);
         try (Response response = client.newCall(request).execute()) {
             RestUtils.throwIfNotSuccessful(response);
