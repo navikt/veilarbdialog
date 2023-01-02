@@ -2,8 +2,9 @@ package no.nav.fo.veilarbdialog.config;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.rest.client.RestUtils;
-import no.nav.common.sts.SystemUserTokenProvider;
+import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
+import no.nav.common.token_client.client.TokenXOnBehalfOfTokenClient;
 import no.nav.common.utils.UrlUtils;
 import no.nav.fo.veilarbdialog.auth.AuthService;
 import okhttp3.OkHttpClient;
@@ -33,14 +34,17 @@ public class VeilarboppfolgingClient {
     public VeilarboppfolgingClient(
             @Value("${application.veilarboppfolging.api.scope}") String veilarboppfolgingapiScope,
             AzureAdOnBehalfOfTokenClient azureAdOnBehalfOfTokenClient,
-            SystemUserTokenProvider systemUserTokenProvider,
+            AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient,
+            TokenXOnBehalfOfTokenClient tokenXOnBehalfOfTokenClient,
             OkHttpClient client,
             AuthService auth) {
         this.tokenProvider = () -> {
             if (auth.erInternBruker()) {
                 return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
+            } else if (auth.erInternBruker()) {
+                return tokenXOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
             } else {
-                return systemUserTokenProvider.getSystemUserToken();
+                return azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
             }
         };
         this.client = client;
