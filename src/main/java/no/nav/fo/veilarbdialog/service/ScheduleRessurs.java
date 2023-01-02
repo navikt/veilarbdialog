@@ -80,9 +80,6 @@ public class ScheduleRessurs {
                             BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST,
                             oppfolgingsperiode,
                             BrukernotifikasjonsType.BESKJED,
-                            BrukernotifikasjonTekst.BESKJED_EPOST_TITTEL,
-                            BrukernotifikasjonTekst.BESKJED_EPOST_BODY,
-                            BrukernotifikasjonTekst.BESKJED_SMS_TEKST,
                             dialogDataService.utledDialogLink(dialogId)
                     );
 

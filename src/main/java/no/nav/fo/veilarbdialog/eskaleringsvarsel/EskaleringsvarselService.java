@@ -90,9 +90,6 @@ public class EskaleringsvarselService {
                 BrukernotifikasjonTekst.OPPGAVE_BRUKERNOTIFIKASJON_TEKST,
                 gjeldendeOppfolgingsperiodeId,
                 BrukernotifikasjonsType.OPPGAVE,
-                BrukernotifikasjonTekst.OPPGAVE_EPOST_TITTEL,
-                BrukernotifikasjonTekst.OPPGAVE_EPOST_BODY,
-                BrukernotifikasjonTekst.OPPGAVE_SMS_TEKST,
                 dialogDataService.utledDialogLink(dialogData.getId())
         );
 

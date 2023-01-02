@@ -12,9 +12,6 @@ public record Brukernotifikasjon(
         String melding,
         UUID oppfolgingsperiodeId,
         BrukernotifikasjonsType type,
-        String epostTitel,
-        String epostBody,
-        String smsTekst,
         URL link
 ) {
 }
