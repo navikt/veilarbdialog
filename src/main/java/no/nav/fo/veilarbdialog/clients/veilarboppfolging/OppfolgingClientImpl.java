@@ -3,7 +3,6 @@ package no.nav.fo.veilarbdialog.clients.veilarboppfolging;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.types.identer.Fnr;
-import no.nav.fo.veilarbdialog.config.VeilarboppfolgingClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;

@@ -1,12 +1,8 @@
-package no.nav.fo.veilarbdialog.config;
+package no.nav.fo.veilarbdialog.clients.veilarboppfolging;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.rest.client.RestUtils;
-import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
-import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
-import no.nav.common.token_client.client.TokenXOnBehalfOfTokenClient;
 import no.nav.common.utils.UrlUtils;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -25,36 +21,23 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @Service
 @Slf4j
 public class VeilarboppfolgingClient {
-    private final Supplier<String> tokenProvider;
+    private final Supplier<String> veilarbTokenProvider;
     private final OkHttpClient client;
 
     @Value("${application.veilarboppfolging.api.url}")
     private String baseUrl;
 
     public VeilarboppfolgingClient(
-            @Value("${application.veilarboppfolging.api.azureScope}") String azureScope,
-            @Value("${application.veilarboppfolging.api.tokenXScope}") String tokenXScope,
-            AzureAdOnBehalfOfTokenClient azureAdOnBehalfOfTokenClient,
-            AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient,
-            TokenXOnBehalfOfTokenClient tokenXOnBehalfOfTokenClient,
-            OkHttpClient client,
-            AuthService auth) {
-        this.tokenProvider = () -> {
-            if (auth.erInternBruker()) {
-                return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(azureScope, auth.getInnloggetBrukerToken());
-            } else if (auth.erEksternBruker()) {
-                return tokenXOnBehalfOfTokenClient.exchangeOnBehalfOfToken(tokenXScope, auth.getInnloggetBrukerToken());
-            } else {
-                return azureAdMachineToMachineTokenClient.createMachineToMachineToken(azureScope);
-            }
-        };
+            Supplier<String> veilarbTokenProvider,
+            OkHttpClient client) {
+        this.veilarbTokenProvider = veilarbTokenProvider;
         this.client = client;
     }
 
     @NotNull
     private Request buildRequest(String path) {
         String uri = UrlUtils.joinPaths(baseUrl, path);
-        var token = tokenProvider.get();
+        var token = veilarbTokenProvider.get();
         if (token == null) throw new IllegalStateException("Token can not be null");
         return new Request.Builder()
                 .url(uri)
