@@ -33,18 +33,18 @@ public class VeilarboppfolgingClient {
 
     public VeilarboppfolgingClient(
             @Value("${application.veilarboppfolging.api.azureScope}") String azureScope,
-            // @Value("${application.veilarboppfolging.api.tokenXScope}") String tokenXScope,
+            @Value("${application.veilarboppfolging.api.tokenXScope}") String tokenXScope,
             AzureAdOnBehalfOfTokenClient azureAdOnBehalfOfTokenClient,
             AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient,
-            // TokenXOnBehalfOfTokenClient tokenXOnBehalfOfTokenClient,
+            TokenXOnBehalfOfTokenClient tokenXOnBehalfOfTokenClient,
             OkHttpClient client,
             AuthService auth) {
         this.tokenProvider = () -> {
             if (auth.erInternBruker()) {
                 return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(azureScope, auth.getInnloggetBrukerToken());
             } else if (auth.erEksternBruker()) {
-                return azureAdMachineToMachineTokenClient.createMachineToMachineToken(azureScope);
-                // return tokenXOnBehalfOfTokenClient.exchangeOnBehalfOfToken(tokenXScope, auth.getInnloggetBrukerToken());
+                // return azureAdMachineToMachineTokenClient.createMachineToMachineToken(azureScope);
+                return tokenXOnBehalfOfTokenClient.exchangeOnBehalfOfToken(tokenXScope, auth.getInnloggetBrukerToken());
             } else {
                 return azureAdMachineToMachineTokenClient.createMachineToMachineToken(azureScope);
             }
