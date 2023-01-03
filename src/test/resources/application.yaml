@@ -108,7 +108,8 @@ application:
   veilarboppfolging:
     api:
       url: http://localhost:${wiremock.server.port}/veilarboppfolging/api
-      scope: api://test.pto.veilarboppfolging/.default
+      azureScope: api://test.pto.veilarboppfolging/.default
+      tokenXScope: test:pto:veilarboppfolging
   veilarbperson:
     api:
       url: http://localhost:${wiremock.server.port}/veilarbperson/api

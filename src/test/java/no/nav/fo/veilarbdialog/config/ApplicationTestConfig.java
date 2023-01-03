@@ -2,8 +2,10 @@ package no.nav.fo.veilarbdialog.config;
 
 import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.sts.SystemUserTokenProvider;
+import no.nav.common.token_client.builder.TokenXTokenClientBuilder;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
+import no.nav.common.token_client.client.TokenXOnBehalfOfTokenClient;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +33,13 @@ public class ApplicationTestConfig {
         AzureAdMachineToMachineTokenClient tokenClient = mock(AzureAdMachineToMachineTokenClient.class);
         Mockito.when(tokenClient.createMachineToMachineToken(any())).thenReturn("mockMachineToMachineToken");
         return tokenClient;
+    }
+
+    @Bean
+    public TokenXOnBehalfOfTokenClient tokenXOnBehalfOfTokenClient() {
+        TokenXOnBehalfOfTokenClient client = mock(TokenXOnBehalfOfTokenClient.class);
+        Mockito.when(client.exchangeOnBehalfOfToken(any(), any())).thenReturn("mockMachineToMachineToken");
+        return client;
     }
 
     @Bean
