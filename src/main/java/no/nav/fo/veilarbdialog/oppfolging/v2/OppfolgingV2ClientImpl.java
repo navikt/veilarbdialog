@@ -6,7 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
-import no.nav.fo.veilarbdialog.config.VeilarboppfolgingClient;
+import no.nav.fo.veilarbdialog.clients.veilarboppfolging.VeilarboppfolgingClient;
+import no.nav.fo.veilarbdialog.kvp.KvpDTO;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.GjeldendePeriodeMetrikk;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -42,5 +43,15 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
         Fnr fnr = aktorOppslagClient.hentFnr(aktorId);
         String uri = String.format("/v2/oppfolging/perioder?fnr=%s", fnr.get());
         return veilarboppfolgingClient.requestArrayData(uri, OppfolgingPeriodeMinimalDTO.class);
+    }
+
+    @Timed
+    @Override
+    public String hentKVPKontorEnhet(String aktorId) {
+        var path = String.format("/v2/kvp?aktorId=%s", aktorId);
+        return veilarboppfolgingClient
+                .request(path, KvpDTO.class)
+                .map(KvpDTO::getEnhet)
+                .orElse(null);
     }
 }

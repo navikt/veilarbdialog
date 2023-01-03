@@ -14,4 +14,6 @@ public interface OppfolgingV2Client {
     Optional<OppfolgingPeriodeMinimalDTO> fetchGjeldendePeriode(AktorId aktorId);
 
     Optional<List<OppfolgingPeriodeMinimalDTO>> hentOppfolgingsperioder(AktorId aktorId);
+
+    String hentKVPKontorEnhet(String aktorId);
 }
