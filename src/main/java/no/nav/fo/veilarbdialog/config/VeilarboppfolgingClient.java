@@ -43,7 +43,6 @@ public class VeilarboppfolgingClient {
             if (auth.erInternBruker()) {
                 return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(azureScope, auth.getInnloggetBrukerToken());
             } else if (auth.erEksternBruker()) {
-                // return azureAdMachineToMachineTokenClient.createMachineToMachineToken(azureScope);
                 return tokenXOnBehalfOfTokenClient.exchangeOnBehalfOfToken(tokenXScope, auth.getInnloggetBrukerToken());
             } else {
                 return azureAdMachineToMachineTokenClient.createMachineToMachineToken(azureScope);
