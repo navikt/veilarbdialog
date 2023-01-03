@@ -93,14 +93,6 @@ public class FilterConfig {
         registration.addUrlPatterns("/*");
         return registration;
     }
-    @Bean
-    public FilterRegistrationBean<SecureRequestLoggerFilter> secureRequestLoggerFilterFilterRegistrationBean(SecureRequestLoggerFilter filter) {
-        FilterRegistrationBean<SecureRequestLoggerFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(filter);
-        registration.addUrlPatterns("/api/*");
-        registration.setOrder(3);
-        return registration;
-    }
 
     @Bean
     @ConditionalOnProperty(
@@ -118,11 +110,21 @@ public class FilterConfig {
                 )
         );
         registration.setFilter(authenticationFilter);
-        registration.setOrder(4);
+        registration.setOrder(3);
         registration.addUrlPatterns("/api/*");
         registration.addUrlPatterns(("/internal/api/*"));
         return registration;
     }
+
+    @Bean
+    public FilterRegistrationBean<SecureRequestLoggerFilter> secureRequestLoggerFilterFilterRegistrationBean(SecureRequestLoggerFilter filter) {
+        FilterRegistrationBean<SecureRequestLoggerFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(filter);
+        registration.addUrlPatterns("/api/*");
+        registration.setOrder(4);
+        return registration;
+    }
+
 
     @Bean
     public FilterRegistrationBean<SetStandardHttpHeadersFilter> setStandardHeadersFilterRegistrationBean() {

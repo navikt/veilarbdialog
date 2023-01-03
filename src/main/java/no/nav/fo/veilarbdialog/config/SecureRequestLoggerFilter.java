@@ -27,7 +27,6 @@ public class SecureRequestLoggerFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-
         filterChain.doFilter(servletRequest, servletResponse);
 
         HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
@@ -45,7 +44,6 @@ public class SecureRequestLoggerFilter implements Filter {
                 httpRequest.getQueryString()
         );
         log.info(msg);
-
     }
 
 }
