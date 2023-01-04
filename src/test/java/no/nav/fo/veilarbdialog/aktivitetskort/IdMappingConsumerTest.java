@@ -8,7 +8,7 @@ import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import org.assertj.core.api.Assertions;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -18,7 +18,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import java.util.UUID;
 
 
-public class IdMappingConsumerTest extends SpringBootTestBase {
+class IdMappingConsumerTest extends SpringBootTestBase {
 
     @Autowired
     KafkaTemplate<String, String> stringStringKafkaTemplate;
@@ -30,7 +30,7 @@ public class IdMappingConsumerTest extends SpringBootTestBase {
 
     @Test
     @SneakyThrows
-    public void arena_aktivitet_skal_faa_teknisk_id_etter_migrering() {
+    void arena_aktivitet_skal_faa_teknisk_id_etter_migrering() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
 
         String arenaId = "ARENATA123";
@@ -38,7 +38,7 @@ public class IdMappingConsumerTest extends SpringBootTestBase {
                 .setTekst("tekst")
                 .setAktivitetId(arenaId);
 
-        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomBruker(port, mockBruker, nyHenvendelseDTO);
+        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomBruker(mockBruker, nyHenvendelseDTO);
 
         Long tekniskId = 123123L;
         IdMappingDTO idMapping = new IdMappingDTO(arenaId, tekniskId, UUID.randomUUID());
@@ -47,7 +47,7 @@ public class IdMappingConsumerTest extends SpringBootTestBase {
 
         kafkaTestService.assertErKonsumertAiven(idMappingTopic, offset, send.get().getRecordMetadata().partition(), 10);
 
-        DialogDTO dialogDTO = dialogTestService.hentDialog(port, mockBruker, Long.parseLong(opprettetDialog.getId()));
+        DialogDTO dialogDTO = dialogTestService.hentDialog(mockBruker, Long.parseLong(opprettetDialog.getId()));
 
         Assertions.assertThat(dialogDTO.getAktivitetId()).isEqualTo(tekniskId.toString());
     }
