@@ -46,7 +46,7 @@ public class KafkaAivenConfig {
     }
     // *********** produser brukernotifikasjoner SLUTT ****************
 
-    // ************ konsumer siste_oppfolgings_periode START ***************
+    // ************ konsumer siste_oppfolgings_periode og aktivitetskort-idmappinger START ***************
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, String> stringStringKafkaListenerContainerFactory(
             ConsumerFactory<String, String> stringStringConsumerFactory) {
@@ -63,7 +63,7 @@ public class KafkaAivenConfig {
                         rec.partition(),
                         rec.offset(),
                         rec.key(),
-                        thr.getCause()
+                        thr.getMessage()
                 ),
                 new FixedBackOff(DEFAULT_INTERVAL, UNLIMITED_ATTEMPTS)));
         return factory;
@@ -78,7 +78,7 @@ public class KafkaAivenConfig {
         return new DefaultKafkaConsumerFactory<>(consumerProperties);
     }
 
-    // ************ konsumer siste_oppfolgings_periode SLUTT ***************
+    // ************ konsumer siste_oppfolgings_periode og aktivitetskort-idmappinger SLUTT ***************
 
 
     // ************ konsumer ekstern-varsel-kvittering START ***************

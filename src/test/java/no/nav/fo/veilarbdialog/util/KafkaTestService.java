@@ -73,7 +73,7 @@ public class KafkaTestService {
 
 
     public void assertErKonsumertAiven(String topic, long producerOffset, int partition, int timeOutSeconds) {
-        await().atMost(timeOutSeconds, SECONDS).until(() -> erKonsumert(topic, aivenGroupId, producerOffset,partition));
+        await().atMost(timeOutSeconds, SECONDS).until(() -> erKonsumert(topic, aivenGroupId, producerOffset, partition));
     }
 
     @SneakyThrows
