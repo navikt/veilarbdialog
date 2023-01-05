@@ -20,8 +20,8 @@ public class IdMappingDAO {
                 .addValue("arenaId", arenaId.getId());
 
         return jdbcTemplate.update("""
-                UPDATE DIALOG SET AKTIVITET_ID = :aktivitetId
-                WHERE ARENA_ID = :arenaId OR AKTIVITET_ID = :arenaId
+                UPDATE DIALOG SET AKTIVITET_ID = :aktivitetId, ARENA_ID = :arenaId 
+                WHERE ARENA_ID = :arenaId OR (AKTIVITET_ID = :arenaId AND ARENA_ID is null)
                 """, params);
     }
 }
