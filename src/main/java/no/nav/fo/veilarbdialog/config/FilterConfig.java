@@ -6,18 +6,16 @@ import no.nav.common.auth.oidc.filter.OidcAuthenticationFilter;
 import no.nav.common.auth.oidc.filter.OidcAuthenticatorConfig;
 import no.nav.common.rest.filter.LogRequestFilter;
 import no.nav.common.rest.filter.SetStandardHttpHeadersFilter;
-import no.nav.common.token_client.builder.AzureAdTokenClientBuilder;
 import no.nav.fo.veilarbdialog.util.PingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 
 import java.util.List;
 
-import static no.nav.common.auth.Constants.*;
+import static no.nav.common.auth.Constants.AZURE_AD_B2C_ID_TOKEN_COOKIE_NAME;
 import static no.nav.common.auth.oidc.filter.OidcAuthenticator.fromConfigs;
 import static no.nav.fo.veilarbdialog.rest.AdminController.PTO_ADMIN_SERVICE_USER;
 
@@ -93,10 +91,11 @@ public class FilterConfig {
         registration.addUrlPatterns("/*");
         return registration;
     }
+
     @Bean
-    public FilterRegistrationBean<SecureRequestLoggerFilter> secureRequestLoggerFilterFilterRegistrationBean(SecureRequestLoggerFilter filter) {
+    public FilterRegistrationBean<SecureRequestLoggerFilter> secureRequestLoggerFilterRegistrationBean() {
         FilterRegistrationBean<SecureRequestLoggerFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(filter);
+        registration.setFilter(new SecureRequestLoggerFilter());
         registration.addUrlPatterns("/api/*");
         registration.setOrder(3);
         return registration;
@@ -125,10 +124,19 @@ public class FilterConfig {
     }
 
     @Bean
+    public FilterRegistrationBean<EnhanceSecureLogsFilter> enhanceSecureLogsFilterRegistrationBean(EnhanceSecureLogsFilter enhanceSecureLogsFilter) {
+        FilterRegistrationBean<EnhanceSecureLogsFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(enhanceSecureLogsFilter);
+        registration.addUrlPatterns("/api/*");
+        registration.setOrder(5);
+        return registration;
+    }
+
+    @Bean
     public FilterRegistrationBean<SetStandardHttpHeadersFilter> setStandardHeadersFilterRegistrationBean() {
         FilterRegistrationBean<SetStandardHttpHeadersFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new SetStandardHttpHeadersFilter());
-        registration.setOrder(5);
+        registration.setOrder(6);
         registration.addUrlPatterns("/*");
         return registration;
     }

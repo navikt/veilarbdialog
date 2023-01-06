@@ -1,51 +1,46 @@
 package no.nav.fo.veilarbdialog.config;
 
-import lombok.RequiredArgsConstructor;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.slf4j.MDC;
 
-import javax.servlet.Filter;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.ServletException;
-import javax.servlet.FilterChain;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Optional;
 
 import static java.lang.String.format;
+import static no.nav.fo.veilarbdialog.config.EnhanceSecureLogsFilter.SECURELOGS_ER_INTERN_BRUKER;
+import static no.nav.fo.veilarbdialog.config.EnhanceSecureLogsFilter.SECURELOGS_INNLOGGET_BRUKER_IDENT;
 
-@Service
-@RequiredArgsConstructor
 public class SecureRequestLoggerFilter implements Filter {
-    private final Logger log = LoggerFactory.getLogger("SecureLog");
 
-    private final AuthService authService;
+    private final Logger secureLog = LoggerFactory.getLogger("SecureLog");
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-
         filterChain.doFilter(servletRequest, servletResponse);
 
         HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpResponse = (HttpServletResponse) servletResponse;
-
-        Optional<String> innloggetBrukerIdent = authService.getIdent();
 
         String msg = format("status=%s method=%s host=%s path=%s erInternBruker=%s innloggetIdent=%s queryString=%s",
                 httpResponse.getStatus(),
                 httpRequest.getMethod(),
                 httpRequest.getServerName(),
                 httpRequest.getRequestURI(),
-                authService.erInternBruker(),
-                innloggetBrukerIdent.orElse(null),
+                MDC.get(SECURELOGS_ER_INTERN_BRUKER),
+                MDC.get(SECURELOGS_INNLOGGET_BRUKER_IDENT),
                 httpRequest.getQueryString()
         );
-        log.info(msg);
-
+        secureLog.info(msg);
     }
 
+    @Override
+    public void destroy() {
+        MDC.remove(SECURELOGS_ER_INTERN_BRUKER);
+        MDC.remove(SECURELOGS_INNLOGGET_BRUKER_IDENT);
+
+        Filter.super.destroy();
+    }
 }
