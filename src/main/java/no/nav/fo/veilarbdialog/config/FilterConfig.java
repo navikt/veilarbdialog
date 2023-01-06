@@ -93,10 +93,11 @@ public class FilterConfig {
         registration.addUrlPatterns("/*");
         return registration;
     }
+
     @Bean
-    public FilterRegistrationBean<SecureRequestLoggerFilter> secureRequestLoggerFilterFilterRegistrationBean(SecureRequestLoggerFilter filter) {
+    public FilterRegistrationBean<SecureRequestLoggerFilter> secureRequestLoggerFilterRegistrationBean() {
         FilterRegistrationBean<SecureRequestLoggerFilter> registration = new FilterRegistrationBean<>();
-        registration.setFilter(filter);
+        registration.setFilter(new SecureRequestLoggerFilter());
         registration.addUrlPatterns("/api/*");
         registration.setOrder(3);
         return registration;
@@ -125,10 +126,19 @@ public class FilterConfig {
     }
 
     @Bean
+    public FilterRegistrationBean<EnhanceSecureLogsFilter> enhanceSecureLogsFilterRegistrationBean(EnhanceSecureLogsFilter enhanceSecureLogsFilter) {
+        FilterRegistrationBean<EnhanceSecureLogsFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(enhanceSecureLogsFilter);
+        registration.addUrlPatterns("/api/*");
+        registration.setOrder(5);
+        return registration;
+    }
+
+    @Bean
     public FilterRegistrationBean<SetStandardHttpHeadersFilter> setStandardHeadersFilterRegistrationBean() {
         FilterRegistrationBean<SetStandardHttpHeadersFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new SetStandardHttpHeadersFilter());
-        registration.setOrder(5);
+        registration.setOrder(6);
         registration.addUrlPatterns("/*");
         return registration;
     }
