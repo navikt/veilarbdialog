@@ -7,7 +7,7 @@ metadata:
   labels:
     team: pto
 spec:
-  image: docker.pkg.github.com/navikt/veilarbdialog/veilarbdialog:{{version}}
+  image: ghcr.io/navikt/veilarbdialog/veilarbdialog:{{version}}
   port: 8080
   prometheus:
     enabled: true
