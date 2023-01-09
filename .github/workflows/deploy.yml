@@ -68,17 +68,3 @@ jobs:
           CLUSTER: prod-fss
           RESOURCE: nais/nais-prod.yaml
           VAR: version=${{ env.IMAGE_TAG }}
-
-  release-prod:
-    name: Create prod release
-    needs: deploy-prod
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: release/prod@${{ env.IMAGE_TAG }}
-          release_name: Release to prod
-          prerelease: false
