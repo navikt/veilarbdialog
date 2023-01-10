@@ -19,10 +19,10 @@ import java.util.function.Supplier;
 @Configuration
 public class OkHttpClientConfig {
 
-    @Bean OkHttpClient veilarbpersonClient(MeterRegistry meterRegistry, AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient) {
+    @Bean OkHttpClient veilarbpersonClient(MeterRegistry meterRegistry, Interceptor veilarbpersonInterceptor) {
         return RestClient.baseClientBuilder()
-            .eventListener(OkHttpMetricsEventListener.builder(meterRegistry, "okhttp.requests").build())
-            .addInterceptor(azureM2MInterceptor(veilarbpersonScope, azureAdMachineToMachineTokenClient)).build();
+                .eventListener(OkHttpMetricsEventListener.builder(meterRegistry, "okhttp.requests").build())
+                .addInterceptor(veilarbpersonInterceptor).build();
     }
 
     @Bean OkHttpClient veilarbOppfolgingClient(MeterRegistry meterRegistry, Interceptor oppfolgingInterceptor) {
@@ -56,12 +56,13 @@ public class OkHttpClientConfig {
             return chain.proceed(newReq);
         };
     }
-    private Interceptor azureM2MInterceptor(String scope, AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient) {
+    @Bean
+    Interceptor veilarbpersonInterceptor(AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient) {
         return chain -> {
             var original = chain.request();
             var newReq = original
                     .newBuilder()
-                    .addHeader("Authorization", "Bearer " + azureAdMachineToMachineTokenClient.createMachineToMachineToken(scope))
+                    .addHeader("Authorization", "Bearer " + azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarbpersonScope))
                     .method(original.method(), original.body())
                     .build();
             return chain.proceed(newReq);
