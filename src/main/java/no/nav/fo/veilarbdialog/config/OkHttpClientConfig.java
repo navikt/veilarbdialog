@@ -6,7 +6,6 @@ import no.nav.common.rest.client.RestClient;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 import no.nav.fo.veilarbdialog.auth.AuthService;
-import no.nav.fo.veilarbdialog.clients.util.HttpClientWrapper;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Value;
