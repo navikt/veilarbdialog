@@ -18,16 +18,16 @@ import java.util.function.Supplier;
 @Configuration
 public class OkHttpClientConfig {
 
-    @Bean OkHttpClient veilarbpersonClient(MeterRegistry meterRegistry, Interceptor veilarbpersonInterceptor) {
+    @Bean OkHttpClient veilarbpersonClient(MeterRegistry meterRegistry, Interceptor veilarbpersonAuthInterceptor) {
         return RestClient.baseClientBuilder()
                 .eventListener(OkHttpMetricsEventListener.builder(meterRegistry, "okhttp.requests").build())
-                .addInterceptor(veilarbpersonInterceptor).build();
+                .addInterceptor(veilarbpersonAuthInterceptor).build();
     }
 
-    @Bean OkHttpClient veilarbOppfolgingClient(MeterRegistry meterRegistry, Interceptor oppfolgingInterceptor) {
+    @Bean OkHttpClient veilarbOppfolgingClient(MeterRegistry meterRegistry, Interceptor oppfolgingAuthInterceptor) {
         return RestClient.baseClientBuilder()
                 .eventListener(OkHttpMetricsEventListener.builder(meterRegistry, "okhttp.requests").build())
-                .addInterceptor(oppfolgingInterceptor).build();
+                .addInterceptor(oppfolgingAuthInterceptor).build();
     }
 
     @Value("${application.veilarbperson.api.scope}") String veilarbpersonScope;
@@ -35,7 +35,7 @@ public class OkHttpClientConfig {
 
 
     @Bean
-    Interceptor oppfolgingInterceptor(AuthService auth,
+    Interceptor oppfolgingAuthInterceptor(AuthService auth,
                   AzureAdOnBehalfOfTokenClient azureAdOnBehalfOfTokenClient,
                   AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient) {
         Supplier<String> tokenProvider = () -> {
@@ -56,7 +56,7 @@ public class OkHttpClientConfig {
         };
     }
     @Bean
-    Interceptor veilarbpersonInterceptor(AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient) {
+    Interceptor veilarbpersonAuthInterceptor(AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient) {
         return chain -> {
             var original = chain.request();
             var newReq = original
