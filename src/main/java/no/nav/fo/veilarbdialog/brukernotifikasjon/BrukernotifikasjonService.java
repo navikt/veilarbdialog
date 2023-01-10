@@ -19,11 +19,11 @@ import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntit
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringDAO;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringMetrikk;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
-import no.nav.fo.veilarbdialog.clients.veilarboppfolging.OppfolgingClient;
 import no.nav.fo.veilarbdialog.clients.veilarbperson.Nivaa4DTO;
 import no.nav.fo.veilarbdialog.clients.veilarbperson.VeilarbpersonClient;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
+import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class BrukernotifikasjonService {
     private static final int OPPGAVE_SIKKERHETSNIVAA = 4;
     private static final int BESKJED_SIKKERHETSNIVAA = 3;
 
-    private final OppfolgingClient oppfolgingClient;
+    private final OppfolgingV2Client oppfolgingClient;
 
     private final VeilarbpersonClient veilarbpersonClient;
 

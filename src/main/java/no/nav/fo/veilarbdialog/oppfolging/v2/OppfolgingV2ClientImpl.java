@@ -6,10 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
-import no.nav.fo.veilarbdialog.kvp.KvpDTO;
+import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
+import no.nav.fo.veilarbdialog.clients.veilarboppfolging.UnderOppfolgingDTO;
 import no.nav.fo.veilarbdialog.clients.util.HttpClientWrapper;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.GjeldendePeriodeMetrikk;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -21,10 +25,13 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
     private final GjeldendePeriodeMetrikk gjeldendePeriodeMetrikk;
     private final HttpClientWrapper veilarboppfolgingClientWrapper;
 
-    public Optional<OppfolgingV2UnderOppfolgingDTO> fetchUnderoppfolging(AktorId aktorId) {
-        var fnr = aktorOppslagClient.hentFnr(aktorId);
-        var uri = String.format("/v2/oppfolging?fnr=%s", fnr.get());
-        return veilarboppfolgingClientWrapper.get(uri, OppfolgingV2UnderOppfolgingDTO.class);
+    @Override
+    public boolean erUnderOppfolging(Fnr fnr) {
+        String uri = String.format("/v2/oppfolging?fnr=%s", fnr.get());
+        return veilarboppfolgingClientWrapper
+                .get(uri, UnderOppfolgingDTO.class)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Feil ved kall mot oppfolging"))
+                .isErUnderOppfolging();
     }
 
     @Override
@@ -45,13 +52,9 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
         return veilarboppfolgingClientWrapper.getList(uri, OppfolgingPeriodeMinimalDTO.class);
     }
 
-    @Timed
     @Override
-    public String hentKVPKontorEnhet(String aktorId) {
-        var path = String.format("/v2/kvp?aktorId=%s", aktorId);
-        return veilarboppfolgingClientWrapper
-                .get(path, KvpDTO.class)
-                .map(KvpDTO::getEnhet)
-                .orElse(null);
+    public Optional<ManuellStatusV2DTO> hentManuellStatus(Fnr fnr) {
+        String uri = String.format("/v2/manuell/status?fnr=%s", fnr.get());
+        return veilarboppfolgingClientWrapper.get(uri, ManuellStatusV2DTO.class);
     }
 }
