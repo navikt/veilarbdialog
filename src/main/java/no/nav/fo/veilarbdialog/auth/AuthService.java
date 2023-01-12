@@ -85,7 +85,7 @@ public class AuthService {
         var loggedInUserFnr = getIdent().orElse("");
         if (!loggedInUserFnr.equals(fnr.get())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(
-                    "ekstern bruker har ikke tilgang til andre brukere enn seg selv",
+                    "ekstern bruker har ikke tilgang til andre brukere enn seg selv"
             ));
         };
     }
