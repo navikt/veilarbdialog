@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 
 @Component
 @RequiredArgsConstructor
-public class VeilarbTokenProvider implements Supplier<String> {
+public class VeilarbOppfolgingTokenProvider implements Supplier<String> {
 
 
     final AuthService auth;

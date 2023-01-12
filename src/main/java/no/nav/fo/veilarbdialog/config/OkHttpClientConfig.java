@@ -5,7 +5,9 @@ import io.micrometer.core.instrument.binder.okhttp3.OkHttpMetricsEventListener;
 import no.nav.common.rest.client.RestClient;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
+import no.nav.common.token_client.client.TokenXOnBehalfOfTokenClient;
 import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.fo.veilarbdialog.clients.veilarboppfolging.VeilarbOppfolgingTokenProvider;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,24 +34,16 @@ public class OkHttpClientConfig {
 
     @Value("${application.veilarbperson.api.scope}") String veilarbpersonScope;
     @Value("${application.veilarboppfolging.api.azureScope}") String veilarboppfolgingapiScope;
+    @Value("${application.veilarboppfolging.api.tokenXScope}") String veilarboppfolgingapiScopeTokenX;
 
 
     @Bean
-    Interceptor oppfolgingAuthInterceptor(AuthService auth,
-                  AzureAdOnBehalfOfTokenClient azureAdOnBehalfOfTokenClient,
-                  AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient) {
-        Supplier<String> tokenProvider = () -> {
-            if (auth.erInternBruker()) {
-                return azureAdOnBehalfOfTokenClient.exchangeOnBehalfOfToken(veilarboppfolgingapiScope, auth.getInnloggetBrukerToken());
-            } else {
-                return azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarboppfolgingapiScope);
-            }
-        };
+    Interceptor oppfolgingAuthInterceptor(VeilarbOppfolgingTokenProvider veilarbOppfolgingTokenProvider) {
         return chain -> {
             var original = chain.request();
             var newReq = original
                     .newBuilder()
-                    .addHeader("Authorization", "Bearer " + tokenProvider.get())
+                    .addHeader("Authorization", "Bearer " + veilarbOppfolgingTokenProvider.get())
                     .method(original.method(), original.body())
                     .build();
             return chain.proceed(newReq);
