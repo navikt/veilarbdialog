@@ -49,7 +49,7 @@ public class OkHttpClientConfig {
             var original = chain.request();
             var newReq = original
                     .newBuilder()
-                    .addHeader("Authorization", "Bearer " + tokenProvider)
+                    .addHeader("Authorization", "Bearer " + tokenProvider.get())
                     .method(original.method(), original.body())
                     .build();
             return chain.proceed(newReq);
