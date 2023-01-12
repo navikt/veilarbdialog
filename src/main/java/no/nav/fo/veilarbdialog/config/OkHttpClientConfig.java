@@ -33,8 +33,6 @@ public class OkHttpClientConfig {
     }
 
     @Value("${application.veilarbperson.api.scope}") String veilarbpersonScope;
-    @Value("${application.veilarboppfolging.api.azureScope}") String veilarboppfolgingapiScope;
-    @Value("${application.veilarboppfolging.api.tokenXScope}") String veilarboppfolgingapiScopeTokenX;
 
 
     @Bean

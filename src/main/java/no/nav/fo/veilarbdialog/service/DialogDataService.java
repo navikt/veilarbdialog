@@ -54,7 +54,11 @@ public class DialogDataService {
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person) {
         String aktorId = hentAktoerIdForPerson(person);
-        auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
+        if (auth.erEksternBruker()) {
+            auth.sjekkEksternBrukerHarTilgang(Fnr.of(person.get()));
+        } else {
+            auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
+        }
         return dialogDAO.hentDialogerForAktorId(aktorId);
     }
 
@@ -226,7 +230,6 @@ public class DialogDataService {
     }
 
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
-
         if (dialogData != null && !auth.harTilgangTilPerson(dialogData.getAktorId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(
                     "%s har ikke lesetilgang til %s",
