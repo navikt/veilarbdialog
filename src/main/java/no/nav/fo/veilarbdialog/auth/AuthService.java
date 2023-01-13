@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.common.abac.Pep;
 import no.nav.common.abac.domain.request.ActionId;
 import no.nav.common.auth.context.AuthContextHolder;
+import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.EnhetId;
 import no.nav.common.types.identer.Fnr;
@@ -25,6 +26,8 @@ public class AuthService {
 
     private final Pep pep;
     private final AuthContextHolder authContextHolder;
+
+    private final AktorOppslagClient aktorOppslagClient;
 
     public Optional<String> getIdent() {
         return authContextHolder.getUid();
@@ -50,14 +53,17 @@ public class AuthService {
         );
     }
 
-    public boolean harTilgangTilPerson(String aktorId) {
+    public boolean harTilgangTilPerson(AktorId aktorId) {
         if (erSystemkallFraAzureAd(authContextHolder)) {
             return true;
+        } else if (erEksternBruker()) {
+            var fnr = aktorOppslagClient.hentFnr(aktorId).get();
+            return getIdent().map(ident -> ident.equals(fnr)).orElse(false);
         } else {
             return pep.harTilgangTilPerson(
                 getInnloggetBrukerToken(),
                 ActionId.READ,
-                AktorId.of(aktorId)
+                aktorId
             );
         }
     }
@@ -72,7 +78,7 @@ public class AuthService {
     }
 
     public void harTilgangTilPersonEllerKastIngenTilgang(String aktorId) {
-        if (!harTilgangTilPerson(aktorId)) {
+        if (!harTilgangTilPerson(AktorId.of(aktorId))) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(
                     "%s har ikke lesetilgang til %s",
                     getIdent().orElse("null"),
