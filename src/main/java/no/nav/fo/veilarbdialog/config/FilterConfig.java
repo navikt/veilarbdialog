@@ -72,8 +72,8 @@ public class FilterConfig {
 
     private OidcAuthenticatorConfig tokenxConfig() {
         return new OidcAuthenticatorConfig()
-                .withDiscoveryUrl(TokenXEnvironmentvariables.TOKEN_X_WELL_KNOWN_URL)
-                .withClientId(TokenXEnvironmentvariables.TOKEN_X_CLIENT_ID)
+                .withDiscoveryUrl(System.getenv(TokenXEnvironmentvariables.TOKEN_X_WELL_KNOWN_URL))
+                .withClientId(System.getenv(TokenXEnvironmentvariables.TOKEN_X_CLIENT_ID))
                 .withUserRole(UserRole.EKSTERN);
     }
 
