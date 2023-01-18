@@ -6,6 +6,7 @@ import no.nav.common.auth.oidc.filter.OidcAuthenticationFilter;
 import no.nav.common.auth.oidc.filter.OidcAuthenticatorConfig;
 import no.nav.common.rest.filter.LogRequestFilter;
 import no.nav.common.rest.filter.SetStandardHttpHeadersFilter;
+import no.nav.common.token_client.utils.env.TokenXEnvironmentvariables;
 import no.nav.fo.veilarbdialog.util.PingFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -69,6 +70,13 @@ public class FilterConfig {
                 .withUserRoleResolver(new AzureAdUserRoleResolver());
     }
 
+    private OidcAuthenticatorConfig tokenxConfig() {
+        return new OidcAuthenticatorConfig()
+                .withDiscoveryUrl(TokenXEnvironmentvariables.TOKEN_X_WELL_KNOWN_URL)
+                .withClientId(TokenXEnvironmentvariables.TOKEN_X_CLIENT_ID)
+                .withUserRole(UserRole.EKSTERN);
+    }
+
     @Bean
     public FilterRegistrationBean<PingFilter> pingFilter() {
         // Veilarbproxy trenger dette endepunktet for å sjekke at tjenesten lever
@@ -113,7 +121,8 @@ public class FilterConfig {
                 fromConfigs(
                         loginserviceIdportenConfig(),
                         naisAzureAdConfig(),
-                        naisStsAuthConfig()
+                        naisStsAuthConfig(),
+                        tokenxConfig()
                 )
         );
         registration.setFilter(authenticationFilter);
