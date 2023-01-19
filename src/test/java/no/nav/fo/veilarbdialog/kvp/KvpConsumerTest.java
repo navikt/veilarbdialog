@@ -65,7 +65,7 @@ class KvpConsumerTest extends SpringBootTestBase {
 
     @SneakyThrows
     @Test
-    void avslutte_kvp_bruker_som_ikke_er_under_kvp() {
+    void nar_avslutter_kvp_men_bruker_ikke_var_under_kvp_skal_ikke_dialoger_bli_historiske() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         String aktorId = mockBruker.getAktorId();
         UUID oppfolgingsId = mockBruker.getOppfolgingsperiode();
@@ -106,7 +106,7 @@ class KvpConsumerTest extends SpringBootTestBase {
 
     @SneakyThrows
     @Test
-    void avslutte_kvp_bruker_som_er_under_kvp() {
+    void nar_en_bruker_avslutter_kvp_skal_dialoger_bli_historiske() {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         String aktorId = mockBruker.getAktorId();
         UUID oppfolgingsId = mockBruker.getOppfolgingsperiode();
