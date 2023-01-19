@@ -32,7 +32,7 @@ public class AuthService {
         return authContextHolder.getUid();
     }
 
-    public boolean eksternBrukerHasNiva4() {
+    private boolean eksternBrukerHasNiva4() {
         return authContextHolder.getIdTokenClaims()
             .map(jwtClaimsSet -> {
                 try {
