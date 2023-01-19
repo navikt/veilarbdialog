@@ -2,6 +2,8 @@ package no.nav.fo.veilarbdialog.oppfolging.v2;
 
 
 import no.nav.common.types.identer.AktorId;
+import no.nav.common.types.identer.Fnr;
+import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,11 +11,12 @@ import java.util.Optional;
 
 
 public interface OppfolgingV2Client {
-    Optional<OppfolgingV2UnderOppfolgingDTO> fetchUnderoppfolging(AktorId aktorId);
 
     Optional<OppfolgingPeriodeMinimalDTO> fetchGjeldendePeriode(AktorId aktorId);
 
     Optional<List<OppfolgingPeriodeMinimalDTO>> hentOppfolgingsperioder(AktorId aktorId);
 
-    String hentKVPKontorEnhet(String aktorId);
+    Optional<ManuellStatusV2DTO> hentManuellStatus(Fnr fnr);
+
+    boolean erUnderOppfolging(Fnr fnr);
 }

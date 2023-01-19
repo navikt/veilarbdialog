@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.text.ParseException;
+import java.util.Objects;
 import java.util.Optional;
 
 import static no.nav.fo.veilarbdialog.util.AuthUtils.erSystemkallFraAzureAd;
@@ -28,6 +30,17 @@ public class AuthService {
 
     public Optional<String> getIdent() {
         return authContextHolder.getUid();
+    }
+
+    private boolean eksternBrukerHasNiva4() {
+        return authContextHolder.getIdTokenClaims()
+            .map(jwtClaimsSet -> {
+                try {
+                    return Objects.equals(jwtClaimsSet.getStringClaim("acr"), "Level4");
+                } catch (ParseException e) {
+                    return false;
+                }
+            }).orElse(false);
     }
 
     public NavIdent getNavIdent() {
@@ -78,6 +91,20 @@ public class AuthService {
                     getIdent().orElse("null"),
                     aktorId
             ));
+        }
+    }
+
+    public void sjekkEksternBrukerHarTilgang(Fnr fnr) {
+        var loggedInUserFnr = getIdent().orElse("");
+        if (!loggedInUserFnr.equals(fnr.get())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "ekstern bruker har ikke tilgang til andre brukere enn seg selv"
+            );
+        }
+        if (!eksternBrukerHasNiva4()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "ekstern bruker har ikke innloggingsnivå 4"
+            );
         }
     }
 

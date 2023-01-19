@@ -12,7 +12,6 @@ import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
-import no.nav.fo.veilarbdialog.clients.veilarboppfolging.OppfolgingClient;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
@@ -20,6 +19,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerIkkeUnderOppfo
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
+import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +38,7 @@ public class EskaleringsvarselService {
     private final DialogDataService dialogDataService;
     private final AuthService authService;
     private final AktorOppslagClient aktorOppslagClient;
-    private final OppfolgingClient oppfolgingClient;
+    private final OppfolgingV2Client oppfolgingClient;
     private final SistePeriodeService sistePeriodeService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
 

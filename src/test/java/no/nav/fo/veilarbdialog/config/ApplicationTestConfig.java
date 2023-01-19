@@ -1,8 +1,6 @@
 package no.nav.fo.veilarbdialog.config;
 
 import no.nav.common.featuretoggle.UnleashClient;
-import no.nav.common.sts.SystemUserTokenProvider;
-import no.nav.common.token_client.builder.TokenXTokenClientBuilder;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 import no.nav.common.token_client.client.TokenXOnBehalfOfTokenClient;
@@ -19,13 +17,6 @@ public class ApplicationTestConfig {
     @Bean
     public String pdlUrl(Environment environment) {
         return environment.getRequiredProperty("application.pdl.api.url");
-    }
-
-    @Bean
-    public SystemUserTokenProvider systemUserTokenProvider() {
-        SystemUserTokenProvider systemUserTokenProvider = mock(SystemUserTokenProvider.class);
-        Mockito.when(systemUserTokenProvider.getSystemUserToken()).thenReturn("mockSystemUserToken");
-        return systemUserTokenProvider;
     }
 
     @Bean

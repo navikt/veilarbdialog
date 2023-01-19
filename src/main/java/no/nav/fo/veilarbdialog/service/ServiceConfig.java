@@ -3,14 +3,11 @@ package no.nav.fo.veilarbdialog.service;
 import lombok.Getter;
 import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.featuretoggle.UnleashClientImpl;
-import no.nav.common.sts.NaisSystemUserTokenProvider;
-import no.nav.common.sts.SystemUserTokenProvider;
 import no.nav.common.token_client.builder.AzureAdTokenClientBuilder;
 import no.nav.common.token_client.builder.TokenXTokenClientBuilder;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 import no.nav.common.token_client.client.TokenXOnBehalfOfTokenClient;
-import no.nav.common.utils.Credentials;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,12 +30,6 @@ public class ServiceConfig {
 
     @Value("${spring.application.name}")
     private String applicationName;
-
-    @Bean
-    @Profile("!local")
-    SystemUserTokenProvider systemUserTokenProvider(Credentials systemUser) {
-        return new NaisSystemUserTokenProvider(discoveryUrl, systemUser.username, systemUser.password);
-    }
 
     @Bean
     @Profile("!local")
