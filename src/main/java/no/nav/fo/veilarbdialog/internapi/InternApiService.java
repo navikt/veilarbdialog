@@ -1,10 +1,11 @@
 package no.nav.fo.veilarbdialog.internapi;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,7 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class InternApiService {
 
-    private final AuthService authService;
+    private final IAuthService authService;
     private final DialogDAO dialogDAO;
     private final KontorsperreFilter kontorsperreFilter;
 
@@ -26,7 +27,7 @@ public class InternApiService {
         }
 
         DialogData dialogData = dialogDAO.hentDialog(dialogId);
-        authService.harTilgangTilPersonEllerKastIngenTilgang(dialogData.getAktorId());
+        authService.sjekkTilgangTilPerson(AktorId.of(dialogData.getAktorId()));
 
         return filtrerKontorsperret(dialogData);
     }
@@ -55,14 +56,14 @@ public class InternApiService {
    }
 
    private List<DialogData> hentDialogerForAktorId(String aktorId) {
-        authService.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
+        authService.sjekkTilgangTilPerson(AktorId.of(aktorId));
         return filtrerKontorsperret(dialogDAO.hentDialogerForAktorId(aktorId));
    }
 
    private List<DialogData> hentDialogerForOppfolgingsperiodeId(UUID oppfolgingsperiodeId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForOppfolgingsperiodeId(oppfolgingsperiodeId);
         if (dialoger.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        authService.harTilgangTilPersonEllerKastIngenTilgang(dialoger.get(0).getAktorId());
+        authService.sjekkTilgangTilPerson(AktorId.of(dialoger.get(0).getAktorId()));
         return filtrerKontorsperret(dialoger);
    }
 
@@ -72,9 +73,10 @@ public class InternApiService {
                 .filter(kontorsperreFilter::tilgangTilEnhet)
                 .map(dialog ->
                         dialog.withHenvendelser(
-                                dialog.getHenvendelser().stream().filter(
-                                        kontorsperreFilter::tilgangTilEnhet
-                                ).toList()
+                                dialog.getHenvendelser()
+                                        .stream()
+                                        .filter(kontorsperreFilter::tilgangTilEnhet)
+                                        .toList()
                         )
                 ).toList();
     }

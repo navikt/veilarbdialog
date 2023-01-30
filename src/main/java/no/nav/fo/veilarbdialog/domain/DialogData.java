@@ -3,6 +3,8 @@ package no.nav.fo.veilarbdialog.domain;
 import lombok.Builder;
 import lombok.Value;
 import lombok.With;
+import no.nav.common.types.identer.EnhetId;
+import no.nav.fo.veilarbdialog.kvp.NoeMedKontorEnhet;
 
 import java.util.*;
 
@@ -11,7 +13,7 @@ import static java.util.Optional.ofNullable;
 @Value
 @Builder(toBuilder = true)
 @With
-public class DialogData {
+public class DialogData implements NoeMedKontorEnhet {
 
     long id;
     String aktorId;
@@ -74,6 +76,11 @@ public class DialogData {
 
     public boolean erUlestAvVeileder() {
         return !erNyesteHenvendelseLestAvVeileder();
+    }
+
+    @Override
+    public Optional<EnhetId> getKontorEnhet() {
+        return Optional.ofNullable(getKontorsperreEnhetId()).map(EnhetId::of);
     }
 }
 

@@ -1,10 +1,10 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.Kladd;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.service.KladdService;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +24,7 @@ public class KladdRessurs {
 
     private final KladdService kladdService;
     private final HttpServletRequest httpServletRequest;
-    private final AuthService auth;
+    private final IAuthService auth;
 
     @GetMapping
     public List<KladdDTO> hentKladder() {
@@ -41,7 +41,7 @@ public class KladdRessurs {
 
     private String getContextUserIdent() {
         if (auth.erEksternBruker()) {
-            return auth.getIdent().orElseThrow(RuntimeException::new);
+            return auth.getLoggedInnUser().get();
         }
         return Optional
                 .ofNullable(httpServletRequest.getParameter("fnr"))

@@ -1,5 +1,8 @@
 package no.nav.fo.veilarbdialog.domain;
 
+import no.nav.common.types.identer.EksternBrukerId;
+import no.nav.common.types.identer.Fnr;
+
 import java.util.Objects;
 
 public abstract class Person {
@@ -45,6 +48,12 @@ public abstract class Person {
         private AktorId(String id) {
             super(id);
         }
+    }
+
+    public EksternBrukerId eksternBrukerId() {
+        if (this instanceof Fnr) return no.nav.common.types.identer.Fnr.of(this.get());
+        if (this instanceof AktorId) return no.nav.common.types.identer.AktorId.of(this.get());
+        throw new IllegalStateException("EksternBrukerId må være Fnr eller AktorId");
     }
 
 }

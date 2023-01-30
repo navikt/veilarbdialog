@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 import no.nav.common.token_client.client.TokenXOnBehalfOfTokenClient;
-import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 public class VeilarbOppfolgingTokenProvider implements Supplier<String> {
 
 
-    final AuthService auth;
+    final IAuthService auth;
     final AzureAdOnBehalfOfTokenClient azureAdOnBehalfOfTokenClient;
     final AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient;
     final TokenXOnBehalfOfTokenClient tokenXOnBehalfOfTokenClient;

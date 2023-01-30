@@ -10,6 +10,7 @@ import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -27,6 +28,7 @@ class DialogStatusServiceTest {
     private final DialogDAO dialogDAO = mock(DialogDAO.class);
     private final DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
     private final VarselDAO varselDao = mock(VarselDAO.class);
+    private final IAuthService authService = mock(IAuthService.class);
     private final BrukernotifikasjonRepository brukernotifikasjonRepository = mock(BrukernotifikasjonRepository.class);
     private final EskaleringsvarselRepository eskaleringsvarselRepository = mock(EskaleringsvarselRepository.class);
     private final FunksjonelleMetrikker funksjonelleMetrikker = mock(FunksjonelleMetrikker.class);
@@ -35,11 +37,11 @@ class DialogStatusServiceTest {
             statusDAO,
             dialogDAO,
             dataVarehusDAO,
-            varselDao,
             brukernotifikasjonRepository,
             eskaleringsvarselRepository,
             funksjonelleMetrikker,
-            brukernotifikasjonService
+            brukernotifikasjonService,
+            authService
     );
 
     @Test
@@ -52,8 +54,8 @@ class DialogStatusServiceTest {
         verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), henvendelseData.getSendt(), henvendelseData.getSendt());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
-        verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_BRUKER);
-        verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_NAV);
+        verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_BRUKER, "SYSTEM");
+        verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_NAV, "SYSTEM");
         Mockito.verifyNoMoreInteractions(dataVarehusDAO);
     }
 
@@ -68,7 +70,7 @@ class DialogStatusServiceTest {
         verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), uniktTidspunkt, dialogData.getVenterPaNavSiden());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
-        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_BRUKER);
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_BRUKER, "SYSTEM");
     }
 
     @Test
@@ -84,7 +86,7 @@ class DialogStatusServiceTest {
         verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), dialogData.getSisteUlestAvVeilederTidspunkt(), dialogData.getVenterPaNavSiden());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
-        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_BRUKER);
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_BRUKER, "SYSTEM");
     }
 
     @Test
@@ -97,7 +99,7 @@ class DialogStatusServiceTest {
         verify(statusDAO, only()).setEldsteUlesteForBruker(dialogData.getId(), henvendelseData.getSendt());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
-        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_VEILEDER);
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_VEILEDER, "SYSTEM");
     }
 
     @Test
@@ -110,7 +112,7 @@ class DialogStatusServiceTest {
         verify(statusDAO, only()).setEldsteUlesteForBruker(dialogData.getId(), dialogData.getEldsteUlesteTidspunktForBruker());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
-        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_VEILEDER);
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.NY_HENVENDELSE_FRA_VEILEDER, "SYSTEM");
     }
 
     @Test
@@ -122,7 +124,7 @@ class DialogStatusServiceTest {
         verify(statusDAO, only()).markerSomLestAvBruker(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
-        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.LEST_AV_BRUKER);
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.LEST_AV_BRUKER, "SYSTEM");
     }
 
     @Test
@@ -134,7 +136,7 @@ class DialogStatusServiceTest {
         verify(statusDAO, only()).setVenterPaNavTilNull(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
-        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_NAV);
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_NAV, "SYSTEM");
     }
 
     @Test
@@ -146,7 +148,7 @@ class DialogStatusServiceTest {
         verify(statusDAO, only()).setVenterPaNavTilNaa(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
-        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_NAV);
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_NAV, "SYSTEM");
     }
 
     @Test
@@ -159,7 +161,7 @@ class DialogStatusServiceTest {
         verify(statusDAO, only()).setVenterPaSvarFraBrukerTilNull(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
-        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER, "SYSTEM");
     }
 
     @Test
@@ -172,7 +174,7 @@ class DialogStatusServiceTest {
         verify(statusDAO, only()).setVenterPaSvarFraBrukerTilNaa(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
-        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_BRUKER);
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_BRUKER, "SYSTEM");
     }
 
     @Test
@@ -183,9 +185,9 @@ class DialogStatusServiceTest {
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
         InOrder inOrder = inOrder(dataVarehusDAO);
-        verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_NAV);
-        verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
-        inOrder.verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.SATT_TIL_HISTORISK);
+        verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_NAV, "SYSTEM");
+        verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER, "SYSTEM");
+        inOrder.verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.SATT_TIL_HISTORISK, "SYSTEM");
         inOrder.verifyNoMoreInteractions();
         Mockito.verifyNoMoreInteractions(dataVarehusDAO);
     }
@@ -198,8 +200,8 @@ class DialogStatusServiceTest {
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
         InOrder inOrder = inOrder(dataVarehusDAO);
-        inOrder.verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER);
-        inOrder.verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.SATT_TIL_HISTORISK);
+        inOrder.verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER, "SYSTEM");
+        inOrder.verify(dataVarehusDAO).insertEvent(dialogData, DatavarehusEvent.SATT_TIL_HISTORISK, "SYSTEM");
         Mockito.verifyNoMoreInteractions(dataVarehusDAO);
     }
 
@@ -211,7 +213,7 @@ class DialogStatusServiceTest {
         verify(statusDAO, only()).setHistorisk(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
 
-        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.SATT_TIL_HISTORISK);
+        verify(dataVarehusDAO, only()).insertEvent(dialogData, DatavarehusEvent.SATT_TIL_HISTORISK, "SYSTEM");
     }
 
     private DialogData getDialogData() {

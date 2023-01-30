@@ -1,9 +1,11 @@
 
 package no.nav.fo.veilarbdialog.kvp;
 
-import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.common.types.identer.EnhetId;
+import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -15,12 +17,12 @@ import static org.mockito.Mockito.*;
 class KontorsperreFilterTest {
 
     private KontorsperreFilter filter;
-    private AuthService auth;
+    private IAuthService auth;
 
     @BeforeEach
     void setUp() {
 
-        auth = mock(AuthService.class);
+        auth = mock(IAuthService.class);
         filter = new KontorsperreFilter(auth);
 
     }
@@ -43,28 +45,28 @@ class KontorsperreFilterTest {
 
     @Test
     void tilgangTilEnhet_veilederHarTilgangIABAC_skalReturnereTrue() {
-        String enhet = "enhet";
-        String veileder = "veileder";
+        EnhetId enhet = EnhetId.of("enhet");
+        NavIdent veileder = NavIdent.of("veileder");
 
         when(auth.erEksternBruker()).thenReturn(false);
-        when(auth.getIdent()).thenReturn(Optional.of(veileder));
-        when(auth.harVeilederTilgangTilEnhet(veileder, enhet))
+        when(auth.getLoggedInnUser()).thenReturn(veileder);
+        when(auth.harTilgangTilEnhet(enhet))
                 .thenReturn(true);
 
-        assertThat(filter.tilgangTilEnhet(DialogData.builder().kontorsperreEnhetId(enhet).build())).isTrue();
+        assertThat(filter.tilgangTilEnhet(DialogData.builder().kontorsperreEnhetId(enhet.get()).build())).isTrue();
 
     }
 
     @Test
     void tilgangTilEnhet_veilederHarIkkeTilgangIABAC_skalReturnereFalse() {
-        String enhet = "enhet";
-        String veileder = "veileder";
+        EnhetId enhet = EnhetId.of("enhet");
+        NavIdent veileder = NavIdent.of("veileder");
 
         when(auth.erEksternBruker()).thenReturn(false);
-        when(auth.getIdent()).thenReturn(Optional.of(veileder));
-        when(auth.harVeilederTilgangTilEnhet(veileder, enhet))
+        when(auth.getLoggedInnUser()).thenReturn(veileder);
+        when(auth.harTilgangTilEnhet(enhet))
                 .thenReturn(false);
-        assertThat(filter.tilgangTilEnhet(DialogData.builder().kontorsperreEnhetId(enhet).build())).isFalse();
+        assertThat(filter.tilgangTilEnhet(DialogData.builder().kontorsperreEnhetId(enhet.get()).build())).isFalse();
 
     }
 

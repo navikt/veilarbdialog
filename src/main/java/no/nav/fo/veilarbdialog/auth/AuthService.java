@@ -23,7 +23,7 @@ import static no.nav.fo.veilarbdialog.util.AuthUtils.erSystemkallFraAzureAd;
 @Service
 @Slf4j
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-public class AuthService {
+class AuthService {
 
     private final Pep pep;
     private final AuthContextHolder authContextHolder;

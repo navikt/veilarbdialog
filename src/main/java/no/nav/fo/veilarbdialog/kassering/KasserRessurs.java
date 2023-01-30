@@ -2,10 +2,13 @@ package no.nav.fo.veilarbdialog.kassering;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.common.types.identer.AktorId;
+import no.nav.common.types.identer.Id;
 import no.nav.common.utils.EnvironmentUtils;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.poao.dab.spring_auth.IAuthService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,29 +33,34 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 public class KasserRessurs {
 
     private final DialogDAO dialogDAO;
-    private final AuthService auth;
+    private final IAuthService auth;
 
     private final String godkjenteIdenter = EnvironmentUtils.getOptionalProperty("VEILARB_KASSERING_IDENTER").orElse("");
 
+    private void sjekkErInternbruker() {
+        if (!auth.erInternBruker())
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bare internbrukere tillatt");
+    }
+
     @PutMapping("/henvendelse/{henvendelseId}/kasser")
     public int kasserHenvendelse(@PathVariable String henvendelseId) {
-        auth.skalVereInternBruker();
+        sjekkErInternbruker();
 
         long id = Long.parseLong(henvendelseId);
         DialogData dialogData = dialogDAO.hentDialogGittHenvendelse(id);
 
-        return kjorHvisTilgang(dialogData.getAktorId(), "henvendelse", henvendelseId, () -> dialogDAO.kasserHenvendelse(id));
+        return kjorHvisTilgang(AktorId.of(dialogData.getAktorId()), "henvendelse", henvendelseId, () -> dialogDAO.kasserHenvendelse(id));
     }
 
     @PutMapping("/dialog/{dialogId}/kasser")
     @Transactional
     public int kasserDialog(@PathVariable String dialogId) {
-        auth.skalVereInternBruker();
+        sjekkErInternbruker();
 
         long id = Long.parseLong(dialogId);
         DialogData dialogData = dialogDAO.hentDialog(id);
 
-        return kjorHvisTilgang(dialogData.getAktorId(), "dialog", dialogId, () -> {
+        return kjorHvisTilgang(AktorId.of(dialogData.getAktorId()), "dialog", dialogId, () -> {
             int antallHenvendelser = dialogData.getHenvendelser()
                     .stream()
                     .mapToInt(henvendelse -> dialogDAO.kasserHenvendelse(henvendelse.id))
@@ -62,16 +70,9 @@ public class KasserRessurs {
         });
     }
 
-    private int kjorHvisTilgang(String aktorId, String kasseringAv, String id, Supplier<Integer> fn) {
-
-        String veilederIdent = auth.getIdent().orElse(null);
-        if (!auth.harVeilederTilgangTilPerson(veilederIdent, aktorId)) {
-            throw new ResponseStatusException(FORBIDDEN, String.format(
-                    "%s does not have read access to %s",
-                    veilederIdent,
-                    aktorId
-            ));
-        }
+    private int kjorHvisTilgang(AktorId aktorId, String kasseringAv, String id, Supplier<Integer> fn) {
+        Id veilederIdent = auth.getInnloggetVeilederIdent();
+        auth.sjekkTilgangTilPerson(aktorId);
         List<String> godkjente = Arrays.asList(godkjenteIdenter.split(","));
         if (!godkjente.contains(veilederIdent)) {
             log.error("[KASSERING] {} har ikke tilgang til kassering av {} dialoger", veilederIdent, aktorId);

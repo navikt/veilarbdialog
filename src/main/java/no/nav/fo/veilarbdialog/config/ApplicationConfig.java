@@ -7,8 +7,14 @@ import net.javacrumbs.shedlock.core.LockingTaskExecutor;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import no.nav.common.auth.context.AuthContextHolder;
 import no.nav.common.auth.context.AuthContextHolderThreadLocal;
+import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.job.leader_election.LeaderElectionClient;
 import no.nav.common.job.leader_election.ShedLockLeaderElectionClient;
+import no.nav.common.types.identer.AktorId;
+import no.nav.common.types.identer.EksternBrukerId;
+import no.nav.common.types.identer.Fnr;
+import no.nav.poao.dab.spring_auth.IPersonService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +52,25 @@ public class ApplicationConfig {
     @Bean
     MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
         return registry -> registry.config().commonTags("application", "veilarbdialog");
+    }
+
+    @Bean
+    IPersonService personService(AktorOppslagClient aktorOppslagClient) {
+        return new IPersonService() {
+            @NotNull
+            @Override
+            public Fnr getFnrForAktorId(@NotNull EksternBrukerId eksternBrukerId) {
+                if (eksternBrukerId instanceof Fnr fnr) return fnr;
+                return aktorOppslagClient.hentFnr(AktorId.of(eksternBrukerId.get()));
+            }
+
+            @NotNull
+            @Override
+            public AktorId getAktorIdForPersonBruker(@NotNull EksternBrukerId eksternBrukerId) {
+                if (eksternBrukerId instanceof AktorId aktorId) return aktorId;
+                return aktorOppslagClient.hentAktorId(Fnr.of(eksternBrukerId.get()));
+            }
+        };
     }
 
 }

@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.common.types.identer.Id;
 import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
@@ -20,9 +20,8 @@ import java.util.Optional;
 public class DataVarehusDAO {
 
     private final JdbcTemplate jdbc;
-    private final AuthService auth;
 
-    public void insertEvent(DialogData dialogData, DatavarehusEvent datavarehusEvent) {
+    public void insertEvent(DialogData dialogData, DatavarehusEvent datavarehusEvent, String endretAv) {
         long nextId = Optional
                 .ofNullable(jdbc.queryForObject("select EVENT_ID_SEQ.NEXTVAL from dual", Long.class))
                 .orElseThrow(IllegalStateException::new);
@@ -32,7 +31,7 @@ public class DataVarehusDAO {
                 datavarehusEvent.toString(),
                 dialogData.getAktorId(),
                 Optional.ofNullable(dialogData.getAktivitetId()).map(AktivitetId::getId).orElse(null),
-                auth.getIdent().orElse("SYSTEM"));
+                endretAv);
     }
 
     @Transactional(readOnly = true)

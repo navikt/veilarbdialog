@@ -1,9 +1,11 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.Data;
+import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,9 @@ class DataVarehusDAOTest {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Autowired
+    private IAuthService auth;
+
     @BeforeEach
     public void setup() {
         jdbc.update("DELETE FROM EVENT");
@@ -37,7 +42,8 @@ class DataVarehusDAOTest {
     void insertEvent() {
 
         DialogData dialog = DialogData.builder().id(1).aktivitetId(AktivitetId.of("aktivitet")).aktorId("aktor").build();
-        dataVarehusDAO.insertEvent(dialog, DatavarehusEvent.VENTER_PAA_BRUKER);
+        String loggedInUser = auth.erLoggetInn() ? auth.getLoggedInnUser().get() : "SYSTEM";
+        dataVarehusDAO.insertEvent(dialog, DatavarehusEvent.VENTER_PAA_BRUKER, loggedInUser);
 
         DatavarehusData data = jdbc.queryForObject("select * from event", new BeanPropertyRowMapper<>(DatavarehusData.class));
 

@@ -2,8 +2,11 @@ package no.nav.fo.veilarbdialog.domain;
 
 import lombok.*;
 import lombok.experimental.Accessors;
+import no.nav.common.types.identer.EnhetId;
+import no.nav.fo.veilarbdialog.kvp.NoeMedKontorEnhet;
 
 import java.util.Date;
+import java.util.Optional;
 
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 import static no.nav.fo.veilarbdialog.domain.AvsenderType.VEILEDER;
@@ -14,7 +17,7 @@ import static no.nav.fo.veilarbdialog.domain.AvsenderType.VEILEDER;
 @Accessors(chain = true)
 @With
 @ToString(exclude = "tekst")
-public class HenvendelseData {
+public class HenvendelseData implements NoeMedKontorEnhet {
 
     public final long id;
     public final long dialogId;
@@ -38,5 +41,11 @@ public class HenvendelseData {
         return avsenderType == VEILEDER;
     }
 
+    @Override
+    public Optional<EnhetId> getKontorEnhet() {
+        return kontorsperreEnhetId == null
+                ? Optional.empty()
+                : Optional.of(EnhetId.of(kontorsperreEnhetId));
+    }
 }
 
