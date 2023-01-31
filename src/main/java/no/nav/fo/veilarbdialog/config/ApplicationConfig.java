@@ -53,24 +53,4 @@ public class ApplicationConfig {
     MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
         return registry -> registry.config().commonTags("application", "veilarbdialog");
     }
-
-    @Bean
-    IPersonService personService(AktorOppslagClient aktorOppslagClient) {
-        return new IPersonService() {
-            @NotNull
-            @Override
-            public Fnr getFnrForAktorId(@NotNull EksternBrukerId eksternBrukerId) {
-                if (eksternBrukerId instanceof Fnr fnr) return fnr;
-                return aktorOppslagClient.hentFnr(AktorId.of(eksternBrukerId.get()));
-            }
-
-            @NotNull
-            @Override
-            public AktorId getAktorIdForPersonBruker(@NotNull EksternBrukerId eksternBrukerId) {
-                if (eksternBrukerId instanceof AktorId aktorId) return aktorId;
-                return aktorOppslagClient.hentAktorId(Fnr.of(eksternBrukerId.get()));
-            }
-        };
-    }
-
 }
