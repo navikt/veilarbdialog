@@ -16,7 +16,7 @@ class KasserRessursTest extends SpringBootTestBase {
     MockBruker mockBruker = MockNavService.createHappyBruker();
     MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
     @Test
-    public void bruker_skal_ikke_kunne_kassere() {
+    void bruker_skal_ikke_kunne_kassere() {
         NyHenvendelseDTO nyHenvendelseDTO = new NyHenvendelseDTO().setTekst("Lol");
         DialogDTO opprettetDialog = dialogTestService.opprettDialogSomBruker(mockBruker, nyHenvendelseDTO);
         kasserDialog(mockBruker, Long.parseLong(opprettetDialog.getId()))
@@ -24,14 +24,14 @@ class KasserRessursTest extends SpringBootTestBase {
     }
 
     @Test
-    public void veileder_som_ikke_er_lista_skal_ikke_kunne_kassere() {
+    void veileder_som_ikke_er_lista_skal_ikke_kunne_kassere() {
         NyHenvendelseDTO nyHenvendelseDTO = new NyHenvendelseDTO().setTekst("Lol");
         DialogDTO opprettetDialog = dialogTestService.opprettDialogSomBruker(mockBruker, nyHenvendelseDTO);
         kasserDialog(mockVeileder, Long.parseLong(opprettetDialog.getId()))
                 .statusCode(403);
     }
 
-    public ValidatableResponse kasserDialog(RestassuredUser restassuredUser, long dialogId) {
+    ValidatableResponse kasserDialog(RestassuredUser restassuredUser, long dialogId) {
         return restassuredUser.createRequest()
                 .put("/veilarbdialog/api/kassering/dialog/{dialogId}/kasser", dialogId).then();
     }

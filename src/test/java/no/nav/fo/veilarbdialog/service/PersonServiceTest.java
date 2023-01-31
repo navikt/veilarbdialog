@@ -28,22 +28,22 @@ class PersonServiceTest {
     }
 
     @Test
-    public void skal_ikke_gjore_oppslag_for_aktorId_hvis_aktorId_kommer_inn() {
+    void skal_ikke_gjore_oppslag_for_aktorId_hvis_aktorId_kommer_inn() {
         personService.getAktorIdForPersonBruker(AktorId.of("123"));
         verify(aktorOppslagClient, Mockito.times(0)).hentAktorId(any());
     }
     @Test
-    public void skal_gjore_oppslag_for_aktorId_hvis_aktorId_kommer_inn() {
+    void skal_gjore_oppslag_for_aktorId_hvis_aktorId_kommer_inn() {
         personService.getAktorIdForPersonBruker(Fnr.of("123"));
         verify(aktorOppslagClient, Mockito.times(1)).hentAktorId(any());
     }
     @Test
-    public void skal_ikke_gjore_oppslag_for_fnr_hvis_aktorId_kommer_inn() {
+    void skal_ikke_gjore_oppslag_for_fnr_hvis_aktorId_kommer_inn() {
         personService.getFnrForAktorId(Fnr.of("123"));
         verify(aktorOppslagClient, Mockito.times(0)).hentFnr(any());
     }
     @Test
-    public void skal_gjore_oppslag_for_fnr_hvis_aktorId_kommer_inn() {
+    void skal_gjore_oppslag_for_fnr_hvis_aktorId_kommer_inn() {
         personService.getFnrForAktorId(AktorId.of("123"));
         verify(aktorOppslagClient, Mockito.times(1)).hentFnr(any());
     }
