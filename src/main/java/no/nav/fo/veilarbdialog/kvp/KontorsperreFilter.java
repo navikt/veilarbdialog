@@ -6,8 +6,6 @@ import no.nav.poao.dab.spring_auth.IAuthService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 @RequiredArgsConstructor
 public class KontorsperreFilter {

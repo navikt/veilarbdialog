@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
@@ -70,17 +71,17 @@ public class KasserRessurs {
         });
     }
 
-    private int kjorHvisTilgang(AktorId aktorId, String kasseringAv, String id, Supplier<Integer> fn) {
+    private int kjorHvisTilgang(AktorId aktorId, String kasseringAv, String id, IntSupplier oppdaterteDialoger) {
         Id veilederIdent = auth.getInnloggetVeilederIdent();
         auth.sjekkTilgangTilPerson(aktorId);
         List<String> godkjente = Arrays.asList(godkjenteIdenter.split(","));
-        if (!godkjente.contains(veilederIdent)) {
+        if (!godkjente.contains(veilederIdent.get())) {
             log.error("[KASSERING] {} har ikke tilgang til kassering av {} dialoger", veilederIdent, aktorId);
             throw new ResponseStatusException(FORBIDDEN,
                     String.format("[KASSERING] %s har ikke tilgang til kassinger av %s dialoger", veilederIdent, aktorId));
         }
 
-        int updated = fn.get();
+        int updated = oppdaterteDialoger.getAsInt();
 
         log.info("[KASSERING] {} kasserte en {}. AktoerId: {} {}_id: {}", veilederIdent, kasseringAv, aktorId, kasseringAv, id);
         return updated;

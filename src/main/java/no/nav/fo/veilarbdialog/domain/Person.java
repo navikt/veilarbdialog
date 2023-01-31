@@ -1,7 +1,6 @@
 package no.nav.fo.veilarbdialog.domain;
 
 import no.nav.common.types.identer.EksternBrukerId;
-import no.nav.common.types.identer.Fnr;
 
 import java.util.Objects;
 
