@@ -7,7 +7,6 @@ import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
@@ -15,9 +14,9 @@ import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -40,7 +39,7 @@ public class DialogDataService {
     private final DataVarehusDAO dataVarehusDAO;
     private final KvpService kvpService;
     private final KafkaProducerService kafkaProducerService;
-    private final AuthService auth;
+    private final IAuthService auth;
     private final KladdService kladdService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final SistePeriodeService sistePeriodeService;
@@ -53,41 +52,37 @@ public class DialogDataService {
 
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person) {
-        String aktorId = hentAktoerIdForPerson(person);
-        if (auth.erEksternBruker()) {
-            auth.sjekkEksternBrukerHarTilgang(Fnr.of(person.get()));
-        } else {
-            auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
-        }
-        return dialogDAO.hentDialogerForAktorId(aktorId);
+        auth.sjekkTilgangTilPerson(person.eksternBrukerId());
+        AktorId aktorId = hentAktoerIdForPerson(person);
+        return dialogDAO.hentDialogerForAktorId(aktorId.get());
     }
 
-    public Date hentSistOppdatertForBruker(Person person, String meg) {
-        String aktorId = hentAktoerIdForPerson(person);
-        String aktorEllerIdentInnloggetBruker = auth.erEksternBruker() ? hentAktoerIdForPerson(Person.fnr(meg)) : meg;
-        auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
-        return dataVarehusDAO.hentSisteEndringSomIkkeErDine(aktorId, aktorEllerIdentInnloggetBruker);
+    public Date hentSistOppdatertForBruker(Person person, Id endretAvId) {
+        Id endretAv = auth.erEksternBruker() ? hentAktoerIdForPerson(endretAvId) : endretAvId;
+        AktorId bruker = hentAktoerIdForPerson(person);
+        auth.sjekkTilgangTilPerson(bruker);
+        return dataVarehusDAO.hentSisteEndringSomIkkeErDine(bruker.get(), endretAv.get());
     }
 
     @Transactional
     public DialogData opprettHenvendelse(NyHenvendelseDTO henvendelseData, Person bruker) {
         var aktivitetsId = AktivitetId.of(henvendelseData.getAktivitetId());
-        String aktorId = hentAktoerIdForPerson(bruker);
-        auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
+        AktorId aktorId = hentAktoerIdForPerson(bruker);
+        auth.sjekkTilgangTilPerson(aktorId);
         Fnr fnr = hentFnrForPerson(bruker);
         if (!brukernotifikasjonService.kanVarsles(fnr)) {
             throw new ResponseStatusException(CONFLICT, "Bruker kan ikke varsles.");
         }
 
         DialogData dialog = Optional.ofNullable(hentDialogMedTilgangskontroll(henvendelseData.getDialogId(), aktivitetsId))
-                .orElseGet(() -> opprettDialog(henvendelseData, aktorId));
+                .orElseGet(() -> opprettDialog(henvendelseData, aktorId.get()));
 
         slettKladd(henvendelseData, bruker);
 
         opprettHenvendelseForDialog(dialog, henvendelseData.getEgenskaper() != null && !henvendelseData.getEgenskaper().isEmpty(), henvendelseData.getTekst());
         dialog = markerDialogSomLest(dialog.getId());
 
-        sendPaaKafka(aktorId);
+        sendPaaKafka(aktorId.get());
 
         return dialog;
     }
@@ -125,7 +120,7 @@ public class DialogDataService {
     private DialogData opprettHenvendelseForDialog(DialogData dialogData, boolean viktigMelding, String tekst) {
         HenvendelseData opprettet = dialogDAO.opprettHenvendelse(HenvendelseData.builder()
                 .dialogId(dialogData.getId())
-                .avsenderId(auth.getIdent().orElse(null))
+                .avsenderId(auth.getLoggedInnUser().get())
                 .viktig(viktigMelding)
                 .avsenderType(auth.erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
                 .tekst(tekst)
@@ -172,16 +167,16 @@ public class DialogDataService {
         return dialogDAO.hentDialogForAktivitetId(aktivitetId).map(this::sjekkLeseTilgangTilDialog);
     }
 
-    public String hentAktoerIdForPerson(Person person) {
-        if (person instanceof Person.Fnr) {
+    public AktorId hentAktoerIdForPerson(Person person) { return hentAktoerIdForPerson(person.eksternBrukerId()); }
+
+    public AktorId hentAktoerIdForPerson(Id person) {
+        if (person instanceof Fnr) {
             return Optional
                     .ofNullable(aktorOppslagClient.hentAktorId(Fnr.of(person.get())))
-                    .map(Id::get)
                     .orElseThrow(RuntimeException::new);
-        } else if (person instanceof Person.AktorId) {
-            return person.get();
+        } else if (person instanceof AktorId) {
+            return AktorId.of(person.get());
         }
-
         return null;
     }
     public Fnr hentFnrForPerson(Person person) {
@@ -230,13 +225,8 @@ public class DialogDataService {
     }
 
     private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
-        if (dialogData != null && !auth.harTilgangTilPerson(dialogData.getAktorId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, String.format(
-                    "%s har ikke lesetilgang til %s",
-                    auth.getIdent().orElse(null),
-                    dialogData.getAktorId())
-            );
-        }
+        if (dialogData == null) return null;
+        auth.sjekkTilgangTilPerson(AktorId.of(dialogData.getAktorId()));
         return dialogData;
 
     }

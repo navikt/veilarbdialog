@@ -1,10 +1,10 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +32,12 @@ public class DialogRessurs {
     private final RestMapper restMapper;
     private final HttpServletRequest httpServletRequest;
     private final KontorsperreFilter kontorsperreFilter;
-    private final AuthService auth;
+    private final IAuthService auth;
+
+    private void sjekkErInternbruker() {
+        if (!auth.erInternBruker())
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bare internbrukere tillatt");
+    }
 
     @GetMapping
     public List<DialogDTO> hentDialoger() {
@@ -45,7 +50,7 @@ public class DialogRessurs {
 
     @GetMapping("sistOppdatert")
     public SistOppdatertDTO sistOppdatert() {
-        var oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getIdent().orElse(null));
+        var oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getLoggedInnUser());
         return new SistOppdatertDTO(oppdatert == null ? null : oppdatert.getTime());
     }
 
@@ -92,7 +97,6 @@ public class DialogRessurs {
 
     @PutMapping("{dialogId}/venter_pa_svar/{venter}")
     public DialogDTO oppdaterVenterPaSvar(@PathVariable String dialogId, @PathVariable boolean venter) {
-        auth.skalVereInternBruker();
 
         var dialogStatus = DialogStatus.builder()
                 .dialogId(Long.parseLong(dialogId))
@@ -107,7 +111,7 @@ public class DialogRessurs {
 
     @PutMapping("{dialogId}/ferdigbehandlet/{ferdigbehandlet}")
     public DialogDTO oppdaterFerdigbehandlet(@PathVariable String dialogId, @PathVariable boolean ferdigbehandlet) {
-        auth.skalVereInternBruker();
+        sjekkErInternbruker();
 
         var dialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(Long.parseLong(dialogId), ferdigbehandlet);
         dialogDataService.sendPaaKafka(dialog.getAktorId());
@@ -117,14 +121,13 @@ public class DialogRessurs {
 
     @PostMapping("forhandsorientering")
     public DialogDTO forhandsorienteringPaAktivitet(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
-        String aktorId = dialogDataService.hentAktoerIdForPerson(getContextUserIdent());
-        auth.harTilgangTilPersonEllerKastIngenTilgang(aktorId);
-
-        auth.skalVereInternBruker();
+        sjekkErInternbruker();
+        var aktorId = dialogDataService.hentAktoerIdForPerson(getContextUserIdent());
+        auth.sjekkTilgangTilPerson(aktorId);
 
         var dialog = dialogDataService.hentDialogMedTilgangskontroll(nyHenvendelseDTO.getDialogId(),
                AktivitetId.of(nyHenvendelseDTO.getAktivitetId()));
-        if (dialog == null) dialog = dialogDataService.opprettDialog(nyHenvendelseDTO, aktorId);
+        if (dialog == null) dialog = dialogDataService.opprettDialog(nyHenvendelseDTO, aktorId.get());
 
         long dialogId = dialog.getId();
         dialogDataService.updateDialogEgenskap(EgenskapType.PARAGRAF8, dialogId);
@@ -135,7 +138,8 @@ public class DialogRessurs {
 
     private Person getContextUserIdent() {
         if (auth.erEksternBruker()) {
-            return auth.getIdent().map(Person::fnr).orElseThrow(RuntimeException::new);
+            var user = auth.getLoggedInnUser();
+            return Person.fnr(user.get());
         }
         Optional<Person> fnr = Optional
                 .ofNullable(httpServletRequest.getParameter("fnr"))

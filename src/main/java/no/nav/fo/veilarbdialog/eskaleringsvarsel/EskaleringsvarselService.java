@@ -6,7 +6,6 @@ import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.NavIdent;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.Brukernotifikasjon;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst;
@@ -21,6 +20,7 @@ import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +36,7 @@ public class EskaleringsvarselService {
     private final BrukernotifikasjonService brukernotifikasjonService;
     private final EskaleringsvarselRepository eskaleringsvarselRepository;
     private final DialogDataService dialogDataService;
-    private final AuthService authService;
+    private final IAuthService authService;
     private final AktorOppslagClient aktorOppslagClient;
     private final OppfolgingV2Client oppfolgingClient;
     private final SistePeriodeService sistePeriodeService;
@@ -100,7 +100,7 @@ public class EskaleringsvarselService {
                 dialogData.getId(),
                 brukernotifikasjonEntity.id(),
                 dialogData.getAktorId(),
-                authService.getIdent().orElseThrow(),
+                authService.getLoggedInnUser().get(),
                 begrunnelse
         );
 

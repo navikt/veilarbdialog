@@ -47,5 +47,4 @@ public class ApplicationConfig {
     MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
         return registry -> registry.config().commonTags("application", "veilarbdialog");
     }
-
 }

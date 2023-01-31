@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.rest;
 import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -19,7 +19,7 @@ import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 class RestMapper {
 
     private final KontorsperreFilter kontorsperreFilter;
-    private final AuthService auth;
+    private final IAuthService auth;
 
     public DialogDTO somDialogDTO(DialogData dialogData) {
 

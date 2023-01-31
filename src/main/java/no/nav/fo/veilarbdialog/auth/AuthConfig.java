@@ -5,7 +5,17 @@ import no.nav.common.abac.Pep;
 import no.nav.common.abac.VeilarbPepFactory;
 import no.nav.common.abac.audit.AuditLogFilterUtils;
 import no.nav.common.abac.audit.SpringAuditRequestInfoSupplier;
+import no.nav.common.auth.context.AuthContextHolder;
+import no.nav.common.client.aktoroppslag.AktorOppslagClient;
+import no.nav.common.types.identer.AktorId;
+import no.nav.common.types.identer.EksternBrukerId;
+import no.nav.common.types.identer.Fnr;
 import no.nav.common.utils.Credentials;
+import no.nav.fo.veilarbdialog.service.PersonService;
+import no.nav.poao.dab.spring_auth.AuthService;
+import no.nav.poao.dab.spring_auth.IAuthService;
+import no.nav.poao.dab.spring_auth.IPersonService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,5 +45,10 @@ public class AuthConfig {
                 new SpringAuditRequestInfoSupplier(),
                 not(AuditLogFilterUtils.pathFilter(path -> path.endsWith("/api/dialog/sistOppdatert")))
         );
+    }
+
+    @Bean
+    IAuthService authService(AuthContextHolder authcontextHolder, Pep pep, PersonService personService) {
+        return new AuthService(authcontextHolder, pep, personService);
     }
 }

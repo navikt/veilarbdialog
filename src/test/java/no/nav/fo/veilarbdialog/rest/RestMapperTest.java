@@ -5,7 +5,7 @@ import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.auth.AuthService;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,12 +19,12 @@ class RestMapperTest {
 
     private RestMapper restMapper;
     private KontorsperreFilter filter;
-    private AuthService auth;
+    private IAuthService auth;
 
     @BeforeEach
     void setUp() {
         filter = mock(KontorsperreFilter.class);
-        auth = mock(AuthService.class);
+        auth = mock(IAuthService.class);
         restMapper = new RestMapper(filter, auth);
     }
 

@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.NavIdent;
-import no.nav.fo.veilarbdialog.auth.AuthService;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.GjeldendeEskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
@@ -13,6 +12,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerIkkeUnderOppfolgingException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,12 +33,18 @@ public class EskaleringsvarselController {
 
     private final EskaleringsvarselService eskaleringsvarselService;
 
-    private final AuthService authService;
+    private final IAuthService authService;
+
+    private void skalVereInternBruker() {
+        if (!authService.erInternBruker()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Ugyldig bruker type");
+        }
+    }
 
     @PostMapping(value = "/start")
     public EskaleringsvarselDto start(@RequestBody StartEskaleringDto startEskaleringDto) {
-        authService.skalVereInternBruker();
-        authService.harTilgangTilPersonEllerKastIngenTilgang(startEskaleringDto.fnr());
+        skalVereInternBruker();
+        authService.sjekkTilgangTilPerson(startEskaleringDto.fnr());
 
         EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselService.start(startEskaleringDto.fnr(), startEskaleringDto.begrunnelse(), startEskaleringDto.overskrift(), startEskaleringDto.tekst());
 
@@ -47,9 +53,9 @@ public class EskaleringsvarselController {
 
     @PatchMapping("/stop")
     public void stop(@RequestBody StopEskaleringDto stopEskaleringDto) {
-        authService.skalVereInternBruker();
-        authService.harTilgangTilPersonEllerKastIngenTilgang(stopEskaleringDto.fnr());
-        NavIdent navIdent = authService.getNavIdent();
+        skalVereInternBruker();
+        authService.sjekkTilgangTilPerson(stopEskaleringDto.fnr());
+        NavIdent navIdent = authService.getInnloggetVeilederIdent();
 
         Optional<EskaleringsvarselEntity> eskaleringsvarselEntity = eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), stopEskaleringDto.skalSendeHenvendelse(), navIdent);
         if (eskaleringsvarselEntity.isEmpty()) {
@@ -62,14 +68,15 @@ public class EskaleringsvarselController {
         Fnr fodselsnummer;
         if (fnr == null) { // eksternbruker
             if (authService.erEksternBruker()) {
-                fodselsnummer = Fnr.of(authService.getIdent().orElseThrow());
+                fodselsnummer = (Fnr) authService.getLoggedInnUser();
             } else {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Internbruker må sende med fnr som parameter");
             }
         } else { // internbruker
             fodselsnummer = fnr;
         }
-        authService.harTilgangTilPersonEllerKastIngenTilgang(fodselsnummer);
+
+        authService.sjekkTilgangTilPerson(fodselsnummer);
 
         Optional<EskaleringsvarselEntity> maybeGjeldende = eskaleringsvarselService.hentGjeldende(fodselsnummer);
 
@@ -80,8 +87,8 @@ public class EskaleringsvarselController {
 
     @GetMapping(value = "/historikk", params = "fnr")
     public List<EskaleringsvarselDto> historikk(@RequestParam Fnr fnr) {
-        authService.skalVereInternBruker();
-        authService.harTilgangTilPersonEllerKastIngenTilgang(fnr);
+        skalVereInternBruker();
+        authService.sjekkTilgangTilPerson(fnr);
 
         return eskaleringsvarselService.historikk(fnr)
                 .stream()
