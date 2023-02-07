@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import lombok.val;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
+import no.nav.fo.veilarbdialog.domain.NyEgenvurderingDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
@@ -163,6 +164,24 @@ class DialogRessursTest {
                 .extract()
                 .as(DialogDTO.class);
         assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
+    }
+
+    @Test
+    void nyHenvendelse_egenvurdering_venterIkkePaaSvarFraNav() {
+
+        NyEgenvurderingDTO egenVurdering = new NyEgenvurderingDTO()
+                .setTekst("Jeg skal klare meg selv")
+                .setVenterPaaSvarFraNav(false);
+        DialogDTO brukersEgenvurdering = bruker.createRequest()
+                .body(egenVurdering)
+                .post("/veilarbdialog/api/dialog/egenvurdering")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+
+        assertThat(brukersEgenvurdering.isFerdigBehandlet()).isTrue();
     }
 
     @Test

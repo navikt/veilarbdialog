@@ -5,6 +5,7 @@ import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.poao.dab.spring_auth.IAuthService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,9 @@ public class DialogRessurs {
     private final HttpServletRequest httpServletRequest;
     private final KontorsperreFilter kontorsperreFilter;
     private final IAuthService auth;
+
+    @Value("${application.egenvurdering.allowlist}")
+    private List<String> egenvurderingAllowList;
 
     private void sjekkErInternbruker() {
         if (!auth.erInternBruker())
@@ -81,12 +85,12 @@ public class DialogRessurs {
     }
 
     @PostMapping("egenvurdering")
-    public DialogDTO egenVurderingsmelding(@RequestBody NyHenvendelseDTO nyHenvendelseDTO, @RequestParam boolean venterPaaSvarFraNav) {
+    public DialogDTO egenVurderingsmelding(@RequestBody NyEgenvurderingDTO nyEgenvurderingDTO) {
         sjekkErEksternbruker();
-        auth.sjekkAtApplikasjonErIAllowList(List.of("egenvurdering"));
+        auth.sjekkAtApplikasjonErIAllowList(egenvurderingAllowList);
         Person bruker = getContextUserIdent();
-        var opprettHenvendelse = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
-        if (venterPaaSvarFraNav) {
+        var opprettHenvendelse = dialogDataService.opprettHenvendelse(nyEgenvurderingDTO.toNyHenvendelseDto(), bruker);
+        if (nyEgenvurderingDTO.isVenterPaaSvarFraNav()) {
             return restMapper.somDialogDTO(opprettHenvendelse);
         } else {
             var ferdigBehandletDialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(opprettHenvendelse.getId(), true);
