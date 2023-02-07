@@ -39,6 +39,11 @@ public class DialogRessurs {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bare internbrukere tillatt");
     }
 
+    private void sjekkErEksternbruker() {
+        if (!auth.erEksternBruker())
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bare eksternbrukere tillatt");
+    }
+
     @GetMapping
     public List<DialogDTO> hentDialoger() {
         return dialogDataService.hentDialogerForBruker(getContextUserIdent())
@@ -73,6 +78,21 @@ public class DialogRessurs {
                 .map(dialogDataService::hentDialogMedTilgangskontroll)
                 .map(restMapper::somDialogDTO)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    @PostMapping("egenvurdering")
+    public DialogDTO egenVurderingsmelding(@RequestBody NyHenvendelseDTO nyHenvendelseDTO, @RequestParam boolean venterPaaSvarFraNav) {
+        sjekkErEksternbruker();
+        auth.sjekkAtApplikasjonErIAllowList(List.of("egenvurdering"));
+        Person bruker = getContextUserIdent();
+        var opprettHenvendelse = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
+        if (venterPaaSvarFraNav) {
+            return restMapper.somDialogDTO(opprettHenvendelse);
+        } else {
+            var ferdigBehandletDialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(opprettHenvendelse.getId(), true);
+            dialogDataService.sendPaaKafka(ferdigBehandletDialog.getAktorId());
+            return restMapper.somDialogDTO(ferdigBehandletDialog);
+        }
     }
 
     @PostMapping
