@@ -166,6 +166,104 @@ class DialogRessursTest {
     }
 
     @Test
+    void nyHenvendelse_egenvurdering_venterIkkePaaSvarFraNav() {
+
+        NyHenvendelseDTO egenVurdering = new NyHenvendelseDTO()
+                .setTekst("Jeg skal klare meg selv")
+                .setOverskrift("Egenvurdering")
+                .setVenterPaaSvarFraNav(false);
+        DialogDTO brukersEgenvurdering = bruker.createRequest()
+                .body(egenVurdering)
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        DialogDTO veiledersDialog = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog/{dialogId}", brukersEgenvurdering.getId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        assertThat(veiledersDialog.isFerdigBehandlet()).isTrue();
+    }
+
+    @Test
+    void nyHenvendelse_egenvurdering_venterPaaSvarFraNav() {
+
+        NyHenvendelseDTO egenVurdering = new NyHenvendelseDTO()
+                .setTekst("Jeg trenger hjelp fra Nav")
+                .setOverskrift("Egenvurdering")
+                .setVenterPaaSvarFraNav(true);
+        DialogDTO brukersEgenvurdering = bruker.createRequest()
+                .body(egenVurdering)
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        DialogDTO veiledersDialog = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog/{dialogId}", brukersEgenvurdering.getId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
+
+    }
+
+    @Test
+    void nyHenvendelse_egenvurdering_venterPaaSvarFraNav_default() {
+
+        NyHenvendelseDTO egenVurdering = new NyHenvendelseDTO()
+                .setOverskrift("Egenvurdering")
+                .setTekst("Jeg trenger hjelp fra Nav");
+        DialogDTO brukersEgenvurdering = bruker.createRequest()
+                .body(egenVurdering)
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        DialogDTO veiledersDialog = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog/{dialogId}", brukersEgenvurdering.getId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
+
+    }
+
+    @Test
+    void nyHenvendelse_fraVeileder_kanVentePaaBeggeParter() {
+        //Veileder kan sende en beskjed som bruker ikke trenger å svare på, veileder må eksplisitt markere at dialogen venter på brukeren
+        DialogDTO dialog = veileder.createRequest()
+                .body(
+                        new NyHenvendelseDTO()
+                                .setTekst("tekst")
+                                .setOverskrift("overskrift")
+                                .setVenterPaaSvarFraBruker(Boolean.TRUE)
+                                .setVenterPaaSvarFraNav(Boolean.TRUE)
+                )
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        assertThat(dialog.isVenterPaSvar()).isTrue();
+        assertThat(dialog.isFerdigBehandlet()).isFalse();
+    }
+
+
+    @Test
     void forhandsorienteringPaAktivitet_dialogFinnes_oppdatererEgenskap() {
         final String aktivitetId = "123";
         var henvendelse = new NyHenvendelseDTO()

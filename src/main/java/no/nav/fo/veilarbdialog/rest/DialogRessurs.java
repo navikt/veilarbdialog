@@ -79,7 +79,19 @@ public class DialogRessurs {
     public DialogDTO nyHenvendelse(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
         Person bruker = getContextUserIdent();
         var dialogData = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
+        if (nyHenvendelseDTO.getVenterPaaSvarFraNav() != null) {
+            dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyHenvendelseDTO.getVenterPaaSvarFraNav() );
+            dialogDataService.sendPaaKafka(dialogData.getAktorId());
+        }
+        if (nyHenvendelseDTO.getVenterPaaSvarFraBruker() != null) {
+            var dialogStatus = DialogStatus.builder()
+                    .dialogId(dialogData.getId())
+                    .venterPaSvar(nyHenvendelseDTO.getVenterPaaSvarFraBruker())
+                    .build();
 
+            dialogData = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
+            dialogDataService.sendPaaKafka(dialogData.getAktorId());
+        }
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
