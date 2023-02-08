@@ -39,11 +39,6 @@ public class DialogRessurs {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bare internbrukere tillatt");
     }
 
-    private void sjekkErEksternbruker() {
-        if (!auth.erEksternBruker())
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bare eksternbrukere tillatt");
-    }
-
     @GetMapping
     public List<DialogDTO> hentDialoger() {
         return dialogDataService.hentDialogerForBruker(getContextUserIdent())
