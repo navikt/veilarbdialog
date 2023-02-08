@@ -84,7 +84,7 @@ spec:
           cluster: dev-gcp
         - application: arbeidsrettet-dialog
           namespace: pto
-          cluster: prod-gcp
+          cluster: dev-gcp
   env:
     - name: APP_ENVIRONMENT_NAME
       value: q1
