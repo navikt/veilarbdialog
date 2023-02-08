@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.rest;
 
 import io.restassured.RestAssured;
 import lombok.val;
+import no.nav.fo.veilarbdialog.auth.TestAuthContextFilter;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
 import no.nav.fo.veilarbdialog.domain.NyEgenvurderingDTO;
@@ -174,14 +175,47 @@ class DialogRessursTest {
                 .setVenterPaaSvarFraNav(false);
         DialogDTO brukersEgenvurdering = bruker.createRequest()
                 .body(egenVurdering)
+                .header(TestAuthContextFilter.clientIdHeader, "cluster:paw:egenvurdering") // client_id i allowedlist
                 .post("/veilarbdialog/api/dialog/egenvurdering")
                 .then()
                 .statusCode(200)
                 .extract()
                 .as(DialogDTO.class);
 
+        DialogDTO veiledersDialog = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog/{dialogId}", brukersEgenvurdering.getId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
 
-        assertThat(brukersEgenvurdering.isFerdigBehandlet()).isTrue();
+        assertThat(veiledersDialog.isFerdigBehandlet()).isTrue();
+    }
+
+    @Test
+    void nyHenvendelse_egenvurdering_venterPaaSvarFraNav() {
+
+        NyEgenvurderingDTO egenVurdering = new NyEgenvurderingDTO()
+                .setTekst("Jeg trenger hjelp fra Nav")
+                .setVenterPaaSvarFraNav(true);
+        DialogDTO brukersEgenvurdering = bruker.createRequest()
+                .body(egenVurdering)
+                .header(TestAuthContextFilter.clientIdHeader, "cluster:paw:egenvurdering") // client_id i allowedlist
+                .post("/veilarbdialog/api/dialog/egenvurdering")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        DialogDTO veiledersDialog = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog/{dialogId}", brukersEgenvurdering.getId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
+
     }
 
     @Test

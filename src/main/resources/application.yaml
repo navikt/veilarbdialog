@@ -161,4 +161,4 @@ application:
         ms: 172800000
   egenvurdering:
     allowlist: >
-      - cluster:team:egenvurdering
+      ${EGENVURDERING_APP}

@@ -18,8 +18,8 @@ public class RestassuredUser {
     public RequestSpecification createRequest() {
         return given()
                 .header("Content-type", "application/json")
-                .header(TestAuthContextFilter.identHeder, ident)
-                .header(TestAuthContextFilter.typeHeder, userRole)
+                .header(TestAuthContextFilter.identHeader, ident)
+                .header(TestAuthContextFilter.typeHeader, userRole)
       ;
     }
 

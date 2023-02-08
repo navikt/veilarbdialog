@@ -138,7 +138,7 @@ application:
         ms: 2000
   egenvurdering:
     allowlist: >
-      - cluster:team:egenvurdering
+      cluster:paw:egenvurdering
 wiremock:
   server:
     port: 0
