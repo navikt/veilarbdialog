@@ -136,9 +136,6 @@ application:
     henvendelse:
       maksalder:
         ms: 2000
-  egenvurdering:
-    allowlist: >
-      cluster:paw:egenvurdering
 wiremock:
   server:
     port: 0

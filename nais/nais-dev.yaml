@@ -91,5 +91,3 @@ spec:
       value: https://pto.dev.nav.no/arbeid/dialog
     - name: APPD_ENABLED
       value: "false"
-    - name: EGENVURDERING_APP
-      value: dev-gcp:paw:aia-backend

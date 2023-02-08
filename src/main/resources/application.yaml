@@ -159,6 +159,3 @@ application:
     henvendelse:
       maksalder:
         ms: 172800000
-  egenvurdering:
-    allowlist: >
-      ${EGENVURDERING_APP}

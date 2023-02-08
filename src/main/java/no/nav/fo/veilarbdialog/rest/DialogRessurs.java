@@ -5,7 +5,6 @@ import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.poao.dab.spring_auth.IAuthService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,9 +33,6 @@ public class DialogRessurs {
     private final HttpServletRequest httpServletRequest;
     private final KontorsperreFilter kontorsperreFilter;
     private final IAuthService auth;
-
-    @Value("${application.egenvurdering.allowlist}")
-    private List<String> egenvurderingAllowList;
 
     private void sjekkErInternbruker() {
         if (!auth.erInternBruker())
@@ -84,26 +80,15 @@ public class DialogRessurs {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    @PostMapping("egenvurdering")
-    public DialogDTO egenVurderingsmelding(@RequestBody NyEgenvurderingDTO nyEgenvurderingDTO) {
-        sjekkErEksternbruker();
-        auth.sjekkAtApplikasjonErIAllowList(egenvurderingAllowList);
-        Person bruker = getContextUserIdent();
-        var opprettHenvendelse = dialogDataService.opprettHenvendelse(nyEgenvurderingDTO.toNyHenvendelseDto(), bruker);
-        if (nyEgenvurderingDTO.isVenterPaaSvarFraNav()) {
-            return restMapper.somDialogDTO(opprettHenvendelse);
-        } else {
-            var ferdigBehandletDialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(opprettHenvendelse.getId(), true);
-            dialogDataService.sendPaaKafka(ferdigBehandletDialog.getAktorId());
-            return restMapper.somDialogDTO(ferdigBehandletDialog);
-        }
-    }
-
     @PostMapping
     public DialogDTO nyHenvendelse(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
         Person bruker = getContextUserIdent();
         var dialogData = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
-
+        if (auth.erEksternBruker() && nyHenvendelseDTO.getVenterPaaSvarFraNav() != null && nyHenvendelseDTO.getVenterPaaSvarFraNav() == Boolean.FALSE) {
+            var dialogSomIkkeSkalBesvares = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), true);
+            dialogDataService.sendPaaKafka(dialogSomIkkeSkalBesvares.getAktorId());
+            return restMapper.somDialogDTO(dialogSomIkkeSkalBesvares);
+        }
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;

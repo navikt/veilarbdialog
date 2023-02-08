@@ -87,5 +87,3 @@ spec:
       value: prod-fss
     - name: DIALOG_EKSTERN_URL
       value: https://www.nav.no/arbeid/dialog
-    - name: EGENVURDERING_APP
-      value: prod-gcp:paw:aia-backend

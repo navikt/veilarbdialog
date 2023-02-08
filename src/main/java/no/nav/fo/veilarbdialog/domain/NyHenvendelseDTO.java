@@ -14,6 +14,7 @@ public class NyHenvendelseDTO {
     private String dialogId;
     private String overskrift;
     private String aktivitetId;
+    private Boolean venterPaaSvarFraNav;
     private List<Egenskap> egenskaper = Collections.emptyList();
 
 }

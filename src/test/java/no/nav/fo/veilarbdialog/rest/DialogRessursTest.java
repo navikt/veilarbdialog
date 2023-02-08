@@ -2,10 +2,8 @@ package no.nav.fo.veilarbdialog.rest;
 
 import io.restassured.RestAssured;
 import lombok.val;
-import no.nav.fo.veilarbdialog.auth.TestAuthContextFilter;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
-import no.nav.fo.veilarbdialog.domain.NyEgenvurderingDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
@@ -170,13 +168,12 @@ class DialogRessursTest {
     @Test
     void nyHenvendelse_egenvurdering_venterIkkePaaSvarFraNav() {
 
-        NyEgenvurderingDTO egenVurdering = new NyEgenvurderingDTO()
+        NyHenvendelseDTO egenVurdering = new NyHenvendelseDTO()
                 .setTekst("Jeg skal klare meg selv")
                 .setVenterPaaSvarFraNav(false);
         DialogDTO brukersEgenvurdering = bruker.createRequest()
                 .body(egenVurdering)
-                .header(TestAuthContextFilter.clientIdHeader, "cluster:paw:egenvurdering") // client_id i allowedlist
-                .post("/veilarbdialog/api/dialog/egenvurdering")
+                .post("/veilarbdialog/api/dialog")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -195,13 +192,36 @@ class DialogRessursTest {
     @Test
     void nyHenvendelse_egenvurdering_venterPaaSvarFraNav() {
 
-        NyEgenvurderingDTO egenVurdering = new NyEgenvurderingDTO()
+        NyHenvendelseDTO egenVurdering = new NyHenvendelseDTO()
                 .setTekst("Jeg trenger hjelp fra Nav")
                 .setVenterPaaSvarFraNav(true);
         DialogDTO brukersEgenvurdering = bruker.createRequest()
                 .body(egenVurdering)
-                .header(TestAuthContextFilter.clientIdHeader, "cluster:paw:egenvurdering") // client_id i allowedlist
-                .post("/veilarbdialog/api/dialog/egenvurdering")
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        DialogDTO veiledersDialog = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog/{dialogId}", brukersEgenvurdering.getId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
+
+    }
+
+    @Test
+    void nyHenvendelse_egenvurdering_venterPaaSvarFraNav_default() {
+
+        NyHenvendelseDTO egenVurdering = new NyHenvendelseDTO()
+                .setTekst("Jeg trenger hjelp fra Nav");
+        DialogDTO brukersEgenvurdering = bruker.createRequest()
+                .body(egenVurdering)
+                .post("/veilarbdialog/api/dialog")
                 .then()
                 .statusCode(200)
                 .extract()
