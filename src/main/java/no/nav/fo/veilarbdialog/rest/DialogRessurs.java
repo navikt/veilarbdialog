@@ -84,10 +84,18 @@ public class DialogRessurs {
     public DialogDTO nyHenvendelse(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
         Person bruker = getContextUserIdent();
         var dialogData = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
-        if (auth.erEksternBruker() && nyHenvendelseDTO.getVenterPaaSvarFraNav() != null && nyHenvendelseDTO.getVenterPaaSvarFraNav() == Boolean.FALSE) {
-            var dialogSomIkkeSkalBesvares = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), true);
-            dialogDataService.sendPaaKafka(dialogSomIkkeSkalBesvares.getAktorId());
-            return restMapper.somDialogDTO(dialogSomIkkeSkalBesvares);
+        if (nyHenvendelseDTO.getVenterPaaSvarFraNav() != null) {
+            dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyHenvendelseDTO.getVenterPaaSvarFraNav() );
+            dialogDataService.sendPaaKafka(dialogData.getAktorId());
+        }
+        if (nyHenvendelseDTO.getVenterPaaSvarFraBruker() != null) {
+            var dialogStatus = DialogStatus.builder()
+                    .dialogId(dialogData.getId())
+                    .venterPaSvar(nyHenvendelseDTO.getVenterPaaSvarFraBruker())
+                    .build();
+
+            dialogData = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
+            dialogDataService.sendPaaKafka(dialogData.getAktorId());
         }
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
