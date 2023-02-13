@@ -85,6 +85,9 @@ spec:
         - application: arbeidsrettet-dialog
           namespace: pto
           cluster: dev-gcp
+        - application: aia-backend
+          namespace: paw
+          cluster: dev-gcp
   env:
     - name: APP_ENVIRONMENT_NAME
       value: q1
