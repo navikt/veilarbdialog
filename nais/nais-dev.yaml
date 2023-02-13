@@ -88,6 +88,9 @@ spec:
         - application: aia-backend
           namespace: paw
           cluster: dev-gcp
+        - application: start-samtale
+          namespace: pto
+          cluster: dev-gcp
   env:
     - name: APP_ENVIRONMENT_NAME
       value: q1
