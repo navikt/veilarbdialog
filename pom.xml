@@ -21,6 +21,7 @@
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
         <common.version>3.2023.03.01_11.54-2d19b8e33bd0</common.version>
+        <dab.common.version>2023.01.31-10.10.5a4836e21d52</dab.common.version>
 
         <flyway.version>4.1.1</flyway.version>
         <jersey.version>2.37</jersey.version>
@@ -123,6 +124,11 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
 
         <!-- Spring -->
         <dependency>
@@ -211,12 +217,12 @@
         <dependency>
             <groupId>com.github.navikt.dab</groupId>
             <artifactId>spring-a2-annotations</artifactId>
-            <version>2023.01.31-10.10.5a4836e21d52</version>
+            <version>${dab.common.version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.navikt.dab</groupId>
             <artifactId>spring-auth</artifactId>
-            <version>2023.01.31-10.10.5a4836e21d52</version>
+            <version>${dab.common.version}</version>
         </dependency>
 
         <!-- Jackson -->
@@ -290,25 +296,44 @@
             <groupId>io.rest-assured</groupId>
             <artifactId>spring-mock-mvc</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.groovy</groupId>
+                    <artifactId>groovy</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.groovy</groupId>
+                    <artifactId>groovy-xml</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
-            <version>4.1.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock</artifactId>
-            <version>2.27.2</version>
+            <version>3.0.0-beta-2</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-contract-stub-runner</artifactId>
-            <version>3.0.1</version>
+            <version>4.0.1</version>
             <scope>test</scope>
         </dependency>
 
