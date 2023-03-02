@@ -33,7 +33,6 @@ import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -41,6 +40,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -225,7 +225,7 @@ public class BrukernotifikasjonService {
 
         final ProducerRecord<NokkelInput, BeskjedInput> kafkaMelding = new ProducerRecord<>(beskjedTopic, nokkel, beskjed);
 
-        ListenableFuture<SendResult<NokkelInput, BeskjedInput>> future = kafkaBeskjedProducer.send(kafkaMelding);
+        CompletableFuture<SendResult<NokkelInput, BeskjedInput>> future = kafkaBeskjedProducer.send(kafkaMelding);
         kafkaDoneProducer.flush();
         future.get();
     }
@@ -256,7 +256,7 @@ public class BrukernotifikasjonService {
 
         final ProducerRecord<NokkelInput, OppgaveInput> kafkaMelding = new ProducerRecord<>(oppgaveTopic, nokkel, oppgave);
 
-        ListenableFuture<SendResult<NokkelInput, OppgaveInput>> future = kafkaOppgaveProducer.send(kafkaMelding);
+        CompletableFuture<SendResult<NokkelInput, OppgaveInput>> future = kafkaOppgaveProducer.send(kafkaMelding);
         kafkaDoneProducer.flush();
         future.get();
         log.info("Sendt oppgave med brukernotifikasjonsid: {}", oppgaveInfo.getBrukernotifikasjonId());
@@ -283,7 +283,7 @@ public class BrukernotifikasjonService {
 
         final ProducerRecord<NokkelInput, DoneInput> kafkaMelding = new ProducerRecord<>(doneTopic, nokkel, done);
 
-        ListenableFuture<SendResult<NokkelInput, DoneInput>> future = kafkaDoneProducer.send(kafkaMelding);
+        CompletableFuture<SendResult<NokkelInput, DoneInput>> future = kafkaDoneProducer.send(kafkaMelding);
         kafkaDoneProducer.flush();
         future.get();
         log.info("Sendt done for brukernotifikasjonsid: {}", doneInfo.getEventId());

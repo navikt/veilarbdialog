@@ -1,9 +1,8 @@
 package no.nav.fo.veilarbdialog.util;
 
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletResponse;
 
 public class PingFilter implements Filter {
 

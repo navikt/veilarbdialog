@@ -26,6 +26,7 @@ import static org.awaitility.Awaitility.await;
 @RequiredArgsConstructor
 public class KafkaTestService {
 
+    public static final Duration DEFAULT_WAIT_TIMEOUT = Duration.ofSeconds(5);
     private final ConsumerFactory<Object, Object> avroAvroConsumerFactory;
     private final ConsumerFactory<String, String> stringStringConsumerFactory;
     private final Admin kafkaAdminClient;

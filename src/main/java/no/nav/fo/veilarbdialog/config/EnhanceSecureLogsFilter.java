@@ -1,11 +1,11 @@
 package no.nav.fo.veilarbdialog.config;
 
+import jakarta.servlet.*;
 import lombok.RequiredArgsConstructor;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.*;
 import java.io.IOException;
 
 @Service

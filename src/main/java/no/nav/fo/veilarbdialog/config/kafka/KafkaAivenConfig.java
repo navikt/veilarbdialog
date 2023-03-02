@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
-import org.springframework.kafka.listener.SeekToCurrentErrorHandler;
+import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
 
@@ -56,17 +56,21 @@ public class KafkaAivenConfig {
                 .setAuthExceptionRetryInterval(Duration.ofSeconds(10L));
 
         factory.setConcurrency(3);
-        factory.setErrorHandler(new SeekToCurrentErrorHandler(
-                (rec, thr) -> log.error("Exception={} oppstått i kafka-consumer record til topic={}, partition={}, offset={}, key={} feilmelding={}",
-                        thr.getClass().getSimpleName(),
-                        rec.topic(),
-                        rec.partition(),
-                        rec.offset(),
-                        rec.key(),
-                        thr.getMessage()
-                ),
-                new FixedBackOff(DEFAULT_INTERVAL, UNLIMITED_ATTEMPTS)));
+        factory.setCommonErrorHandler(errorHandler());
         return factory;
+    }
+
+    @Bean
+    DefaultErrorHandler errorHandler() {
+        return new DefaultErrorHandler((rec, thr) -> log.error("Exception={} oppstått i kafka-consumer record til topic={}, partition={}, offset={}, bestillingsId={} feilmelding={}",
+                thr.getClass().getSimpleName(),
+                rec.topic(),
+                rec.partition(),
+                rec.offset(),
+                rec.key(),
+                thr.getCause()
+        ),
+                new FixedBackOff(DEFAULT_INTERVAL, UNLIMITED_ATTEMPTS));
     }
 
     @Bean
@@ -93,23 +97,14 @@ public class KafkaAivenConfig {
 
     @Bean
     <V extends SpecificRecordBase> ConcurrentKafkaListenerContainerFactory<String, V> stringAvroKafkaListenerContainerFactory(
-            ConsumerFactory<String, V> kafkaConsumerFactory) {
+            ConsumerFactory<String, V> stringAvroConsumerFactory) {
         ConcurrentKafkaListenerContainerFactory<String, V> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(kafkaConsumerFactory);
+        factory.setConsumerFactory(stringAvroConsumerFactory);
         factory.getContainerProperties()
                 .setAuthExceptionRetryInterval(Duration.ofSeconds(10L));
 
         factory.setConcurrency(3);
-        factory.setErrorHandler(new SeekToCurrentErrorHandler(
-                (rec, thr) -> log.error("Exception={} oppstått i kafka-consumer record til topic={}, partition={}, offset={}, bestillingsId={} feilmelding={}",
-                        thr.getClass().getSimpleName(),
-                        rec.topic(),
-                        rec.partition(),
-                        rec.offset(),
-                        rec.key(),
-                        thr.getCause()
-                ),
-                new FixedBackOff(DEFAULT_INTERVAL, UNLIMITED_ATTEMPTS)));
+        factory.setCommonErrorHandler(errorHandler());
         return factory;
     }
 

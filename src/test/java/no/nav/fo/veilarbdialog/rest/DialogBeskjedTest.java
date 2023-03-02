@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
@@ -36,6 +36,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
+import static no.nav.fo.veilarbdialog.util.KafkaTestService.DEFAULT_WAIT_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
@@ -108,7 +109,7 @@ class DialogBeskjedTest {
         brukernotifikasjonService.sendPendingBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, DEFAULT_WAIT_TIMEOUT);
 
         assertThat(brukernotifikasjonRecord.value().getTekst()).isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST);
 
@@ -131,7 +132,7 @@ class DialogBeskjedTest {
         brukernotifikasjonService.sendDoneBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, DoneInput> doneRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, DEFAULT_WAIT_TIMEOUT);
 
         NokkelInput nokkel = doneRecord.key();
 
@@ -228,7 +229,7 @@ class DialogBeskjedTest {
         brukernotifikasjonService.sendPendingBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, DEFAULT_WAIT_TIMEOUT);
 
         Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
@@ -253,7 +254,7 @@ class DialogBeskjedTest {
         brukernotifikasjonService.sendDoneBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, DoneInput> doneRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, DEFAULT_WAIT_TIMEOUT);
 
         Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
 
@@ -285,7 +286,7 @@ class DialogBeskjedTest {
         brukernotifikasjonService.sendPendingBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, DEFAULT_WAIT_TIMEOUT);
 
         Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
@@ -320,7 +321,7 @@ class DialogBeskjedTest {
         brukernotifikasjonService.sendDoneBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, DoneInput> doneRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, DEFAULT_WAIT_TIMEOUT);
 
         Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
 
@@ -351,7 +352,7 @@ class DialogBeskjedTest {
 
 
         ConsumerRecord<NokkelInput, BeskjedInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, 5000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic, DEFAULT_WAIT_TIMEOUT);
 
         Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 
@@ -365,7 +366,7 @@ class DialogBeskjedTest {
         brukernotifikasjonService.sendDoneBrukernotifikasjoner();
 
         ConsumerRecord<NokkelInput, DoneInput> doneRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 5000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, DEFAULT_WAIT_TIMEOUT);
 
         Assertions.assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonDoneTopic, brukerNotifikasjonDoneConsumer));
 
