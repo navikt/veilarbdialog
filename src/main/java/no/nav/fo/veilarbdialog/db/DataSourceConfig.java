@@ -41,8 +41,12 @@ public class DataSourceConfig {
 
     public static DataSource migrate(DataSource dataSource) {
         log.info("Explicitly migrating {} using Flyway", dataSource);
-        Flyway flyway = new Flyway();
-        flyway.setDataSource(dataSource);
+
+        var flyway = new Flyway(Flyway.configure()
+                .dataSource(dataSource)
+                .table("schema_version")
+                .validateMigrationNaming(true));
+
         flyway.migrate();
         return dataSource;
     }

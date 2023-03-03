@@ -23,10 +23,7 @@
         <common.version>3.2023.03.01_11.54-2d19b8e33bd0</common.version>
         <dab.common.version>2023.02.24-10.12.c01f6e9ff044</dab.common.version>
 
-        <flyway.version>4.1.1</flyway.version>
-        <jersey.version>2.37</jersey.version>
         <shedlock.version>4.43.0</shedlock.version>
-        <springfox.version>3.0.0</springfox.version>
 
 
         <sonar.projectKey>navikt_veilarbdialog</sonar.projectKey>
@@ -34,9 +31,6 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
         <doknotifikasjon-schemas-version>1.2021.06.22-11.27-265ce1fe1ab4</doknotifikasjon-schemas-version>
-
-        <!-- Override spring boot okhttp3.version-->
-        <okhttp3.version>4.9.3</okhttp3.version>
 
     </properties>
 
@@ -62,7 +56,7 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-            <version>${flyway.version}</version>
+<!--            <version>${flyway.version}</version>-->
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -119,16 +113,6 @@
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>javax.xml.bind</groupId>-->
-<!--            <artifactId>jaxb-api</artifactId>-->
-<!--            <version>2.4.0-b180830.0359</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>com.fasterxml.jackson.datatype</groupId>-->
-<!--            <artifactId>jackson-datatype-jsr353</artifactId>-->
-<!--        </dependency>-->
         <!-- Spring -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -299,17 +283,7 @@
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>jakarta.xml.bind</groupId>-->
-<!--            <artifactId>jakarta.xml.bind-api</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.glassfish.jaxb</groupId>-->
-<!--            <artifactId>jaxb-runtime</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
-        <!-- Sliter med å bli kvitt denne javax-avhengigheten p.g.a. restassured -->
+        <!-- Sliter med å bli kvitt denne javax-avhengigheten p.g.a. restassured. Heldigvis kun nødvendig for test -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
