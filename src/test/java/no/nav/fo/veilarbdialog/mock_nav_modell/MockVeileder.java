@@ -3,11 +3,13 @@ package no.nav.fo.veilarbdialog.mock_nav_modell;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import no.nav.common.auth.context.UserRole;
 
 import java.util.LinkedList;
 import java.util.List;
 
+@ToString
 public class MockVeileder extends RestassuredUser {
     @Setter
     @Getter
