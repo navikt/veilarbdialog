@@ -20,7 +20,7 @@
         <java.version>17</java.version>
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
-        <common.version>3.2023.03.01_11.54-2d19b8e33bd0</common.version>
+        <common.version>3.2023.02.28_14.59-ff398ca0d33e</common.version>
         <dab.common.version>2023.02.24-10.12.c01f6e9ff044</dab.common.version>
 
         <shedlock.version>4.43.0</shedlock.version>
