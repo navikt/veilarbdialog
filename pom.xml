@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.2</version>
+        <version>3.0.3</version>
         <relativePath/>
     </parent>
 
@@ -207,11 +207,6 @@
             <version>${dab.common.version}</version>
         </dependency>
 
-        <!-- Jackson -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.jaxrs</groupId>
-            <artifactId>jackson-jaxrs-json-provider</artifactId>
-        </dependency>
 
         <!--Tjenester-->
         <dependency>
@@ -280,13 +275,6 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <!-- Sliter med å bli kvitt denne javax-avhengigheten p.g.a. restassured. Heldigvis kun nødvendig for test -->
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
             <scope>test</scope>
         </dependency>
 
@@ -371,7 +359,6 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
-                <version>${flyway.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
