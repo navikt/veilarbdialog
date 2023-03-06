@@ -248,7 +248,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- Kafka -->
+        <!-- Kafka NB hvis vi drar inn common-java-modules:kafka kan vi ta bort denne -->
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-avro-serializer</artifactId>

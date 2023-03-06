@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="no/nav/common/log/logback-default.xml"/>
-    <logger name="no.nav.fo.veilarbdialog" level="DEBUG"/>
+    <logger name="no.nav.fo.veilarbdialog" level="INFO"/>
     <logger name="or.springframework" level="INFO"/>
 
 </configuration>
