@@ -77,6 +77,10 @@ public class KafkaTestService {
         await().atMost(timeOutSeconds, SECONDS).until(() -> erKonsumert(topic, aivenGroupId, producerOffset, partition));
     }
 
+    public void assertErKonsumertAiven(String topic, long producerOffset, int partition) {
+        await().atMost(DEFAULT_WAIT_TIMEOUT).until(() -> erKonsumert(topic, aivenGroupId, producerOffset, partition));
+    }
+
     @SneakyThrows
     public boolean erKonsumert(String topic, String groupId, long producerOffset, int partition) {
         Map<TopicPartition, OffsetAndMetadata> topicPartitionOffsetAndMetadataMap = kafkaAdminClient.listConsumerGroupOffsets(groupId).partitionsToOffsetAndMetadata().get();

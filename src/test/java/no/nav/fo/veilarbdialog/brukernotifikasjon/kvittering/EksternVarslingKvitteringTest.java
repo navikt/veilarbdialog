@@ -131,7 +131,7 @@ class EksternVarslingKvitteringTest {
         long offset = recordMetadata.offset();
         int partition = recordMetadata.partition();
 
-        Awaitility.await().atMost(Duration.ofSeconds(5)).until(() -> kafkaTestService.erKonsumert(kvitteringsTopic, "veilarbdialog", offset, partition));
+        kafkaTestService.assertErKonsumertAiven(kvitteringsTopic, offset, partition, 10);
 
         BrukernotifikasjonEntity brukernotifikasjonEtterProsessering = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(dialogId, BrukernotifikasjonsType.OPPGAVE).get(0);
 
