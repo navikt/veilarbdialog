@@ -36,6 +36,7 @@ import java.util.concurrent.TimeoutException;
 
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static no.nav.fo.veilarbdialog.util.KafkaTestService.DEFAULT_WAIT_TIMEOUT;
 
 class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
@@ -168,7 +169,7 @@ class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
         opprettEllerEndreOppfolgingsperiodeForBruker(stopOppfolging);
 
-        KafkaTestUtils.getSingleRecord(endringPaaDialogConsumer, endringPaaDialogTopic, 10000);
+        KafkaTestUtils.getSingleRecord(endringPaaDialogConsumer, endringPaaDialogTopic, DEFAULT_WAIT_TIMEOUT);
 
 
         DialogDTO hentDialog = dialogTestService.hentDialog(mockBruker, Long.parseLong(dialogDTO.getId()));

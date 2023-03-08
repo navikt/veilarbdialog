@@ -25,7 +25,6 @@ public class OppfolgingsperiodeService {
         AktorId aktorId = dao.hentEnBrukerUtenOppfolgingsperiode();
 
         if (aktorId == null) {
-            log.info("Fant ingen brukere uten oppfølgingsperiode");
             return false;
         }
 

@@ -32,12 +32,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.context.jdbc.Sql;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -48,6 +49,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static no.nav.fo.veilarbdialog.util.KafkaTestService.DEFAULT_WAIT_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -161,7 +163,7 @@ class EskaleringsvarselControllerTest {
         assertThat(startEskalering.opprettetDato()).isEqualToIgnoringNanos(gjeldende.opprettetDato());
         assertThat(startEskalering.opprettetBegrunnelse()).isEqualTo(gjeldende.opprettetBegrunnelse());
 
-        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 10000L);
+        ConsumerRecord<NokkelInput, OppgaveInput> brukernotifikasjonRecord = KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, DEFAULT_WAIT_TIMEOUT);
 
         NokkelInput nokkelInput = brukernotifikasjonRecord.key();
         OppgaveInput oppgaveInput = brukernotifikasjonRecord.value();
@@ -216,7 +218,7 @@ class EskaleringsvarselControllerTest {
 
 
         ConsumerRecord<NokkelInput, DoneInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 10000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, DEFAULT_WAIT_TIMEOUT);
 
         NokkelInput nokkelInput = brukernotifikasjonRecord.key();
         DoneInput doneInput = brukernotifikasjonRecord.value();
@@ -259,7 +261,7 @@ class EskaleringsvarselControllerTest {
 
 
         ConsumerRecord<NokkelInput, DoneInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 10000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, DEFAULT_WAIT_TIMEOUT);
 
         NokkelInput nokkelInput = brukernotifikasjonRecord.key();
         DoneInput doneInput = brukernotifikasjonRecord.value();
@@ -383,7 +385,7 @@ class EskaleringsvarselControllerTest {
 
         requireGjeldende(veileder, bruker);
 
-        KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 10000L);
+        KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, DEFAULT_WAIT_TIMEOUT);
         kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonOppgaveTopic, brukerNotifikasjonOppgaveConsumer);
     }
 
@@ -435,7 +437,7 @@ class EskaleringsvarselControllerTest {
         lesHenvendelse(bruker, startEskalering.tilhorendeDialogId());
 
         ConsumerRecord<NokkelInput, DoneInput> brukernotifikasjonRecord =
-                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, 10000L);
+                KafkaTestUtils.getSingleRecord(brukerNotifikasjonDoneConsumer, brukernotifikasjonDoneTopic, DEFAULT_WAIT_TIMEOUT);
 
         NokkelInput nokkel = brukernotifikasjonRecord.key();
 
@@ -461,7 +463,7 @@ class EskaleringsvarselControllerTest {
 
         requireGjeldende(veileder, bruker);
 
-        KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, 10000L);
+        KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, DEFAULT_WAIT_TIMEOUT);
         // sjekk at det ikke ble sendt beskjed på dialogmelding
         assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
 

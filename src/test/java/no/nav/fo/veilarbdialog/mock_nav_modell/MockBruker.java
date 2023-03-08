@@ -3,12 +3,14 @@ package no.nav.fo.veilarbdialog.mock_nav_modell;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import no.nav.common.auth.context.UserRole;
 import no.nav.common.types.identer.AktorId;
 
 import java.util.UUID;
 
 @Getter
+@ToString
 public class MockBruker extends RestassuredUser {
     private final String aktorId;
     private final UUID oppfolgingsperiode = UUID.randomUUID();
@@ -32,4 +34,5 @@ public class MockBruker extends RestassuredUser {
     public AktorId getAktorIdAsAktorId() {
         return AktorId.of(aktorId);
     }
+
 }

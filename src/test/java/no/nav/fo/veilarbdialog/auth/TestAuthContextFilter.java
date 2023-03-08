@@ -2,13 +2,12 @@ package no.nav.fo.veilarbdialog.auth;
 
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.PlainJWT;
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletRequest;
 import no.nav.common.auth.context.AuthContext;
 import no.nav.common.auth.context.AuthContextHolderThreadLocal;
 import no.nav.common.auth.context.UserRole;
 import org.springframework.stereotype.Service;
-
-import javax.servlet.*;
-import javax.servlet.http.HttpServletRequest;
 
 import static no.nav.common.auth.Constants.AAD_NAV_IDENT_CLAIM;
 import static no.nav.common.test.auth.AuthTestUtils.TEST_AUDIENCE;

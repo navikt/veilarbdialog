@@ -1,13 +1,13 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Date;
 
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
@@ -28,9 +28,9 @@ class StatusDAOTest {
     void markerSomLestAvVeileder_SkalSetteLestTidspunkt() {
         DialogData dialogData = oppretDialogMedStatuser();
 
-        Date forLest = DateTime.now().minusSeconds(5).toDate();
+        Date forLest = Date.from(Instant.now().minusSeconds(5));
         statusDAO.markerSomLestAvVeileder(dialogData.getId(), new Date());
-        Date etterLest = DateTime.now().plusSeconds(5).toDate();
+        Date etterLest = Date.from(Instant.now().plusSeconds(5));
 
         DialogData lest = dialogDAO.hentDialog(dialogData.getId());
 
@@ -49,9 +49,9 @@ class StatusDAOTest {
     void markerSomLestAvBruker() {
         DialogData dialogData = oppretDialogMedStatuser();
 
-        Date forLest = DateTime.now().minusSeconds(5).toDate();
+        Date forLest = Date.from(Instant.now().minusSeconds(5));
         statusDAO.markerSomLestAvBruker(dialogData.getId());
-        Date etterLest = DateTime.now().plusSeconds(5).toDate();
+        Date etterLest = Date.from(Instant.now().plusSeconds(5));
 
         DialogData lest = dialogDAO.hentDialog(dialogData.getId());
 
@@ -70,9 +70,9 @@ class StatusDAOTest {
     void setVenterPaNavTilNaa() {
         DialogData dialogData = oppretDialogMedStatuser();
 
-        Date before = DateTime.now().minusSeconds(5).toDate();
+        Date before = Date.from(Instant.now().minusSeconds(5));
         statusDAO.setVenterPaNavTilNaa(dialogData.getId());
-        Date after = DateTime.now().plusSeconds(5).toDate();
+        Date after = Date.from(Instant.now().plusSeconds(5));
 
         DialogData venterPaNav = dialogDAO.hentDialog(dialogData.getId());
         assertThat(venterPaNav.getVenterPaNavSiden()).isBetween(before, after);
@@ -89,9 +89,9 @@ class StatusDAOTest {
     void setVenterPaSvarFraBrukerTilNaa() {
         DialogData dialogData = oppretDialogMedStatuser();
 
-        Date before = DateTime.now().minusSeconds(5).toDate();
+        Date before = Date.from(Instant.now().minusSeconds(5));
         statusDAO.setVenterPaSvarFraBrukerTilNaa(dialogData.getId());
-        Date after = DateTime.now().plusSeconds(5).toDate();
+        Date after = Date.from(Instant.now().plusSeconds(5));
 
         DialogData venterPaBruker = dialogDAO.hentDialog(dialogData.getId());
         assertThat(venterPaBruker.getVenterPaSvarFraBrukerSiden()).isBetween(before, after);
@@ -108,9 +108,9 @@ class StatusDAOTest {
     void setVenterPaNavTilNull() {
         DialogData dialogData = oppretDialogMedStatuser();
 
-        Date before = DateTime.now().minusSeconds(5).toDate();
+        Date before = Date.from(Instant.now().minusSeconds(5));
         statusDAO.setVenterPaNavTilNull(dialogData.getId());
-        Date after = DateTime.now().plusSeconds(5).toDate();
+        Date after = Date.from(Instant.now().plusSeconds(5));
 
         DialogData venterIkkePaNav = dialogDAO.hentDialog(dialogData.getId());
         assertThat(venterIkkePaNav.getVenterPaNavSiden()).isNull();
@@ -127,9 +127,9 @@ class StatusDAOTest {
     void setVenterPaSvarFraBrukerTilNull() {
         DialogData dialogData = oppretDialogMedStatuser();
 
-        Date before = DateTime.now().minusSeconds(5).toDate();
+        Date before = Date.from(Instant.now().minusSeconds(5));
         statusDAO.setVenterPaSvarFraBrukerTilNull(dialogData.getId());
-        Date after = DateTime.now().plusSeconds(5).toDate();
+        Date after = Date.from(Instant.now().plusSeconds(5));
 
         DialogData venterIkkePaNav = dialogDAO.hentDialog(dialogData.getId());
         assertThat(venterIkkePaNav.getVenterPaSvarFraBrukerSiden()).isNull();
@@ -146,7 +146,7 @@ class StatusDAOTest {
     void setEldsteUlesteForBruker() {
         DialogData dialogData = oppretDialogMedStatuser();
 
-        Date elsteulest = DateTime.now().minusSeconds(5).toDate();
+        Date elsteulest = Date.from(Instant.now().minusSeconds(5));
         statusDAO.setEldsteUlesteForBruker(dialogData.getId(), elsteulest);
 
         DialogData medulest = dialogDAO.hentDialog(dialogData.getId());
@@ -164,8 +164,8 @@ class StatusDAOTest {
     void setNyMeldingFraBruker() {
         DialogData dialogData = oppretDialogMedStatuser();
 
-        Date elsteUlesteForVeileder = DateTime.now().minusSeconds(5).toDate();
-        Date venterPaNavSiden = DateTime.now().minusSeconds(4).toDate();
+        Date elsteUlesteForVeileder = Date.from(Instant.now().minusSeconds(5));
+        Date venterPaNavSiden = Date.from(Instant.now().minusSeconds(4));
         statusDAO.setNyMeldingFraBruker(dialogData.getId(), elsteUlesteForVeileder, venterPaNavSiden);
 
         DialogData nyMeldingFraBruker = dialogDAO.hentDialog(dialogData.getId());

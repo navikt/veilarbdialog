@@ -4,7 +4,6 @@ import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -143,12 +143,12 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
     @Test
      void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
-        var dialog = nyDialog(AKTOR_ID_1234).toBuilder().opprettetDato(DateTime.now().minusSeconds(5).toDate()).overskrift("gammel").build();
+        var dialog = nyDialog(AKTOR_ID_1234).toBuilder().opprettetDato(Date.from(Instant.now().minusSeconds(5))).overskrift("gammel").build();
         dialogDAO.opprettDialog(dialog);
 
         Date avslutningsdato = new Date();
 
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).withOpprettetDato(DateTime.now().plusSeconds(5).toDate()).toBuilder().overskrift("ny").build());
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).withOpprettetDato(Date.from(Instant.now().plusSeconds(5))).withOverskrift("ny"));
 
         List<DialogData> dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
         assertThat(dialoger).hasSize(1);
@@ -157,10 +157,10 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
     @Test
      void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().opprettetDato(DateTime.now().minusSeconds(5).toDate()).overskrift("gammel").kontorsperreEnhetId("123").build());
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().opprettetDato(Date.from(Instant.now().minusSeconds(5))).overskrift("gammel").kontorsperreEnhetId("123").build());
         Date avslutningsdato = new Date();
 
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").opprettetDato(DateTime.now().plusSeconds(5).toDate()).kontorsperreEnhetId("123").build());
+        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").opprettetDato(Date.from(Instant.now().plusSeconds(5))).kontorsperreEnhetId("123").build());
 
         List<DialogData> dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
         assertThat(dialoger).hasSize(1);
@@ -170,7 +170,7 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
     @Test
      void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerSomIkkeErKontorsperret() {
-        var opprettet = DateTime.now().minusSeconds(5).toDate();
+        var opprettet = Date.from(Instant.now().minusSeconds(5));
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("med_sperre").opprettetDato(opprettet).kontorsperreEnhetId("123").build());
         dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("uten_sperre").opprettetDato(opprettet).build());
 

@@ -13,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 
 class IdMappingConsumerTest extends SpringBootTestBase {
@@ -42,7 +42,7 @@ class IdMappingConsumerTest extends SpringBootTestBase {
 
         Long tekniskId = 123123L;
         IdMappingDTO idMapping = new IdMappingDTO(arenaId, tekniskId, UUID.randomUUID());
-        ListenableFuture<SendResult<String, String>> send = stringStringKafkaTemplate.send(idMappingTopic, JsonUtils.toJson(idMapping));
+        CompletableFuture<SendResult<String, String>> send = stringStringKafkaTemplate.send(idMappingTopic, JsonUtils.toJson(idMapping));
         long offset = send.get().getRecordMetadata().offset();
 
         kafkaTestService.assertErKonsumertAiven(idMappingTopic, offset, send.get().getRecordMetadata().partition(), 10);

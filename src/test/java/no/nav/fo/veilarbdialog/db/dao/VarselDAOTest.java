@@ -6,13 +6,13 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.service.DialogStatusService;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
-import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
+import java.time.Instant;
 import java.util.Date;
 
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
@@ -107,7 +107,7 @@ class VarselDAOTest {
     }
 
     private Date getNowMinusSeconds(int seconds) {
-        return DateTime.now().minusSeconds(seconds).toDate();
+        return Date.from(Instant.now().minusSeconds(seconds));
     }
 
 }

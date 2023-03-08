@@ -26,6 +26,7 @@ import static org.awaitility.Awaitility.await;
 @RequiredArgsConstructor
 public class KafkaTestService {
 
+    public static final Duration DEFAULT_WAIT_TIMEOUT = Duration.ofSeconds(5);
     private final ConsumerFactory<Object, Object> avroAvroConsumerFactory;
     private final ConsumerFactory<String, String> stringStringConsumerFactory;
     private final Admin kafkaAdminClient;
@@ -74,6 +75,10 @@ public class KafkaTestService {
 
     public void assertErKonsumertAiven(String topic, long producerOffset, int partition, int timeOutSeconds) {
         await().atMost(timeOutSeconds, SECONDS).until(() -> erKonsumert(topic, aivenGroupId, producerOffset, partition));
+    }
+
+    public void assertErKonsumertAiven(String topic, long producerOffset, int partition) {
+        await().atMost(DEFAULT_WAIT_TIMEOUT).until(() -> erKonsumert(topic, aivenGroupId, producerOffset, partition));
     }
 
     @SneakyThrows
