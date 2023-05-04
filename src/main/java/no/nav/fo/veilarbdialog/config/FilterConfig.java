@@ -119,10 +119,10 @@ public class FilterConfig {
         FilterRegistrationBean<OidcAuthenticationFilter> registration = new FilterRegistrationBean<>();
         var authenticationFilter = new OidcAuthenticationFilter(
                 fromConfigs(
-                        loginserviceIdportenConfig(),
                         naisAzureAdConfig(),
                         naisStsAuthConfig(),
-                        tokenxConfig()
+                        tokenxConfig(),
+                        loginserviceIdportenConfig()
                 )
         );
         registration.setFilter(authenticationFilter);
