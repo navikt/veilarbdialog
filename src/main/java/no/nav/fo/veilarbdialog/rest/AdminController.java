@@ -7,6 +7,7 @@ import no.nav.fo.veilarbdialog.service.KafkaRepubliseringService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -22,6 +23,7 @@ public class AdminController {
     private final KafkaRepubliseringService kafkaRepubliseringService;
 
     @PostMapping("/republiser/endring-paa-dialog")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void republiserDialogerPaaKafka() {
         sjekkTilgangTilAdmin();
         JobRunner.runAsync(
