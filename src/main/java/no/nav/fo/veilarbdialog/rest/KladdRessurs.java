@@ -6,13 +6,12 @@ import no.nav.fo.veilarbdialog.domain.Kladd;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.service.KladdService;
 import no.nav.poao.dab.spring_auth.IAuthService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.stream.Collectors.toList;
 
 @RestController
 @RequestMapping(
@@ -31,10 +30,11 @@ public class KladdRessurs {
         return kladdService.hentKladder(getContextUserIdent())
                 .stream()
                 .map(KladdRessurs::somKladdDTO)
-                .collect(toList());
+                .toList();
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void oppdaterKladd(@RequestBody KladdDTO dto) {
         kladdService.upsertKladd(getContextUserIdent(), somKladd(dto));
     }
