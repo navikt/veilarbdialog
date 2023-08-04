@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,16 +14,17 @@ import java.util.Date;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@ActiveProfiles("local")
-@Transactional
-class StatusDAOTest {
+class StatusDAOTest extends BaseDAOTest {
 
-    @Autowired
-    private StatusDAO statusDAO;
+    private static StatusDAO statusDAO;
 
-    @Autowired
-    private DialogDAO dialogDAO;
+    private static DialogDAO dialogDAO;
+
+    @BeforeAll
+    public static void setup() {
+        dialogDAO = new DialogDAO(jdbc);
+        statusDAO = new StatusDAO(jdbc);
+    }
 
     @Test
     void markerSomLestAvVeileder_SkalSetteLestTidspunkt() {

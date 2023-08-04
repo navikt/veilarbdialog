@@ -6,43 +6,35 @@ import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.poao.dab.spring_auth.IAuthService;
+import org.flywaydb.core.Flyway;
+import org.h2.tools.Server;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
-@ActiveProfiles("local")
-@Transactional
-class DataVarehusDAOTest {
+class DataVarehusDAOTest extends BaseDAOTest {
 
-    @Autowired
-    private DataVarehusDAO dataVarehusDAO;
+    private static DataVarehusDAO dataVarehusDAO;
 
-    @Autowired
-    private JdbcTemplate jdbc;
-
-    @Autowired
-    private IAuthService auth;
-
-    @BeforeEach
-    public void setup() {
-        jdbc.update("DELETE FROM EVENT");
+    @BeforeAll
+    public static void setup() {
+        dataVarehusDAO = new DataVarehusDAO(jdbc);
     }
 
     @Test
     void insertEvent() {
 
         DialogData dialog = DialogData.builder().id(1).aktivitetId(AktivitetId.of("aktivitet")).aktorId("aktor").build();
-        String loggedInUser = auth.erLoggetInn() ? auth.getLoggedInnUser().get() : "SYSTEM";
+        String loggedInUser = "SYSTEM";
         dataVarehusDAO.insertEvent(dialog, DatavarehusEvent.VENTER_PAA_BRUKER, loggedInUser);
 
         DatavarehusData data = jdbc.queryForObject("select * from event", new BeanPropertyRowMapper<>(DatavarehusData.class));
