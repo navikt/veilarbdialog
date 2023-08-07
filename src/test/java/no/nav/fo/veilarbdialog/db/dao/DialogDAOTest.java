@@ -5,7 +5,6 @@ import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -43,7 +42,7 @@ class DialogDAOTest extends BaseDAOTest {
 
     @Test
      void kanHenteDialogerPaaAktorId() {
-        String aktorId = AktorIdProvider.get();
+        String aktorId = AktorIdProvider.getNext();
 
         DialogData dialogData = nyDialog(aktorId);
         dialogDAO.opprettDialog(dialogData);
@@ -64,7 +63,7 @@ class DialogDAOTest extends BaseDAOTest {
 
     @Test
      void kanHentDialogPaDialogId() {
-       String aktorId = AktorIdProvider.get();
+       String aktorId = AktorIdProvider.getNext();
 
         DialogData dialogData = nyDialog(aktorId);
         DialogData opprettDialog = dialogDAO.opprettDialog(dialogData);
@@ -81,7 +80,7 @@ class DialogDAOTest extends BaseDAOTest {
 
     @Test
      void kanOppretteHenvendelse() {
-       String aktorId = AktorIdProvider.get();
+       String aktorId = AktorIdProvider.getNext();
         DialogData dialogData = opprettNyDialog(aktorId);
         HenvendelseData henvendelseData = nyHenvendelse(dialogData.getId(), aktorId, AvsenderType.BRUKER);
 
@@ -103,7 +102,7 @@ class DialogDAOTest extends BaseDAOTest {
 
     @Test
      void kanHenteDialogPaaAktivitetId() {
-       String aktorId = AktorIdProvider.get();
+       String aktorId = AktorIdProvider.getNext();
         var aktivitetId = AktivitetId.of("aktivitetId");
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isEmpty();
         dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().aktivitetId(aktivitetId).build());
@@ -112,7 +111,7 @@ class DialogDAOTest extends BaseDAOTest {
 
     @Test
      void kanHenteDialogPaaArenaAktivitetId() {
-       String aktorId = AktorIdProvider.get();
+       String aktorId = AktorIdProvider.getNext();
         var aktivitetId = AktivitetId.of("ARENATA123");
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isEmpty();
         dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().aktivitetId(aktivitetId).build());
@@ -121,7 +120,7 @@ class DialogDAOTest extends BaseDAOTest {
 
     @Test
      void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedAlleredeHistoriske() {
-       String aktorId = AktorIdProvider.get();
+       String aktorId = AktorIdProvider.getNext();
         DialogData dialog = nyDialog(aktorId)
                 .toBuilder()
                 .overskrift("ny")
@@ -143,7 +142,7 @@ class DialogDAOTest extends BaseDAOTest {
 
     @Test
      void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
-       String aktorId = AktorIdProvider.get();
+       String aktorId = AktorIdProvider.getNext();
         var dialog = nyDialog(aktorId).toBuilder().opprettetDato(Date.from(Instant.now().minusSeconds(5))).overskrift("gammel").build();
         dialogDAO.opprettDialog(dialog);
 
@@ -158,7 +157,7 @@ class DialogDAOTest extends BaseDAOTest {
 
     @Test
      void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
-       String aktorId = AktorIdProvider.get();
+       String aktorId = AktorIdProvider.getNext();
         dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().opprettetDato(Date.from(Instant.now().minusSeconds(5))).overskrift("gammel").kontorsperreEnhetId("123").build());
         Date avslutningsdato = new Date();
 
@@ -172,7 +171,7 @@ class DialogDAOTest extends BaseDAOTest {
 
     @Test
      void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerSomIkkeErKontorsperret() {
-       String aktorId = AktorIdProvider.get();
+       String aktorId = AktorIdProvider.getNext();
         var opprettet = Date.from(Instant.now().minusSeconds(5));
         dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().overskrift("med_sperre").opprettetDato(opprettet).kontorsperreEnhetId("123").build());
         dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().overskrift("uten_sperre").opprettetDato(opprettet).build());

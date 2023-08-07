@@ -5,7 +5,7 @@ public class AktorIdProvider {
     private static int nr = 1000;
 
 
-    public static String get() {
+    public static String getNext() {
         return nr++ + "";
     }
 }
