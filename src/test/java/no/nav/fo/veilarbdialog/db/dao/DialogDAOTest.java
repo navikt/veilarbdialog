@@ -4,12 +4,8 @@ import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Date;
@@ -19,21 +15,16 @@ import static java.util.Arrays.asList;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
-@SpringBootTest
-@ActiveProfiles("local")
-@Transactional
-@Sql(
-        scripts = "/db/testdata/slett_alle_dialoger.sql",
-        executionPhase = BEFORE_TEST_METHOD
-)
- class DialogDAOTest {
 
-    private static final String AKTOR_ID_1234 = "1234";
+class DialogDAOTest extends BaseDAOTest {
 
-    @Autowired
-    private DialogDAO dialogDAO;
+    private static DialogDAO dialogDAO;
+
+    @BeforeAll
+    public static void setup() {
+       dialogDAO = new DialogDAO(jdbc);
+    }
 
     @Test
      void kan_opprette_dialog() {
@@ -51,10 +42,12 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
     @Test
      void kanHenteDialogerPaaAktorId() {
-        DialogData dialogData = nyDialog(AKTOR_ID_1234);
+        String aktorId = AktorIdProvider.getNext();
+
+        DialogData dialogData = nyDialog(aktorId);
         dialogDAO.opprettDialog(dialogData);
 
-        List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(AKTOR_ID_1234);
+        List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
         assertThat(dialoger).hasSize(1);
 
         DialogData hentetDialogData = dialoger.get(0);
@@ -70,7 +63,9 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
     @Test
      void kanHentDialogPaDialogId() {
-        DialogData dialogData = nyDialog(AKTOR_ID_1234);
+       String aktorId = AktorIdProvider.getNext();
+
+        DialogData dialogData = nyDialog(aktorId);
         DialogData opprettDialog = dialogDAO.opprettDialog(dialogData);
 
         DialogData hentetDialog = dialogDAO.hentDialog(opprettDialog.getId());
@@ -85,8 +80,9 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
     @Test
      void kanOppretteHenvendelse() {
-        DialogData dialogData = opprettNyDialog(AKTOR_ID_1234);
-        HenvendelseData henvendelseData = nyHenvendelse(dialogData.getId(), AKTOR_ID_1234, AvsenderType.BRUKER);
+       String aktorId = AktorIdProvider.getNext();
+        DialogData dialogData = opprettNyDialog(aktorId);
+        HenvendelseData henvendelseData = nyHenvendelse(dialogData.getId(), aktorId, AvsenderType.BRUKER);
 
         long henvendelseId = dialogDAO.opprettHenvendelse(henvendelseData).getId();
         List<HenvendelseData> henvendelser = dialogDAO.hentDialog(dialogData.getId()).getHenvendelser();
@@ -106,28 +102,31 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
     @Test
      void kanHenteDialogPaaAktivitetId() {
+       String aktorId = AktorIdProvider.getNext();
         var aktivitetId = AktivitetId.of("aktivitetId");
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isEmpty();
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().aktivitetId(aktivitetId).build());
+        dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().aktivitetId(aktivitetId).build());
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isPresent();
     }
 
     @Test
      void kanHenteDialogPaaArenaAktivitetId() {
+       String aktorId = AktorIdProvider.getNext();
         var aktivitetId = AktivitetId.of("ARENATA123");
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isEmpty();
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().aktivitetId(aktivitetId).build());
+        dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().aktivitetId(aktivitetId).build());
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isPresent();
     }
 
     @Test
      void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedAlleredeHistoriske() {
-        DialogData dialog = nyDialog(AKTOR_ID_1234)
+       String aktorId = AktorIdProvider.getNext();
+        DialogData dialog = nyDialog(aktorId)
                 .toBuilder()
                 .overskrift("ny")
                 .build();
 
-        DialogData historiskDialog = nyDialog(AKTOR_ID_1234)
+        DialogData historiskDialog = nyDialog(aktorId)
                 .toBuilder()
                 .historisk(true)
                 .overskrift("historisk")
@@ -136,33 +135,35 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
         dialogDAO.opprettDialog(dialog);
         dialogDAO.opprettDialog(historiskDialog);
 
-        List<DialogData> dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, new Date(System.currentTimeMillis() + 1000));
+        List<DialogData> dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktorId, new Date(System.currentTimeMillis() + 1000));
         assertThat(dialoger).hasSize(1);
         assertThat(dialoger.get(0).getOverskrift()).isEqualTo("ny");
     }
 
     @Test
      void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
-        var dialog = nyDialog(AKTOR_ID_1234).toBuilder().opprettetDato(Date.from(Instant.now().minusSeconds(5))).overskrift("gammel").build();
+       String aktorId = AktorIdProvider.getNext();
+        var dialog = nyDialog(aktorId).toBuilder().opprettetDato(Date.from(Instant.now().minusSeconds(5))).overskrift("gammel").build();
         dialogDAO.opprettDialog(dialog);
 
         Date avslutningsdato = new Date();
 
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).withOpprettetDato(Date.from(Instant.now().plusSeconds(5))).withOverskrift("ny"));
+        dialogDAO.opprettDialog(nyDialog(aktorId).withOpprettetDato(Date.from(Instant.now().plusSeconds(5))).withOverskrift("ny"));
 
-        List<DialogData> dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
+        List<DialogData> dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktorId, avslutningsdato);
         assertThat(dialoger).hasSize(1);
         assertThat(dialoger.get(0).getOverskrift()).isEqualTo("gammel");
     }
 
     @Test
      void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().opprettetDato(Date.from(Instant.now().minusSeconds(5))).overskrift("gammel").kontorsperreEnhetId("123").build());
+       String aktorId = AktorIdProvider.getNext();
+        dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().opprettetDato(Date.from(Instant.now().minusSeconds(5))).overskrift("gammel").kontorsperreEnhetId("123").build());
         Date avslutningsdato = new Date();
 
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("ny").opprettetDato(Date.from(Instant.now().plusSeconds(5))).kontorsperreEnhetId("123").build());
+        dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().overskrift("ny").opprettetDato(Date.from(Instant.now().plusSeconds(5))).kontorsperreEnhetId("123").build());
 
-        List<DialogData> dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, avslutningsdato);
+        List<DialogData> dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(aktorId, avslutningsdato);
         assertThat(dialoger).hasSize(1);
         assertThat(dialoger.get(0).getOverskrift()).isEqualTo("gammel");
 
@@ -170,11 +171,12 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
     @Test
      void hentKontorsperredeDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerSomIkkeErKontorsperret() {
+       String aktorId = AktorIdProvider.getNext();
         var opprettet = Date.from(Instant.now().minusSeconds(5));
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("med_sperre").opprettetDato(opprettet).kontorsperreEnhetId("123").build());
-        dialogDAO.opprettDialog(nyDialog(AKTOR_ID_1234).toBuilder().overskrift("uten_sperre").opprettetDato(opprettet).build());
+        dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().overskrift("med_sperre").opprettetDato(opprettet).kontorsperreEnhetId("123").build());
+        dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().overskrift("uten_sperre").opprettetDato(opprettet).build());
 
-        var dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(AKTOR_ID_1234, new Date());
+        var dialoger = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(aktorId, new Date());
         assertThat(dialoger).hasSize(1);
         assertThat(dialoger.get(0).getOverskrift()).isEqualTo("med_sperre");
     }
@@ -203,6 +205,7 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
 
     @Test
      void skalHenteBrukereMedAktiveDialoger() {
+       List<String>  before = dialogDAO.hentAktorIderTilBrukereMedAktiveDialoger();
         opprettNyDialog("1", false);
         opprettNyDialog("1", false);
         opprettNyDialog("2", false);
@@ -212,9 +215,11 @@ import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TE
         opprettNyDialog("4", true);
         opprettNyDialog("5", false);
 
-        List<String> brukere = dialogDAO.hentAktorIderTilBrukereMedAktiveDialoger();
+        List<String> after = dialogDAO.hentAktorIderTilBrukereMedAktiveDialoger();
 
-        assertThat(brukere)
+       after.removeAll(before);
+
+       assertThat(after)
                 .hasSize(3)
                 .containsExactlyInAnyOrder("1", "2", "5");
     }
