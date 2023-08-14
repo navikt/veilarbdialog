@@ -10,6 +10,7 @@ import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
 import no.nav.common.types.identer.Fnr;
+import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
@@ -55,17 +56,9 @@ import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
-@Slf4j
-@Sql(
-        scripts = "/db/testdata/slett_alle_dialoger.sql",
-        executionPhase = BEFORE_TEST_METHOD
-)
-class EskaleringsvarselControllerTest {
 
-    @LocalServerPort
-    protected int port;
+@Slf4j
+class EskaleringsvarselControllerTest extends SpringBootTestBase {
 
     @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
     private String brukernotifikasjonOppgaveTopic;
@@ -97,11 +90,6 @@ class EskaleringsvarselControllerTest {
     @Autowired
     ScheduleRessurs scheduleRessurs;
 
-    @Autowired
-    LockProvider lockProvider;
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
 
     Consumer<NokkelInput, OppgaveInput> brukerNotifikasjonOppgaveConsumer;
 
@@ -110,10 +98,7 @@ class EskaleringsvarselControllerTest {
     Consumer<NokkelInput, DoneInput> brukerNotifikasjonDoneConsumer;
 
     @BeforeEach
-    void setup() {
-        JdbcTemplateLockProvider l = (JdbcTemplateLockProvider) lockProvider;
-        l.clearCache();
-        RestAssured.port = port;
+    void setupL() {
         brukerNotifikasjonOppgaveConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonOppgaveTopic);
         brukerNotifikasjonBeskjedConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonBeskjedTopic);
         brukerNotifikasjonDoneConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonDoneTopic);

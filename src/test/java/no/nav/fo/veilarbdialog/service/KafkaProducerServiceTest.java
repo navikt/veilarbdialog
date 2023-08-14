@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
+import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
 import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import org.junit.jupiter.api.Test;
@@ -12,10 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDateTime;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
-@ActiveProfiles("local")
-class KafkaProducerServiceTest {
+class KafkaProducerServiceTest extends SpringBootTestBase {
 
     @Autowired
     private KafkaProducerService kafkaProducerService;

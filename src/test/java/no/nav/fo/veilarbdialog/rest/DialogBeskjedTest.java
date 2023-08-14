@@ -7,6 +7,7 @@ import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import no.nav.brukernotifikasjon.schemas.input.BeskjedInput;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
+import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.*;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
@@ -40,29 +41,14 @@ import static no.nav.fo.veilarbdialog.util.KafkaTestService.DEFAULT_WAIT_TIMEOUT
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
-@Slf4j
-@Sql(
-        scripts = "/db/testdata/slett_alle_dialoger.sql",
-        executionPhase = BEFORE_TEST_METHOD
-)
-class DialogBeskjedTest {
 
-    @LocalServerPort
-    protected int port;
+class DialogBeskjedTest extends SpringBootTestBase {
 
     @Autowired
     ScheduleRessurs scheduleRessurs;
 
     @Autowired
     BrukernotifikasjonRepository brukernotifikasjonRepository;
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    LockProvider lockProvider;
 
     @Autowired
     KafkaTestService kafkaTestService;
@@ -81,10 +67,7 @@ class DialogBeskjedTest {
     Consumer<NokkelInput, DoneInput> brukerNotifikasjonDoneConsumer;
 
     @BeforeEach
-    public void setup() {
-        JdbcTemplateLockProvider l = (JdbcTemplateLockProvider) lockProvider;
-        l.clearCache();
-        RestAssured.port = port;
+    public void setupL() {
         brukerNotifikasjonBeskjedConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonBeskjedTopic);
         brukerNotifikasjonDoneConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonDoneTopic);
     }

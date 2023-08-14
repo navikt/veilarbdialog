@@ -6,6 +6,7 @@ import io.restassured.RestAssured;
 import lombok.SneakyThrows;
 import no.nav.common.types.identer.Fnr;
 import no.nav.doknotifikasjon.schemas.DoknotifikasjonStatus;
+import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus;
@@ -45,9 +46,7 @@ import java.util.concurrent.ExecutionException;
 import static no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarslingKvitteringConsumer.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
-class EksternVarslingKvitteringTest {
+class EksternVarslingKvitteringTest extends SpringBootTestBase {
 
     @Autowired
     BrukernotifikasjonRepository brukernotifikasjonRepository;
@@ -56,13 +55,10 @@ class EksternVarslingKvitteringTest {
     KafkaTestService kafkaTestService;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    @Autowired
     DialogTestService dialogTestService;
 
     @Autowired
-    NamedParameterJdbcTemplate jdbc;
+    NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Value("${application.topic.inn.eksternVarselKvittering}")
     String kvitteringsTopic;
@@ -72,17 +68,6 @@ class EksternVarslingKvitteringTest {
 
     @Autowired
     KafkaTemplate<String, DoknotifikasjonStatus> kvitteringsProducer;
-
-    @Autowired
-    MeterRegistry meterRegistry;
-
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
 
     @AfterEach
     void assertNoUnkowns() {
@@ -159,7 +144,7 @@ class EksternVarslingKvitteringTest {
         Awaitility.await().atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
             SqlParameterSource params = new MapSqlParameterSource()
                     .addValue("bestillingId", bestillingsId.toString());
-            List<String> list = jdbc.queryForList("""
+            List<String> list = namedParameterJdbcTemplate.queryForList("""
                     SELECT DOKNOTIFIKASJON_STATUS
                     FROM EKSTERN_VARSEL_KVITTERING
                     WHERE BRUKERNOTIFIKASJON_BESTILLING_ID = :bestillingId

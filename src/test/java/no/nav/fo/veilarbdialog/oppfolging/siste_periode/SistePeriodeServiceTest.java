@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.oppfolging.siste_periode;
 
 import no.nav.common.types.identer.AktorId;
+import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
@@ -17,9 +18,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
-class SistePeriodeServiceTest {
+
+class SistePeriodeServiceTest extends SpringBootTestBase {
     @Autowired
     SistePeriodeDAO sistePeriodeDAO;
     @Autowired

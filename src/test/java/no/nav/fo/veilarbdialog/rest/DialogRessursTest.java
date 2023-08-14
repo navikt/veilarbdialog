@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.rest;
 
 import io.restassured.RestAssured;
 import lombok.val;
+import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
@@ -23,30 +24,14 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
-@ActiveProfiles("local")
-@Sql(
-        scripts = "/db/testdata/slett_alle_dialoger.sql",
-        executionPhase = AFTER_TEST_METHOD
-)
-class DialogRessursTest {
 
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    JdbcTemplate jdbc;
-
-    @Autowired
-    DialogRessurs dialogRessurs;
+class DialogRessursTest extends SpringBootTestBase {
 
     private MockBruker bruker;
     private MockVeileder veileder;
 
     @BeforeEach
-    void setup() {
-        RestAssured.port = port;
+    void setupl() {
         bruker = MockNavService.createHappyBruker();
         veileder = MockNavService.createVeileder(bruker);
     }
