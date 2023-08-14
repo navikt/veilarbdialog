@@ -1,66 +1,32 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import io.restassured.RestAssured;
-import no.nav.common.client.aktoroppslag.AktorOppslagClient;
+import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.Avsender;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
-import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
-import no.nav.fo.veilarbdialog.service.DialogDataService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.AFTER_TEST_METHOD;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
-@ActiveProfiles("local")
-@Sql(
-        scripts = "/db/testdata/slett_alle_dialoger.sql",
-        executionPhase = AFTER_TEST_METHOD
-)
-class RestServiceTest {
+
+class RestServiceTest extends SpringBootTestBase {
 
     MockVeileder veileder;
     MockBruker bruker;
-
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    private JdbcTemplate jdbc;
-
-    @Autowired
-    KontorsperreFilter kontorsperreFilter;
-
-    @Autowired
-    RestMapper restMapper;
-
-    @Autowired
-    AktorOppslagClient aktorOppslagClient;
-
-    @Autowired
-    DialogDataService dialogDataService;
-
-    @Autowired
-    DialogRessurs dialogRessurs;
 
 
     @BeforeEach
@@ -154,7 +120,7 @@ class RestServiceTest {
 
     @Test
     void sistOppdatert_brukerInnlogget_kunBrukerHarLest_returnererNull() {
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), bruker.getAktorId());
+        jdbcTemplate.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), bruker.getAktorId());
 
         bruker.createRequest()
                 .param("aktorId", bruker.getAktorId())
@@ -168,7 +134,7 @@ class RestServiceTest {
 
     @Test
     void sistOppdatert_veilederInnlogget_kunVeilederHarLest_returnererNull() {
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), veileder.getNavIdent());
+        jdbcTemplate.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), veileder.getNavIdent());
 
         veileder.createRequest()
                 .param("aktorId", bruker.getAktorId())
@@ -185,8 +151,8 @@ class RestServiceTest {
         Timestamp brukerLest = Timestamp.valueOf(LocalDateTime.now().minusHours(1));
         Timestamp veilederLest = Timestamp.valueOf(LocalDateTime.now());
 
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), bruker.getAktorId(), brukerLest);
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), veileder.getNavIdent(), veilederLest);
+        jdbcTemplate.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), bruker.getAktorId(), brukerLest);
+        jdbcTemplate.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), veileder.getNavIdent(), veilederLest);
 
         bruker.createRequest()
                 .param("aktorId", bruker.getAktorId())
@@ -203,8 +169,8 @@ class RestServiceTest {
         Timestamp veilederLest = Timestamp.valueOf(LocalDateTime.now().minusHours(1));
         Timestamp brukerLest = Timestamp.valueOf(LocalDateTime.now());
 
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), veileder.getNavIdent(), veilederLest);
-        jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), bruker.getAktorId(), brukerLest);
+        jdbcTemplate.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), veileder.getNavIdent(), veilederLest);
+        jdbcTemplate.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), bruker.getAktorId(), brukerLest);
 
         veileder.createRequest()
                 .param("aktorId", bruker.getAktorId())
