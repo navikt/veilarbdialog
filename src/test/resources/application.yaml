@@ -69,6 +69,8 @@ server:
     context-path: "/veilarbdialog"
 
 application:
+  poao_tilgang:
+    scope: "poao_tilgang.scope"
   cluster: TEST
   namespace: APP_NAMESPACE_NAME
   environment: APP_ENVIRONMENT_NAME

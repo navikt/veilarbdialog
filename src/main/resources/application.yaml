@@ -1,4 +1,4 @@
-spring:
+  spring:
   application:
     name: "veilarbdialog"
   data:
@@ -106,6 +106,9 @@ application:
   cluster: ${APP_CLUSTER_NAME}
   namespace: ${NAIS_NAMESPACE}
   environment: ${APP_ENVIRONMENT_NAME}
+  poao_tilgang:
+    url: http://poao-tilgang.poao.svc.nais.local
+    scope: ${POAO_TILGANG_SCOPE}
   abac:
     url: ${ABAC_PDP_ENDPOINT_URL}
   azure:

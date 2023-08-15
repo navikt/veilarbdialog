@@ -20,8 +20,10 @@
         <java.version>17</java.version>
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
-        <common.version>3.2023.02.28_14.59-ff398ca0d33e</common.version>
-        <dab.common.version>2023.02.24-10.12.c01f6e9ff044</dab.common.version>
+        <common.version>3.2023.06.27_13.10-a13ff6f90290</common.version>
+        <dab.common.version>2023.06.30-12.11.f11e6e6e92ef</dab.common.version>
+        <poao.tilgang.version>2023.08.04_08.06-bb3c9f5f3d03</poao.tilgang.version>
+
 
         <shedlock.version>4.43.0</shedlock.version>
 
@@ -205,6 +207,17 @@
             <groupId>com.github.navikt.dab</groupId>
             <artifactId>spring-auth</artifactId>
             <version>${dab.common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.navikt.poao-tilgang</groupId>
+            <artifactId>client</artifactId>
+            <version>${poao.tilgang.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.navikt.poao-tilgang</groupId>
+            <artifactId>poao-tilgang-test-wiremock</artifactId>
+            <version>${poao.tilgang.version}</version>
+            <scope>test</scope>
         </dependency>
 
 

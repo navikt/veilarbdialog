@@ -11,7 +11,7 @@ public class BrukerOptions {
     private boolean erReservertKrr;
     private boolean kanVarsles;
     private boolean erUnderKvp;
-    private String kontorsperreEnhet;
+    private String oppfolgingsEnhet;
     private boolean harBruktNivaa4;
 
     private boolean oppfolgingFeiler;

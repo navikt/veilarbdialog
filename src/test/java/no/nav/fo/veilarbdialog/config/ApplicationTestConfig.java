@@ -50,8 +50,4 @@ public class ApplicationTestConfig {
         return mock(UnleashClient.class);
     }
 
-    @Bean
-    public IAuthService authService(AuthContextHolder authContextHolder, Pep pep, IPersonService personService) {
-        return new AuthService(authContextHolder, pep, personService);
-    }
 }
