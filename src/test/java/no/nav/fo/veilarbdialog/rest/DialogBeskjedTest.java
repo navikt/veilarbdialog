@@ -1,9 +1,5 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import io.restassured.RestAssured;
-import lombok.extern.slf4j.Slf4j;
-import net.javacrumbs.shedlock.core.LockProvider;
-import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import no.nav.brukernotifikasjon.schemas.input.BeskjedInput;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
@@ -26,12 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
-import org.springframework.test.context.jdbc.Sql;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -39,7 +30,6 @@ import java.util.Date;
 
 import static no.nav.fo.veilarbdialog.util.KafkaTestService.DEFAULT_WAIT_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 
 class DialogBeskjedTest extends SpringBootTestBase {
