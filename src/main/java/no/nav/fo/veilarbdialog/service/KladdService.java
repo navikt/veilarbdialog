@@ -8,7 +8,6 @@ import no.nav.fo.veilarbdialog.domain.Kladd;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service

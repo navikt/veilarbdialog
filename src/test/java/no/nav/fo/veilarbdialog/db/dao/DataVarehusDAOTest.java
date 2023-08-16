@@ -1,22 +1,13 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.Data;
-import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.poao.dab.spring_auth.IAuthService;
-import org.flywaydb.core.Flyway;
-import org.h2.tools.Server;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
-import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
