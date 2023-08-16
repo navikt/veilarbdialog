@@ -20,7 +20,7 @@
         <java.version>17</java.version>
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
-        <common.version>3.2023.06.27_13.10-a13ff6f90290</common.version>
+        <common.version>3.2023.07.07_09.10-85326e9557f0</common.version>
         <dab.common.version>2023.06.30-12.11.f11e6e6e92ef</dab.common.version>
         <poao.tilgang.version>2023.08.04_08.06-bb3c9f5f3d03</poao.tilgang.version>
 
