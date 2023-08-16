@@ -78,8 +78,6 @@ application:
     idporten:
       audience: IDPORTEN_CLIENTID_USERNAME
       discoveryUrl: http://localhost:8080/IDPORTEN_DISCOVERY_URL
-  abac:
-    url: http://localhost:8080/ABAC_PDP_ENDPOINT_URL
   azure:
     ad:
       clientId: VEILARBDIALOG_OIDC_CLIENT_ID
