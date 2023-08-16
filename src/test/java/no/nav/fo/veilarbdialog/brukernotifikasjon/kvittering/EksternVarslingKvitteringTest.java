@@ -1,8 +1,6 @@
 package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.restassured.RestAssured;
 import lombok.SneakyThrows;
 import no.nav.common.types.identer.Fnr;
 import no.nav.doknotifikasjon.schemas.DoknotifikasjonStatus;
@@ -22,14 +20,9 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 import org.assertj.core.api.SoftAssertions;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
