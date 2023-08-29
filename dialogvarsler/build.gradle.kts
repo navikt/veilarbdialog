@@ -2,6 +2,9 @@
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
+val tokensupport_version: String by project
+val kafka_client_version: String by project
+val mockoath_version: String by project
 
 plugins {
     kotlin("jvm") version "1.9.10"
@@ -31,7 +34,16 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
     implementation("io.ktor:ktor-server-websockets-jvm")
     implementation("io.ktor:ktor-server-netty-jvm")
+    implementation("io.ktor:ktor-server-auth:$ktor_version")
+    implementation("io.ktor:ktor-server-auth-jwt:$ktor_version")
+    implementation("io.ktor:ktor-server-config-yaml:$ktor_version")
+
+    implementation("org.apache.kafka:kafka-clients:$kafka_client_version")
+    implementation("io.github.embeddedkafka:embedded-kafka_3:$kafka_client_version")
+
     implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("no.nav.security:token-validation-ktor-v2:$tokensupport_version")
+    testImplementation("no.nav.security:mock-oauth2-server:$mockoath_version")
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
