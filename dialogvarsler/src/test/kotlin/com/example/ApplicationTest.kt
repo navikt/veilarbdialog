@@ -7,11 +7,16 @@ import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.testing.*
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import java.util.UUID
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
+import io.github.embeddedkafka.EmbeddedKafka
+import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerConfig
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.serialization.StringSerializer
+import java.util.*
 
 class ApplicationTest {
 
@@ -40,28 +45,35 @@ class ApplicationTest {
             assertEquals(HttpStatusCode.OK, status)
             UUID.fromString(this.bodyAsText())
         }
+
+        val producer = getTestProducer()
+        val messageToSend = "Hello, Kafka!"
+        val record = ProducerRecord("test-topic","12345678910", messageToSend )
+        producer.send(record).get()
     }
 
     private fun ApplicationEngineEnvironmentBuilder.doConfig(
-        acceptedIssuer: String = "default",
-        acceptedAudience: String = "default"
+            acceptedIssuer: String = "default",
+            acceptedAudience: String = "default"
     ) {
         config = MapApplicationConfig(
-            "no.nav.security.jwt.issuers.size" to "1",
-            "no.nav.security.jwt.issuers.0.issuer_name" to acceptedIssuer,
-            "no.nav.security.jwt.issuers.0.discoveryurl" to "${server.wellKnownUrl(acceptedIssuer)}",
-            "no.nav.security.jwt.issuers.0.accepted_audience" to acceptedAudience
+                "no.nav.security.jwt.issuers.size" to "1",
+                "no.nav.security.jwt.issuers.0.issuer_name" to acceptedIssuer,
+                "no.nav.security.jwt.issuers.0.discoveryurl" to "${server.wellKnownUrl(acceptedIssuer)}",
+                "no.nav.security.jwt.issuers.0.accepted_audience" to acceptedAudience
         )
     }
+
     companion object {
+        var kafkaBrokerServer = EmbeddedKafkaSetup.start()
+
         val server: MockOAuth2Server by lazy {
             MockOAuth2Server()
-                .also { it.start() }
+                    .also { it.start() }
         }
 
         @BeforeTest
         fun before() {
-            EmbeddedKafkaSetup.start()
             server.start()
         }
 
@@ -70,5 +82,19 @@ class ApplicationTest {
             EmbeddedKafkaSetup.stop()
             server.shutdown()
         }
+
+    }
+
+    fun getTestProducer(): KafkaProducer<String, String> {
+        var connectionString = kafkaBrokerServer?.broker()?.createBrokerInfo()?.broker()?.endPoints()?.find { true }?.get()?.connectionString()
+                ?: throw Exception("Could not find brokerserver")
+        val kafkaProps = Properties().apply {
+            put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, connectionString)
+            put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)
+            put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)
+        }
+
+        return KafkaProducer<String, String>(kafkaProps)
+
     }
 }
