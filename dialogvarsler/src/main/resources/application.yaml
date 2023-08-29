@@ -1,0 +1,15 @@
+ktor:
+  deployment:
+    port: 8080
+  application:
+    modules:
+      - com.example.ApplicationKt.module
+
+no:
+  nav:
+    security:
+      jwt:
+        issuers:
+          - discoveryurl: "$AZURE_APP_WELL_KNOWN_URL:null"
+            accepted_audience: "$AZURE_APP_CLIENT_ID:null"
+            issuer_name: "AzureAD"
