@@ -40,6 +40,9 @@ object NyDialogFlow {
             isStartedState.emit(true)
             while (!shuttingDown) {
                 val records = consumer.poll(Duration.ofMillis(100))
+                if (!records.isEmpty) {
+                    logger.info("Emitting ${records.count()} in messageFlow")
+                }
                 for (record in records) {
                     messageFlow.emit(record)
                     consumer.commitSync()
