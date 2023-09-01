@@ -15,9 +15,9 @@ jobs:
     name: Test, build and push
     runs-on: ubuntu-latest
     steps:
-    - name: Dialogvarsler - Execute Gradle build
+    - name: Dialogvarsler - Test
       working-directory: dialogvarsler
-      run: ./gradlew build
+      run: ./gradlew test
     - name: Dialogvarsler - Build image
       working-directory: dialogvarsler
       run: ./gradlew buildImage
