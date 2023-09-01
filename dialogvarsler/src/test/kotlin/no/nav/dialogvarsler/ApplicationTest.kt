@@ -64,12 +64,14 @@ class ApplicationTest : StringSpec({
                 logger.info("Pushing kafka message for test-fnr 1")
                 producer.send(fnr1Record).get()
                 receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
+                logger.info("Received message, closing websocket for fnr 1")
             }
             client.webSocket("/ws") {
                 awaitAuth(veileder2token)
                 logger.info("Pushing kafka message for test-fnr 2")
                 producer.send(fnr2Record).get()
                 receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
+                logger.info("Received message, closing websocket for fnr 2")
             }
         }
     }

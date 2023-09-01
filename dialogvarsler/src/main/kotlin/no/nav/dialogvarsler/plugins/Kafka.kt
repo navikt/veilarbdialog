@@ -56,9 +56,7 @@ fun Application.configureKafka() {
     }
 
     NyDialogFlow.subscribe(consumer)
-    NyDialogFlow.messageFlow.onEach {
-        DialogNotifier.notifySubscribers(it)
-    }
+    NyDialogFlow.messageFlow
+        .onEach { DialogNotifier.notifySubscribers(it) }
         .launchIn(CoroutineScope(Dispatchers.Default))
-//    if (NyDialogFlow.messageFlow.subscriptionCount.value == 0) throw IllegalStateException("NO SUBS")
 }
