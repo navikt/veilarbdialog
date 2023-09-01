@@ -20,9 +20,9 @@ object NyDialogFlow {
             .distinctUntilChanged() // only react to true<->false changes
             .onEach { isActive -> // configure an action
                 if (isActive)
-                    logger.info("Have subscribers")
+                    logger.info("MessageFlow received subscribers")
                 else
-                    logger.info("No subscribers")
+                    logger.info("Message lost all subscribers")
             }
             .launchIn(CoroutineScope(Dispatchers.Default))
     }
@@ -32,9 +32,9 @@ object NyDialogFlow {
     }
     fun subscribe(consumer: KafkaConsumer<String, String>) {
         val coroutineScope = CoroutineScope(Dispatchers.Default)
-        logger.info("Subscribing to topic")
+        logger.info("Setting up flow subscription...")
         coroutineScope.launch {
-            logger.info("Subscribing to topic")
+            logger.info("Launched coroutine for polling...")
             while (!shuttingDown) {
                 val records = consumer.poll(Duration.ofMillis(100))
                 for (record in records) {

@@ -61,11 +61,13 @@ class ApplicationTest : StringSpec({
 
             client.webSocket("/ws") {
                 awaitAuth(veileder1token)
+                logger.info("Pushing kafka message for test-fnr 1")
                 producer.send(fnr1Record).get()
                 receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
             }
             client.webSocket("/ws") {
                 awaitAuth(veileder2token)
+                logger.info("Pushing kafka message for test-fnr 2")
                 producer.send(fnr2Record).get()
                 receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
             }
@@ -136,8 +138,11 @@ class ApplicationTest : StringSpec({
 }
 
 suspend fun DefaultClientWebSocketSession.awaitAuth(token: String) {
+    val logger = LoggerFactory.getLogger(javaClass)
+    logger.info("Sending authtoken on websocket")
     send(Frame.Text(token))
     val authAck = (incoming.receive() as? Frame.Text)?.readText() ?: ""
+    logger.info("Received auth-ack")
     authAck shouldBe "AUTHENTICATED"
 }
 suspend fun DefaultClientWebSocketSession.receiveStringWithTimeout(): String {
