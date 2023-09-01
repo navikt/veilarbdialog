@@ -57,18 +57,25 @@ jobs:
           IMAGE_TAG: ${{ env.IMAGE_TAG }}}
           USERNAME: ${{ github.actor }}
           PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-
-  deploy-dev:
-    name: Deploy application to dev
-    needs: test-build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
       - name: Deploy application
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
           RESOURCE: nais/nais-dev.yaml
-          VAR: version=${{ env.IMAGE_TAG }},namespace=q1
+          VAR: version=${{ env.IMAGE_TAG }}
+
+#  deploy-dev:
+#    name: Deploy application to dev
+#    needs: test-build-and-push
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#      - name: Deploy application
+#        uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+#          CLUSTER: dev-fss
+#          RESOURCE: nais/nais-dev.yaml
+#          VAR: version=${{ env.IMAGE_TAG }},namespace=q1
