@@ -1,12 +1,10 @@
 package no.nav.dialogvarsler.plugins
 
-import com.example.*
 import no.nav.dialogvarsler.WsConnectionHolder.addSubscription
 import no.nav.dialogvarsler.WsConnectionHolder.removeSubscription
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
-import kotlinx.serialization.json.Json
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel

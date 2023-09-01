@@ -1,0 +1,47 @@
+kind: Application
+apiVersion: nais.io/v1alpha1
+metadata:
+  name: dialogvarsler
+  namespace: dab
+  cluster: dev-gcp
+  labels:
+    team: dab
+spec:
+  image: ghcr.io/navikt/dialogvarsler/dialogvarsler:{{version}}
+  ingresses:
+    - https://dialogvarsler.ekstern.dev.nav.no
+  port: 8080
+  liveness:
+    path: /isAlive
+    port: 8080
+    initialDelay: 5
+  readiness:
+    path: /isReady
+    port: 8080
+    initialDelay: 5
+  replicas:
+    min: 1
+    max: 1
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      cpu: "2"
+      memory: 1024Mi
+    requests:
+      cpu: 200m
+      memory: 768Mi
+  kafka:
+    pool: nav-dev
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true
+      claims:
+        extra:
+          - "NAVident"
+  accessPolicy:
+    inbound:
+      rules:
+        - application: veilarbdialog
+          namespace: pto
+          cluster: dev-fss

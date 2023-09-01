@@ -3,6 +3,10 @@ run-name: Deploy dialogvarsler feature branch ${{ github.ref_name }} by @${{ git
 on:
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: dialogvarsler
+
 env:
   IMAGE_TAG: ${{ github.sha }}
 
