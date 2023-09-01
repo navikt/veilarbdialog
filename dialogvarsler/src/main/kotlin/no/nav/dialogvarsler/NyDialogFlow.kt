@@ -1,4 +1,4 @@
-package com.example
+package no.nav.dialogvarsler
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

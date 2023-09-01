@@ -1,4 +1,4 @@
-package com.example
+package no.nav.dialogvarsler
 
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.StringSpec

@@ -1,7 +1,7 @@
-package com.example.plugins
+package no.nav.dialogvarsler.plugins
 
-import com.example.DialogNotifier
-import com.example.NyDialogFlow
+import no.nav.dialogvarsler.DialogNotifier
+import no.nav.dialogvarsler.NyDialogFlow
 import io.ktor.server.application.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

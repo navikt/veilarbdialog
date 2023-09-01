@@ -1,4 +1,4 @@
-package com.example
+package no.nav.dialogvarsler
 
 import io.github.embeddedkafka.EmbeddedK
 import io.github.embeddedkafka.EmbeddedKafka

@@ -1,6 +1,6 @@
-package com.example.plugins
+package no.nav.dialogvarsler.plugins
 
-import com.example.WsTicketHandler
+import no.nav.dialogvarsler.WsTicketHandler
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*

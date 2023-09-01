@@ -1,4 +1,4 @@
-package com.example
+package no.nav.dialogvarsler
 
 import io.ktor.websocket.*
 import kotlinx.serialization.Serializable

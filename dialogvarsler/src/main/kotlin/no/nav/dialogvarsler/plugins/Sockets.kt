@@ -1,8 +1,8 @@
-package com.example.plugins
+package no.nav.dialogvarsler.plugins
 
 import com.example.*
-import com.example.WsConnectionHolder.addSubscription
-import com.example.WsConnectionHolder.removeSubscription
+import no.nav.dialogvarsler.WsConnectionHolder.addSubscription
+import no.nav.dialogvarsler.WsConnectionHolder.removeSubscription
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
@@ -11,6 +11,9 @@ import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.*
+import no.nav.dialogvarsler.ConnectionTicket
+import no.nav.dialogvarsler.Subscription
+import no.nav.dialogvarsler.WsConnectionHolder
 import java.lang.IllegalArgumentException
 import java.time.Duration
 
