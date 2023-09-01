@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
@@ -12,6 +13,7 @@ import java.time.Duration
 object NyDialogFlow {
     private val logger = LoggerFactory.getLogger(javaClass)
     val messageFlow = MutableSharedFlow<ConsumerRecord<String, String>>() // No-replay, hot-flow
+    private val isStartedState = MutableStateFlow(false)
     var shuttingDown = false
 
     init {
@@ -35,6 +37,7 @@ object NyDialogFlow {
         logger.info("Setting up flow subscription...")
         coroutineScope.launch {
             logger.info("Launched coroutine for polling...")
+            isStartedState.emit(true)
             while (!shuttingDown) {
                 val records = consumer.poll(Duration.ofMillis(100))
                 for (record in records) {
@@ -42,10 +45,13 @@ object NyDialogFlow {
                     consumer.commitSync()
                 }
             }
+            logger.info("Closing consumer...")
             consumer.close(Duration.ofMillis(500))
             consumer.unsubscribe()
         }
-
+        runBlocking {
+            isStartedState.first { isStarted -> isStarted }
+        }
     }
 }
 
