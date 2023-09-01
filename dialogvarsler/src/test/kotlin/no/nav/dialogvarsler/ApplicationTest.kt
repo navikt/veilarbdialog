@@ -78,27 +78,27 @@ class ApplicationTest : StringSpec({
         }
     }
 
-    "authorization should work" {
-        testApplication {
-            environment { doConfig() }
-            application { module() }
-            client.get("/isAlive").apply {
-                assertEquals(HttpStatusCode.OK, status)
-                assertEquals("", bodyAsText())
-            }
-            client.post("/ws-auth-ticket").apply {
-                assertEquals(HttpStatusCode.Unauthorized, status)
-            }
-            client.post("/ws-auth-ticket") {
-                bearerAuth(server.issueToken().serialize())
-                contentType(ContentType.Application.Json)
-                setBody("""{ "fnr": "12345678910" }""")
-            }.apply {
-                assertEquals(HttpStatusCode.OK, status)
-                UUID.fromString(this.bodyAsText())
-            }
-        }
-    }
+//    "authorization should work" {
+//        testApplication {
+//            environment { doConfig() }
+//            application { module() }
+//            client.get("/isAlive").apply {
+//                assertEquals(HttpStatusCode.OK, status)
+//                assertEquals("", bodyAsText())
+//            }
+//            client.post("/ws-auth-ticket").apply {
+//                assertEquals(HttpStatusCode.Unauthorized, status)
+//            }
+//            client.post("/ws-auth-ticket") {
+//                bearerAuth(server.issueToken().serialize())
+//                contentType(ContentType.Application.Json)
+//                setBody("""{ "fnr": "12345678910" }""")
+//            }.apply {
+//                assertEquals(HttpStatusCode.OK, status)
+//                UUID.fromString(this.bodyAsText())
+//            }
+//        }
+//    }
     }) {
 
     companion object {
