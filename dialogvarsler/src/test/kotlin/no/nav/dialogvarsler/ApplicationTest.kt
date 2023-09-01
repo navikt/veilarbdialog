@@ -65,6 +65,7 @@ class ApplicationTest : StringSpec({
                 producer.send(fnr1Record).get()
                 receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
                 logger.info("Received message, closing websocket for fnr 1")
+                close(CloseReason(CloseReason.Codes.NORMAL, "Bye"))
             }
             client.webSocket("/ws") {
                 awaitAuth(veileder2token)
@@ -72,8 +73,8 @@ class ApplicationTest : StringSpec({
                 producer.send(fnr2Record).get()
                 receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
                 logger.info("Received message, closing websocket for fnr 2")
+                close(CloseReason(CloseReason.Codes.NORMAL, "Bye"))
             }
-            client.close()
         }
     }
 
