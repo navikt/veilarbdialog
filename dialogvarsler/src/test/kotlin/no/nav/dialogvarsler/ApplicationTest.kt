@@ -73,6 +73,7 @@ class ApplicationTest : StringSpec({
                 receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
                 logger.info("Received message, closing websocket for fnr 2")
             }
+            client.close()
         }
     }
 

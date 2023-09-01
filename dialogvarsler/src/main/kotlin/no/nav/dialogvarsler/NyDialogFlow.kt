@@ -45,7 +45,7 @@ object NyDialogFlow {
                 }
                 for (record in records) {
                     messageFlow.emit(record)
-                    consumer.commitSync()
+//                    consumer.commitSync()
                 }
             }
             logger.info("Closing consumer...")
