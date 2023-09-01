@@ -59,12 +59,12 @@ class ApplicationTest : StringSpec({
             val veileder1token = getToken(fnr1, veileder1)
             val veileder2token = getToken(fnr2, veileder2)
 
-            val veileder1Session = client.webSocket("/ws") {
+            client.webSocket("/ws") {
                 awaitAuth(veileder1token)
                 producer.send(fnr1Record).get()
                 receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
             }
-            val veileder2Session = client.webSocket("/ws") {
+            client.webSocket("/ws") {
                 awaitAuth(veileder2token)
                 producer.send(fnr2Record).get()
                 receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
