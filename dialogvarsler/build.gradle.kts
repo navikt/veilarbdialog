@@ -5,6 +5,7 @@ val logback_version: String by project
 val tokensupport_version: String by project
 val kafka_client_version: String by project
 val mockoath_version: String by project
+val kotest_version: String by project
 
 plugins {
     kotlin("jvm") version "1.9.10"
@@ -26,6 +27,10 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+}
+
 dependencies {
     implementation("io.ktor:ktor-server-call-logging-jvm")
     implementation("io.ktor:ktor-server-call-id-jvm")
@@ -43,7 +48,15 @@ dependencies {
 
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("no.nav.security:token-validation-ktor-v2:$tokensupport_version")
+
+//    testImplementation("io.kotest.extensions:kotest-extensions-embedded-kafka")
+    testImplementation("io.kotest:kotest-runner-junit5:$kotest_version")
+    testImplementation("io.kotest:kotest-assertions-core:$kotest_version")
+//    testImplementation("io.kotest.extensions:kotest-assertions-ktor:$kotest_version")
+
+
     testImplementation("no.nav.security:mock-oauth2-server:$mockoath_version")
     testImplementation("io.ktor:ktor-server-tests-jvm")
+    testImplementation("io.ktor:ktor-client-websockets:$ktor_version")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

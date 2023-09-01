@@ -17,4 +17,5 @@ fun Application.module() {
     configureSerialization()
     configureSockets()
     configureRouting()
+    configureKafka()
 }

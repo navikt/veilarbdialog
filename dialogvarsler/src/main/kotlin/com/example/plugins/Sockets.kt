@@ -1,7 +1,6 @@
 package com.example.plugins
 
-import com.example.ConnectionIdentifier
-import com.example.Subscription
+import com.example.*
 import com.example.WsConnectionHolder.addSubscription
 import com.example.WsConnectionHolder.removeSubscription
 import io.ktor.server.application.*
@@ -29,13 +28,15 @@ fun Application.configureSockets() {
             try {
                 subscription = authenticate(incoming)
                 addSubscription(subscription)
-//                outgoing.send(Frame.Text("YOU SAID: $text"))
+                this.send("AUTHENTICATED")
+                for (frame in incoming) {
+                }
             } catch (e: ClosedReceiveChannelException) {
                 println("onClose ${closeReason.await()}")
+                subscription?.let { removeSubscription(it) }
             } catch (e: Throwable) {
                 println("onError ${closeReason.await()}")
                 e.printStackTrace()
-            } finally {
                 subscription?.let { removeSubscription(it) }
             }
         }
@@ -48,14 +49,15 @@ suspend fun DefaultWebSocketServerSession.authenticate(channel: ReceiveChannel<F
         .first { it != null } ?: throw IllegalArgumentException("Failed to find auth message in websocket")
     return Subscription(
         wsSession = this,
-        identifier = connectionIdentifier!!
+        identifier = connectionIdentifier
     )
 }
 
-fun tryAuthenticateWithMessage(frame: Frame): ConnectionIdentifier? {
+fun tryAuthenticateWithMessage(frame: Frame): ConnectionTicket? {
     try {
         if (frame !is Frame.Text) return null
-        return Json.decodeFromString<ConnectionIdentifier>(frame.readText())
+        val connectionToken = frame.readText()
+        return WsConnectionHolder.wsConnectionTokenHolder[connectionToken]
     } catch (e: Throwable) {
         println("Failed to deserialize ws-message")
         e.printStackTrace()

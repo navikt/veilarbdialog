@@ -22,7 +22,7 @@ fun Application.configureRouting() {
         authenticate("AzureAD") {
             post("/ws-auth-ticket") {
                 try {
-                    val ticket = WsTicketHandler.get(this)
+                    val ticket = WsTicketHandler.generateTicket(this)
                     call.respondText(ticket)
                 } catch (e: IllegalArgumentException) {
                     call.respond(HttpStatusCode.BadRequest, "Invalid auth")

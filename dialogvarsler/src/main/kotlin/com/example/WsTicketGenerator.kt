@@ -15,13 +15,13 @@ data class TicketRequest(
 )
 
 object WsTicketHandler {
-    suspend fun get(pipelineContext: PipelineContext<Unit, ApplicationCall>): ConnectionToken {
+    suspend fun generateTicket(pipelineContext: PipelineContext<Unit, ApplicationCall>): ConnectionToken {
         // TODO: Add authorization(a2)
         val subject = pipelineContext.call.authentication.principal<TokenValidationContextPrincipal>()
             ?.context?.anyValidClaims?.get()?.get("sub")?.toString() ?: throw IllegalArgumentException("No subject claim found")
         val payload = pipelineContext.call.receive<TicketRequest>()
         val id = UUID.randomUUID().toString()
-        WsConnectionHolder.wsConnectionTokenHolder.put(id, ConnectionTicket(subject ,id, payload.fnr))
+        WsConnectionHolder.wsConnectionTokenHolder[id] = ConnectionTicket(subject ,id, payload.fnr)
         return id
     }
 }

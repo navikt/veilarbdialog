@@ -5,6 +5,18 @@ ktor:
     modules:
       - com.example.ApplicationKt.module
 
+topic:
+  ny-dialog: "$ny-dialog-topic:null"
+
+kafka:
+  brokers: "$KAFKA_BROKERS:null"
+  truststore:
+    path: "KAFKA_TRUSTSTORE_PATH:null"
+    password: "KAFKA_CREDSTORE_PASSWORD:null"
+  keystore:
+    path: "KAFKA_KEYSTORE_PATH:null"
+    password: "KAFKA_CREDSTORE_PASSWORD:null"
+
 no:
   nav:
     security:
