@@ -23,12 +23,31 @@ application {
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
+java {
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 repositories {
     mavenCentral()
 }
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+}
+
+ktor {
+    docker {
+        jreVersion.set(io.ktor.plugin.features.JreVersion.JRE_17)
+        localImageName.set("dialogvarsler")
+        imageTag.set(providers.environmentVariable("IMAGE_TAG"))
+        externalRegistry.set(
+            io.ktor.plugin.features.DockerImageRegistry.dockerHub(
+                appName = provider { "dialogvarsler" },
+                username = providers.environmentVariable("USERNAME"),
+                password = providers.environmentVariable("PASSWORD")
+            )
+        )
+    }
 }
 
 dependencies {
