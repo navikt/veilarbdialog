@@ -48,7 +48,7 @@ fun Application.configureKafka() {
     consumer.assign(listOf(TopicPartition(topic, 0)))
 
     // When in tests mode make sure kafka is up and runnning before
-    if (config.property("kafka.localTest").getString().toBoolean()) {
+    if (config.propertyOrNull("kafka.localTest")?.getString()?.toBoolean() == true) {
         val partitions = consumer.partitionsFor(topic).map { TopicPartition(topic, it.partition()) }
         consumer.seekToEnd(partitions)
         partitions.forEach { partition -> consumer.position(partition, Duration.ofSeconds(10)) }

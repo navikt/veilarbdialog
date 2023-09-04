@@ -1,6 +1,10 @@
 name: Deploy dialogvarsler branch to dev
 run-name: Deploy dialogvarsler feature branch ${{ github.ref_name }} by @${{ github.actor }}
 on:
+  # TODO: Remove this before merging
+  push:
+    branches:
+      - dialogvarsler
   workflow_dispatch:
 
 defaults:
