@@ -7,7 +7,7 @@ metadata:
   labels:
     team: dab
 spec:
-  image: ghcr.io/navikt/dialogvarsler/dialogvarsler:{{version}}
+  image: ghcr.io/navikt/veilarbdialog/dialogvarsler:{{version}}
   ingresses:
     - https://dialogvarsler.ekstern.dev.nav.no
   port: 8080

@@ -60,9 +60,9 @@ jobs:
       - name: Deploy application
         uses: nais/deploy/actions/deploy@v1
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-fss
-          RESOURCE: nais/nais-dev.yaml
+          APIKEY: ${{ secrets.DAB_NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: dialogvarsler/nais/nais-dev.yaml
           VAR: version=${{ env.IMAGE_TAG }}
 
 #  deploy-dev:
