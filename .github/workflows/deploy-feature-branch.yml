@@ -47,14 +47,14 @@ jobs:
         working-directory: dialogvarsler
         run: ./gradlew buildImage
         env:
-          IMAGE_TAG: ${{ env.IMAGE_TAG }}}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
           USERNAME: ${{ github.actor }}
           PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       - name: Dialogvarsler - Publish image
         working-directory: dialogvarsler
         run: ./gradlew publishImage
         env:
-          IMAGE_TAG: ${{ env.IMAGE_TAG }}}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
           USERNAME: ${{ github.actor }}
           PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       - name: Deploy application
