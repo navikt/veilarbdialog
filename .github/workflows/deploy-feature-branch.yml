@@ -55,7 +55,7 @@ jobs:
         run: ./gradlew publishImage
         env:
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
-          USERNAME: ${{ github.repository }}
+          USERNAME: ${{ github.actor }}
           PASSWORD: ${{ secrets.GITHUB_TOKEN }}
       - name: Deploy application
         uses: nais/deploy/actions/deploy@v1
