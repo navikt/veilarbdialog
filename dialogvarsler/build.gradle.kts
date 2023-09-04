@@ -53,7 +53,7 @@ ktor {
         externalRegistry.set(
             GithubImageRegistry(
                 toImage = provider { "ghcr.io/veilarbdialog/dialogvarsler" },
-                username = providers.environmentVariable("USERNAME"),
+                username = providers.environmentVariable("GITHUB_REPOSITORY"),
                 password = providers.environmentVariable("PASSWORD"),
             )
         )
