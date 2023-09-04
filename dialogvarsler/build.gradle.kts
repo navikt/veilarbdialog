@@ -42,20 +42,29 @@ tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
-data class GithubImageRegistry(override val toImage: Provider<String>, override val username: Provider<String>, override val password: Provider<String>) :
-    DockerImageRegistry
+data class GithubImageRegistry(
+    override val toImage: Provider<String>,
+    override val username: Provider<String>,
+    override val password: Provider<String>) : DockerImageRegistry
 
 ktor {
     docker {
-        jreVersion.set(io.ktor.plugin.features.JreVersion.JRE_17)
+        jreVersion.set(JreVersion.JRE_17)
         localImageName.set("dialogvarsler")
         imageTag.set(providers.environmentVariable("IMAGE_TAG"))
         externalRegistry.set(
-            GithubImageRegistry(
-                toImage = provider { "ghcr.io/veilarbdialog/dialogvarsler" },
+            DockerImageRegistry.externalRegistry(
                 username = providers.environmentVariable("USERNAME"),
                 password = providers.environmentVariable("PASSWORD"),
+                project = provider { "veilarbdialog" },
+                hostname = provider { "ghcr.io" },
+                namespace = provider { "dialogvarsler" }
             )
+//            GithubImageRegistry(
+//                toImage = provider { "ghcr.io/veilarbdialog/dialogvarsler" },
+//                username = providers.environmentVariable("USERNAME"),
+//                password = providers.environmentVariable("PASSWORD"),
+//            )
         )
     }
 }
