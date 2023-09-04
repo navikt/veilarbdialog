@@ -47,12 +47,9 @@ jobs:
 #      - name: Dialogvarsler - Test
 #        working-directory: dialogvarsler
 #        run: ./gradlew test
-      - name: Dialogvarsler - Build image
-        working-directory: dialogvarsler
-        run: ./gradlew buildImage
       - name: Dialogvarsler - Publish image
         working-directory: dialogvarsler
-        run: ./gradlew publishImage
+        run: ./gradlew publishImage --scan
         env:
           IMAGE_TAG: ${{ env.IMAGE_TAG }}
           USERNAME: ${{ github.actor }}
