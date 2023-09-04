@@ -56,9 +56,9 @@ ktor {
             DockerImageRegistry.externalRegistry(
                 username = providers.environmentVariable("USERNAME"),
                 password = providers.environmentVariable("PASSWORD"),
-                project = provider { "veilarbdialog" },
+                project = provider { "veilarbdialog/dialogvarsler" },
                 hostname = provider { "ghcr.io" },
-                namespace = provider { "dialogvarsler" }
+                namespace = provider { "navikt" }
             )
 //            GithubImageRegistry(
 //                toImage = provider { "ghcr.io/veilarbdialog/dialogvarsler" },
