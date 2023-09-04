@@ -1,3 +1,4 @@
+import io.ktor.plugin.features.*
 
 val ktor_version: String by project
 val kotlin_version: String by project
@@ -41,16 +42,19 @@ tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
+data class GithubImageRegistry(override val toImage: Provider<String>, override val username: Provider<String>, override val password: Provider<String>) :
+    DockerImageRegistry
+
 ktor {
     docker {
         jreVersion.set(io.ktor.plugin.features.JreVersion.JRE_17)
         localImageName.set("dialogvarsler")
         imageTag.set(providers.environmentVariable("IMAGE_TAG"))
         externalRegistry.set(
-            io.ktor.plugin.features.DockerImageRegistry.dockerHub(
-                appName = provider { "dialogvarsler" },
+            GithubImageRegistry(
+                toImage = provider { "ghcr.io/veilarbdialog/dialogvarsler" },
                 username = providers.environmentVariable("USERNAME"),
-                password = providers.environmentVariable("PASSWORD")
+                password = providers.environmentVariable("PASSWORD"),
             )
         )
     }
