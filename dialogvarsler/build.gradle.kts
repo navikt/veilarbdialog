@@ -14,11 +14,11 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
 }
 
-group = "com.example"
+group = "no.nav.dialogvarsler"
 version = "0.0.1"
 
 application {
-    mainClass.set("com.example.ApplicationKt")
+    mainClass.set("no.nav.dialogvarsler.ApplicationKt")
 
     val isDevelopment: Boolean = project.ext.has("development")
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")

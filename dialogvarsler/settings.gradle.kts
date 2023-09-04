@@ -1,1 +1,1 @@
-rootProject.name = "com.example.dialogvarsler"
+rootProject.name = "no.nav.dialogvarsler"
