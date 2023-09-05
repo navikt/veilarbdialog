@@ -7,6 +7,7 @@ val tokensupport_version: String by project
 val kafka_client_version: String by project
 val mockoath_version: String by project
 val kotest_version: String by project
+val prometheus_version: String by project
 
 plugins {
     kotlin("jvm") version "1.9.10"
@@ -80,6 +81,8 @@ dependencies {
     implementation("io.ktor:ktor-server-auth:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jwt:$ktor_version")
     implementation("io.ktor:ktor-server-config-yaml:$ktor_version")
+    implementation("io.ktor:ktor-server-metrics-micrometer:$ktor_version")
+    implementation("io.micrometer:micrometer-registry-prometheus:$prometheus_version")
 
     implementation("org.apache.kafka:kafka-clients:$kafka_client_version")
     implementation("io.github.embeddedkafka:embedded-kafka_3:$kafka_client_version")

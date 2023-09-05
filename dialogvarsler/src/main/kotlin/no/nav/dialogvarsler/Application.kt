@@ -15,6 +15,7 @@ fun main(args: Array<String>): Unit = EngineMain.main(args)
 fun Application.module() {
     configureAuthentication()
     configureMonitoring()
+    configureMicrometer()
     configureSerialization()
     configureSockets()
     configureRouting()

@@ -6,7 +6,7 @@ ktor:
       - no.nav.dialogvarsler.ApplicationKt.module
 
 topic:
-  ny-dialog: "$ny-dialog-topic:null"
+  ny-dialog: "dab.dialog-events-v1"
 
 kafka:
   brokers: "$KAFKA_BROKERS:null"
