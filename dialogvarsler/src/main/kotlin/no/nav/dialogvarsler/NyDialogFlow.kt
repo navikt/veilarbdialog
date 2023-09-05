@@ -30,7 +30,7 @@ object NyDialogFlow {
         shuttingDown = true
     }
     fun subscribe(consumer: KafkaConsumer<String, String>) {
-        val coroutineScope = CoroutineScope(Dispatchers.Default)
+        val coroutineScope = CoroutineScope(Dispatchers.IO)
         val handler = CoroutineExceptionHandler { thread, exception ->
             logger.error("Error in kafka coroutine:", exception)
         }
