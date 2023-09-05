@@ -23,7 +23,7 @@ version = "0.0.1"
 application {
     mainClass.set("no.nav.dialogvarsler.ApplicationKt")
     val isDevelopment: Boolean = project.ext.has("development")
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment", "-Xmx1024m")
+    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment", "-Xmx1024m", "-Xms256m")
 }
 
 java {
