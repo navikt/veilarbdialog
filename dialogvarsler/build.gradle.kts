@@ -8,6 +8,7 @@ val kafka_client_version: String by project
 val mockoath_version: String by project
 val kotest_version: String by project
 val prometheus_version: String by project
+val logstash_encoder_version: String by project
 
 plugins {
     kotlin("jvm") version "1.9.10"
@@ -86,6 +87,7 @@ dependencies {
 
     implementation("org.apache.kafka:kafka-clients:$kafka_client_version")
     implementation("io.github.embeddedkafka:embedded-kafka_3:$kafka_client_version")
+    implementation("net.logstash.logback:logstash-logback-encoder:$logstash_encoder_version")
 
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("no.nav.security:token-validation-ktor-v2:$tokensupport_version")
