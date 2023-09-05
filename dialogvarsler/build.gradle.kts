@@ -1,4 +1,5 @@
 import io.ktor.plugin.features.*
+import org.jetbrains.kotlin.cli.jvm.compiler.jvmFactories
 
 val ktor_version: String by project
 val kotlin_version: String by project
@@ -21,9 +22,8 @@ version = "0.0.1"
 
 application {
     mainClass.set("no.nav.dialogvarsler.ApplicationKt")
-
     val isDevelopment: Boolean = project.ext.has("development")
-    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
+    applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment", "-Xmx1024m")
 }
 
 java {
@@ -62,11 +62,6 @@ ktor {
                 hostname = provider { "ghcr.io" },
                 namespace = provider { "navikt" }
             )
-//            GithubImageRegistry(
-//                toImage = provider { "ghcr.io/veilarbdialog/dialogvarsler" },
-//                username = providers.environmentVariable("USERNAME"),
-//                password = providers.environmentVariable("PASSWORD"),
-//            )
         )
     }
 }
