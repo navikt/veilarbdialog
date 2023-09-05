@@ -1,10 +1,7 @@
 package no.nav.dialogvarsler
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
@@ -34,8 +31,11 @@ object NyDialogFlow {
     }
     fun subscribe(consumer: KafkaConsumer<String, String>) {
         val coroutineScope = CoroutineScope(Dispatchers.Default)
+        val handler = CoroutineExceptionHandler { thread, exception ->
+            logger.error("Error in kafka coroutine:", exception)
+        }
         logger.info("Setting up flow subscription...")
-        coroutineScope.launch {
+        coroutineScope.launch(handler) {
             logger.info("Launched coroutine for polling...")
             isStartedState.emit(true)
             while (!shuttingDown) {
