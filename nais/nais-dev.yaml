@@ -39,7 +39,6 @@ spec:
       memory: 768Mi
   envFrom:
     - configmap: pto-config
-    - configmap: loginservice-idporten
   vault:
     enabled: true
     paths:

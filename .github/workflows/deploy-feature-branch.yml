@@ -12,6 +12,9 @@ concurrency:
   group: deploy_feature_branch
   cancel-in-progress: true
 
+permissions:
+  packages: write
+
 jobs:
   test-build-and-push:
     name: Test, build and push
