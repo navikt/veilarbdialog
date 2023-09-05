@@ -11,6 +11,9 @@ spec:
   ingresses:
     - https://dialogvarsler.ekstern.dev.nav.no
   port: 8080
+  redis:
+    - instance: dialogvarsler
+      access: read
   liveness:
     path: /isAlive
     port: 8080
@@ -33,8 +36,6 @@ spec:
     requests:
       cpu: 200m
       memory: 768Mi
-  kafka:
-    pool: nav-dev
   azure:
     application:
       enabled: true

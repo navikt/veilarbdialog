@@ -11,7 +11,6 @@ import io.ktor.server.engine.*
 import io.ktor.server.testing.*
 import io.ktor.websocket.*
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import kotlin.test.assertEquals
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -28,7 +27,7 @@ class ApplicationTest : StringSpec({
         server.shutdown()
     }
 
-    "kafka should work" {
+    "kafka should work".config(enabled = false) {
         testApplication {
             environment { doConfig() }
             application { module() }

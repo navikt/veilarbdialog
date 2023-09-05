@@ -3,13 +3,13 @@ package no.nav.dialogvarsler
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
-import java.time.Duration
+import redis.clients.jedis.JedisPool
+import redis.clients.jedis.JedisPubSub
 
 object NyDialogFlow {
     private val logger = LoggerFactory.getLogger(javaClass)
-    val messageFlow = MutableSharedFlow<ConsumerRecord<String, String>>() // No-replay, hot-flow
+    val messageFlow = MutableSharedFlow<String>() // No-replay, hot-flow
     private val isStartedState = MutableStateFlow(false)
     var shuttingDown = false
 
@@ -29,29 +29,30 @@ object NyDialogFlow {
     fun stop() {
         shuttingDown = true
     }
-    fun subscribe(consumer: KafkaConsumer<String, String>) {
+    fun subscribe(jedisPool: JedisPool, channel: String) {
         val coroutineScope = CoroutineScope(Dispatchers.IO)
         val handler = CoroutineExceptionHandler { thread, exception ->
             logger.error("Error in kafka coroutine:", exception)
+        }
+
+        val onEvent: JedisPubSub = object:JedisPubSub() {
+            override fun onMessage(channel: String?, message: String?) {
+                if (message == null) return
+                coroutineScope.launch {
+                    messageFlow.emit(message)
+                }
+            }
         }
         logger.info("Setting up flow subscription...")
         coroutineScope.launch(handler) {
             logger.info("Launched coroutine for polling...")
             isStartedState.emit(true)
-            while (!shuttingDown) {
-                val records = consumer.poll(Duration.ofMillis(100))
-                if (!records.isEmpty) {
-                    logger.info("Emitting ${records.count()} in messageFlow")
-                }
-                for (record in records) {
-                    messageFlow.emit(record)
-//                    consumer.commitSync()
-                }
-            }
-            logger.info("Closing consumer...")
-            consumer.close(Duration.ofMillis(500))
-            consumer.unsubscribe()
+            jedisPool.resource.subscribe(onEvent, channel)
         }
+
+        messageFlow
+            .onEach { DialogNotifier.notifySubscribers(it) }
+            .launchIn(CoroutineScope(Dispatchers.IO))
         runBlocking {
             isStartedState.first { isStarted -> isStarted }
         }

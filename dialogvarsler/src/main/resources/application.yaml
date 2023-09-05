@@ -8,6 +8,12 @@ ktor:
 topic:
   ny-dialog: "dab.dialog-events-v1"
 
+redis:
+  host: "$REDIS_URI_DIALOGVARSLER:null"
+  username: "$REDIS_USERNAME_DIALOGVARSLER:null"
+  password: "$REDIS_PASSWORD_DIALOGVARSLER:null"
+  channel: "dab.dialog-events-v1"
+
 kafka:
   brokers: "$KAFKA_BROKERS:null"
   truststore:

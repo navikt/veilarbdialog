@@ -5,10 +5,10 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 
 class DialogNotifierTest : StringSpec({
 
-    "should serialize message".config(enabled = false) {
+    "should serialize message" {
         val fnr = "12345678910"
-        val messageToSend = """{ "sistOppdatert": 1693510558103 }"""
-        val record = ConsumerRecord("topic", 0,  1, fnr, messageToSend)
+        val messageToSend = """{ "eventType": "NY_MELDING", "fnr": "$fnr" }"""
+        val record = messageToSend
         DialogNotifier.notifySubscribers(record)
     }
 

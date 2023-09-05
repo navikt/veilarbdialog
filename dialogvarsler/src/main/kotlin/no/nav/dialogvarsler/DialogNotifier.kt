@@ -4,19 +4,21 @@ import io.ktor.websocket.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.apache.kafka.clients.consumer.ConsumerRecord
 
+enum class EventType {
+    NY_MELDING
+}
 @Serializable
-data class SistOppdatertMessage(
-    val sistOppdatert: Long
+data class DialogHendelse(
+    val eventType: EventType,
+    val fnr: String
 )
 
 object DialogNotifier {
-    suspend fun notifySubscribers(kafkaMessage: ConsumerRecord<String, String>) {
-        val sistOppdatert = Json.decodeFromString<SistOppdatertMessage>(kafkaMessage.value())
-        val fnr = kafkaMessage.key()
-        val websocketMessage = Json.encodeToString(sistOppdatert)
-        WsConnectionHolder.dialogSubscriptions[fnr]
+    suspend fun notifySubscribers(messageString: String) {
+        val message = Json.decodeFromString<DialogHendelse>(messageString)
+        val websocketMessage = Json.encodeToString(message.eventType)
+        WsConnectionHolder.dialogSubscriptions[message.fnr]
             ?.forEach { it.wsSession.send(websocketMessage) }
     }
 }
