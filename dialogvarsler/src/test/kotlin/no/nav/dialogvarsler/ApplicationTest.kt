@@ -3,6 +3,7 @@ package no.nav.dialogvarsler
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -10,18 +11,21 @@ import io.ktor.server.config.*
 import io.ktor.server.engine.*
 import io.ktor.server.testing.*
 import io.ktor.websocket.*
-import no.nav.security.mock.oauth2.MockOAuth2Server
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerConfig
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.StringSerializer
-import org.slf4j.LoggerFactory
-import java.util.*
-import io.ktor.client.plugins.websocket.*
 import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.json.Json
+import no.nav.security.mock.oauth2.MockOAuth2Server
+import org.slf4j.LoggerFactory
+import redis.embedded.RedisServer
+
 
 class ApplicationTest : StringSpec({
+    lateinit var redisServer: RedisServer
+    beforeSpec {
+        redisServer = RedisServer(6379)
+        redisServer.start()
+    }
     afterSpec {
+        redisServer.stop()
         NyDialogFlow.stop()
         server.shutdown()
     }
@@ -45,11 +49,11 @@ class ApplicationTest : StringSpec({
             }
 
             suspend fun postMessage(fnr: String) {
-                client.post("/dialog") {
-                    bearerAuth(server.issueToken(subject = "server").serialize())
+                client.post("/notify-subscribers") {
+                    bearerAuth(server.issueToken(subject = "Z123123").serialize())
                     contentType(ContentType.Application.Json)
-                    setBody("""{ "fnr": "$fnr" }""")
-                }.bodyAsText()
+                    setBody("""{ "fnr": "$fnr", "eventType": "NY_MELDING" }""")
+                }.status shouldBe HttpStatusCode.OK
             }
 
             val veileder1 = "Z123123"
@@ -63,17 +67,17 @@ class ApplicationTest : StringSpec({
 
             client.webSocket("/ws") {
                 awaitAuth(veileder1token)
-                logger.info("Pushing kafka message for test-fnr 1")
+                logger.info("Posting to veilarbdialog for test-fnr 1")
                 postMessage(fnr1)
-                receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
+                receiveStringWithTimeout().let { Json.decodeFromString<EventType>(it)  } shouldBe EventType.NY_MELDING
                 logger.info("Received message, closing websocket for fnr 1")
                 close(CloseReason(CloseReason.Codes.NORMAL, "Bye"))
             }
             client.webSocket("/ws") {
                 awaitAuth(veileder2token)
-                logger.info("Pushing kafka message for test-fnr 2")
+                logger.info("Posting to veilarbdialog for test-fnr 2")
                 postMessage(fnr2)
-                receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
+                receiveStringWithTimeout().let { Json.decodeFromString<EventType>(it)  } shouldBe EventType.NY_MELDING
                 logger.info("Received message, closing websocket for fnr 2")
                 close(CloseReason(CloseReason.Codes.NORMAL, "Bye"))
             }
@@ -122,7 +126,8 @@ class ApplicationTest : StringSpec({
                 "no.nav.security.jwt.issuers.0.discoveryurl" to "${server.wellKnownUrl(acceptedIssuer)}",
                 "no.nav.security.jwt.issuers.0.accepted_audience" to acceptedAudience,
                 "topic.ny-dialog" to testTopic,
-                "redis.host"
+                "redis.host" to "localhost",
+                "redis.channel" to "dab.dialog-events-v1"
             )
         }
     }

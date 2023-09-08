@@ -16,12 +16,15 @@ fun Application.configureRedis(): (NyDialogNotification) -> Long {
 
     val config = this.environment.config
     val host = config.property("redis.host").getString()
-    val username = config.property("redis.username").getString()
-    val password = config.property("redis.password").getString()
-    val channel = config.property("redis.channel").getString()
+    val username = config.propertyOrNull("redis.username")?.getString()
+    val password = config.propertyOrNull("redis.password")?.getString()
+    val channel = config.property("redis.channel")?.getString()
 
     val poolConfig = JedisPoolConfig()
-    val jedisPool = JedisPool(poolConfig, host, 6379, username, password)
+    val jedisPool = when {
+        username != null && password != null -> JedisPool(poolConfig, host, 6379, username, password)
+        else -> JedisPool(poolConfig, host, 6379)
+    }
 
     val subscribe = { scope: CoroutineScope, onMessage: suspend (message: String) -> Unit ->
         val eventHandler = object : JedisPubSub() {

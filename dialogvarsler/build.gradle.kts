@@ -87,11 +87,9 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("no.nav.security:token-validation-ktor-v2:$tokensupport_version")
     implementation("redis.clients:jedis:$jedis_version")
-//    testImplementation("io.kotest.extensions:kotest-extensions-embedded-kafka")
     testImplementation("io.kotest:kotest-runner-junit5:$kotest_version")
     testImplementation("io.kotest:kotest-assertions-core:$kotest_version")
-//    testImplementation("io.kotest.extensions:kotest-assertions-ktor:$kotest_version")
-    testImplementation("io.lettuce:lettuce-core:6.2.6")
+    testImplementation("org.signal:embedded-redis:0.8.3")
 
     testImplementation("no.nav.security:mock-oauth2-server:$mockoath_version")
     testImplementation("io.ktor:ktor-server-tests-jvm")
