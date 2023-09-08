@@ -99,10 +99,6 @@ management:
         enabled: true
 
 application:
-  loginservice:
-    idporten:
-      discoveryUrl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
-      audience: ${LOGINSERVICE_IDPORTEN_AUDIENCE}
   cluster: ${APP_CLUSTER_NAME}
   namespace: ${NAIS_NAMESPACE}
   environment: ${APP_ENVIRONMENT_NAME}
