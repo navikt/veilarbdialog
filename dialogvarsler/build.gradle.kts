@@ -91,7 +91,7 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:$kotest_version")
     testImplementation("io.kotest:kotest-assertions-core:$kotest_version")
 //    testImplementation("io.kotest.extensions:kotest-assertions-ktor:$kotest_version")
-
+    testImplementation("io.lettuce:lettuce-core:6.2.6")
 
     testImplementation("no.nav.security:mock-oauth2-server:$mockoath_version")
     testImplementation("io.ktor:ktor-server-tests-jvm")

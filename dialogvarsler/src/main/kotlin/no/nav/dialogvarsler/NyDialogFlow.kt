@@ -2,10 +2,7 @@ package no.nav.dialogvarsler
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
-import redis.clients.jedis.JedisPool
-import redis.clients.jedis.JedisPubSub
 
 object NyDialogFlow {
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -29,25 +26,17 @@ object NyDialogFlow {
     fun stop() {
         shuttingDown = true
     }
-    fun subscribe(jedisPool: JedisPool, channel: String) {
+    fun flowOf(subscribe: (scope: CoroutineScope, suspend (message: String) -> Unit) -> Unit) {
         val coroutineScope = CoroutineScope(Dispatchers.IO)
         val handler = CoroutineExceptionHandler { thread, exception ->
             logger.error("Error in kafka coroutine:", exception)
         }
 
-        val onEvent: JedisPubSub = object:JedisPubSub() {
-            override fun onMessage(channel: String?, message: String?) {
-                if (message == null) return
-                coroutineScope.launch {
-                    messageFlow.emit(message)
-                }
-            }
-        }
         logger.info("Setting up flow subscription...")
         coroutineScope.launch(handler) {
             logger.info("Launched coroutine for polling...")
             isStartedState.emit(true)
-            jedisPool.resource.subscribe(onEvent, channel)
+            subscribe(coroutineScope) { message -> messageFlow.emit(message) }
         }
 
         messageFlow

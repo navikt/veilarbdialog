@@ -4,10 +4,15 @@ import no.nav.dialogvarsler.WsTicketHandler
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.Serializable
+import no.nav.dialogvarsler.TicketRequest
+import no.nav.security.token.support.v2.TokenValidationContextPrincipal
+import redis.clients.jedis.Jedis
 
-fun Application.configureRouting() {
+fun Application.configureRouting(publishMessage: (message :NyDialogNotification) -> Long) {
     routing {
         route("/isAlive") {
             get {
@@ -20,9 +25,19 @@ fun Application.configureRouting() {
             }
         }
         authenticate("AzureAD") {
+            post("/dialog") {
+                val dialogNotification = call.receive<NyDialogNotification>()
+                publishMessage(dialogNotification)
+            }
+
             post("/ws-auth-ticket") {
                 try {
-                    val ticket = WsTicketHandler.generateTicket(this)
+                    // TODO: Add authorization(a2)
+                    val subject = call.authentication.principal<TokenValidationContextPrincipal>()
+                        ?.context?.anyValidClaims?.get()?.get("sub")?.toString() ?: throw java.lang.IllegalArgumentException(
+                        "No subject claim found")
+                    val payload = call.receive<TicketRequest>()
+                    val ticket = WsTicketHandler.generateTicket(subject, payload)
                     call.respondText(ticket)
                 } catch (e: IllegalArgumentException) {
                     call.respond(HttpStatusCode.BadRequest, "Invalid auth")
@@ -34,3 +49,8 @@ fun Application.configureRouting() {
         }
     }
 }
+
+@Serializable
+data class NyDialogNotification(
+    val fnr: String
+)

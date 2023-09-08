@@ -19,6 +19,6 @@ fun Application.module() {
     configureMicrometer()
     configureSerialization()
     configureSockets()
-    configureRouting()
-    configureRedis()
+    val publishMessage = configureRedis()
+    configureRouting(publishMessage)
 }

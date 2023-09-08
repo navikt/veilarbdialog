@@ -23,11 +23,10 @@ import kotlinx.coroutines.withTimeout
 class ApplicationTest : StringSpec({
     afterSpec {
         NyDialogFlow.stop()
-        EmbeddedKafkaSetup.stop()
         server.shutdown()
     }
 
-    "kafka should work".config(enabled = false) {
+    "should notify subscribers" {
         testApplication {
             environment { doConfig() }
             application { module() }
@@ -35,7 +34,7 @@ class ApplicationTest : StringSpec({
                 install(WebSockets)
             }
 
-            suspend fun getToken(fnr: String, sub: String): String {
+            suspend fun getWsToken(fnr: String, sub: String): String {
                 val authToken = client.post("/ws-auth-ticket") {
                     bearerAuth(server.issueToken(subject = sub).serialize())
                     contentType(ContentType.Application.Json)
@@ -45,23 +44,27 @@ class ApplicationTest : StringSpec({
                 return authToken
             }
 
+            suspend fun postMessage(fnr: String) {
+                client.post("/dialog") {
+                    bearerAuth(server.issueToken(subject = "server").serialize())
+                    contentType(ContentType.Application.Json)
+                    setBody("""{ "fnr": "$fnr" }""")
+                }.bodyAsText()
+            }
+
             val veileder1 = "Z123123"
             val fnr1 = "12345678910"
 
             val veileder2 = "Z321321"
             val fnr2 = "11111178910"
 
-            val producer = getTestProducer()
-            val messageToSend = """{ "sistOppdatert": 1693510558103 }"""
-            val fnr1Record = ProducerRecord(testTopic, fnr1, messageToSend)
-            val fnr2Record = ProducerRecord(testTopic, fnr2, messageToSend)
-            val veileder1token = getToken(fnr1, veileder1)
-            val veileder2token = getToken(fnr2, veileder2)
+            val veileder1token = getWsToken(fnr1, veileder1)
+            val veileder2token = getWsToken(fnr2, veileder2)
 
             client.webSocket("/ws") {
                 awaitAuth(veileder1token)
                 logger.info("Pushing kafka message for test-fnr 1")
-                producer.send(fnr1Record).get()
+                postMessage(fnr1)
                 receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
                 logger.info("Received message, closing websocket for fnr 1")
                 close(CloseReason(CloseReason.Codes.NORMAL, "Bye"))
@@ -69,7 +72,7 @@ class ApplicationTest : StringSpec({
             client.webSocket("/ws") {
                 awaitAuth(veileder2token)
                 logger.info("Pushing kafka message for test-fnr 2")
-                producer.send(fnr2Record).get()
+                postMessage(fnr2)
                 receiveStringWithTimeout() shouldBe """{"sistOppdatert":1693510558103}"""
                 logger.info("Received message, closing websocket for fnr 2")
                 close(CloseReason(CloseReason.Codes.NORMAL, "Bye"))
@@ -102,23 +105,9 @@ class ApplicationTest : StringSpec({
 
     companion object {
         private val logger = LoggerFactory.getLogger(javaClass)
-        var kafkaBrokerServer = EmbeddedKafkaSetup.start()
         val server: MockOAuth2Server by lazy {
             MockOAuth2Server()
                 .also { it.start() }
-        }
-        private fun getBrokerConnectionString(): String {
-            return kafkaBrokerServer?.broker()?.createBrokerInfo()
-                ?.broker()?.endPoints()?.find { true }?.get()?.connectionString()
-                ?: throw Exception("Could not find brokerserver")
-        }
-        private fun getTestProducer(): KafkaProducer<String, String> {
-            val kafkaProps = Properties().apply {
-                put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, getBrokerConnectionString())
-                put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)
-                put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer::class.java)
-            }
-            return KafkaProducer<String, String>(kafkaProps)
         }
 
         const val testTopic = "ny-dialog-topic-i-test"
@@ -133,8 +122,7 @@ class ApplicationTest : StringSpec({
                 "no.nav.security.jwt.issuers.0.discoveryurl" to "${server.wellKnownUrl(acceptedIssuer)}",
                 "no.nav.security.jwt.issuers.0.accepted_audience" to acceptedAudience,
                 "topic.ny-dialog" to testTopic,
-                "kafka.brokers" to getBrokerConnectionString(),
-                "kafka.localTest" to "true"
+                "redis.host"
             )
         }
     }
