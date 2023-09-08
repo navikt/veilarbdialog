@@ -37,7 +37,6 @@ spec:
     - https://veilarbdialog.prod-fss-pub.nais.io
   envFrom:
     - configmap: pto-config
-    - configmap: loginservice-idporten
   vault:
     enabled: true
     paths:
