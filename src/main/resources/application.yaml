@@ -102,8 +102,9 @@ application:
   cluster: ${APP_CLUSTER_NAME}
   namespace: ${NAIS_NAMESPACE}
   environment: ${APP_ENVIRONMENT_NAME}
-  abac:
-    url: ${ABAC_PDP_ENDPOINT_URL}
+  poao_tilgang:
+    url: http://poao-tilgang.poao.svc.nais.local
+    scope: ${POAO_TILGANG_SCOPE}
   azure:
     ad:
       clientId: ${AZURE_APP_CLIENT_ID}

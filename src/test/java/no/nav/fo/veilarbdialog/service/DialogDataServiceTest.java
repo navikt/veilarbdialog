@@ -26,8 +26,7 @@ class DialogDataServiceTest extends SpringBootTestBase {
     void setupL() {
         bruker = MockNavService.createHappyBruker();
         brukersVeileder = MockNavService.createVeileder(bruker);
-        veilederNasjonalTilgang = MockNavService.createVeileder();
-        veilederNasjonalTilgang.setNasjonalTilgang(true);
+        veilederNasjonalTilgang = MockNavService.createNKS();
         tilfeldigVeileder = MockNavService.createVeileder();
     }
 
@@ -46,7 +45,7 @@ class DialogDataServiceTest extends SpringBootTestBase {
                 .extract()
                 .as(DialogDTO.class);
 
-        BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).kontorsperreEnhet("1234").build();
+        BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
         MockNavService.updateBruker(bruker, brukerOptionsKvp);
 
         DialogDTO dialogUnderKvp = brukersVeileder.createRequest()
@@ -80,7 +79,7 @@ class DialogDataServiceTest extends SpringBootTestBase {
     @Test
     void opprettHenvendelse_brukerManglerTilgangTilPerson_Forbidden403() {
 
-        BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).kontorsperreEnhet("1234").build();
+        BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
         MockNavService.updateBruker(bruker, brukerOptionsKvp);
 
         NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
@@ -98,7 +97,7 @@ class DialogDataServiceTest extends SpringBootTestBase {
     @Test
     void publicMetoder_sjekkerOmBrukerHarTilgang() {
 
-        BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).kontorsperreEnhet("1234").build();
+        BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
         MockNavService.updateBruker(bruker, brukerOptionsKvp);
 
         NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()

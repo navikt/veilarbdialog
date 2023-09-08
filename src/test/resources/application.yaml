@@ -69,11 +69,11 @@ server:
     context-path: "/veilarbdialog"
 
 application:
+  poao_tilgang:
+    scope: "poao_tilgang.scope"
   cluster: TEST
   namespace: APP_NAMESPACE_NAME
   environment: APP_ENVIRONMENT_NAME
-  abac:
-    url: http://localhost:8080/ABAC_PDP_ENDPOINT_URL
   azure:
     ad:
       clientId: VEILARBDIALOG_OIDC_CLIENT_ID

@@ -2,6 +2,4 @@
 <configuration>
     <include resource="no/nav/common/log/logback-default.xml"/>
     <logger name="no.nav.fo.veilarbdialog" level="INFO"/>
-    <logger name="or.springframework" level="INFO"/>
-
 </configuration>

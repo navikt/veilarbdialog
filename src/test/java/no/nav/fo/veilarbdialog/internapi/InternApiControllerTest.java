@@ -46,7 +46,7 @@ class InternApiControllerTest extends SpringBootTestBase {
         DialogDTO opprettetDialog2 = dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst2"));
 
         // Sett bruker under KVP
-        BrukerOptions kvpOptions = mockBruker.getBrukerOptions().toBuilder().erUnderKvp(true).kontorsperreEnhet("123").build();
+        BrukerOptions kvpOptions = mockBruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
         MockNavService.updateBruker(mockBruker, kvpOptions);
         dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst3"));
 
@@ -65,8 +65,7 @@ class InternApiControllerTest extends SpringBootTestBase {
         assertThat(dialoger.get(1).getHenvendelser()).hasSize(2);
 
         // Veileder uten tilgang til mockbrukers enhet
-        MockVeileder mockVeileder2 = MockNavService.createVeileder();
-        mockVeileder2.setNasjonalTilgang(true);
+        MockVeileder mockVeileder2 = MockNavService.createNKS();
         List<Dialog> dialoger2 = mockVeileder2.createRequest()
                 .get("http://localhost/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}", mockBruker.getAktorId())
                 .then()
