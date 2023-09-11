@@ -23,6 +23,7 @@ fun Application.configureSockets() {
     }
     routing {
         webSocket("/ws") {
+            logger.info("Opening websocket connection")
             var subscription: Subscription? = null
             try {
                 subscription = awaitAuthentication(incoming)
@@ -37,6 +38,8 @@ fun Application.configureSockets() {
                 logger.warn("onError ${closeReason.await()}")
                 e.printStackTrace()
                 subscription?.let { removeSubscription(it) }
+            } finally {
+                logger.info("Closing websocket connection")
             }
         }
     }
