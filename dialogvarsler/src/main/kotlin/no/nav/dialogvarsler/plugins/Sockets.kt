@@ -14,10 +14,13 @@ import no.nav.dialogvarsler.varsler.ConnectionTicket
 import no.nav.dialogvarsler.varsler.Subscription
 import no.nav.dialogvarsler.varsler.WsConnectionHolder
 import no.nav.dialogvarsler.varsler.authenticate
+import org.slf4j.LoggerFactory
 import java.lang.IllegalArgumentException
 import java.time.Duration
 
 fun Application.configureSockets() {
+    val logger = LoggerFactory.getLogger(javaClass)
+
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)
         timeout = Duration.ofSeconds(15)
@@ -34,10 +37,10 @@ fun Application.configureSockets() {
                 // Keep open until termination
                 for (frame in incoming) {}
             } catch (e: ClosedReceiveChannelException) {
-                println("onClose ${closeReason.await()}")
+                logger.warn("onClose ${closeReason.await()}")
                 subscription?.let { removeSubscription(it) }
             } catch (e: Throwable) {
-                println("onError ${closeReason.await()}")
+                logger.warn("onError ${closeReason.await()}")
                 e.printStackTrace()
                 subscription?.let { removeSubscription(it) }
             }
