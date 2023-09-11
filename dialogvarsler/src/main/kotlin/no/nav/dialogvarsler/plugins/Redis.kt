@@ -11,24 +11,27 @@ import kotlinx.serialization.json.Json
 import no.nav.dialogvarsler.varsler.DialogNotifier
 import no.nav.dialogvarsler.varsler.IncomingDialogMessageFlow
 import org.slf4j.LoggerFactory
+import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
 import redis.clients.jedis.JedisPubSub
+import java.lang.IllegalArgumentException
 
 typealias PublishMessage = (NyDialogNotification) -> Long
 fun Application.configureRedis(): PublishMessage {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
     val config = this.environment.config
-    val host = config.property("redis.host").getString()
+    val hostAndPort = config.property("redis.host").getString().split("://").last()
     val username = config.propertyOrNull("redis.username")?.getString()
     val password = config.propertyOrNull("redis.password")?.getString()
     val channel = config.property("redis.channel").getString()
 
-    val poolConfig = JedisPoolConfig()
+    val (host, port) = hostAndPort.split(":")
+        .also { if (it.size < 2) throw IllegalArgumentException("Malformed redis url") }
     val jedisPool = when {
-        username != null && password != null -> JedisPool(poolConfig, host, 6379, username, password)
-        else -> JedisPool(poolConfig, host, 6379)
+        username != null && password != null -> JedisPool(JedisPoolConfig(), host, port.toInt(), username, password)
+        else -> JedisPool(JedisPoolConfig(), host, 6379)
     }
 
     val subscribe = { scope: CoroutineScope, onMessage: suspend (message: String) -> Unit ->
