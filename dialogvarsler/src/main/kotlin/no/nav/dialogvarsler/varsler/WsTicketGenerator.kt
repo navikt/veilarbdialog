@@ -10,6 +10,8 @@ data class TicketRequest(
 )
 
 object WsTicketHandler {
+    // TODO: Only allow 1 ticket per sub
+    // TODO: Make these expire after x-minutes
     private val wsConnectionTokenHolder = Collections.synchronizedMap<ConnectionToken, ConnectionTicket>(mutableMapOf())
     fun consumeTicket(ticket: String): ConnectionTicket {
         if (ticket in wsConnectionTokenHolder) {
