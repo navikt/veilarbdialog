@@ -4,6 +4,7 @@ import no.nav.dialogvarsler.varsler.WsTicketHandler
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -34,12 +35,16 @@ fun Application.configureRouting(publishMessage: (message :NyDialogNotification)
             post("/ws-auth-ticket") {
                 try {
                     // TODO: Add authorization(a2)
-                    val subject = call.authentication.principal<TokenValidationContextPrincipal>()
-                        ?.context?.anyValidClaims?.get()?.get("sub")?.toString() ?: throw IllegalArgumentException(
-                        "No subject claim found")
-                    val payload = call.receive<TicketRequest>()
-                    val ticket = WsTicketHandler.generateTicket(subject, payload)
-                    call.respondText(ticket)
+                    try {
+                        val subject = call.authentication.principal<TokenValidationContextPrincipal>()
+                            ?.context?.anyValidClaims?.get()?.get("sub")?.toString() ?: throw IllegalArgumentException(
+                            "No subject claim found")
+                        val payload = call.receive<TicketRequest>()
+                        val ticket = WsTicketHandler.generateTicket(subject, payload)
+                        call.respondText(ticket)
+                    } catch (e: CannotTransformContentToTypeException) {
+                        call.respond(HttpStatusCode.BadRequest, "Invalid payload")
+                    }
                 } catch (e: IllegalArgumentException) {
                     call.respond(HttpStatusCode.BadRequest, "Invalid auth")
                 } catch (e: Throwable) {
