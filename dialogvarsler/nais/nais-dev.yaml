@@ -49,3 +49,6 @@ spec:
         - application: veilarbdialog
           namespace: pto
           cluster: dev-fss
+        - application: arbeidsrettet-dialog
+          namespace: dab
+          cluster: dev-gcp
