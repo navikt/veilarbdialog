@@ -10,7 +10,10 @@ import org.slf4j.event.*
 fun Application.configureMonitoring() {
     install(CallLogging) {
         level = Level.INFO
-        filter { call -> call.request.path().startsWith("/") }
+        filter { call ->
+            val path = call.request.path()
+            path.startsWith("/") && path != "/isAlive" && path != "/isReady"
+        }
         callIdMdc("nav-call-id")
     }
     install(CallId) {
