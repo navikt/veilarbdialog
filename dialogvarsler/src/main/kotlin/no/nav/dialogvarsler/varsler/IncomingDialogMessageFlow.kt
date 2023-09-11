@@ -6,30 +6,27 @@ import org.slf4j.LoggerFactory
 
 object IncomingDialogMessageFlow {
     private val logger = LoggerFactory.getLogger(javaClass)
-    val messageFlow = MutableSharedFlow<String>() // No-replay, hot-flow
+    private val messageFlow = MutableSharedFlow<String>() // No-replay, hot-flow
     private val isStartedState = MutableStateFlow(false)
-    var shuttingDown = false
+    private var shuttingDown = false
 
     init {
         messageFlow.subscriptionCount
             .map { it != 0 }
             .distinctUntilChanged() // only react to true<->false changes
             .onEach { isActive -> // configure an action
-                if (isActive)
-                    logger.info("MessageFlow received subscribers")
-                else
-                    logger.info("Message lost all subscribers")
-            }
+                if (isActive) logger.info("MessageFlow received subscribers")
+                else logger.info("MessageFlow has no subscribers") }
             .launchIn(CoroutineScope(Dispatchers.Default))
     }
 
     fun stop() {
         shuttingDown = true
     }
-    fun flowOf(subscribe: (scope: CoroutineScope, suspend (message: String) -> Unit) -> Unit) {
+    fun flowOf(subscribe: (scope: CoroutineScope, suspend (message: String) -> Unit) -> Unit): MutableSharedFlow<String> {
         val coroutineScope = CoroutineScope(Dispatchers.IO)
         val handler = CoroutineExceptionHandler { thread, exception ->
-            logger.error("Error in kafka coroutine:", exception)
+            logger.error("Error in event flow coroutine:", exception)
         }
 
         logger.info("Setting up flow subscription...")
@@ -39,12 +36,8 @@ object IncomingDialogMessageFlow {
             subscribe(coroutineScope) { message -> messageFlow.emit(message) }
         }
 
-        messageFlow
-            .onEach { DialogNotifier.notifySubscribers(it) }
-            .launchIn(CoroutineScope(Dispatchers.IO))
-        runBlocking {
-            isStartedState.first { isStarted -> isStarted }
-        }
+        runBlocking { isStartedState.first { isStarted -> isStarted } }
+        return messageFlow
     }
 }
 

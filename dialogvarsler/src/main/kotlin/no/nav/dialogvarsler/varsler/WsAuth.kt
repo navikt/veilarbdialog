@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import java.lang.IllegalArgumentException
 
-suspend fun DefaultWebSocketServerSession.authenticate(channel: ReceiveChannel<Frame>): Subscription {
+suspend fun DefaultWebSocketServerSession.awaitAuthentication(channel: ReceiveChannel<Frame>): Subscription {
     val connectionTicket = channel.receiveAsFlow()
         .map { tryAuthenticateWithMessage(it) }
         .first { it != null } ?: throw IllegalArgumentException("Failed to find auth message in websocket")

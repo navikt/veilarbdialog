@@ -3,19 +3,13 @@ package no.nav.dialogvarsler.plugins
 import no.nav.dialogvarsler.varsler.WsConnectionHolder.addSubscription
 import no.nav.dialogvarsler.varsler.WsConnectionHolder.removeSubscription
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.flow.*
-import no.nav.dialogvarsler.varsler.ConnectionTicket
 import no.nav.dialogvarsler.varsler.Subscription
-import no.nav.dialogvarsler.varsler.WsConnectionHolder
-import no.nav.dialogvarsler.varsler.authenticate
+import no.nav.dialogvarsler.varsler.awaitAuthentication
 import org.slf4j.LoggerFactory
-import java.lang.IllegalArgumentException
 import java.time.Duration
 
 fun Application.configureSockets() {
@@ -31,11 +25,11 @@ fun Application.configureSockets() {
         webSocket("/ws") {
             var subscription: Subscription? = null
             try {
-                subscription = authenticate(incoming)
+                subscription = awaitAuthentication(incoming)
                 addSubscription(subscription)
                 this.send("AUTHENTICATED")
                 // Keep open until termination
-                for (frame in incoming) {}
+                incoming.receive()
             } catch (e: ClosedReceiveChannelException) {
                 logger.warn("onClose ${closeReason.await()}")
                 subscription?.let { removeSubscription(it) }

@@ -7,12 +7,14 @@ import io.ktor.server.plugins.callloging.*
 import io.ktor.server.request.*
 import org.slf4j.event.*
 
+val excludedPaths = listOf("/isAlive", "/isReady", "/metrics")
+
 fun Application.configureMonitoring() {
     install(CallLogging) {
         level = Level.INFO
         filter { call ->
             val path = call.request.path()
-            path.startsWith("/") && path != "/isAlive" && path != "/isReady"
+            path.startsWith("/") && !excludedPaths.contains(path)
         }
         callIdMdc("nav-call-id")
     }

@@ -2,23 +2,28 @@ package no.nav.dialogvarsler.plugins
 
 import io.ktor.server.application.*
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import no.nav.dialogvarsler.varsler.DialogNotifier
 import no.nav.dialogvarsler.varsler.IncomingDialogMessageFlow
 import org.slf4j.LoggerFactory
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
 import redis.clients.jedis.JedisPubSub
 
-fun Application.configureRedis(): (NyDialogNotification) -> Long {
+typealias PublishMessage = (NyDialogNotification) -> Long
+fun Application.configureRedis(): PublishMessage {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
     val config = this.environment.config
     val host = config.property("redis.host").getString()
     val username = config.propertyOrNull("redis.username")?.getString()
     val password = config.propertyOrNull("redis.password")?.getString()
-    val channel = config.property("redis.channel")?.getString()
+    val channel = config.property("redis.channel").getString()
 
     val poolConfig = JedisPoolConfig()
     val jedisPool = when {
@@ -37,6 +42,9 @@ fun Application.configureRedis(): (NyDialogNotification) -> Long {
     }
 
     IncomingDialogMessageFlow.flowOf(subscribe)
+        .onEach { DialogNotifier.notifySubscribers(it) }
+        .launchIn(CoroutineScope(Dispatchers.IO))
+
     return { message: NyDialogNotification -> jedisPool.resource.publish(channel, Json.encodeToString(message))
         .also { receivers -> logger.info("Message delivered to $receivers receivers") }
     }
