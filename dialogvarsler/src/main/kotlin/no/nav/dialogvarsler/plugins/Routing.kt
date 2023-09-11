@@ -1,6 +1,6 @@
 package no.nav.dialogvarsler.plugins
 
-import no.nav.dialogvarsler.WsTicketHandler
+import no.nav.dialogvarsler.varsler.WsTicketHandler
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -8,10 +8,9 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
-import no.nav.dialogvarsler.EventType
-import no.nav.dialogvarsler.TicketRequest
+import no.nav.dialogvarsler.varsler.EventType
+import no.nav.dialogvarsler.varsler.TicketRequest
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
-import redis.clients.jedis.Jedis
 
 fun Application.configureRouting(publishMessage: (message :NyDialogNotification) -> Long) {
     routing {

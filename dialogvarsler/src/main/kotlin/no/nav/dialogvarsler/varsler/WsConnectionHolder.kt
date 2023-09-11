@@ -1,12 +1,10 @@
-package no.nav.dialogvarsler
+package no.nav.dialogvarsler.varsler
 
-import io.ktor.network.sockets.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import java.util.*
-import kotlin.collections.LinkedHashSet
 
 //@Serializable
 //data class ConnectionIdentifier(
@@ -31,7 +29,6 @@ data class Subscription(
 )
 
 object WsConnectionHolder {
-    val wsConnectionTokenHolder = Collections.synchronizedMap<ConnectionToken, ConnectionTicket>(mutableMapOf())
     val dialogSubscriptions = Collections.synchronizedMap(mutableMapOf<Fnr, List<Subscription>>())
 
     fun addSubscription(subscription: Subscription) {

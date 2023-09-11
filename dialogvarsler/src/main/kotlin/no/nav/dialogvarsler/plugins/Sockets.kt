@@ -1,17 +1,19 @@
 package no.nav.dialogvarsler.plugins
 
-import no.nav.dialogvarsler.WsConnectionHolder.addSubscription
-import no.nav.dialogvarsler.WsConnectionHolder.removeSubscription
+import no.nav.dialogvarsler.varsler.WsConnectionHolder.addSubscription
+import no.nav.dialogvarsler.varsler.WsConnectionHolder.removeSubscription
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.flow.*
-import no.nav.dialogvarsler.ConnectionTicket
-import no.nav.dialogvarsler.Subscription
-import no.nav.dialogvarsler.WsConnectionHolder
+import no.nav.dialogvarsler.varsler.ConnectionTicket
+import no.nav.dialogvarsler.varsler.Subscription
+import no.nav.dialogvarsler.varsler.WsConnectionHolder
+import no.nav.dialogvarsler.varsler.authenticate
 import java.lang.IllegalArgumentException
 import java.time.Duration
 
@@ -24,14 +26,13 @@ fun Application.configureSockets() {
     }
     routing {
         webSocket("/ws") {
-            this.call.request.queryParameters
             var subscription: Subscription? = null
             try {
                 subscription = authenticate(incoming)
                 addSubscription(subscription)
                 this.send("AUTHENTICATED")
-                for (frame in incoming) {
-                }
+                // Keep open until termination
+                for (frame in incoming) {}
             } catch (e: ClosedReceiveChannelException) {
                 println("onClose ${closeReason.await()}")
                 subscription?.let { removeSubscription(it) }
@@ -41,27 +42,5 @@ fun Application.configureSockets() {
                 subscription?.let { removeSubscription(it) }
             }
         }
-    }
-}
-
-suspend fun DefaultWebSocketServerSession.authenticate(channel: ReceiveChannel<Frame>): Subscription {
-    val connectionIdentifier = channel.receiveAsFlow()
-        .map { tryAuthenticateWithMessage(it) }
-        .first { it != null } ?: throw IllegalArgumentException("Failed to find auth message in websocket")
-    return Subscription(
-        wsSession = this,
-        identifier = connectionIdentifier
-    )
-}
-
-fun tryAuthenticateWithMessage(frame: Frame): ConnectionTicket? {
-    try {
-        if (frame !is Frame.Text) return null
-        val connectionToken = frame.readText()
-        return WsConnectionHolder.wsConnectionTokenHolder[connectionToken]
-    } catch (e: Throwable) {
-        println("Failed to deserialize ws-message")
-        e.printStackTrace()
-        return null
     }
 }

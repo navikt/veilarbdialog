@@ -1,7 +1,7 @@
 package no.nav.dialogvarsler
 
 import io.kotest.core.spec.style.StringSpec
-import org.apache.kafka.clients.consumer.ConsumerRecord
+import no.nav.dialogvarsler.varsler.DialogNotifier
 
 class DialogNotifierTest : StringSpec({
 

@@ -5,7 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import no.nav.dialogvarsler.NyDialogFlow
+import no.nav.dialogvarsler.varsler.IncomingDialogMessageFlow
 import org.slf4j.LoggerFactory
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
@@ -36,7 +36,7 @@ fun Application.configureRedis(): (NyDialogNotification) -> Long {
         jedisPool.resource.subscribe(eventHandler, channel)
     }
 
-    NyDialogFlow.flowOf(subscribe)
+    IncomingDialogMessageFlow.flowOf(subscribe)
     return { message: NyDialogNotification -> jedisPool.resource.publish(channel, Json.encodeToString(message))
         .also { receivers -> logger.info("Message delivered to $receivers receivers") }
     }

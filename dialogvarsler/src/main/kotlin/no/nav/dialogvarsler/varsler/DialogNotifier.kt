@@ -1,4 +1,4 @@
-package no.nav.dialogvarsler
+package no.nav.dialogvarsler.varsler
 
 import io.ktor.websocket.*
 import kotlinx.serialization.Serializable
@@ -18,13 +18,13 @@ data class DialogHendelse(
 object DialogNotifier {
     private val logger = LoggerFactory.getLogger(javaClass)
     suspend fun notifySubscribers(messageString: String) {
-//        runCatching {
+        runCatching {
             val message = Json.decodeFromString<DialogHendelse>(messageString)
             val websocketMessage = Json.encodeToString(message.eventType)
             WsConnectionHolder.dialogSubscriptions[message.fnr]
                 ?.forEach { it.wsSession.send(websocketMessage) }
-//        }.onFailure { error ->
-//            logger.warn("Failed to notify subscribers", error)
-//        }
+        }.onFailure { error ->
+            logger.warn("Failed to notify subscribers", error)
+        }
     }
 }

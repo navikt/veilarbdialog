@@ -1,10 +1,10 @@
-package no.nav.dialogvarsler
+package no.nav.dialogvarsler.varsler
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.slf4j.LoggerFactory
 
-object NyDialogFlow {
+object IncomingDialogMessageFlow {
     private val logger = LoggerFactory.getLogger(javaClass)
     val messageFlow = MutableSharedFlow<String>() // No-replay, hot-flow
     private val isStartedState = MutableStateFlow(false)
