@@ -8,6 +8,7 @@ import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
+import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.*;
@@ -34,6 +35,7 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 public class DialogDataService {
 
     private final AktorOppslagClient aktorOppslagClient;
+    private final DialogVarslerClient dialogVarslerClient;
     private final DialogDAO dialogDAO;
     private final DialogStatusService dialogStatusService;
     private final DataVarehusDAO dataVarehusDAO;
@@ -83,6 +85,7 @@ public class DialogDataService {
         dialog = markerDialogSomLest(dialog.getId());
 
         sendPaaKafka(aktorId.get());
+        dialogVarslerClient.varsleLyttere(fnr);
 
         return dialog;
     }

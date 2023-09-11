@@ -28,6 +28,7 @@ public class WireMockUtil {
         kvp(aktorId, erUnderKvp, mockBruker.getBrukerOptions().getOppfolgingsEnhet());
         aktor(fnr, aktorId);
         nivaa4(fnr, harBruktNivaa4);
+        dialogvarsler();
     }
 
     private static void oppfolging(String fnr, boolean underOppfolging, boolean oppfolgingFeiler, UUID periode) {
@@ -98,6 +99,11 @@ public class WireMockUtil {
             stubFor(get("/veilarboppfolging/api/v2/kvp?aktorId=" + aktorId)
                     .willReturn(aResponse().withStatus(204)));
         }
+    }
+
+    private static void dialogvarsler() {
+        stubFor(post("/notifiy-subscribers")
+                .willReturn(aResponse().withStatus(204)));
     }
 
     public static void aktorUtenGjeldendeIdent(String fnr, String aktorId) {

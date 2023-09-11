@@ -26,7 +26,14 @@ public class OkHttpClientConfig {
                 .addInterceptor(oppfolgingAuthInterceptor).build();
     }
 
+    @Bean OkHttpClient dialogvarslerClient(MeterRegistry meterRegistry, Interceptor dialogvarslerAuthInterceptor) {
+        return RestClient.baseClientBuilder()
+                .eventListener(OkHttpMetricsEventListener.builder(meterRegistry, "okhttp.requests").build())
+                .addInterceptor(dialogvarslerAuthInterceptor).build();
+    }
+
     @Value("${application.veilarbperson.api.scope}") String veilarbpersonScope;
+    @Value("${application.veilarbperson.api.scope}") String dialogvarslerScope;
 
 
     @Bean
@@ -48,6 +55,20 @@ public class OkHttpClientConfig {
             var newReq = original
                     .newBuilder()
                     .addHeader("Authorization", "Bearer " + azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarbpersonScope))
+                    .method(original.method(), original.body())
+                    .build();
+            return chain.proceed(newReq);
+        };
+    }
+
+    @Bean
+    Interceptor dialogvarslerAuthInterceptor(AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient) {
+        return chain -> {
+            var original = chain.request();
+            var token = azureAdMachineToMachineTokenClient.createMachineToMachineToken(dialogvarslerScope);
+            var newReq = original
+                    .newBuilder()
+                    .addHeader("Authorization", "Bearer " + token)
                     .method(original.method(), original.body())
                     .build();
             return chain.proceed(newReq);

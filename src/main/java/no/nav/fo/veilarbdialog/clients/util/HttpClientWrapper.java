@@ -5,6 +5,7 @@ import no.nav.common.rest.client.RestUtils;
 import no.nav.common.utils.UrlUtils;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,16 @@ public class HttpClientWrapper {
         try (Response response = client.newCall(request).execute()) {
             RestUtils.throwIfNotSuccessful(response);
             return RestUtils.parseJsonResponse(response, classOfT);
+        } catch (Exception e) {
+            throw internalServerError(e, request.url().toString());
+        }
+    }
+
+    public void post(String path, RequestBody body) {
+        Request request = buildRequest(path).newBuilder()
+            .post(body).build();
+        try (Response response = client.newCall(request).execute()) {
+            RestUtils.throwIfNotSuccessful(response);
         } catch (Exception e) {
             throw internalServerError(e, request.url().toString());
         }

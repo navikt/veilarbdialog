@@ -135,6 +135,10 @@ application:
     api:
       url: ${VEILARBPERSONAPI_URL}
       scope: api://${APP_CLUSTER_NAME}.pto.veilarbperson/.default
+  dialogvarsler:
+    api:
+      url: ${DIALOGVARSLER_URL}
+      scope: ${DIALOGVARSLER_SCOPE}
   topic:
     inn:
       oppfolgingsperiode: pto.oppfolgingsperiode-v1

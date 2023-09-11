@@ -106,6 +106,10 @@ application:
     api:
       url: http://localhost:${wiremock.server.port}/veilarbperson/api
       scope: api://test.pto.veilarbperson/.default
+  dialogvarsler:
+    api:
+      url: http://localhost:${wiremock.server.port}/
+      scope: api://test.pto.dialogvarsler/.default
   pdl:
     api:
       url: http://localhost:${wiremock.server.port}/pdl

@@ -40,10 +40,10 @@ public class ScheduleRessurs {
     private final AktorOppslagClient aktorOppslagClient;
 
     @Value("${application.brukernotifikasjon.grace.periode.ms}")
-    private Long brukernotifikasjonGracePeriode;
+    private Long brukernotifikasjonGracePeriode; // 30 min
 
     @Value("${application.brukernotifikasjon.henvendelse.maksalder.ms}")
-    private Long brukernotifikasjonHenvendelseMaksAlder;
+    private Long brukernotifikasjonHenvendelseMaksAlder; // 2 dager
 
     // Ti min
     @Scheduled(fixedDelay = 600000)
