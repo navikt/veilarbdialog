@@ -37,7 +37,6 @@ spec:
     - https://veilarbdialog.prod-fss-pub.nais.io
   envFrom:
     - configmap: pto-config
-    - configmap: loginservice-idporten
   vault:
     enabled: true
     paths:
@@ -97,3 +96,5 @@ spec:
       value: prod-fss
     - name: DIALOG_EKSTERN_URL
       value: https://www.nav.no/arbeid/dialog
+    - name: POAO_TILGANG_SCOPE
+      value: api://prod-fss.poao.poao-tilgang/.default

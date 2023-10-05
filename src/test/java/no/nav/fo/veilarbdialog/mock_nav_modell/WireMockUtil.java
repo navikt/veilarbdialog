@@ -25,7 +25,7 @@ public class WireMockUtil {
 
         oppfolging(fnr, underOppfolging, oppfolgingFeiler, mockBruker.getOppfolgingsperiode());
         manuell(fnr, erManuell, erReservertKrr, kanVarsles);
-        kvp(aktorId, erUnderKvp, mockBruker.getBrukerOptions().getKontorsperreEnhet());
+        kvp(aktorId, erUnderKvp, mockBruker.getBrukerOptions().getOppfolgingsEnhet());
         aktor(fnr, aktorId);
         nivaa4(fnr, harBruktNivaa4);
     }

@@ -39,7 +39,6 @@ spec:
       memory: 768Mi
   envFrom:
     - configmap: pto-config
-    - configmap: loginservice-idporten
   vault:
     enabled: true
     paths:
@@ -101,3 +100,5 @@ spec:
       value: https://pto.dev.ekstern.nav.no/arbeid/dialog
     - name: APPD_ENABLED
       value: "false"
+    - name: POAO_TILGANG_SCOPE
+      value: api://dev-fss.poao.poao-tilgang/.default

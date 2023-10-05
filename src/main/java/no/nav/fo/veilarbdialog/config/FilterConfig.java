@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-import static no.nav.common.auth.Constants.AZURE_AD_B2C_ID_TOKEN_COOKIE_NAME;
 import static no.nav.common.auth.oidc.filter.OidcAuthenticator.fromConfigs;
 import static no.nav.fo.veilarbdialog.rest.AdminController.PTO_ADMIN_SERVICE_USER;
 
@@ -42,25 +41,11 @@ public class FilterConfig {
     @Value("${application.azure.ad.clientId}")
     private String azureAdClientId;
 
-    @Value("${application.loginservice.idporten.audience}")
-    private String loginserviceIdportenAudience;
-
-    @Value("${application.loginservice.idporten.discoveryUrl}")
-    private String loginserviceIdportenDiscoveryUrl;
-
     private OidcAuthenticatorConfig naisStsAuthConfig() {
         return new OidcAuthenticatorConfig()
                 .withDiscoveryUrl(naisStsDiscoveryUrl)
                 .withClientIds(ALLOWED_SERVICE_USERS)
                 .withUserRole(UserRole.SYSTEM);
-    }
-
-    private OidcAuthenticatorConfig loginserviceIdportenConfig() {
-        return new OidcAuthenticatorConfig()
-                .withDiscoveryUrl(loginserviceIdportenDiscoveryUrl)
-                .withClientId(loginserviceIdportenAudience)
-                .withIdTokenCookieName(AZURE_AD_B2C_ID_TOKEN_COOKIE_NAME)
-                .withUserRole(UserRole.EKSTERN);
     }
 
     private OidcAuthenticatorConfig naisAzureAdConfig() {
@@ -121,8 +106,7 @@ public class FilterConfig {
                 fromConfigs(
                         naisAzureAdConfig(),
                         naisStsAuthConfig(),
-                        tokenxConfig(),
-                        loginserviceIdportenConfig()
+                        tokenxConfig()
                 )
         );
         registration.setFilter(authenticationFilter);
