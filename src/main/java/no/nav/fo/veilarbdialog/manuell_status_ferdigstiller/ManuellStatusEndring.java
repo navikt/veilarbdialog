@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.manuellStatus;
+package no.nav.fo.veilarbdialog.manuell_status_ferdigstiller;
 
 public record ManuellStatusEndring (
     String aktorId,

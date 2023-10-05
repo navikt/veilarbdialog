@@ -1,9 +1,8 @@
-package no.nav.fo.veilarbdialog.manuellStatus;
+package no.nav.fo.veilarbdialog.manuell_status_ferdigstiller;
 
 import lombok.SneakyThrows;
 import no.nav.common.json.JsonUtils;
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
-import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import org.assertj.core.api.Assertions;
@@ -13,10 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class ManuellStatusConsumerTest extends SpringBootTestBase {
+class ManuellStatusConsumerTest extends SpringBootTestBase {
     @Autowired
     KafkaTemplate<String, String> stringStringKafkaTemplate;
 

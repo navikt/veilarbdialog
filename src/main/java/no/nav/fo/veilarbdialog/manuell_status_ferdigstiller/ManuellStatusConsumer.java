@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.manuellStatus;
+package no.nav.fo.veilarbdialog.manuell_status_ferdigstiller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +21,11 @@ public class ManuellStatusConsumer {
 
     @Transactional
     @KafkaListener(topics = "${application.topic.inn.manuellStatusEndring}", containerFactory = "stringStringKafkaListenerContainerFactory")
-    public void consume(ConsumerRecord<String, String> kafkaRecord) {
+    public void ferdigstillAlleDialoger(ConsumerRecord<String, String> kafkaRecord) {
         ManuellStatusEndring manuellStatusEndring = JsonUtils.fromJson(kafkaRecord.value(), ManuellStatusEndring.class);
         var aktorId = Person.aktorId(manuellStatusEndring.aktorId());
         var dialoger = dialogDataService.hentDialogerForBruker(aktorId);
-        dialoger.forEach((dialog) -> {
+        dialoger.forEach(dialog -> {
             if (dialog.erFerdigbehandlet()) return;
             // Sett alle dialoger som "Venter på svar fra NAV" til ferdigbehandlet
             dialogStatusService.oppdaterVenterPaNavSiden(dialog, true);
