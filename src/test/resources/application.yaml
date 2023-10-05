@@ -129,6 +129,7 @@ application:
       kvpavsluttet: pto.kvp-avsluttet-v1
       eksternVarselKvittering: teamdokumenthandtering.aapen-dok-notifikasjon-status
       aktivitetskortIdMapping: dab.aktivitetskort-idmapping-v1
+      manuellStatusEndring: pto.endring-paa-manuell-status-v1
   brukernotifikasjon:
     grace:
       periode:

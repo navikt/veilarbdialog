@@ -38,6 +38,15 @@ public class DialogTestService {
                 .as(DialogDTO.class);
     }
 
+    public DialogDTO setFerdigBehandlet(RestassuredUser restassuredUser, long dialogId, boolean ferdigBehandlet) {
+        return restassuredUser.createRequest()
+                .put("/veilarbdialog/api/dialog/{dialogId}/ferdigbehandlet/{ferdigbehandlet}", dialogId, ferdigBehandlet)
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+    }
+
     private DialogDTO opprettDialog(RestassuredUser restassuredUser, MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
         Response response = restassuredUser.createRequest()
                 .body(nyHenvendelseDTO)

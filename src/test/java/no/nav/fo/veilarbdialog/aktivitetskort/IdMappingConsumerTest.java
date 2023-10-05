@@ -19,14 +19,11 @@ import java.util.concurrent.CompletableFuture;
 
 
 class IdMappingConsumerTest extends SpringBootTestBase {
-
     @Autowired
     KafkaTemplate<String, String> stringStringKafkaTemplate;
 
-
     @Value("${application.topic.inn.aktivitetskortIdMapping}")
     String idMappingTopic;
-
 
     @Test
     @SneakyThrows
@@ -51,7 +48,4 @@ class IdMappingConsumerTest extends SpringBootTestBase {
 
         Assertions.assertThat(dialogDTO.getAktivitetId()).isEqualTo(tekniskId.toString());
     }
-
-
-
 }
