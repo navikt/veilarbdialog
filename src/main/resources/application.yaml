@@ -126,8 +126,6 @@ application:
   sts:
     discovery:
       url: ${SECURITY_TOKEN_SERVICE_DISCOVERY_URL}
-  unleash:
-    url: ${UNLEASH_API_URL}
   veilarboppfolging:
     api:
       url: ${VEILARBOPPFOLGINGAPI_URL}
