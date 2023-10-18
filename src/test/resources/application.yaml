@@ -97,8 +97,6 @@ application:
   sts:
     discovery:
       url: http://localhost:8080/SECURITYTOKENSERVICE_URL
-  unleash:
-    url: http://localhost:8080/UNLEASH_API_URL
   veilarboppfolging:
     api:
       url: http://localhost:${wiremock.server.port}/veilarboppfolging/api

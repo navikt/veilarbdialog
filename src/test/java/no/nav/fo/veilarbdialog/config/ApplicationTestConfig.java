@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog.config;
 
-import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 import no.nav.common.token_client.client.TokenXOnBehalfOfTokenClient;
@@ -38,11 +37,6 @@ public class ApplicationTestConfig {
         AzureAdOnBehalfOfTokenClient tokenClient = mock(AzureAdOnBehalfOfTokenClient.class);
         Mockito.when(tokenClient.exchangeOnBehalfOfToken(any(), any())).thenReturn("mockMachineToMachineToken");
         return tokenClient;
-    }
-
-    @Bean
-    UnleashClient unleashClient() {
-        return mock(UnleashClient.class);
     }
 
 }
