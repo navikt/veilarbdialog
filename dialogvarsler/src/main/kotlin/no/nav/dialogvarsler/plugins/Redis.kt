@@ -11,10 +11,7 @@ import kotlinx.serialization.json.Json
 import no.nav.dialogvarsler.varsler.DialogNotifier
 import no.nav.dialogvarsler.varsler.IncomingDialogMessageFlow
 import org.slf4j.LoggerFactory
-import redis.clients.jedis.HostAndPort
-import redis.clients.jedis.JedisPool
-import redis.clients.jedis.JedisPoolConfig
-import redis.clients.jedis.JedisPubSub
+import redis.clients.jedis.*
 import java.lang.IllegalArgumentException
 
 typealias PublishMessage = (NyDialogNotification) -> Long
@@ -27,11 +24,20 @@ fun Application.configureRedis(): PublishMessage {
     val password = config.propertyOrNull("redis.password")?.getString()
     val channel = config.property("redis.channel").getString()
 
+    val credentials = DefaultRedisCredentials(username, password)
+    val credentialsProvider = DefaultRedisCredentialsProvider(credentials)
+    val clientConfig: DefaultJedisClientConfig = DefaultJedisClientConfig.builder()
+        .credentialsProvider(credentialsProvider)
+        .build()
+
+
     val (host, port) = hostAndPort.split(":")
         .also { if (it.size < 2) throw IllegalArgumentException("Malformed redis url") }
+    val redisHostAndPort = HostAndPort(host, port.toInt())
     val jedisPool = when {
-        username != null && password != null -> JedisPool(JedisPoolConfig(), host, port.toInt(), 60000, username, password)
-        else -> JedisPool(JedisPoolConfig(), host, 6379)
+//        username != null && password != null -> JedisPool(JedisPoolConfig(), host, port.toInt(), 60000, username, password)
+        username != null && password != null -> JedisPooled(redisHostAndPort, clientConfig)
+        else -> JedisPooled(host, 6379)
     }
 
     val subscribe = { scope: CoroutineScope, onMessage: suspend (message: String) -> Unit ->
@@ -41,14 +47,14 @@ fun Application.configureRedis(): PublishMessage {
                 scope.launch { onMessage(message) }
             }
         }
-        jedisPool.resource.subscribe(eventHandler, channel)
+        jedisPool.subscribe(eventHandler, channel)
     }
 
     IncomingDialogMessageFlow.flowOf(subscribe)
         .onEach { DialogNotifier.notifySubscribers(it) }
         .launchIn(CoroutineScope(Dispatchers.IO))
 
-    return { message: NyDialogNotification -> jedisPool.resource.publish(channel, Json.encodeToString(message))
+    return { message: NyDialogNotification -> jedisPool.publish(channel, Json.encodeToString(message))
         .also { receivers -> logger.info("Message delivered to $receivers receivers") }
     }
 }
