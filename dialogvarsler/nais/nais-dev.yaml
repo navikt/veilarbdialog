@@ -16,7 +16,7 @@ spec:
   port: 8080
   redis:
     - instance: dialogvarsler
-      access: read
+      access: readwrite
   liveness:
     path: /isAlive
     port: 8080
