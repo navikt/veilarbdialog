@@ -3,12 +3,14 @@ package no.nav.dialogvarsler.varsler
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
-import java.lang.IllegalArgumentException
+import org.slf4j.LoggerFactory
 import java.lang.IllegalStateException
+
+
+val logger = LoggerFactory.getLogger("no.nav.dialogvarsler.varsler.WsAuth.kt")
 
 suspend fun DefaultWebSocketServerSession.awaitAuthentication(channel: ReceiveChannel<Frame>): Subscription {
     val result = channel.receiveAsFlow()
@@ -35,8 +37,7 @@ fun tryAuthenticateWithMessage(frame: Frame): AuthResult {
         val connectionTicket = frame.readText()
         return AuthResult.Success(WsTicketHandler.consumeTicket(connectionTicket))
     } catch (e: Throwable) {
-        println("Failed to deserialize ws-message")
-        e.printStackTrace()
+        logger.warn("Failed to deserialize ws-message", e)
         return AuthResult.Failed
     }
 }

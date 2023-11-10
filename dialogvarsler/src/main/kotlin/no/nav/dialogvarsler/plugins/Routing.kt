@@ -11,6 +11,7 @@ import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import no.nav.dialogvarsler.varsler.EventType
 import no.nav.dialogvarsler.varsler.TicketRequest
+import no.nav.dialogvarsler.varsler.logger
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
 fun Application.configureRouting(publishMessage: (message :NyDialogNotification) -> Long) {
@@ -49,7 +50,7 @@ fun Application.configureRouting(publishMessage: (message :NyDialogNotification)
                     call.respond(HttpStatusCode.BadRequest, "Invalid auth")
                 } catch (e: Throwable) {
                     call.respond(HttpStatusCode.InternalServerError, "Internal error")
-                    e.printStackTrace()
+                    logger.warn("Internal error", e)
                 }
             }
         }
