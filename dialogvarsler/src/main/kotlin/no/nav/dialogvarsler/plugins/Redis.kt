@@ -34,6 +34,8 @@ fun Application.configureRedis(): PublishMessage {
     val (host, port) = hostAndPort.split(":")
         .also { if (it.size < 2) throw IllegalArgumentException("Malformed redis url") }
     val redisHostAndPort = HostAndPort(host, port.toInt())
+    log.info("Connecting to redis, host: $host port: $port user: $username channel: $channel")
+
     val jedisPool = when {
 //        username != null && password != null -> JedisPool(JedisPoolConfig(), host, port.toInt(), 60000, username, password)
         username != null && password != null -> JedisPooled(redisHostAndPort, clientConfig)
