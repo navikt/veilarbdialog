@@ -33,7 +33,7 @@ public class OkHttpClientConfig {
     }
 
     @Value("${application.veilarbperson.api.scope}") String veilarbpersonScope;
-    @Value("${application.veilarbperson.api.scope}") String dialogvarslerScope;
+    @Value("${application.dialogvarsler.api.scope}") String dialogvarslerScope;
 
 
     @Bean

@@ -3,6 +3,7 @@ package no.nav.dialogvarsler
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.string.shouldNotBeEmpty
 import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -46,6 +47,7 @@ class ApplicationTest : StringSpec({
                     contentType(ContentType.Application.Json)
                     setBody("""{ "fnr": "$fnr" }""")
                 }.bodyAsText()
+                authToken.shouldNotBeEmpty()
                 authToken shouldNotBe null
                 return authToken
             }
