@@ -19,7 +19,7 @@ public class DialogVarslerClientImpl implements DialogVarslerClient {
     public void varsleLyttere(Fnr fnr) {
         var payload = new DialogVarselDto(fnr.get(), "NY_MELDING");
         var requestBody = RequestBody.create(JsonUtils.toJson(payload), MediaType.parse("application/json"));
-        dialogvarslerClientWrapper.post("/notifiy-subscribers", requestBody);
+        dialogvarslerClientWrapper.post("/notify-subscribers", requestBody);
     }
 }
 

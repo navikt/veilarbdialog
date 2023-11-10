@@ -3,29 +3,40 @@ package no.nav.dialogvarsler.varsler
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import java.lang.IllegalArgumentException
+import java.lang.IllegalStateException
 
 suspend fun DefaultWebSocketServerSession.awaitAuthentication(channel: ReceiveChannel<Frame>): Subscription {
-    val connectionTicket = channel.receiveAsFlow()
+    val result = channel.receiveAsFlow()
         .map { tryAuthenticateWithMessage(it) }
-        .first { it != null } ?: throw IllegalArgumentException("Failed to find auth message in websocket")
-    return Subscription(
-        wsSession = this,
-        identifier = connectionTicket
-    )
+        .first { it is AuthResult.Success }
+    return when (result) {
+        is AuthResult.Success -> Subscription(
+            wsSession = this,
+            identifier = result.connectionTicket
+        )
+        else -> throw IllegalStateException("Failed to authenticate")
+    }
 }
 
-fun tryAuthenticateWithMessage(frame: Frame): ConnectionTicket? {
+
+sealed class AuthResult {
+    class Success(val connectionTicket: ConnectionTicket): AuthResult()
+    data object Failed: AuthResult()
+}
+
+fun tryAuthenticateWithMessage(frame: Frame): AuthResult {
     try {
-        if (frame !is Frame.Text) return null
+        if (frame !is Frame.Text) return AuthResult.Failed
         val connectionTicket = frame.readText()
-        return WsTicketHandler.consumeTicket(connectionTicket)
+        return AuthResult.Success(WsTicketHandler.consumeTicket(connectionTicket))
     } catch (e: Throwable) {
         println("Failed to deserialize ws-message")
         e.printStackTrace()
-        return null
+        return AuthResult.Failed
     }
 }

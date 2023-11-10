@@ -35,8 +35,7 @@ fun Application.configureSockets() {
                 logger.warn("onClose ${closeReason.await()}")
                 subscription?.let { removeSubscription(it) }
             } catch (e: Throwable) {
-                logger.warn("onError ${closeReason.await()}")
-                e.printStackTrace()
+                logger.warn("onError ${closeReason.await()}", e)
                 subscription?.let { removeSubscription(it) }
             } finally {
                 logger.info("Closing websocket connection")
