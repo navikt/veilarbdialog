@@ -39,7 +39,10 @@ fun Application.configureRedis(): PublishMessage {
     val jedisPool = when {
 //        username != null && password != null -> JedisPool(JedisPoolConfig(), host, port.toInt(), 60000, username, password)
         username != null && password != null -> JedisPooled(redisHostAndPort, clientConfig)
-        else -> JedisPooled(host, 6379)
+        else -> {
+            log.info("Fallback to local test connection (localhost) for redis")
+            JedisPooled(host, 6379)
+        }
     }
 
     val subscribe = { scope: CoroutineScope, onMessage: suspend (message: String) -> Unit ->
