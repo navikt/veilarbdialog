@@ -28,6 +28,7 @@ fun Application.configureRedis(): PublishMessage {
     val credentialsProvider = DefaultRedisCredentialsProvider(credentials)
     val clientConfig: DefaultJedisClientConfig = DefaultJedisClientConfig.builder()
         .credentialsProvider(credentialsProvider)
+        .timeoutMillis(0)
         .build()
 
 
