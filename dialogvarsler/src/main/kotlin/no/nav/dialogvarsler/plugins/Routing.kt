@@ -18,12 +18,12 @@ fun Application.configureRouting(publishMessage: (message: NyDialogNotification)
     routing {
         route("/isAlive") {
             get {
-                pingRedis()
                 call.respond(HttpStatusCode.OK)
             }
         }
         route("/isReady") {
             get {
+                pingRedis()
                 call.respond(HttpStatusCode.OK)
             }
         }
