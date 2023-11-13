@@ -14,7 +14,7 @@ import no.nav.dialogvarsler.varsler.TicketRequest
 import no.nav.dialogvarsler.varsler.logger
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
-fun Application.configureRouting(publishMessage: (message :NyDialogNotification) -> Long) {
+fun Application.configureRouting(publishMessage: (message: NyDialogNotification) -> Long, pingRedis: PingRedis) {
     routing {
         route("/isAlive") {
             get {
@@ -24,6 +24,7 @@ fun Application.configureRouting(publishMessage: (message :NyDialogNotification)
         route("/isReady") {
             get {
                 call.respond(HttpStatusCode.OK)
+                pingRedis()
             }
         }
         authenticate("AzureAD") {

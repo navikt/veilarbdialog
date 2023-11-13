@@ -15,7 +15,8 @@ import redis.clients.jedis.*
 import java.lang.IllegalArgumentException
 
 typealias PublishMessage = (NyDialogNotification) -> Long
-fun Application.configureRedis(): PublishMessage {
+typealias PingRedis = () -> String
+fun Application.configureRedis(): Pair<PublishMessage, PingRedis> {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
     val config = this.environment.config
@@ -60,7 +61,12 @@ fun Application.configureRedis(): PublishMessage {
         .onEach { DialogNotifier.notifySubscribers(it) }
         .launchIn(CoroutineScope(Dispatchers.IO))
 
-    return { message: NyDialogNotification -> jedisPool.publish(channel, Json.encodeToString(message))
+    val publishMessage: PublishMessage = { message: NyDialogNotification -> jedisPool.publish(channel, Json.encodeToString(message)) }
         .also { receivers -> logger.info("Message delivered to $receivers receivers") }
+    val pingRedis: PingRedis = {
+        jedisPool.ping()
+            .also { logger.info("Redis ping: $it") }
     }
+
+    return Pair(publishMessage, pingRedis)
 }
