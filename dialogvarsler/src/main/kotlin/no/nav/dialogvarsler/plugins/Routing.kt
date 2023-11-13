@@ -23,7 +23,7 @@ fun Application.configureRouting(publishMessage: (message: NyDialogNotification)
         }
         route("/isReady") {
             get {
-                pingRedis()
+//                pingRedis()
                 call.respond(HttpStatusCode.OK)
             }
         }
