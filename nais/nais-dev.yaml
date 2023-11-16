@@ -91,6 +91,9 @@ spec:
         - application: start-samtale
           namespace: pto
           cluster: dev-gcp
+        - application: arbeidssokerregistrering-for-veileder
+          namespace: paw
+          cluster: dev-gcp
   env:
     - name: APP_ENVIRONMENT_NAME
       value: q1

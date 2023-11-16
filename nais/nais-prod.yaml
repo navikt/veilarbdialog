@@ -89,6 +89,9 @@ spec:
         - application: start-samtale
           namespace: pto
           cluster: prod-gcp
+        - application: arbeidssokerregistrering-for-veileder
+          namespace: paw
+          cluster: prod-gcp
   env:
     - name: APP_ENVIRONMENT_NAME
       value: p
