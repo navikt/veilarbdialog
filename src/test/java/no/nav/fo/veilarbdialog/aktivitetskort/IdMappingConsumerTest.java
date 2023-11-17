@@ -17,6 +17,7 @@ import org.springframework.kafka.support.SendResult;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+
 class IdMappingConsumerTest extends SpringBootTestBase {
 
     @Autowired
