@@ -20,9 +20,9 @@
         <java.version>17</java.version>
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
-        <common.version>3.2023.07.07_09.10-85326e9557f0</common.version>
-        <dab.common.version>2023.06.30-12.11.f11e6e6e92ef</dab.common.version>
-        <poao.tilgang.version>2023.08.04_08.06-bb3c9f5f3d03</poao.tilgang.version>
+        <common.version>3.2023.10.23_12.41-bafec3836d28</common.version>
+        <dab.common.version>2023.10.16-14.09.5407a74a7ffa</dab.common.version>
+        <poao.tilgang.version>2023.11.14_13.53-b10eb7528eda</poao.tilgang.version>
 
 
         <shedlock.version>4.43.0</shedlock.version>
@@ -38,12 +38,16 @@
 
     <repositories>
         <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
+            <id>navgithubproxy</id>
+            <url>https://github-package-registry-mirror.gc.nav.no/cached/maven-release</url>
         </repository>
         <repository>
             <id>confluent</id>
             <url>https://packages.confluent.io/maven/</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
@@ -128,84 +132,84 @@
 
         <!-- no.nav.common -->
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>nais</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>job</artifactId>
         <version>${common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>util</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>client</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>token-client</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>sts</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>json</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>log</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>rest</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>metrics</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>types</artifactId>
             <version>${common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>auth</artifactId>
             <version>${common.version}</version>
         </dependency>
 
 
         <dependency>
-            <groupId>com.github.navikt.dab</groupId>
+            <groupId>no.nav.poao.dab</groupId>
             <artifactId>spring-a2-annotations</artifactId>
             <version>${dab.common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.dab</groupId>
+            <groupId>no.nav.poao.dab</groupId>
             <artifactId>spring-auth</artifactId>
             <version>${dab.common.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.poao-tilgang</groupId>
+            <groupId>no.nav.poao-tilgang</groupId>
             <artifactId>client</artifactId>
             <version>${poao.tilgang.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.navikt.poao-tilgang</groupId>
+            <groupId>no.nav.poao-tilgang</groupId>
             <artifactId>poao-tilgang-test-wiremock</artifactId>
             <version>${poao.tilgang.version}</version>
             <scope>test</scope>
@@ -295,7 +299,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.navikt.common-java-modules</groupId>
+            <groupId>no.nav.common</groupId>
             <artifactId>test</artifactId>
             <version>${common.version}</version>
             <scope>test</scope>
