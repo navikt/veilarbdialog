@@ -101,3 +101,7 @@ spec:
       value: https://www.nav.no/arbeid/dialog
     - name: POAO_TILGANG_SCOPE
       value: api://prod-fss.poao.poao-tilgang/.default
+    - name: DIALOGVARSLER_URL
+      value: https://dialogvarsler.ekstern.nav.no
+    - name: DIALOGVARSLER_SCOPE
+      value: api://prod-gcp.dab.dialogvarsler/.default
