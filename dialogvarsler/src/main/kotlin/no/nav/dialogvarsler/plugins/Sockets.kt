@@ -29,6 +29,7 @@ fun Application.configureSockets() {
                 subscription = awaitAuthentication(incoming)
                 addSubscription(subscription)
                 this.send("AUTHENTICATED")
+                logger.info("Authenticated")
                 // Keep open until termination
                 incoming.receive()
             } catch (e: ClosedReceiveChannelException) {

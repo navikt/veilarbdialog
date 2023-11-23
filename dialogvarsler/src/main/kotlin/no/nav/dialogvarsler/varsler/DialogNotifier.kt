@@ -26,6 +26,7 @@ object DialogNotifier {
                 ?.forEach {
                     if (it.wsSession.isActive) {
                         it.wsSession.send(websocketMessage)
+                        logger.warn("Message delivered")
                     } else {
                         logger.warn("WS session was not active, could not deliver message")
                         WsConnectionHolder.removeSubscription(it)
