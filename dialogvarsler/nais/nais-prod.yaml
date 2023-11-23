@@ -1,0 +1,57 @@
+kind: Application
+apiVersion: nais.io/v1alpha1
+metadata:
+  name: dialogvarsler
+  namespace: dab
+  cluster: prod-gcp
+  labels:
+    team: dab
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+spec:
+  image: ghcr.io/navikt/veilarbdialog/dialogvarsler:{{version}}
+  ingresses:
+    - https://dialogvarsler.ekstern.nav.no
+  port: 8080
+  redis:
+    - instance: dialogvarsler
+      access: readwrite
+  liveness:
+    path: /isAlive
+    port: 8080
+    initialDelay: 5
+  readiness:
+    path: /isReady
+    port: 8080
+    initialDelay: 5
+  prometheus:
+    enabled: true
+    path: /metrics
+  replicas:
+    min: 2
+    max: 4
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      cpu: "2"
+      memory: 1024Mi
+    requests:
+      cpu: 200m
+      memory: 768Mi
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true
+      claims:
+        extra:
+          - "NAVident"
+  accessPolicy:
+    inbound:
+      rules:
+        - application: veilarbdialog
+          namespace: pto
+          cluster: prod-fss
+        - application: veilarbpersonflate
+          namespace: poao
+          cluster: prod-gcp
