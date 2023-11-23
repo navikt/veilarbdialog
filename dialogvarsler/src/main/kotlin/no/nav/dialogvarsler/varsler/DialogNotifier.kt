@@ -1,6 +1,7 @@
 package no.nav.dialogvarsler.varsler
 
 import io.ktor.websocket.*
+import kotlinx.coroutines.isActive
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -22,7 +23,14 @@ object DialogNotifier {
             val message = Json.decodeFromString<DialogHendelse>(messageString)
             val websocketMessage = Json.encodeToString(message.eventType)
             WsConnectionHolder.dialogSubscriptions[message.fnr]
-                ?.forEach { it.wsSession.send(websocketMessage) }
+                ?.forEach {
+                    if (it.wsSession.isActive) {
+                        it.wsSession.send(websocketMessage)
+                    } else {
+                        logger.warn("WS session was not active, could not deliver message")
+                        WsConnectionHolder.removeSubscription(it)
+                    }
+                }
         }.onFailure { error ->
             logger.warn("Failed to notify subscribers", error)
         }

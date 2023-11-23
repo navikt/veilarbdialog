@@ -33,7 +33,7 @@ sealed class AuthResult {
 
 fun tryAuthenticateWithMessage(frame: Frame): AuthResult {
     try {
-        logger.info("Received ticket, trying to authenticate")
+        logger.info("Received ticket, trying to authenticate $frame")
         if (frame !is Frame.Text) return AuthResult.Failed
         val connectionTicket = frame.readText()
         return AuthResult.Success(WsTicketHandler.consumeTicket(connectionTicket))
