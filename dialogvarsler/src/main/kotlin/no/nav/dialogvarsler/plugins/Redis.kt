@@ -65,7 +65,6 @@ fun Application.configureRedis(): Triple<PublishMessage, PingRedis, TicketStore>
         .also { receivers -> logger.info("Message delivered to $receivers receivers") }
     val pingRedis: PingRedis = {
         jedisPool.ping()
-            .also { logger.info("Redis ping: $it") }
     }
 
     return Triple(publishMessage, pingRedis, RedisTicketStore(jedisPool))
