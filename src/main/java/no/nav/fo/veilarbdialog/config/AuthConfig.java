@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.auth;
+package no.nav.fo.veilarbdialog.config;
 
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.auth.context.AuthContextHolder;
@@ -30,6 +30,6 @@ public class AuthConfig {
     }
     @Bean
     IAuthService authService(AuthContextHolder authcontextHolder, PoaoTilgangClient poaoTilgangClient, PersonService personService) {
-        return new AuthService(authcontextHolder, poaoTilgangClient, personService);
+        return new AuthService(authcontextHolder, poaoTilgangClient, personService, "veilarbdialog");
     }
 }
