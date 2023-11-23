@@ -17,35 +17,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  dialogvarsler:
-    name: Dialogvarsler - Test, build and push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: 17
-          distribution: 'temurin'
-          cache: 'gradle'
-#      - name: Dialogvarsler - Test
+#  dialogvarsler:
+#    name: Dialogvarsler - Test, build and push
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#      - name: Set up JDK 17
+#        uses: actions/setup-java@v3
+#        with:
+#          java-version: 17
+#          distribution: 'temurin'
+#          cache: 'gradle'
+##      - name: Dialogvarsler - Test
+##        working-directory: dialogvarsler
+##        run: ./gradlew test
+#      - name: Dialogvarsler - Publish image
 #        working-directory: dialogvarsler
-#        run: ./gradlew test
-      - name: Dialogvarsler - Publish image
-        working-directory: dialogvarsler
-        run: ./gradlew publishImage --scan
-        env:
-          IMAGE_TAG: ${{ env.IMAGE_TAG }}
-          USERNAME: ${{ github.actor }}
-          PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-      - name: Dialogvarsler - Deploy application
-        uses: nais/deploy/actions/deploy@v1
-        env:
-          APIKEY: ${{ secrets.DAB_NAIS_DEPLOY_APIKEY }}
-          CLUSTER: dev-gcp
-          RESOURCE: dialogvarsler/nais/nais-dev.yaml
-          VAR: version=${{ env.IMAGE_TAG }}
+#        run: ./gradlew publishImage --scan
+#        env:
+#          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+#          USERNAME: ${{ github.actor }}
+#          PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Dialogvarsler - Deploy application
+#        uses: nais/deploy/actions/deploy@v1
+#        env:
+#          APIKEY: ${{ secrets.DAB_NAIS_DEPLOY_APIKEY }}
+#          CLUSTER: dev-gcp
+#          RESOURCE: dialogvarsler/nais/nais-dev.yaml
+#          VAR: version=${{ env.IMAGE_TAG }}
   veilarbdialog:
     name: Veilarbdialog - Test, build, push, deploy
     runs-on: ubuntu-latest

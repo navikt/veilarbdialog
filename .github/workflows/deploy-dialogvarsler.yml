@@ -1,45 +1,38 @@
-#name: Deploy dialogvarsler branch to dev
-#run-name: Deploy dialogvarsler feature branch ${{ github.ref_name }} by @${{ github.actor }}
-#on:
-#  # TODO: Remove this before merging
-#  push:
-#    branches:
-#      - dialogvarsler
-#  workflow_dispatch:
-#
-#defaults:
-#  run:
-#    working-directory: dialogvarsler
-#
-#env:
-#  IMAGE_TAG: ${{ github.sha }}
-#
-#jobs:
-#  test-build-and-push:
-#    name: Test, build and push
-#    runs-on: ubuntu-latest
-#    steps:
-#    - name: Dialogvarsler - Test
-#      working-directory: dialogvarsler
-#      run: ./gradlew test
-#    - name: Dialogvarsler - Build image
-#      working-directory: dialogvarsler
-#      run: ./gradlew buildImage
-#      env:
-#        IMAGE_TAG: ${{ env.IMAGE_TAG }}
-#        USERNAME: ${{ github.actor }}
-#        PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-#    - name: Dialogvarsler - Publish image
-#      working-directory: dialogvarsler
-#      run: ./gradlew publishImage
-#      env:
-#        IMAGE_TAG: ${{ env.IMAGE_TAG }}
-#        USERNAME: ${{ github.actor }}
-#        PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-#    - name: Deploy application
-#      uses: nais/deploy/actions/deploy@v1
-#      env:
-#        APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-#        CLUSTER: dev-fss
-#        RESOURCE: nais/nais-dev.yaml
-#        VAR: version=${{ env.IMAGE_TAG }}
+name: Deploy dialogvarsler branch to dev
+run-name: Deploy dialogvarsler feature branch ${{ github.ref_name }} by @${{ github.actor }}
+on:
+  # TODO: Remove this before merging
+  push:
+    branches:
+      - dialogvarsler
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: dialogvarsler
+
+env:
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  test-build-and-push:
+    name: Test, build and push
+    runs-on: ubuntu-latest
+    steps:
+    - name: Dialogvarsler - Test
+      working-directory: dialogvarsler
+      run: ./gradlew test
+    - name: Dialogvarsler - Publish image
+      working-directory: dialogvarsler
+      run: ./gradlew publishImage --scan
+      env:
+        IMAGE_TAG: ${{ env.IMAGE_TAG }}
+        USERNAME: ${{ github.actor }}
+        PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+    - name: Deploy application
+      uses: nais/deploy/actions/deploy@v1
+      env:
+        APIKEY: ${{ secrets.DAB_NAIS_DEPLOY_APIKEY }}
+        CLUSTER: dev-gcp
+        RESOURCE: dialogvarsler/nais/nais-dev.yaml
+        VAR: version=${{ env.IMAGE_TAG }}
