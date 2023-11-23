@@ -28,6 +28,7 @@ fun Application.configureRedis(): Pair<PublishMessage, PingRedis> {
     val credentials = DefaultRedisCredentials(username, password)
     val credentialsProvider = DefaultRedisCredentialsProvider(credentials)
     val clientConfig: DefaultJedisClientConfig = DefaultJedisClientConfig.builder()
+        .ssl(true)
         .credentialsProvider(credentialsProvider)
         .timeoutMillis(0)
         .build()
