@@ -14,7 +14,7 @@ import no.nav.dialogvarsler.varsler.TicketRequest
 import no.nav.dialogvarsler.varsler.logger
 import no.nav.security.token.support.v2.TokenValidationContextPrincipal
 
-fun Application.configureRouting(publishMessage: (message: NyDialogNotification) -> Long, pingRedis: PingRedis) {
+fun Application.configureRouting(publishMessage: (message: NyDialogNotification) -> Long, pingRedis: PingRedis, ticketHandler: WsTicketHandler) {
     routing {
         route("/isAlive") {
             get {
@@ -23,7 +23,7 @@ fun Application.configureRouting(publishMessage: (message: NyDialogNotification)
         }
         route("/isReady") {
             get {
-//                pingRedis()
+                pingRedis()
                 call.respond(HttpStatusCode.OK)
             }
         }
@@ -42,7 +42,7 @@ fun Application.configureRouting(publishMessage: (message: NyDialogNotification)
                             ?.context?.anyValidClaims?.get()?.get("sub")?.toString() ?: throw IllegalArgumentException(
                             "No subject claim found")
                         val payload = call.receive<TicketRequest>()
-                        val ticket = WsTicketHandler.generateTicket(subject, payload)
+                        val ticket = ticketHandler.generateTicket(subject, payload)
                         call.respondText(ticket)
                     } catch (e: CannotTransformContentToTypeException) {
                         call.respond(HttpStatusCode.BadRequest, "Invalid payload")

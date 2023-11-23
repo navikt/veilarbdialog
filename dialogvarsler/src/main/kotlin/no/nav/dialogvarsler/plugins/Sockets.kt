@@ -8,11 +8,12 @@ import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import no.nav.dialogvarsler.varsler.Subscription
+import no.nav.dialogvarsler.varsler.WsTicketHandler
 import no.nav.dialogvarsler.varsler.awaitAuthentication
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
-fun Application.configureSockets() {
+fun Application.configureSockets(ticketHandler: WsTicketHandler) {
     val logger = LoggerFactory.getLogger(javaClass)
 
     install(WebSockets) {
@@ -26,7 +27,7 @@ fun Application.configureSockets() {
             logger.info("Opening websocket connection")
             var subscription: Subscription? = null
             try {
-                subscription = awaitAuthentication(incoming)
+                subscription = awaitAuthentication(incoming, ticketHandler)
                 addSubscription(subscription)
                 this.send("AUTHENTICATED")
                 logger.info("Authenticated")

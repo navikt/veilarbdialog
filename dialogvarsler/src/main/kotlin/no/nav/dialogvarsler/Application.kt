@@ -3,6 +3,7 @@ package no.nav.dialogvarsler
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
 import no.nav.dialogvarsler.plugins.*
+import no.nav.dialogvarsler.varsler.WsTicketHandler
 import org.slf4j.LoggerFactory
 
 fun main(args: Array<String>) {
@@ -18,7 +19,8 @@ fun Application.module() {
     configureMonitoring()
     configureMicrometer()
     configureSerialization()
-    configureSockets()
-    val (publishMessage, pingRedis) = configureRedis()
-    configureRouting(publishMessage, pingRedis)
+    val (publishMessage, pingRedis, ticketStore) = configureRedis()
+    val ticketHandler = WsTicketHandler(ticketStore)
+    configureSockets(ticketHandler)
+    configureRouting(publishMessage, pingRedis, ticketHandler)
 }

@@ -12,9 +12,9 @@ import java.lang.IllegalStateException
 
 val logger = LoggerFactory.getLogger("no.nav.dialogvarsler.varsler.WsAuth.kt")
 
-suspend fun DefaultWebSocketServerSession.awaitAuthentication(channel: ReceiveChannel<Frame>): Subscription {
+suspend fun DefaultWebSocketServerSession.awaitAuthentication(channel: ReceiveChannel<Frame>, ticketHandler: WsTicketHandler): Subscription {
     val result = channel.receiveAsFlow()
-        .map { tryAuthenticateWithMessage(it) }
+        .map { tryAuthenticateWithMessage(it, ticketHandler) }
         .first { it is AuthResult.Success }
     return when (result) {
         is AuthResult.Success -> Subscription(
@@ -31,12 +31,12 @@ sealed class AuthResult {
     data object Failed: AuthResult()
 }
 
-fun tryAuthenticateWithMessage(frame: Frame): AuthResult {
+fun tryAuthenticateWithMessage(frame: Frame, ticketHandler: WsTicketHandler): AuthResult {
     try {
         logger.info("Received ticket, trying to authenticate $frame")
         if (frame !is Frame.Text) return AuthResult.Failed
         val connectionTicket = frame.readText()
-        return AuthResult.Success(WsTicketHandler.consumeTicket(connectionTicket))
+        return AuthResult.Success(ticketHandler.consumeTicket(connectionTicket))
     } catch (e: Throwable) {
         logger.warn("Failed to deserialize ws-message", e)
         return AuthResult.Failed

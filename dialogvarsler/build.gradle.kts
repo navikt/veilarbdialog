@@ -67,13 +67,13 @@ ktor {
 }
 
 dependencies {
-    implementation("io.ktor:ktor-server-call-logging-jvm")
-    implementation("io.ktor:ktor-server-call-id-jvm")
-    implementation("io.ktor:ktor-server-content-negotiation-jvm")
-    implementation("io.ktor:ktor-server-core-jvm")
-    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
-    implementation("io.ktor:ktor-server-websockets-jvm")
-    implementation("io.ktor:ktor-server-netty-jvm")
+    implementation("io.ktor:ktor-server-call-logging-jvm:2.3.6")
+    implementation("io.ktor:ktor-server-call-id-jvm:2.3.6")
+    implementation("io.ktor:ktor-server-content-negotiation-jvm:2.3.6")
+    implementation("io.ktor:ktor-server-core-jvm:2.3.6")
+    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:2.3.6")
+    implementation("io.ktor:ktor-server-websockets-jvm:2.3.6")
+    implementation("io.ktor:ktor-server-netty-jvm:2.3.6")
     implementation("io.ktor:ktor-server-auth:$ktor_version")
     implementation("io.ktor:ktor-server-auth-jwt:$ktor_version")
     implementation("io.ktor:ktor-server-config-yaml:$ktor_version")
@@ -92,7 +92,7 @@ dependencies {
     testImplementation("org.signal:embedded-redis:0.8.3")
 
     testImplementation("no.nav.security:mock-oauth2-server:$mockoath_version")
-    testImplementation("io.ktor:ktor-server-tests-jvm")
-    testImplementation("io.ktor:ktor-client-websockets:$ktor_version")
+    testImplementation("io.ktor:ktor-server-tests-jvm:2.3.6")
+    testImplementation("io.ktor:ktor-client-websockets-jvm:2.3.6")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

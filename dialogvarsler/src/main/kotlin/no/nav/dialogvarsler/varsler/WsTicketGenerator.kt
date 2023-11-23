@@ -9,21 +9,23 @@ data class TicketRequest(
     val fnr: String,
 )
 
-object WsTicketHandler {
+interface TicketStore {
+    fun getTicket(ticket: ConnectionToken): ConnectionTicket?
+    fun addTicket(token: ConnectionToken, ticket: ConnectionTicket)
+    fun removeTicket(ticket: ConnectionToken): Unit
+}
+
+class WsTicketHandler(private val ticketStore: TicketStore) {
     // TODO: Only allow 1 ticket per sub
     // TODO: Make these expire after x-minutes
     private val wsConnectionTokenHolder = Collections.synchronizedMap<ConnectionToken, ConnectionTicket>(mutableMapOf())
-    fun consumeTicket(ticket: String): ConnectionTicket {
-        if (ticket in wsConnectionTokenHolder) {
-            return wsConnectionTokenHolder.remove(ticket) ?:
-                throw IllegalArgumentException("Invalid or already used connection ticket")
-        } else {
-            throw IllegalArgumentException("Invalid or already used connection ticket")
-        }
+    fun consumeTicket(ticket: ConnectionToken): ConnectionTicket {
+        return ticketStore.getTicket(ticket)
+            ?.also { ticketStore.removeTicket(ticket) }
+            ?: throw IllegalArgumentException("Invalid or already used connection ticket")
     }
     fun generateTicket(subject: String, payload: TicketRequest): ConnectionToken {
-        val id = UUID.randomUUID().toString()
-        wsConnectionTokenHolder[id] = ConnectionTicket(subject ,id, payload.fnr)
-        return id
+        return UUID.randomUUID().toString()
+            .also { ticketStore.addTicket(it, ConnectionTicket(subject ,it, payload.fnr)) }
     }
 }

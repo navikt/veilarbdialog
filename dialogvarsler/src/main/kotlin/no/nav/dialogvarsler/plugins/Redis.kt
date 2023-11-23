@@ -8,15 +8,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import no.nav.dialogvarsler.varsler.DialogNotifier
-import no.nav.dialogvarsler.varsler.IncomingDialogMessageFlow
+import no.nav.dialogvarsler.varsler.*
 import org.slf4j.LoggerFactory
 import redis.clients.jedis.*
 import java.lang.IllegalArgumentException
 
 typealias PublishMessage = (NyDialogNotification) -> Long
 typealias PingRedis = () -> String
-fun Application.configureRedis(): Pair<PublishMessage, PingRedis> {
+fun Application.configureRedis(): Triple<PublishMessage, PingRedis, TicketStore> {
     val logger = LoggerFactory.getLogger(Application::class.java)
 
     val config = this.environment.config
@@ -69,5 +68,21 @@ fun Application.configureRedis(): Pair<PublishMessage, PingRedis> {
             .also { logger.info("Redis ping: $it") }
     }
 
-    return Pair(publishMessage, pingRedis)
+    return Triple(publishMessage, pingRedis, RedisTicketStore(jedisPool))
+}
+
+class RedisTicketStore(val jedis: JedisPooled): TicketStore {
+    override fun getTicket(ticket: ConnectionToken): ConnectionTicket? {
+        val value = jedis.get(ticket)
+        return Json.decodeFromString<ConnectionTicket>(value)
+    }
+
+    override fun addTicket(token: ConnectionToken, ticket: ConnectionTicket) {
+        jedis.set(token, Json.encodeToString(ticket))
+    }
+
+    override fun removeTicket(ticket: ConnectionToken) {
+        jedis.del(ticket)
+    }
+
 }
