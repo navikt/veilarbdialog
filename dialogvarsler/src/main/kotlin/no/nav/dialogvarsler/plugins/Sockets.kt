@@ -1,13 +1,13 @@
 package no.nav.dialogvarsler.plugins
 
-import no.nav.dialogvarsler.varsler.WsConnectionHolder.addSubscription
-import no.nav.dialogvarsler.varsler.WsConnectionHolder.removeSubscription
+import no.nav.dialogvarsler.varsler.WsConnectionHolder.addListener
+import no.nav.dialogvarsler.varsler.WsConnectionHolder.removeListener
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
-import no.nav.dialogvarsler.varsler.Subscription
+import no.nav.dialogvarsler.varsler.WsListener
 import no.nav.dialogvarsler.varsler.WsTicketHandler
 import no.nav.dialogvarsler.varsler.awaitAuthentication
 import org.slf4j.LoggerFactory
@@ -25,20 +25,20 @@ fun Application.configureSockets(ticketHandler: WsTicketHandler) {
     routing {
         webSocket("/ws") {
             logger.info("Opening websocket connection")
-            var subscription: Subscription? = null
+            var wsListener: WsListener? = null
             try {
-                subscription = awaitAuthentication(incoming, ticketHandler)
-                addSubscription(subscription)
+                wsListener = awaitAuthentication(incoming, ticketHandler)
+                addListener(wsListener)
                 this.send("AUTHENTICATED")
                 logger.info("Authenticated")
                 // Keep open until termination
                 incoming.receive()
             } catch (e: ClosedReceiveChannelException) {
                 logger.warn("onClose ${closeReason.await()}")
-                subscription?.let { removeSubscription(it) }
+                wsListener?.let { removeListener(it) }
             } catch (e: Throwable) {
                 logger.warn("onError ${closeReason.await()}", e)
-                subscription?.let { removeSubscription(it) }
+                wsListener?.let { removeListener(it) }
             } finally {
                 logger.info("Closing websocket connection")
             }

@@ -71,17 +71,17 @@ fun Application.configureRedis(): Triple<PublishMessage, PingRedis, TicketStore>
 }
 
 class RedisTicketStore(val jedis: JedisPooled): TicketStore {
-    override fun getTicket(ticket: ConnectionToken): ConnectionTicket? {
-        val value = jedis.get(ticket)
-        return Json.decodeFromString<ConnectionTicket>(value)
+    override fun getSubscription(ticket: ValidTicket): Subscription? {
+        val value = jedis.get(ticket.value)
+        return Json.decodeFromString<Subscription>(value)
     }
 
-    override fun addTicket(token: ConnectionToken, ticket: ConnectionTicket) {
-        jedis.set(token, Json.encodeToString(ticket))
+    override fun addSubscription(ticket: ValidTicket, subscription: Subscription) {
+        jedis.set(ticket.value, Json.encodeToString(subscription))
     }
 
-    override fun removeTicket(ticket: ConnectionToken) {
-        jedis.del(ticket)
+    override fun removeSubscription(ticket: ValidTicket) {
+        jedis.del(ticket.value)
     }
 
 }

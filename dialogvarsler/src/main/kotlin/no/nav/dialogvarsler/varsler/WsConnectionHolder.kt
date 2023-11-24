@@ -6,44 +6,37 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import java.util.*
 
-//@Serializable
-//data class ConnectionIdentifier(
-//    val fnr: String,
-//    val sub: String,
-//    val uuid: String,
-//)
-
 typealias Fnr = String
-typealias ConnectionToken = String
+//typealias ConnectionTicket = String
 
 @Serializable
-data class ConnectionTicket(
+data class Subscription(
     val sub: String,
-    val connectionToken: ConnectionToken,
+    val connectionTicket: String,
     val fnr: Fnr
 )
 
-data class Subscription(
+data class WsListener(
     val wsSession: DefaultWebSocketServerSession,
-    val identifier: ConnectionTicket
+    val subscription: Subscription
 )
 
 object WsConnectionHolder {
-    val dialogSubscriptions = Collections.synchronizedMap(mutableMapOf<Fnr, List<Subscription>>())
+    val dialogListeners = Collections.synchronizedMap(mutableMapOf<Fnr, List<WsListener>>())
 
-    fun addSubscription(subscription: Subscription) {
-        val currentSubscriptions = dialogSubscriptions[subscription.identifier.fnr]
-        val newSubscriptions: List<Subscription> = currentSubscriptions
-            ?.let { it + listOf(subscription) } ?: listOf(subscription)
-        dialogSubscriptions[subscription.identifier.fnr] = newSubscriptions
+    fun addListener(wsListener: WsListener) {
+        val currentSubscriptions = dialogListeners[wsListener.subscription.fnr]
+        val newWsListeners: List<WsListener> = currentSubscriptions
+            ?.let { it + listOf(wsListener) } ?: listOf(wsListener)
+        dialogListeners[wsListener.subscription.fnr] = newWsListeners
     }
-    fun removeSubscription(subscription: Subscription) {
-        val currentSubscriptions = dialogSubscriptions[subscription.identifier.fnr]
-        val newSubscriptions: List<Subscription> = currentSubscriptions
-            ?.filter { it.identifier == subscription.identifier } ?: emptyList()
-        dialogSubscriptions[subscription.identifier.fnr] = newSubscriptions
+    fun removeListener(wsListener: WsListener) {
+        val currentSubscriptions = dialogListeners[wsListener.subscription.fnr]
+        val newWsListeners: List<WsListener> = currentSubscriptions
+            ?.filter { it.subscription == wsListener.subscription } ?: emptyList()
+        dialogListeners[wsListener.subscription.fnr] = newWsListeners
         runBlocking {
-            subscription.wsSession.close(CloseReason(CloseReason.Codes.GOING_AWAY,"unsubscribing"))
+            wsListener.wsSession.close(CloseReason(CloseReason.Codes.GOING_AWAY,"unsubscribing"))
         }
     }
 }

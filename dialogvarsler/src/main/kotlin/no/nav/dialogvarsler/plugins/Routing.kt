@@ -43,7 +43,7 @@ fun Application.configureRouting(publishMessage: (message: NyDialogNotification)
                             "No subject claim found")
                         val payload = call.receive<TicketRequest>()
                         val ticket = ticketHandler.generateTicket(subject, payload)
-                        call.respondText(ticket)
+                        call.respondText(ticket.value)
                     } catch (e: CannotTransformContentToTypeException) {
                         call.respond(HttpStatusCode.BadRequest, "Invalid payload")
                     }

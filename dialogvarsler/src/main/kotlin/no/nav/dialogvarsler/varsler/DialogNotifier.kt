@@ -20,16 +20,16 @@ object DialogNotifier {
     private val logger = LoggerFactory.getLogger(javaClass)
     suspend fun notifySubscribers(messageString: String) {
         runCatching {
-            val message = Json.decodeFromString<DialogHendelse>(messageString)
-            val websocketMessage = Json.encodeToString(message.eventType)
-            WsConnectionHolder.dialogSubscriptions[message.fnr]
+            val event = Json.decodeFromString<DialogHendelse>(messageString)
+            val websocketMessage = Json.encodeToString(event.eventType)
+            WsConnectionHolder.dialogListeners[event.fnr]
                 ?.forEach {
                     if (it.wsSession.isActive) {
                         it.wsSession.send(websocketMessage)
                         logger.warn("Message delivered")
                     } else {
                         logger.warn("WS session was not active, could not deliver message")
-                        WsConnectionHolder.removeSubscription(it)
+                        WsConnectionHolder.removeListener(it)
                     }
                 }
         }.onFailure { error ->
