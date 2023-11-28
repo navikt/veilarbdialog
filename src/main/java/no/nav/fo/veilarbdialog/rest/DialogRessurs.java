@@ -9,11 +9,9 @@ import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -75,7 +73,7 @@ public class DialogRessurs {
 
     @GetMapping("{dialogId}")
     public DialogDTO hentDialog(@PathVariable Long dialogId) {
-        DialogData dialogData = dialogDataService.hentDialogMedTilgangskontroll(dialogId);
+        DialogData dialogData = dialogDataService.hentDialog(dialogId);
         sjekkTilgangTilDialog(dialogData);
         return restMapper.somDialogDTO(dialogData);
     }
@@ -146,8 +144,8 @@ public class DialogRessurs {
     public DialogDTO forhandsorienteringPaAktivitet(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
         var aktorId = dialogDataService.hentAktoerIdForPerson(getContextUserIdent());
 
-        var dialog = dialogDataService.hentDialogMedTilgangskontroll(nyHenvendelseDTO.getDialogId(),
-                AktivitetId.of(nyHenvendelseDTO.getAktivitetId()));
+        var dialog = dialogDataService.hentDialog(nyHenvendelseDTO.getDialogId(),
+               AktivitetId.of(nyHenvendelseDTO.getAktivitetId()));
         if (dialog == null) dialog = dialogDataService.opprettDialog(nyHenvendelseDTO, aktorId.get());
 
         long dialogId = dialog.getId();

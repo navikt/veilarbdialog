@@ -27,7 +27,6 @@ public class InternApiService {
         }
 
         DialogData dialogData = dialogDAO.hentDialog(dialogId);
-        authService.sjekkTilgangTilPerson(AktorId.of(dialogData.getAktorId()));
 
         return filtrerKontorsperret(dialogData);
     }
@@ -56,14 +55,12 @@ public class InternApiService {
    }
 
    private List<DialogData> hentDialogerForAktorId(String aktorId) {
-        authService.sjekkTilgangTilPerson(AktorId.of(aktorId));
         return filtrerKontorsperret(dialogDAO.hentDialogerForAktorId(aktorId));
    }
 
    private List<DialogData> hentDialogerForOppfolgingsperiodeId(UUID oppfolgingsperiodeId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForOppfolgingsperiodeId(oppfolgingsperiodeId);
         if (dialoger.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        authService.sjekkTilgangTilPerson(AktorId.of(dialoger.get(0).getAktorId()));
         return filtrerKontorsperret(dialoger);
    }
 
