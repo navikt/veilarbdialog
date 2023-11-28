@@ -58,7 +58,6 @@ public class DialogDataService {
 
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person) {
-        auth.sjekkTilgangTilPerson(person.eksternBrukerId());
         AktorId aktorId = hentAktoerIdForPerson(person);
         return dialogDAO.hentDialogerForAktorId(aktorId.get());
     }
@@ -66,7 +65,6 @@ public class DialogDataService {
     public Date hentSistOppdatertForBruker(Person person, Id endretAvId) {
         Id endretAv = auth.erEksternBruker() ? hentAktoerIdForPerson(endretAvId) : endretAvId;
         AktorId bruker = hentAktoerIdForPerson(person);
-        auth.sjekkTilgangTilPerson(bruker);
         return dataVarehusDAO.hentSisteEndringSomIkkeErDine(bruker.get(), endretAv.get());
     }
 
@@ -74,7 +72,6 @@ public class DialogDataService {
     public DialogData opprettHenvendelse(NyHenvendelseDTO henvendelseData, Person bruker) {
         var aktivitetsId = AktivitetId.of(henvendelseData.getAktivitetId());
         AktorId aktorId = hentAktoerIdForPerson(bruker);
-        auth.sjekkTilgangTilPerson(aktorId);
         Fnr fnr = hentFnrForPerson(bruker);
         if (!brukernotifikasjonService.kanVarsles(fnr)) {
             throw new ResponseStatusException(CONFLICT, "Bruker kan ikke varsles.");

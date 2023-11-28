@@ -5,6 +5,7 @@ import no.nav.common.auth.context.AuthContextHolder;
 import no.nav.common.rest.client.RestClient;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.fo.veilarbdialog.service.PersonService;
+import no.nav.poao.dab.spring_a2_annotations.EnableAuthorization;
 import no.nav.poao.dab.spring_auth.AuthService;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import no.nav.poao_tilgang.client.PoaoTilgangCachedClient;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@EnableAuthorization
 @Slf4j
 public class AuthConfig {
 

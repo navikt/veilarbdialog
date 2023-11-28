@@ -2,9 +2,12 @@ package no.nav.fo.veilarbdialog.rest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
+import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
+import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,12 +38,8 @@ public class DialogRessurs {
     private final KontorsperreFilter kontorsperreFilter;
     private final IAuthService auth;
 
-    private void sjekkErInternbruker() {
-        if (!auth.erInternBruker())
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bare internbrukere tillatt");
-    }
-
     @GetMapping
+    @AuthorizeFnr(auditlogMessage = "hent dialoger")
     public List<DialogDTO> hentDialoger(@RequestParam(value = "ekskluderDialogerMedKontorsperre", required = false) boolean ekskluderDialogerMedKontorsperre) {
         return dialogDataService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
@@ -54,13 +53,8 @@ public class DialogRessurs {
                 .collect(toList());
     }
 
-    @GetMapping("sistOppdatert")
-    public SistOppdatertDTO sistOppdatert() {
-        var oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getLoggedInnUser());
-        return new SistOppdatertDTO(oppdatert == null ? null : oppdatert.getTime());
-    }
-
     @GetMapping("antallUleste")
+    @AuthorizeFnr(auditlogMessage = "hent antall uleste")
     public AntallUlesteDTO antallUleste() {
 
         long antall = dialogDataService.hentDialogerForBruker(getContextUserIdent())
@@ -72,16 +66,22 @@ public class DialogRessurs {
 
     }
 
+    @GetMapping("sistOppdatert")
+    @AuthorizeFnr()
+    public SistOppdatertDTO sistOppdatert() {
+        var oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getLoggedInnUser());
+        return new SistOppdatertDTO(oppdatert == null ? null : oppdatert.getTime());
+    }
+
     @GetMapping("{dialogId}")
-    public DialogDTO hentDialog(@PathVariable String dialogId) {
-        return Optional.ofNullable(dialogId)
-                .map(Long::parseLong)
-                .map(dialogDataService::hentDialogMedTilgangskontroll)
-                .map(restMapper::somDialogDTO)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public DialogDTO hentDialog(@PathVariable Long dialogId) {
+        DialogData dialogData = dialogDataService.hentDialogMedTilgangskontroll(dialogId);
+        sjekkTilgangTilDialog(dialogData);
+        return restMapper.somDialogDTO(dialogData);
     }
 
     @PostMapping
+    @AuthorizeFnr(auditlogMessage = "ny henvendelse")
     public DialogDTO nyHenvendelse(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
         Person bruker = getContextUserIdent();
         var dialogData = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
@@ -106,42 +106,45 @@ public class DialogRessurs {
 
     @PutMapping("{dialogId}/les")
     @Transactional
-    public DialogDTO markerSomLest(@PathVariable String dialogId) {
-        var dialogData = dialogDataService.markerDialogSomLest(Long.parseLong(dialogId));
-        return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
-                restMapper.somDialogDTO(dialogData)
-                : null;
+    public DialogDTO markerSomLest(@PathVariable Long dialogId) {
+        var dialogData = dialogDataService.markerDialogSomLest(dialogId);
+        sjekkTilgangTilDialog(dialogData);
+
+        return restMapper.somDialogDTO(dialogData);
     }
 
     @PutMapping("{dialogId}/venter_pa_svar/{venter}")
-    public DialogDTO oppdaterVenterPaSvar(@PathVariable String dialogId, @PathVariable boolean venter) {
+    @OnlyInternBruker
+    @Transactional
+    public DialogDTO oppdaterVenterPaSvar(@PathVariable Long dialogId, @PathVariable boolean venter) {
 
         var dialogStatus = DialogStatus.builder()
-                .dialogId(Long.parseLong(dialogId))
+                .dialogId(dialogId)
                 .venterPaSvar(venter)
                 .build();
 
         var dialog = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
+        sjekkTilgangTilDialog(dialog);
         dialogDataService.sendPaaKafka(dialog.getAktorId());
 
         return markerSomLest(dialogId);
     }
 
     @PutMapping("{dialogId}/ferdigbehandlet/{ferdigbehandlet}")
-    public DialogDTO oppdaterFerdigbehandlet(@PathVariable String dialogId, @PathVariable boolean ferdigbehandlet) {
-        sjekkErInternbruker();
-
-        var dialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(Long.parseLong(dialogId), ferdigbehandlet);
+    @OnlyInternBruker
+    public DialogDTO oppdaterFerdigbehandlet(@PathVariable Long dialogId, @PathVariable boolean ferdigbehandlet) {
+        var dialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogId, ferdigbehandlet);
+        sjekkTilgangTilDialog(dialog);
         dialogDataService.sendPaaKafka(dialog.getAktorId());
 
         return markerSomLest(dialogId);
     }
 
     @PostMapping("forhandsorientering")
+    @AuthorizeFnr(auditlogMessage = "forhåndsorientering på aktivitet")
+    @OnlyInternBruker
     public DialogDTO forhandsorienteringPaAktivitet(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
-        sjekkErInternbruker();
         var aktorId = dialogDataService.hentAktoerIdForPerson(getContextUserIdent());
-        auth.sjekkTilgangTilPerson(aktorId);
 
         var dialog = dialogDataService.hentDialogMedTilgangskontroll(nyHenvendelseDTO.getDialogId(),
                 AktivitetId.of(nyHenvendelseDTO.getAktivitetId()));
@@ -166,5 +169,10 @@ public class DialogRessurs {
                 .ofNullable(httpServletRequest.getParameter("aktorId"))
                 .map(Person::aktorId);
         return fnr.orElseGet(() -> aktorId.orElseThrow(RuntimeException::new));
+    }
+
+    private void sjekkTilgangTilDialog(DialogData dialogData) {
+        auth.sjekkTilgangTilPerson(AktorId.of(dialogData.getAktorId()));
+        dialogData.getKontorEnhet().ifPresent(auth::sjekkTilgangTilEnhet);
     }
 }

@@ -12,6 +12,8 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerIkkeUnderOppfolgingException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
+import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
+import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,15 +37,9 @@ public class EskaleringsvarselController {
 
     private final IAuthService authService;
 
-    private void skalVereInternBruker() {
-        if (!authService.erInternBruker()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Ugyldig bruker type");
-        }
-    }
-
     @PostMapping(value = "/start")
+    @OnlyInternBruker
     public EskaleringsvarselDto start(@RequestBody StartEskaleringDto startEskaleringDto) {
-        skalVereInternBruker();
         authService.sjekkTilgangTilPerson(startEskaleringDto.fnr());
 
         EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselService.start(startEskaleringDto.fnr(), startEskaleringDto.begrunnelse(), startEskaleringDto.overskrift(), startEskaleringDto.tekst());
@@ -52,8 +48,8 @@ public class EskaleringsvarselController {
     }
 
     @PatchMapping("/stop")
+    @OnlyInternBruker
     public void stop(@RequestBody StopEskaleringDto stopEskaleringDto) {
-        skalVereInternBruker();
         authService.sjekkTilgangTilPerson(stopEskaleringDto.fnr());
         NavIdent navIdent = authService.getInnloggetVeilederIdent();
 
@@ -86,10 +82,9 @@ public class EskaleringsvarselController {
     }
 
     @GetMapping(value = "/historikk", params = "fnr")
+    @OnlyInternBruker
+    @AuthorizeFnr(auditlogMessage = "eskaleringsvarselhistorikk")
     public List<EskaleringsvarselDto> historikk(@RequestParam Fnr fnr) {
-        skalVereInternBruker();
-        authService.sjekkTilgangTilPerson(fnr);
-
         return eskaleringsvarselService.historikk(fnr)
                 .stream()
                 .map(EskaleringsvarselController::eskaleringsvarselEntity2Dto)

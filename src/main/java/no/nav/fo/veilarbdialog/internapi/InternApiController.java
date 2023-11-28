@@ -1,6 +1,10 @@
 package no.nav.fo.veilarbdialog.internapi;
 
 import lombok.RequiredArgsConstructor;
+import no.nav.common.types.identer.AktorId;
+import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeAktorId;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import no.nav.veilarbdialog.internapi.api.InternalApi;
 import no.nav.veilarbdialog.internapi.model.Dialog;
 import org.springframework.http.HttpStatus;
@@ -17,20 +21,28 @@ import java.util.UUID;
 public class InternApiController implements InternalApi {
 
     private final InternApiService internApiService;
+    private final IAuthService auth;
 
     @Override
     public ResponseEntity<Dialog> hentDialog(Integer dialogId) {
-        Dialog dialog = Optional.of(internApiService.hentDialog(dialogId))
-                .map(InternDialogMapper::mapTilDialog)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NO_CONTENT));
+        DialogData dialogData = internApiService.hentDialog(dialogId);
+        auth.sjekkTilgangTilPerson(AktorId.of(dialogData.getAktorId()));
+        Dialog dialog = InternDialogMapper.mapTilDialog(dialogData);
 
-        return ResponseEntity.of(Optional.of(dialog));
+        return ResponseEntity.of(Optional.ofNullable(dialog));
     }
 
     @Override
     public ResponseEntity<List<Dialog>> hentDialoger(String aktorId, UUID oppfolgingsperiodeId) {
-        List<Dialog> dialoger = Optional.of(internApiService.hentDialoger(aktorId, oppfolgingsperiodeId))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NO_CONTENT))
+        List<DialogData> dialogData = internApiService.hentDialoger(aktorId, oppfolgingsperiodeId);
+        dialogData
+                .stream()
+                .findAny()
+                .map(DialogData::getAktorId)
+                .map(AktorId::of)
+                .ifPresent(auth::sjekkTilgangTilPerson);
+
+        List<Dialog> dialoger = dialogData
                 .stream()
                 .map(InternDialogMapper::mapTilDialog)
                 .toList();
