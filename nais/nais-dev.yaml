@@ -39,7 +39,6 @@ spec:
       memory: 768Mi
   envFrom:
     - configmap: pto-config
-    - configmap: loginservice-idporten
   vault:
     enabled: true
     paths:
@@ -71,6 +70,9 @@ spec:
         - application: veilarbapi
           namespace: pto
           cluster: dev-gcp
+        - application: arbeidssokerregistrering-for-veileder
+          namespace: paw
+          cluster: dev-gcp
         - application: veilarbpersonflate
           namespace: poao
           cluster: dev-gcp
@@ -98,6 +100,8 @@ spec:
     - name: APP_CLUSTER_NAME
       value: dev-fss
     - name: DIALOG_EKSTERN_URL
-      value: https://pto.dev.nav.no/arbeid/dialog
+      value: https://pto.dev.ekstern.nav.no/arbeid/dialog
     - name: APPD_ENABLED
       value: "false"
+    - name: POAO_TILGANG_SCOPE
+      value: api://dev-fss.poao.poao-tilgang/.default

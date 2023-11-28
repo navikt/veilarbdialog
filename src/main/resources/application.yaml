@@ -99,15 +99,12 @@ management:
         enabled: true
 
 application:
-  loginservice:
-    idporten:
-      discoveryUrl: ${LOGINSERVICE_IDPORTEN_DISCOVERY_URL}
-      audience: ${LOGINSERVICE_IDPORTEN_AUDIENCE}
   cluster: ${APP_CLUSTER_NAME}
   namespace: ${NAIS_NAMESPACE}
   environment: ${APP_ENVIRONMENT_NAME}
-  abac:
-    url: ${ABAC_PDP_ENDPOINT_URL}
+  poao_tilgang:
+    url: http://poao-tilgang.poao.svc.nais.local
+    scope: ${POAO_TILGANG_SCOPE}
   azure:
     ad:
       clientId: ${AZURE_APP_CLIENT_ID}
@@ -129,8 +126,6 @@ application:
   sts:
     discovery:
       url: ${SECURITY_TOKEN_SERVICE_DISCOVERY_URL}
-  unleash:
-    url: ${UNLEASH_API_URL}
   veilarboppfolging:
     api:
       url: ${VEILARBOPPFOLGINGAPI_URL}

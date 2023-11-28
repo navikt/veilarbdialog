@@ -1,8 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
 import lombok.Getter;
-import no.nav.common.featuretoggle.UnleashClient;
-import no.nav.common.featuretoggle.UnleashClientImpl;
 import no.nav.common.token_client.builder.AzureAdTokenClientBuilder;
 import no.nav.common.token_client.builder.TokenXTokenClientBuilder;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
@@ -24,9 +22,6 @@ public class ServiceConfig {
 
     @Value("${application.sts.discovery.url}")
     private String discoveryUrl;
-
-    @Value("${application.unleash.url}")
-    private String unleashUrl;
 
     @Value("${spring.application.name}")
     private String applicationName;
@@ -53,12 +48,6 @@ public class ServiceConfig {
         return AzureAdTokenClientBuilder.builder()
                 .withNaisDefaults()
                 .buildOnBehalfOfTokenClient();
-    }
-
-    @Profile("!local")
-    @Bean
-    public UnleashClient unleashClient() {
-        return new UnleashClientImpl(unleashUrl, "veilarbdialog");
     }
 
 }

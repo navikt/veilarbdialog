@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
-import io.restassured.RestAssured;
+import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
@@ -9,32 +9,13 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
-@Sql(
-        scripts = "/db/testdata/slett_alle_dialoger.sql",
-        executionPhase = BEFORE_TEST_METHOD
-)
-class DialogDataServiceTest {
 
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
+class DialogDataServiceTest extends SpringBootTestBase {
 
     MockBruker bruker;
     MockVeileder brukersVeileder;
@@ -42,14 +23,11 @@ class DialogDataServiceTest {
     MockVeileder tilfeldigVeileder;
 
     @BeforeEach
-    void setup() {
-        RestAssured.port = port;
+    void setupL() {
         bruker = MockNavService.createHappyBruker();
         brukersVeileder = MockNavService.createVeileder(bruker);
-        veilederNasjonalTilgang = MockNavService.createVeileder();
-        veilederNasjonalTilgang.setNasjonalTilgang(true);
+        veilederNasjonalTilgang = MockNavService.createNKS();
         tilfeldigVeileder = MockNavService.createVeileder();
-
     }
 
     @Test
@@ -67,7 +45,7 @@ class DialogDataServiceTest {
                 .extract()
                 .as(DialogDTO.class);
 
-        BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).kontorsperreEnhet("1234").build();
+        BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
         MockNavService.updateBruker(bruker, brukerOptionsKvp);
 
         DialogDTO dialogUnderKvp = brukersVeileder.createRequest()
@@ -101,7 +79,7 @@ class DialogDataServiceTest {
     @Test
     void opprettHenvendelse_brukerManglerTilgangTilPerson_Forbidden403() {
 
-        BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).kontorsperreEnhet("1234").build();
+        BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
         MockNavService.updateBruker(bruker, brukerOptionsKvp);
 
         NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
@@ -119,7 +97,7 @@ class DialogDataServiceTest {
     @Test
     void publicMetoder_sjekkerOmBrukerHarTilgang() {
 
-        BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).kontorsperreEnhet("1234").build();
+        BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
         MockNavService.updateBruker(bruker, brukerOptionsKvp);
 
         NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()

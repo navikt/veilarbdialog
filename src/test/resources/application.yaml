@@ -69,21 +69,15 @@ server:
     context-path: "/veilarbdialog"
 
 application:
+  poao_tilgang:
+    scope: "poao_tilgang.scope"
   cluster: TEST
   namespace: APP_NAMESPACE_NAME
   environment: APP_ENVIRONMENT_NAME
-  loginservice:
-    idporten:
-      audience: IDPORTEN_CLIENTID_USERNAME
-      discoveryUrl: http://localhost:8080/IDPORTEN_DISCOVERY_URL
-  abac:
-    url: http://localhost:8080/ABAC_PDP_ENDPOINT_URL
   azure:
     ad:
       clientId: VEILARBDIALOG_OIDC_CLIENT_ID
       discoveryUrl: http://localhost:8080/AAD_DISCOVERY_URL
-      loginservice:
-        clientId: LOGINSERVICE_OIDC_CLIENT_ID
   datasource:
     url: jdbc:h2:file:~/database/veilarbdialog;DB_CLOSE_DELAY=-1;MODE=Oracle;AUTO_SERVER=TRUE;
     username: sa
@@ -103,8 +97,6 @@ application:
   sts:
     discovery:
       url: http://localhost:8080/SECURITYTOKENSERVICE_URL
-  unleash:
-    url: http://localhost:8080/UNLEASH_API_URL
   veilarboppfolging:
     api:
       url: http://localhost:${wiremock.server.port}/veilarboppfolging/api

@@ -1,14 +1,8 @@
 package no.nav.fo.veilarbdialog.config;
 
-import no.nav.common.abac.Pep;
-import no.nav.common.auth.context.AuthContextHolder;
-import no.nav.common.featuretoggle.UnleashClient;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 import no.nav.common.token_client.client.TokenXOnBehalfOfTokenClient;
-import no.nav.poao.dab.spring_auth.AuthService;
-import no.nav.poao.dab.spring_auth.IAuthService;
-import no.nav.poao.dab.spring_auth.IPersonService;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,13 +39,4 @@ public class ApplicationTestConfig {
         return tokenClient;
     }
 
-    @Bean
-    UnleashClient unleashClient() {
-        return mock(UnleashClient.class);
-    }
-
-    @Bean
-    public IAuthService authService(AuthContextHolder authContextHolder, Pep pep, IPersonService personService) {
-        return new AuthService(authContextHolder, pep, personService);
-    }
 }

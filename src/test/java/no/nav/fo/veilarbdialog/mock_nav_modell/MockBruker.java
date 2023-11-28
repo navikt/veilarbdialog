@@ -27,10 +27,6 @@ public class MockBruker extends RestassuredUser {
         return super.ident;
     }
 
-    public boolean harIdent(String ident) {
-        return super.ident.equals(ident) || aktorId.equals(ident);
-    }
-
     public AktorId getAktorIdAsAktorId() {
         return AktorId.of(aktorId);
     }
