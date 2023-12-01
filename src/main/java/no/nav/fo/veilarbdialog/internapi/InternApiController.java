@@ -3,14 +3,11 @@ package no.nav.fo.veilarbdialog.internapi;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeAktorId;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import no.nav.veilarbdialog.internapi.api.InternalApi;
 import no.nav.veilarbdialog.internapi.model.Dialog;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;

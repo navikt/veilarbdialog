@@ -1,7 +1,6 @@
 package no.nav.fo.veilarbdialog.internapi;
 
 import lombok.RequiredArgsConstructor;
-import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
