@@ -8,6 +8,7 @@ on:
       - '.github/workflows/unleash-apitoken.yaml'
       - 'nais/unleash-apitoken-dev.yaml'
       - 'nais/unleash-apitoken.yaml'
+  workflow_dispatch:
 
 jobs:
   apply-apitoken-unleash:
