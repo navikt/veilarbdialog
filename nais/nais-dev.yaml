@@ -105,7 +105,7 @@ spec:
       value: "false"
     - name: POAO_TILGANG_SCOPE
       value: api://dev-fss.poao.poao-tilgang/.default
-    - name: DIALOGVARSLER_URL
-      value: https://dialogvarsler.ekstern.dev.nav.no
-    - name: DIALOGVARSLER_SCOPE
-      value: api://dev-gcp.dab.dialogvarsler/.default
+    - name: PLEASE_URL
+      value: https://please.ekstern.dev.nav.no
+    - name: PLEASE_SCOPE
+      value: api://dev-gcp.dab.please/.default

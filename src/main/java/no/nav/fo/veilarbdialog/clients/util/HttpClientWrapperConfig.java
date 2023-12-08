@@ -23,7 +23,7 @@ public class HttpClientWrapperConfig {
     }
 
     @Bean
-    public HttpClientWrapper dialogvarslerClientWrapper(@Value("${application.dialogvarsler.api.url}") String baseUrl, OkHttpClient dialogvarslerClient) {
+    public HttpClientWrapper dialogvarslerClientWrapper(@Value("${application.please.api.url}") String baseUrl, OkHttpClient dialogvarslerClient) {
         return new HttpClientWrapper(
                 dialogvarslerClient,
                 baseUrl

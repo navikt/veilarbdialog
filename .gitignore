@@ -4,5 +4,3 @@ target
 !.idea/runConfigurations/
 *.log
 ignore
-/dialogvarsler/build/
-/dialogvarsler/.gradle/

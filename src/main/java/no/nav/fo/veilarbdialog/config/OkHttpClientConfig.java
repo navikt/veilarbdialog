@@ -26,14 +26,14 @@ public class OkHttpClientConfig {
                 .addInterceptor(oppfolgingAuthInterceptor).build();
     }
 
-    @Bean OkHttpClient dialogvarslerClient(MeterRegistry meterRegistry, Interceptor dialogvarslerAuthInterceptor) {
+    @Bean OkHttpClient dialogvarslerClient(MeterRegistry meterRegistry, Interceptor pleaseAuthInterceptor) {
         return RestClient.baseClientBuilder()
                 .eventListener(OkHttpMetricsEventListener.builder(meterRegistry, "okhttp.requests").build())
-                .addInterceptor(dialogvarslerAuthInterceptor).build();
+                .addInterceptor(pleaseAuthInterceptor).build();
     }
 
     @Value("${application.veilarbperson.api.scope}") String veilarbpersonScope;
-    @Value("${application.dialogvarsler.api.scope}") String dialogvarslerScope;
+    @Value("${application.please.api.scope}") String pleaseScope;
 
 
     @Bean
@@ -62,10 +62,10 @@ public class OkHttpClientConfig {
     }
 
     @Bean
-    Interceptor dialogvarslerAuthInterceptor(AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient) {
+    Interceptor pleaseAuthInterceptor(AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient) {
         return chain -> {
             var original = chain.request();
-            var token = azureAdMachineToMachineTokenClient.createMachineToMachineToken(dialogvarslerScope);
+            var token = azureAdMachineToMachineTokenClient.createMachineToMachineToken(pleaseScope);
             var newReq = original
                     .newBuilder()
                     .addHeader("Authorization", "Bearer " + token)
