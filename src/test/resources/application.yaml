@@ -109,7 +109,8 @@ application:
   please:
     api:
       url: http://localhost:${wiremock.server.port}/
-      scope: api://test.dab.please/.default
+      azureScope: api://test.dab.please/.default
+      tokenXScope: test:dab:please
   pdl:
     api:
       url: http://localhost:${wiremock.server.port}/pdl

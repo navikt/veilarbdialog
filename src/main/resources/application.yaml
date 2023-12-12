@@ -138,7 +138,8 @@ application:
   please:
     api:
       url: ${PLEASE_URL}
-      scope: ${PLEASE_SCOPE}
+      azureScope: ${PLEASE_AZURE_SCOPE}
+      tokenXScope: ${PLEASE_TOKENX_SCOPE}
   topic:
     inn:
       oppfolgingsperiode: pto.oppfolgingsperiode-v1

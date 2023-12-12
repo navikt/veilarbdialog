@@ -33,7 +33,7 @@ public class OkHttpClientConfig {
     }
 
     @Value("${application.veilarbperson.api.scope}") String veilarbpersonScope;
-    @Value("${application.please.api.scope}") String pleaseScope;
+
 
 
     @Bean
@@ -64,10 +64,10 @@ public class OkHttpClientConfig {
     }
 
     @Bean
-    Interceptor pleaseAuthInterceptor(AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient) {
+    Interceptor pleaseAuthInterceptor(TokenProvider tokenProvider, @Value("${application.please.api.azureScope}") String pleaseAzureScope,  @Value("${application.please.api.tokenXScope}") String pleaseTokenXScope) {
         return chain -> {
             var original = chain.request();
-            var token = azureAdMachineToMachineTokenClient.createMachineToMachineToken(pleaseScope);
+            var token = tokenProvider.get(pleaseAzureScope, pleaseTokenXScope);
             var newReq = original
                     .newBuilder()
                     .addHeader("Authorization", "Bearer " + token)
