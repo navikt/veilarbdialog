@@ -37,6 +37,7 @@ spec:
     - https://veilarbdialog.prod-fss-pub.nais.io
   envFrom:
     - configmap: pto-config
+    - secret: veilarbdialog-unleash-api-token
   vault:
     enabled: true
     paths:
@@ -92,6 +93,9 @@ spec:
         - application: start-samtale
           namespace: pto
           cluster: prod-gcp
+    outbound:
+      external:
+        - host: dab-unleash-api.nav.cloud.nais.io
   env:
     - name: APP_ENVIRONMENT_NAME
       value: p
