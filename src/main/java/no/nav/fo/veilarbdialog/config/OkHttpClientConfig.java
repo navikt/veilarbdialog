@@ -4,7 +4,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.okhttp3.OkHttpMetricsEventListener;
 import no.nav.common.rest.client.RestClient;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
-import no.nav.fo.veilarbdialog.clients.veilarboppfolging.VeilarbOppfolgingTokenProvider;
+import no.nav.fo.veilarbdialog.clients.util.TokenProvider;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,12 +37,14 @@ public class OkHttpClientConfig {
 
 
     @Bean
-    Interceptor oppfolgingAuthInterceptor(VeilarbOppfolgingTokenProvider veilarbOppfolgingTokenProvider) {
+    Interceptor oppfolgingAuthInterceptor(TokenProvider veilarbOppfolgingTokenProvider,
+                                          @Value("${application.veilarboppfolging.api.azureScope}") String veilarboppfolgingAzureScope,
+                                          @Value("${application.veilarboppfolging.api.tokenXScope}") String veilarboppfolgingTokenXScope) {
         return chain -> {
             var original = chain.request();
             var newReq = original
                     .newBuilder()
-                    .addHeader("Authorization", "Bearer " + veilarbOppfolgingTokenProvider.get())
+                    .addHeader("Authorization", "Bearer " + veilarbOppfolgingTokenProvider.get(veilarboppfolgingAzureScope, veilarboppfolgingTokenXScope))
                     .method(original.method(), original.body())
                     .build();
             return chain.proceed(newReq);
