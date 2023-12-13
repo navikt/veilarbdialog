@@ -5,6 +5,6 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 class DialogVarselDto {
-    String fnr;
-    String eventType = "NY_MELDING";
+    String subscriptionKey;
+    String eventType = "NY_DIALOGMELDING_FRA_BRUKER_TIL_NAV";
 }
