@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
+import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,7 @@ public class DialogDataService {
     private final KladdService kladdService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final SistePeriodeService sistePeriodeService;
+    private final Unleash unleash;
 
     private final BrukernotifikasjonService brukernotifikasjonService;
 
@@ -85,7 +87,10 @@ public class DialogDataService {
         dialog = markerDialogSomLest(dialog.getId());
 
         sendPaaKafka(aktorId.get());
-        dialogVarslerClient.varsleLyttere(fnr);
+        
+        if (unleash.isEnabled("veilarbdialog.dialogvarsling")) {
+            dialogVarslerClient.varsleLyttere(fnr);
+        }
 
         return dialog;
     }
