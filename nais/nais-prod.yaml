@@ -96,6 +96,7 @@ spec:
     outbound:
       external:
         - host: dab-unleash-api.nav.cloud.nais.io
+        - host: please.ekstern.nav.no
   env:
     - name: APP_ENVIRONMENT_NAME
       value: p
