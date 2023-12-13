@@ -18,14 +18,16 @@ public class DialogVarslerClientImpl implements DialogVarslerClient {
     }
 
     @Override
-    public void varsleLyttere(Fnr fnr) {
+    public void varsleLyttere(Fnr fnr, EventType eventType) {
         try {
-            var payload = new DialogVarselDto(fnr.get(), "NY_DIALOGMELDING_FRA_BRUKER_TIL_NAV");
+            var payload = new DialogVarselDto(fnr.get(), eventType.name());
             var requestBody = RequestBody.create(JsonUtils.toJson(payload), MediaType.parse("application/json"));
             dialogvarslerClientWrapper.post("/notify-subscribers", requestBody);
         } catch (Exception e) {
             log.warn("Kunne ikke varsle om dialog til PLEASE", e);
         }
     }
+
+
 }
 

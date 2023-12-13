@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.rest;
 
 import lombok.val;
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
+import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
@@ -10,9 +11,11 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -25,6 +28,7 @@ class DialogRessursTest extends SpringBootTestBase {
     void setupl() {
         bruker = MockNavService.createHappyBruker();
         veileder = MockNavService.createVeileder(bruker);
+        Mockito.when(unleash.isEnabled("veilarbdialog.dialogvarsling")).thenReturn(true);
     }
 
     @Test
@@ -70,6 +74,8 @@ class DialogRessursTest extends SpringBootTestBase {
 
         assertThat(veiledersDialog.isVenterPaSvar()).isFalse();
         assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
+        verify(postRequestedFor(urlEqualTo("/please/notify-subscribers"))
+                .withRequestBody(matchingJsonPath("eventType", equalTo(DialogVarslerClient.EventType.NY_DIALOGMELDING_FRA_BRUKER_TIL_NAV.name()))));
     }
 
     @Test
@@ -85,6 +91,8 @@ class DialogRessursTest extends SpringBootTestBase {
 
         assertThat(dialog.isVenterPaSvar()).isFalse();
         assertThat(dialog.isFerdigBehandlet()).isTrue();
+        verify(postRequestedFor(urlEqualTo("/please/notify-subscribers"))
+                .withRequestBody(matchingJsonPath("eventType", equalTo(DialogVarslerClient.EventType.NY_DIALOGMELDING_FRA_NAV_TIL_BRUKER.name()))));
     }
 
     @Test

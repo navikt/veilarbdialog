@@ -102,7 +102,7 @@ public class WireMockUtil {
     }
 
     private static void dialogvarsler() {
-        stubFor(post("/notify-subscribers")
+        stubFor(post("/please/notify-subscribers")
                 .willReturn(aResponse().withStatus(204)));
     }
 

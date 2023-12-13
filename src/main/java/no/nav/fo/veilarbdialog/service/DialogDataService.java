@@ -27,6 +27,8 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient.EventType.NY_DIALOGMELDING_FRA_BRUKER_TIL_NAV;
+import static no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient.EventType.NY_DIALOGMELDING_FRA_NAV_TIL_BRUKER;
 import static org.springframework.http.HttpStatus.CONFLICT;
 
 @Service
@@ -87,9 +89,10 @@ public class DialogDataService {
         dialog = markerDialogSomLest(dialog.getId());
 
         sendPaaKafka(aktorId.get());
-        
+
         if (unleash.isEnabled("veilarbdialog.dialogvarsling")) {
-            dialogVarslerClient.varsleLyttere(fnr);
+            var eventType = auth.erEksternBruker() ? NY_DIALOGMELDING_FRA_BRUKER_TIL_NAV : NY_DIALOGMELDING_FRA_NAV_TIL_BRUKER;
+            dialogVarslerClient.varsleLyttere(fnr, eventType);
         }
 
         return dialog;
@@ -175,7 +178,9 @@ public class DialogDataService {
         return dialogDAO.hentDialogForAktivitetId(aktivitetId).map(this::sjekkLeseTilgangTilDialog);
     }
 
-    public AktorId hentAktoerIdForPerson(Person person) { return hentAktoerIdForPerson(person.eksternBrukerId()); }
+    public AktorId hentAktoerIdForPerson(Person person) {
+        return hentAktoerIdForPerson(person.eksternBrukerId());
+    }
 
     public AktorId hentAktoerIdForPerson(Id person) {
         if (person instanceof Fnr) {
@@ -187,6 +192,7 @@ public class DialogDataService {
         }
         return null;
     }
+
     public Fnr hentFnrForPerson(Person person) {
         if (person instanceof Person.AktorId) {
             return Optional
