@@ -3,6 +3,10 @@ run-name: Deploy feature branch ${{ github.ref_name }} by @${{ github.actor }}
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 env:
   IMAGE_TAG: ${{ github.sha }}
   IMAGE: ghcr.io/${{ github.repository }}/veilarbdialog
@@ -12,12 +16,9 @@ concurrency:
   group: deploy_feature_branch
   cancel-in-progress: true
 
-permissions:
-  packages: write
-
 jobs:
-  test-build-and-push:
-    name: Test, build and push
+  veilarbdialog:
+    name: Veilarbdialog - Test, build, push, deploy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,27 +29,21 @@ jobs:
           java-version: 17
           distribution: 'temurin'
           cache: 'maven'
-      - name: Build maven artifacts
+      - name: Veilarbdialog - Build maven artifacts
         run: mvn -B package -DskipTests
       - uses: docker/login-action@v2
+        name: Veilarbdialog - Docker login
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v3
+        name: Veilarbdialog - Push image
         with:
           context: .
           push: true
           tags: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
-
-  deploy-dev:
-    name: Deploy application to dev
-    needs: test-build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Deploy application
+      - name: Veilarbdialog - Deploy application
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}

@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
+import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,7 @@ import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
+import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.*;
@@ -34,6 +36,7 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 public class DialogDataService {
 
     private final AktorOppslagClient aktorOppslagClient;
+    private final DialogVarslerClient dialogVarslerClient;
     private final DialogDAO dialogDAO;
     private final DialogStatusService dialogStatusService;
     private final DataVarehusDAO dataVarehusDAO;
@@ -43,6 +46,7 @@ public class DialogDataService {
     private final KladdService kladdService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final SistePeriodeService sistePeriodeService;
+    private final Unleash unleash;
 
     private final BrukernotifikasjonService brukernotifikasjonService;
 
@@ -83,6 +87,10 @@ public class DialogDataService {
         dialog = markerDialogSomLest(dialog.getId());
 
         sendPaaKafka(aktorId.get());
+        
+        if (unleash.isEnabled("veilarbdialog.dialogvarsling")) {
+            dialogVarslerClient.varsleLyttere(fnr);
+        }
 
         return dialog;
     }

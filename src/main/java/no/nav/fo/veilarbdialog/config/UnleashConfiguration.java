@@ -36,6 +36,7 @@ public class UnleashConfiguration {
         var environment = isProduction().orElse(false) ? "production" : "development";
 
         return UnleashConfig.builder()
+                .fetchTogglesInterval(5)
                 .appName(appName)
                 .instanceId(instanceId)
                 .unleashAPI(url + "/api")
