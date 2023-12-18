@@ -37,6 +37,7 @@ spec:
     - https://veilarbdialog.prod-fss-pub.nais.io
   envFrom:
     - configmap: pto-config
+    - secret: veilarbdialog-unleash-api-token
   vault:
     enabled: true
     paths:
@@ -92,6 +93,10 @@ spec:
         - application: start-samtale
           namespace: pto
           cluster: prod-gcp
+    outbound:
+      external:
+        - host: dab-unleash-api.nav.cloud.nais.io
+        - host: please.nav.no
   env:
     - name: APP_ENVIRONMENT_NAME
       value: p
@@ -101,3 +106,9 @@ spec:
       value: https://www.nav.no/arbeid/dialog
     - name: POAO_TILGANG_SCOPE
       value: api://prod-fss.poao.poao-tilgang/.default
+    - name: PLEASE_URL
+      value: https://please.nav.no
+    - name: PLEASE_AZURE_SCOPE
+      value: api://prod-gcp.dab.please/.default
+    - name: PLEASE_TOKENX_SCOPE
+      value: prod-gcp:dab:please

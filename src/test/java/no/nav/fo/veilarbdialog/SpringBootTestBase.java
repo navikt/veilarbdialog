@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog;
 
+import io.getunleash.Unleash;
 import io.restassured.RestAssured;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
@@ -44,6 +45,9 @@ public abstract class SpringBootTestBase {
 
     @Autowired
     private LockProvider lockProvider;
+
+    @Autowired
+    protected Unleash unleash;
 
     @LocalServerPort
     protected int port;

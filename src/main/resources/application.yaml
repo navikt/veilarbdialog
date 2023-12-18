@@ -135,6 +135,11 @@ application:
     api:
       url: ${VEILARBPERSONAPI_URL}
       scope: api://${APP_CLUSTER_NAME}.pto.veilarbperson/.default
+  please:
+    api:
+      url: ${PLEASE_URL}
+      azureScope: ${PLEASE_AZURE_SCOPE}
+      tokenXScope: ${PLEASE_TOKENX_SCOPE}
   topic:
     inn:
       oppfolgingsperiode: pto.oppfolgingsperiode-v1
@@ -154,3 +159,9 @@ application:
     henvendelse:
       maksalder:
         ms: 172800000
+
+unleash:
+  appName: ${NAIS_APP_NAME}
+  url: ${UNLEASH_SERVER_API_URL}
+  token: ${UNLEASH_SERVER_API_TOKEN}
+  instanceId: ${NAIS_CLIENT_ID}

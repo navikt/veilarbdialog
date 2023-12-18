@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
+import io.getunleash.Unleash;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,7 @@ import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
+import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.*;
@@ -25,6 +27,8 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient.EventType.NY_DIALOGMELDING_FRA_BRUKER_TIL_NAV;
+import static no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient.EventType.NY_DIALOGMELDING_FRA_NAV_TIL_BRUKER;
 import static org.springframework.http.HttpStatus.CONFLICT;
 
 @Service
@@ -34,6 +38,7 @@ import static org.springframework.http.HttpStatus.CONFLICT;
 public class DialogDataService {
 
     private final AktorOppslagClient aktorOppslagClient;
+    private final DialogVarslerClient dialogVarslerClient;
     private final DialogDAO dialogDAO;
     private final DialogStatusService dialogStatusService;
     private final DataVarehusDAO dataVarehusDAO;
@@ -43,6 +48,7 @@ public class DialogDataService {
     private final KladdService kladdService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final SistePeriodeService sistePeriodeService;
+    private final Unleash unleash;
 
     private final BrukernotifikasjonService brukernotifikasjonService;
 
@@ -83,6 +89,11 @@ public class DialogDataService {
         dialog = markerDialogSomLest(dialog.getId());
 
         sendPaaKafka(aktorId.get());
+
+        if (unleash.isEnabled("veilarbdialog.dialogvarsling")) {
+            var eventType = auth.erEksternBruker() ? NY_DIALOGMELDING_FRA_BRUKER_TIL_NAV : NY_DIALOGMELDING_FRA_NAV_TIL_BRUKER;
+            dialogVarslerClient.varsleLyttere(fnr, eventType);
+        }
 
         return dialog;
     }
@@ -167,7 +178,9 @@ public class DialogDataService {
         return dialogDAO.hentDialogForAktivitetId(aktivitetId).map(this::sjekkLeseTilgangTilDialog);
     }
 
-    public AktorId hentAktoerIdForPerson(Person person) { return hentAktoerIdForPerson(person.eksternBrukerId()); }
+    public AktorId hentAktoerIdForPerson(Person person) {
+        return hentAktoerIdForPerson(person.eksternBrukerId());
+    }
 
     public AktorId hentAktoerIdForPerson(Id person) {
         if (person instanceof Fnr) {
@@ -179,6 +192,7 @@ public class DialogDataService {
         }
         return null;
     }
+
     public Fnr hentFnrForPerson(Person person) {
         if (person instanceof Person.AktorId) {
             return Optional
