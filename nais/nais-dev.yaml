@@ -105,7 +105,7 @@ spec:
     - name: APP_CLUSTER_NAME
       value: dev-fss
     - name: DIALOG_EKSTERN_URL
-      value: https://pto.dev.ekstern.nav.no/arbeid/dialog
+      value: https://pto.ekstern.dev.nav.no/arbeid/dialog
     - name: APPD_ENABLED
       value: "false"
     - name: POAO_TILGANG_SCOPE
