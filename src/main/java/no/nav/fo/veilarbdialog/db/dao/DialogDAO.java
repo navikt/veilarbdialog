@@ -158,7 +158,7 @@ public class DialogDAO {
         dialogData.getEgenskaper()
                 .forEach(egenskapType -> updateDialogEgenskap(egenskapType, dialogId));
 
-        log.info("opprettet dialog id:{} data:{}", dialogId, dialogData);
+        log.info("opprettet dialog id:{}", dialogId);
         return hentDialog(dialogId);
     }
 
