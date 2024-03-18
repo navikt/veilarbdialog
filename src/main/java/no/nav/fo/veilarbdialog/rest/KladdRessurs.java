@@ -9,6 +9,7 @@ import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +37,7 @@ public class KladdRessurs {
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void oppdaterKladd(@RequestBody KladdDTO dto) {
+        if (dto.getOverskrift().length() > 255) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Kladd overskrift can not be longer than 255 characters");
         kladdService.upsertKladd(getContextUserIdent(), somKladd(dto));
     }
 
