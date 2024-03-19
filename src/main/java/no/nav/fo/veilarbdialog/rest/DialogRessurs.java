@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static java.lang.Math.toIntExact;
 import static java.util.Collections.singletonList;
@@ -40,9 +41,14 @@ public class DialogRessurs {
     }
 
     @GetMapping
-    public List<DialogDTO> hentDialoger() {
+    public List<DialogDTO> hentDialoger(@RequestParam(value = "ekskluderDialogerMedKontorsperre", required = false) boolean ekskluderDialogerMedKontorsperre) {
         return dialogDataService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
+                .filter((dialog) ->
+                     ekskluderDialogerMedKontorsperre ?
+                            dialog.getKontorsperreEnhetId() == null || dialog.getKontorsperreEnhetId().isBlank()
+                    : true
+                )
                 .filter(kontorsperreFilter::tilgangTilEnhet)
                 .map(restMapper::somDialogDTO)
                 .collect(toList());
@@ -80,7 +86,7 @@ public class DialogRessurs {
         Person bruker = getContextUserIdent();
         var dialogData = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
         if (nyHenvendelseDTO.getVenterPaaSvarFraNav() != null) {
-            dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyHenvendelseDTO.getVenterPaaSvarFraNav() );
+            dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyHenvendelseDTO.getVenterPaaSvarFraNav());
             dialogDataService.sendPaaKafka(dialogData.getAktorId());
         }
         if (nyHenvendelseDTO.getVenterPaaSvarFraBruker() != null) {
@@ -138,7 +144,7 @@ public class DialogRessurs {
         auth.sjekkTilgangTilPerson(aktorId);
 
         var dialog = dialogDataService.hentDialogMedTilgangskontroll(nyHenvendelseDTO.getDialogId(),
-               AktivitetId.of(nyHenvendelseDTO.getAktivitetId()));
+                AktivitetId.of(nyHenvendelseDTO.getAktivitetId()));
         if (dialog == null) dialog = dialogDataService.opprettDialog(nyHenvendelseDTO, aktorId.get());
 
         long dialogId = dialog.getId();
