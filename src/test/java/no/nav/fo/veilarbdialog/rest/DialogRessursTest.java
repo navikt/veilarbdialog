@@ -1,11 +1,11 @@
 package no.nav.fo.veilarbdialog.rest;
 
-import lombok.val;
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.Egenskap;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
@@ -48,6 +48,47 @@ class DialogRessursTest extends SpringBootTestBase {
                 .getList(".", DialogDTO.class);
 
         assertThat(dialoger).hasSize(1);
+    }
+
+    @Test
+    void skal_kunne_filtrere_vekk_dialoger_med_kontorsperre_på_veileders_egen_enhet_når_bruker_er_i_kvp() {
+        var oppfølgingsenhet = "enhetTilKvpBruker";
+        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).harBruktNivaa4(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
+        var kvpBruker = MockNavService.createBruker(brukerOptions);
+        var veileder = MockNavService.createVeileder(kvpBruker);
+        veileder.setNasjonalTilgang(true);
+        dialogTestService.opprettDialogSomVeileder(veileder, kvpBruker, new NyHenvendelseDTO().setTekst("hei"));
+        dialogTestService.opprettDialogSomBruker(kvpBruker, new NyHenvendelseDTO().setTekst("hallo"));
+
+        var dialoger = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog?fnr={fnr}&ekskluderDialogerMedKontorsperre=true", kvpBruker.getFnr())
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getList(".", DialogDTO.class);
+
+        assertThat(dialoger).isEmpty();
+    }
+
+    @Test
+    void skal_kunne_inkludere_dialoger_med_kontorsperre_på_veileders_egen_enhet_selv_om_bruker_er_i_kvp() {
+        var oppfølgingsenhet = "enhetTilKvpBruker";
+        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).harBruktNivaa4(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
+        var kvpBruker = MockNavService.createBruker(brukerOptions);
+        var veileder = MockNavService.createVeileder(kvpBruker);
+        dialogTestService.opprettDialogSomVeileder(veileder, kvpBruker, new NyHenvendelseDTO().setTekst("hei"));
+        dialogTestService.opprettDialogSomBruker(kvpBruker, new NyHenvendelseDTO().setTekst("hallo"));
+
+        var dialoger = veileder.createRequest()
+                .get("/veilarbdialog/api/dialog?fnr={fnr}", kvpBruker.getFnr())
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getList(".", DialogDTO.class);
+
+        assertThat(dialoger).hasSize(2);
     }
 
     @Test
@@ -302,7 +343,7 @@ class DialogRessursTest extends SpringBootTestBase {
                 .then()
                 .statusCode(200);
 
-        val hentedeDialoger = veileder.createRequest()
+        var hentedeDialoger = veileder.createRequest()
                 .get("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
                 .then()
                 .statusCode(200)

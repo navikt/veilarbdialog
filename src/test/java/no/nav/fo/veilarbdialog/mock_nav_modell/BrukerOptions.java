@@ -36,5 +36,4 @@ public class BrukerOptions {
                 .erUnderKvp(false)
                 .harBruktNivaa4(true);
     }
-
 }
