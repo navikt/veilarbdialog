@@ -58,7 +58,6 @@ public class DialogDataService {
 
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person) {
-        auth.sjekkTilgangTilPerson(person.eksternBrukerId());
         AktorId aktorId = hentAktoerIdForPerson(person);
         return dialogDAO.hentDialogerForAktorId(aktorId.get());
     }
@@ -66,7 +65,6 @@ public class DialogDataService {
     public Date hentSistOppdatertForBruker(Person person, Id endretAvId) {
         Id endretAv = auth.erEksternBruker() ? hentAktoerIdForPerson(endretAvId) : endretAvId;
         AktorId bruker = hentAktoerIdForPerson(person);
-        auth.sjekkTilgangTilPerson(bruker);
         return dataVarehusDAO.hentSisteEndringSomIkkeErDine(bruker.get(), endretAv.get());
     }
 
@@ -74,13 +72,12 @@ public class DialogDataService {
     public DialogData opprettHenvendelse(NyHenvendelseDTO henvendelseData, Person bruker) {
         var aktivitetsId = AktivitetId.of(henvendelseData.getAktivitetId());
         AktorId aktorId = hentAktoerIdForPerson(bruker);
-        auth.sjekkTilgangTilPerson(aktorId);
         Fnr fnr = hentFnrForPerson(bruker);
         if (!brukernotifikasjonService.kanVarsles(fnr)) {
             throw new ResponseStatusException(CONFLICT, "Bruker kan ikke varsles.");
         }
 
-        DialogData dialog = Optional.ofNullable(hentDialogMedTilgangskontroll(henvendelseData.getDialogId(), aktivitetsId))
+        DialogData dialog = Optional.ofNullable(hentDialog(henvendelseData.getDialogId(), aktivitetsId))
                 .orElseGet(() -> opprettDialog(henvendelseData, aktorId.get()));
 
         slettKladd(henvendelseData, bruker);
@@ -107,25 +104,18 @@ public class DialogDataService {
     }
 
     public DialogData oppdaterFerdigbehandletTidspunkt(long dialogId, boolean ferdigBehandlet) {
-        var dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
+        var dialogData = hentDialogSomKanOppdateres(dialogId);
         return dialogStatusService.oppdaterVenterPaNavSiden(dialogData, ferdigBehandlet);
     }
 
     public DialogData oppdaterVentePaSvarTidspunkt(DialogStatus dialogStatus) {
         long dialogId = dialogStatus.dialogId;
-        var dialogData = hentDialogMedSkrivetilgangskontroll(dialogId);
+        var dialogData = hentDialogSomKanOppdateres(dialogId);
         return dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
     }
 
     public void markerSomParagra8(long dialogId) {
         dialogStatusService.markerSomParagraf8(dialogId);
-    }
-
-    @Transactional(readOnly = true)
-    public DialogData hentDialogMedTilgangskontroll(long dialogId) {
-        var dialogData = hentDialogUtenTilgangskontroll(dialogId);
-        sjekkLeseTilgangTilDialog(dialogData);
-        return dialogData;
     }
 
     private DialogData opprettHenvendelseForDialog(DialogData dialogData, boolean viktigMelding, String tekst) {
@@ -142,19 +132,19 @@ public class DialogDataService {
         return dialogStatusService.nyHenvendelse(dialogData, opprettet);
     }
 
-    private DialogData hentDialogMedSkrivetilgangskontroll(long id) {
-        var dialogData = hentDialogMedTilgangskontroll(id);
+    private DialogData hentDialogSomKanOppdateres(long id) {
+        var dialogData = hentDialog(id);
         if (dialogData.isHistorisk()) {
             throw new ResponseStatusException(CONFLICT);
         }
         return dialogData;
     }
 
-    public DialogData hentDialogMedTilgangskontroll(String dialogId, AktivitetId aktivitetId) {
+    public DialogData hentDialog(String dialogId, AktivitetId aktivitetId) {
         if (dialogId == null && aktivitetId == null) return null;
 
         if (dialogId != null && !dialogId.isEmpty()) {
-            return hentDialogMedTilgangskontroll(Long.parseLong(dialogId));
+            return hentDialog(Long.parseLong(dialogId));
         } else {
             return Optional.ofNullable(aktivitetId)
                     .filter(a -> StringUtils.isNotEmpty(a.getId()))
@@ -164,18 +154,18 @@ public class DialogDataService {
     }
 
     private DialogData markerDialogSomLestAvVeileder(long dialogId) {
-        var dialogData = hentDialogMedTilgangskontroll(dialogId);
+        var dialogData = hentDialog(dialogId);
         return dialogStatusService.markerSomLestAvVeileder(dialogData);
     }
 
     private DialogData markerDialogSomLestAvBruker(long dialogId) {
-        var dialogData = hentDialogMedTilgangskontroll(dialogId);
+        var dialogData = hentDialog(dialogId);
         return dialogStatusService.markerSomLestAvBruker(dialogData);
     }
 
     @Transactional(readOnly = true)
     public Optional<DialogData> hentDialogForAktivitetId(AktivitetId aktivitetId) {
-        return dialogDAO.hentDialogForAktivitetId(aktivitetId).map(this::sjekkLeseTilgangTilDialog);
+        return dialogDAO.hentDialogForAktivitetId(aktivitetId);
     }
 
     public AktorId hentAktoerIdForPerson(Person person) {
@@ -205,7 +195,6 @@ public class DialogDataService {
     }
 
     public void settKontorsperredeDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
-        // NB: ingen tilgangskontroll, brukes av vår feed-consumer
         dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
                 .forEach(this::oppdaterDialogTilHistorisk);
 
@@ -213,7 +202,6 @@ public class DialogDataService {
     }
 
     public void settDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
-        // NB: ingen tilgangskontroll, brukes av vår feed-consumer
         dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
                 .forEach(this::oppdaterDialogTilHistorisk);
 
@@ -230,19 +218,12 @@ public class DialogDataService {
         dialogDAO.updateDialogEgenskap(type, dialogId);
     }
 
-    private DialogData hentDialogUtenTilgangskontroll(long dialogId) {
+    public DialogData hentDialog(long dialogId) {
         return dialogDAO.hentDialog(dialogId);
     }
 
     private void oppdaterDialogTilHistorisk(DialogData dialogData) {
         dialogStatusService.settDialogTilHistorisk(dialogData);
-    }
-
-    private DialogData sjekkLeseTilgangTilDialog(DialogData dialogData) {
-        if (dialogData == null) return null;
-        auth.sjekkTilgangTilPerson(AktorId.of(dialogData.getAktorId()));
-        return dialogData;
-
     }
 
     public DialogData opprettDialog(NyHenvendelseDTO nyHenvendelseDTO, String aktorId) {
