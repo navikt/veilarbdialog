@@ -12,7 +12,6 @@ public class BrukerOptions {
     private boolean kanVarsles;
     private boolean erUnderKvp;
     private String oppfolgingsEnhet;
-    private boolean harBruktNivaa4;
 
     private boolean oppfolgingFeiler;
     /*
@@ -33,7 +32,6 @@ public class BrukerOptions {
                 .erManuell(false)
                 .erReservertKrr(false)
                 .kanVarsles(true)
-                .erUnderKvp(false)
-                .harBruktNivaa4(true);
+                .erUnderKvp(false);
     }
 }

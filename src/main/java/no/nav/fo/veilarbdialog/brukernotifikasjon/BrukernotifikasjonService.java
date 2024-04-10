@@ -19,8 +19,6 @@ import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntit
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringDAO;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringMetrikk;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
-import no.nav.fo.veilarbdialog.clients.veilarbperson.Nivaa4DTO;
-import no.nav.fo.veilarbdialog.clients.veilarbperson.VeilarbpersonClient;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client;
@@ -52,8 +50,6 @@ public class BrukernotifikasjonService {
     private static final int BESKJED_SIKKERHETSNIVAA = 3;
 
     private final OppfolgingV2Client oppfolgingClient;
-
-    private final VeilarbpersonClient veilarbpersonClient;
 
     private final BrukernotifikasjonRepository brukernotifikasjonRepository;
 
@@ -185,16 +181,13 @@ public class BrukernotifikasjonService {
 
     public boolean kanVarsles(Fnr fnr) {
         Optional<ManuellStatusV2DTO> manuellStatusResponse = oppfolgingClient.hentManuellStatus(fnr);
-        Optional<Nivaa4DTO> nivaa4DTO = veilarbpersonClient.hentNiva4(fnr);
-
         boolean erManuell = manuellStatusResponse.map(ManuellStatusV2DTO::isErUnderManuellOppfolging).orElse(true);
         boolean erReservertIKrr = manuellStatusResponse.map(ManuellStatusV2DTO::getKrrStatus).map(ManuellStatusV2DTO.KrrStatus::isErReservert).orElse(true);
-        boolean harBruktNivaa4 = nivaa4DTO.map(Nivaa4DTO::isHarbruktnivaa4).orElse(false);
 
-        boolean kanVarsles = !erManuell && !erReservertIKrr && harBruktNivaa4;
+        boolean kanVarsles = !erManuell && !erReservertIKrr;
 
         if(!kanVarsles) {
-            secureLogs.warn("bruker med fnr: {} kan ikke varsles, statuser erManuell: {}, erReservertIKrr: {}, harBruktNivaa4: {}", fnr, erManuell, erReservertIKrr, harBruktNivaa4);
+            secureLogs.warn("bruker med fnr: {} kan ikke varsles, statuser erManuell: {}, erReservertIKrr: {}}", fnr, erManuell, erReservertIKrr);
         }
 
         return kanVarsles;
