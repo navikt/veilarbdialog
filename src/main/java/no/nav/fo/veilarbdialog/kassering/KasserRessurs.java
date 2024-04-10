@@ -7,6 +7,8 @@ import no.nav.common.types.identer.Id;
 import no.nav.common.utils.EnvironmentUtils;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
+import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -37,15 +39,9 @@ public class KasserRessurs {
 
     private final String godkjenteIdenter = EnvironmentUtils.getOptionalProperty("VEILARB_KASSERING_IDENTER").orElse("");
 
-    private void sjekkErInternbruker() {
-        if (!auth.erInternBruker())
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bare internbrukere tillatt");
-    }
-
     @PutMapping("/henvendelse/{henvendelseId}/kasser")
+    @OnlyInternBruker
     public int kasserHenvendelse(@PathVariable String henvendelseId) {
-        sjekkErInternbruker();
-
         long id = Long.parseLong(henvendelseId);
         DialogData dialogData = dialogDAO.hentDialogGittHenvendelse(id);
 
@@ -53,20 +49,18 @@ public class KasserRessurs {
     }
 
     @PutMapping("/dialog/{dialogId}/kasser")
+    @OnlyInternBruker
     @Transactional
-    public int kasserDialog(@PathVariable String dialogId) {
-        sjekkErInternbruker();
+    public int kasserDialog(@PathVariable Long dialogId) {
+        DialogData dialogData = dialogDAO.hentDialog(dialogId);
 
-        long id = Long.parseLong(dialogId);
-        DialogData dialogData = dialogDAO.hentDialog(id);
-
-        return kjorHvisTilgang(AktorId.of(dialogData.getAktorId()), "dialog", dialogId, () -> {
+        return kjorHvisTilgang(AktorId.of(dialogData.getAktorId()), "dialog", String.valueOf(dialogId), () -> {
             int antallHenvendelser = dialogData.getHenvendelser()
                     .stream()
                     .mapToInt(henvendelse -> dialogDAO.kasserHenvendelse(henvendelse.id))
                     .sum();
 
-            return dialogDAO.kasserDialog(id) + antallHenvendelser;
+            return dialogDAO.kasserDialog(dialogId) + antallHenvendelser;
         });
     }
 

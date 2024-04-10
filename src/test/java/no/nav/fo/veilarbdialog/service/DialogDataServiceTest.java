@@ -39,7 +39,7 @@ class DialogDataServiceTest extends SpringBootTestBase {
 
         DialogDTO dialogUtenomKvp = brukersVeileder.createRequest()
                 .body(nyHenvendelse)
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -50,14 +50,14 @@ class DialogDataServiceTest extends SpringBootTestBase {
 
         DialogDTO dialogUnderKvp = brukersVeileder.createRequest()
                 .body(nyHenvendelse)
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
                 .as(DialogDTO.class);
 
         List<DialogDTO> synligeDialogerForVeilederMedNasjonalTilgang = veilederNasjonalTilgang.createRequest()
-                .get("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -67,7 +67,7 @@ class DialogDataServiceTest extends SpringBootTestBase {
         assertThat(synligeDialogerForVeilederMedNasjonalTilgang).hasSize(1).containsOnly(dialogUtenomKvp);
 
         List<DialogDTO> synligeDialogerForBrukersVeileder = brukersVeileder.createRequest()
-                .get("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -89,7 +89,7 @@ class DialogDataServiceTest extends SpringBootTestBase {
 
         tilfeldigVeileder.createRequest()
                 .body(nyHenvendelse)
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(403);
     }
@@ -107,7 +107,7 @@ class DialogDataServiceTest extends SpringBootTestBase {
 
         DialogDTO dialogUnderKvp = brukersVeileder.createRequest()
                 .body(nyHenvendelse)
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -120,7 +120,7 @@ class DialogDataServiceTest extends SpringBootTestBase {
                 .statusCode(403);
 
         tilfeldigVeileder.createRequest()
-                .get("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(403);
 

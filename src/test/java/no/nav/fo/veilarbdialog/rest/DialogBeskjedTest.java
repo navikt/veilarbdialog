@@ -69,7 +69,7 @@ class DialogBeskjedTest extends SpringBootTestBase {
 
         DialogDTO dialog = mockVeileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -119,7 +119,7 @@ class DialogBeskjedTest extends SpringBootTestBase {
 
         mockVeileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -139,7 +139,7 @@ class DialogBeskjedTest extends SpringBootTestBase {
 
         DialogDTO dialog = mockVeileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -165,7 +165,7 @@ class DialogBeskjedTest extends SpringBootTestBase {
 
         veileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(409);
 
@@ -179,7 +179,7 @@ class DialogBeskjedTest extends SpringBootTestBase {
 
         DialogDTO dialog = mockVeileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -188,7 +188,7 @@ class DialogBeskjedTest extends SpringBootTestBase {
         // Hy henvendelse samme dialog
         DialogDTO sammeDialog = mockVeileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst2").setDialogId(dialog.getId()))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -245,7 +245,7 @@ class DialogBeskjedTest extends SpringBootTestBase {
 
         DialogDTO dialog = mockVeileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -269,7 +269,7 @@ class DialogBeskjedTest extends SpringBootTestBase {
         // Hy henvendelse samme dialog
         DialogDTO sammedialog = mockVeileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst2").setDialogId(dialog.getId()))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -313,7 +313,7 @@ class DialogBeskjedTest extends SpringBootTestBase {
 
         DialogDTO dialog = mockVeileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -347,7 +347,7 @@ class DialogBeskjedTest extends SpringBootTestBase {
         // Hy henvendelse samme dialog
         DialogDTO sammeDialog = mockVeileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst2").setDialogId(dialog.getId()))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", mockBruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()

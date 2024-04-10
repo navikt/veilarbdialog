@@ -42,7 +42,7 @@ public class DialogTestService {
         Response response = restassuredUser.createRequest()
                 .body(nyHenvendelseDTO)
                 .when()
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .assertThat().statusCode(HttpStatus.OK.value())
                 .extract().response();
