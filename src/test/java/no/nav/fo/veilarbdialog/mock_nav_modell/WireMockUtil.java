@@ -19,15 +19,12 @@ public class WireMockUtil {
         boolean erUnderKvp = mockBruker.getBrukerOptions().isErUnderKvp();
         boolean kanVarsles = mockBruker.getBrukerOptions().isKanVarsles();
         boolean underOppfolging = mockBruker.getBrukerOptions().isUnderOppfolging();
-        boolean harBruktNivaa4 = mockBruker.getBrukerOptions().isHarBruktNivaa4();
-
         boolean oppfolgingFeiler = mockBruker.getBrukerOptions().isOppfolgingFeiler();
 
         oppfolging(fnr, underOppfolging, oppfolgingFeiler, mockBruker.getOppfolgingsperiode());
         manuell(fnr, erManuell, erReservertKrr, kanVarsles);
         kvp(aktorId, erUnderKvp, mockBruker.getBrukerOptions().getOppfolgingsEnhet());
         aktor(fnr, aktorId);
-        nivaa4(fnr, harBruktNivaa4);
         dialogvarsler();
     }
 
@@ -73,13 +70,6 @@ public class WireMockUtil {
             stubFor(get("/veilarboppfolging/api/v2/oppfolging/periode/gjeldende?fnr=" + fnr)
                     .willReturn(aResponse().withStatus(204)));
         }
-    }
-
-    private static void nivaa4(String fnr, boolean harBruktNivaa4) {
-        stubFor(get("/veilarbperson/api/person/" + fnr + "/harNivaa4")
-                .willReturn(ok()
-                        .withHeader("Content-Type", "text/json")
-                        .withBody("{\"harbruktnivaa4\":" + harBruktNivaa4 + "}")));
     }
 
     private static void manuell(String fnr, boolean erManuell, boolean erReservertKrr, boolean kanVarsles) {

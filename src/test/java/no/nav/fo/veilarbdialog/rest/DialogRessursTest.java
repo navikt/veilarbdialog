@@ -53,7 +53,7 @@ class DialogRessursTest extends SpringBootTestBase {
     @Test
     void skal_kunne_filtrere_vekk_dialoger_med_kontorsperre_på_veileders_egen_enhet_når_bruker_er_i_kvp() {
         var oppfølgingsenhet = "enhetTilKvpBruker";
-        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).harBruktNivaa4(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
+        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
         var kvpBruker = MockNavService.createBruker(brukerOptions);
         var veileder = MockNavService.createVeileder(kvpBruker);
         veileder.setNasjonalTilgang(true);
@@ -74,7 +74,7 @@ class DialogRessursTest extends SpringBootTestBase {
     @Test
     void skal_kunne_inkludere_dialoger_med_kontorsperre_på_veileders_egen_enhet_selv_om_bruker_er_i_kvp() {
         var oppfølgingsenhet = "enhetTilKvpBruker";
-        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).harBruktNivaa4(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
+        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
         var kvpBruker = MockNavService.createBruker(brukerOptions);
         var veileder = MockNavService.createVeileder(kvpBruker);
         dialogTestService.opprettDialogSomVeileder(veileder, kvpBruker, new NyHenvendelseDTO().setTekst("hei"));
