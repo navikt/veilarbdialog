@@ -21,7 +21,7 @@
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
         <common.version>3.2023.10.23_12.41-bafec3836d28</common.version>
-        <dab.common.version>2023.10.16-14.09.5407a74a7ffa</dab.common.version>
+        <dab.common.version>2024.04.05-15.01.4a82af932963</dab.common.version>
         <poao.tilgang.version>2023.11.14_13.53-b10eb7528eda</poao.tilgang.version>
 
 
@@ -82,6 +82,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-graphql</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
