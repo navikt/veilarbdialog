@@ -25,7 +25,12 @@ class Extension {
 }
 
 @Data
+class Dialoger {
+    List dialoger;
+}
+
+@Data
 class GraphqlResult {
-    List<DialogDTO> data;
+    Dialoger data;
     List<Error> errors;
 }
