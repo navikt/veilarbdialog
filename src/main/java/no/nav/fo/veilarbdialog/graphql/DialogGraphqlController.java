@@ -48,7 +48,7 @@ public class DialogGraphqlController {
             return Fnr.of(fnr);
         }
         else {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
     }
 

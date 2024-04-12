@@ -24,13 +24,13 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
         Mockito.when(unleash.isEnabled("veilarbdialog.dialogvarsling")).thenReturn(true);
     }
 
-    private GraphqlResult graphqlRequest(RestassuredUser user, String query) {
-        return graphqlRequest(user, query, false);
+    private GraphqlResult graphqlRequest(RestassuredUser user, String fnr, String query) {
+        return graphqlRequest(user, fnr, query, false);
     }
 
-    private GraphqlResult graphqlRequest(RestassuredUser user, String query, Boolean bareMedAktiviteter) {
+    private GraphqlResult graphqlRequest(RestassuredUser user, String fnr,  String query, Boolean bareMedAktiviteter) {
         return user.createRequest()
-            .body("{ \"query\": \""+ query  +"\", \"variables\": { \"fnr\": \"" + bruker.getFnr() + "\", \"bareMedAktiviteter\": " + bareMedAktiviteter + "} }")
+            .body("{ \"query\": \""+ query  +"\", \"variables\": { \"fnr\": \"" + fnr + "\", \"bareMedAktiviteter\": " + bareMedAktiviteter + "} }")
             .post("/veilarbdialog/graphql")
             .then()
             .statusCode(200)
@@ -53,15 +53,22 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     @Test
     void veileder_skal_kun_hente_dialoger_for_bruker() {
         nyTraad(veileder);
-        var result = graphqlRequest(veileder, allDialogFields);
+        var result = graphqlRequest(veileder, bruker.getFnr(), allDialogFields);
         assertThat(result.data.dialoger).hasSize(1);
         assertThat(result.errors).isNull();
     }
 
     @Test
+    void veileder_maa_oppgi_fnr() {
+        var result = graphqlRequest(veileder, "", allDialogFields);
+        assertThat(result.data.dialoger).isNull();
+        assertThat(result.errors.get(0).message).isEqualTo("Ikke tilgang");
+    }
+
+    @Test
     void bruker_skal_kun_hente_dialoger_for_seg_selv() {
         nyTraad(bruker);
-        var result = graphqlRequest(bruker, allDialogFields);
+        var result = graphqlRequest(bruker, bruker.getFnr(), allDialogFields);
         assertThat(result.data.dialoger).hasSize(1);
         assertThat(result.errors).isNull();
     }
@@ -70,7 +77,7 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     void skal_kunne_be_om_bare_dialoger_med_aktivitet_id() {
         nyTraad(bruker, new AktivitetId("123123"));
         nyTraad(bruker);
-        var result = graphqlRequest(bruker, allDialogFields, true);
+        var result = graphqlRequest(bruker, bruker.getFnr(), allDialogFields, true);
         assertThat(result.data.dialoger).hasSize(1);
         assertThat(result.data.dialoger).hasSize(1);
         assertThat(result.errors).isNull();
@@ -80,7 +87,7 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     void bruker_skal_bare_kunne_hente_dialoger_for_seg_selv_uansett_fnr_param() {
         nyTraad(bruker);
         var brukerUtenDialoger = MockNavService.createHappyBruker();
-        var result = graphqlRequest(brukerUtenDialoger, allDialogFields);
+        var result = graphqlRequest(brukerUtenDialoger, bruker.getFnr(), allDialogFields);
         assertThat(result.data.dialoger).hasSize(0);
         assertThat(result.errors).isNull();
     }
@@ -88,7 +95,7 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     @Test
     void veileder_uten_tilgang_til_bruker_skal_ikke_kunne_hente_dialoger() {
         var veilederUtenTilgang = MockNavService.createVeileder();
-        var result = graphqlRequest(veilederUtenTilgang, allDialogFields);
+        var result = graphqlRequest(veilederUtenTilgang, bruker.getFnr(), allDialogFields);
         assertThat(result).isNotNull();
         assertThat(result.errors).hasSize(1);
         assertThat(result.errors.get(0).message).isEqualTo("Ikke tilgang");
