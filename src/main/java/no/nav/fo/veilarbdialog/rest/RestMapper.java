@@ -16,7 +16,7 @@ import static no.nav.fo.veilarbdialog.domain.AvsenderType.BRUKER;
 
 @Component
 @RequiredArgsConstructor
-class RestMapper {
+public class RestMapper {
 
     private final KontorsperreFilter kontorsperreFilter;
     private final IAuthService auth;

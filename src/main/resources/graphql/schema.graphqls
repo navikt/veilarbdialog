@@ -1,0 +1,48 @@
+type Query {
+    dialoger(fnr: String!, bareMedAktiviteter: Boolean = false): [DialogDTO]
+}
+
+scalar Date
+
+enum Egenskap {
+    ESKALERINGSVARSEL
+    PARAGRAF8
+}
+
+enum Avsender {
+    BRUKER
+    VEILEDER
+}
+
+type HenvendelseDTO {
+    id: String
+    dialogId: String
+    avsender: Avsender
+    avsenderId: String
+    sendt: Date
+    lest: Boolean
+    viktig: Boolean
+    tekst: String
+}
+
+type DialogDTO {
+    id: String
+    aktivitetId: String
+    overskrift: String
+    sisteTekst: String
+    sisteDato: Date
+    opprettetDato: Date
+    historisk: Boolean
+    lest: Boolean #// lest av brukertype som gjør kall
+
+#    // veileder-felter
+    venterPaSvar: Boolean
+    ferdigBehandlet: Boolean
+    lestAvBrukerTidspunkt: Date
+    erLestAvBruker: Boolean
+
+    oppfolgingsperiode: String
+
+    henvendelser: [HenvendelseDTO]
+    egenskaper: [Egenskap]
+}

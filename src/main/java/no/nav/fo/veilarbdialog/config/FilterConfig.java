@@ -112,6 +112,7 @@ public class FilterConfig {
         registration.setFilter(authenticationFilter);
         registration.setOrder(4);
         registration.addUrlPatterns("/api/*");
+        registration.addUrlPatterns("/graphql");
         registration.addUrlPatterns(("/internal/api/*"));
         return registration;
     }
@@ -121,6 +122,7 @@ public class FilterConfig {
         FilterRegistrationBean<EnhanceSecureLogsFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(enhanceSecureLogsFilter);
         registration.addUrlPatterns("/api/*");
+        registration.addUrlPatterns("/graphql");
         registration.setOrder(5);
         return registration;
     }
