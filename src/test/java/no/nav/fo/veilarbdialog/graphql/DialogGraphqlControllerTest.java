@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.graphql;
 
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
+import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
@@ -16,7 +17,7 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     private MockVeileder veileder;
 
     @BeforeEach
-    void setupl() {
+    void setupl() { // Må bruke et annet navn en "setup" fordi det brukes i super-klassen
         bruker = MockNavService.createHappyBruker();
         veileder = MockNavService.createVeileder(bruker);
         Mockito.when(unleash.isEnabled("veilarbdialog.dialogvarsling")).thenReturn(true);
@@ -32,19 +33,27 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
             .as(GraphqlResult.class);
     }
 
+    private void nyTraad(RestassuredUser user) {
+        user.createRequest()
+                .body(new NyHenvendelseDTO().setTekst("tekst"))
+                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .then()
+                .statusCode(200);
+    }
+
     @Test
     void veileder_skal_kun_hente_dialoger_for_bruker() {
+        nyTraad(veileder);
         var result = graphqlRequest(veileder, allDialogFields);
-        assertThat(result).isNotNull();
-        assertThat(result.data).isNotNull();
+        assertThat(result.data.dialoger).hasSize(1);
         assertThat(result.errors).isNull();
     }
 
     @Test
     void bruker_skal_kun_hente_dialoger_for_seg_selv() {
+        nyTraad(bruker);
         var result = graphqlRequest(bruker, allDialogFields);
-        assertThat(result).isNotNull();
-        assertThat(result.data).isNotNull();
+        assertThat(result.data.dialoger).hasSize(1);
         assertThat(result.errors).isNull();
     }
 

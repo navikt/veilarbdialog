@@ -26,7 +26,7 @@ class Extension {
 
 @Data
 class Dialoger {
-    List dialoger;
+    List<DialogDTO> dialoger;
 }
 
 @Data
