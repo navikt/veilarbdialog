@@ -35,7 +35,7 @@ class DialogRessursTest extends SpringBootTestBase {
     void hentDialoger_bruker() {
         veileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst"))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200);
 
@@ -53,7 +53,7 @@ class DialogRessursTest extends SpringBootTestBase {
     @Test
     void skal_kunne_filtrere_vekk_dialoger_med_kontorsperre_på_veileders_egen_enhet_når_bruker_er_i_kvp() {
         var oppfølgingsenhet = "enhetTilKvpBruker";
-        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).harBruktNivaa4(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
+        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
         var kvpBruker = MockNavService.createBruker(brukerOptions);
         var veileder = MockNavService.createVeileder(kvpBruker);
         veileder.setNasjonalTilgang(true);
@@ -74,7 +74,7 @@ class DialogRessursTest extends SpringBootTestBase {
     @Test
     void skal_kunne_inkludere_dialoger_med_kontorsperre_på_veileders_egen_enhet_selv_om_bruker_er_i_kvp() {
         var oppfølgingsenhet = "enhetTilKvpBruker";
-        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).harBruktNivaa4(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
+        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
         var kvpBruker = MockNavService.createBruker(brukerOptions);
         var veileder = MockNavService.createVeileder(kvpBruker);
         dialogTestService.opprettDialogSomVeileder(veileder, kvpBruker, new NyHenvendelseDTO().setTekst("hei"));
@@ -124,7 +124,7 @@ class DialogRessursTest extends SpringBootTestBase {
         //Veileder kan sende en beskjed som bruker ikke trenger å svare på, veileder må eksplisitt markere at dialogen venter på brukeren
         DialogDTO dialog = veileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -151,7 +151,7 @@ class DialogRessursTest extends SpringBootTestBase {
 
         DialogDTO veiledersDialog = veileder.createRequest()
                 .body(veiledersHenvendelse)
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -166,7 +166,7 @@ class DialogRessursTest extends SpringBootTestBase {
         NyHenvendelseDTO veiledersHenvendelse = new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift");
         DialogDTO veiledersDialog = veileder.createRequest()
                 .body(veiledersHenvendelse)
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -277,7 +277,7 @@ class DialogRessursTest extends SpringBootTestBase {
                                 .setVenterPaaSvarFraBruker(Boolean.TRUE)
                                 .setVenterPaaSvarFraNav(Boolean.TRUE)
                 )
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -297,12 +297,12 @@ class DialogRessursTest extends SpringBootTestBase {
 
         veileder.createRequest()
                 .body(henvendelse)
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200);
 
         List<DialogDTO> opprettetDialog = veileder.createRequest()
-                .get("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -316,12 +316,12 @@ class DialogRessursTest extends SpringBootTestBase {
 //forhandsorientering
         veileder.createRequest()
                 .body(henvendelse)
-                .post("/veilarbdialog/api/dialog/forhandsorientering?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog/forhandsorientering?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200);
 
         List<DialogDTO> dialogMedParagraf8 = veileder.createRequest()
-                .get("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -339,12 +339,12 @@ class DialogRessursTest extends SpringBootTestBase {
                 .body(new NyHenvendelseDTO()
                         .setTekst("tekst")
                         .setAktivitetId("123"))
-                .post("/veilarbdialog/api/dialog/forhandsorientering?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog/forhandsorientering?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200);
 
         var hentedeDialoger = veileder.createRequest()
-                .get("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .get("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()

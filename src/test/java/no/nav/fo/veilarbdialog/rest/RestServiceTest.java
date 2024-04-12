@@ -96,7 +96,7 @@ class RestServiceTest extends SpringBootTestBase {
 
         DialogDTO resultatDialog = veileder.createRequest()
                 .body(nyHenvendelse)
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -134,7 +134,7 @@ class RestServiceTest extends SpringBootTestBase {
         jdbcTemplate.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (0, 0, 'DIALOG_OPPRETTET', ?, ?, CURRENT_TIMESTAMP)", bruker.getAktorId(), veileder.getNavIdent());
 
         veileder.createRequest()
-                .param("aktorId", bruker.getAktorId())
+                .param("fnr", bruker.getFnr())
                 .get("/veilarbdialog/api/dialog/sistOppdatert")
                 .then()
                 .assertThat()
@@ -170,7 +170,7 @@ class RestServiceTest extends SpringBootTestBase {
         jdbcTemplate.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, AKTOR_ID, LAGT_INN_AV, TIDSPUNKT) values (1, 0, 'DIALOG_OPPRETTET', ?, ?, ?)", bruker.getAktorId(), bruker.getAktorId(), brukerLest);
 
         veileder.createRequest()
-                .param("aktorId", bruker.getAktorId())
+                .param("fnr", bruker.getFnr())
                 .get("/veilarbdialog/api/dialog/sistOppdatert")
                 .then()
                 .assertThat()

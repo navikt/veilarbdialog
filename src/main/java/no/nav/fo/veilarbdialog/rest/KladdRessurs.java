@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import no.nav.fo.veilarbdialog.domain.Kladd;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.service.KladdService;
+import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,6 +27,7 @@ public class KladdRessurs {
     private final IAuthService auth;
 
     @GetMapping
+    @AuthorizeFnr()
     public List<KladdDTO> hentKladder() {
         return kladdService.hentKladder(getContextUserIdent())
                 .stream()
@@ -34,6 +36,7 @@ public class KladdRessurs {
     }
 
     @PostMapping
+    @AuthorizeFnr()
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void oppdaterKladd(@RequestBody KladdDTO dto) {
         kladdService.upsertKladd(getContextUserIdent(), somKladd(dto));

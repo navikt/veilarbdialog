@@ -22,6 +22,9 @@ public class RestMapper {
     private final IAuthService auth;
 
     public DialogDTO somDialogDTO(DialogData dialogData) {
+        if (dialogData == null) {
+            return null;
+        }
 
         List<HenvendelseData> henvendelser = dialogData
                 .getHenvendelser()
