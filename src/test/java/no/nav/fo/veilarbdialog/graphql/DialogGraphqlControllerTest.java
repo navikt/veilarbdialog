@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.graphql;
 
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
+import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
@@ -24,8 +25,12 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     }
 
     private GraphqlResult graphqlRequest(RestassuredUser user, String query) {
+        return graphqlRequest(user, query, false);
+    }
+
+    private GraphqlResult graphqlRequest(RestassuredUser user, String query, Boolean bareMedAktiviteter) {
         return user.createRequest()
-            .body("{ \"query\": \""+ query  +"\", \"variables\": { \"fnr\": \"" + bruker.getFnr() + "\" } }")
+            .body("{ \"query\": \""+ query  +"\", \"variables\": { \"fnr\": \"" + bruker.getFnr() + "\", \"bareMedAktiviteter\": " + bareMedAktiviteter + "} }")
             .post("/veilarbdialog/graphql")
             .then()
             .statusCode(200)
@@ -34,8 +39,11 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     }
 
     private void nyTraad(RestassuredUser user) {
+        nyTraad(user, null);
+    }
+    private void nyTraad(RestassuredUser user, AktivitetId aktivitetId) {
         user.createRequest()
-                .body(new NyHenvendelseDTO().setTekst("tekst"))
+                .body(new NyHenvendelseDTO().setTekst("tekst").setAktivitetId(aktivitetId != null ? aktivitetId.getId() : null))
                 .queryParam("aktorId", bruker.getAktorId())
                 .post("/veilarbdialog/api/dialog")
                 .then()
@@ -59,7 +67,17 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     }
 
     @Test
-    void bruker_skal_bare_kunne_hente_dialoger_for_seg_selv() {
+    void skal_kunne_be_om_bare_dialoger_med_aktivitet_id() {
+        nyTraad(bruker, new AktivitetId("123123"));
+        nyTraad(bruker);
+        var result = graphqlRequest(bruker, allDialogFields, true);
+        assertThat(result.data.dialoger).hasSize(1);
+        assertThat(result.data.dialoger).hasSize(1);
+        assertThat(result.errors).isNull();
+    }
+
+    @Test
+    void bruker_skal_bare_kunne_hente_dialoger_for_seg_selv_uansett_fnr_param() {
         nyTraad(bruker);
         var brukerUtenDialoger = MockNavService.createHappyBruker();
         var result = graphqlRequest(brukerUtenDialoger, allDialogFields);
@@ -77,8 +95,8 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     }
 
     static String allDialogFields = """
-            query($fnr: String!) {
-                dialoger(fnr: $fnr) {
+            query($fnr: String!, $bareMedAktiviteter: Boolean) {
+                dialoger(fnr: $fnr, bareMedAktiviteter: $bareMedAktiviteter) {
                     aktivitetId,
                     oppfolgingsperiode,
                     opprettetDato,

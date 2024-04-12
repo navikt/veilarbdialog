@@ -49,10 +49,6 @@ spring:
   batch:
     jdbc:
       initialize-schema:
-
-  graphql:
-    graphiql:
-      enabled: true
   endpoint:
     metrics:
       enabled: true
@@ -70,8 +66,6 @@ spring:
 server:
   servlet:
     context-path: "/veilarbdialog"
-
-
 
 application:
   poao_tilgang:
