@@ -36,7 +36,8 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     private void nyTraad(RestassuredUser user) {
         user.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst"))
-                .post("/veilarbdialog/api/dialog?aktorId={aktorId}", bruker.getAktorId())
+                .queryParam("aktorId", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog")
                 .then()
                 .statusCode(200);
     }
@@ -58,12 +59,12 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     }
 
     @Test
-    void ukjent_bruker_skal_ikke_kun_hente_dialoger_for_andre() {
-        var ukjentbruker = MockNavService.createHappyBruker();
-        var result = graphqlRequest(ukjentbruker, allDialogFields);
-        assertThat(result.data.dialoger).isNull();
-        assertThat(result.errors).isNotNull();
-        assertThat(result.errors.get(0).message).isEqualTo("Ikke tilgang");
+    void bruker_skal_bare_kunne_hente_dialoger_for_seg_selv() {
+        nyTraad(bruker);
+        var brukerUtenDialoger = MockNavService.createHappyBruker();
+        var result = graphqlRequest(brukerUtenDialoger, allDialogFields);
+        assertThat(result.data.dialoger).hasSize(0);
+        assertThat(result.errors).isNull();
     }
 
     @Test

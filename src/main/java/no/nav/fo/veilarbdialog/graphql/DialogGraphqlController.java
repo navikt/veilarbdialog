@@ -13,8 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Controller
@@ -25,11 +25,19 @@ public class DialogGraphqlController {
     final private RestMapper restMapper;
 
     @QueryMapping
-    public List<DialogDTO> dialoger(@Argument String fnr) {
+    public List<DialogDTO> dialoger(@Argument String fnr, @Argument Optional<Boolean> bareMedAktiviteter) {
         var targetFnr = Fnr.of(getContextUserIdent(fnr).get());
         authService.sjekkTilgangTilPerson(targetFnr);
-        return dialogDataService.hentDialogerForBruker(Person.fnr(fnr))
-                .stream().map(restMapper::somDialogDTO).toList();
+        return dialogDataService.hentDialogerForBruker(Person.fnr(targetFnr.get()))
+                .stream()
+                .filter(dialog -> {
+                    if (bareMedAktiviteter.orElse(false)) {
+                        return dialog.getAktivitetId() != null;
+                    } else {
+                        return true;
+                    }
+                })
+                .map(restMapper::somDialogDTO).toList();
     }
 
     private Fnr getContextUserIdent(String fnr) {
