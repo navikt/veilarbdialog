@@ -6,6 +6,7 @@ import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
+import no.nav.fo.veilarbdialog.util.DialogResource;
 import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
@@ -72,9 +73,9 @@ public class DialogRessurs {
     }
 
     @GetMapping("{dialogId}")
+    @AuthorizeFnr(auditlogMessage = "hent dialog", resourceIdParamName = "dialogId", resourceType = DialogResource.class)
     public DialogDTO hentDialog(@PathVariable Long dialogId) {
         DialogData dialogData = dialogDataService.hentDialog(dialogId);
-        sjekkTilgangTilDialog(dialogData);
         return restMapper.somDialogDTO(dialogData);
     }
 
@@ -103,38 +104,33 @@ public class DialogRessurs {
     }
 
     @PutMapping("{dialogId}/les")
+    @AuthorizeFnr(auditlogMessage = "les dialog", resourceIdParamName = "dialogId", resourceType = DialogResource.class)
     @Transactional
     public DialogDTO markerSomLest(@PathVariable Long dialogId) {
         var dialogData = dialogDataService.markerDialogSomLest(dialogId);
-        sjekkTilgangTilDialog(dialogData);
-
         return restMapper.somDialogDTO(dialogData);
     }
 
     @PutMapping("{dialogId}/venter_pa_svar/{venter}")
+    @AuthorizeFnr(auditlogMessage = "hent dialog", resourceIdParamName = "dialogId", resourceType = DialogResource.class)
     @OnlyInternBruker
     @Transactional
     public DialogDTO oppdaterVenterPaSvar(@PathVariable Long dialogId, @PathVariable boolean venter) {
-
         var dialogStatus = DialogStatus.builder()
                 .dialogId(dialogId)
                 .venterPaSvar(venter)
                 .build();
-
         var dialog = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
-        sjekkTilgangTilDialog(dialog);
         dialogDataService.sendPaaKafka(dialog.getAktorId());
-
         return markerSomLest(dialogId);
     }
 
     @PutMapping("{dialogId}/ferdigbehandlet/{ferdigbehandlet}")
+    @AuthorizeFnr(auditlogMessage = "hent dialog", resourceIdParamName = "dialogId", resourceType = DialogResource.class)
     @OnlyInternBruker
     public DialogDTO oppdaterFerdigbehandlet(@PathVariable Long dialogId, @PathVariable boolean ferdigbehandlet) {
         var dialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogId, ferdigbehandlet);
-        sjekkTilgangTilDialog(dialog);
         dialogDataService.sendPaaKafka(dialog.getAktorId());
-
         return markerSomLest(dialogId);
     }
 
