@@ -2,9 +2,7 @@ package no.nav.fo.veilarbdialog.graphql;
 
 import lombok.AllArgsConstructor;
 import no.nav.common.types.identer.Fnr;
-import no.nav.fo.veilarbdialog.domain.DialogDTO;
-import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.Person;
+import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.rest.RestMapper;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
@@ -18,6 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+
+import static java.lang.Math.toIntExact;
 
 @AllArgsConstructor
 @Controller

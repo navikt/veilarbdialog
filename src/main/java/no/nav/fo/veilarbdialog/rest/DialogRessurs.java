@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.domain.*;
@@ -37,6 +38,11 @@ public class DialogRessurs {
     private final KontorsperreFilter kontorsperreFilter;
     private final IAuthService auth;
 
+    @AllArgsConstructor
+    class FnrDto {
+        String fnr;
+    }
+
     @GetMapping
     @AuthorizeFnr(auditlogMessage = "hent dialoger")
     public List<DialogDTO> hentDialoger(@RequestParam(value = "ekskluderDialogerMedKontorsperre", required = false) boolean ekskluderDialogerMedKontorsperre) {
@@ -52,23 +58,42 @@ public class DialogRessurs {
                 .collect(toList());
     }
 
+    @PostMapping
+    @AuthorizeFnr(auditlogMessage = "hent antall uleste")
+    public AntallUlesteDTO antallUlestePost(@RequestBody FnrDto fnrDto) {
+        return innterAntallUleste(Person.fnr(fnrDto.fnr));
+    }
+
     @GetMapping("antallUleste")
     @AuthorizeFnr(auditlogMessage = "hent antall uleste")
     public AntallUlesteDTO antallUleste() {
+        var fnr = getContextUserIdent();
+        return innterAntallUleste(fnr);
+    }
 
+    private AntallUlesteDTO innterAntallUleste(Person fnr) {
         long antall = dialogDataService.hentDialogerForBruker(getContextUserIdent())
                 .stream()
                 .filter(auth.erEksternBruker() ? DialogData::erUlestForBruker : DialogData::erUlestAvVeileder)
                 .filter(it -> !it.isHistorisk())
                 .count();
         return new AntallUlesteDTO(toIntExact(antall));
+    }
 
+    @PostMapping("sistOppdatert")
+    @AuthorizeFnr()
+    public SistOppdatertDTO sistOppdatertPost(@RequestBody FnrDto fnrDto) {
+        return internSistOppdatert(Person.fnr(fnrDto.fnr));
     }
 
     @GetMapping("sistOppdatert")
     @AuthorizeFnr()
     public SistOppdatertDTO sistOppdatert() {
-        var oppdatert = dialogDataService.hentSistOppdatertForBruker(getContextUserIdent(), auth.getLoggedInnUser());
+        return internSistOppdatert(getContextUserIdent());
+    }
+
+    private SistOppdatertDTO internSistOppdatert(Person fnr) {
+        var oppdatert = dialogDataService.hentSistOppdatertForBruker(fnr, auth.getLoggedInnUser());
         return new SistOppdatertDTO(oppdatert == null ? null : oppdatert.getTime());
     }
 
@@ -134,23 +159,6 @@ public class DialogRessurs {
         return markerSomLest(dialogId);
     }
 
-    @PostMapping("forhandsorientering")
-    @AuthorizeFnr(auditlogMessage = "forhåndsorientering på aktivitet")
-    @OnlyInternBruker
-    public DialogDTO forhandsorienteringPaAktivitet(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
-        var aktorId = dialogDataService.hentAktoerIdForPerson(getContextUserIdent());
-
-        var dialog = dialogDataService.hentDialog(nyHenvendelseDTO.getDialogId(),
-               AktivitetId.of(nyHenvendelseDTO.getAktivitetId()));
-        if (dialog == null) dialog = dialogDataService.opprettDialog(nyHenvendelseDTO, aktorId.get());
-
-        long dialogId = dialog.getId();
-        dialogDataService.updateDialogEgenskap(EgenskapType.PARAGRAF8, dialogId);
-        dialogDataService.markerSomParagra8(dialogId);
-        return nyHenvendelse(nyHenvendelseDTO.setEgenskaper(singletonList(Egenskap.PARAGRAF8)));
-    }
-
-
     private Person getContextUserIdent() {
         if (auth.erEksternBruker()) {
             var user = auth.getLoggedInnUser();
@@ -163,10 +171,5 @@ public class DialogRessurs {
                 .ofNullable(httpServletRequest.getParameter("aktorId"))
                 .map(Person::aktorId);
         return fnr.orElseGet(() -> aktorId.orElseThrow(RuntimeException::new));
-    }
-
-    private void sjekkTilgangTilDialog(DialogData dialogData) {
-        auth.sjekkTilgangTilPerson(AktorId.of(dialogData.getAktorId()));
-        dialogData.getKontorEnhet().ifPresent(auth::sjekkTilgangTilEnhet);
     }
 }
