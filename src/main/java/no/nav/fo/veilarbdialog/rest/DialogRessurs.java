@@ -60,8 +60,9 @@ public class DialogRessurs {
 
     @PostMapping("antallUleste")
     @AuthorizeFnr(auditlogMessage = "hent antall uleste")
-    public AntallUlesteDTO antallUlestePost(@RequestBody FnrDto fnrDto) {
-        return innterAntallUleste(Person.fnr(fnrDto.fnr));
+    public AntallUlesteDTO antallUlestePost(@RequestBody(required = false) FnrDto fnrDto) {
+        var fnr = fnrDto != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
+        return innterAntallUleste(fnr);
     }
 
     @GetMapping("antallUleste")
@@ -72,7 +73,7 @@ public class DialogRessurs {
     }
 
     private AntallUlesteDTO innterAntallUleste(Person fnr) {
-        long antall = dialogDataService.hentDialogerForBruker(getContextUserIdent())
+        long antall = dialogDataService.hentDialogerForBruker(fnr)
                 .stream()
                 .filter(auth.erEksternBruker() ? DialogData::erUlestForBruker : DialogData::erUlestAvVeileder)
                 .filter(it -> !it.isHistorisk())
