@@ -1,12 +1,15 @@
 package no.nav.fo.veilarbdialog.graphql;
 
+import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import no.nav.fo.veilarbdialog.mock_nav_modell.RestassuredUser;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -50,6 +53,15 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
                 .statusCode(200);
     }
 
+    private void startVarsel(MockVeileder veileder, MockBruker bruker) {
+        this.dialogTestService.startEskalering(veileder, new StartEskaleringDto(
+                Fnr.of(bruker.getFnr()),
+                "Fordi",
+                "VARSEL",
+                "tekst"
+        ));
+    }
+
     @Test
     void veileder_skal_kun_hente_dialoger_for_bruker() {
         nyTraad(veileder);
@@ -79,7 +91,6 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
         nyTraad(bruker);
         var result = graphqlRequest(bruker, bruker.getFnr(), allDialogFields, true);
         assertThat(result.data.dialoger).hasSize(1);
-        assertThat(result.data.dialoger).hasSize(1);
         assertThat(result.errors).isNull();
     }
 
@@ -100,6 +111,34 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
         assertThat(result.errors).hasSize(1);
         assertThat(result.errors.get(0).message).isEqualTo("Ikke tilgang");
     }
+
+    @Test
+    void veileder_skal_kunne_hente_varsel_om_stans() {
+        startVarsel(veileder, bruker);
+        var result = graphqlRequest(veileder, bruker.getFnr(), varselOmStans);
+        assertThat(result.getData().stansVarsel).isNotNull();
+        assertThat(result.errors).isNull();
+    }
+
+    @Test
+    void bruker_skal_kunne_hente_varsel_om_stans() {
+        startVarsel(veileder, bruker);
+        var result = graphqlRequest(bruker, "", varselOmStans);
+        assertThat(result.getData().stansVarsel).isNotNull();
+        assertThat(result.errors).isNull();
+    }
+
+    static String varselOmStans = """
+        query($fnr: String!) {
+            stansVarsel(fnr: $fnr) {
+                id,
+                tilhorendeDialogId,
+                opprettetDato,
+                opprettetAv,
+                opprettetBegrunnelse
+            }
+        }
+    """.trim().replace("\n", "");
 
     static String allDialogFields = """
             query($fnr: String!, $bareMedAktiviteter: Boolean) {
