@@ -37,11 +37,7 @@ public class DialogRessurs {
     private final HttpServletRequest httpServletRequest;
     private final KontorsperreFilter kontorsperreFilter;
     private final IAuthService auth;
-
-    @AllArgsConstructor
-    class FnrDto {
-        String fnr;
-    }
+    private final IAuthService authService;
 
     @GetMapping
     @AuthorizeFnr(auditlogMessage = "hent dialoger")
@@ -59,9 +55,9 @@ public class DialogRessurs {
     }
 
     @PostMapping("antallUleste")
-    @AuthorizeFnr(auditlogMessage = "hent antall uleste")
     public AntallUlesteDTO antallUlestePost(@RequestBody(required = false) FnrDto fnrDto) {
         var fnr = fnrDto != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
+        authService.sjekkTilgangTilPerson(fnr.eksternBrukerId());
         return innterAntallUleste(fnr);
     }
 
@@ -82,9 +78,10 @@ public class DialogRessurs {
     }
 
     @PostMapping("sistOppdatert")
-    @AuthorizeFnr()
-    public SistOppdatertDTO sistOppdatertPost(@RequestBody FnrDto fnrDto) {
-        return internSistOppdatert(Person.fnr(fnrDto.fnr));
+    public SistOppdatertDTO sistOppdatertPost(@RequestBody(required = false) FnrDto fnrDto) {
+        var fnr = fnrDto != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
+        authService.sjekkTilgangTilPerson(fnr.eksternBrukerId());
+        return internSistOppdatert(fnr);
     }
 
     @GetMapping("sistOppdatert")
