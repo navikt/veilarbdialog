@@ -90,7 +90,7 @@ class DialogRessursTest extends SpringBootTestBase {
     void veileder_skal_kunne_hente_antall_uleste() {
         veilederSenderMelding();
         var uleste = hentAntallUleste(veileder, bruker.getFnr());
-        assertThat(uleste.antallUleste).isEqualTo(0);
+        assertThat(uleste.antallUleste).isZero();
     }
 
     @Test
