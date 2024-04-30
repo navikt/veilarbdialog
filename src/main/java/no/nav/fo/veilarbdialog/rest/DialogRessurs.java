@@ -58,7 +58,7 @@ public class DialogRessurs {
                 .collect(toList());
     }
 
-    @PostMapping
+    @PostMapping("antallUleste")
     @AuthorizeFnr(auditlogMessage = "hent antall uleste")
     public AntallUlesteDTO antallUlestePost(@RequestBody FnrDto fnrDto) {
         return innterAntallUleste(Person.fnr(fnrDto.fnr));
