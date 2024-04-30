@@ -1,8 +1,19 @@
 type Query {
-    dialoger(fnr: String!, bareMedAktiviteter: Boolean = false): [DialogDTO]
+    dialoger(fnr: String!, bareMedAktiviteter: Boolean = false): [DialogDTO],
+    stansVarsel(fnr: String!): GjeldendeEskaleringsvarselDto
+}
+
+type GjeldendeEskaleringsvarselDto {
+    id: Int,
+    tilhorendeDialogId: Int,
+    opprettetAv: String,
+    opprettetDato: ZonedDateTime,
+    opprettetBegrunnelse: String
 }
 
 scalar Date
+
+scalar ZonedDateTime
 
 enum Egenskap {
     ESKALERINGSVARSEL
