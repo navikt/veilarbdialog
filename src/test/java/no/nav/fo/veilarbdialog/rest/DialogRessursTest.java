@@ -2,13 +2,8 @@ package no.nav.fo.veilarbdialog.rest;
 
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
-import no.nav.fo.veilarbdialog.domain.DialogDTO;
-import no.nav.fo.veilarbdialog.domain.Egenskap;
-import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
-import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
-import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
-import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
-import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
+import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.fo.veilarbdialog.mock_nav_modell.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -31,23 +26,83 @@ class DialogRessursTest extends SpringBootTestBase {
         Mockito.when(unleash.isEnabled("veilarbdialog.dialogvarsling")).thenReturn(true);
     }
 
-    @Test
-    void hentDialoger_bruker() {
+    private void veilederSenderMelding() {
         veileder.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst"))
                 .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
                 .then()
                 .statusCode(200);
+    }
 
-        List<DialogDTO> dialoger = bruker.createRequest()
+    private List<DialogDTO> hentDialoger(RestassuredUser avsender) {
+        return avsender.createRequest()
                 .get("/veilarbdialog/api/dialog")
                 .then()
                 .statusCode(200)
                 .extract()
                 .jsonPath()
                 .getList(".", DialogDTO.class);
+    }
 
+    private AntallUlesteDTO hentAntallUleste(RestassuredUser user, String fnr) {
+        var request = user.createRequest();
+        if (fnr != null) {
+            request.body(new FnrDto(fnr));
+        }
+        return request
+                .post("/veilarbdialog/api/dialog/antallUleste")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getObject(".", AntallUlesteDTO.class);
+    }
+
+    private SistOppdatertDTO hentSistOppdatert(RestassuredUser user, String fnr) {
+        var request = user.createRequest();
+        if (fnr != null) {
+            request.body(new FnrDto(fnr));
+        }
+        return request
+                .post("/veilarbdialog/api/dialog/sistOppdatert")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getObject(".", SistOppdatertDTO.class);
+    }
+
+    @Test
+    void hentDialoger_bruker() {
+        veilederSenderMelding();
+        var dialoger = hentDialoger(bruker);
         assertThat(dialoger).hasSize(1);
+    }
+
+    @Test
+    void bruker_skal_kunne_hente_antall_uleste() {
+        veilederSenderMelding();
+        var uleste = hentAntallUleste(bruker, null);
+        assertThat(uleste.antallUleste).isEqualTo(1);
+    }
+
+    @Test
+    void veileder_skal_kunne_hente_antall_uleste() {
+        veilederSenderMelding();
+        var uleste = hentAntallUleste(veileder, bruker.getFnr());
+        assertThat(uleste.antallUleste).isZero();
+    }
+
+    @Test
+    void bruker_skal_kunne_hente_sist_oppdatert() {
+        veilederSenderMelding();
+        hentSistOppdatert(bruker, null);
+    }
+
+    @Test
+    void veileder_skal_kunne_hente_sist_oppdatert() {
+        veilederSenderMelding();
+        hentSistOppdatert(veileder, bruker.getFnr());
     }
 
     @Test
