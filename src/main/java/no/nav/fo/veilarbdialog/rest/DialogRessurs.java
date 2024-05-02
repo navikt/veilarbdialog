@@ -1,12 +1,16 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import no.nav.common.types.identer.AktorId;
+import no.nav.common.client.aktoroppslag.AktorOppslagClient;
+import no.nav.common.types.identer.EksternBrukerId;
+import no.nav.common.types.identer.EnhetId;
+import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
+import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
+import no.nav.fo.veilarbdialog.service.PersonService;
 import no.nav.fo.veilarbdialog.util.DialogResource;
 import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
@@ -17,10 +21,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import static java.lang.Math.toIntExact;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 @Transactional
@@ -36,8 +38,9 @@ public class DialogRessurs {
     private final RestMapper restMapper;
     private final HttpServletRequest httpServletRequest;
     private final KontorsperreFilter kontorsperreFilter;
+    private final KvpService kvpService;
     private final IAuthService auth;
-    private final IAuthService authService;
+    private final PersonService personService;
 
     @GetMapping
     @AuthorizeFnr(auditlogMessage = "hent dialoger")
@@ -57,7 +60,7 @@ public class DialogRessurs {
     @PostMapping("antallUleste")
     public AntallUlesteDTO antallUlestePost(@RequestBody(required = false) FnrDto fnrDto) {
         var fnr = fnrDto != null && fnrDto.fnr != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
-        authService.sjekkTilgangTilPerson(fnr.eksternBrukerId());
+        auth.sjekkTilgangTilPerson(fnr.eksternBrukerId());
         return innterAntallUleste(fnr);
     }
 
@@ -80,7 +83,7 @@ public class DialogRessurs {
     @PostMapping("sistOppdatert")
     public SistOppdatertDTO sistOppdatertPost(@RequestBody(required = false) FnrDto fnrDto) {
         var fnr = fnrDto != null && fnrDto.fnr != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
-        authService.sjekkTilgangTilPerson(fnr.eksternBrukerId());
+        auth.sjekkTilgangTilPerson(fnr.eksternBrukerId());
         return internSistOppdatert(fnr);
     }
 
@@ -102,10 +105,27 @@ public class DialogRessurs {
         return restMapper.somDialogDTO(dialogData);
     }
 
+    private void sjekkTilgangOgAuditlog(EksternBrukerId bruker) {
+        var subject = auth.getLoggedInnUser();
+        try {
+            if (auth.erEksternBruker()) {
+                auth.sjekkTilgangTilPerson(bruker);
+            } else {
+                auth.sjekkInternbrukerHarSkriveTilgangTilPerson(bruker);
+            }
+        } catch (Exception e) {
+            auth.auditlog(false, subject , bruker, "ny melding");
+            throw e;
+        }
+        // Litt tidlig audit-logging men men
+        auth.auditlog(true, subject , bruker, "ny melding");
+    }
+
     @PostMapping
-    @AuthorizeFnr(auditlogMessage = "ny henvendelse")
     public DialogDTO nyHenvendelse(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
-        Person bruker = getContextUserIdent();
+        Person bruker = nyHenvendelseDTO.getFnr() != null ? Person.fnr(nyHenvendelseDTO.getFnr()) : getContextUserIdent();
+        sjekkTilgangOgAuditlog(bruker.eksternBrukerId());
+
         var dialogData = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
         if (nyHenvendelseDTO.getVenterPaaSvarFraNav() != null) {
             dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyHenvendelseDTO.getVenterPaaSvarFraNav());
@@ -120,10 +140,10 @@ public class DialogRessurs {
             dialogData = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
             dialogDataService.sendPaaKafka(dialogData.getAktorId());
         }
+        // Vi er ikke helt sikre på hvotfor dette er sånn
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
-
     }
 
     @PutMapping("{dialogId}/les")
