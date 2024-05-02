@@ -79,7 +79,7 @@ public class DialogRessurs {
 
     @PostMapping("sistOppdatert")
     public SistOppdatertDTO sistOppdatertPost(@RequestBody(required = false) FnrDto fnrDto) {
-        var fnr = fnrDto != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
+        var fnr = fnrDto != null && fnrDto.fnr != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
         authService.sjekkTilgangTilPerson(fnr.eksternBrukerId());
         return internSistOppdatert(fnr);
     }
