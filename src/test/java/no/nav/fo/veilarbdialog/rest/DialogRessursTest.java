@@ -51,7 +51,8 @@ class DialogRessursTest extends SpringBootTestBase {
                 .extract()
                 .as(DialogDTO.class);
     }
-    private DialogDTO nyHenvendelseUtenFnrIUrl(RestassuredUser avsender, MockBruker bruker, NyHenvendelseDTO henvendelseDTO) {
+
+    private DialogDTO nyHenvendelseUtenFnrIUrl(RestassuredUser avsender, NyHenvendelseDTO henvendelseDTO) {
         return avsender.createRequest()
                 .body(henvendelseDTO)
                 .post("/veilarbdialog/api/dialog")
@@ -280,13 +281,25 @@ class DialogRessursTest extends SpringBootTestBase {
     @Test
     void bruker_skal_kunne_sende_henvedelse_uten_fnr_i_url() {
         var melding = new NyHenvendelseDTO().setTekst("tekst");
-        nyHenvendelseUtenFnrIUrl(bruker, bruker, melding);
+        nyHenvendelseUtenFnrIUrl(bruker, melding);
     }
 
     @Test
     void veileder_skal_kunne_sende_henvedelse_uten_fnr_i_url() {
         var melding = new NyHenvendelseDTO().setTekst("tekst").setFnr(bruker.getFnr());
-        nyHenvendelseUtenFnrIUrl(veileder, bruker, melding);
+        nyHenvendelseUtenFnrIUrl(veileder, melding);
     }
 
+    @Test
+    void veileder_skal_ikke_kunne_sende_henvedelse_til_bruker_uten_tilgang() {
+        var oppfølgingsenhet = "enhetTilKvpBruker";
+        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
+        var kvpBruker = MockNavService.createBruker(brukerOptions);
+        var melding = new NyHenvendelseDTO().setFnr(kvpBruker.getFnr()).setTekst("LOL");
+        veileder.createRequest()
+                .body(melding)
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(403);
+    }
 }
