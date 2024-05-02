@@ -107,19 +107,17 @@ public class DialogRessurs {
 
     private void sjekkTilgangOgAuditlog(EksternBrukerId bruker) {
         var subject = auth.getLoggedInnUser();
-        var aktorId = Person.aktorId(personService.getAktorIdForPersonBruker(bruker).get());
-        var kontorSperreEnhet = Optional.ofNullable(kvpService.kontorsperreEnhetId(aktorId.get()))
-                .map(EnhetId::of)
-                .orElse(null);
         try {
-            if (kontorSperreEnhet != null) {
-                auth.sjekkTilgangTilEnhet(kontorSperreEnhet);
+            if (auth.erEksternBruker()) {
+                auth.sjekkTilgangTilPerson(bruker);
+            } else {
+                auth.sjekkInternbrukerHarSkriveTilgangTilPerson(bruker);
             }
-            auth.sjekkTilgangTilPerson(bruker);
         } catch (Exception e) {
             auth.auditlog(false, subject , bruker, "ny melding");
             throw e;
         }
+        // Litt tidlig audit-logging men men
         auth.auditlog(true, subject , bruker, "ny melding");
     }
 
@@ -142,7 +140,10 @@ public class DialogRessurs {
             dialogData = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
             dialogDataService.sendPaaKafka(dialogData.getAktorId());
         }
-        return restMapper.somDialogDTO(dialogData);
+        // Vi er ikke helt sikre på hvotfor dette er sånn
+        return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
+                restMapper.somDialogDTO(dialogData)
+                : null;
     }
 
     @PutMapping("{dialogId}/les")
