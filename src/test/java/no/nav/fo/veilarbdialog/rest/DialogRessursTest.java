@@ -291,7 +291,7 @@ class DialogRessursTest extends SpringBootTestBase {
     }
 
     @Test
-    void veileder_skal_ikke_kunne_sende_henvedelse_til_bruker_uten_tilgang() {
+    void veileder_skal_ikke_kunne_sende_henvedelse_til_kvpbruker_uten_tilgang_til_enhet() {
         var oppfølgingsenhet = "enhetTilKvpBruker";
         var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
         var kvpBruker = MockNavService.createBruker(brukerOptions);
