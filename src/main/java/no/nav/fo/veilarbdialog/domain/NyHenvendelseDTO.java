@@ -17,5 +17,6 @@ public class NyHenvendelseDTO {
     private Boolean venterPaaSvarFraNav;
     private Boolean venterPaaSvarFraBruker;
     private List<Egenskap> egenskaper = Collections.emptyList();
+    private String fnr;
 
 }
