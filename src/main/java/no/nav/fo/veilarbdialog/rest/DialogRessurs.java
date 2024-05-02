@@ -56,7 +56,7 @@ public class DialogRessurs {
 
     @PostMapping("antallUleste")
     public AntallUlesteDTO antallUlestePost(@RequestBody(required = false) FnrDto fnrDto) {
-        var fnr = fnrDto != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
+        var fnr = fnrDto != null && fnrDto.fnr != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
         authService.sjekkTilgangTilPerson(fnr.eksternBrukerId());
         return innterAntallUleste(fnr);
     }
