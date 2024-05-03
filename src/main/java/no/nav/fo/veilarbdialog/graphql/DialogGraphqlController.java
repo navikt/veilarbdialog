@@ -29,12 +29,12 @@ import static java.lang.Math.toIntExact;
 @Controller
 public class DialogGraphqlController {
 
-    final private AuthService authService;
-    final private DialogDataService dialogDataService;
-    final private RestMapper restMapper;
-    final private KontorsperreFilter kontorsperreFilter;
-    final private EskaleringsvarselService eskaleringsvarselService;
-    final private KladdService kladdService;
+    private final AuthService authService;
+    private final DialogDataService dialogDataService;
+    private final RestMapper restMapper;
+    private final KontorsperreFilter kontorsperreFilter;
+    private final EskaleringsvarselService eskaleringsvarselService;
+    private final KladdService kladdService;
 
 
     @QueryMapping

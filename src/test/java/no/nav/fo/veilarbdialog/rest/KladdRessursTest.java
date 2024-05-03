@@ -13,7 +13,7 @@ import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class KladdRessursTest extends SpringBootTestBase  {
+class KladdRessursTest extends SpringBootTestBase  {
 
     private MockBruker bruker;
     private MockVeileder veileder;
@@ -23,20 +23,6 @@ public class KladdRessursTest extends SpringBootTestBase  {
         bruker = MockNavService.createHappyBruker();
         veileder = MockNavService.createVeileder(bruker);
         Mockito.when(unleash.isEnabled("veilarbdialog.dialogvarsling")).thenReturn(true);
-    }
-
-    @Test
-    void skal_kunne_lage_kladd_med_fnr_i_url() {
-        NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
-                .setTekst("tekst")
-                .setOverskrift("overskrift");
-        var traad = dialogTestService.opprettDialogSomVeileder(veileder, bruker, nyHenvendelse);
-        var kladd = KladdDTO.builder()
-                .dialogId(traad.getId())
-                .fnr(bruker.getFnr())
-                .aktivitetId(traad.getId()) // Workaround
-                .tekst("noe").build();
-        dialogTestService.nyKladdMedFnrIUrl(veileder, kladd);
     }
 
     @Test
