@@ -7,6 +7,7 @@ import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
@@ -65,6 +66,11 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
                 "VARSEL",
                 "tekst"
         ));
+    }
+
+    private void stansVarsel(MockVeileder veileder, MockBruker bruker) {
+        var stopp = new StopEskaleringDto(Fnr.of(bruker.getFnr()), "Fordi", false);
+        this.dialogTestService.stoppEskalering(veileder, stopp);
     }
 
     @Test
@@ -149,6 +155,15 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     }
 
     @Test
+    void veileder_skal_kunne_hente_varsel_historikk() {
+        startVarsel(veileder, bruker);
+        stansVarsel(veileder, bruker);
+        var result = graphqlRequest(veileder, bruker.getFnr(), varselOmStansHistorikk);
+        assertThat(result.getData().stansVarselHistorikk).isNotNull();
+        assertThat(result.errors).isNull();
+    }
+
+    @Test
     void veileder_skal_kunne_hente_kladder() {
         var traad = nyTraad(veileder);
         var kladd = KladdDTO.builder()
@@ -163,6 +178,15 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
         assertThat(result.errors).isNull();
     }
 
+    @Test
+    void bruker_skal_ikke_kunne_hente_varsel_historikk() {
+        startVarsel(veileder, bruker);
+        stansVarsel(veileder, bruker);
+        var result = graphqlRequest(bruker, "", varselOmStansHistorikk);
+        assertThat(result.getData().stansVarselHistorikk).isNull();
+        assertThat(result.errors).hasSize(1);
+        assertThat(result.errors.get(0).message).isEqualTo("Ikke tilgang");
+    }
 
     static String varselOmStans = """
         query($fnr: String!) {
@@ -183,6 +207,21 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
                 tekst,
                 dialogId,
                 aktivitetId
+            }
+        }
+    """.trim().replace("\n", "");
+
+    static String varselOmStansHistorikk = """
+        query($fnr: String!) {
+            stansVarselHistorikk(fnr: $fnr) {
+                id,
+                tilhorendeDialogId,
+                opprettetDato,
+                opprettetAv,
+                opprettetBegrunnelse,
+                avsluttetDato,
+                avsluttetAv,
+                avsluttetBegrunnelse
             }
         }
     """.trim().replace("\n", "");
