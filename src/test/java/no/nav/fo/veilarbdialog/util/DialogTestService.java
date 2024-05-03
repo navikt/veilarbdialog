@@ -7,6 +7,7 @@ import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import no.nav.fo.veilarbdialog.mock_nav_modell.RestassuredUser;
@@ -96,5 +97,15 @@ public class DialogTestService {
                 .extract()
                 .jsonPath()
                 .getList(".", KladdDTO.class);
+    }
+        public void stoppEskalering(MockVeileder veileder, StopEskaleringDto stopEskaleringDto) {
+            veileder.createRequest()
+                    .body(stopEskaleringDto)
+                    .when()
+                    .patch("/veilarbdialog/api/eskaleringsvarsel/stop")
+                    .then()
+                    .assertThat().statusCode(HttpStatus.OK.value())
+                    .extract().response();
+            brukernotifikasjonService.sendDoneBrukernotifikasjoner();
     }
 }

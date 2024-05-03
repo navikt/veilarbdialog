@@ -468,14 +468,7 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
     }
 
     private void stopEskalering(MockVeileder veileder, StopEskaleringDto stopEskaleringDto) {
-        veileder.createRequest()
-                .body(stopEskaleringDto)
-                .when()
-                .patch("/veilarbdialog/api/eskaleringsvarsel/stop")
-                .then()
-                .assertThat().statusCode(HttpStatus.OK.value())
-                .extract().response();
-        brukernotifikasjonService.sendDoneBrukernotifikasjoner();
+        dialogTestService.stoppEskalering(veileder, stopEskaleringDto);
     }
 
     private void lesHenvendelse(MockBruker bruker, long dialogId) {

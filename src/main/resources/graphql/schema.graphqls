@@ -2,6 +2,7 @@ type Query {
     dialoger(fnr: String!, bareMedAktiviteter: Boolean = false): [DialogDTO],
     stansVarsel(fnr: String!): GjeldendeEskaleringsvarselDto
     kladder(fnr: String!): [Kladd]
+    stansVarselHistorikk(fnr: String!): [EskaleringsvarselDto]
 }
 
 type Kladd {
@@ -17,6 +18,19 @@ type GjeldendeEskaleringsvarselDto {
     opprettetAv: String,
     opprettetDato: ZonedDateTime,
     opprettetBegrunnelse: String
+}
+
+type EskaleringsvarselDto {
+    # Holder det enkelt foreløpig men duplisering av felter
+    id: Int,
+    tilhorendeDialogId: Int,
+    opprettetAv: String,
+    opprettetDato: ZonedDateTime,
+    opprettetBegrunnelse: String,
+
+    avsluttetDato: ZonedDateTime,
+    avsluttetAv: String,
+    avsluttetBegrunnelse: String
 }
 
 scalar Date

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.GjeldendeEskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
@@ -24,6 +25,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import static java.lang.Math.toIntExact;
+import static no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto.fromEntity;
 
 @AllArgsConstructor
 @Controller
@@ -74,6 +76,16 @@ public class DialogGraphqlController {
                         .overskrift(kladd.getOverskrift())
                         .tekst(kladd.getTekst())
                         .build())
+                .toList();
+    }
+
+    @QueryMapping
+    public List<EskaleringsvarselDto> stansVarselHistorikk(@Argument String fnr) {
+        var targetFnr = Fnr.of(getContextUserIdent(fnr).get());
+        if (!authService.erInternBruker()) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bruker kan ikke hente stansVarselHistorikk");
+        authService.sjekkTilgangTilPerson(targetFnr);
+        return eskaleringsvarselService.historikk(targetFnr)
+                .stream().map(EskaleringsvarselDto::fromEntity)
                 .toList();
     }
 

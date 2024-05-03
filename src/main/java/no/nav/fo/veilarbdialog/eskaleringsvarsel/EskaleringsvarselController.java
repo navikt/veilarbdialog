@@ -41,10 +41,8 @@ public class EskaleringsvarselController {
     @OnlyInternBruker
     public EskaleringsvarselDto start(@RequestBody StartEskaleringDto startEskaleringDto) {
         authService.sjekkTilgangTilPerson(startEskaleringDto.fnr());
-
         EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselService.start(startEskaleringDto.fnr(), startEskaleringDto.begrunnelse(), startEskaleringDto.overskrift(), startEskaleringDto.tekst());
-
-        return eskaleringsvarselEntity2Dto(eskaleringsvarselEntity);
+        return EskaleringsvarselDto.fromEntity(eskaleringsvarselEntity);
     }
 
     @PatchMapping("/stop")
@@ -87,7 +85,7 @@ public class EskaleringsvarselController {
     public List<EskaleringsvarselDto> historikk(@RequestParam Fnr fnr) {
         return eskaleringsvarselService.historikk(fnr)
                 .stream()
-                .map(EskaleringsvarselController::eskaleringsvarselEntity2Dto)
+                .map(EskaleringsvarselDto::fromEntity)
                 .toList();
     }
 
@@ -97,11 +95,6 @@ public class EskaleringsvarselController {
         log.warn(feilmelding);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(feilmelding);
 
-    }
-
-
-    public static EskaleringsvarselDto eskaleringsvarselEntity2Dto(EskaleringsvarselEntity entity) {
-        return new EskaleringsvarselDto(entity.varselId(), entity.tilhorendeDialogId(), entity.opprettetAv(), entity.opprettetDato(), entity.opprettetBegrunnelse(), entity.avsluttetDato(), entity.avsluttetAv(), entity.avsluttetBegrunnelse());
     }
 
     public static GjeldendeEskaleringsvarselDto gjeldendeEskaleringsvarselDto(EskaleringsvarselEntity entity) {
