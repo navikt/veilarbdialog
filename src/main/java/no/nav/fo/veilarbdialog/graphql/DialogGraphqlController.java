@@ -7,8 +7,10 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.GjeldendeEskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
+import no.nav.fo.veilarbdialog.rest.KladdRessurs;
 import no.nav.fo.veilarbdialog.rest.RestMapper;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
+import no.nav.fo.veilarbdialog.service.KladdService;
 import no.nav.poao.dab.spring_auth.AuthService;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -32,6 +34,7 @@ public class DialogGraphqlController {
     final private RestMapper restMapper;
     final private KontorsperreFilter kontorsperreFilter;
     final private EskaleringsvarselService eskaleringsvarselService;
+    final private KladdService kladdService;
 
 
     @QueryMapping
@@ -57,6 +60,21 @@ public class DialogGraphqlController {
                         varsel.opprettetDato(),
                         varsel.opprettetBegrunnelse()
                 )).orElse(null);
+    }
+
+    @QueryMapping
+    public List<KladdDTO> kladder(@Argument String fnr) {
+        var targetFnr = Fnr.of(getContextUserIdent(fnr).get());
+        authService.sjekkTilgangTilPerson(targetFnr);
+        return kladdService.hentKladder(targetFnr.get())
+                .stream()
+                .map(kladd -> KladdDTO.builder()
+                        .aktivitetId(kladd.getAktivitetId())
+                        .dialogId(kladd.getDialogId())
+                        .overskrift(kladd.getOverskrift())
+                        .tekst(kladd.getTekst())
+                        .build())
+                .toList();
     }
 
     private Predicate<DialogData> bareMedAktiviteterFilter(Optional<Boolean> bareMedAktiviteter) {

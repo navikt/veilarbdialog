@@ -1,6 +1,14 @@
 type Query {
     dialoger(fnr: String!, bareMedAktiviteter: Boolean = false): [DialogDTO],
     stansVarsel(fnr: String!): GjeldendeEskaleringsvarselDto
+    kladder(fnr: String!): [Kladd]
+}
+
+type Kladd {
+    dialogId: String,
+    aktivitetId: String,
+    overskrift: String,
+    tekst: String
 }
 
 type GjeldendeEskaleringsvarselDto {

@@ -3,16 +3,20 @@ package no.nav.fo.veilarbdialog.graphql;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.AktivitetId;
+import no.nav.fo.veilarbdialog.domain.DialogDTO;
+import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
 import no.nav.fo.veilarbdialog.mock_nav_modell.RestassuredUser;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.util.Objects;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DialogGraphqlControllerTest extends SpringBootTestBase {
@@ -41,16 +45,17 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
             .as(GraphqlResult.class);
     }
 
-    private void nyTraad(RestassuredUser user) {
-        nyTraad(user, null);
+    private DialogDTO nyTraad(RestassuredUser user) {
+        return nyTraad(user, null);
     }
-    private void nyTraad(RestassuredUser user, AktivitetId aktivitetId) {
-        user.createRequest()
+    private DialogDTO nyTraad(RestassuredUser user, AktivitetId aktivitetId) {
+        return user.createRequest()
                 .body(new NyHenvendelseDTO().setTekst("tekst").setAktivitetId(aktivitetId != null ? aktivitetId.getId() : null))
                 .queryParam("aktorId", bruker.getAktorId())
                 .post("/veilarbdialog/api/dialog")
                 .then()
-                .statusCode(200);
+                .statusCode(200)
+                .extract().as(DialogDTO.class);
     }
 
     private void startVarsel(MockVeileder veileder, MockBruker bruker) {
@@ -128,6 +133,37 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
         assertThat(result.errors).isNull();
     }
 
+    @Test
+    void bruker_skal_kunne_hente_kladder() {
+        var traad = nyTraad(bruker);
+        var kladd = KladdDTO.builder()
+                .dialogId(traad.getId())
+                .fnr(bruker.getFnr())
+                .aktivitetId(traad.getId()) // Workaround
+                .tekst("noe").build();
+        dialogTestService.nyKladd(bruker, kladd);
+        var result = graphqlRequest(bruker, "", kladderQuery);
+        assertThat(result.getData().kladder).hasSize(1);
+        assertThat(result.getData().kladder.get(0)).isEqualTo(kladd.setFnr(null));
+        assertThat(result.errors).isNull();
+    }
+
+    @Test
+    void veileder_skal_kunne_hente_kladder() {
+        var traad = nyTraad(veileder);
+        var kladd = KladdDTO.builder()
+                .dialogId(traad.getId())
+                .fnr(bruker.getFnr())
+                .aktivitetId(traad.getId()) // Workaround
+                .tekst("noe").build();
+        dialogTestService.nyKladd(veileder, kladd);
+        var result = graphqlRequest(veileder, bruker.getFnr(), kladderQuery);
+        assertThat(result.getData().kladder).hasSize(1);
+        assertThat(result.getData().kladder.get(0)).isEqualTo(kladd.setFnr(null));
+        assertThat(result.errors).isNull();
+    }
+
+
     static String varselOmStans = """
         query($fnr: String!) {
             stansVarsel(fnr: $fnr) {
@@ -136,6 +172,17 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
                 opprettetDato,
                 opprettetAv,
                 opprettetBegrunnelse
+            }
+        }
+    """.trim().replace("\n", "");
+
+    static String kladderQuery = """
+        query($fnr: String!) {
+            kladder(fnr: $fnr) {
+                overskrift,
+                tekst,
+                dialogId,
+                aktivitetId
             }
         }
     """.trim().replace("\n", "");

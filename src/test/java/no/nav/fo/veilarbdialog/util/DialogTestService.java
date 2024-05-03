@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.util;
 import io.restassured.response.Response;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
+import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
@@ -12,6 +13,8 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.RestassuredUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -66,5 +69,32 @@ public class DialogTestService {
         // Scheduled task
         brukernotifikasjonService.sendPendingBrukernotifikasjoner();
         return eskaleringsvarselDto;
+    }
+
+    public void nyKladd(RestassuredUser user, KladdDTO kladd) {
+        user.createRequest()
+                .body(kladd)
+                .post("/veilarbdialog/api/kladd")
+                .then()
+                .statusCode(204);
+    }
+
+    public void nyKladdMedFnrIUrl(RestassuredUser user, KladdDTO kladd) {
+        var fnr = kladd.getFnr();
+        user.createRequest()
+                .body(kladd.setFnr(null))
+                .post("/veilarbdialog/api/kladd?fnr=" + fnr)
+                .then()
+                .statusCode(204);
+    }
+
+    public List<KladdDTO> hentKladder(RestassuredUser user, MockBruker bruker) {
+        return user.createRequest()
+                .get("/veilarbdialog/api/kladd?fnr=" + bruker.getFnr())
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getList(".", KladdDTO.class);
     }
 }
