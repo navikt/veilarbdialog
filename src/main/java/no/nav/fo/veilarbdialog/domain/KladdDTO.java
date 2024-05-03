@@ -13,4 +13,5 @@ public class KladdDTO {
     private String aktivitetId;
     private String overskrift;
     private String tekst;
+    private String fnr;
 }
