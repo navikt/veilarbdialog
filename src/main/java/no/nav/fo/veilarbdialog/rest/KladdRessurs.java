@@ -2,13 +2,10 @@ package no.nav.fo.veilarbdialog.rest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import no.nav.common.types.identer.EksternBrukerId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.domain.Kladd;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
-import no.nav.fo.veilarbdialog.domain.KladdDTOUtenDialogId;
 import no.nav.fo.veilarbdialog.service.KladdService;
-import no.nav.fo.veilarbdialog.util.DialogResource;
 import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.http.HttpStatus;
