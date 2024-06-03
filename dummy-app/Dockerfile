@@ -1,8 +1,8 @@
 FROM busybox:latest
 ENV PORT=8080
 
-ADD ./www/index.html /www/index.html
-ADD ./www/hello-nais.png /www/hello-nais.png
+ADD ./dummy-app/www/index.html /www/index.html
+ADD ./dummy-app/www/hello-nais.png /www/hello-nais.png
 
 HEALTHCHECK CMD nc -z localhost $PORT
 
