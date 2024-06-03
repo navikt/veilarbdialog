@@ -17,6 +17,7 @@ jobs:
         id: docker-build-push
         with:
           team: dab
+          owner: dab
           dockerfile: dummy-app/Dockerfile
           image_suffix: dummy
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }} # Provided as Organization Secret
