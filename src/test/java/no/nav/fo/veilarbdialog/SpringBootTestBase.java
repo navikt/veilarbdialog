@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog;
 
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import io.getunleash.Unleash;
 import io.restassured.RestAssured;
 import net.javacrumbs.shedlock.core.LockProvider;
@@ -22,7 +23,8 @@ import org.springframework.test.context.jdbc.Sql;
 import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureWireMock(port = 0)
+//@AutoConfigureWireMock(port = 0)
+@WireMockTest
 @Sql(
         scripts = "/db/testdata/slett_alle_dialoger.sql",
         executionPhase = BEFORE_TEST_METHOD
