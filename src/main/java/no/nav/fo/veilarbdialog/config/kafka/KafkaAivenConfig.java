@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.config.kafka;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.ssl.DefaultSslBundleRegistry;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +29,7 @@ public class KafkaAivenConfig {
     // *********** produser brukernotifikasjoner START ****************
     @Bean
     <K extends SpecificRecordBase,V extends SpecificRecordBase> ProducerFactory<K, V> avroAvroProducerFactory(KafkaProperties kafkaProperties) {
-        Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties();
+        Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties(new DefaultSslBundleRegistry());
         producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
         producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
@@ -44,7 +45,7 @@ public class KafkaAivenConfig {
     // ************ konsumer siste_oppfolgings_periode og aktivitetskort-idmappinger START ***************
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, String> stringStringKafkaListenerContainerFactory(
-            ConsumerFactory<String, String> stringStringConsumerFactory) {
+            @Qualifier("stringStringConsumerFactory") ConsumerFactory<String, String> stringStringConsumerFactory) {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(stringStringConsumerFactory);
         factory.getContainerProperties()
@@ -68,7 +69,7 @@ public class KafkaAivenConfig {
                 new FixedBackOff(DEFAULT_INTERVAL, UNLIMITED_ATTEMPTS));
     }
 
-    @Bean
+    @Bean("stringStringConsumerFactory")
     ConsumerFactory<String, String> stringStringConsumerFactory(KafkaProperties kafkaProperties) {
         Map<String, Object> consumerProperties = kafkaProperties.buildConsumerProperties(new DefaultSslBundleRegistry());
         consumerProperties.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, org.apache.kafka.common.serialization.StringDeserializer.class);
@@ -82,7 +83,7 @@ public class KafkaAivenConfig {
 
     // ************ konsumer ekstern-varsel-kvittering START ***************
 
-    @Bean
+    @Bean("stringAvroConsumerFactory")
     <V extends SpecificRecordBase> ConsumerFactory<String, V> stringAvroConsumerFactory(KafkaProperties kafkaProperties) {
         Map<String, Object> consumerProperties = kafkaProperties.buildConsumerProperties(new DefaultSslBundleRegistry());
         consumerProperties.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, org.apache.kafka.common.serialization.StringDeserializer.class);
@@ -92,7 +93,7 @@ public class KafkaAivenConfig {
 
     @Bean
     <V extends SpecificRecordBase> ConcurrentKafkaListenerContainerFactory<String, V> stringAvroKafkaListenerContainerFactory(
-            ConsumerFactory<String, V> stringAvroConsumerFactory) {
+            @Qualifier("stringAvroConsumerFactory") ConsumerFactory<String, V> stringAvroConsumerFactory) {
         ConcurrentKafkaListenerContainerFactory<String, V> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(stringAvroConsumerFactory);
         factory.getContainerProperties()

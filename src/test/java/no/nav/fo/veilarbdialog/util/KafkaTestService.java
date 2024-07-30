@@ -1,13 +1,14 @@
 package no.nav.fo.veilarbdialog.util;
 
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.stereotype.Service;
@@ -23,14 +24,23 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
 @Service
-@RequiredArgsConstructor
 public class KafkaTestService {
 
     public static final Duration DEFAULT_WAIT_TIMEOUT = Duration.ofSeconds(5);
-    private final ConsumerFactory<Object, Object> avroAvroConsumerFactory;
+    private final ConsumerFactory<SpecificRecordBase, SpecificRecordBase> avroAvroConsumerFactory;
     private final ConsumerFactory<String, String> stringStringConsumerFactory;
     private final Admin kafkaAdminClient;
     private @Value("${spring.kafka.consumer.group-id}") String aivenGroupId;
+
+    public KafkaTestService(
+            @Qualifier("avroAvroConsumerFactory") ConsumerFactory<SpecificRecordBase, SpecificRecordBase> avroAvroConsumerFactory,
+            @Qualifier("stringStringConsumerFactory") ConsumerFactory<String, String> stringStringConsumerFactory,
+            Admin kafkaAdminClient
+    ) {
+        this.avroAvroConsumerFactory = avroAvroConsumerFactory;
+        this.stringStringConsumerFactory = stringStringConsumerFactory;
+        this.kafkaAdminClient = kafkaAdminClient;
+    }
 
 
     public Consumer createAvroAvroConsumer(String topic) {
@@ -53,15 +63,11 @@ public class KafkaTestService {
 
 
 
-    public void seekToEnd(String topic, Consumer newConsumer) {
-        List<PartitionInfo> partitionInfos = newConsumer.partitionsFor(topic);
-        List<TopicPartition> collect = partitionInfos.stream().map(f -> new TopicPartition(topic, f.partition())).collect(Collectors.toList());
-
-        newConsumer.assign(collect);
-        newConsumer.seekToEnd(collect);
-
-        collect.forEach(a -> newConsumer.position(a, Duration.ofSeconds(10)));
-
+    private void seekToEnd(String topic, Consumer newConsumer) {
+        var topicPartitions = List.of(new TopicPartition(topic, 0));
+        newConsumer.assign(topicPartitions);
+        newConsumer.seekToEnd(topicPartitions);
+        topicPartitions.forEach(topicPartition -> newConsumer.position(topicPartition, Duration.ofSeconds(10)));
         newConsumer.commitSync(Duration.ofSeconds(10));
     }
 

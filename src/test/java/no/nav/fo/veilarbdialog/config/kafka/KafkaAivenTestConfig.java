@@ -12,12 +12,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.test.EmbeddedKafkaBroker;
-import org.springframework.kafka.test.core.BrokerAddress;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Configuration
 public class KafkaAivenTestConfig {
@@ -48,7 +46,8 @@ public class KafkaAivenTestConfig {
 
 
     // ******* Lese fra brukernotifikasjons topics i test START ***********
-    @Bean
+    @Bean("avroAvroConsumerFactory")
+    @Primary
     <K extends SpecificRecordBase, V extends SpecificRecordBase> ConsumerFactory<K, V> avroAvroConsumerFactory(KafkaProperties kafkaProperties, EmbeddedKafkaBroker embeddedKafka) {
         Map<String, Object> consumerProperties = kafkaProperties.buildConsumerProperties(new DefaultSslBundleRegistry());
         consumerProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, embeddedKafka.getBrokersAsString());
