@@ -15,4 +15,11 @@ RUN /bin/mkdir /secure-logs
 RUN chown nonroot /secure-logs
 EXPOSE 8080
 USER nonroot
-CMD ["veilarbdialog.jar"]
+CMD /init-scripts/init.sh \
+    && set -x \
+    && exec java \
+      ${DEFAULT_JVM_OPTS} \
+      ${JAVA_OPTS} \
+      -jar ${APP_JAR} \
+      ${RUNTIME_OPTS} \
+      veilarbdialog.jar
