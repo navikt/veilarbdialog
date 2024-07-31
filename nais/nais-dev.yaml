@@ -95,6 +95,9 @@ spec:
         - application: start-samtale
           namespace: pto
           cluster: dev-gcp
+        - application: veilarbaktivitet
+          namespace: dab
+          cluster: dev-gcp
     outbound:
       external:
         - host: dab-unleash-api.nav.cloud.nais.io
