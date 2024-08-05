@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static no.nav.fo.veilarbdialog.SpringBootTestBase.wireMock;
 
 public class WireMockUtil {
 
@@ -30,15 +31,15 @@ public class WireMockUtil {
 
     private static void oppfolging(String fnr, boolean underOppfolging, boolean oppfolgingFeiler, UUID periode) {
         if (oppfolgingFeiler) {
-            stubFor(get("/veilarboppfolging/api/v2/oppfolging?fnr=" + fnr)
+            wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging?fnr=" + fnr)
                     .willReturn(aResponse().withStatus(500)));
-            stubFor(get("/veilarboppfolging/api/v2/oppfolging/periode/gjeldende?fnr=" + fnr)
+            wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging/periode/gjeldende?fnr=" + fnr)
                     .willReturn(aResponse().withStatus(500)));
-            stubFor(get("/veilarboppfolging/api/v2/oppfolging/perioder?fnr=" + fnr)
+            wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging/perioder?fnr=" + fnr)
                     .willReturn(aResponse().withStatus(500)));
             return;
         }
-        stubFor(get("/veilarboppfolging/api/v2/oppfolging?fnr=" + fnr)
+        wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging?fnr=" + fnr)
                 .willReturn(ok()
                         .withHeader("Content-Type", "text/json")
                         .withBody("{\"erUnderOppfolging\":" + underOppfolging + "}")));
@@ -57,23 +58,23 @@ public class WireMockUtil {
             String gjeldendePeriode = JsonUtils.toJson(oppfolgingsperiode);
 
             String oppfolgingsperioder = JsonUtils.toJson(List.of(oppfolgingsperiode, gammelPeriode));
-            stubFor(get("/veilarboppfolging/api/v2/oppfolging/periode/gjeldende?fnr=" + fnr)
+            wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging/periode/gjeldende?fnr=" + fnr)
                     .willReturn(ok()
                             .withHeader("Content-Type", "text/json")
                             .withBody(gjeldendePeriode)));
-            stubFor(get("/veilarboppfolging/api/v2/oppfolging/perioder?fnr=" + fnr)
+            wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging/perioder?fnr=" + fnr)
                     .willReturn(ok()
                             .withHeader("Content-Type", "text/json")
                             .withBody(oppfolgingsperioder)));
 
         } else {
-            stubFor(get("/veilarboppfolging/api/v2/oppfolging/periode/gjeldende?fnr=" + fnr)
+            wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging/periode/gjeldende?fnr=" + fnr)
                     .willReturn(aResponse().withStatus(204)));
         }
     }
 
     private static void manuell(String fnr, boolean erManuell, boolean erReservertKrr, boolean kanVarsles) {
-        stubFor(get("/veilarboppfolging/api/v2/manuell/status?fnr=" + fnr)
+        wireMock.stubFor(get("/veilarboppfolging/api/v2/manuell/status?fnr=" + fnr)
                 .willReturn(ok()
                         .withHeader("Content-Type", "text/json")
                         .withBody("{\"erUnderManuellOppfolging\":" + erManuell + ",\"krrStatus\":{\"kanVarsles\":" + kanVarsles + ",\"erReservert\":" + erReservertKrr + "}}")));
@@ -81,23 +82,23 @@ public class WireMockUtil {
 
     private static void kvp(String aktorId, boolean erUnderKvp, String enhet) {
         if (erUnderKvp) {
-            stubFor(get("/veilarboppfolging/api/v2/kvp?aktorId=" + aktorId)
+            wireMock.stubFor(get("/veilarboppfolging/api/v2/kvp?aktorId=" + aktorId)
                     .willReturn(ok()
                             .withHeader("Content-Type", "text/json")
                             .withBody("{\"enhet\":\"" + enhet + "\"}")));
         } else {
-            stubFor(get("/veilarboppfolging/api/v2/kvp?aktorId=" + aktorId)
+            wireMock.stubFor(get("/veilarboppfolging/api/v2/kvp?aktorId=" + aktorId)
                     .willReturn(aResponse().withStatus(204)));
         }
     }
 
     private static void dialogvarsler() {
-        stubFor(post("/please/notify-subscribers")
+        wireMock.stubFor(post("/please/notify-subscribers")
                 .willReturn(aResponse().withStatus(204)));
     }
 
     public static void aktorUtenGjeldendeIdent(String fnr, String aktorId) {
-        stubFor(post(urlEqualTo("/pdl/graphql"))
+        wireMock.stubFor(post(urlEqualTo("/pdl/graphql"))
                 .withRequestBody(matching("^.*FOLKEREGISTERIDENT.*"))
                 .withRequestBody(matchingJsonPath("$.variables.ident", equalTo(aktorId)))
                 .willReturn(aResponse()
@@ -111,7 +112,7 @@ public class WireMockUtil {
                                  }
                                  """)));
 
-        stubFor(post(urlEqualTo("/pdl/graphql"))
+        wireMock.stubFor(post(urlEqualTo("/pdl/graphql"))
                 .withRequestBody(matching("^.*AKTORID.*"))
                 .withRequestBody(matchingJsonPath("$.variables.ident", equalTo(fnr)))
                 .willReturn(aResponse()
@@ -127,7 +128,7 @@ public class WireMockUtil {
     }
 
     private static void aktor(String fnr, String aktorId) {
-        stubFor(post(urlEqualTo("/pdl/graphql"))
+        wireMock.stubFor(post(urlEqualTo("/pdl/graphql"))
                 .withRequestBody(matching("^.*FOLKEREGISTERIDENT.*"))
                 .withRequestBody(matchingJsonPath("$.variables.ident", equalTo(aktorId)))
                 .willReturn(aResponse()
@@ -146,7 +147,7 @@ public class WireMockUtil {
                                  }
                                  """.formatted(fnr))));
 
-        stubFor(post(urlEqualTo("/pdl/graphql"))
+        wireMock.stubFor(post(urlEqualTo("/pdl/graphql"))
                 .withRequestBody(matching("^.*AKTORID.*"))
                 .withRequestBody(matchingJsonPath("$.variables.ident", equalTo(fnr)))
                 .willReturn(aResponse()

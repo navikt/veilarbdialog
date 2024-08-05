@@ -197,7 +197,7 @@ class DialogRessursTest extends SpringBootTestBase {
 
         assertThat(veiledersDialog.isVenterPaSvar()).isFalse();
         assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
-        verify(postRequestedFor(urlEqualTo("/please/notify-subscribers"))
+        wireMock.verify(postRequestedFor(urlEqualTo("/please/notify-subscribers"))
                 .withRequestBody(matchingJsonPath("eventType", equalTo(DialogVarslerClient.EventType.NY_DIALOGMELDING_FRA_BRUKER_TIL_NAV.name()))));
     }
 
@@ -208,7 +208,7 @@ class DialogRessursTest extends SpringBootTestBase {
 
         assertThat(dialog.isVenterPaSvar()).isFalse();
         assertThat(dialog.isFerdigBehandlet()).isTrue();
-        verify(postRequestedFor(urlEqualTo("/please/notify-subscribers"))
+        wireMock.verify(postRequestedFor(urlEqualTo("/please/notify-subscribers"))
                 .withRequestBody(matchingJsonPath("eventType", equalTo(DialogVarslerClient.EventType.NY_DIALOGMELDING_FRA_NAV_TIL_BRUKER.name()))));
     }
 
