@@ -18,22 +18,20 @@
 
     <properties>
         <java.version>21</java.version>
+
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
         <common.version>3.2024.02.21_11.18-8f9b43befae1</common.version>
         <dab.common.version>2024.05.02-12.56.e7c652672873</dab.common.version>
         <poao.tilgang.version>2024.06.20_04.57-261f6c070c00</poao.tilgang.version>
 
-
         <shedlock.version>4.43.0</shedlock.version>
-
 
         <sonar.projectKey>navikt_veilarbdialog</sonar.projectKey>
         <sonar.organization>navikt</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
         <doknotifikasjon-schemas-version>1.2021.06.22-11.27-265ce1fe1ab4</doknotifikasjon-schemas-version>
-
     </properties>
 
     <repositories>
@@ -361,6 +359,13 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>${java.version}</release>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
@@ -371,7 +376,6 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.7</version>
             </plugin>
             <plugin>
                 <groupId>org.openapitools</groupId>
