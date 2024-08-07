@@ -302,4 +302,31 @@ class DialogRessursTest extends SpringBootTestBase {
                 .then()
                 .statusCode(403);
     }
+
+    @Test
+    void veileder_kan_ikke_sende_henvendelse_på_historisk_dialog() {
+        NyHenvendelseDTO henvendelseFørHistorisk = new NyHenvendelseDTO()
+                .setTekst("tekst")
+                .setOverskrift("overskrift");
+        dialogTestService.opprettDialogSomVeileder(veileder, bruker, henvendelseFørHistorisk);
+
+
+
+        var meldingFørHistorisk = new NyHenvendelseDTO().setTekst("tekst").setFnr(bruker.getFnr());
+        nyHenvendelseUtenFnrIUrl(veileder, meldingFørHistorisk);
+
+
+
+
+
+        var oppfølgingsenhet = "enhetTilKvpBruker";
+        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
+        var kvpBruker = MockNavService.createBruker(brukerOptions);
+        var melding = new NyHenvendelseDTO().setFnr(kvpBruker.getFnr()).setTekst("LOL");
+        veileder.createRequest()
+                .body(melding)
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(403);
+    }
 }
