@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.Date;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -309,24 +310,15 @@ class DialogRessursTest extends SpringBootTestBase {
                 .setTekst("tekst")
                 .setOverskrift("overskrift");
         dialogTestService.opprettDialogSomVeileder(veileder, bruker, henvendelseFørHistorisk);
-
-
-
         var meldingFørHistorisk = new NyHenvendelseDTO().setTekst("tekst").setFnr(bruker.getFnr());
         nyHenvendelseUtenFnrIUrl(veileder, meldingFørHistorisk);
+        dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), new Date());
 
-
-
-
-
-        var oppfølgingsenhet = "enhetTilKvpBruker";
-        var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
-        var kvpBruker = MockNavService.createBruker(brukerOptions);
-        var melding = new NyHenvendelseDTO().setFnr(kvpBruker.getFnr()).setTekst("LOL");
+        var melding = new NyHenvendelseDTO().setFnr(bruker.getFnr()).setTekst("LOL");
         veileder.createRequest()
                 .body(melding)
                 .post("/veilarbdialog/api/dialog")
                 .then()
-                .statusCode(403);
+                .statusCode(400);
     }
 }
