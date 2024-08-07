@@ -68,7 +68,7 @@ public class KasserRessurs {
         Id veilederIdent = auth.getInnloggetVeilederIdent();
         auth.sjekkTilgangTilPerson(aktorId);
         List<String> godkjente = Arrays.asList(godkjenteIdenter.split(","));
-        log.info("Kassering, finnes antall identer: ", godkjenteIdenter.length());
+        log.info("Kassering, finnes antall identer: " + godkjenteIdenter.length());
         if (!godkjente.contains(veilederIdent.get())) {
             log.error("[KASSERING] {} har ikke tilgang til kassering av {} dialoger", veilederIdent, aktorId);
             throw new ResponseStatusException(FORBIDDEN,
