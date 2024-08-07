@@ -40,6 +40,7 @@ spec:
   envFrom:
     - configmap: pto-config
     - secret: veilarbdialog-unleash-api-token
+    - secret: veilarb-kassering-identer
   vault:
     enabled: true
     paths:
