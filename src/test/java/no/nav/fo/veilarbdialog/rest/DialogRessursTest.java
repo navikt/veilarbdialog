@@ -310,12 +310,26 @@ class DialogRessursTest extends SpringBootTestBase {
                 .setTekst("tekst")
                 .setOverskrift("overskrift");
         dialogTestService.opprettDialogSomVeileder(veileder, bruker, henvendelseFørHistorisk);
-        var meldingFørHistorisk = new NyHenvendelseDTO().setTekst("tekst").setFnr(bruker.getFnr());
-        nyHenvendelseUtenFnrIUrl(veileder, meldingFørHistorisk);
         dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), new Date());
 
         var melding = new NyHenvendelseDTO().setFnr(bruker.getFnr()).setTekst("LOL");
         veileder.createRequest()
+                .body(melding)
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(400);
+    }
+
+    @Test
+    void bruker_kan_ikke_sende_henvendelse_på_historisk_dialog() {
+        NyHenvendelseDTO henvendelseFørHistorisk = new NyHenvendelseDTO()
+                .setTekst("tekst")
+                .setOverskrift("overskrift");
+        dialogTestService.opprettDialogSomBruker(bruker, henvendelseFørHistorisk);
+        dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), new Date());
+
+        var melding = new NyHenvendelseDTO().setFnr(bruker.getFnr()).setTekst("LOL");
+        bruker.createRequest()
                 .body(melding)
                 .post("/veilarbdialog/api/dialog")
                 .then()
