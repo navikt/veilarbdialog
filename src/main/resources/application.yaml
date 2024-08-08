@@ -130,12 +130,12 @@ application:
   veilarboppfolging:
     api:
       url: ${VEILARBOPPFOLGINGAPI_URL}
-      azureScope: api://${APP_CLUSTER_NAME}.pto.veilarboppfolging/.default
-      tokenXScope: ${APP_CLUSTER_NAME}:pto:veilarboppfolging
+      azureScope: ${VEILARBOPPFOLGINGAPI_AZURE_SCOPE}
+      tokenXScope: ${VEILARBOPPFOLGINGAPI_TOKENX_SCOPE}
   veilarbperson:
     api:
       url: ${VEILARBPERSONAPI_URL}
-      scope: api://${APP_CLUSTER_NAME}.pto.veilarbperson/.default
+      scope: ${VEILARBPERSONAPI_AZURE_SCOPE}
   please:
     api:
       url: ${PLEASE_URL}
