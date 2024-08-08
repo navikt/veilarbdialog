@@ -116,3 +116,9 @@ spec:
       value: api://prod-gcp.dab.please/.default
     - name: PLEASE_TOKENX_SCOPE
       value: prod-gcp:dab:please
+    - name: VEILARBOPPFOLGINGAPI_AZURE_SCOPE
+      value: api://prod-fss.pto.veilarboppfolging/.default
+    - name: VEILARBOPPFOLGINGAPI_TOKENX_SCOPE
+      value: prod-fss:pto:veilarboppfolging
+    - name: VEILARBPERSONAPI_AZURE_SCOPE
+      value: api://prod-fss.pto.veilarbperson/.default
