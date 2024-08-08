@@ -1,0 +1,118 @@
+kind: Application
+apiVersion: nais.io/v1alpha1
+metadata:
+  name: veilarbdialog
+  namespace: dab
+  cluster: dev-gcp
+  labels:
+    team: dab
+spec:
+  image: ghcr.io/navikt/veilarbdialog/veilarbdialog:{{version}}
+  ingresses:
+    - https://veilarbdialog.dev.nav.cloud.nais.io
+    - https://veilarbdialog.intern.dev.nav.no
+  port: 8080
+  prometheus:
+    enabled: true
+    path: /veilarbdialog/internal/prometheus
+  liveness:
+    path: /veilarbdialog/internal/info
+    port: 8080
+    initialDelay: 30
+  readiness:
+    path: /veilarbdialog/internal/info
+    port: 8080
+    initialDelay: 30
+  replicas:
+    min: 2
+    max: 2
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      cpu: "2"
+      memory: 1024Mi
+    requests:
+      cpu: 200m
+      memory: 768Mi
+  envFrom:
+#    - configmap: pto-config
+    - secret: veilarbdialog-unleash-api-token
+    - secret: veilarb-kassering-identer
+  secureLogs:
+    enabled: true
+  kafka:
+    pool: nav-dev
+  tokenx:
+    enabled: true
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true #todo burde vi legge inn noen roller her?
+      claims:
+        extra:
+          - "NAVident"
+  accessPolicy:
+    inbound:
+      rules:
+        - application: veilarbapi
+          namespace: pto
+          cluster: dev-gcp
+        - application: arbeidssokerregistrering-for-veileder
+          namespace: paw
+          cluster: dev-gcp
+        - application: veilarbpersonflate
+          namespace: poao
+          cluster: dev-gcp
+        - application: mulighetsrommet-api
+          namespace: team-mulighetsrommet
+          cluster: dev-gcp
+        - application: veilarbdirigent
+          namespace: pto
+          cluster: dev-fss
+        - application: aktivitetsplan
+          namespace: pto
+          cluster: dev-gcp
+        - application: arbeidsrettet-dialog
+          namespace: pto
+          cluster: dev-gcp
+        - application: aia-backend
+          namespace: paw
+          cluster: dev-gcp
+        - application: start-samtale
+          namespace: pto
+          cluster: dev-gcp
+        - application: veilarbaktivitet
+          namespace: dab
+          cluster: dev-gcp
+    outbound:
+      external:
+        - host: dab-unleash-api.nav.cloud.nais.io
+        - host: please.ekstern.dev.nav.no
+  gcp:
+    sqlInstances:
+      - name: veilarbdialog
+        type: POSTGRES_14
+        tier: db-custom-1-3840
+        diskType: SSD
+        diskAutoresize: true
+        flags: # Nødvendig for datastreams
+          - name: cloudsql.logical_decoding
+            value: "on"
+        databases:
+          - name: veilarbdialog
+            envVarPrefix: DB
+            users:
+              - name: datastream
+  env:
+    - name: APP_CLUSTER_NAME
+      value: dev-gcp
+    - name: DIALOG_EKSTERN_URL
+      value: https://dab.ekstern.dev.nav.no/arbeid/dialog
+    - name: POAO_TILGANG_SCOPE
+      value: api://dev-fss.poao.poao-tilgang/.default
+    - name: PLEASE_URL
+      value: https://please.ekstern.dev.nav.no
+    - name: PLEASE_AZURE_SCOPE
+      value: api://dev-gcp.dab.please/.default
+    - name: PLEASE_TOKENX_SCOPE
+      value: dev-gcp:dab:please
