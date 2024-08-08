@@ -8,7 +8,7 @@ spring:
   cloud:
     gateway:
       mvc:
-        enabled=${FSS_PROXY_ENABLED:true}
+        enabled: ${FSS_PROXY_ENABLED:true}
   flyway:
     enabled: false
     ###############################################
