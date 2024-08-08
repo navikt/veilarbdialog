@@ -46,21 +46,21 @@ public class ScheduleRessurs {
     private Long brukernotifikasjonHenvendelseMaksAlder; // 2 dager
 
     // Ti min
-    @Scheduled(fixedDelay = 600000)
+//    @Scheduled(fixedDelay = 600000)
     public void slettGamleKladder() {
         kladdService.slettGamleKladder();
     }
 
     //5MIN ER VALGT ARBITRÆRT
-    @Scheduled(fixedDelay = 300000)
+//    @Scheduled(fixedDelay = 300000)
     public void sendFeilendeKafkaMeldinger() {
         kafkaProducerService.sendAlleFeilendeMeldinger();
     }
 
     // To minutter mellom hver kjøring
-    @Scheduled(initialDelay = 60000, fixedDelay = 120000)
+//    @Scheduled(initialDelay = 60000, fixedDelay = 120000)
     @Transactional
-    @SchedulerLock(name = "brukernotifikasjon_beskjed_kafka_scheduledTask", lockAtMostFor = "PT2M")
+//    @SchedulerLock(name = "brukernotifikasjon_beskjed_kafka_scheduledTask", lockAtMostFor = "PT2M")
     public void sendBrukernotifikasjonerForUlesteDialoger() {
         List<Long> dialogIder = varselDAO.hentDialogerMedUlesteMeldingerEtterSisteVarsel(brukernotifikasjonGracePeriode, brukernotifikasjonHenvendelseMaksAlder);
 
