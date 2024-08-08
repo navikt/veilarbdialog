@@ -36,7 +36,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.DAB_NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
-          RESOURCE: nais/unleash-apitoken-dev-gco.yaml
+          RESOURCE: nais/unleash-apitoken-dev-gcp.yaml
       - name: Deploy to prod (gcp)
         uses: nais/deploy/actions/deploy@v1
         env:
