@@ -5,6 +5,10 @@ spring:
     jdbc:
       repositories:
         enabled: false
+  cloud:
+    gateway:
+      mvc:
+        enabled=${FSS_PROXY_ENABLED:true}
   flyway:
     enabled: false
     ###############################################
@@ -164,3 +168,6 @@ unleash:
   url: ${UNLEASH_SERVER_API_URL}
   token: ${UNLEASH_SERVER_API_TOKEN}
   instanceId: ${NAIS_CLIENT_ID}
+
+veilarbdialog-fss:
+  url: ${VEILARBDIALOG_FSS_URL}

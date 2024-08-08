@@ -116,3 +116,7 @@ spec:
       value: api://dev-gcp.dab.please/.default
     - name: PLEASE_TOKENX_SCOPE
       value: dev-gcp:dab:please
+    - name: VEILARBDIALOG_FSS_URL
+      value: "https://veilarbdialog.dev-fss-pub.nais.io"
+    - name: FSS_PROXY_ENABLED
+      value: "true"
