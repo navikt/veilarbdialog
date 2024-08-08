@@ -11,14 +11,12 @@ COPY --from=busybox /bin/chown /bin/chown
 ENV TZ="Europe/Oslo"
 ENV APP_JAR=veilarbdialog.jar
 WORKDIR /app
-COPY nais/init.sh /init-scripts/init.sh
 COPY target/veilarbdialog.jar ./
 RUN /bin/mkdir /secure-logs
 RUN chown nonroot /secure-logs
 EXPOSE 8080
 USER nonroot
-ENTRYPOINT source /init-scripts/init.sh \
-    && set -x \
+ENTRYPOINT set -x \
     && exec java \
       ${DEFAULT_JVM_OPTS} \
       ${JAVA_OPTS} \
