@@ -126,9 +126,6 @@ application:
   serviceuser:
     username: ${SERVICEUSER_USERNAME}
     password: ${SERVICEUSER_PASSWORD}
-  sts:
-    discovery:
-      url: ${SECURITY_TOKEN_SERVICE_DISCOVERY_URL}
   veilarboppfolging:
     api:
       url: ${VEILARBOPPFOLGINGAPI_URL}

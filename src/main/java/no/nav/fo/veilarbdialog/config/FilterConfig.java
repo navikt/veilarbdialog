@@ -32,21 +32,11 @@ public class FilterConfig {
     @Value("${application.cluster}")
     private String applicationCluster;
 
-    @Value("${application.sts.discovery.url}")
-    private String naisStsDiscoveryUrl;
-
     @Value("${application.azure.ad.discoveryUrl}")
     private String azureAdDiscoveryUrl;
 
     @Value("${application.azure.ad.clientId}")
     private String azureAdClientId;
-
-    private OidcAuthenticatorConfig naisStsAuthConfig() {
-        return new OidcAuthenticatorConfig()
-                .withDiscoveryUrl(naisStsDiscoveryUrl)
-                .withClientIds(ALLOWED_SERVICE_USERS)
-                .withUserRole(UserRole.SYSTEM);
-    }
 
     private OidcAuthenticatorConfig naisAzureAdConfig() {
         return new OidcAuthenticatorConfig()
@@ -105,7 +95,6 @@ public class FilterConfig {
         var authenticationFilter = new OidcAuthenticationFilter(
                 fromConfigs(
                         naisAzureAdConfig(),
-                        naisStsAuthConfig(),
                         tokenxConfig()
                 )
         );
