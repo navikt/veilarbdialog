@@ -16,7 +16,7 @@ public class DatabaseHelsesjekk implements HealthCheck {
     @Override
     public HealthCheckResult checkHealth() {
         try {
-            jdbc.queryForObject("select 1 from DUAL", Long.class);
+            jdbc.queryForObject("select 1", Long.class);
         } catch (DataAccessException e) {
             return HealthCheckResult.unhealthy(e);
         }
