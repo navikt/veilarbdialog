@@ -3,6 +3,10 @@ spring:
     active: local
   application:
     name: "veilarbdialog"
+  cloud:
+    gateway:
+      mvc:
+        enabled: false
   flyway:
     enabled: false
   main:
