@@ -30,6 +30,7 @@ public class DataSourceConfig {
         log.info("Creating data source to URL '{}'", url);
 
         HikariConfig config = new HikariConfig();
+        config.setSchema("veilarbdialog");
         config.setJdbcUrl(url);
         config.setUsername(username);
         config.setPassword(password);
