@@ -116,9 +116,10 @@ application:
       clientId: ${AAD_B2C_CLIENTID_USERNAME}
       discoveryUrl: ${AAD_B2C_DISCOVERY_URL}
   datasource:
-    url: ${JDBC_URL}
-    username: ${JDBC_USERNAME}
-    password: ${JDBC_PASSWORD}
+    # TODO remove readonly after migration
+    url: ${DB_JDBC_URL}&readOnly=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   dialog:
     url: ${DIALOG_EKSTERN_URL}
   kafka:
