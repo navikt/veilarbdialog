@@ -54,8 +54,6 @@ public class ProxyToOnPremFilter {
                 .route(path("/internal/isAlive")
                         .or(path("/internal/isReady"))
                         .or(path("/internal/selftest"))
-                        .or(path("/internal/kassering"))
-                        .or(path("/api/kassering/**"))
                         .negate(), sendToOnPrem)
                 .before(oboExchange(() -> proxyToOnPremTokenProvider.getProxyToken()))
                 .onError((Throwable error) -> {
