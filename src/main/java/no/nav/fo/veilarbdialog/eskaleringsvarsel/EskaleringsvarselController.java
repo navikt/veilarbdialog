@@ -9,9 +9,6 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.GjeldendeEskaleringsvarselD
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
-import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
-import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerIkkeUnderOppfolgingException;
-import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
 import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
@@ -87,14 +84,6 @@ public class EskaleringsvarselController {
                 .stream()
                 .map(EskaleringsvarselDto::fromEntity)
                 .toList();
-    }
-
-    @ExceptionHandler({BrukerKanIkkeVarslesException.class, BrukerIkkeUnderOppfolgingException.class, AktivEskaleringException.class})
-    public ResponseEntity<String> handleExceptions(Exception e) {
-        String feilmelding = String.format("Funksjonell feil under behandling: %s - %s ", e.getClass().getSimpleName(), e.getMessage());
-        log.warn(feilmelding);
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(feilmelding);
-
     }
 
     public static GjeldendeEskaleringsvarselDto gjeldendeEskaleringsvarselDto(EskaleringsvarselEntity entity) {

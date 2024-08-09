@@ -7,6 +7,7 @@ import io.restassured.RestAssured;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
+import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.util.DialogTestService;
 import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import no.nav.poao_tilgang.poao_tilgang_test_wiremock.PoaoTilgangWiremock;
@@ -56,6 +57,9 @@ public abstract class SpringBootTestBase {
 
     @Autowired
     protected Unleash unleash;
+
+    @Autowired
+    protected DialogDataService dialogDataService;
 
     @LocalServerPort
     protected int port;
