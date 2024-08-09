@@ -1,5 +1,7 @@
 create schema if not exists veilarbdialog;
 
+set search_path to veilarbdialog;
+
 create table veilarbdialog.shedlock
 (
     name       varchar(64) not null primary key,
