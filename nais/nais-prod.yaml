@@ -101,6 +101,7 @@ spec:
       external:
         - host: dab-unleash-api.nav.cloud.nais.io
         - host: please.nav.no
+        - host: veilarbaktivitet.prod-fss-pub.nais.io
   env:
     - name: APP_ENVIRONMENT_NAME
       value: p
