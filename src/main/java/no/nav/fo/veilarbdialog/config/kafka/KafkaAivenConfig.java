@@ -22,7 +22,7 @@ import static org.springframework.util.backoff.FixedBackOff.DEFAULT_INTERVAL;
 import static org.springframework.util.backoff.FixedBackOff.UNLIMITED_ATTEMPTS;
 
 @Slf4j
-@EnableKafka
+//@EnableKafka
 @Configuration
 public class KafkaAivenConfig {
 
