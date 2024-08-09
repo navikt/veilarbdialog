@@ -107,6 +107,7 @@ spec:
             envVarPrefix: DB
             users:
               - name: datastream
+              - name: veilarbdialog_midlertidig
   env:
     - name: APP_CLUSTER_NAME
       value: dev-gcp
