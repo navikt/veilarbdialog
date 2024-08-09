@@ -24,6 +24,9 @@ spec:
     - team: pto
       application: veilarbportefolje
       access: read
+    - team: obo
+      application: veilarbportefolje
+      access: read
     - team: pto
       application: pto-kafka-manager
       access: read
