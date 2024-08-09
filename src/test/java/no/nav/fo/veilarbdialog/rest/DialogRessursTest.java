@@ -309,15 +309,15 @@ class DialogRessursTest extends SpringBootTestBase {
         NyHenvendelseDTO henvendelseFørHistorisk = new NyHenvendelseDTO()
                 .setTekst("tekst")
                 .setOverskrift("overskrift");
-        dialogTestService.opprettDialogSomVeileder(veileder, bruker, henvendelseFørHistorisk);
+        var dialog = dialogTestService.opprettDialogSomVeileder(veileder, bruker, henvendelseFørHistorisk);
         dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), new Date());
 
-        var melding = new NyHenvendelseDTO().setFnr(bruker.getFnr()).setTekst("LOL");
+        var melding = new NyHenvendelseDTO().setFnr(bruker.getFnr()).setTekst("LOL").setDialogId(dialog.getId());
         veileder.createRequest()
                 .body(melding)
                 .post("/veilarbdialog/api/dialog")
                 .then()
-                .statusCode(400);
+                .statusCode(409);
     }
 
     @Test
@@ -325,14 +325,14 @@ class DialogRessursTest extends SpringBootTestBase {
         NyHenvendelseDTO henvendelseFørHistorisk = new NyHenvendelseDTO()
                 .setTekst("tekst")
                 .setOverskrift("overskrift");
-        dialogTestService.opprettDialogSomBruker(bruker, henvendelseFørHistorisk);
+        var dialog = dialogTestService.opprettDialogSomBruker(bruker, henvendelseFørHistorisk);
         dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), new Date());
 
-        var melding = new NyHenvendelseDTO().setFnr(bruker.getFnr()).setTekst("LOL");
+        var melding = new NyHenvendelseDTO().setFnr(bruker.getFnr()).setTekst("LOL").setDialogId(dialog.getId());
         bruker.createRequest()
                 .body(melding)
                 .post("/veilarbdialog/api/dialog")
                 .then()
-                .statusCode(400);
+                .statusCode(409);
     }
 }
