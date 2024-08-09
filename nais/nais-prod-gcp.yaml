@@ -96,11 +96,11 @@ spec:
     sqlInstances:
       - name: veilarbdialog
         type: POSTGRES_14
-        tier: db-custom-8-53248 #TODO reduser etter migrering?
+        tier: db-custom-4-26624 #TODO reduser etter migrering?
         diskType: SSD
         diskAutoresize: true
-        highAvailability: true
-        pointInTimeRecovery: true
+        highAvailability: false #TODO skru på etter migrering
+        pointInTimeRecovery: false #TODO skru på etter migrering
         flags: # Nødvendig for datastreams
           - name: cloudsql.logical_decoding
             value: "on"
