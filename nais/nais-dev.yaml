@@ -40,6 +40,7 @@ spec:
   envFrom:
     - configmap: pto-config
     - secret: veilarbdialog-unleash-api-token
+    - secret: veilarb-kassering-identer
   vault:
     enabled: true
     paths:
@@ -96,6 +97,9 @@ spec:
           namespace: pto
           cluster: dev-gcp
         - application: veilarbaktivitet
+          namespace: dab
+          cluster: dev-gcp
+        - application: veilarbdialog
           namespace: dab
           cluster: dev-gcp
     outbound:
