@@ -2,9 +2,6 @@ name: Deploy branch to dev gcp
 run-name: Deploy feature branch ${{ github.ref_name }} by @${{ github.actor }}
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - gcp-main
 
 permissions:
   contents: read
