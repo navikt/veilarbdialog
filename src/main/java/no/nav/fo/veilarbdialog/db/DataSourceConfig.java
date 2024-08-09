@@ -27,7 +27,7 @@ public class DataSourceConfig {
     @Bean
     public DataSource dataSource() {
 
-        log.info("Creating data source to URL '{}'", url);
+        log.info("Creating data source");
 
         HikariConfig config = new HikariConfig();
         config.setSchema("veilarbdialog");
