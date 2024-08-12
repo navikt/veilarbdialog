@@ -90,6 +90,7 @@ spec:
           cluster: dev-gcp
     outbound:
       external:
+        - host: veilarbdialog.dev-fss-pub.nais.io
         - host: dab-unleash-api.nav.cloud.nais.io
         - host: please.ekstern.dev.nav.no
   gcp:
