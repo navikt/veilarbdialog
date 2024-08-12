@@ -89,6 +89,7 @@ spec:
           cluster: prod-gcp
     outbound:
       external:
+        - host: veilarbdialog.prod-fss-pub.nais.io
         - host: dab-unleash-api.nav.cloud.nais.io
         - host: please.ekstern.prod.nav.no
   gcp:
