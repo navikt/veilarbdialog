@@ -16,6 +16,7 @@ import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
+import no.nav.fo.veilarbdialog.service.exceptions.NyHenvendelsePåHistoriskDialogException;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -77,8 +78,11 @@ public class DialogDataService {
             throw new ResponseStatusException(CONFLICT, "Bruker kan ikke varsles.");
         }
 
+
         DialogData dialog = Optional.ofNullable(hentDialog(henvendelseData.getDialogId(), aktivitetsId))
                 .orElseGet(() -> opprettDialog(henvendelseData, aktorId.get()));
+
+        if(dialog.isHistorisk()) throw new NyHenvendelsePåHistoriskDialogException();
 
         slettKladd(henvendelseData, bruker);
 
