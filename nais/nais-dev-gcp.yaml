@@ -92,7 +92,6 @@ spec:
       external:
         - host: dab-unleash-api.nav.cloud.nais.io
         - host: please.ekstern.dev.nav.no
-        - host: veilarbaktivitet.dev-fss-pub.nais.io
   gcp:
     sqlInstances:
       - name: veilarbdialog
