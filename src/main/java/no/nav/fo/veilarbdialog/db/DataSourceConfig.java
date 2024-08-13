@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 
-@Profile("!test")
+@Profile("!local")
 @Configuration
 @Slf4j
 public class DataSourceConfig {

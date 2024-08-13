@@ -6,6 +6,7 @@ import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 import no.nav.common.token_client.client.TokenXOnBehalfOfTokenClient;
 import no.nav.fo.veilarbdialog.db.DataSourceConfig;
+import no.nav.fo.veilarbdialog.db.dao.LocalDatabaseSingleton;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,8 +26,7 @@ public class ApplicationTestConfig {
 
     @Bean
     public DataSource dataSource() throws IOException {
-        var db = EmbeddedPostgres.start().getPostgresDatabase();
-        DataSourceConfig.migrate(db);
+        var db = LocalDatabaseSingleton.INSTANCE.getPostgres();
         return db;
     }
 
