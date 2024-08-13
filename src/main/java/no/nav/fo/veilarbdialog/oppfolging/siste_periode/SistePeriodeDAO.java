@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.oppfolging.siste_periode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
+import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogSqlParameterSource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -39,7 +40,7 @@ class SistePeriodeDAO {
     }
 
     void upsertOppfolgingsperiode(Oppfolgingsperiode oppfolgingsperiode) {
-        MapSqlParameterSource params = new MapSqlParameterSource()
+        var params = new VeilarbDialogSqlParameterSource()
                 .addValue("aktorId", oppfolgingsperiode.aktorid())
                 .addValue("periode", oppfolgingsperiode.oppfolgingsperiode().toString())
                 .addValue("startTid", oppfolgingsperiode.startTid())

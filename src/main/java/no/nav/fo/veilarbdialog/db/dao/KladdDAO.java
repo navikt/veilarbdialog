@@ -27,7 +27,7 @@ public class KladdDAO {
 
         Long id = Optional.ofNullable(kladd.getDialogId()).map(Long::parseLong).orElse(null);
         long kladdSeq = Optional
-                .ofNullable(jdbc.getJdbcTemplate().queryForObject("select KLADD_ID_SEQ.nextval", Long.class))
+                .ofNullable(jdbc.getJdbcTemplate().queryForObject("select nextval('KLADD_ID_SEQ')", Long.class))
                 .orElseThrow(IllegalStateException::new);
 
         jdbc.update("insert into KLADD (AKTOR_ID, DIALOG_ID, AKTIVITET_ID, OVERSKRIFT, TEKST, LAGT_INN_AV, OPPDATERT, UNIQUE_SEQ) " +
@@ -42,18 +42,19 @@ public class KladdDAO {
                         .addValue("kladdSeq", kladdSeq)
         );
 
-        jdbc.update("" +
-                        " delete from KLADD " +
-                        " where UNIQUE_SEQ < :kladdSeq " +
-                        " and LAGT_INN_AV = :lagtInnAv" +
-                        " and AKTOR_ID = :aktorId " +
-                        " and (DIALOG_ID = :dialogId or (DIALOG_ID is null and :dialogId is null))" +
-                        //henvendelser på eksisterende tråer har ikke aktivitetId
-                        " and (DIALOG_ID is not null or (AKTIVITET_ID = :aktivitetId or (AKTIVITET_ID is null and :aktivitetId is null)))  ",
+        //henvendelser på eksisterende tråer har ikke aktivitetId
+        jdbc.update("""
+                        \
+                         delete from KLADD \
+                         where UNIQUE_SEQ < :kladdSeq \
+                         and LAGT_INN_AV = :lagtInnAv\
+                         and AKTOR_ID = :aktorId \
+                         and (DIALOG_ID = :dialogId or (DIALOG_ID is null and :dialogId is null))\
+                         and (DIALOG_ID is not null or (AKTIVITET_ID = :aktivitetId or (AKTIVITET_ID is null and :aktivitetId is null))) \s""",
                 new MapSqlParameterSource("kladdSeq", kladdSeq)
                         .addValue("lagtInnAv", kladd.getLagtInnAv())
                         .addValue("aktorId", kladd.getAktorId())
-                        .addValue("dialogId", kladd.getDialogId())
+                        .addValue("dialogId", kladd.getDialogId(), Types.BIGINT)
                         .addValue("aktivitetId", kladd.getAktivitetId())
         );
 

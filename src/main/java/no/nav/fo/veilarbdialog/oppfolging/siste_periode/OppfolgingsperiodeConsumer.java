@@ -22,7 +22,7 @@ class OppfolgingsperiodeConsumer {
     private final BrukernotifikasjonService brukernotifikasjonService;
     private final DialogDataService dialogDataService;
 
-//    @KafkaListener(topics = "${application.topic.inn.oppfolgingsperiode}", containerFactory = "stringStringKafkaListenerContainerFactory")
+    @KafkaListener(topics = "${application.topic.inn.oppfolgingsperiode}", containerFactory = "stringStringKafkaListenerContainerFactory", autoStartup = "${app.kafka.enabled:true}")
     @Timed
     void opprettEllerOppdaterSistePeriode(ConsumerRecord<String, String> consumerRecord) {
         OppfolgingsperiodeV1 oppfolgingsperiodeV1 = JsonUtils.fromJson(consumerRecord.value(), OppfolgingsperiodeV1.class);
