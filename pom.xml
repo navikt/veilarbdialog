@@ -32,6 +32,7 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
         <doknotifikasjon-schemas-version>1.2021.06.22-11.27-265ce1fe1ab4</doknotifikasjon-schemas-version>
+        <kotlin.version>2.0.10</kotlin.version>
     </properties>
 
     <repositories>
@@ -276,6 +277,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+
 
         <!-- test dependencies -->
         <dependency>
@@ -336,6 +343,16 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.zonky.test</groupId>
+            <artifactId>embedded-database-spring-test</artifactId>
+            <version>2.5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.zonky.test</groupId>
+            <artifactId>embedded-postgres</artifactId>
+            <version>2.0.7</version>
+        </dependency>
 
         <!-- ShedLock -->
         <dependency>
@@ -364,6 +381,11 @@
                 <configuration>
                     <release>${java.version}</release>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <version>${kotlin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

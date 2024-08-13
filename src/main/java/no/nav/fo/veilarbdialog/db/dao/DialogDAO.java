@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -133,7 +134,7 @@ public class DialogDAO {
 
     public DialogData opprettDialog(DialogData dialogData) {
         long dialogId = Optional
-                .ofNullable(jdbc.queryForObject("select DIALOG_ID_SEQ.nextval from DUAL", Long.class))
+                .ofNullable(jdbc.queryForObject("select nextval('DIALOG_ID_SEQ')", Long.class))
                 .orElseThrow(IllegalStateException::new);
 
         var hasId = dialogData.getAktivitetId() != null;
@@ -171,11 +172,11 @@ public class DialogDAO {
 
     public HenvendelseData opprettHenvendelse(HenvendelseData henvendelseData) {
         long henvendelseId = Optional
-                .ofNullable(jdbc.queryForObject("select HENVENDELSE_ID_SEQ.nextval from DUAL", Long.class))
+                .ofNullable(jdbc.queryForObject("select nextval('HENVENDELSE_ID_SEQ')", Long.class))
                 .orElseThrow(IllegalStateException::new);
 
         jdbc.update("insert into HENVENDELSE (HENVENDELSE_ID, DIALOG_ID, SENDT, TEKST, KONTORSPERRE_ENHET_ID, AVSENDER_ID, AVSENDER_TYPE, VIKTIG) " +
-                        "values (?, ?, ? , ?, ?, ?, ?, ?)",
+                        "values (?, ?, ?, ?, ?, ?, ?, ?)",
                 henvendelseId,
                 henvendelseData.dialogId,
                 henvendelseData.sendt,

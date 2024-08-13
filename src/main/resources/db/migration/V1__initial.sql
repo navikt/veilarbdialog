@@ -65,30 +65,6 @@ create sequence kladd_id_seq
 
 alter sequence kladd_id_seq owner to veilarbdialog;
 
-create table schema_version
-(
-    installed_rank integer                 not null
-        constraint schema_version_pk
-            primary key,
-    version        varchar(50),
-    description    varchar(200)            not null,
-    type           varchar(20)             not null,
-    script         varchar(1000)           not null,
-    checksum       integer,
-    installed_by   varchar(100)            not null,
-    installed_on   timestamp default now() not null,
-    execution_time integer                 not null,
-    success        boolean                 not null
-);
-
-alter table schema_version
-    owner to veilarbdialog;
-
-create index schema_version_s_idx
-    on schema_version (success);
-
-grant select on schema_version to veilarbdialog_midlertidig;
-
 create table shedlock
 (
     name       varchar(64) not null
@@ -164,7 +140,7 @@ create table dialog_egenskap
         constraint dialog_egenskap_type_fk
             references dialog_egenskap_type,
     dialog_id                 numeric                                                                          not null,
-    rowid                     numeric(33) default nextval('veilarbdialog.dialog_egenskap_rowid_seq'::regclass) not null
+    rowid                     numeric(33) default nextval('dialog_egenskap_rowid_seq'::regclass) not null
         constraint veilarbdialog_dialog_egenskap_pk_rowid
             primary key
 );
@@ -185,7 +161,7 @@ create table ekstern_varsel_kvittering
     melding                          varchar(1024)                                                                              not null,
     distribusjon_id                  numeric,
     json_payload                     text                                                                                       not null,
-    rowid                            numeric(33) default nextval('veilarbdialog.ekstern_varsel_kvittering_rowid_seq'::regclass) not null
+    rowid                            numeric(33) default nextval('ekstern_varsel_kvittering_rowid_seq'::regclass) not null
         constraint veilarbdialog_ekstern_varsel_kvittering_pk_rowid
             primary key
 );
@@ -229,7 +205,7 @@ create index event_indeks
 create table feilede_kafka_aktor_id
 (
     aktor_id varchar(255)                                                                            not null,
-    rowid    numeric(33) default nextval('veilarbdialog.feilede_kafka_aktor_id_rowid_seq'::regclass) not null
+    rowid    numeric(33) default nextval('feilede_kafka_aktor_id_rowid_seq'::regclass) not null
         constraint veilarbdialog_feilede_kafka_aktor_id_pk_rowid
             primary key
 );
@@ -278,7 +254,7 @@ create table kladd
     oppdatert    timestamp(6),
     opprettet    timestamp(6) default (CURRENT_TIMESTAMP)::timestamp without time zone,
     unique_seq   bigint,
-    rowid        numeric(33)  default nextval('veilarbdialog.kladd_rowid_seq'::regclass) not null
+    rowid        numeric(33)  default nextval('kladd_rowid_seq'::regclass) not null
         constraint veilarbdialog_kladd_pk_rowid
             primary key
 );
@@ -298,7 +274,7 @@ create table paragraf8varsel
     sendt       timestamp(6),
     skalstoppes smallint,
     deaktivert  timestamp(6),
-    rowid       numeric(33) default nextval('veilarbdialog.paragraf8varsel_rowid_seq'::regclass) not null
+    rowid       numeric(33) default nextval('paragraf8varsel_rowid_seq'::regclass) not null
         constraint veilarbdialog_paragraf8varsel_pk_rowid
             primary key
 );
@@ -336,7 +312,7 @@ alter table varsel
 
 create table brukernotifikasjon
 (
-    id                       bigint       default nextval('veilarbdialog."iseq$$_130623"'::regclass) not null
+    id                       bigint       default nextval('"iseq$$_130623"'::regclass) not null
         constraint sys_c0020075
             primary key,
     event_id                 varchar(40)                                                             not null,
@@ -372,7 +348,7 @@ create index brukernotifikasjon_status_idx
 
 create table eskaleringsvarsel
 (
-    id                               numeric default nextval('veilarbdialog."iseq$$_130634"'::regclass) not null
+    id                               numeric default nextval('"iseq$$_130634"'::regclass) not null
         constraint sys_c0020090
             primary key,
     aktor_id                         varchar(255)                                                       not null,

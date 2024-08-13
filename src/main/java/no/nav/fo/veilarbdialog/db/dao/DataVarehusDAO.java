@@ -22,7 +22,7 @@ public class DataVarehusDAO {
 
     public void insertEvent(DialogData dialogData, DatavarehusEvent datavarehusEvent, String endretAv) {
         long nextId = Optional
-                .ofNullable(jdbc.queryForObject("select EVENT_ID_SEQ.NEXTVAL from dual", Long.class))
+                .ofNullable(jdbc.queryForObject("select EVENT_ID_SEQ.NEXTVAL", Long.class))
                 .orElseThrow(IllegalStateException::new);
         jdbc.update("insert into EVENT (EVENT_ID, DIALOGID, EVENT, TIDSPUNKT, AKTOR_ID, AKTIVITET_ID, LAGT_INN_AV) values (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?)",
                 nextId,
