@@ -2,7 +2,7 @@ create schema if not exists veilarbdialog;
 
 set search_path to veilarbdialog;
 
-create table veilarbdialog.shedlock
+create table shedlock
 (
     name       varchar(64) not null primary key,
     lock_until timestamp(3),
@@ -10,7 +10,7 @@ create table veilarbdialog.shedlock
     locked_by  varchar(255)
 );
 
-create table veilarbdialog.schema_version
+create table schema_version
 (
     installed_rank integer                 not null
         constraint schema_version_pk
@@ -27,7 +27,7 @@ create table veilarbdialog.schema_version
 );
 
 create index schema_version_s_idx
-    on veilarbdialog.schema_version (success);
+    on schema_version (success);
 
 grant usage on schema veilarbdialog to "veilarbdialog_midlertidig";
 grant select, insert, delete, update on table shedlock to "veilarbdialog_midlertidig";
