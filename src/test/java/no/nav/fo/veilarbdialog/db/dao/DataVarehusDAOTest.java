@@ -18,7 +18,7 @@ class DataVarehusDAOTest extends BaseDAOTest {
 
     @BeforeAll
     public static void setup() {
-        dataVarehusDAO = new DataVarehusDAO(jdbc);
+        dataVarehusDAO = new DataVarehusDAO(jdbc.getJdbcTemplate());
     }
 
     @Test
@@ -28,7 +28,7 @@ class DataVarehusDAOTest extends BaseDAOTest {
         String loggedInUser = "SYSTEM";
         dataVarehusDAO.insertEvent(dialog, DatavarehusEvent.VENTER_PAA_BRUKER, loggedInUser);
 
-        DatavarehusData data = jdbc.queryForObject("select * from event", new BeanPropertyRowMapper<>(DatavarehusData.class));
+        DatavarehusData data = jdbc.getJdbcTemplate().queryForObject("select * from event", new BeanPropertyRowMapper<>(DatavarehusData.class));
 
         assertThat(data).isNotNull();
         assertThat(data.dialogId).isEqualTo(dialog.getId());

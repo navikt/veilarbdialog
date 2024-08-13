@@ -28,7 +28,7 @@ class VarselDAOTest extends BaseDAOTest {
     @BeforeAll
     public static void setup() {
         dialogDAO = new DialogDAO(jdbc);
-        varselDAO = new VarselDAO(new NamedParameterJdbcTemplate(jdbc.getDataSource()));
+        varselDAO = new VarselDAO(jdbc);
     }
 
     private DialogData opprettNyDialog(String aktorId) {
