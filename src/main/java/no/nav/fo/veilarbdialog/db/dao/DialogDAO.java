@@ -41,7 +41,7 @@ public class DialogDAO {
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForOppfolgingsperiodeId(UUID oppfolgingsperiodeId) {
         return jdbc.query("select * from DIALOG where OPPFOLGINGSPERIODE_UUID = :oppfolgingsPeriodeId",
-                new MapSqlParameterSource("oppfolgingsPeriodeId", oppfolgingsperiodeId),
+                new MapSqlParameterSource("oppfolgingsPeriodeId", oppfolgingsperiodeId.toString()),
                 this::mapRow);
     }
 
