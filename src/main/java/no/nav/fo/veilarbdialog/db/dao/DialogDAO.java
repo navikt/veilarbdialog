@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
+import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogResultSet;
 import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogSqlParameterSource;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -115,9 +116,9 @@ public class DialogDAO {
 
     private String getIdQuery(AktivitetId aktivitetId) {
         if (aktivitetId instanceof TekniskId) {
-            return "select * from DIALOG where AKTIVITET_ID = ?";
+            return "select * from DIALOG where AKTIVITET_ID = :aktivitetId";
         } else if (aktivitetId instanceof Arenaid) {
-            return "select * from DIALOG where ARENA_ID = ?";
+            return "select * from DIALOG where ARENA_ID = :aktivitetId";
         } else {
             throw new UnsupportedOperationException("Uknown id-type");
         }
@@ -126,7 +127,7 @@ public class DialogDAO {
     public Optional<DialogData> hentDialogForAktivitetId(AktivitetId aktivitetId) {
         if (aktivitetId == null) return Optional.empty();
         return jdbc.query(getIdQuery(aktivitetId),
-                new MapSqlParameterSource("aktivitetId", aktivitetId),
+                new MapSqlParameterSource("aktivitetId", aktivitetId.getId()),
                 this::mapRow)
                 .stream()
                 .findFirst();
@@ -219,8 +220,8 @@ public class DialogDAO {
         }
     }
 
-    public DialogData mapRow(ResultSet rs, int rowNum) throws SQLException {
-
+    public DialogData mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+        var rs = new VeilarbDialogResultSet(resultSet);
         var dialogId = rs.getLong("DIALOG_ID");
         List<EgenskapType> egenskaper =
                 jdbc.query("select d.DIALOG_EGENSKAP_TYPE_KODE from DIALOG_EGENSKAP d where d.DIALOG_ID = :dialogId",

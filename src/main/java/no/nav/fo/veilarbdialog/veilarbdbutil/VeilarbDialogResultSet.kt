@@ -2,7 +2,7 @@ package no.nav.veilarbaktivitet.veilarbdbutil
 
 import java.sql.ResultSet
 
-class VeilarbAktivitetResultSet(private val resultSet: ResultSet): ResultSet by resultSet {
+class VeilarbDialogResultSet(private val resultSet: ResultSet): ResultSet by resultSet {
 
     override fun getBoolean(columnLabel: String?): Boolean {
         return when(resultSet.getInt(columnLabel)) {
