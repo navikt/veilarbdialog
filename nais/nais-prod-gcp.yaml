@@ -24,15 +24,15 @@ spec:
     initialDelay: 30
   replicas:
     min: 2
-    max: 2
+    max: 8
     cpuThresholdPercentage: 50
   resources:
     limits:
       cpu: "2"
-      memory: 1024Mi
+      memory: 8092Mi
     requests:
-      cpu: 200m
-      memory: 768Mi
+      cpu: "1"
+      memory: 1536Mi
   envFrom:
     #    - configmap: pto-config
     - secret: veilarbdialog-unleash-api-token
