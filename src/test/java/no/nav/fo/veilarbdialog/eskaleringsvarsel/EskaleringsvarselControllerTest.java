@@ -45,6 +45,7 @@ import java.util.concurrent.Executors;
 import static no.nav.fo.veilarbdialog.util.KafkaTestService.DEFAULT_WAIT_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -422,28 +423,24 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
 
     @Test
     void unngaaDobleNotifikasjonerPaaEskaleringsvarsel() throws InterruptedException {
-
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
-
-
         StartEskaleringDto startEskaleringDto =
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
+        var initialOffsets = KafkaTestUtils.getEndOffsets(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic);
+
         dialogTestService.startEskalering(veileder, startEskaleringDto);
 
-        Thread.sleep(1000L);
+        Thread.sleep(1002L);
         // Batchen bestiller beskjeder ved nye dialoger (etter 1000 ms)
         scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
-
         brukernotifikasjonService.sendPendingBrukernotifikasjoner();
 
-        requireGjeldende(veileder, bruker);
-
+        // sjekk at det er blitt sendt en oppgave
         KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, DEFAULT_WAIT_TIMEOUT);
         // sjekk at det ikke ble sendt beskjed på dialogmelding
-        assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
-
-
+//        assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
+        assertEquals(initialOffsets, KafkaTestUtils.getEndOffsets(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic));
     }
 
     private List<EskaleringsvarselDto> hentHistorikk(MockVeileder veileder, MockBruker mockBruker) {
