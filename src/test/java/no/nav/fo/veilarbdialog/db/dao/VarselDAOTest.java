@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
@@ -44,7 +45,10 @@ class VarselDAOTest extends BaseDAOTest {
 
         varselDAO.oppdaterSisteVarselForBruker(aktorId);
 
-        val aktor = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(0);
+        val aktor = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(0)
+                .stream()
+                .filter( aktør -> Objects.equals(aktør, aktorId))
+                .toList();
         assertThat(aktor.size(), equalTo(0));
     }
 
@@ -54,7 +58,10 @@ class VarselDAOTest extends BaseDAOTest {
         DialogData dialogId = opprettNyDialog(aktorId);
         dialogDAO.opprettHenvendelse(getHenvendelseData(dialogId, getNowMinusSeconds(10)));
 
-        val aktor1 = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(0); // Utenfor grace
+        val aktor1 = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(0)
+                .stream()
+                .filter(aktør -> Objects.equals(aktør, aktorId))
+                .toList(); // Utenfor grace
         assertThat(aktor1.size(), equalTo(1));
 
         val aktor2 = varselDAO.hentAktorerMedUlesteMeldingerEtterSisteVarsel(TI_MINUTTER); // Innenfor grace

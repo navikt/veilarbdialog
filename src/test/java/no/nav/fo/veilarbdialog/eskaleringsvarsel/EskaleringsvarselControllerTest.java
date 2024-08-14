@@ -427,11 +427,11 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
         MockVeileder veileder = MockNavService.createVeileder(bruker);
         StartEskaleringDto startEskaleringDto =
                 new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
-        var initialOffsets = KafkaTestUtils.getEndOffsets(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic);
+        var initialEndOffsets = KafkaTestUtils.getEndOffsets(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic);
 
         dialogTestService.startEskalering(veileder, startEskaleringDto);
 
-        Thread.sleep(1002L);
+        Thread.sleep(2000L);
         // Batchen bestiller beskjeder ved nye dialoger (etter 1000 ms)
         scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger();
         brukernotifikasjonService.sendPendingBrukernotifikasjoner();
@@ -439,8 +439,7 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
         // sjekk at det er blitt sendt en oppgave
         KafkaTestUtils.getSingleRecord(brukerNotifikasjonOppgaveConsumer, brukernotifikasjonOppgaveTopic, DEFAULT_WAIT_TIMEOUT);
         // sjekk at det ikke ble sendt beskjed på dialogmelding
-//        assertTrue(kafkaTestService.harKonsumertAlleMeldinger(brukernotifikasjonBeskjedTopic, brukerNotifikasjonBeskjedConsumer));
-        assertEquals(initialOffsets, KafkaTestUtils.getEndOffsets(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic));
+        assertEquals(initialEndOffsets, KafkaTestUtils.getEndOffsets(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic));
     }
 
     private List<EskaleringsvarselDto> hentHistorikk(MockVeileder veileder, MockBruker mockBruker) {
