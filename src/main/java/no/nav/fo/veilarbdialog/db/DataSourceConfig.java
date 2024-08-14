@@ -24,6 +24,15 @@ public class DataSourceConfig {
     @Value("${application.datasource.password}")
     private String password;
 
+    @Value("${application.datasource.flyway.url}")
+    private String jdbcUrlForFlyway;
+
+    @Value("${application.datasource.flyway.username}")
+    private String usernameForFlyway;
+
+    @Value("${application.datasource.flyway.password}")
+    private String passwordForFlyway;
+
     @Bean
     public DataSource dataSource() {
 
@@ -36,11 +45,24 @@ public class DataSourceConfig {
         config.setPassword(password);
         config.setMaximumPoolSize(150);
         config.setMinimumIdle(2);
+        var dataSource = new HikariDataSource(config);
 
-        return migrate(new HikariDataSource(config));
+        // TODO: Delete hikariDataSource for flyway after migration to GCP
+        HikariConfig configForFlyway = new HikariConfig();
+        configForFlyway.setSchema("veilarbdialog");
+        configForFlyway.setJdbcUrl(jdbcUrlForFlyway);
+        configForFlyway.setUsername(usernameForFlyway);
+        configForFlyway.setPassword(passwordForFlyway);
+        configForFlyway.setMaximumPoolSize(1);
+        config.setMinimumIdle(0);
+        var dataSourceForFlyway = new HikariDataSource(configForFlyway);
+
+        migrate(dataSourceForFlyway);
+
+        return dataSource;
     }
 
-    public static DataSource migrate(DataSource dataSource) {
+    public static void migrate(DataSource dataSource) {
         log.info("Explicitly migrating {} using Flyway", dataSource);
 
         var flyway = new Flyway(Flyway.configure()
@@ -49,7 +71,6 @@ public class DataSourceConfig {
                 .validateMigrationNaming(true));
 
         flyway.migrate();
-        return dataSource;
     }
 
     @Bean

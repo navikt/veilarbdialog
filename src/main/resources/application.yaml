@@ -116,10 +116,14 @@ application:
       clientId: ${AAD_B2C_CLIENTID_USERNAME}
       discoveryUrl: ${AAD_B2C_DISCOVERY_URL}
   datasource:
-    # TODO switch to regular user after migration
+    # TODO switch to regular user after migration and delete specific Flyway user
     url: ${DB_VEILARBDIALOG_MIDLERTIDIG_JDBC_URL}
     username: ${DB_VEILARBDIALOG_MIDLERTIDIG_USERNAME}
     password: ${DB_VEILARBDIALOG_MIDLERTIDIG_PASSWORD}
+    flyway:
+      url: ${DB_JDBC_URL}
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
   dialog:
     url: ${DIALOG_EKSTERN_URL}
   kafka:
