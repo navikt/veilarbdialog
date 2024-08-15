@@ -23,7 +23,7 @@ import static org.springframework.cloud.gateway.server.mvc.handler.GatewayRouter
 import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions.https;
 import static org.springframework.web.servlet.function.RequestPredicates.path;
 
-@Profile("!test")
+@Profile("!local")
 @Service
 @RequiredArgsConstructor
 @Slf4j

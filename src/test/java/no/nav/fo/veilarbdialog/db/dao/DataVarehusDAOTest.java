@@ -18,17 +18,17 @@ class DataVarehusDAOTest extends BaseDAOTest {
 
     @BeforeAll
     public static void setup() {
-        dataVarehusDAO = new DataVarehusDAO(jdbc);
+        dataVarehusDAO = new DataVarehusDAO(jdbc.getJdbcTemplate());
     }
 
     @Test
     void insertEvent() {
 
-        DialogData dialog = DialogData.builder().id(1).aktivitetId(AktivitetId.of("aktivitet")).aktorId("aktor").build();
+        DialogData dialog = DialogData.builder().id(12345).aktivitetId(AktivitetId.of("aktivitet")).aktorId("aktor").build();
         String loggedInUser = "SYSTEM";
         dataVarehusDAO.insertEvent(dialog, DatavarehusEvent.VENTER_PAA_BRUKER, loggedInUser);
 
-        DatavarehusData data = jdbc.queryForObject("select * from event", new BeanPropertyRowMapper<>(DatavarehusData.class));
+        DatavarehusData data = jdbc.getJdbcTemplate().queryForObject("select * from event where dialogid = 12345", new BeanPropertyRowMapper<>(DatavarehusData.class));
 
         assertThat(data).isNotNull();
         assertThat(data.dialogId).isEqualTo(dialog.getId());

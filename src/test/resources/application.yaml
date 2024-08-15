@@ -139,3 +139,6 @@ application:
 wiremock:
   server:
     port: 0
+app:
+  kafka:
+    enabled: true

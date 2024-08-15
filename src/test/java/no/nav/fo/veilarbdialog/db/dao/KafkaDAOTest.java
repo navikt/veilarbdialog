@@ -13,7 +13,7 @@ class KafkaDAOTest extends BaseDAOTest {
 
     @BeforeAll
     public static void setup() {
-        kafkaDAO = new KafkaDAO(jdbc);
+        kafkaDAO = new KafkaDAO(jdbc.getJdbcTemplate());
     }
 
 

@@ -18,7 +18,7 @@ public class AktivitetskortIdMappingConsumer {
     private final IdMappingService idMappingService;
 
     @Transactional
-//    @KafkaListener(topics = "${application.topic.inn.aktivitetskortIdMapping}", containerFactory = "stringStringKafkaListenerContainerFactory")
+    @KafkaListener(topics = "${application.topic.inn.aktivitetskortIdMapping}", containerFactory = "stringStringKafkaListenerContainerFactory", autoStartup = "${app.kafka.enabled:false}")
     public void consume(ConsumerRecord<String, String> kafkaRecord) {
         IdMappingDTO idMapping = JsonUtils.fromJson(kafkaRecord.value(), IdMappingDTO.class);
 

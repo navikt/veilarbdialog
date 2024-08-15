@@ -6,6 +6,7 @@ import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
+import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogSqlParameterSource;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -41,7 +42,7 @@ public class EskaleringsvarselRepository {
 
     public EskaleringsvarselEntity opprett(long tilhorendeDialogId, long tilhorendeBrukernotifikasjonsId, String aktorId, String opprettetAv, String opprettetBegrunnelse) {
         ZonedDateTime opprettetDato = ZonedDateTime.now();
-        MapSqlParameterSource params = new MapSqlParameterSource()
+        var params = new VeilarbDialogSqlParameterSource()
                 .addValue("aktorId", aktorId)
                 .addValue("opprettetAv", opprettetAv)
                 .addValue("opprettetDato", opprettetDato)
@@ -83,7 +84,7 @@ public class EskaleringsvarselRepository {
     }
 
     public void stop(long varselId, String begrunnelse, NavIdent avsluttetAv) {
-        MapSqlParameterSource params = new MapSqlParameterSource()
+        var params = new VeilarbDialogSqlParameterSource()
                 .addValue("avsluttetDato", ZonedDateTime.now())
                 .addValue("avsluttetAv", avsluttetAv.get())
                 .addValue("avsluttetBegrunnelse", begrunnelse)
