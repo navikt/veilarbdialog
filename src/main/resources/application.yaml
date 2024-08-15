@@ -173,3 +173,6 @@ unleash:
 
 veilarbdialog-fss:
   url: ${VEILARBDIALOG_FSS_URL}
+app:
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}

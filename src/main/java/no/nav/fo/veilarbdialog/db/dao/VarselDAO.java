@@ -60,17 +60,15 @@ public class VarselDAO {
     }
 
     public void oppdaterSisteVarselForBruker(String aktorId) {
-        MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("aktorId", aktorId);
-        final int rowsUpdated = jdbc.update("update VARSEL set SENDT = CURRENT_TIMESTAMP where AKTOR_ID = :aktorId" , param);
+        var param = new MapSqlParameterSource("aktorId", aktorId);
+        var rowsUpdated = jdbc.update("update VARSEL set SENDT = CURRENT_TIMESTAMP where AKTOR_ID = :aktorId" , param);
         if (rowsUpdated == 0) {
             opprettVarselForBruker(aktorId);
         }
     }
 
     private void opprettVarselForBruker(String aktorId) {
-        MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("aktorId", aktorId);
+        var param = new MapSqlParameterSource("aktorId", aktorId);
         jdbc.update("INSERT INTO VARSEL (AKTOR_ID, SENDT) VALUES (:aktorId, CURRENT_TIMESTAMP)", param);
     }
 }

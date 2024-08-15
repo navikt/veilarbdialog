@@ -68,6 +68,4 @@ public class KafkaProducerService {
         kafkaMelding.headers().add(new RecordHeader(LogRequestFilter.NAV_CALL_ID_HEADER_NAME, getCallIdOrRandom().getBytes()));
         return kafkaMelding;
     }
-
-
 }
