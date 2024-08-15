@@ -175,4 +175,4 @@ veilarbdialog-fss:
   url: ${VEILARBDIALOG_FSS_URL}
 app:
   kafka:
-    enabled: ${!FSS_PROXY_ENABLED:false}
+    enabled: ${KAFKA_ENABLED:false}

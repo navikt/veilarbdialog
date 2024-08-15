@@ -141,4 +141,4 @@ wiremock:
     port: 0
 app:
   kafka:
-    enabled: ${!FSS_PROXY_ENABLED:true}
+    enabled: true
