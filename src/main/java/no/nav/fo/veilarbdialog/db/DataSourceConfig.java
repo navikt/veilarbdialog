@@ -53,8 +53,8 @@ public class DataSourceConfig {
         configForFlyway.setJdbcUrl(jdbcUrlForFlyway);
         configForFlyway.setUsername(usernameForFlyway);
         configForFlyway.setPassword(passwordForFlyway);
-        configForFlyway.setMaximumPoolSize(2);
-        config.setMinimumIdle(0);
+        configForFlyway.setMaximumPoolSize(10);
+        config.setMinimumIdle(2);
         var dataSourceForFlyway = new HikariDataSource(configForFlyway);
 
         migrate(dataSourceForFlyway);
