@@ -34,7 +34,6 @@ public class ScheduleRessurs {
     private final KladdService kladdService;
     private final DialogDataService dialogDataService;
     private final LockingTaskExecutor lockingTaskExecutor;
-    private final KafkaProducerService kafkaProducerService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final BrukernotifikasjonService brukernotifikasjonService;
     private final AktorOppslagClient aktorOppslagClient;
@@ -49,12 +48,6 @@ public class ScheduleRessurs {
 //    @Scheduled(fixedDelay = 600000)
     public void slettGamleKladder() {
         kladdService.slettGamleKladder();
-    }
-
-    //5MIN ER VALGT ARBITRÆRT
-//    @Scheduled(fixedDelay = 300000)
-    public void sendFeilendeKafkaMeldinger() {
-        kafkaProducerService.sendAlleFeilendeMeldinger();
     }
 
     // To minutter mellom hver kjøring
