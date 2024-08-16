@@ -127,9 +127,9 @@ spec:
     - name: VEILARBDIALOG_FSS_URL
       value: "https://veilarbdialog.prod-fss-pub.nais.io"
     - name: FSS_PROXY_ENABLED
-      value: "true"
-    - name: KAFKA_ENABLED
       value: "false"
+    - name: KAFKA_ENABLED
+      value: "true"
     # OK fix eller fjern B2C props
     # OK fix SERVICEUSER_* SystemUserConfig til å bruke Azure token i stedet for vault secrets
     - name: VEILARBOPPFOLGINGAPI_URL
