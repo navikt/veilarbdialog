@@ -103,6 +103,9 @@ spec:
         flags: # Nødvendig for datastreams
           - name: cloudsql.logical_decoding
             value: "on"
+              # for debugging av replikering
+          - name: log_statement
+            value: "mod"
         databases:
           - name: veilarbdialog
             envVarPrefix: DB
