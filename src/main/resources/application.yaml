@@ -106,7 +106,7 @@ application:
   cluster: ${APP_CLUSTER_NAME}
   namespace: ${NAIS_NAMESPACE}
   poao_tilgang:
-    url: http://poao-tilgang.poao.svc.nais.local
+    url: ${POAO_TILGANG_URL}
     scope: ${POAO_TILGANG_SCOPE}
   azure:
     ad:

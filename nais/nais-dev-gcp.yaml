@@ -120,6 +120,8 @@ spec:
       value: https://dab.ekstern.dev.nav.no/arbeid/dialog
     - name: POAO_TILGANG_SCOPE
       value: api://dev-gcp.poao.poao-tilgang/.default
+    - name: POAO_TILGANG_URL
+      value: http://poao-tilgang.poao
     - name: PLEASE_URL
       value: https://please.ekstern.dev.nav.no
     - name: PLEASE_AZURE_SCOPE
