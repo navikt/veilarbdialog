@@ -117,7 +117,7 @@ spec:
     - name: DIALOG_EKSTERN_URL
       value: https://dab.ekstern.nav.no/arbeid/dialog
     - name: POAO_TILGANG_SCOPE
-      value: api://prod-fss.poao.poao-tilgang/.default
+      value: api://prod-gcp.poao.poao-tilgang/.default
     - name: PLEASE_URL
       value: https://please.ekstern.nav.no
     - name: PLEASE_AZURE_SCOPE
