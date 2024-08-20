@@ -135,6 +135,9 @@ application:
     api:
       url: ${VEILARBPERSONAPI_URL}
       scope: ${VEILARBPERSONAPI_AZURE_SCOPE}
+  pdl:
+    api:
+      url: ${PDL_URL}
   please:
     api:
       url: ${PLEASE_URL}
