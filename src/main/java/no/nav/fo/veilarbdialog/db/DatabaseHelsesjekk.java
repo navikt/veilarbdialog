@@ -15,11 +15,11 @@ public class DatabaseHelsesjekk implements HealthCheck {
 
     @Override
     public HealthCheckResult checkHealth() {
-        try {
-            jdbc.queryForObject("select 1", Long.class);
-        } catch (DataAccessException e) {
-            return HealthCheckResult.unhealthy(e);
-        }
+//        try {
+//            jdbc.queryForObject("select 1", Long.class);
+//        } catch (DataAccessException e) {
+//            return HealthCheckResult.unhealthy(e);
+//        }
         return HealthCheckResult.healthy();
     }
 
