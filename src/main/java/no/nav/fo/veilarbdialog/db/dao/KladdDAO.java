@@ -55,7 +55,7 @@ public class KladdDAO {
                         .addValue("lagtInnAv", kladd.getLagtInnAv())
                         .addValue("aktorId", kladd.getAktorId())
                         .addValue("dialogId", kladd.getDialogId(), Types.BIGINT)
-                        .addValue("aktivitetId", kladd.getAktivitetId())
+                        .addValue("aktivitetId", kladd.getAktivitetId(), Types.VARCHAR)
         );
 
     }
