@@ -92,10 +92,11 @@ spec:
         - host: veilarbdialog.prod-fss-pub.nais.io
         - host: veilarboppfolging.prod-fss-pub.nais.io
         - host: dab-unleash-api.nav.cloud.nais.io
-        - host: please.ekstern.prod.nav.no
       rules:
         - application: poao-tilgang
           namespace: poao
+        - application: please
+          namespace: dab
   gcp:
     sqlInstances:
       - name: veilarbdialog
