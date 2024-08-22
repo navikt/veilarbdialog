@@ -26,7 +26,7 @@ public class HttpClientWrapperConfig {
     public HttpClientWrapper dialogvarslerClientWrapper(@Value("${application.please.api.url}") String baseUrl, OkHttpClient dialogvarslerClient) {
         return new HttpClientWrapper(
                 dialogvarslerClient,
-                baseUrl + "/please"
+                baseUrl
         );
     }
 }

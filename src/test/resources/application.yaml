@@ -111,7 +111,7 @@ application:
       scope: api://test.pto.veilarbperson/.default
   please:
     api:
-      url: http://localhost:${wiremock.server.port}
+      url: http://localhost:${wiremock.server.port}/please
       azureScope: api://test.dab.please/.default
       tokenXScope: test:dab:please
   pdl:
