@@ -118,7 +118,7 @@ spec:
     - name: APP_CLUSTER_NAME
       value: prod-gcp
     - name: DIALOG_EKSTERN_URL
-      value: https://dab.ekstern.nav.no/arbeid/dialog
+      value: https://www.nav.no/arbeid/dialog
     - name: POAO_TILGANG_SCOPE
       value: api://prod-gcp.poao.poao-tilgang/.default
     - name: POAO_TILGANG_URL
