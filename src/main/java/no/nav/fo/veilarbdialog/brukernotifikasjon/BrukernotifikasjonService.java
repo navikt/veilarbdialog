@@ -110,11 +110,11 @@ public class BrukernotifikasjonService {
         brukernotifikasjonRepository.bestillDoneForPeriode(oppfolgingsperiode);
     }
 
-//    @Scheduled(
-//            initialDelay = 60000,
-//            fixedDelay = 5000
-//    )
-//    @SchedulerLock(name = "brukernotifikasjon_oppgave_kafka_scheduledTask", lockAtMostFor = "PT2M")
+    @Scheduled(
+            initialDelay = 60000,
+            fixedDelay = 5000
+    )
+    @SchedulerLock(name = "brukernotifikasjon_oppgave_kafka_scheduledTask", lockAtMostFor = "PT2M")
     public void sendPendingBrukernotifikasjoner() {
         List<BrukernotifikasjonEntity> pendingBrukernotifikasjoner = brukernotifikasjonRepository.hentPendingBrukernotifikasjoner();
         pendingBrukernotifikasjoner.stream().forEach(
@@ -150,11 +150,11 @@ public class BrukernotifikasjonService {
         );
     }
 
-//    @Scheduled(
-//            initialDelay = 60000,
-//            fixedDelay = 5000
-//    )
-//    @SchedulerLock(name = "brukernotifikasjon_done_kafka_scheduledTask", lockAtMostFor = "PT2M")
+    @Scheduled(
+            initialDelay = 60000,
+            fixedDelay = 5000
+    )
+    @SchedulerLock(name = "brukernotifikasjon_done_kafka_scheduledTask", lockAtMostFor = "PT2M")
     public void sendDoneBrukernotifikasjoner() {
         List<BrukernotifikasjonEntity> skalAvsluttesNotifikasjoner = brukernotifikasjonRepository.hentPendingDoneBrukernotifikasjoner();
         skalAvsluttesNotifikasjoner.stream().forEach(
@@ -170,10 +170,10 @@ public class BrukernotifikasjonService {
         );
     }
 
-//    @Scheduled(
-//            initialDelay = 60000,
-//            fixedDelay = 30000
-//    )
+    @Scheduled(
+            initialDelay = 60000,
+            fixedDelay = 30000
+    )
     public void countForsinkedeVarslerSisteDognet() {
         int antall = kvitteringDAO.hentAntallUkvitterteVarslerForsoktSendt(20);
         kvitteringMetrikk.countForsinkedeVarslerSisteDognet(antall);

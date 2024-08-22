@@ -106,7 +106,7 @@ application:
   cluster: ${APP_CLUSTER_NAME}
   namespace: ${NAIS_NAMESPACE}
   poao_tilgang:
-    url: http://poao-tilgang.poao.svc.nais.local
+    url: ${POAO_TILGANG_URL}
     scope: ${POAO_TILGANG_SCOPE}
   azure:
     ad:
@@ -116,14 +116,9 @@ application:
       clientId: ${AAD_B2C_CLIENTID_USERNAME}
       discoveryUrl: ${AAD_B2C_DISCOVERY_URL}
   datasource:
-    # TODO switch to regular user after migration and delete specific Flyway user
-    url: ${DB_VEILARBDIALOG_MIDLERTIDIG_JDBC_URL}
-    username: ${DB_VEILARBDIALOG_MIDLERTIDIG_USERNAME}
-    password: ${DB_VEILARBDIALOG_MIDLERTIDIG_PASSWORD}
-    flyway:
-      url: ${DB_JDBC_URL}
-      username: ${DB_USERNAME}
-      password: ${DB_PASSWORD}
+    url: ${DB_JDBC_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   dialog:
     url: ${DIALOG_EKSTERN_URL}
   kafka:
@@ -140,6 +135,9 @@ application:
     api:
       url: ${VEILARBPERSONAPI_URL}
       scope: ${VEILARBPERSONAPI_AZURE_SCOPE}
+  pdl:
+    api:
+      url: ${PDL_URL}
   please:
     api:
       url: ${PLEASE_URL}
