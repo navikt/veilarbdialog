@@ -126,7 +126,7 @@ spec:
     - name: PDL_URL
       value: https://pdl-api.prod-fss-pub.nais.io
     - name: PLEASE_URL
-      value: https://please.ekstern.nav.no
+      value: http://dab.please
     - name: PLEASE_AZURE_SCOPE
       value: api://prod-gcp.dab.please/.default
     - name: PLEASE_TOKENX_SCOPE
