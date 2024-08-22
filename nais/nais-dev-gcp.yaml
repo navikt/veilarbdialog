@@ -94,6 +94,9 @@ spec:
         - host: veilarboppfolging.dev-fss-pub.nais.io
         - host: dab-unleash-api.nav.cloud.nais.io
         - host: please.ekstern.dev.nav.no
+      rules:
+        - application: poao-tilgang
+          namespace: poao
   gcp:
     sqlInstances:
       - name: veilarbdialog
@@ -117,11 +120,15 @@ spec:
     - name: APP_CLUSTER_NAME
       value: dev-gcp
     - name: DIALOG_EKSTERN_URL
-      value: https://dab.ekstern.dev.nav.no/arbeid/dialog
+      value: https://pto.ekstern.dev.nav.no/arbeid/dialog
     - name: POAO_TILGANG_SCOPE
-      value: api://dev-fss.poao.poao-tilgang/.default
+      value: api://dev-gcp.poao.poao-tilgang/.default
+    - name: POAO_TILGANG_URL
+      value: http://poao-tilgang.poao
+    - name: PDL_URL
+      value: https://pdl-api.dev-fss-pub.nais.io
     - name: PLEASE_URL
-      value: https://please.ekstern.dev.nav.no
+      value: http://please
     - name: PLEASE_AZURE_SCOPE
       value: api://dev-gcp.dab.please/.default
     - name: PLEASE_TOKENX_SCOPE
@@ -129,9 +136,9 @@ spec:
     - name: VEILARBDIALOG_FSS_URL
       value: "https://veilarbdialog.dev-fss-pub.nais.io"
     - name: FSS_PROXY_ENABLED
-      value: "true"
-    - name: KAFKA_ENABLED
       value: "false"
+    - name: KAFKA_ENABLED
+      value: "true"
     # OK fix eller fjern B2C props
     # OK fix SERVICEUSER_* SystemUserConfig til å bruke Azure token i stedet for vault secrets
     - name: VEILARBOPPFOLGINGAPI_URL

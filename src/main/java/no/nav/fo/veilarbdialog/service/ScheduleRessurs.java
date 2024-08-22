@@ -17,6 +17,7 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,15 +46,15 @@ public class ScheduleRessurs {
     private Long brukernotifikasjonHenvendelseMaksAlder; // 2 dager
 
     // Ti min
-//    @Scheduled(fixedDelay = 600000)
+    @Scheduled(fixedDelay = 600000)
     public void slettGamleKladder() {
         kladdService.slettGamleKladder();
     }
 
     // To minutter mellom hver kjøring
-//    @Scheduled(initialDelay = 60000, fixedDelay = 120000)
+    @Scheduled(initialDelay = 60000, fixedDelay = 120000)
     @Transactional
-//    @SchedulerLock(name = "brukernotifikasjon_beskjed_kafka_scheduledTask", lockAtMostFor = "PT2M")
+    @SchedulerLock(name = "brukernotifikasjon_beskjed_kafka_scheduledTask", lockAtMostFor = "PT2M")
     public void sendBrukernotifikasjonerForUlesteDialoger() {
         List<Long> dialogIder = varselDAO.hentDialogerMedUlesteMeldingerEtterSisteVarsel(brukernotifikasjonGracePeriode, brukernotifikasjonHenvendelseMaksAlder);
 

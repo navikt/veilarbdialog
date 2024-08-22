@@ -15,10 +15,10 @@ public class OppfolgingsperiodeCron {
     private final LeaderElectionClient leaderElectionClient;
     private final OppfolgingsperiodeService oppfolgingsperiodeServiceAdder;
 
-//    @Scheduled(
-//            initialDelay = 60000,
-//            fixedDelay = 500
-//    )
+    @Scheduled(
+            initialDelay = 60000,
+            fixedDelay = 500
+    )
     public void addOppfolgingsperioder() {
         if (leaderElectionClient.isLeader()) {
             while (oppfolgingsperiodeServiceAdder.addOppfolgingsperioderForEnBruker());

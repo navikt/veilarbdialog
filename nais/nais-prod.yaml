@@ -114,6 +114,8 @@ spec:
       value: https://www.nav.no/arbeid/dialog
     - name: POAO_TILGANG_SCOPE
       value: api://prod-fss.poao.poao-tilgang/.default
+    - name: POAO_TILGANG_URL
+      value: http://poao-tilgang.poao.svc.nais.local
     - name: PLEASE_URL
       value: https://please.nav.no
     - name: PLEASE_AZURE_SCOPE
