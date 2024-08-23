@@ -1,9 +1,9 @@
-name: Deploy main-gcp to dev and prod
-run-name: Deploy gcp-main by @${{ github.actor }}
+name: Deploy main to dev and prod
+run-name: Deploy main by @${{ github.actor }}
 on:
   push:
     branches:
-      - gcp-main
+      - main
 
 permissions:
   contents: read
