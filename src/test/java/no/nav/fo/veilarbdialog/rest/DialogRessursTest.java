@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.util.Date;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -301,5 +302,37 @@ class DialogRessursTest extends SpringBootTestBase {
                 .post("/veilarbdialog/api/dialog")
                 .then()
                 .statusCode(403);
+    }
+
+    @Test
+    void veileder_kan_ikke_sende_henvendelse_på_historisk_dialog() {
+        NyHenvendelseDTO henvendelseFørHistorisk = new NyHenvendelseDTO()
+                .setTekst("tekst")
+                .setOverskrift("overskrift");
+        var dialog = dialogTestService.opprettDialogSomVeileder(veileder, bruker, henvendelseFørHistorisk);
+        dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), new Date());
+
+        var melding = new NyHenvendelseDTO().setFnr(bruker.getFnr()).setTekst("LOL").setDialogId(dialog.getId());
+        veileder.createRequest()
+                .body(melding)
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(409);
+    }
+
+    @Test
+    void bruker_kan_ikke_sende_henvendelse_på_historisk_dialog() {
+        NyHenvendelseDTO henvendelseFørHistorisk = new NyHenvendelseDTO()
+                .setTekst("tekst")
+                .setOverskrift("overskrift");
+        var dialog = dialogTestService.opprettDialogSomBruker(bruker, henvendelseFørHistorisk);
+        dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), new Date());
+
+        var melding = new NyHenvendelseDTO().setFnr(bruker.getFnr()).setTekst("LOL").setDialogId(dialog.getId());
+        bruker.createRequest()
+                .body(melding)
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(409);
     }
 }

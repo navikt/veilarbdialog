@@ -99,6 +99,9 @@ spec:
         - application: veilarbaktivitet
           namespace: dab
           cluster: dev-gcp
+        - application: veilarbdialog
+          namespace: dab
+          cluster: dev-gcp
     outbound:
       external:
         - host: dab-unleash-api.nav.cloud.nais.io
