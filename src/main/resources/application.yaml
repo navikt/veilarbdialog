@@ -60,9 +60,13 @@ spring:
             commit: true
         retry:
           backoff:
+            max:
+              ms: 2000
             ms: 2000
         reconnect:
           backoff:
+            max:
+              ms: 2000
             ms: 2000
       auto-offset-reset: earliest
       key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
