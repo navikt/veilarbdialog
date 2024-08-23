@@ -5,6 +5,10 @@ spring:
     jdbc:
       repositories:
         enabled: false
+  cloud:
+    gateway:
+      mvc:
+        enabled: ${FSS_PROXY_ENABLED:true}
   flyway:
     enabled: false
     ###############################################
@@ -101,9 +105,8 @@ management:
 application:
   cluster: ${APP_CLUSTER_NAME}
   namespace: ${NAIS_NAMESPACE}
-  environment: ${APP_ENVIRONMENT_NAME}
   poao_tilgang:
-    url: http://poao-tilgang.poao.svc.nais.local
+    url: ${POAO_TILGANG_URL}
     scope: ${POAO_TILGANG_SCOPE}
   azure:
     ad:
@@ -113,9 +116,9 @@ application:
       clientId: ${AAD_B2C_CLIENTID_USERNAME}
       discoveryUrl: ${AAD_B2C_DISCOVERY_URL}
   datasource:
-    url: ${JDBC_URL}
-    username: ${JDBC_USERNAME}
-    password: ${JDBC_PASSWORD}
+    url: ${DB_JDBC_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   dialog:
     url: ${DIALOG_EKSTERN_URL}
   kafka:
@@ -123,18 +126,18 @@ application:
   serviceuser:
     username: ${SERVICEUSER_USERNAME}
     password: ${SERVICEUSER_PASSWORD}
-  sts:
-    discovery:
-      url: ${SECURITY_TOKEN_SERVICE_DISCOVERY_URL}
   veilarboppfolging:
     api:
       url: ${VEILARBOPPFOLGINGAPI_URL}
-      azureScope: api://${APP_CLUSTER_NAME}.pto.veilarboppfolging/.default
-      tokenXScope: ${APP_CLUSTER_NAME}:pto:veilarboppfolging
+      azureScope: ${VEILARBOPPFOLGINGAPI_AZURE_SCOPE}
+      tokenXScope: ${VEILARBOPPFOLGINGAPI_TOKENX_SCOPE}
   veilarbperson:
     api:
       url: ${VEILARBPERSONAPI_URL}
-      scope: api://${APP_CLUSTER_NAME}.pto.veilarbperson/.default
+      scope: ${VEILARBPERSONAPI_AZURE_SCOPE}
+  pdl:
+    api:
+      url: ${PDL_URL}
   please:
     api:
       url: ${PLEASE_URL}
@@ -165,3 +168,9 @@ unleash:
   url: ${UNLEASH_SERVER_API_URL}
   token: ${UNLEASH_SERVER_API_TOKEN}
   instanceId: ${NAIS_CLIENT_ID}
+
+veilarbdialog-fss:
+  url: ${VEILARBDIALOG_FSS_URL}
+app:
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}

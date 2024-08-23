@@ -20,9 +20,6 @@ public class ServiceConfig {
     @Value("${application.dialog.url}")
     private String arbeidsrettetDialogUrl;
 
-    @Value("${application.sts.discovery.url}")
-    private String discoveryUrl;
-
     @Value("${spring.application.name}")
     private String applicationName;
 

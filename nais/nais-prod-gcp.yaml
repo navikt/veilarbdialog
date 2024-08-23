@@ -1,0 +1,154 @@
+kind: Application
+apiVersion: nais.io/v1alpha1
+metadata:
+  name: veilarbdialog
+  namespace: dab
+  cluster: prod-gcp
+  labels:
+    team: dab
+spec:
+  image: ghcr.io/navikt/veilarbdialog/veilarbdialog:{{version}}
+  ingresses:
+    - https://veilarbdialog.intern.nav.no
+  port: 8080
+  prometheus:
+    enabled: true
+    path: /veilarbdialog/internal/prometheus
+  liveness:
+    path: /veilarbdialog/internal/info
+    port: 8080
+    initialDelay: 30
+  readiness:
+    path: /veilarbdialog/internal/info
+    port: 8080
+    initialDelay: 30
+  replicas:
+    min: 2
+    max: 8
+    cpuThresholdPercentage: 50
+  resources:
+    limits:
+      cpu: "2"
+      memory: 8092Mi
+    requests:
+      cpu: "1"
+      memory: 1536Mi
+  envFrom:
+    #    - configmap: pto-config
+    - secret: veilarbdialog-unleash-api-token
+    - secret: veilarbdialog-kassering-identer
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
+  secureLogs:
+    enabled: true
+  kafka:
+    pool: nav-prod
+  tokenx:
+    enabled: true
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true #todo burde vi legge inn noen roller her?
+      claims:
+        extra:
+          - "NAVident"
+  accessPolicy:
+    inbound:
+      rules:
+        - application: veilarbapi
+          namespace: pto
+          cluster: prod-gcp
+        - application: arbeidssokerregistrering-for-veileder
+          namespace: paw
+          cluster: prod-gcp
+        - application: veilarbpersonflate
+          namespace: poao
+          cluster: prod-gcp
+        - application: mulighetsrommet-api
+          namespace: team-mulighetsrommet
+          cluster: prod-gcp
+        - application: veilarbdirigent
+          namespace: pto
+          cluster: prod-fss
+        - application: aktivitetsplan
+          namespace: pto
+          cluster: prod-gcp
+        - application: arbeidsrettet-dialog
+          namespace: pto
+          cluster: prod-gcp
+        - application: aia-backend
+          namespace: paw
+          cluster: prod-gcp
+        - application: start-samtale
+          namespace: pto
+          cluster: prod-gcp
+        - application: veilarbaktivitet
+          namespace: dab
+          cluster: prod-gcp
+    outbound:
+      external:
+        - host: veilarbdialog.prod-fss-pub.nais.io
+        - host: veilarboppfolging.prod-fss-pub.nais.io
+        - host: dab-unleash-api.nav.cloud.nais.io
+      rules:
+        - application: poao-tilgang
+          namespace: poao
+        - application: please
+          namespace: dab
+  gcp:
+    sqlInstances:
+      - name: veilarbdialog
+        type: POSTGRES_14
+        tier: db-custom-8-53248 #TODO reduser etter migrering?
+        diskType: SSD
+        diskAutoresize: true
+        highAvailability: true
+        pointInTimeRecovery: true
+        flags: # Nødvendig for datastreams
+          - name: cloudsql.logical_decoding
+            value: "on"
+        databases:
+          - name: veilarbdialog
+            envVarPrefix: DB
+            users:
+              - name: datastream
+              - name: veilarbdialog_midlertidig
+  env:
+    - name: APP_CLUSTER_NAME
+      value: prod-gcp
+    - name: DIALOG_EKSTERN_URL
+      value: https://www.nav.no/arbeid/dialog
+    - name: POAO_TILGANG_SCOPE
+      value: api://prod-gcp.poao.poao-tilgang/.default
+    - name: POAO_TILGANG_URL
+      value: http://poao-tilgang.poao
+    - name: PDL_URL
+      value: https://pdl-api.prod-fss-pub.nais.io
+    - name: PLEASE_URL
+      value: http://please
+    - name: PLEASE_AZURE_SCOPE
+      value: api://prod-gcp.dab.please/.default
+    - name: PLEASE_TOKENX_SCOPE
+      value: prod-gcp:dab:please
+    - name: VEILARBDIALOG_FSS_URL
+      value: "https://veilarbdialog.prod-fss-pub.nais.io"
+    - name: FSS_PROXY_ENABLED
+      value: "false"
+    - name: KAFKA_ENABLED
+      value: "true"
+    # OK fix eller fjern B2C props
+    # OK fix SERVICEUSER_* SystemUserConfig til å bruke Azure token i stedet for vault secrets
+    - name: VEILARBOPPFOLGINGAPI_URL
+      value: "https://veilarboppfolging.prod-fss-pub.nais.io"
+    - name: VEILARBOPPFOLGINGAPI_AZURE_SCOPE
+      value: api://prod-fss.pto.veilarboppfolging/.default
+    - name: VEILARBOPPFOLGINGAPI_TOKENX_SCOPE
+      value: prod-fss:pto:veilarboppfolging
+    # OK fix veilarboppfolging scope til å peke på FSS
+    - name: VEILARBPERSONAPI_URL
+      value: "https://veilarbperson.prod-fss-pub.nais.io"
+    - name: VEILARBPERSONAPI_AZURE_SCOPE
+      value: api://prod-fss.pto.veilarbperson/.default
+    # TODO fix unleash

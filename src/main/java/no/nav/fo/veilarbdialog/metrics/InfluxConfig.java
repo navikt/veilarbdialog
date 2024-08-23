@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.metrics;
 
 import lombok.RequiredArgsConstructor;
+import no.nav.common.metrics.Event;
 import no.nav.common.metrics.InfluxClient;
 import no.nav.common.metrics.MetricsClient;
 import no.nav.common.metrics.SensuConfig;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Map;
 
 @Configuration
 @RequiredArgsConstructor
@@ -26,22 +28,11 @@ public class InfluxConfig {
 
     @Bean
     MetricsClient metricsClient() throws UnknownHostException {
-        return new InfluxClient(
-                SensuConfig
-                        .builder()
-                        .sensuHost("sensu.nais")
-                        .sensuPort(3030)
-                        .application(applicationName)
-                        .hostname(InetAddress.getLocalHost().getCanonicalHostName())
-                        .cluster(cluster)
-                        .namespace(namespace)
-                        .retryInterval(5000L)
-                        .connectTimeout(3000)
-                        .queueSize(20000)
-                        .maxBatchTime(10000L)
-                        .batchSize(500)
-                        .cleanupOnShutdown(true)
-                        .build()
-        );
+        return new MetricsClient() {
+            @Override
+            public void report(Event event) {}
+            @Override
+            public void report(String s, Map<String, Object> map, Map<String, String> map1, long l) {}
+        };
     }
 }

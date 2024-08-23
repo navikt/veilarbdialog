@@ -71,16 +71,11 @@ public class EskaleringsvarselService {
                 .build();
 
         dialogData = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
-
         dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), true);
-
         dialogDataService.sendPaaKafka(dialogData.getAktorId());
-
         dialogDataService.markerDialogSomLest(dialogData.getId());
 
-
         UUID brukernotifikasjonId = UUID.randomUUID();
-
         UUID gjeldendeOppfolgingsperiodeId = sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(AktorId.of(dialogData.getAktorId()));
 
         Brukernotifikasjon brukernotifikasjon = new Brukernotifikasjon(

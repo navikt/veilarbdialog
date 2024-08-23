@@ -3,6 +3,10 @@ spring:
     active: local
   application:
     name: "veilarbdialog"
+  cloud:
+    gateway:
+      mvc:
+        enabled: false
   flyway:
     enabled: false
   main:
@@ -98,7 +102,7 @@ application:
       url: http://localhost:8080/SECURITYTOKENSERVICE_URL
   veilarboppfolging:
     api:
-      url: http://localhost:${wiremock.server.port}/veilarboppfolging/api
+      url: http://localhost:${wiremock.server.port}
       azureScope: api://test.pto.veilarboppfolging/.default
       tokenXScope: test:pto:veilarboppfolging
   veilarbperson:
@@ -135,3 +139,6 @@ application:
 wiremock:
   server:
     port: 0
+app:
+  kafka:
+    enabled: true

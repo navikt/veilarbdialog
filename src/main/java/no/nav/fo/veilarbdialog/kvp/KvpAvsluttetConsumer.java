@@ -19,7 +19,7 @@ public class KvpAvsluttetConsumer {
 
     private final DialogDataService dialogDataService;
 
-    @KafkaListener(topics = "${application.topic.inn.kvpavsluttet}", containerFactory = "stringStringKafkaListenerContainerFactory")
+    @KafkaListener(topics = "${application.topic.inn.kvpavsluttet}", containerFactory = "stringStringKafkaListenerContainerFactory", autoStartup = "${app.kafka.enabled:false}")
     @Timed
     void avsluttKvpPeriode(ConsumerRecord<String, String> consumerRecord) {
         KvpAvsluttetKafkaDTO kvpAvsluttetKafkaDTO = JsonUtils.fromJson(consumerRecord.value(), KvpAvsluttetKafkaDTO.class);

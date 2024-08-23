@@ -11,7 +11,7 @@ public class HttpClientWrapperConfig {
     public HttpClientWrapper veilarboppfolgingClientWrapper(@Value("${application.veilarboppfolging.api.url}") String baseUrl, OkHttpClient veilarbOppfolgingClient) {
         return new HttpClientWrapper(
                 veilarbOppfolgingClient,
-                baseUrl
+                baseUrl + "/veilarboppfolging/api"
         );
     }
     @Bean

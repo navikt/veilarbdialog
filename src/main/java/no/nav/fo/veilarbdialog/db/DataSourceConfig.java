@@ -7,10 +7,12 @@ import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 
+@Profile("!local")
 @Configuration
 @Slf4j
 public class DataSourceConfig {
@@ -27,19 +29,23 @@ public class DataSourceConfig {
     @Bean
     public DataSource dataSource() {
 
-        log.info("Creating data source to URL '{}'", url);
+        log.info("Creating data source");
 
         HikariConfig config = new HikariConfig();
+        config.setSchema("veilarbdialog");
         config.setJdbcUrl(url);
         config.setUsername(username);
         config.setPassword(password);
         config.setMaximumPoolSize(150);
         config.setMinimumIdle(2);
+        var dataSource = new HikariDataSource(config);
 
-        return migrate(new HikariDataSource(config));
+        migrate(dataSource);
+
+        return dataSource;
     }
 
-    public static DataSource migrate(DataSource dataSource) {
+    public static void migrate(DataSource dataSource) {
         log.info("Explicitly migrating {} using Flyway", dataSource);
 
         var flyway = new Flyway(Flyway.configure()
@@ -48,7 +54,6 @@ public class DataSourceConfig {
                 .validateMigrationNaming(true));
 
         flyway.migrate();
-        return dataSource;
     }
 
     @Bean

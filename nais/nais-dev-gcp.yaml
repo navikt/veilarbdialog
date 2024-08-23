@@ -2,18 +2,15 @@ kind: Application
 apiVersion: nais.io/v1alpha1
 metadata:
   name: veilarbdialog
-  namespace: pto
-  cluster: dev-fss
+  namespace: dab
+  cluster: dev-gcp
   labels:
-    team: pto
+    team: dab
 spec:
   image: ghcr.io/navikt/veilarbdialog/veilarbdialog:{{version}}
   ingresses:
-    - https://veilarbdialog-q1.nais.preprod.local
-    - https://app-q1.adeo.no/veilarbdialog
-    - https://app-q1.dev.adeo.no/veilarbdialog
-    - https://app.dev.adeo.no/veilarbdialog
-    - https://veilarbdialog.dev-fss-pub.nais.io
+    - https://veilarbdialog.dev.nav.cloud.nais.io
+    - https://veilarbdialog.intern.dev.nav.no
   port: 8080
   prometheus:
     enabled: true
@@ -38,21 +35,13 @@ spec:
       cpu: 200m
       memory: 768Mi
   envFrom:
-    - configmap: pto-config
+#    - configmap: pto-config
     - secret: veilarbdialog-unleash-api-token
-    - secret: veilarb-kassering-identer
-  vault:
-    enabled: true
-    paths:
-      - kvPath: /oracle/data/dev/creds/veilarbdialog_q1-user
-        mountPath: /var/run/secrets/nais.io/oracle_creds
-      - kvPath: /oracle/data/dev/config/veilarbdialog_q1
-        mountPath: /var/run/secrets/nais.io/oracle_config
-      - kvPath: /serviceuser/data/dev/srvveilarbdialog
-        mountPath: /secrets/serviceuser
-      - kvPath: /kv/preprod/fss/veilarbdialog/q1
-        mountPath: /var/run/secrets/nais.io/vault
-  webproxy: true
+    - secret: veilarbdialog-kassering-identer
+  observability:
+    autoInstrumentation:
+      enabled: true
+      runtime: java
   secureLogs:
     enabled: true
   kafka:
@@ -99,27 +88,69 @@ spec:
         - application: veilarbaktivitet
           namespace: dab
           cluster: dev-gcp
-        - application: veilarbdialog
-          namespace: dab
-          cluster: dev-gcp
     outbound:
       external:
+        - host: veilarbdialog.dev-fss-pub.nais.io
+        - host: veilarboppfolging.dev-fss-pub.nais.io
         - host: dab-unleash-api.nav.cloud.nais.io
-        - host: please.ekstern.dev.nav.no
+      rules:
+        - application: poao-tilgang
+          namespace: poao
+        - application: please
+          namespace: dab
+  gcp:
+    sqlInstances:
+      - name: veilarbdialog
+        type: POSTGRES_14
+        tier: db-custom-1-3840
+        diskType: SSD
+        diskAutoresize: true
+        flags: # Nødvendig for datastreams
+          - name: cloudsql.logical_decoding
+            value: "on"
+              # for debugging av replikering
+          - name: log_statement
+            value: "mod"
+        databases:
+          - name: veilarbdialog
+            envVarPrefix: DB
+            users:
+              - name: datastream
+              - name: veilarbdialog_midlertidig
   env:
-    - name: APP_ENVIRONMENT_NAME
-      value: q1
     - name: APP_CLUSTER_NAME
-      value: dev-fss
+      value: dev-gcp
     - name: DIALOG_EKSTERN_URL
       value: https://pto.ekstern.dev.nav.no/arbeid/dialog
-    - name: APPD_ENABLED
-      value: "false"
     - name: POAO_TILGANG_SCOPE
-      value: api://dev-fss.poao.poao-tilgang/.default
+      value: api://dev-gcp.poao.poao-tilgang/.default
+    - name: POAO_TILGANG_URL
+      value: http://poao-tilgang.poao
+    - name: PDL_URL
+      value: https://pdl-api.dev-fss-pub.nais.io
     - name: PLEASE_URL
-      value: https://please.ekstern.dev.nav.no
+      value: http://please
     - name: PLEASE_AZURE_SCOPE
       value: api://dev-gcp.dab.please/.default
     - name: PLEASE_TOKENX_SCOPE
       value: dev-gcp:dab:please
+    - name: VEILARBDIALOG_FSS_URL
+      value: "https://veilarbdialog.dev-fss-pub.nais.io"
+    - name: FSS_PROXY_ENABLED
+      value: "false"
+    - name: KAFKA_ENABLED
+      value: "true"
+    # OK fix eller fjern B2C props
+    # OK fix SERVICEUSER_* SystemUserConfig til å bruke Azure token i stedet for vault secrets
+    - name: VEILARBOPPFOLGINGAPI_URL
+      value: "https://veilarboppfolging.dev-fss-pub.nais.io"
+    - name: VEILARBOPPFOLGINGAPI_AZURE_SCOPE
+      value: api://dev-fss.pto.veilarboppfolging/.default
+    - name: VEILARBOPPFOLGINGAPI_TOKENX_SCOPE
+      value: dev-fss:pto:veilarboppfolging
+    # OK fix veilarboppfolging scope til å peke på FSS
+    - name: VEILARBPERSONAPI_URL
+      value: "https://veilarbperson.dev-fss-pub.nais.io"
+    - name: VEILARBPERSONAPI_AZURE_SCOPE
+      value: api://dev-fss.pto.veilarbperson/.default
+    # TODO fix unleash

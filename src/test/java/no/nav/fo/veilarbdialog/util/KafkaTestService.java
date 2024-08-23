@@ -113,10 +113,10 @@ public class KafkaTestService {
         }
 
         List<PartitionInfo> partitionInfos = consumer.partitionsFor(topic);
-        List<TopicPartition> collect = partitionInfos.stream().map(f -> new TopicPartition(topic, f.partition())).collect(Collectors.toList());
+        List<TopicPartition> partitions = partitionInfos.stream().map(f -> new TopicPartition(topic, f.partition())).collect(Collectors.toList());
 
-        Map<TopicPartition, Long> map = consumer.endOffsets(collect);
-        Long endOffset = map.get(collect.get(0));
+        Map<TopicPartition, Long> map = consumer.endOffsets(partitions);
+        Long endOffset = map.get(partitions.get(0));
 
         return offsetAndMetadata.offset() == endOffset;
     }

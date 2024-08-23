@@ -6,9 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.common.json.JsonUtils;
 import no.nav.common.rest.filter.LogRequestFilter;
 import no.nav.common.utils.IdUtils;
-import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
-import no.nav.fo.veilarbdialog.db.dao.KafkaDAO;
-import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
@@ -17,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 
@@ -25,10 +21,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class KafkaProducerService {
-
-    private final KafkaDAO kafkaDAO;
-
-    private final DialogDAO dialogDAO;
 
     private final KafkaTemplate<String, String> stringStringKafkaTemplate;
 
@@ -40,16 +32,6 @@ public class KafkaProducerService {
         String aktorId = kafkaDialogMelding.getAktorId();
 
         sendSync(opprettKafkaMelding(endringPaaDialogTopic, aktorId, kafkaStringMelding));
-    }
-
-    public void sendAlleFeilendeMeldinger() {
-        kafkaDAO.hentAlleFeilendeAktorId()
-                .stream()
-                .map(aktorId -> {
-                    List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
-                    return KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
-                })
-                .forEach(this::sendDialogMelding);
     }
 
     private static String getCallIdOrRandom() {
@@ -68,6 +50,4 @@ public class KafkaProducerService {
         kafkaMelding.headers().add(new RecordHeader(LogRequestFilter.NAV_CALL_ID_HEADER_NAME, getCallIdOrRandom().getBytes()));
         return kafkaMelding;
     }
-
-
 }

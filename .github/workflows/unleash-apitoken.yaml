@@ -6,8 +6,10 @@ on:
       - main
     paths:
       - '.github/workflows/unleash-apitoken.yaml'
-      - 'nais/unleash-apitoken-dev.yaml'
-      - 'nais/unleash-apitoken.yaml'
+#      - 'nais/unleash-apitoken-dev.yaml'
+#      - 'nais/unleash-apitoken.yaml'
+      - 'nais/unleash-apitoken-dev-gcp.yaml'
+      - 'nais/unleash-apitoken-gcp.yaml'
   workflow_dispatch:
 
 jobs:
@@ -17,15 +19,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: deploy to dev
+      - name: Deploy to dev (fss)
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
           RESOURCE: nais/unleash-apitoken-dev.yaml
-      - name: deploy to prod
+      - name: Deploy to prod (fss)
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-fss
           RESOURCE: nais/unleash-apitoken.yaml
+      - name: Deploy to dev (gcp)
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.DAB_NAIS_DEPLOY_APIKEY }}
+          CLUSTER: dev-gcp
+          RESOURCE: nais/unleash-apitoken-dev-gcp.yaml
+      - name: Deploy to prod (gcp)
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.DAB_NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: nais/unleash-apitoken-gcp.yaml

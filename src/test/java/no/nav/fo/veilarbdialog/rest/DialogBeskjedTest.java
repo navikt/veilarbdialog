@@ -22,8 +22,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 
+import java.sql.Types;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -364,14 +367,15 @@ class DialogBeskjedTest extends SpringBootTestBase {
 
     // Setter sendt til å være N sekund tidligere pga. grace period
     private void settHenvendelseSendtForNSekundSiden(String henvendelseId, int sekunderSiden) {
+        NamedParameterJdbcTemplate namedJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         Date nySendt = Date.from(Instant.now().minus(sekunderSiden, ChronoUnit.SECONDS));
-        int update = jdbcTemplate.update("""
-                                UPDATE HENVENDELSE
-                                SET SENDT = ?
-                                WHERE HENVENDELSE_ID = ?
+        int update = namedJdbcTemplate.update("""
+                                UPDATE HENVENDELSE 
+                                SET SENDT = :sendt
+                                WHERE HENVENDELSE_ID = :henvendelseId
                         """,
-                nySendt,
-                henvendelseId
+                new MapSqlParameterSource("sendt", nySendt)
+                    .addValue("henvendelseId", henvendelseId, Types.BIGINT)
         );
         assertThat(update).isEqualTo(1);
     }
