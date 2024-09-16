@@ -91,10 +91,9 @@ spec:
     outbound:
       external:
         - host: veilarbdialog.dev-fss-pub.nais.io
+        - host: veilarboppfolging.dev-fss-pub.nais.io
         - host: dab-unleash-api.nav.cloud.nais.io
       rules:
-        - application: veilarboppfolging
-          namespace: poao
         - application: poao-tilgang
           namespace: poao
         - application: please
@@ -144,11 +143,11 @@ spec:
     # OK fix eller fjern B2C props
     # OK fix SERVICEUSER_* SystemUserConfig til å bruke Azure token i stedet for vault secrets
     - name: VEILARBOPPFOLGINGAPI_URL
-      value: "http://veilarboppfolging.poao"
+      value: "https://veilarboppfolging.dev-fss-pub.nais.io"
     - name: VEILARBOPPFOLGINGAPI_AZURE_SCOPE
-      value: api://dev-gcp.poao.veilarboppfolging/.default
+      value: api://dev-fss.pto.veilarboppfolging/.default
     - name: VEILARBOPPFOLGINGAPI_TOKENX_SCOPE
-      value: dev-gcp:poao:veilarboppfolging
+      value: dev-fss:pto:veilarboppfolging
     # OK fix veilarboppfolging scope til å peke på FSS
     - name: VEILARBPERSONAPI_URL
       value: "https://veilarbperson.dev-fss-pub.nais.io"
