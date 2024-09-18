@@ -151,7 +151,7 @@ spec:
       value: dev-gcp:poao:veilarboppfolging
     # OK fix veilarboppfolging scope til å peke på FSS
     - name: VEILARBPERSONAPI_URL
-      value: "http://veilarbperson.obo"
+      value: "https://veilarbperson.dev-fss-pub.nais.io"
     - name: VEILARBPERSONAPI_AZURE_SCOPE
-      value: api://dev-gcp.obo.veilarbperson/.default
+      value: api://dev-fss.pto.veilarbperson/.default
     # TODO fix unleash
