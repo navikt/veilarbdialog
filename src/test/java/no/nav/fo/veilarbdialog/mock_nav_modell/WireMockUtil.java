@@ -31,15 +31,15 @@ public class WireMockUtil {
 
     private static void oppfolging(String fnr, boolean underOppfolging, boolean oppfolgingFeiler, UUID periode) {
         if (oppfolgingFeiler) {
-            wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging?fnr=" + fnr)
+            wireMock.stubFor(post("/veilarboppfolging/api/v3/hent-oppfolging")
                     .willReturn(aResponse().withStatus(500)));
-            wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging/periode/gjeldende?fnr=" + fnr)
+            wireMock.stubFor(post("/veilarboppfolging/api/v3/oppfolging/periode/hent-gjeldende")
                     .willReturn(aResponse().withStatus(500)));
-            wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging/perioder?fnr=" + fnr)
+            wireMock.stubFor(post("/veilarboppfolging/api/v3/oppfolging/hent-perioder")
                     .willReturn(aResponse().withStatus(500)));
             return;
         }
-        wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging?fnr=" + fnr)
+        wireMock.stubFor(post("/veilarboppfolging/api/v3/hent-oppfolging")
                 .willReturn(ok()
                         .withHeader("Content-Type", "text/json")
                         .withBody("{\"erUnderOppfolging\":" + underOppfolging + "}")));
@@ -58,23 +58,23 @@ public class WireMockUtil {
             String gjeldendePeriode = JsonUtils.toJson(oppfolgingsperiode);
 
             String oppfolgingsperioder = JsonUtils.toJson(List.of(oppfolgingsperiode, gammelPeriode));
-            wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging/periode/gjeldende?fnr=" + fnr)
+            wireMock.stubFor(post("/veilarboppfolging/api/v3/oppfolging/periode/hent-gjeldende")
                     .willReturn(ok()
                             .withHeader("Content-Type", "text/json")
                             .withBody(gjeldendePeriode)));
-            wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging/perioder?fnr=" + fnr)
+            wireMock.stubFor(post("/veilarboppfolging/api/v3/oppfolging/hent-perioder")
                     .willReturn(ok()
                             .withHeader("Content-Type", "text/json")
                             .withBody(oppfolgingsperioder)));
 
         } else {
-            wireMock.stubFor(get("/veilarboppfolging/api/v2/oppfolging/periode/gjeldende?fnr=" + fnr)
+            wireMock.stubFor(post("/veilarboppfolging/api/v3/oppfolging/periode/hent-gjeldende")
                     .willReturn(aResponse().withStatus(204)));
         }
     }
 
     private static void manuell(String fnr, boolean erManuell, boolean erReservertKrr, boolean kanVarsles) {
-        wireMock.stubFor(get("/veilarboppfolging/api/v2/manuell/status?fnr=" + fnr)
+        wireMock.stubFor(post("/veilarboppfolging/api/v3/manuell/hent-status")
                 .willReturn(ok()
                         .withHeader("Content-Type", "text/json")
                         .withBody("{\"erUnderManuellOppfolging\":" + erManuell + ",\"krrStatus\":{\"kanVarsles\":" + kanVarsles + ",\"erReservert\":" + erReservertKrr + "}}")));
