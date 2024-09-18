@@ -105,10 +105,6 @@ application:
       url: http://localhost:${wiremock.server.port}
       azureScope: api://test.pto.veilarboppfolging/.default
       tokenXScope: test:pto:veilarboppfolging
-  veilarbperson:
-    api:
-      url: http://localhost:${wiremock.server.port}/veilarbperson/api
-      scope: api://test.pto.veilarbperson/.default
   please:
     api:
       url: http://localhost:${wiremock.server.port}/please

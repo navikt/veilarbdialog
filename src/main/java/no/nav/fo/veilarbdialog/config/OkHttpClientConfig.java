@@ -13,13 +13,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OkHttpClientConfig {
-
-    @Bean OkHttpClient veilarbpersonClient(MeterRegistry meterRegistry, Interceptor veilarbpersonAuthInterceptor) {
-        return RestClient.baseClientBuilder()
-                .eventListener(OkHttpMetricsEventListener.builder(meterRegistry, "okhttp.requests").build())
-                .addInterceptor(veilarbpersonAuthInterceptor).build();
-    }
-
     @Bean OkHttpClient veilarbOppfolgingClient(MeterRegistry meterRegistry, Interceptor oppfolgingAuthInterceptor) {
         return RestClient.baseClientBuilder()
                 .eventListener(OkHttpMetricsEventListener.builder(meterRegistry, "okhttp.requests").build())
@@ -32,10 +25,6 @@ public class OkHttpClientConfig {
                 .addInterceptor(pleaseAuthInterceptor).build();
     }
 
-    @Value("${application.veilarbperson.api.scope}") String veilarbpersonScope;
-
-
-
     @Bean
     Interceptor oppfolgingAuthInterceptor(TokenProvider veilarbOppfolgingTokenProvider,
                                           @Value("${application.veilarboppfolging.api.azureScope}") String veilarboppfolgingAzureScope,
@@ -45,18 +34,6 @@ public class OkHttpClientConfig {
             var newReq = original
                     .newBuilder()
                     .addHeader("Authorization", "Bearer " + veilarbOppfolgingTokenProvider.get(veilarboppfolgingAzureScope, veilarboppfolgingTokenXScope))
-                    .method(original.method(), original.body())
-                    .build();
-            return chain.proceed(newReq);
-        };
-    }
-    @Bean
-    Interceptor veilarbpersonAuthInterceptor(AzureAdMachineToMachineTokenClient azureAdMachineToMachineTokenClient) {
-        return chain -> {
-            var original = chain.request();
-            var newReq = original
-                    .newBuilder()
-                    .addHeader("Authorization", "Bearer " + azureAdMachineToMachineTokenClient.createMachineToMachineToken(veilarbpersonScope))
                     .method(original.method(), original.body())
                     .build();
             return chain.proceed(newReq);

@@ -150,8 +150,4 @@ spec:
     - name: VEILARBOPPFOLGINGAPI_TOKENX_SCOPE
       value: dev-gcp:poao:veilarboppfolging
     # OK fix veilarboppfolging scope til å peke på FSS
-    - name: VEILARBPERSONAPI_URL
-      value: "http://veilarbperson.obo"
-    - name: VEILARBPERSONAPI_AZURE_SCOPE
-      value: api://dev-gcp.obo.veilarbperson/.default
     # TODO fix unleash

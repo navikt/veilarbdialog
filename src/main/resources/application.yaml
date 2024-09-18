@@ -135,10 +135,6 @@ application:
       url: ${VEILARBOPPFOLGINGAPI_URL}
       azureScope: ${VEILARBOPPFOLGINGAPI_AZURE_SCOPE}
       tokenXScope: ${VEILARBOPPFOLGINGAPI_TOKENX_SCOPE}
-  veilarbperson:
-    api:
-      url: ${VEILARBPERSONAPI_URL}
-      scope: ${VEILARBPERSONAPI_AZURE_SCOPE}
   pdl:
     api:
       url: ${PDL_URL}
