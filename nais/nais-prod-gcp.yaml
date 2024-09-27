@@ -84,12 +84,8 @@ spec:
         - application: start-samtale
           namespace: pto
           cluster: prod-gcp
-        - application: veilarbaktivitet
-          namespace: dab
-          cluster: prod-gcp
     outbound:
       external:
-        - host: veilarbdialog.prod-fss-pub.nais.io
         - host: dab-unleash-api.nav.cloud.nais.io
       rules:
         - application: veilarboppfolging
@@ -102,7 +98,7 @@ spec:
     sqlInstances:
       - name: veilarbdialog
         type: POSTGRES_14
-        tier: db-custom-8-53248 #TODO reduser etter migrering?
+        tier: db-custom-4-26624
         diskType: SSD
         diskAutoresize: true
         highAvailability: true
@@ -115,7 +111,6 @@ spec:
             envVarPrefix: DB
             users:
               - name: datastream
-              - name: veilarbdialog_midlertidig
   env:
     - name: APP_CLUSTER_NAME
       value: prod-gcp
@@ -133,19 +128,11 @@ spec:
       value: api://prod-gcp.dab.please/.default
     - name: PLEASE_TOKENX_SCOPE
       value: prod-gcp:dab:please
-    - name: VEILARBDIALOG_FSS_URL
-      value: "https://veilarbdialog.prod-fss-pub.nais.io"
-    - name: FSS_PROXY_ENABLED
-      value: "false"
     - name: KAFKA_ENABLED
       value: "true"
-    # OK fix eller fjern B2C props
-    # OK fix SERVICEUSER_* SystemUserConfig til å bruke Azure token i stedet for vault secrets
     - name: VEILARBOPPFOLGINGAPI_URL
       value: "http://veilarboppfolging.poao"
     - name: VEILARBOPPFOLGINGAPI_AZURE_SCOPE
       value: api://prod-gcp.poao.veilarboppfolging/.default
     - name: VEILARBOPPFOLGINGAPI_TOKENX_SCOPE
       value: prod-gcp:poao:veilarboppfolging
-    # OK fix veilarboppfolging scope til å peke på FSS
-    # TODO fix unleash
