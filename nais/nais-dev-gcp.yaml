@@ -35,7 +35,6 @@ spec:
       cpu: 200m
       memory: 768Mi
   envFrom:
-#    - configmap: pto-config
     - secret: veilarbdialog-unleash-api-token
     - secret: veilarbdialog-kassering-identer
   observability:
@@ -51,7 +50,7 @@ spec:
   azure:
     application:
       enabled: true
-      allowAllUsers: true #todo burde vi legge inn noen roller her?
+      allowAllUsers: true
       claims:
         extra:
           - "NAVident"
@@ -90,8 +89,8 @@ spec:
           cluster: dev-gcp
     outbound:
       external:
-        - host: veilarbdialog.dev-fss-pub.nais.io
         - host: dab-unleash-api.nav.cloud.nais.io
+        - host: pdl-api.dev-fss-pub.nais.io
       rules:
         - application: veilarboppfolging
           namespace: poao
@@ -109,7 +108,6 @@ spec:
         flags: # Nødvendig for datastreams
           - name: cloudsql.logical_decoding
             value: "on"
-              # for debugging av replikering
           - name: log_statement
             value: "mod"
         databases:
@@ -117,7 +115,6 @@ spec:
             envVarPrefix: DB
             users:
               - name: datastream
-              - name: veilarbdialog_midlertidig
   env:
     - name: APP_CLUSTER_NAME
       value: dev-gcp
@@ -135,23 +132,11 @@ spec:
       value: api://dev-gcp.dab.please/.default
     - name: PLEASE_TOKENX_SCOPE
       value: dev-gcp:dab:please
-    - name: VEILARBDIALOG_FSS_URL
-      value: "https://veilarbdialog.dev-fss-pub.nais.io"
-    - name: FSS_PROXY_ENABLED
-      value: "false"
     - name: KAFKA_ENABLED
       value: "true"
-    # OK fix eller fjern B2C props
-    # OK fix SERVICEUSER_* SystemUserConfig til å bruke Azure token i stedet for vault secrets
     - name: VEILARBOPPFOLGINGAPI_URL
       value: "http://veilarboppfolging.poao"
     - name: VEILARBOPPFOLGINGAPI_AZURE_SCOPE
       value: api://dev-gcp.poao.veilarboppfolging/.default
     - name: VEILARBOPPFOLGINGAPI_TOKENX_SCOPE
       value: dev-gcp:poao:veilarboppfolging
-    # OK fix veilarboppfolging scope til å peke på FSS
-    - name: VEILARBPERSONAPI_URL
-      value: "http://veilarbperson.obo"
-    - name: VEILARBPERSONAPI_AZURE_SCOPE
-      value: api://dev-gcp.obo.veilarbperson/.default
-    # TODO fix unleash

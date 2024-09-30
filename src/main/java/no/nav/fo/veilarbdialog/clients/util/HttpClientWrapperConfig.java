@@ -14,13 +14,6 @@ public class HttpClientWrapperConfig {
                 baseUrl + "/veilarboppfolging/api"
         );
     }
-    @Bean
-    public HttpClientWrapper veilarbpersonClientWrapper(@Value("${application.veilarbperson.api.url}") String baseUrl, OkHttpClient veilarbpersonClient) {
-        return new HttpClientWrapper(
-                veilarbpersonClient,
-                baseUrl
-        );
-    }
 
     @Bean
     public HttpClientWrapper dialogvarslerClientWrapper(@Value("${application.please.api.url}") String baseUrl, OkHttpClient dialogvarslerClient) {
