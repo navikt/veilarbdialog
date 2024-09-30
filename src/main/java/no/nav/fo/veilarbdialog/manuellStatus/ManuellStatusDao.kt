@@ -13,7 +13,7 @@ class ManuellStatusDao(val jdbcTemplate: NamedParameterJdbcTemplate) {
         )
     }
 
-    fun getManuellStatus(aktorId: String): ManuellStatusDto {
+    fun getManuellStatus(aktorId: String): ManuellStatusDto? {
         return jdbcTemplate.queryForObject(
             "SELECT * FROM MANUELL_STATUS WHERE aktorId = :aktorId",
             mapOf("aktorId" to aktorId)) {
@@ -21,6 +21,6 @@ class ManuellStatusDao(val jdbcTemplate: NamedParameterJdbcTemplate) {
                 rs.getString("aktorId"),
                 rs.getBoo("erManuell")
             )
-        } ?: ManuellStatusDto(aktorId, false)
+        }
     }
 }
