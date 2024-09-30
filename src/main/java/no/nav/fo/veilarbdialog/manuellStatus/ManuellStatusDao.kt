@@ -12,4 +12,15 @@ class ManuellStatusDao(val jdbcTemplate: NamedParameterJdbcTemplate) {
         """.trimIndent(), mapOf("aktorId" to manuellStatus.aktorId, "erManuell" to manuellStatus.erManuell)
         )
     }
+
+    fun getManuellStatus(aktorId: String): ManuellStatusDto {
+        return jdbcTemplate.queryForObject(
+            "SELECT * FROM MANUELL_STATUS WHERE aktorId = :aktorId",
+            mapOf("aktorId" to aktorId)) {
+                rs, _ -> ManuellStatusDto(
+                rs.getString("aktorId"),
+                rs.getBoo("erManuell")
+            )
+        } ?: ManuellStatusDto(aktorId, false)
+    }
 }
