@@ -5,6 +5,6 @@ import lombok.Data;
 
 @AllArgsConstructor
 @Data
-class FnrDto {
+public class FnrDto {
     String fnr;
 }

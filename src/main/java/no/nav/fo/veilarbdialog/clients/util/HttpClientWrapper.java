@@ -53,6 +53,28 @@ public class HttpClientWrapper {
         }
     }
 
+    public <T> Optional<T> postAndReceive(String path, RequestBody body, Class<T> classOfT) {
+        Request request = buildRequest(path).newBuilder()
+                .post(body).build();
+        try (Response response = client.newCall(request).execute()) {
+            RestUtils.throwIfNotSuccessful(response);
+            return RestUtils.parseJsonResponse(response, classOfT);
+        } catch (Exception e) {
+            throw internalServerError(e, request.url().toString());
+        }
+    }
+
+    public <T> Optional<List<T>> postAndReceiveList(String path, RequestBody body, Class<T> classOfT) {
+        Request request = buildRequest(path).newBuilder()
+                .post(body).build();
+        try (Response response = client.newCall(request).execute()) {
+            RestUtils.throwIfNotSuccessful(response);
+            return RestUtils.parseJsonArrayResponse(response, classOfT);
+        } catch (Exception e) {
+            throw internalServerError(e, request.url().toString());
+        }
+    }
+
 
     public <T> Optional<List<T>> getList(String path, Class<T> classOfT) {
         Request request = buildRequest(path);
