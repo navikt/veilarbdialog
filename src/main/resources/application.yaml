@@ -171,8 +171,6 @@ unleash:
   token: ${UNLEASH_SERVER_API_TOKEN}
   instanceId: ${NAIS_CLIENT_ID}
 
-veilarbdialog-fss:
-  url: ${VEILARBDIALOG_FSS_URL}
 app:
   kafka:
-    enabled: ${KAFKA_ENABLED:false}
+    enabled: ${KAFKA_ENABLED:true}
