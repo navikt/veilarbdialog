@@ -145,6 +145,8 @@ application:
       tokenXScope: ${PLEASE_TOKENX_SCOPE}
   topic:
     inn:
+      kvpPerioder: pto:kvp-perioder-v1
+      manuellStatus: pto.endring-paa-manuell-status-v1
       oppfolgingsperiode: pto.oppfolgingsperiode-v1
       kvpavsluttet: pto.kvp-avsluttet-v1
       eksternVarselKvittering: teamdokumenthandtering.aapen-dok-notifikasjon-status
