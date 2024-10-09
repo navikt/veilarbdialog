@@ -56,7 +56,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Deploy application to dev
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
           RESOURCE: nais/nais-dev-gcp.yaml
@@ -80,7 +80,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Deploy application to prod
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: prod-gcp
           RESOURCE: nais/nais-prod-gcp.yaml

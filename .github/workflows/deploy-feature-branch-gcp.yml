@@ -48,7 +48,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Veilarbdialog - Deploy application to dev
-        uses: nais/deploy/actions/deploy@v1
+        uses: nais/deploy/actions/deploy@v2
         env:
           CLUSTER: dev-gcp
           RESOURCE: nais/nais-dev-gcp.yaml
