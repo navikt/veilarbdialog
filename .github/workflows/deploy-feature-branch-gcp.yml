@@ -3,13 +3,7 @@ run-name: Deploy feature branch ${{ github.ref_name }} by @${{ github.actor }}
 on:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  packages: write
-
 env:
-  IMAGE_TAG: ${{ github.sha }}
-  IMAGE: ghcr.io/${{ github.repository }}/veilarbdialog
   PRINT_PAYLOAD: true
 
 concurrency:
@@ -17,9 +11,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  veilarbdialog:
-    name: Veilarbdialog - Test, build, push, deploy
+  build:
+    name: Veilarbdialog - Test, build, push
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,22 +28,29 @@ jobs:
           cache: 'maven'
       - name: Veilarbdialog - Build maven artifacts
         run: mvn -B package
-      - uses: docker/login-action@v2
-        name: Veilarbdialog - Docker login
+      - name: Push docker image to GAR
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v3
-        name: Veilarbdialog - Push image
-        with:
-          context: .
-          push: true
-          tags: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
-      - name: Veilarbdialog - Deploy application
+          team: dab
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }} # Provided as Organization Secret
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }} # Provided as Organization Variable
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
+      telemetry: ${{ steps.docker-build-push.outputs.telemetry }}
+  deploy:
+    name: Veilarbdialog - deploy to dev
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Veilarbdialog - Deploy application to dev
         uses: nais/deploy/actions/deploy@v1
         env:
-          APIKEY: ${{ secrets.DAB_NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: nais/nais-dev-gcp.yaml
-          VAR: version=${{ env.IMAGE_TAG }}
+          VAR: image=${{ needs.build.outputs.image }}
+          TELEMETRY: ${{ needs.build.outputs.telemetry }}

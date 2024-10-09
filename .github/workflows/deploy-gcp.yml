@@ -5,13 +5,7 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-  packages: write
-
 env:
-  IMAGE_TAG: ${{ github.sha }}
-  IMAGE: ghcr.io/${{ github.repository }}/veilarbdialog
   PRINT_PAYLOAD: true
 
 concurrency:
@@ -33,18 +27,26 @@ jobs:
           cache: 'maven'
       - name: Build maven artifacts
         run: mvn -B package
-      - uses: docker/login-action@v2
-        name: Docker login
+      - name: Slack Notification (test failure)
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_COLOR: danger
+          SLACK_USERNAME: Github Actions
+          SLACK_ICON: https://github.com/github.png?size=48
+          SLACK_TITLE: 'Veilarbdialog: bygg feilet under deploy til prod'
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: 'Commit-message til feilende deploy: ${{ github.event.head_commit.message }}'
+      - name: Push docker image to GAR
+        uses: nais/docker-build-push@v0
+        id: docker-build-push
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v3
-        name: Push image
-        with:
-          context: .
-          push: true
-          tags: ${{ env.IMAGE }}:${{ env.IMAGE_TAG }}
+          team: dab
+          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }} # Provided as Organization Secret
+          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }} # Provided as Organization Variable
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
+      telemetry: ${{ steps.docker-build-push.outputs.telemetry }}
 
   deploy-to-dev:
     name: Deploy to dev
@@ -56,22 +58,41 @@ jobs:
       - name: Deploy application to dev
         uses: nais/deploy/actions/deploy@v1
         env:
-          APIKEY: ${{ secrets.DAB_NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: nais/nais-dev-gcp.yaml
-          VAR: version=${{ env.IMAGE_TAG }}
-
+          VAR: image=${{ needs.test-build-push.outputs.image }}
+          TELEMETRY: ${{ needs.test-build-push.outputs.telemetry }}
+      - name: Slack Notification (deploy failure)
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_COLOR: danger
+          SLACK_USERNAME: Github Actions
+          SLACK_ICON: https://github.com/github.png?size=48
+          SLACK_TITLE: 'Veilarbdialog: deploy til dev feilet - deploy til prod ble ikke kjørt!'
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: 'Commit-message til feilende deploy: ${{ github.event.head_commit.message }}'
   deploy-to-prod:
     name: Deploy to prod
     runs-on: ubuntu-latest
-    needs: [ deploy-to-dev ]
+    needs: [ test-build-push, deploy-to-dev ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Deploy application to prod
         uses: nais/deploy/actions/deploy@v1
         env:
-          APIKEY: ${{ secrets.DAB_NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: nais/nais-prod-gcp.yaml
-          VAR: version=${{ env.IMAGE_TAG }}
+          VAR: image=${{ needs.test-build-push.outputs.image }}
+          TELEMETRY: ${{ needs.test-build-push.outputs.telemetry }}
+      - name: Slack Notification (deploy failure)
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_COLOR: danger
+          SLACK_USERNAME: Github Actions
+          SLACK_ICON: https://github.com/github.png?size=48
+          SLACK_TITLE: 'Veilarbdialog: deploy til prod feilet'
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_MESSAGE: 'Commit-message til feilende deploy: ${{ github.event.head_commit.message }}'
