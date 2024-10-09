@@ -7,7 +7,7 @@ metadata:
   labels:
     team: dab
 spec:
-  image: ghcr.io/navikt/veilarbdialog/veilarbdialog:{{version}}
+  image: {{image}}
   ingresses:
     - https://veilarbdialog.dev.nav.cloud.nais.io
     - https://veilarbdialog.intern.dev.nav.no
