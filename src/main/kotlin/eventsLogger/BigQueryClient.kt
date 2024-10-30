@@ -29,7 +29,7 @@ class BigQueryClientImplementation(@Value("\${application.gcp.projectId}") val p
     }
 
     val bigQuery = BigQueryOptions.newBuilder().setProjectId(projectId).build().service
-    val log = LoggerFactory.getLogger(this::class.java)
+    val log = LoggerFactory.getLogger(this.javaClass)
 
     override fun logEvent(eskaleringsvarselEntity: EskaleringsvarselEntity, eventType: EventType) {
         runCatching {
