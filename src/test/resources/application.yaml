@@ -132,9 +132,13 @@ application:
     henvendelse:
       maksalder:
         ms: 2000
+  gcp:
+    projectId: test
 wiremock:
   server:
     port: 0
 app:
   kafka:
     enabled: true
+
+
