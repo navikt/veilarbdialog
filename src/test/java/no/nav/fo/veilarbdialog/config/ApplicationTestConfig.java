@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.config;
 
+import eventsLogger.BigQueryClient;
 import io.getunleash.Unleash;
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
@@ -64,6 +65,11 @@ public class ApplicationTestConfig {
     @Bean
     Unleash unleash() {
         return mock(Unleash.class);
+    }
+
+    @Bean
+    BigQueryClient bigQueryClient() {
+        return mock(BigQueryClient.class);
     }
 
 }

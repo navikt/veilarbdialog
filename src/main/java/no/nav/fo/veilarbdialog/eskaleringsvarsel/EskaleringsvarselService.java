@@ -1,5 +1,7 @@
 package no.nav.fo.veilarbdialog.eskaleringsvarsel;
 
+import eventsLogger.BigQueryClient;
+import eventsLogger.EventType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
@@ -41,6 +43,7 @@ public class EskaleringsvarselService {
     private final OppfolgingV2Client oppfolgingClient;
     private final SistePeriodeService sistePeriodeService;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
+    private final BigQueryClient bigQueryClient;
 
     @Transactional
     public EskaleringsvarselEntity start(Fnr fnr, String begrunnelse, String overskrift, String tekst) {
@@ -102,6 +105,7 @@ public class EskaleringsvarselService {
         funksjonelleMetrikker.nyBrukernotifikasjon(true, BrukernotifikasjonsType.OPPGAVE);
         log.info("Eskaleringsvarsel sendt eventId={}", brukernotifikasjonId);
 
+        bigQueryClient.logEvent(eskaleringsvarselEntity, EventType.FORHAANDSVARSEL_OPPRETTET);
         return eskaleringsvarselEntity;
     }
 
@@ -123,7 +127,9 @@ public class EskaleringsvarselService {
 
         brukernotifikasjonService.bestillDone(eskaleringsvarsel.tilhorendeBrukernotifikasjonId());
 
-        return eskaleringsvarselRepository.hentVarsel(eskaleringsvarsel.varselId());
+        var eskaleringsvarselEntity = eskaleringsvarselRepository.hentVarsel(eskaleringsvarsel.varselId());
+        eskaleringsvarselEntity.ifPresent((varsel) -> bigQueryClient.logEvent(varsel, EventType.FORHAANDSVARSEL_INAKTIVERT));
+        return eskaleringsvarselEntity;
     }
 
     @Transactional

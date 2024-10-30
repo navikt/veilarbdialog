@@ -1,5 +1,7 @@
 package no.nav.fo.veilarbdialog.service;
 
+import eventsLogger.BigQueryClient;
+import eventsLogger.BigQueryClientImplementation;
 import lombok.Getter;
 import no.nav.common.token_client.builder.AzureAdTokenClientBuilder;
 import no.nav.common.token_client.builder.TokenXTokenClientBuilder;
@@ -45,6 +47,12 @@ public class ServiceConfig {
         return AzureAdTokenClientBuilder.builder()
                 .withNaisDefaults()
                 .buildOnBehalfOfTokenClient();
+    }
+
+    @Bean
+    @Profile("!local")
+    public BigQueryClient bigQueryClient(BigQueryClientImplementation bigQueryClient) {
+        return bigQueryClient;
     }
 
 }
