@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.service;
 
-import eventsLogger.BigQueryClient;
-import eventsLogger.BigQueryClientImplementation;
+import no.nav.veilarbdialog.eventsLogger.BigQueryClient;
+import no.nav.veilarbdialog.eventsLogger.BigQueryClientImplementation;
 import no.nav.common.token_client.builder.AzureAdTokenClientBuilder;
 import no.nav.common.token_client.builder.TokenXTokenClientBuilder;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;

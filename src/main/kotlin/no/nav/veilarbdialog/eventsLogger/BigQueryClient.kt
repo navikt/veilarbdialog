@@ -1,4 +1,4 @@
-package eventsLogger
+package no.nav.veilarbdialog.eventsLogger
 
 import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.InsertAllRequest

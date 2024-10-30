@@ -1,7 +1,5 @@
 package no.nav.fo.veilarbdialog.config;
 
-import eventsLogger.BigQueryClient;
-import eventsLogger.BigQueryClientImplementation;
 import io.micrometer.core.instrument.MeterRegistry;
 import net.javacrumbs.shedlock.core.DefaultLockingTaskExecutor;
 import net.javacrumbs.shedlock.core.LockProvider;

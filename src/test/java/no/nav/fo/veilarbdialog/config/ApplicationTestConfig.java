@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.config;
 
-import eventsLogger.BigQueryClient;
+import no.nav.veilarbdialog.eventsLogger.BigQueryClient;
 import io.getunleash.Unleash;
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
