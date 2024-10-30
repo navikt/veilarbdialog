@@ -5,9 +5,8 @@ import com.google.cloud.bigquery.InsertAllRequest
 import com.google.cloud.bigquery.TableId
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
+import kotlin.system.exitProcess
 
 enum class EventType {
     FORHAANDSVARSEL_OPPRETTET,
@@ -18,8 +17,7 @@ interface BigQueryClient {
     fun logEvent(eskaleringsvarselEntity: EskaleringsvarselEntity, eventType: EventType)
 }
 
-@Service
-class BigQueryClientImplementation(@Value("\${application.gcp.projectId}") val projectId: String): BigQueryClient {
+class BigQueryClientImplementation(projectId: String): BigQueryClient {
     val FORHAANSVARSEL_EVENTS = "FORHAANDSVARSEL_EVENTS"
     val DATASET_NAME = "aktivitet_metrikker"
     val forhaandsvarselEventsTable = TableId.of(DATASET_NAME, FORHAANSVARSEL_EVENTS)

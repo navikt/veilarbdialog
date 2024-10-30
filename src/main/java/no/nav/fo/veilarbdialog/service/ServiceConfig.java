@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.service;
 
+import com.google.api.client.util.Value;
 import no.nav.veilarbdialog.eventsLogger.BigQueryClient;
 import no.nav.veilarbdialog.eventsLogger.BigQueryClientImplementation;
 import no.nav.common.token_client.builder.AzureAdTokenClientBuilder;
@@ -13,6 +14,8 @@ import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class ServiceConfig {
+    @Value("${application.gcp.projectId}")
+    String gcpProjectId;
 
     @Bean
     @Profile("!local")
@@ -40,8 +43,8 @@ public class ServiceConfig {
 
     @Bean
     @Profile("!local")
-    public BigQueryClient bigQueryClient(BigQueryClientImplementation bigQueryClientImplementation) {
-        return bigQueryClientImplementation;
+    public BigQueryClient bigQueryClient() {
+        return new BigQueryClientImplementation(gcpProjectId);
     }
 
 }
