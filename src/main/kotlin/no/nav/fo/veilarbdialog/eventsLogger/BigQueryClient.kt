@@ -32,7 +32,7 @@ class BigQueryClientImplementation(projectId: String): BigQueryClient {
         runCatching {
             val forhaandsvarselRow = mapOf(
                 "id" to eskaleringsvarselEntity.varselId,
-                "opprettet" to eskaleringsvarselEntity.opprettetDato,
+                "opprettet" to eskaleringsvarselEntity.opprettetDato.toOffsetDateTime().toString(),
                 "timestamp" to ZonedDateTime.now().toOffsetDateTime().toString(),
                 "event" to eventType.name
             )
