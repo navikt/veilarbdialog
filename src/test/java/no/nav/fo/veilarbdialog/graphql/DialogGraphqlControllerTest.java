@@ -64,7 +64,8 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
                 Fnr.of(bruker.getFnr()),
                 "Fordi",
                 "VARSEL",
-                "tekst"
+                "tekst",
+                null
         ));
     }
 

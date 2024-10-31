@@ -74,7 +74,7 @@ class EksternVarslingKvitteringTest extends SpringBootTestBase {
         MockVeileder veileder = MockNavService.createVeileder(bruker);
 
         StartEskaleringDto startEskaleringDto =
-                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
+                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst", null);
         EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(veileder, startEskaleringDto);
 
         BrukernotifikasjonEntity opprinneligBrukernotifikasjon = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(startEskalering.tilhorendeDialogId(), BrukernotifikasjonsType.OPPGAVE).get(0);
