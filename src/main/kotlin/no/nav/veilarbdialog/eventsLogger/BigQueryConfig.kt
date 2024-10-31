@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Profile
 open class BigQueryConfig(@Value("\${application.gcp.projectId}") val projectId: String) {
 
     @Bean
-    @Profile("!local")
+//    @Profile("!local")
     open fun bigQueryClient(): BigQueryClient {
         return BigQueryClientImplementation(projectId)
     }
