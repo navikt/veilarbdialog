@@ -97,6 +97,10 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
     }
 
 
+    private StartEskaleringDto lagEskaleringsVarsel(MockBruker bruker) {
+        return new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst", null);
+    }
+
     @Test
     void start_eskalering_happy_case() {
 
@@ -171,7 +175,7 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
         String avsluttBegrunnelse = "Du har gjort aktiviteten vi ba om.";
         Fnr brukerFnr = Fnr.of(bruker.getFnr());
 
-        StartEskaleringDto startEskaleringDto = new StartEskaleringDto(brukerFnr, "begrunnelse", "overskrift", "tekst", null);
+        StartEskaleringDto startEskaleringDto = lagEskaleringsVarsel(bruker);
         EskaleringsvarselDto eskaleringsvarsel = dialogTestService.startEskalering(veileder, startEskaleringDto);
 
         StopEskaleringDto stopEskaleringDto = new StopEskaleringDto(brukerFnr, avsluttBegrunnelse, true);
@@ -219,7 +223,7 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
         String avsluttBegrunnelse = "Fordi ...";
         Fnr brukerFnr = Fnr.of(bruker.getFnr());
 
-        StartEskaleringDto startEskaleringDto = new StartEskaleringDto(brukerFnr, "begrunnelse", "overskrift", "tekst", null);
+        StartEskaleringDto startEskaleringDto = lagEskaleringsVarsel(bruker);
         EskaleringsvarselDto eskaleringsvarsel = dialogTestService.startEskalering(veileder, startEskaleringDto);
 
         StopEskaleringDto stopEskaleringDto = new StopEskaleringDto(brukerFnr, avsluttBegrunnelse, false);
@@ -263,8 +267,7 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
 
         MockVeileder veileder = MockNavService.createVeileder(bruker);
 
-        StartEskaleringDto startEskaleringDto =
-                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst", null);
+        StartEskaleringDto startEskaleringDto = lagEskaleringsVarsel(bruker);
         Response response = tryStartEskalering(veileder, startEskaleringDto);
 
         assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value());
@@ -280,8 +283,7 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
 
         MockVeileder veileder = MockNavService.createVeileder(bruker);
 
-        StartEskaleringDto startEskaleringDto =
-                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst", null);
+        StartEskaleringDto startEskaleringDto = lagEskaleringsVarsel(bruker);
         Response response = tryStartEskalering(veileder, startEskaleringDto);
 
         assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value());
@@ -293,8 +295,7 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
     void bruker_har_allerede_aktiv_eskalering() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
-        StartEskaleringDto startEskaleringDto =
-                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst", null);
+        StartEskaleringDto startEskaleringDto = lagEskaleringsVarsel(bruker);
         dialogTestService.startEskalering(veileder, startEskaleringDto);
         Response response = tryStartEskalering(veileder, startEskaleringDto);
         assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value());
@@ -304,8 +305,7 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
     void test_historikk() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
-        StartEskaleringDto startEskaleringDto =
-                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst", null);
+        StartEskaleringDto startEskaleringDto = lagEskaleringsVarsel(bruker);
         dialogTestService.startEskalering(veileder, startEskaleringDto);
         StopEskaleringDto stopEskaleringDto =
                 new StopEskaleringDto(Fnr.of(bruker.getFnr()), "avsluttbegrunnelse", false);
@@ -344,8 +344,7 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
 
-        StartEskaleringDto startEskaleringDto =
-                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "Dialog overskrift", "henvendelseTekst", null);
+        StartEskaleringDto startEskaleringDto = lagEskaleringsVarsel(bruker);
 
         for (int i = 0; i < antallKall; i++) {
             bakgrunnService.submit(() -> {
@@ -387,8 +386,7 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
     void hentGjeldendeSomVeilederUtenFnrParam() {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
-        StartEskaleringDto startEskaleringDto =
-                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst", null);
+        StartEskaleringDto startEskaleringDto = lagEskaleringsVarsel(bruker);
         dialogTestService.startEskalering(veileder, startEskaleringDto);
 
         veileder.createRequest()
@@ -400,15 +398,10 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
 
     @Test
     void send_done_naar_eskalering_lest_av_bruker() {
-
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
-        String begrunnelse = "Fordi ...";
-        String overskrift = "Dialog tittel";
-        String henvendelseTekst = "Henvendelsestekst... lang tekst";
 
-        StartEskaleringDto startEskaleringDto =
-                new StartEskaleringDto(Fnr.of(bruker.getFnr()), begrunnelse, overskrift, henvendelseTekst, null);
+        StartEskaleringDto startEskaleringDto = lagEskaleringsVarsel(bruker);
         EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(veileder, startEskaleringDto);
 
         lesHenvendelse(bruker, startEskalering.tilhorendeDialogId());
@@ -425,8 +418,7 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
     void unngaaDobleNotifikasjonerPaaEskaleringsvarsel() throws InterruptedException {
         MockBruker bruker = MockNavService.createHappyBruker();
         MockVeileder veileder = MockNavService.createVeileder(bruker);
-        StartEskaleringDto startEskaleringDto =
-                new StartEskaleringDto(Fnr.of(bruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst", null);
+        StartEskaleringDto startEskaleringDto = lagEskaleringsVarsel(bruker);
         var initialEndOffsets = KafkaTestUtils.getEndOffsets(brukerNotifikasjonBeskjedConsumer, brukernotifikasjonBeskjedTopic);
 
         dialogTestService.startEskalering(veileder, startEskaleringDto);
