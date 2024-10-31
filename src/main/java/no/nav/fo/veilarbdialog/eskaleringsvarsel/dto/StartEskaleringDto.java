@@ -6,6 +6,7 @@ public record StartEskaleringDto(
         Fnr fnr,
         String begrunnelse,
         String overskrift,
-        String tekst
+        String tekst,
+        String begrunnelseType
 ) {
 }

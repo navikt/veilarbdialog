@@ -259,6 +259,11 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-maven-lombok</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
 
         <!-- Kafka NB hvis vi drar inn common-java-modules:kafka kan vi ta bort denne -->
         <dependency>
@@ -391,6 +396,27 @@
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <version>${kotlin.version}</version>
+                <configuration>
+                    <compilerPlugins>
+                        <plugin>lombok</plugin>
+                    </compilerPlugins>
+                    <pluginOptions>
+                        <option>lombok:config=${project.basedir}/lombok.config</option>
+                    </pluginOptions>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-lombok</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                        <version>1.18.20</version>
+                        <scope>provided</scope>
+                    </dependency>
+                </dependencies>
                 <extensions>true</extensions> <!-- You can set this option
             to automatically take information about lifecycles -->
                 <executions>

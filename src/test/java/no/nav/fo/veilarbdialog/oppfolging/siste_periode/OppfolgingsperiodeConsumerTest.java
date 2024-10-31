@@ -121,7 +121,7 @@ class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
         opprettEllerEndreOppfolgingsperiodeForBruker(startOppfolging);
 
         StartEskaleringDto startEskaleringDto =
-                new StartEskaleringDto(Fnr.of(mockBruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst");
+                new StartEskaleringDto(Fnr.of(mockBruker.getFnr()), "begrunnelse", "overskrift", "henvendelseTekst", null);
         EskaleringsvarselDto startEskalering = dialogTestService.startEskalering(mockVeileder, startEskaleringDto);
 
         OppfolgingsperiodeV1 stopOppfolging = OppfolgingsperiodeV1.builder()

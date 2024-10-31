@@ -13,7 +13,7 @@ enum class EventType {
 }
 
 interface BigQueryClient {
-    fun logEvent(eskaleringsvarselEntity: EskaleringsvarselEntity, eventType: EventType)
+    fun logEvent(eskaleringsvarselEntity: EskaleringsvarselEntity, eventType: EventType, begrunnelseType: String? = null)
 }
 
 class BigQueryClientImplementation(projectId: String): BigQueryClient {
@@ -21,22 +21,26 @@ class BigQueryClientImplementation(projectId: String): BigQueryClient {
     val DATASET_NAME = "dialog_metrikker"
     val forhaandsvarselEventsTable = TableId.of(DATASET_NAME, FORHAANSVARSEL_EVENTS)
 
-    fun TableId.insertRequest(row: Map<String, Any>): InsertAllRequest {
+    private fun TableId.insertRequest(row: Map<String, Any>): InsertAllRequest {
         return InsertAllRequest.newBuilder(this).addRow(row).build()
     }
 
     val bigQuery = BigQueryOptions.newBuilder().setProjectId(projectId).build().service
     val log = LoggerFactory.getLogger(this.javaClass)
 
-    override fun logEvent(eskaleringsvarselEntity: EskaleringsvarselEntity, eventType: EventType) {
+    override fun logEvent(
+        eskaleringsvarselEntity: EskaleringsvarselEntity,
+        eventType: EventType,
+        begrunnelseType: String?
+    ) {
         runCatching {
             val forhaandsvarselRow = mapOf(
                 "id" to eskaleringsvarselEntity.varselId,
                 "opprettet" to eskaleringsvarselEntity.opprettetDato.toOffsetDateTime().toString(),
                 "timestamp" to ZonedDateTime.now().toOffsetDateTime().toString(),
-                "event" to eventType.name
-            )
-            val insertRequest =forhaandsvarselEventsTable.insertRequest(forhaandsvarselRow)
+                "event" to eventType.name,
+            ) + (begrunnelseType?.let { mapOf("begrunnelseType" to it) } ?: emptyMap<String, Any>())
+            val insertRequest = forhaandsvarselEventsTable.insertRequest(forhaandsvarselRow)
             insertWhileToleratingErrors(insertRequest)
         }
             .onFailure {
