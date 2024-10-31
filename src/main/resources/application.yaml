@@ -162,6 +162,8 @@ application:
     henvendelse:
       maksalder:
         ms: 172800000
+  gcp:
+    projectId: ${GCP_TEAM_PROJECT_ID}
 
 unleash:
   appName: ${NAIS_APP_NAME}

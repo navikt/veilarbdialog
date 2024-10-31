@@ -38,7 +38,7 @@ public class EskaleringsvarselController {
     @OnlyInternBruker
     public EskaleringsvarselDto start(@RequestBody StartEskaleringDto startEskaleringDto) {
         authService.sjekkTilgangTilPerson(startEskaleringDto.fnr());
-        EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselService.start(startEskaleringDto.fnr(), startEskaleringDto.begrunnelse(), startEskaleringDto.overskrift(), startEskaleringDto.tekst());
+        EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselService.start(startEskaleringDto);
         return EskaleringsvarselDto.fromEntity(eskaleringsvarselEntity);
     }
 
@@ -48,7 +48,7 @@ public class EskaleringsvarselController {
         authService.sjekkTilgangTilPerson(stopEskaleringDto.fnr());
         NavIdent navIdent = authService.getInnloggetVeilederIdent();
 
-        Optional<EskaleringsvarselEntity> eskaleringsvarselEntity = eskaleringsvarselService.stop(stopEskaleringDto.fnr(), stopEskaleringDto.begrunnelse(), stopEskaleringDto.skalSendeHenvendelse(), navIdent);
+        Optional<EskaleringsvarselEntity> eskaleringsvarselEntity = eskaleringsvarselService.stop(stopEskaleringDto, navIdent);
         if (eskaleringsvarselEntity.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ingen gjeldende eskaleringsvarsel");
         }

@@ -132,6 +132,8 @@ application:
     henvendelse:
       maksalder:
         ms: 2000
+  gcp:
+    projectId: test
 wiremock:
   server:
     port: 0

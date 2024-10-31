@@ -1,13 +1,11 @@
 package no.nav.fo.veilarbdialog.config;
 
+import no.nav.fo.veilarbdialog.eventsLogger.BigQueryClient;
 import io.getunleash.Unleash;
-import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient;
 import no.nav.common.token_client.client.AzureAdOnBehalfOfTokenClient;
 import no.nav.common.token_client.client.TokenXOnBehalfOfTokenClient;
-import no.nav.fo.veilarbdialog.db.DataSourceConfig;
 import no.nav.fo.veilarbdialog.db.dao.LocalDatabaseSingleton;
-import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -64,6 +62,11 @@ public class ApplicationTestConfig {
     @Bean
     Unleash unleash() {
         return mock(Unleash.class);
+    }
+
+    @Bean
+    BigQueryClient bigQueryClient() {
+        return mock(BigQueryClient.class);
     }
 
 }
