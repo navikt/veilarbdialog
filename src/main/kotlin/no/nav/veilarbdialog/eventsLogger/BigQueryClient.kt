@@ -6,7 +6,6 @@ import com.google.cloud.bigquery.TableId
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
 import org.slf4j.LoggerFactory
 import java.time.ZonedDateTime
-import kotlin.system.exitProcess
 
 enum class EventType {
     FORHAANDSVARSEL_OPPRETTET,

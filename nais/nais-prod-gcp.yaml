@@ -115,10 +115,10 @@ spec:
             envVarPrefix: DB
             users:
               - name: datastream
-    bigQueryDatasets:
-      - description: Funksjonelle metrikker for arbeidsrettet dialog
-        name: dialog_metrikker
-        permission: READWRITE
+#    bigQueryDatasets:
+#      - description: Funksjonelle metrikker for arbeidsrettet dialog
+#        name: dialog_metrikker
+#        permission: READWRITE
   env:
     - name: APP_CLUSTER_NAME
       value: prod-gcp
