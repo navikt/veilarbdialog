@@ -18,7 +18,7 @@ interface BigQueryClient {
 
 class BigQueryClientImplementation(projectId: String): BigQueryClient {
     val FORHAANSVARSEL_EVENTS = "FORHAANDSVARSEL_EVENTS"
-    val DATASET_NAME = "aktivitet_metrikker"
+    val DATASET_NAME = "dialog_metrikker"
     val forhaandsvarselEventsTable = TableId.of(DATASET_NAME, FORHAANSVARSEL_EVENTS)
 
     fun TableId.insertRequest(row: Map<String, Any>): InsertAllRequest {
