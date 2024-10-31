@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.eskaleringsvarsel;
 
-import no.nav.veilarbdialog.eventsLogger.BigQueryClient;
-import no.nav.veilarbdialog.eventsLogger.EventType;
+import no.nav.fo.veilarbdialog.eventsLogger.BigQueryClient;
+import no.nav.fo.veilarbdialog.eventsLogger.EventType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.client.aktoroppslag.AktorOppslagClient;
