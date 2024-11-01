@@ -52,7 +52,7 @@ public class RestMapper {
                 )
                 .setSisteDato(sisteHenvendelse
                         .map(HenvendelseData::getSendt)
-                        .orElse(null)
+                        .orElse(dialogData.getOpprettetDato())
                 )
                 .setSisteTekst(sisteHenvendelse
                         .map(HenvendelseData::getTekst)
