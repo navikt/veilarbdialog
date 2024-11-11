@@ -114,7 +114,8 @@ public class BrukernotifikasjonService {
                             brukernotifikasjonEntity.epostBody(),
                             brukernotifikasjonEntity.smsText(),
                             brukernotifikasjonEntity.lenke(),
-                            brukernotifikasjonEntity.type()
+                            brukernotifikasjonEntity.type(),
+                            brukernotifikasjonEntity.fnr()
                     ));
                     brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.id(), BrukernotifikasjonBehandlingStatus.SENDT);
                 }

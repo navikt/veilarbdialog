@@ -1,10 +1,16 @@
 package no.nav.fo.veilarbdialog.minsidevarsler
 
+import lombok.`var`
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType.BESKJED
+import no.nav.fo.veilarbdialog.domain.Person.Fnr
 import no.nav.tms.varsel.action.EksternKanal
 import no.nav.tms.varsel.action.Produsent
+import no.nav.tms.varsel.action.Sensitivitet
+import no.nav.tms.varsel.action.Tekst
+import no.nav.tms.varsel.action.Varseltype
 import no.nav.tms.varsel.builder.VarselActionBuilder
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -20,7 +26,8 @@ data class PendingVarsel(
     val epostBody: String,
     val smsText: String,
     val lenke: URL,
-    val type: BrukernotifikasjonsType
+    val type: BrukernotifikasjonsType,
+    val fnr: Fnr
 )
 
 @Service
@@ -32,31 +39,28 @@ open class MinsideVarselProducer(
     private val cluster: String,
     @Value("\${spring.application.name}")
     private val applicationName: String,
+    @Value("\${application.topic.ut.minside.varsel}")
+    private val topic: String,
 ) {
 
     open fun publiserVarselPåKafka(varsel: PendingVarsel) {
-        /*
-        new BeskjedInputBuilder()
-            .withTidspunkt(LocalDateTime.now(ZoneOffset.UTC))
-            .withTekst(beskjedInfo.getMelding())
-            .withLink(beskjedInfo.getLink())
-            .withSikkerhetsnivaa(BESKJED_SIKKERHETSNIVAA)
-            .withEksternVarsling(true)
-            .withPrefererteKanaler(PreferertKanal.SMS)
-            .withSmsVarslingstekst(beskjedInfo.getSmsTekst())
-            .withEpostVarslingstittel(beskjedInfo.getEpostTitel())
-            .withEpostVarslingstekst(beskjedInfo.getEpostBody())
-            .withSynligFremTil(LocalDateTime.now(ZoneOffset.UTC).plusMonths(1))
-            .build();
-         */
-        VarselActionBuilder.opprett {
+        val melding = VarselActionBuilder.opprett {
             varselId = varsel.varselId.toString()
+            type = if (varsel.type == BESKJED) Varseltype.Beskjed else Varseltype.Oppgave
+            ident = varsel.fnr.get()
+            sensitivitet = if (varsel.type == BESKJED) Sensitivitet.Substantial else Sensitivitet.High
+            link = varsel.lenke.toString()
+            aktivFremTil = ZonedDateTime.now().plusMonths(1)
+            tekst = Tekst(
+                spraakkode = "nb",
+                tekst = varsel.melding,
+                default = true
+            )
             eksternVarsling {
                 preferertKanal = EksternKanal.SMS
                 smsVarslingstekst = varsel.smsText
                 epostVarslingstittel = varsel.epostTittel
                 epostVarslingstekst = varsel.epostBody
-                kanBatches = if (varsel.type == BESKJED) true else false
                 utsettSendingTil = ZonedDateTime.now().plusMinutes(5)
             }
             produsent = Produsent(
@@ -65,7 +69,7 @@ open class MinsideVarselProducer(
                 appnavn = applicationName
             )
         }
-//        kafkaTemplate.send()
+        kafkaTemplate.send(topic, varsel.varselId.toString(), melding)
     }
 
 }
