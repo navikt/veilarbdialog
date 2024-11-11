@@ -1,16 +1,10 @@
 package no.nav.fo.veilarbdialog.minsidevarsler
 
-import lombok.`var`
+import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType.BESKJED
-import no.nav.fo.veilarbdialog.domain.Person.Fnr
-import no.nav.tms.varsel.action.EksternKanal
-import no.nav.tms.varsel.action.Produsent
-import no.nav.tms.varsel.action.Sensitivitet
-import no.nav.tms.varsel.action.Tekst
-import no.nav.tms.varsel.action.Varseltype
+import no.nav.tms.varsel.action.*
 import no.nav.tms.varsel.builder.VarselActionBuilder
-import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service

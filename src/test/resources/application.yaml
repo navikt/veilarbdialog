@@ -114,17 +114,21 @@ application:
     api:
       url: http://localhost:${wiremock.server.port}/pdl
   topic:
-    ut:
-      brukernotifikasjon:
-        oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
-        beskjed: min-side.aapen-brukernotifikasjon-beskjed-v1
-        done: min-side.aapen-brukernotifikasjon-done-v1
-      endringPaaDialog: dab.endring-paa-dialog-v1
     inn:
       oppfolgingsperiode: pto.oppfolgingsperiode-v1
       kvpavsluttet: pto.kvp-avsluttet-v1
       eksternVarselKvittering: teamdokumenthandtering.aapen-dok-notifikasjon-status
       aktivitetskortIdMapping: dab.aktivitetskort-idmapping-v1
+      minside:
+        varsel-hendelse: aapen-varsel-hendelse-v1
+    ut:
+      minside:
+        varsel: aapen-brukervarsel-v1
+      brukernotifikasjon:
+        oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
+        beskjed: min-side.aapen-brukernotifikasjon-beskjed-v1
+        done: min-side.aapen-brukernotifikasjon-done-v1
+      endringPaaDialog: dab.endring-paa-dialog-v1
   brukernotifikasjon:
     grace:
       periode:
