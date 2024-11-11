@@ -28,6 +28,7 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      auto-commit-interval: 100ms
     listener:
       ack-mode: record
     producer:

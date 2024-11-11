@@ -39,9 +39,9 @@ public class BrukernotifikasjonRepository {
                     DatabaseUtils.hentLocalDateTime(rs, "opprettet"),
                     DatabaseUtils.hentLocalDateTime(rs, "forsokt_sendt"),
                     rs.getString("melding"),
-                    rs.getString("smstekst"),
-                    rs.getString("eposttittel"),
-                    rs.getString("epostbody"),
+                    rs.getString("smstekst"), // TODO: Denne brukes ikke
+                    rs.getString("eposttittel"),// TODO: Denne brukes ikke
+                    rs.getString("epostbody"),// TODO: Denne brukes ikke
                     DatabaseUtils.hentMaybeURL(rs, "lenke")
             );
 

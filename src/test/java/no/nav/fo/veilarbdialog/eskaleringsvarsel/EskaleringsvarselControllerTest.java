@@ -73,20 +73,15 @@ class EskaleringsvarselControllerTest extends SpringBootTestBase {
 
     @Autowired
     DialogTestService dialogTestService;
-
     @Autowired
     KafkaTestService kafkaTestService;
-
     @Autowired
     BrukernotifikasjonService brukernotifikasjonService;
-
     @Autowired
     ScheduleRessurs scheduleRessurs;
 
     Consumer<String, String> minsideVarselConsumer;
-
     Consumer<NokkelInput, BeskjedInput> brukerNotifikasjonBeskjedConsumer;
-
     Consumer<NokkelInput, DoneInput> brukerNotifikasjonDoneConsumer;
 
     @BeforeEach

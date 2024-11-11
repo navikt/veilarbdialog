@@ -15,10 +15,6 @@ import java.util.*
 data class PendingVarsel(
     val varselId: UUID,
     val melding: String,
-//brukernotifikasjonEntity.oppfolgingsPeriodeId().toString(),
-    val epostTittel: String,
-    val epostBody: String,
-    val smsText: String,
     val lenke: URL,
     val type: BrukernotifikasjonsType,
     val fnr: Fnr
@@ -52,9 +48,9 @@ open class MinsideVarselProducer(
             )
             eksternVarsling {
                 preferertKanal = EksternKanal.SMS
-                smsVarslingstekst = varsel.smsText
-                epostVarslingstittel = varsel.epostTittel
-                epostVarslingstekst = varsel.epostBody
+                smsVarslingstekst = null
+                epostVarslingstittel = null
+                epostVarslingstekst = null
                 utsettSendingTil = ZonedDateTime.now().plusMinutes(5)
             }
             produsent = Produsent(

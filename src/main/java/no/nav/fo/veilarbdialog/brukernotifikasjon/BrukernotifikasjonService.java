@@ -110,9 +110,6 @@ public class BrukernotifikasjonService {
                             brukernotifikasjonEntity.eventId(),
                             brukernotifikasjonEntity.melding(),
 //                            brukernotifikasjonEntity.oppfolgingsPeriodeId().toString(),
-                            brukernotifikasjonEntity.epostTittel(),
-                            brukernotifikasjonEntity.epostBody(),
-                            brukernotifikasjonEntity.smsText(),
                             brukernotifikasjonEntity.lenke(),
                             brukernotifikasjonEntity.type(),
                             brukernotifikasjonEntity.fnr()
