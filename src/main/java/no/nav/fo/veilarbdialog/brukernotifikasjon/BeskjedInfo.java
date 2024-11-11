@@ -7,7 +7,7 @@ import java.net.URL;
 
 @Getter
 @Builder
-class BeskjedInfo {
+public class BeskjedInfo {
     private final String brukernotifikasjonId;
     private final String melding;
     private final String oppfolgingsperiode;

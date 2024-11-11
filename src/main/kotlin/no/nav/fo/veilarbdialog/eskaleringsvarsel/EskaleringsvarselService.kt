@@ -78,12 +78,12 @@ open class EskaleringsvarselService(
         dialogDataService.sendPaaKafka(dialogData.aktorId)
         dialogDataService.markerDialogSomLest(dialogData.id)
 
-        val brukernotifikasjonId = UUID.randomUUID()
+        val varselId = UUID.randomUUID()
         val gjeldendeOppfolgingsperiodeId =
             sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(AktorId.of(dialogData.aktorId))
 
         val brukernotifikasjon = Brukernotifikasjon(
-            brukernotifikasjonId,
+            varselId,
             dialogData.id,
             stansVarsel.fnr,
             BrukernotifikasjonTekst.OPPGAVE_BRUKERNOTIFIKASJON_TEKST,
@@ -104,7 +104,7 @@ open class EskaleringsvarselService(
         )
 
         funksjonelleMetrikker.nyBrukernotifikasjon(true, BrukernotifikasjonsType.OPPGAVE)
-        log.info("Eskaleringsvarsel sendt eventId={}", brukernotifikasjonId)
+        log.info("Eskaleringsvarsel sendt varselId={}", varselId)
 
         bigQueryClient.logEvent(eskaleringsvarselEntity, EventType.FORHAANDSVARSEL_OPPRETTET, stansVarsel.begrunnelseType)
         return eskaleringsvarselEntity

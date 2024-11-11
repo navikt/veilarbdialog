@@ -389,6 +389,11 @@
             <artifactId>shedlock-provider-jdbc-template</artifactId>
             <version>${shedlock.version}</version>
         </dependency>
+        <dependency>
+            <groupId>no.nav.tms.varsel</groupId>
+            <artifactId>kotlin-builder</artifactId>
+            <version>2.1.0</version>
+        </dependency>
 
     </dependencies>
 
