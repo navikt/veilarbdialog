@@ -1,11 +1,16 @@
 package no.nav.fo.veilarbdialog.minsidevarsler
 
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType.BESKJED
+import no.nav.tms.varsel.action.EksternKanal
+import no.nav.tms.varsel.action.Produsent
 import no.nav.tms.varsel.builder.VarselActionBuilder
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import java.net.URL
-import java.util.UUID
+import java.time.ZonedDateTime
+import java.util.*
 
 data class PendingVarsel(
     val varselId: UUID,
@@ -20,7 +25,13 @@ data class PendingVarsel(
 
 @Service
 open class MinsideVarselProducer(
-    val kafkaTemplate: KafkaTemplate<String, String>
+    val kafkaTemplate: KafkaTemplate<String, String>,
+    @Value("\${application.namespace}")
+    private val namespace: String,
+    @Value("\${application.cluster}")
+    private val cluster: String,
+    @Value("\${spring.application.name}")
+    private val applicationName: String,
 ) {
 
     open fun publiserVarselPåKafka(varsel: PendingVarsel) {
@@ -41,8 +52,18 @@ open class MinsideVarselProducer(
         VarselActionBuilder.opprett {
             varselId = varsel.varselId.toString()
             eksternVarsling {
-
+                preferertKanal = EksternKanal.SMS
+                smsVarslingstekst = varsel.smsText
+                epostVarslingstittel = varsel.epostTittel
+                epostVarslingstekst = varsel.epostBody
+                kanBatches = if (varsel.type == BESKJED) true else false
+                utsettSendingTil = ZonedDateTime.now().plusMinutes(5)
             }
+            produsent = Produsent(
+                cluster = cluster,
+                namespace = namespace,
+                appnavn = applicationName
+            )
         }
 //        kafkaTemplate.send()
     }
