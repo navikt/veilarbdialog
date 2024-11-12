@@ -37,7 +37,6 @@ public class BrukernotifikasjonService {
 
     private final OppfolgingV2Client oppfolgingClient;
     private final BrukernotifikasjonRepository brukernotifikasjonRepository;
-    private final KafkaTemplate<NokkelInput, DoneInput> kafkaDoneProducer;
     private final VarselDAO varselDAO;
     private final KvitteringDAO kvitteringDAO;
     private final KvitteringMetrikk kvitteringMetrikk;

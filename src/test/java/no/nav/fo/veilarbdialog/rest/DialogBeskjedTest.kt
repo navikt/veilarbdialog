@@ -11,7 +11,7 @@ import no.nav.fo.veilarbdialog.domain.DialogDTO
 import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO
 import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
-import no.nav.fo.veilarbdialog.service.ScheduleRessurs
+import no.nav.fo.veilarbdialog.minsidevarsler.ScheduleSendBrukernotifikasjonerForUlesteDialoger
 import no.nav.fo.veilarbdialog.util.KafkaTestService
 import no.nav.tms.varsel.action.OpprettVarsel
 import org.apache.kafka.clients.consumer.Consumer
@@ -36,7 +36,7 @@ import java.util.Date
 
 internal class DialogBeskjedTest(
     @Autowired
-    var scheduleRessurs: ScheduleRessurs,
+    var scheduleRessurs: ScheduleSendBrukernotifikasjonerForUlesteDialoger,
     @Autowired
     var brukernotifikasjonRepository: BrukernotifikasjonRepository,
     @Autowired

@@ -16,7 +16,7 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder
-import no.nav.fo.veilarbdialog.service.ScheduleRessurs
+import no.nav.fo.veilarbdialog.minsidevarsler.ScheduleSendBrukernotifikasjonerForUlesteDialoger
 import no.nav.fo.veilarbdialog.util.DialogTestService
 import no.nav.fo.veilarbdialog.util.KafkaTestService
 import no.nav.tms.varsel.action.InaktiverVarsel
@@ -56,9 +56,9 @@ internal class EskaleringsvarselControllerTest(
     @Autowired
     var brukernotifikasjonService: BrukernotifikasjonService,
     @Autowired
-    var scheduleRessurs: ScheduleRessurs,
+    var scheduleSendBrukernotifikasjonerForUlesteDialoger: ScheduleSendBrukernotifikasjonerForUlesteDialoger,
 
-) : SpringBootTestBase() {
+    ) : SpringBootTestBase() {
     private val log = LoggerFactory.getLogger(EskaleringsvarselController::class.java)
 
     var minsideVarselConsumer: Consumer<String?, String?>? = null
@@ -397,7 +397,7 @@ internal class EskaleringsvarselControllerTest(
 
         Thread.sleep(2000L)
         // Batchen bestiller beskjeder ved nye dialoger (etter 1000 ms)
-        scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger()
+        scheduleSendBrukernotifikasjonerForUlesteDialoger.sendBrukernotifikasjonerForUlesteDialoger()
         brukernotifikasjonService.sendPendingBrukernotifikasjoner()
 
         // sjekk at det er blitt sendt en oppgave
