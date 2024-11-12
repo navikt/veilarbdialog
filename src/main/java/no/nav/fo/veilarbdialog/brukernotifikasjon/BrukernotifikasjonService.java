@@ -44,29 +44,13 @@ import java.util.concurrent.CompletableFuture;
 public class BrukernotifikasjonService {
     private final Logger secureLogs = LoggerFactory.getLogger("SecureLog");
 
-    private static final int OPPGAVE_SIKKERHETSNIVAA = 4;
-    private static final int BESKJED_SIKKERHETSNIVAA = 3;
-
     private final OppfolgingV2Client oppfolgingClient;
     private final BrukernotifikasjonRepository brukernotifikasjonRepository;
-    private final KafkaTemplate<NokkelInput, OppgaveInput> kafkaOppgaveProducer;
-    private final KafkaTemplate<NokkelInput, BeskjedInput> kafkaBeskjedProducer;
     private final KafkaTemplate<NokkelInput, DoneInput> kafkaDoneProducer;
     private final VarselDAO varselDAO;
     private final KvitteringDAO kvitteringDAO;
     private final KvitteringMetrikk kvitteringMetrikk;
     private final MinsideVarselProducer minsideVarselProducer;
-
-    @Value("${application.topic.ut.brukernotifikasjon.oppgave}")
-    private String oppgaveTopic;
-    @Value("${application.topic.ut.brukernotifikasjon.beskjed}")
-    private String beskjedTopic;
-    @Value("${application.topic.ut.brukernotifikasjon.done}")
-    private String doneTopic;
-    @Value("${spring.application.name}")
-    String applicationName;
-    @Value("${application.namespace}")
-    String namespace;
 
     public BrukernotifikasjonEntity bestillBrukernotifikasjon(Brukernotifikasjon brukernotifikasjon, AktorId aktorId) {
         BrukernotifikasjonInsert insert = new BrukernotifikasjonInsert(
@@ -133,7 +117,7 @@ public class BrukernotifikasjonService {
                             brukernotifikasjonEntity.eventId().toString(),
                             brukernotifikasjonEntity.oppfolgingsPeriodeId().toString()
                     );
-                    sendDone(brukernotifikasjonEntity.fnr(), doneInfo);
+                    minsideVarselProducer.publiserInaktiveringsMeldingPåKafka(doneInfo);
                     brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.id(), BrukernotifikasjonBehandlingStatus.AVSLUTTET);
                 }
         );
@@ -164,29 +148,6 @@ public class BrukernotifikasjonService {
 
     public BrukernotifikasjonEntity hentBrukernotifikasjon(long brukernotifikasjonId) {
         return brukernotifikasjonRepository.hentBrukernotifikasjon(brukernotifikasjonId).orElseThrow();
-    }
-
-    @SneakyThrows
-    public void sendDone(Fnr fnr, DoneInfo doneInfo) {
-        NokkelInput nokkel = NokkelInput.newBuilder()
-                .setAppnavn(applicationName)
-                .setNamespace(namespace)
-                .setFodselsnummer(fnr.get())
-                .setGrupperingsId(doneInfo.getOppfolgingsperiode())
-                .setEventId(doneInfo.getEventId())
-                .build();
-
-        LocalDateTime localUTCtime = doneInfo.avsluttetTidspunkt.toLocalDateTime().atZone(ZoneOffset.UTC).toLocalDateTime();
-
-        // Tidspunkt skal ifølge doc være UTC
-        DoneInput done = new DoneInputBuilder().withTidspunkt(localUTCtime).build();
-
-        final ProducerRecord<NokkelInput, DoneInput> kafkaMelding = new ProducerRecord<>(doneTopic, nokkel, done);
-
-        CompletableFuture<SendResult<NokkelInput, DoneInput>> future = kafkaDoneProducer.send(kafkaMelding);
-        kafkaDoneProducer.flush();
-        future.get();
-        log.info("Sendt done for brukernotifikasjonsid: {}", doneInfo.getEventId());
     }
 
 }

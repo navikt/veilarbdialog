@@ -3,8 +3,10 @@ package no.nav.fo.veilarbdialog.minsidevarsler
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType.BESKJED
+import no.nav.fo.veilarbdialog.brukernotifikasjon.DoneInfo
 import no.nav.tms.varsel.action.*
 import no.nav.tms.varsel.builder.VarselActionBuilder
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -32,6 +34,7 @@ open class MinsideVarselProducer(
     @Value("\${application.topic.ut.minside.varsel}")
     private val topic: String,
 ) {
+    private val log = LoggerFactory.getLogger(MinsideVarselProducer::class.java)
 
     open fun publiserVarselPåKafka(varsel: PendingVarsel) {
         val melding = VarselActionBuilder.opprett {
@@ -60,6 +63,19 @@ open class MinsideVarselProducer(
             )
         }
         kafkaTemplate.send(topic, varsel.varselId.toString(), melding)
+    }
+
+    open fun publiserInaktiveringsMeldingPåKafka(doneInfo: DoneInfo) {
+        val melding = VarselActionBuilder.inaktiver {
+            this.varselId = doneInfo.eventId
+            this.produsent = Produsent(
+                cluster = cluster,
+                namespace = namespace,
+                appnavn = applicationName
+            )
+        }
+        kafkaTemplate.send(topic, doneInfo.eventId, melding)
+        log.info("Sendt done for brukernotifikasjonsid: {}", doneInfo.getEventId());
     }
 
 }

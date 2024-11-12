@@ -1,7 +1,5 @@
 package no.nav.fo.veilarbdialog.rest
 
-import no.nav.brukernotifikasjon.schemas.input.DoneInput
-import no.nav.brukernotifikasjon.schemas.input.NokkelInput
 import no.nav.common.json.JsonUtils
 import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus
@@ -29,6 +27,7 @@ import org.springframework.kafka.test.utils.KafkaTestUtils
 import java.sql.Types
 import java.time.Instant
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.tms.varsel.action.InaktiverVarsel
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions.assertSoftly
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -46,8 +45,6 @@ internal class DialogBeskjedTest(
     var brukernotifikasjonService: BrukernotifikasjonService,
     @Value("\${application.topic.ut.minside.varsel}")
     private val minsideVarselTopic: String,
-    @Value("\${application.topic.ut.brukernotifikasjon.done}")
-    private val brukernotifikasjonDoneTopic: String,
 ) : SpringBootTestBase() {
 
     init {
@@ -55,12 +52,10 @@ internal class DialogBeskjedTest(
     }
 
     var minsideVarselConsumer: Consumer<String, String>? = null
-    var brukerNotifikasjonDoneConsumer: Consumer<NokkelInput, DoneInput>? = null
 
     @BeforeEach
     fun setupL() {
         minsideVarselConsumer = kafkaTestService.createStringStringConsumer(minsideVarselTopic)
-        brukerNotifikasjonDoneConsumer = kafkaTestService.createAvroAvroConsumer(brukernotifikasjonDoneTopic) as Consumer<NokkelInput, DoneInput>?
     }
 
     private fun hentOpprettetVarselKafkaTopic(): OpprettVarsel {
@@ -74,6 +69,15 @@ internal class DialogBeskjedTest(
         val opprettVarsel =
             JsonUtils.fromJson<OpprettVarsel>(brukernotifikasjonRecord.value(), OpprettVarsel::class.java)
         return opprettVarsel
+    }
+
+    private fun hentInaktiveringFraKafka(): InaktiverVarsel {
+        val doneRecord = KafkaTestUtils.getSingleRecord<String, String>(
+                minsideVarselConsumer,
+                minsideVarselTopic,
+                KafkaTestService.DEFAULT_WAIT_TIMEOUT
+            )
+        return JsonUtils.fromJson(doneRecord.value(), InaktiverVarsel::class.java)
     }
 
     @Test
@@ -104,7 +108,7 @@ internal class DialogBeskjedTest(
             BrukernotifikasjonsType.BESKJED
         )[0]
 
-        SoftAssertions.assertSoftly {
+        assertSoftly {
             assertions: SoftAssertions? ->
             assertions!!.assertThat(brukernotifikasjonEntity.dialogId).isEqualTo(dialog.getId().toLong())
             assertions.assertThat<BrukernotifikasjonsType?>(brukernotifikasjonEntity.type)
@@ -120,14 +124,7 @@ internal class DialogBeskjedTest(
 
         brukernotifikasjonService.sendDoneBrukernotifikasjoner()
 
-        val doneRecord =
-            KafkaTestUtils.getSingleRecord<NokkelInput, DoneInput>(
-                brukerNotifikasjonDoneConsumer,
-                brukernotifikasjonDoneTopic,
-                KafkaTestService.DEFAULT_WAIT_TIMEOUT
-            )
-
-        val nokkel = doneRecord.key()
+        hentInaktiveringFraKafka()
 
         Assertions.assertThat(mockBruker.fnr).isEqualTo(opprettVarsel.ident)
     }
@@ -259,22 +256,16 @@ internal class DialogBeskjedTest(
 
         brukernotifikasjonService.sendDoneBrukernotifikasjoner()
 
-        val doneRecord =
-            KafkaTestUtils.getSingleRecord<NokkelInput?, DoneInput?>(
-                brukerNotifikasjonDoneConsumer,
-                brukernotifikasjonDoneTopic,
-                KafkaTestService.DEFAULT_WAIT_TIMEOUT
-            )
+        val doneRecord = hentInaktiveringFraKafka()
 
         assertTrue(
             kafkaTestService.harKonsumertAlleMeldinger(
-                brukernotifikasjonDoneTopic,
-                brukerNotifikasjonDoneConsumer
+                minsideVarselTopic,
+                minsideVarselConsumer
             )
         )
 
-        val nokkel = doneRecord.key()
-        assertThat(mockBruker.fnr).isEqualTo(nokkel.fodselsnummer)
+        assertThat(opprettVarsel.varselId).isEqualTo(doneRecord.varselId)
     }
 
     @Test
@@ -340,22 +331,16 @@ internal class DialogBeskjedTest(
 
         brukernotifikasjonService.sendDoneBrukernotifikasjoner()
 
-        val doneRecord =
-            KafkaTestUtils.getSingleRecord<NokkelInput?, DoneInput?>(
-                brukerNotifikasjonDoneConsumer,
-                brukernotifikasjonDoneTopic,
-                KafkaTestService.DEFAULT_WAIT_TIMEOUT
-            )
+        val doneRecord = hentInaktiveringFraKafka()
 
         assertTrue(
             kafkaTestService.harKonsumertAlleMeldinger(
-                brukernotifikasjonDoneTopic,
-                brukerNotifikasjonDoneConsumer
+                minsideVarselTopic,
+                minsideVarselConsumer,
             )
         )
 
-        val nokkel = doneRecord.key()
-        assertThat(mockBruker.fnr).isEqualTo(nokkel.fodselsnummer)
+        assertThat(opprettVarsel.varselId).isEqualTo(doneRecord.varselId)
     }
 
 
@@ -396,20 +381,14 @@ internal class DialogBeskjedTest(
 
         brukernotifikasjonService.sendDoneBrukernotifikasjoner()
 
-        val doneRecord =
-            KafkaTestUtils.getSingleRecord<NokkelInput?, DoneInput?>(
-                brukerNotifikasjonDoneConsumer,
-                brukernotifikasjonDoneTopic,
-                KafkaTestService.DEFAULT_WAIT_TIMEOUT
-            )
+        hentInaktiveringFraKafka()
 
         assertTrue(
             kafkaTestService.harKonsumertAlleMeldinger(
-                brukernotifikasjonDoneTopic,
-                brukerNotifikasjonDoneConsumer
+                minsideVarselTopic,
+                minsideVarselConsumer,
             )
         )
-
 
         // Hy henvendelse samme dialog
         val sammeDialog = mockVeileder.createRequest()
