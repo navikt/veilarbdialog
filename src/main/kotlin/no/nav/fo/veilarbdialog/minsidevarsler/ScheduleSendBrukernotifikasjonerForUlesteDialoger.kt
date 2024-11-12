@@ -4,23 +4,18 @@ import lombok.RequiredArgsConstructor
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import no.nav.common.client.aktoroppslag.AktorOppslagClient
 import no.nav.common.types.identer.AktorId
-import no.nav.fo.veilarbdialog.brukernotifikasjon.Brukernotifikasjon
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import no.nav.fo.veilarbdialog.service.DialogDataService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
-import java.util.function.Consumer
 
 @Component
 @RequiredArgsConstructor
@@ -50,34 +45,30 @@ open class ScheduleSendBrukernotifikasjonerForUlesteDialoger(
 
         log.info("Varsler (beskjed): {} brukere", dialogIder.size)
 
-        dialogIder.forEach(
-            Consumer { dialogId: Long? ->
-                val dialogData = dialogDAO.hentDialog(dialogId!!)
-                val fnr = aktorOppslagClient.hentFnr(AktorId.of(dialogData.aktorId))
+        dialogIder.forEach { dialogId ->
+            val dialogData = dialogDAO.hentDialog(dialogId)
+            val fnr = aktorOppslagClient.hentFnr(AktorId.of(dialogData.aktorId))
 
-                val oppfolgingsperiode = dialogData.oppfolgingsperiode
+            val oppfolgingsperiode = dialogData.oppfolgingsperiode
 
-                val brukernotifikasjon = Brukernotifikasjon(
-                    MinSideVarselId(UUID.randomUUID()),
-                    dialogData.id,
-                    fnr,
-                    BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST,
-                    oppfolgingsperiode,
-                    BrukernotifikasjonsType.BESKJED,
-                    dialogDataService.utledDialogLink(dialogId)
+            val varselOmUlestMelding = DialogVarsel.varselOmNyMelding(
+                dialogData.id,
+                fnr,
+                oppfolgingsperiode,
+                dialogDataService.utledDialogLink(dialogId)
+            )
+
+            try {
+                brukernotifikasjonService.bestillVarsel(
+                    varselOmUlestMelding,
+                    AktorId.of(dialogData.aktorId)
                 )
-
-                try {
-                    brukernotifikasjonService.bestillBrukernotifikasjon(
-                        brukernotifikasjon,
-                        AktorId.of(dialogData.aktorId)
-                    )
-                } catch (e: BrukerKanIkkeVarslesException) {
-                    log.warn("Bruker kan ikke varsles.")
-                    funksjonelleMetrikker.nyBrukernotifikasjon(false, BrukernotifikasjonsType.BESKJED)
-                }
-                funksjonelleMetrikker.nyBrukernotifikasjon(true, BrukernotifikasjonsType.BESKJED)
+            } catch (e: BrukerKanIkkeVarslesException) {
+                log.warn("Bruker kan ikke varsles.")
+                funksjonelleMetrikker.nyBrukernotifikasjon(false, BrukernotifikasjonsType.BESKJED)
             }
-        )
+            funksjonelleMetrikker.nyBrukernotifikasjon(true, BrukernotifikasjonsType.BESKJED)
+        }
+
     }
 }

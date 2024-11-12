@@ -15,6 +15,7 @@ import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternStatusOppdatertEventNam
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselHendelseDTO
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselKanal
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselStatus
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
 import no.nav.fo.veilarbdialog.util.DialogTestService
 import no.nav.fo.veilarbdialog.util.KafkaTestService
@@ -133,21 +134,21 @@ internal class EksternVarslingKvitteringTest(
             brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(dialogId, BrukernotifikasjonsType.OPPGAVE)[0]
 
         SoftAssertions.assertSoftly(Consumer { assertions: SoftAssertions? ->
-            assertions!!.assertThat<UUID?>(brukernotifikasjonEtterProsessering.varselId)
-                .isEqualTo(opprinneligBrukernotifikasjon.varselId)
+            assertions!!.assertThat<UUID?>(brukernotifikasjonEtterProsessering.varselId.value)
+                .isEqualTo(opprinneligBrukernotifikasjon.varselId.value)
             assertions.assertThat<VarselKvitteringStatus?>(brukernotifikasjonEtterProsessering.varselKvitteringStatus)
                 .isEqualTo(expectedStatus)
             assertions.assertAll()
         })
     }
 
-    private fun lagVarselHendelseMelding(varselId: UUID, status: EksternVarselStatus): EksternVarselHendelseDTO {
+    private fun lagVarselHendelseMelding(varselId: MinSideVarselId, status: EksternVarselStatus): EksternVarselHendelseDTO {
         return EksternVarselHendelseDTO(
             EksternStatusOppdatertEventName,
             "dab",
             appname,
             Varseltype.Beskjed,
-            varselId,
+            varselId.value,
             status,
             false,
             null,
@@ -155,15 +156,15 @@ internal class EksternVarslingKvitteringTest(
         )
     }
 
-    private fun sendtStatus(bestillingsId: UUID): EksternVarselHendelseDTO {
+    private fun sendtStatus(bestillingsId: MinSideVarselId): EksternVarselHendelseDTO {
         return lagVarselHendelseMelding(bestillingsId, EksternVarselStatus.sendt)
     }
 
-    private fun feiletStatus(bestillingsId: UUID): EksternVarselHendelseDTO {
+    private fun feiletStatus(bestillingsId: MinSideVarselId): EksternVarselHendelseDTO {
         return lagVarselHendelseMelding(bestillingsId, EksternVarselStatus.feilet)
     }
 
-    private fun bestiltStatus(eventId: UUID): EksternVarselHendelseDTO {
+    private fun bestiltStatus(eventId: MinSideVarselId): EksternVarselHendelseDTO {
         return lagVarselHendelseMelding(eventId, EksternVarselStatus.bestilt)
     }
 }

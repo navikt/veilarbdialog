@@ -232,7 +232,7 @@ internal class DialogBeskjedTest(
         )
 
         assertThat(opprettVarsel.tekster.first().tekst)
-            .isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST)
+            .isEqualTo(BrukernotifikasjonTekst.NY_MELDING_TEKST)
 
         val brukernotifikasjonEntity =
             brukernotifikasjonRepository!!.hentBrukernotifikasjonForDialogId(
@@ -298,7 +298,7 @@ internal class DialogBeskjedTest(
         )
 
         assertThat(opprettVarsel.tekster.first().tekst)
-            .isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST)
+            .isEqualTo(BrukernotifikasjonTekst.NY_MELDING_TEKST)
 
         // Hy henvendelse samme dialog
         val sammedialog = mockVeileder.createRequest()
@@ -372,7 +372,7 @@ internal class DialogBeskjedTest(
         )
 
         assertThat(opprettVarsel.tekster.first().tekst)
-            .isEqualTo(BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST)
+            .isEqualTo(BrukernotifikasjonTekst.NY_MELDING_TEKST)
 
         mockBruker.createRequest()
             .put("/veilarbdialog/api/dialog/{dialogId}/les", dialog.getId())

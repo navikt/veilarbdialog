@@ -8,8 +8,5 @@ import java.time.ZonedDateTime;
 @Getter
 @Builder
 public class DoneInfo {
-    ZonedDateTime avsluttetTidspunkt;
     String eventId;
-    String oppfolgingsperiode;
-
 }

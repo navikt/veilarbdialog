@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.minsidevarsler
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType.BESKJED
-import no.nav.fo.veilarbdialog.brukernotifikasjon.DoneInfo
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import no.nav.tms.varsel.action.*
 import no.nav.tms.varsel.builder.VarselActionBuilder
 import org.slf4j.LoggerFactory
@@ -12,10 +12,9 @@ import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import java.net.URL
 import java.time.ZonedDateTime
-import java.util.*
 
 data class PendingVarsel(
-    val varselId: UUID,
+    val varselId: MinSideVarselId,
     val melding: String,
     val lenke: URL,
     val type: BrukernotifikasjonsType,
@@ -38,7 +37,7 @@ open class MinsideVarselProducer(
 
     open fun publiserVarselPåKafka(varsel: PendingVarsel) {
         val melding = VarselActionBuilder.opprett {
-            varselId = varsel.varselId.toString()
+            varselId = varsel.varselId.value.toString()
             type = if (varsel.type == BESKJED) Varseltype.Beskjed else Varseltype.Oppgave
             ident = varsel.fnr.get()
             sensitivitet = if (varsel.type == BESKJED) Sensitivitet.Substantial else Sensitivitet.High
@@ -62,20 +61,20 @@ open class MinsideVarselProducer(
                 appnavn = applicationName
             )
         }
-        kafkaTemplate.send(topic, varsel.varselId.toString(), melding)
+        kafkaTemplate.send(topic, varsel.varselId.value.toString(), melding)
     }
 
-    open fun publiserInaktiveringsMeldingPåKafka(doneInfo: DoneInfo) {
+    open fun publiserInaktiveringsMeldingPåKafka(inativerVarsel: VarselInaktivering) {
         val melding = VarselActionBuilder.inaktiver {
-            this.varselId = doneInfo.eventId
+            this.varselId = inativerVarsel.varselId.value.toString()
             this.produsent = Produsent(
                 cluster = cluster,
                 namespace = namespace,
                 appnavn = applicationName
             )
         }
-        kafkaTemplate.send(topic, doneInfo.eventId, melding)
-        log.info("Sendt done for brukernotifikasjonsid: {}", doneInfo.getEventId());
+        kafkaTemplate.send(topic, inativerVarsel.varselId.value.toString(), melding)
+        log.info("Sendt done for varselId: {}", inativerVarsel.varselId);
     }
 
 }

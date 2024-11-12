@@ -4,6 +4,7 @@ import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
 
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ import java.util.UUID;
 
 public record BrukernotifikasjonEntity(
         long id,
-        UUID varselId,
+        MinSideVarselId varselId,
         long dialogId,
         Fnr fnr,
         UUID oppfolgingsPeriodeId,

@@ -6,9 +6,7 @@ import no.nav.common.client.aktoroppslag.AktorOppslagClient
 import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr
 import no.nav.common.types.identer.NavIdent
-import no.nav.fo.veilarbdialog.brukernotifikasjon.Brukernotifikasjon
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
 import no.nav.fo.veilarbdialog.domain.*
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto
@@ -20,6 +18,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarsles
 import no.nav.fo.veilarbdialog.eventsLogger.BigQueryClient
 import no.nav.fo.veilarbdialog.eventsLogger.EventType
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker
+import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client
@@ -83,18 +82,15 @@ open class EskaleringsvarselService(
         val gjeldendeOppfolgingsperiodeId =
             sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(AktorId.of(dialogData.aktorId))
 
-        val brukernotifikasjon = Brukernotifikasjon(
-            varselId,
+        val varselOmMuligStans = DialogVarsel.varselOmMuligStans(
             dialogData.id,
             stansVarsel.fnr,
-            BrukernotifikasjonTekst.OPPGAVE_BRUKERNOTIFIKASJON_TEKST,
             gjeldendeOppfolgingsperiodeId,
-            BrukernotifikasjonsType.OPPGAVE,
             dialogDataService.utledDialogLink(dialogData.id)
         )
 
         val brukernotifikasjonEntity =
-            brukernotifikasjonService.bestillBrukernotifikasjon(brukernotifikasjon, AktorId.of(dialogData.aktorId))
+            brukernotifikasjonService.bestillVarsel(varselOmMuligStans, AktorId.of(dialogData.aktorId))
 
         val eskaleringsvarselEntity = eskaleringsvarselRepository.opprett(
             dialogData.id,

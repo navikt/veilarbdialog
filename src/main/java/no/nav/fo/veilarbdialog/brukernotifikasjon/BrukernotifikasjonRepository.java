@@ -30,7 +30,9 @@ public class BrukernotifikasjonRepository {
     private static final RowMapper<BrukernotifikasjonEntity> rowmapper = (rs, rowNum) ->
             new BrukernotifikasjonEntity(
                     rs.getLong("id"),
-                    DatabaseUtils.hentMaybeUUID(rs, "event_id"),
+                    Optional.ofNullable(DatabaseUtils.hentMaybeUUID(rs, "event_id"))
+                            .map(MinSideVarselId::new)
+                            .orElse(null),
                     rs.getLong("dialog_id"),
                     Fnr.of(rs.getString("foedselsnummer")),
                     DatabaseUtils.hentMaybeUUID(rs, "oppfolgingsperiode_id"),

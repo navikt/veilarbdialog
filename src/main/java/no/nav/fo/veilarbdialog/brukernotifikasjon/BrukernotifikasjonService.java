@@ -3,8 +3,6 @@ package no.nav.fo.veilarbdialog.brukernotifikasjon;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import no.nav.brukernotifikasjon.schemas.input.DoneInput;
-import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
@@ -13,12 +11,13 @@ import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringMetrikk;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
+import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel;
+import no.nav.fo.veilarbdialog.minsidevarsler.VarselInaktivering;
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client;
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselProducer;
 import no.nav.fo.veilarbdialog.minsidevarsler.PendingVarsel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,18 +41,18 @@ public class BrukernotifikasjonService {
     private final KvitteringMetrikk kvitteringMetrikk;
     private final MinsideVarselProducer minsideVarselProducer;
 
-    public BrukernotifikasjonEntity bestillBrukernotifikasjon(Brukernotifikasjon brukernotifikasjon, AktorId aktorId) {
+    public BrukernotifikasjonEntity bestillVarsel(DialogVarsel brukernotifikasjon, AktorId aktorId) {
         BrukernotifikasjonInsert insert = new BrukernotifikasjonInsert(
-                brukernotifikasjon.varselId(),
-                brukernotifikasjon.dialogId(),
-                brukernotifikasjon.foedselsnummer(),
-                brukernotifikasjon.melding(),
-                brukernotifikasjon.oppfolgingsperiodeId(),
-                brukernotifikasjon.type(),
+                brukernotifikasjon.getVarselId(),
+                brukernotifikasjon.getDialogId(),
+                brukernotifikasjon.getFoedselsnummer(),
+                brukernotifikasjon.getMelding(),
+                brukernotifikasjon.getOppfolgingsperiodeId(),
+                brukernotifikasjon.getType(),
                 BrukernotifikasjonBehandlingStatus.PENDING,
-                brukernotifikasjon.link()
+                brukernotifikasjon.getLink()
         );
-        if (!kanVarsles(brukernotifikasjon.foedselsnummer())) {
+        if (!kanVarsles(brukernotifikasjon.getFoedselsnummer())) {
             log.warn("Kan ikke varsle bruker: {}. Se årsak i SecureLog", aktorId.get());
             throw new BrukerKanIkkeVarslesException();
         }
@@ -83,7 +82,6 @@ public class BrukernotifikasjonService {
                     minsideVarselProducer.publiserVarselPåKafka(new PendingVarsel(
                             brukernotifikasjonEntity.varselId(),
                             brukernotifikasjonEntity.melding(),
-//                            brukernotifikasjonEntity.oppfolgingsPeriodeId().toString(),
                             brukernotifikasjonEntity.lenke(),
                             brukernotifikasjonEntity.type(),
                             brukernotifikasjonEntity.fnr()
@@ -102,12 +100,8 @@ public class BrukernotifikasjonService {
         List<BrukernotifikasjonEntity> skalAvsluttesNotifikasjoner = brukernotifikasjonRepository.hentPendingDoneBrukernotifikasjoner();
         skalAvsluttesNotifikasjoner.stream().forEach(
                 brukernotifikasjonEntity ->  {
-                    DoneInfo doneInfo = new DoneInfo(
-                            ZonedDateTime.now(ZoneOffset.UTC),
-                            brukernotifikasjonEntity.varselId().toString(),
-                            brukernotifikasjonEntity.oppfolgingsPeriodeId().toString()
-                    );
-                    minsideVarselProducer.publiserInaktiveringsMeldingPåKafka(doneInfo);
+                    var inaktivering = new VarselInaktivering(brukernotifikasjonEntity.varselId());
+                    minsideVarselProducer.publiserInaktiveringsMeldingPåKafka(inaktivering);
                     brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.id(), BrukernotifikasjonBehandlingStatus.AVSLUTTET);
                 }
         );
