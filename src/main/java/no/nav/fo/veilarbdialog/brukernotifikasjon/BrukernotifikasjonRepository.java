@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -48,7 +49,7 @@ public class BrukernotifikasjonRepository {
     Long opprettBrukernotifikasjon(BrukernotifikasjonInsert insert) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("event_id", insert.eventId().toString())
+                .addValue("event_id", insert.varselId().getValue().toString())
                 .addValue("dialog_id", insert.dialogId())
                 .addValue("foedselsnummer", insert.foedselsnummer().get())
                 .addValue("oppfolgingsperiode_id", insert.oppfolgingsperiodeId().toString())
@@ -85,12 +86,12 @@ public class BrukernotifikasjonRepository {
         }
     }
 
-    public boolean finnesBrukernotifikasjon(String eventId) {
+    public boolean finnesBrukernotifikasjon(MinSideVarselId varselId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("brukernotifikasjon_id", eventId);
+                .addValue("varlselId", varselId.getValue().toString());
         String sql = """
             SELECT COUNT(*) FROM BRUKERNOTIFIKASJON
-            WHERE EVENT_ID=:brukernotifikasjon_id
+            WHERE EVENT_ID=:varlselId
         """;
         int antall = jdbcTemplate.queryForObject(sql, params, int.class);
         return antall > 0;
@@ -142,37 +143,33 @@ public class BrukernotifikasjonRepository {
         jdbcTemplate.update(sql, params);
     }
 
-    public void setEksternVarselFeilet(String bestillingsId) {
+    public void setEksternVarselFeilet(MinSideVarselId varselId) {
         MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("bestillingsId", bestillingsId)
+                .addValue("varlselId", varselId.getValue().toString())
                 .addValue("varselKvitteringStatus", VarselKvitteringStatus.FEILET.toString());
         jdbcTemplate.update("""
              update BRUKERNOTIFIKASJON
                set
                 VARSEL_FEILET = current_timestamp,
                 VARSEL_KVITTERING_STATUS = :varselKvitteringStatus
-                    where EVENT_ID = :bestillingsId
+                    where EVENT_ID = :varlselId
                  """, param);
     }
 
-    public void setEksternVarselSendtOk(String bestillingsId) {
+    public void setEksternVarselSendtOk(MinSideVarselId varlselId) {
         MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("bestillingsId", bestillingsId)
-                .addValue("varselKvitteringStatusOk", VarselKvitteringStatus.OK.name())
-                .addValue("varselKvitteringStatusFeilet", VarselKvitteringStatus.FEILET.name())
-                .addValue("brukernotifikasjonBehandlingStatusAvsluttet", BrukernotifikasjonBehandlingStatus.AVSLUTTET.name());
+            .addValue("varlselId", varlselId.getValue().toString())
+            .addValue("varselKvitteringStatusOk", VarselKvitteringStatus.OK.name())
+            .addValue("varselKvitteringStatusFeilet", VarselKvitteringStatus.FEILET.name());
 
         jdbcTemplate.update("""
-                   update BRUKERNOTIFIKASJON
-                    set
-                       BEKREFTET_SENDT = CURRENT_TIMESTAMP,
-                       VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
-                       where BRUKERNOTIFIKASJON.VARSEL_KVITTERING_STATUS != :varselKvitteringStatusFeilet
-                       and STATUS != :brukernotifikasjonBehandlingStatusAvsluttet
-                       and EVENT_ID = :bestillingsId
-                       """
-                , param
-        );
+            update BRUKERNOTIFIKASJON
+            set
+            BEKREFTET_SENDT = CURRENT_TIMESTAMP,
+            VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
+            where BRUKERNOTIFIKASJON.VARSEL_KVITTERING_STATUS != :varselKvitteringStatusFeilet
+            and EVENT_ID = :varlselId
+            """, param);
     }
 
 

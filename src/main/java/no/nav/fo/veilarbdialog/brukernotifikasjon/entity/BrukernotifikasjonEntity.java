@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public record BrukernotifikasjonEntity(
         long id,
-        UUID eventId,
+        UUID varselId,
         long dialogId,
         Fnr fnr,
         UUID oppfolgingsPeriodeId,

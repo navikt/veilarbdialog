@@ -20,6 +20,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarsles
 import no.nav.fo.veilarbdialog.eventsLogger.BigQueryClient
 import no.nav.fo.veilarbdialog.eventsLogger.EventType
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client
 import no.nav.fo.veilarbdialog.service.DialogDataService
@@ -78,7 +79,7 @@ open class EskaleringsvarselService(
         dialogDataService.sendPaaKafka(dialogData.aktorId)
         dialogDataService.markerDialogSomLest(dialogData.id)
 
-        val varselId = UUID.randomUUID()
+        val varselId = MinSideVarselId(UUID.randomUUID())
         val gjeldendeOppfolgingsperiodeId =
             sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(AktorId.of(dialogData.aktorId))
 

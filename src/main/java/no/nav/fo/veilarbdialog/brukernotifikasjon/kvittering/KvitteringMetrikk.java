@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.VarselHendelseEventType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -15,10 +16,12 @@ public class KvitteringMetrikk {
     private static final String BRUKERNOTIFIKASJON_MANGLER_KVITTERING = "brukernotifikasjon_mangler_kvittering";
     private static final String STATUS = "status";
     private static final List<String> statuser = List.of(
-            EksternVarslingKvitteringConsumer.FEILET,
-            EksternVarslingKvitteringConsumer.FERDIGSTILT,
-            EksternVarslingKvitteringConsumer.INFO,
-            EksternVarslingKvitteringConsumer.OVERSENDT
+        VarselHendelseEventType.feilet_ekstern.name(),
+        VarselHendelseEventType.bestilt_ekstern.name(),
+        VarselHendelseEventType.sendt_ekstern.name(),
+        VarselHendelseEventType.opprettet.name(),
+        VarselHendelseEventType.inaktivert.name(),
+        VarselHendelseEventType.slettet.name()
     );
 
     private final AtomicInteger forsinkedeBestillinger = new AtomicInteger();
@@ -30,9 +33,9 @@ public class KvitteringMetrikk {
         Gauge.builder(BRUKERNOTIFIKASJON_MANGLER_KVITTERING, forsinkedeBestillinger, AtomicInteger::doubleValue).register(meterRegistry);
     }
 
-    public void incrementBrukernotifikasjonKvitteringMottatt(String status) {
+    public void incrementBrukernotifikasjonKvitteringMottatt(VarselHendelseEventType hendelseEventType) {
         Counter.builder(BRUKERNOTIFIKASJON_KVITTERING_MOTTATT)
-                .tag(KvitteringMetrikk.STATUS, status)
+                .tag(KvitteringMetrikk.STATUS, hendelseEventType.name())
                 .register(meterRegistry)
                 .increment();
     }

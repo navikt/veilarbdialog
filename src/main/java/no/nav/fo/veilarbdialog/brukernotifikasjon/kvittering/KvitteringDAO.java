@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.doknotifikasjon.schemas.DoknotifikasjonStatus;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -25,9 +26,9 @@ public class KvitteringDAO {
             rs.getLong("DISTRIBUSJON_ID")
     );
 
-    public void lagreKvittering(String bestillingsId, DoknotifikasjonStatus melding) {
+    public void lagreKvittering(MinSideVarselId varselId, DoknotifikasjonStatus melding) {
         SqlParameterSource parameterSource = new MapSqlParameterSource()
-                .addValue("brukernotifikasjon_bestilling_id", bestillingsId)
+                .addValue("brukernotifikasjon_bestilling_id", varselId.getValue())
                 .addValue("doknotifikasjon_status", melding.getStatus())
                 .addValue("melding", melding.getMelding())
                 .addValue("distribusjon_id", melding.getDistribusjonId())

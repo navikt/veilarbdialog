@@ -16,6 +16,7 @@ import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -68,7 +69,7 @@ public class ScheduleRessurs {
                     UUID oppfolgingsperiode = dialogData.getOppfolgingsperiode();
 
                     Brukernotifikasjon brukernotifikasjon = new Brukernotifikasjon(
-                            UUID.randomUUID(),
+                            new MinSideVarselId(UUID.randomUUID()),
                             dialogData.getId(),
                             fnr,
                             BrukernotifikasjonTekst.BESKJED_BRUKERNOTIFIKASJON_TEKST,

@@ -1,14 +1,10 @@
 package no.nav.fo.veilarbdialog.brukernotifikasjon;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import no.nav.brukernotifikasjon.schemas.builders.DoneInputBuilder;
-import no.nav.brukernotifikasjon.schemas.input.BeskjedInput;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
-import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
@@ -20,23 +16,18 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarsles
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client;
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselProducer;
 import no.nav.fo.veilarbdialog.minsidevarsler.PendingVarsel;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -54,7 +45,7 @@ public class BrukernotifikasjonService {
 
     public BrukernotifikasjonEntity bestillBrukernotifikasjon(Brukernotifikasjon brukernotifikasjon, AktorId aktorId) {
         BrukernotifikasjonInsert insert = new BrukernotifikasjonInsert(
-                brukernotifikasjon.eventId(),
+                brukernotifikasjon.varselId(),
                 brukernotifikasjon.dialogId(),
                 brukernotifikasjon.foedselsnummer(),
                 brukernotifikasjon.melding(),
@@ -91,7 +82,7 @@ public class BrukernotifikasjonService {
         List<BrukernotifikasjonEntity> pendingBrukernotifikasjoner = brukernotifikasjonRepository.hentPendingBrukernotifikasjoner();
         pendingBrukernotifikasjoner.stream().forEach( brukernotifikasjonEntity -> {
                     minsideVarselProducer.publiserVarselPåKafka(new PendingVarsel(
-                            brukernotifikasjonEntity.eventId(),
+                            brukernotifikasjonEntity.varselId(),
                             brukernotifikasjonEntity.melding(),
 //                            brukernotifikasjonEntity.oppfolgingsPeriodeId().toString(),
                             brukernotifikasjonEntity.lenke(),
@@ -114,7 +105,7 @@ public class BrukernotifikasjonService {
                 brukernotifikasjonEntity ->  {
                     DoneInfo doneInfo = new DoneInfo(
                             ZonedDateTime.now(ZoneOffset.UTC),
-                            brukernotifikasjonEntity.eventId().toString(),
+                            brukernotifikasjonEntity.varselId().toString(),
                             brukernotifikasjonEntity.oppfolgingsPeriodeId().toString()
                     );
                     minsideVarselProducer.publiserInaktiveringsMeldingPåKafka(doneInfo);
