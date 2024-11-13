@@ -12,10 +12,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class VarselDAO {
-
     private final NamedParameterJdbcTemplate jdbc;
-
-
 
     public List<Long> hentDialogerMedUlesteMeldingerEtterSisteVarsel(long graceMillis, long maxAgeMillis) {
         final Date minimumAlder = new Date(System.currentTimeMillis() - graceMillis);

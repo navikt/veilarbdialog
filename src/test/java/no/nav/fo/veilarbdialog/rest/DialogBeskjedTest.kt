@@ -97,7 +97,7 @@ internal class DialogBeskjedTest(
         settHenvendelseSendtForNSekundSiden(dialog.henvendelser[0].id, 1)
 
         scheduleRessurs!!.sendBrukernotifikasjonerForUlesteDialoger()
-        brukernotifikasjonService!!.sendPendingBrukernotifikasjoner()
+        brukernotifikasjonService!!.sendPendingVarsler()
 
         val opprettVarsel = hentOpprettetVarselKafkaTopic()
 
@@ -143,7 +143,7 @@ internal class DialogBeskjedTest(
             .`as`<DialogDTO?>(DialogDTO::class.java)
 
         scheduleRessurs!!.sendBrukernotifikasjonerForUlesteDialoger()
-        brukernotifikasjonService!!.sendPendingBrukernotifikasjoner()
+        brukernotifikasjonService!!.sendPendingVarsler()
 
         val harKonsumertAlleMeldinger = kafkaTestService.harKonsumertAlleMeldinger(
             minsideVarselTopic,
@@ -169,7 +169,7 @@ internal class DialogBeskjedTest(
         settHenvendelseSendtForNSekundSiden(dialog.getHenvendelser().get(0).getId(), 3)
 
         scheduleRessurs!!.sendBrukernotifikasjonerForUlesteDialoger()
-        brukernotifikasjonService!!.sendPendingBrukernotifikasjoner()
+        brukernotifikasjonService!!.sendPendingVarsler()
 
         val harKonsumertAlleMeldinger = kafkaTestService!!.harKonsumertAlleMeldinger(
             minsideVarselTopic,
@@ -220,7 +220,7 @@ internal class DialogBeskjedTest(
         settHenvendelseSendtForNSekundSiden(sammeDialog.henvendelser[1].id, 1)
 
         scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger()
-        brukernotifikasjonService.sendPendingBrukernotifikasjoner()
+        brukernotifikasjonService.sendPendingVarsler()
 
         val opprettVarsel = hentOpprettetVarselKafkaTopic()
 
@@ -286,7 +286,7 @@ internal class DialogBeskjedTest(
         settHenvendelseSendtForNSekundSiden(dialog.getHenvendelser().get(0).getId(), 1)
 
         scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger()
-        brukernotifikasjonService.sendPendingBrukernotifikasjoner()
+        brukernotifikasjonService.sendPendingVarsler()
 
         val opprettVarsel = hentOpprettetVarselKafkaTopic()
 
@@ -314,7 +314,7 @@ internal class DialogBeskjedTest(
         settHenvendelseSendtForNSekundSiden(sammedialog.henvendelser[1].id, 1)
 
         scheduleRessurs!!.sendBrukernotifikasjonerForUlesteDialoger()
-        brukernotifikasjonService!!.sendPendingBrukernotifikasjoner()
+        brukernotifikasjonService!!.sendPendingVarsler()
 
         // Ingen nye beskjeder siden forrige henvendelse ikke er lest
         assertTrue(
@@ -360,7 +360,7 @@ internal class DialogBeskjedTest(
 
         settHenvendelseSendtForNSekundSiden(dialog.henvendelser[0].id, 1)
         scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger()
-        brukernotifikasjonService.sendPendingBrukernotifikasjoner()
+        brukernotifikasjonService.sendPendingVarsler()
 
         val opprettVarsel = hentOpprettetVarselKafkaTopic()
 
@@ -401,7 +401,7 @@ internal class DialogBeskjedTest(
 
         Thread.sleep(1000L)
         scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger()
-        brukernotifikasjonService.sendPendingBrukernotifikasjoner()
+        brukernotifikasjonService.sendPendingVarsler()
 
         // Ny beskjed siden forrige henvendelse er lest
         org.junit.jupiter.api.Assertions.assertFalse(

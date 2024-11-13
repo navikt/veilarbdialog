@@ -66,9 +66,9 @@ public class BrukernotifikasjonService {
             initialDelay = 60000,
             fixedDelay = 5000
     )
-    @SchedulerLock(name = "brukernotifikasjon_oppgave_kafka_scheduledTask", lockAtMostFor = "PT2M")
-    public void sendPendingBrukernotifikasjoner() {
-        List<BrukernotifikasjonEntity> pendingBrukernotifikasjoner = brukernotifikasjonRepository.hentPendingBrukernotifikasjoner();
+    @SchedulerLock(name = "varsler_oppgave_kafka_scheduledTask", lockAtMostFor = "PT2M")
+    public void sendPendingVarsler() {
+        List<BrukernotifikasjonEntity> pendingBrukernotifikasjoner = brukernotifikasjonRepository.hentPendingVarsler();
         pendingBrukernotifikasjoner.stream().forEach( brukernotifikasjonEntity -> {
                     minsideVarselProducer.publiserVarselPåKafka(new PendingVarsel(
                             brukernotifikasjonEntity.varselId(),
@@ -110,7 +110,7 @@ public class BrukernotifikasjonService {
         return kanVarsles;
     }
 
-    public BrukernotifikasjonEntity hentBrukernotifikasjon(long brukernotifikasjonId) {
+    private BrukernotifikasjonEntity hentBrukernotifikasjon(long brukernotifikasjonId) {
         return brukernotifikasjonRepository.hentBrukernotifikasjon(brukernotifikasjonId).orElseThrow();
     }
 

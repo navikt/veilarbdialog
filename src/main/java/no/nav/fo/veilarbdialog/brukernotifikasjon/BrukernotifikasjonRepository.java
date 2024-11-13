@@ -116,7 +116,7 @@ public class BrukernotifikasjonRepository {
         }
     }
 
-    List<BrukernotifikasjonEntity> hentPendingBrukernotifikasjoner() {
+    List<BrukernotifikasjonEntity> hentPendingVarsler() {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("pending", BrukernotifikasjonBehandlingStatus.PENDING.name());
         String sql = """

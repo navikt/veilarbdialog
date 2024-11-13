@@ -398,7 +398,7 @@ internal class EskaleringsvarselControllerTest(
         Thread.sleep(2000L)
         // Batchen bestiller beskjeder ved nye dialoger (etter 1000 ms)
         scheduleSendBrukernotifikasjonerForUlesteDialoger.sendBrukernotifikasjonerForUlesteDialoger()
-        brukernotifikasjonService.sendPendingBrukernotifikasjoner()
+        brukernotifikasjonService.sendPendingVarsler()
 
         // sjekk at det er blitt sendt en oppgave
         ventPåVarselOpprettelsePåKafka()
@@ -428,7 +428,7 @@ internal class EskaleringsvarselControllerTest(
             .post("/veilarbdialog/api/eskaleringsvarsel/start")
             .then()
             .extract().response()
-        brukernotifikasjonService.sendPendingBrukernotifikasjoner()
+        brukernotifikasjonService.sendPendingVarsler()
         return response
     }
 

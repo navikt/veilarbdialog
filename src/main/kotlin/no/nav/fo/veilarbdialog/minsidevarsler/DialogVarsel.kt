@@ -14,7 +14,8 @@ class DialogVarsel(
     val melding: String ,
     val oppfolgingsperiodeId: UUID ,
     val type: BrukernotifikasjonsType,
-    val link: URL
+    val link: URL,
+    val skalBatches: Boolean
 ) {
 
     companion object {
@@ -31,7 +32,8 @@ class DialogVarsel(
                 BrukernotifikasjonTekst.NAV_VURDERER_Å_STANSE_PENGENE_DINE_TEKST,
                 oppfolgingsperiode,
                 BrukernotifikasjonsType.OPPGAVE,
-                link
+                link,
+                false
             )
         }
 
@@ -49,6 +51,7 @@ class DialogVarsel(
                 oppfolgingsperiode,
                 BrukernotifikasjonsType.BESKJED,
                 link,
+                true
             )
         }
     }
