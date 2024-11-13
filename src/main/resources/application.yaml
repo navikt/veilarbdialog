@@ -150,10 +150,10 @@ application:
       eksternVarselKvittering: teamdokumenthandtering.aapen-dok-notifikasjon-status
       aktivitetskortIdMapping: dab.aktivitetskort-idmapping-v1
       minside:
-        varsel-hendelse: aapen-varsel-hendelse-v1
+        varsel-hendelse: min-side.aapen-varsel-hendelse-v1
     ut:
       minside:
-        varsel: aapen-brukervarsel-v1
+        varsel: min-side.aapen-brukervarsel-v1
       brukernotifikasjon:
         oppgave: min-side.aapen-brukernotifikasjon-oppgave-v1
         beskjed: min-side.aapen-brukernotifikasjon-beskjed-v1
