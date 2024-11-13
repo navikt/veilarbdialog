@@ -112,7 +112,7 @@ open class EksternVarslingKvitteringConsumerTest(
 
     private fun createDoknotifikasjonStatus(
         varselId: MinSideVarselId,
-        status: EksternVarselStatus?
+        status: EksternVarselStatus
     ): EksternVarselHendelseDTO {
         return EksternVarselHendelseDTO(
             EksternStatusOppdatertEventName,
@@ -120,7 +120,7 @@ open class EksternVarslingKvitteringConsumerTest(
             APP_NAME,
             Varseltype.Beskjed,
             varselId.value,
-            EksternVarselStatus.sendt,
+            status,
             false,
             null,
             EksternVarselKanal.SMS

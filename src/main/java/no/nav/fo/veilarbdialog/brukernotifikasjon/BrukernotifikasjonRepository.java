@@ -139,7 +139,7 @@ public class BrukernotifikasjonRepository {
                 .addValue("id", varselId.getValue().toString())
                 .addValue("status", status.name());
         String sql = """
-                UPDATE BRUKERNOTIFIKASJON SET STATUS = :status WHERE id = :id
+                UPDATE BRUKERNOTIFIKASJON SET STATUS = :status WHERE event_id = :id
                 """;
         jdbcTemplate.update(sql, params);
     }
