@@ -3,12 +3,13 @@ package no.nav.fo.veilarbdialog.minsidevarsler
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringMetrikk
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Bestilt
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarsling
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselOppdatering
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Feilet
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.InternVarselHendelseDTO
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Renotifikasjon
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Sendt
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.VarselFraAnnenApp
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.Venter
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.deserialiserVarselHendelse
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -21,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional
 open class MinsideVarselHendelseConsumer(
     @Value("\${spring.application.name}")
     private val appname: String,
-//    private val kvitteringDAO: KvitteringDAO,
     private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
     private val kvitteringMetrikk: KvitteringMetrikk,
 ) {
@@ -33,13 +33,13 @@ open class MinsideVarselHendelseConsumer(
     open fun consume(kafkaRecord: ConsumerRecord<String, String> ) {
         val varselHendelse = kafkaRecord.value().deserialiserVarselHendelse(appname)
         when (varselHendelse) {
-            is EksternVarsling -> behandleEksternVarsel(varselHendelse)
+            is EksternVarselOppdatering -> behandleEksternVarsel(varselHendelse)
             is InternVarselHendelseDTO -> {}
             VarselFraAnnenApp -> {}
         }
     }
 
-    private fun behandleEksternVarsel(varsel: EksternVarsling) {
+    private fun behandleEksternVarsel(varsel: EksternVarselOppdatering) {
         var varselId = varsel.varselId
         log.info("Konsumerer minside-varsel-hendelse varselId={}, type={}", varselId, varsel.hendelseType.name);
 
@@ -48,9 +48,7 @@ open class MinsideVarselHendelseConsumer(
             throw IllegalArgumentException("Ugyldig varselId.")
         }
 
-        // TODO: Vurder om denne trengs
-//        kvitteringDAO.lagreKvittering(varselId, melding)
-
+        log.info("Minside varsel (ekstern) av type {} er {} varselId {}", varsel.varseltype, varsel.hendelseType, varselId);
         when (varsel) {
             is Bestilt -> {}
             is Feilet -> {
@@ -62,10 +60,8 @@ open class MinsideVarselHendelseConsumer(
                 brukernotifikasjonRepository.setEksternVarselSendtOk(varselId);
                 log.info("Varsel fullført for varselId={}", varselId);
             }
+            is Venter -> {}
         }
-
-//        List<Kvittering> kvitterings = kvitteringDAO.hentKvitteringer(bestillingsId);
-//        log.info("EksternVarsel Kvitteringshistorikk {}", kvitterings);
 
         kvitteringMetrikk.incrementBrukernotifikasjonKvitteringMottatt(varsel.hendelseType);
     }
