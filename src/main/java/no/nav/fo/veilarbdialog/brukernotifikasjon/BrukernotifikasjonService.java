@@ -107,15 +107,6 @@ public class BrukernotifikasjonService {
         );
     }
 
-    @Scheduled(
-            initialDelay = 60000,
-            fixedDelay = 30000
-    )
-    public void countForsinkedeVarslerSisteDognet() {
-        int antall = kvitteringDAO.hentAntallUkvitterteVarslerForsoktSendt(20);
-        kvitteringMetrikk.countForsinkedeVarslerSisteDognet(antall);
-    }
-
     public boolean kanVarsles(Fnr fnr) {
         Optional<ManuellStatusV2DTO> manuellStatusResponse = oppfolgingClient.hentManuellStatus(fnr);
         boolean erManuell = manuellStatusResponse.map(ManuellStatusV2DTO::isErUnderManuellOppfolging).orElse(true);

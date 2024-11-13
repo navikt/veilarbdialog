@@ -19,6 +19,7 @@ public class KvitteringMetrikk {
         VarselHendelseEventType.feilet_ekstern.name(),
         VarselHendelseEventType.bestilt_ekstern.name(),
         VarselHendelseEventType.sendt_ekstern.name(),
+        VarselHendelseEventType.venter_ekstern.name(),
         VarselHendelseEventType.opprettet.name(),
         VarselHendelseEventType.inaktivert.name(),
         VarselHendelseEventType.slettet.name()
