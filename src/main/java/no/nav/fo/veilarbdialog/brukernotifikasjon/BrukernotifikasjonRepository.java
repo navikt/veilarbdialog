@@ -161,16 +161,14 @@ public class BrukernotifikasjonRepository {
     public void setEksternVarselSendtOk(MinSideVarselId varlselId) {
         MapSqlParameterSource param = new MapSqlParameterSource()
             .addValue("varlselId", varlselId.getValue().toString())
-            .addValue("varselKvitteringStatusOk", VarselKvitteringStatus.OK.name())
-            .addValue("varselKvitteringStatusFeilet", VarselKvitteringStatus.FEILET.name());
+            .addValue("varselKvitteringStatusOk", VarselKvitteringStatus.OK.name());
 
         jdbcTemplate.update("""
             update BRUKERNOTIFIKASJON
             set
             BEKREFTET_SENDT = CURRENT_TIMESTAMP,
             VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
-            where BRUKERNOTIFIKASJON.VARSEL_KVITTERING_STATUS != :varselKvitteringStatusFeilet
-            and EVENT_ID = :varlselId
+            where EVENT_ID = :varlselId
             """, param);
     }
 
