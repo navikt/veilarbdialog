@@ -12,10 +12,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class KvitteringMetrikk {
     private final MeterRegistry meterRegistry;
-    private static final String BRUKERNOTIFIKASJON_KVITTERING_MOTTATT = "brukernotifikasjon_kvittering_mottatt";
-    private static final String BRUKERNOTIFIKASJON_MANGLER_KVITTERING = "brukernotifikasjon_mangler_kvittering";
-    private static final String STATUS = "status";
-    private static final List<String> statuser = List.of(
+    private static final String VARSEL_HENDELSE = "varsel_hendelse";
+    private static final String HENDELSE_TYPE = "hendelse_type";
+    private static final List<String> hendelseTyper = List.of(
         VarselHendelseEventType.feilet_ekstern.name(),
         VarselHendelseEventType.bestilt_ekstern.name(),
         VarselHendelseEventType.sendt_ekstern.name(),
@@ -25,23 +24,16 @@ public class KvitteringMetrikk {
         VarselHendelseEventType.slettet.name()
     );
 
-    private final AtomicInteger forsinkedeBestillinger = new AtomicInteger();
-
     public KvitteringMetrikk(MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
 
-        statuser.forEach(s -> meterRegistry.counter(BRUKERNOTIFIKASJON_KVITTERING_MOTTATT, KvitteringMetrikk.STATUS, s));
-        Gauge.builder(BRUKERNOTIFIKASJON_MANGLER_KVITTERING, forsinkedeBestillinger, AtomicInteger::doubleValue).register(meterRegistry);
+        hendelseTyper.forEach(hendelseNavn -> meterRegistry.counter(VARSEL_HENDELSE, HENDELSE_TYPE, hendelseNavn));
     }
 
     public void incrementBrukernotifikasjonKvitteringMottatt(VarselHendelseEventType hendelseEventType) {
-        Counter.builder(BRUKERNOTIFIKASJON_KVITTERING_MOTTATT)
-                .tag(KvitteringMetrikk.STATUS, hendelseEventType.name())
+        Counter.builder(VARSEL_HENDELSE)
+                .tag(HENDELSE_TYPE, hendelseEventType.name())
                 .register(meterRegistry)
                 .increment();
-    }
-
-    public void countForsinkedeVarslerSisteDognet(int antall) {
-        forsinkedeBestillinger.setPlain(antall);
     }
 }
