@@ -35,24 +35,15 @@ public class BrukernotifikasjonService {
     private final VarselDAO varselDAO;
     private final MinsideVarselProducer minsideVarselProducer;
 
-    public BrukernotifikasjonEntity puttVarselIOutbox(DialogVarsel brukernotifikasjon, AktorId aktorId) {
-        BrukernotifikasjonInsert insert = new BrukernotifikasjonInsert(
-                brukernotifikasjon.getVarselId(),
-                brukernotifikasjon.getDialogId(),
-                brukernotifikasjon.getFoedselsnummer(),
-                brukernotifikasjon.getMelding(),
-                brukernotifikasjon.getOppfolgingsperiodeId(),
-                brukernotifikasjon.getType(),
-                BrukernotifikasjonBehandlingStatus.PENDING,
-                brukernotifikasjon.getLink()
-        );
-        if (!kanVarsles(brukernotifikasjon.getFoedselsnummer())) {
+    public BrukernotifikasjonEntity puttVarselIOutbox(DialogVarsel varsel, AktorId aktorId) {
+        if (!kanVarsles(varsel.getFoedselsnummer())) {
             log.warn("Kan ikke varsle bruker: {}. Se årsak i SecureLog", aktorId.get());
             throw new BrukerKanIkkeVarslesException();
         }
 
-        Long id = brukernotifikasjonRepository.opprettBrukernotifikasjon(insert);
+        Long id = brukernotifikasjonRepository.opprettVarselIPendingStatus(varsel);
         varselDAO.oppdaterSisteVarselForBruker(aktorId.get());
+        log.info("Minside varsel opprettet i PENDING status {}", varsel.getVarselId());
         return hentBrukernotifikasjon(id);
     }
 

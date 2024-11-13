@@ -4,6 +4,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
+import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel;
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
@@ -47,18 +48,18 @@ public class BrukernotifikasjonRepository {
                     DatabaseUtils.hentMaybeURL(rs, "lenke")
             );
 
-    Long opprettBrukernotifikasjon(BrukernotifikasjonInsert insert) {
+    Long opprettVarselIPendingStatus(DialogVarsel varsel) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("event_id", insert.varselId().getValue().toString())
-                .addValue("dialog_id", insert.dialogId())
-                .addValue("foedselsnummer", insert.foedselsnummer().get())
-                .addValue("oppfolgingsperiode_id", insert.oppfolgingsperiodeId().toString())
-                .addValue("type", insert.type().name())
-                .addValue("status", insert.status().name())
+                .addValue("event_id", varsel.getVarselId().getValue().toString())
+                .addValue("dialog_id", varsel.getDialogId())
+                .addValue("foedselsnummer", varsel.getFoedselsnummer().get())
+                .addValue("oppfolgingsperiode_id", varsel.getOppfolgingsperiodeId().toString())
+                .addValue("type", varsel.getType().name())
+                .addValue("status", BrukernotifikasjonBehandlingStatus.PENDING.name())
                 .addValue("varsel_kvittering_status", VarselKvitteringStatus.IKKE_SATT.name())
-                .addValue("melding", insert.melding())
-                .addValue("lenke", insert.link().toExternalForm());
+                .addValue("melding", varsel.getMelding())
+                .addValue("lenke", varsel.getLink().toExternalForm());
 
         jdbcTemplate.update("" +
                         " INSERT INTO brukernotifikasjon " +

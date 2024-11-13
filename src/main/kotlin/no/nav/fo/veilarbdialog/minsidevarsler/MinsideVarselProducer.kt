@@ -74,7 +74,7 @@ open class MinsideVarselProducer(
             )
         }
         kafkaTemplate.send(topic, inativerVarselId.value.toString(), melding)
-        log.info("Sendt done for varselId: {}", inativerVarselId);
+        log.info("Minside varsel inaktivering publisert for varselId: {}", inativerVarselId);
     }
 
 }
