@@ -33,13 +33,17 @@ open class MinsideVarselHendelseConsumer(
     open fun consume(kafkaRecord: ConsumerRecord<String, String> ) {
         val varselHendelse = kafkaRecord.value().deserialiserVarselHendelse(appname)
         when (varselHendelse) {
-            is EksternVarselOppdatering -> behandleEksternVarsel(varselHendelse)
-            is InternVarselHendelseDTO -> {}
+            is EksternVarselOppdatering -> behandleEksternVarselHendelse(varselHendelse)
+            is InternVarselHendelseDTO -> behandleInternVarselHendelse(varselHendelse)
             VarselFraAnnenApp -> {}
         }
     }
 
-    private fun behandleEksternVarsel(varsel: EksternVarselOppdatering) {
+    private fun behandleInternVarselHendelse(varsel: InternVarselHendelseDTO) {
+        log.info("Minside varsel (intern) av type {} er {} varselId {}", varsel.varseltype, varsel.eventName, varsel.varselId)
+    }
+
+    private fun behandleEksternVarselHendelse(varsel: EksternVarselOppdatering) {
         var varselId = varsel.varselId
         log.info("Konsumerer minside-varsel-hendelse varselId={}, type={}", varselId, varsel.hendelseType.name);
 
