@@ -29,8 +29,6 @@ import java.util.UUID
 @ExtendWith(MockitoExtension::class)
 open class EksternVarslingKvitteringConsumerTest(
     @Mock
-    private val kvitteringDAO: KvitteringDAO,
-    @Mock
     private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
     @Mock
     private val kvitteringMetrikk: KvitteringMetrikk,
@@ -69,9 +67,7 @@ open class EksternVarslingKvitteringConsumerTest(
 
         val consumerRecord = createConsumerRecord(varselHendelse)
         eksternVarslingKvitteringConsumer!!.consume(consumerRecord)
-        Mockito.verifyNoInteractions(
-            kvitteringDAO, brukernotifikasjonRepository, kvitteringMetrikk
-        )
+        Mockito.verifyNoInteractions(brukernotifikasjonRepository, kvitteringMetrikk)
     }
 
     //    @Test

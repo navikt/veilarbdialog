@@ -90,7 +90,7 @@ open class EskaleringsvarselService(
         )
 
         val brukernotifikasjonEntity =
-            brukernotifikasjonService.bestillVarsel(varselOmMuligStans, AktorId.of(dialogData.aktorId))
+            brukernotifikasjonService.puttVarselIOutbox(varselOmMuligStans, AktorId.of(dialogData.aktorId))
 
         val eskaleringsvarselEntity = eskaleringsvarselRepository.opprett(
             dialogData.id,
@@ -120,7 +120,7 @@ open class EskaleringsvarselService(
         }
 
         eskaleringsvarselRepository.stop(eskaleringsvarsel.varselId, stopVarselDto.begrunnelse, avsluttetAv)
-        brukernotifikasjonService.bestillDone(eskaleringsvarsel.tilhorendeBrukernotifikasjonId)
+        brukernotifikasjonService.setVarselTilSkalAvsluttes(eskaleringsvarsel.varselId)
 
         val eskaleringsvarselEntity = eskaleringsvarselRepository.hentVarsel(eskaleringsvarsel.varselId)
         eskaleringsvarselEntity.ifPresent { varsel ->

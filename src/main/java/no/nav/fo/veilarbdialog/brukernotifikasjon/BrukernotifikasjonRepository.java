@@ -16,7 +16,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Types;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -125,7 +124,7 @@ public class BrukernotifikasjonRepository {
         return jdbcTemplate.query(sql, params, rowmapper);
     }
 
-    List<BrukernotifikasjonEntity> hentPendingDoneBrukernotifikasjoner() {
+    List<BrukernotifikasjonEntity> hentVarslerSomSkalAvsluttes() {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("skal_avsluttes", BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES.name());
         String sql = """
@@ -135,9 +134,9 @@ public class BrukernotifikasjonRepository {
 
     }
 
-    void updateStatus(@NonNull Long id, @NonNull BrukernotifikasjonBehandlingStatus status) {
+    void updateStatus(@NonNull MinSideVarselId varselId, @NonNull BrukernotifikasjonBehandlingStatus status) {
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", id)
+                .addValue("id", varselId.getValue().toString())
                 .addValue("status", status.name());
         String sql = """
                 UPDATE BRUKERNOTIFIKASJON SET STATUS = :status WHERE id = :id
@@ -173,7 +172,7 @@ public class BrukernotifikasjonRepository {
     }
 
 
-    void bestillDoneForPeriode(UUID oppfolgingsperiodeUuid) {
+    void setSkalAvsluttesForVarslerIPeriode(UUID oppfolgingsperiodeUuid) {
         MapSqlParameterSource skalAvsluttes = new MapSqlParameterSource()
                 .addValue("oppfolgingsperiode", oppfolgingsperiodeUuid.toString())
                 .addValue("fra_status", BrukernotifikasjonBehandlingStatus.SENDT.name())

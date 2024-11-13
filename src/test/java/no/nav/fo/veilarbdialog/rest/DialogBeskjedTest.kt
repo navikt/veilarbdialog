@@ -122,7 +122,7 @@ internal class DialogBeskjedTest(
             .then()
             .statusCode(200)
 
-        brukernotifikasjonService.sendDoneBrukernotifikasjoner()
+        brukernotifikasjonService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
 
         hentInaktiveringFraKafka()
 
@@ -254,7 +254,7 @@ internal class DialogBeskjedTest(
             .then()
             .statusCode(200)
 
-        brukernotifikasjonService.sendDoneBrukernotifikasjoner()
+        brukernotifikasjonService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
 
         val doneRecord = hentInaktiveringFraKafka()
 
@@ -329,7 +329,7 @@ internal class DialogBeskjedTest(
             .then()
             .statusCode(200)
 
-        brukernotifikasjonService.sendDoneBrukernotifikasjoner()
+        brukernotifikasjonService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
 
         val doneRecord = hentInaktiveringFraKafka()
 
@@ -379,7 +379,7 @@ internal class DialogBeskjedTest(
             .then()
             .statusCode(200)
 
-        brukernotifikasjonService.sendDoneBrukernotifikasjoner()
+        brukernotifikasjonService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
 
         hentInaktiveringFraKafka()
 

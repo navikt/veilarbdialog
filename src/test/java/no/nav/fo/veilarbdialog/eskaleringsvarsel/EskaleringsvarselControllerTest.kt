@@ -444,7 +444,7 @@ internal class EskaleringsvarselControllerTest(
             .extract()
             .response()
             .`as`<DialogDTO?>(DialogDTO::class.java)
-        brukernotifikasjonService.sendDoneBrukernotifikasjoner()
+        brukernotifikasjonService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
     }
 
     private fun requireGjeldende(veileder: MockVeileder, mockBruker: MockBruker): GjeldendeEskaleringsvarselDto {

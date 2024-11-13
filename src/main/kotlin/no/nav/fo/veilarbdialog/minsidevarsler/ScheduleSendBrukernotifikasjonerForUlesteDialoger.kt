@@ -59,7 +59,7 @@ open class ScheduleSendBrukernotifikasjonerForUlesteDialoger(
             )
 
             try {
-                brukernotifikasjonService.bestillVarsel(
+                brukernotifikasjonService.puttVarselIOutbox(
                     varselOmUlestMelding,
                     AktorId.of(dialogData.aktorId)
                 )

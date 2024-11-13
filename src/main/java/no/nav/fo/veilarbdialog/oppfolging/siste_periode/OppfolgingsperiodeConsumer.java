@@ -42,7 +42,7 @@ class OppfolgingsperiodeConsumer {
 
     private void avsluttEskaleringsverslerOgAktiveBrukernotifikasjoner(OppfolgingsperiodeV1 oppfolgingsperiodeV1) {
         eskaleringsvarselService.stop(oppfolgingsperiodeV1.uuid);
-        brukernotifikasjonService.bestillDoneForOppfolgingsperiode(oppfolgingsperiodeV1.uuid);
+        brukernotifikasjonService.setSkalAvsluttesForVarslerIPeriode(oppfolgingsperiodeV1.uuid);
     }
 
     private void settDialogerTilHistorisk(OppfolgingsperiodeV1 oppfolgingAvsluttetDto) {

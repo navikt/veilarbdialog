@@ -65,13 +65,13 @@ public class DialogStatusService {
 
         brukernotifikasjonRepository
                 .hentBrukernotifikasjonForDialogId(dialogData.getId(), BrukernotifikasjonsType.BESKJED).forEach(
-                        brukernotifikasjon -> brukernotifikasjonService.bestillDone(brukernotifikasjon.id())
+                        varsel -> brukernotifikasjonService.setVarselTilSkalAvsluttes(varsel.varselId())
                 );
 
         eskaleringsvarselRepository.hentGjeldende(AktorId.of(dialogData.getAktorId())).ifPresent(
                 eskaleringsvarselEntity -> {
                     if (eskaleringsvarselEntity.tilhorendeDialogId() == dialogData.getId()) {
-                        brukernotifikasjonService.bestillDone(eskaleringsvarselEntity.tilhorendeBrukernotifikasjonId());
+                        brukernotifikasjonService.setVarselTilSkalAvsluttes(eskaleringsvarselEntity.tilhorendeBrukernotifikasjonId());
                     }
                 }
         );

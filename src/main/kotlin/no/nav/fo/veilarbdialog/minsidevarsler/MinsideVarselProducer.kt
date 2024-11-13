@@ -64,17 +64,17 @@ open class MinsideVarselProducer(
         kafkaTemplate.send(topic, varsel.varselId.value.toString(), melding)
     }
 
-    open fun publiserInaktiveringsMeldingPåKafka(inativerVarsel: VarselInaktivering) {
+    open fun publiserInaktiveringsMeldingPåKafka(inativerVarselId: MinSideVarselId) {
         val melding = VarselActionBuilder.inaktiver {
-            this.varselId = inativerVarsel.varselId.value.toString()
+            this.varselId = inativerVarselId.value.toString()
             this.produsent = Produsent(
                 cluster = cluster,
                 namespace = namespace,
                 appnavn = applicationName
             )
         }
-        kafkaTemplate.send(topic, inativerVarsel.varselId.value.toString(), melding)
-        log.info("Sendt done for varselId: {}", inativerVarsel.varselId);
+        kafkaTemplate.send(topic, inativerVarselId.value.toString(), melding)
+        log.info("Sendt done for varselId: {}", inativerVarselId);
     }
 
 }

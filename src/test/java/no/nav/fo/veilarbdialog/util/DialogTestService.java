@@ -106,6 +106,6 @@ public class DialogTestService {
                     .then()
                     .assertThat().statusCode(HttpStatus.OK.value())
                     .extract().response();
-            brukernotifikasjonService.sendDoneBrukernotifikasjoner();
+            brukernotifikasjonService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes();
     }
 }

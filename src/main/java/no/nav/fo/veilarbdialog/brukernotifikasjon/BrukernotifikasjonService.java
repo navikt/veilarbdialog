@@ -6,13 +6,11 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringDAO;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringMetrikk;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
 import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel;
-import no.nav.fo.veilarbdialog.minsidevarsler.VarselInaktivering;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client;
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselProducer;
 import no.nav.fo.veilarbdialog.minsidevarsler.PendingVarsel;
@@ -22,8 +20,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,11 +33,9 @@ public class BrukernotifikasjonService {
     private final OppfolgingV2Client oppfolgingClient;
     private final BrukernotifikasjonRepository brukernotifikasjonRepository;
     private final VarselDAO varselDAO;
-    private final KvitteringDAO kvitteringDAO;
-    private final KvitteringMetrikk kvitteringMetrikk;
     private final MinsideVarselProducer minsideVarselProducer;
 
-    public BrukernotifikasjonEntity bestillVarsel(DialogVarsel brukernotifikasjon, AktorId aktorId) {
+    public BrukernotifikasjonEntity puttVarselIOutbox(DialogVarsel brukernotifikasjon, AktorId aktorId) {
         BrukernotifikasjonInsert insert = new BrukernotifikasjonInsert(
                 brukernotifikasjon.getVarselId(),
                 brukernotifikasjon.getDialogId(),
@@ -62,13 +56,19 @@ public class BrukernotifikasjonService {
         return hentBrukernotifikasjon(id);
     }
 
-    public void bestillDone(long brukernotifikasjonId) {
-        brukernotifikasjonRepository.updateStatus(brukernotifikasjonId, BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES);
+    public void setVarselTilSkalAvsluttes(long brukernotifikasjonId) {
+        brukernotifikasjonRepository.hentBrukernotifikasjon(brukernotifikasjonId)
+                .map(BrukernotifikasjonEntity::varselId)
+                .ifPresent(this::setVarselTilSkalAvsluttes);
+    }
+
+    public void setVarselTilSkalAvsluttes(MinSideVarselId varselId) {
+        brukernotifikasjonRepository.updateStatus(varselId, BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES);
     }
 
     @Transactional
-    public void bestillDoneForOppfolgingsperiode(UUID oppfolgingsperiode) {
-        brukernotifikasjonRepository.bestillDoneForPeriode(oppfolgingsperiode);
+    public void setSkalAvsluttesForVarslerIPeriode(UUID oppfolgingsperiode) {
+        brukernotifikasjonRepository.setSkalAvsluttesForVarslerIPeriode(oppfolgingsperiode);
     }
 
     @Scheduled(
@@ -86,7 +86,7 @@ public class BrukernotifikasjonService {
                             brukernotifikasjonEntity.type(),
                             brukernotifikasjonEntity.fnr()
                     ));
-                    brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.id(), BrukernotifikasjonBehandlingStatus.SENDT);
+                    brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.varselId(), BrukernotifikasjonBehandlingStatus.SENDT);
                 }
         );
     }
@@ -95,14 +95,12 @@ public class BrukernotifikasjonService {
             initialDelay = 60000,
             fixedDelay = 5000
     )
-    @SchedulerLock(name = "brukernotifikasjon_done_kafka_scheduledTask", lockAtMostFor = "PT2M")
-    public void sendDoneBrukernotifikasjoner() {
-        List<BrukernotifikasjonEntity> skalAvsluttesNotifikasjoner = brukernotifikasjonRepository.hentPendingDoneBrukernotifikasjoner();
-        skalAvsluttesNotifikasjoner.stream().forEach(
-                brukernotifikasjonEntity ->  {
-                    var inaktivering = new VarselInaktivering(brukernotifikasjonEntity.varselId());
-                    minsideVarselProducer.publiserInaktiveringsMeldingPåKafka(inaktivering);
-                    brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.id(), BrukernotifikasjonBehandlingStatus.AVSLUTTET);
+    @SchedulerLock(name = "varsel_inaktivering_kafka_scheduledTask", lockAtMostFor = "PT2M")
+    public void sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes() {
+        List<BrukernotifikasjonEntity> skalAvsluttesNotifikasjoner = brukernotifikasjonRepository.hentVarslerSomSkalAvsluttes();
+        skalAvsluttesNotifikasjoner.stream().forEach( varselSomSkalAvsluttes ->  {
+                    minsideVarselProducer.publiserInaktiveringsMeldingPåKafka(varselSomSkalAvsluttes.varselId());
+                    brukernotifikasjonRepository.updateStatus(varselSomSkalAvsluttes.varselId(), BrukernotifikasjonBehandlingStatus.AVSLUTTET);
                 }
         );
     }
