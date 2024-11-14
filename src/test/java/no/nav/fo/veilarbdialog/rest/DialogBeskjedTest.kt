@@ -303,7 +303,7 @@ internal class DialogBeskjedTest(
             .extract()
             .`as`<DialogDTO>(DialogDTO::class.java)
 
-
+        mockVeileder.sendEnMelding(mockBruker)
         // Setter sendt til å være 1 sekund tidligere pga. grace period
         settHenvendelseSendtForNSekundSiden(sammedialog.henvendelser[1].id, 1)
 

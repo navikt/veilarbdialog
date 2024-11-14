@@ -19,9 +19,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.PENDING;
 
 @Service
 @Slf4j
@@ -39,6 +43,14 @@ public class MinsideVarselService {
             throw new BrukerKanIkkeVarslesException();
         }
 
+        List<BrukernotifikasjonEntity> eksisterendeVarsel = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(varsel.getDialogId(), varsel.getType());
+        if (!eksisterendeVarsel.isEmpty()) {
+            // Hvis det er sendt eller skal sendes varsel for denne dialogen siste halvtimen, ikke opprett nytt varsel
+            var uteståendeVarslerForDialogId = eksisterendeVarsel.stream().anyMatch(
+                    it -> (it.status() == PENDING ||  it.status() == BrukernotifikasjonBehandlingStatus.SENDT)
+                            && it.opprettet().isAfter(LocalDateTime.now().minusMinutes(30)));
+            if (uteståendeVarslerForDialogId) return null;
+        }
         Long id = brukernotifikasjonRepository.opprettVarselIPendingStatus(varsel);
         log.info("Minside varsel opprettet i PENDING status {}", varsel.getVarselId());
         return hentBrukernotifikasjon(id);

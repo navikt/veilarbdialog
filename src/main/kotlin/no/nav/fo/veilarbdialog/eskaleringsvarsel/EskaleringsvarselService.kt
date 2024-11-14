@@ -8,6 +8,7 @@ import no.nav.common.types.identer.Fnr
 import no.nav.common.types.identer.NavIdent
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
 import no.nav.fo.veilarbdialog.brukernotifikasjon.MinsideVarselService
+import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity
 import no.nav.fo.veilarbdialog.domain.*
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto
@@ -89,8 +90,9 @@ open class EskaleringsvarselService(
             dialogDataService.utledDialogLink(dialogData.id)
         )
 
-        val brukernotifikasjonEntity =
+        val brukernotifikasjonEntity: BrukernotifikasjonEntity =
             minsideVarselService.puttVarselIOutbox(varselOmMuligStans, AktorId.of(dialogData.aktorId))
+                ?: throw AktivEskaleringException("Det finnes allerede et oppgavevarsel for dialogId ${dialogData.id}.")
 
         val eskaleringsvarselEntity = eskaleringsvarselRepository.opprett(
             dialogData.id,
