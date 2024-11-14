@@ -62,10 +62,12 @@ open class MinsideVarselHendelseConsumer(
                 log.error("varsel feilet for notifikasjon varselId={} med feilmelding {}", varselId, varsel.feilmelding);
                 brukernotifikasjonRepository.setEksternVarselFeilet(varselId);
             }
-            is Renotifikasjon -> {}
+            is Renotifikasjon -> {
+                log.info("Minside varsel renotifkasjon sendt i kanal {} for varselId={}", varsel.kanal.name, varselId)
+            }
             is Sendt -> {
-                brukernotifikasjonRepository.setEksternVarselSendtOk(varselId);
-                log.info("Varsel fullført for varselId={}", varselId);
+                brukernotifikasjonRepository.setEksternVarselSendtOk(varselId)
+                log.info("Minside varsel sendt i kanal {} for varselId={}", varsel.kanal.name,  varselId)
             }
             is Venter -> {}
             is Kasellert -> {
