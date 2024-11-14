@@ -68,7 +68,7 @@ public class DialogTestService {
         EskaleringsvarselDto eskaleringsvarselDto = response.as(EskaleringsvarselDto.class);
         assertNotNull(eskaleringsvarselDto);
         // Scheduled task
-        minsideVarselService.sendPendingVarsler();
+        minsideVarselService.sendPendingVarslerCron();
         return eskaleringsvarselDto;
     }
 

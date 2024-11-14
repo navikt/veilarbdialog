@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -76,7 +75,7 @@ public class MinsideVarselService {
             fixedDelay = 5000
     )
     @SchedulerLock(name = "varsler_oppgave_kafka_scheduledTask", lockAtMostFor = "PT2M")
-    public void sendPendingVarsler() {
+    public Integer sendPendingVarslerCron() {
         List<BrukernotifikasjonEntity> pendingBrukernotifikasjoner = brukernotifikasjonRepository.hentPendingVarsler();
         pendingBrukernotifikasjoner.stream().forEach( brukernotifikasjonEntity -> {
                     minsideVarselProducer.publiserVarselPåKafka(new PendingVarsel(
@@ -90,6 +89,7 @@ public class MinsideVarselService {
                     brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.varselId(), BrukernotifikasjonBehandlingStatus.SENDT);
                 }
         );
+        return pendingBrukernotifikasjoner.size();
     }
 
     @Scheduled(

@@ -2,10 +2,8 @@ package no.nav.fo.veilarbdialog.rest
 
 import no.nav.common.json.JsonUtils
 import no.nav.fo.veilarbdialog.SpringBootTestBase
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
 import no.nav.fo.veilarbdialog.domain.DialogDTO
 import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
@@ -24,6 +22,9 @@ import org.springframework.kafka.test.utils.KafkaTestUtils
 import java.sql.Types
 import java.time.Instant
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst.NY_MELDING_TEKST
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType.BESKJED
 import no.nav.fo.veilarbdialog.brukernotifikasjon.MinsideVarselService
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
@@ -58,63 +59,72 @@ internal class DialogBeskjedTest(
         minsideVarselConsumer = kafkaTestService.createStringStringConsumer(minsideVarselTopic)
     }
 
-    private fun hentOpprettetVarselKafkaTopic(): OpprettVarsel {
+    private fun assertOpprettetVarselPublisertPåKafka(): OpprettVarsel {
         val brukernotifikasjonRecord =
             KafkaTestUtils.getSingleRecord<String, String>(
                 minsideVarselConsumer,
                 minsideVarselTopic,
                 KafkaTestService.DEFAULT_WAIT_TIMEOUT
             )
-
+        assertTrue(
+            kafkaTestService.harKonsumertAlleMeldinger(
+                minsideVarselTopic,
+                minsideVarselConsumer,
+            )
+        )
         val opprettVarsel =
             JsonUtils.fromJson<OpprettVarsel>(brukernotifikasjonRecord.value(), OpprettVarsel::class.java)
         return opprettVarsel
     }
 
-    private fun hentInaktiveringFraKafka(): InaktiverVarsel {
+    private fun assertInaktiveringPublisertPåKafka(): InaktiverVarsel {
         val doneRecord = KafkaTestUtils.getSingleRecord<String, String>(
                 minsideVarselConsumer,
                 minsideVarselTopic,
                 KafkaTestService.DEFAULT_WAIT_TIMEOUT
             )
+        assertTrue(
+            kafkaTestService.harKonsumertAlleMeldinger(
+                minsideVarselTopic,
+                minsideVarselConsumer,
+            )
+        )
         return JsonUtils.fromJson(doneRecord.value(), InaktiverVarsel::class.java)
     }
 
     @Test
-    fun beskjed_happy_case() {
+    fun `varsel skal opprettes når veileder sender melding og inaktiveres når bruker leser melding`() {
         val mockBruker = MockNavService.createHappyBruker()
         val mockVeileder = MockNavService.createVeileder(mockBruker)
 
         val dialog = mockVeileder.sendEnMelding(mockBruker)
 
-        minsideVarselService.sendPendingVarsler()
-        val opprettVarsel = hentOpprettetVarselKafkaTopic()
+        minsideVarselService.sendPendingVarslerCron()
+        val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
 
-        assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(BrukernotifikasjonTekst.NY_MELDING_TEKST)
+        assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(NY_MELDING_TEKST)
         assertThat(opprettVarsel.type).isEqualTo(Varseltype.Beskjed)
 
         val brukernotifikasjonEntity = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(
             dialog.id.toLong(),
-            BrukernotifikasjonsType.BESKJED
+            BESKJED
         )[0]
 
         assertSoftly { assertions ->
-            assertions!!.assertThat(brukernotifikasjonEntity.dialogId).isEqualTo(dialog.id.toLong())
-            assertions.assertThat<BrukernotifikasjonBehandlingStatus?>(brukernotifikasjonEntity.status)
-                .isEqualTo(BrukernotifikasjonBehandlingStatus.SENDT)
+            assertions.assertThat(brukernotifikasjonEntity.dialogId).isEqualTo(dialog.id.toLong())
+            assertions.assertThat(brukernotifikasjonEntity.status).isEqualTo(SENDT)
         }
 
         mockBruker.lesMelding(dialog.id)
-
         minsideVarselService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
-        hentInaktiveringFraKafka()
 
+        assertInaktiveringPublisertPåKafka()
         Assertions.assertThat(mockBruker.fnr).isEqualTo(opprettVarsel.ident)
     }
 
-    private fun MockVeileder.sendEnMelding(mockBruker: MockBruker): DialogDTO {
+    private fun MockVeileder.sendEnMelding(mockBruker: MockBruker, dialogId: String? = null): DialogDTO {
         return this.createRequest()
-            .body(NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift"))
+            .body(NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift").setDialogId(dialogId))
             .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.fnr)
             .then()
             .statusCode(200)
@@ -129,48 +139,16 @@ internal class DialogBeskjedTest(
             .statusCode(200)
     }
 
-    private fun hentVarselOpprettelseFraKafka(): OpprettVarsel {
-        val doneRecord = KafkaTestUtils.getSingleRecord<String, String>(
-            minsideVarselConsumer,
-            minsideVarselTopic,
-            KafkaTestService.DEFAULT_WAIT_TIMEOUT
-        )
-        return JsonUtils.fromJson(doneRecord.value(), OpprettVarsel::class.java)
-    }
-
     @Test
     fun sending_av_melding_skal_putte_varsel_i_pending() {
         val mockBruker = MockNavService.createHappyBruker()
         val mockVeileder = MockNavService.createVeileder(mockBruker)
 
         mockVeileder.sendEnMelding(mockBruker)
-        minsideVarselService.sendPendingVarsler()
-        val varselOpprettelse = hentVarselOpprettelseFraKafka()
+        minsideVarselService.sendPendingVarslerCron()
 
-        val harKonsumertAlleMeldinger = kafkaTestService.harKonsumertAlleMeldinger(
-            minsideVarselTopic,
-            minsideVarselConsumer
-        )
-        Assertions.assertThat(harKonsumertAlleMeldinger).isTrue()
+        val varselOpprettelse = assertOpprettetVarselPublisertPåKafka()
         assertThat(varselOpprettelse.eksternVarsling?.kanBatches).isTrue()
-    }
-
-    @Test
-    fun ikke_beskjed_naar_maxalder_er_passert() {
-        val mockBruker = MockNavService.createHappyBruker()
-        val mockVeileder = MockNavService.createVeileder(mockBruker)
-
-        val dialog = mockVeileder.sendEnMelding(mockBruker)
-        // Setter sendt til å være 3 sekund tidligere pga. max alder
-        settHenvendelseSendtForNSekundSiden(dialog.henvendelser[0].id, 3)
-
-        minsideVarselService.sendPendingVarsler()
-
-        val harKonsumertAlleMeldinger = kafkaTestService.harKonsumertAlleMeldinger(
-            minsideVarselTopic,
-            minsideVarselConsumer
-        )
-        Assertions.assertThat(harKonsumertAlleMeldinger).isTrue()
     }
 
     @Test
@@ -178,7 +156,6 @@ internal class DialogBeskjedTest(
         val bruker = MockNavService.createHappyBruker()
         val reservertKrr: BrukerOptions? = bruker.getBrukerOptions().toBuilder().erReservertKrr(true).build()
         MockNavService.updateBruker(bruker, reservertKrr)
-
         val veileder = MockNavService.createVeileder(bruker)
 
         veileder.createRequest()
@@ -193,74 +170,32 @@ internal class DialogBeskjedTest(
         val mockBruker = MockNavService.createHappyBruker()
         val mockVeileder = MockNavService.createVeileder(mockBruker)
 
-        val dialog = mockVeileder.createRequest()
-            .body(NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift"))
-            .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.fnr)
-            .then()
-            .statusCode(200)
-            .extract()
-            .`as`<DialogDTO>(DialogDTO::class.java)
-
+        val dialog = mockVeileder.sendEnMelding(mockBruker)
         // Hy henvendelse samme dialog
-        val sammeDialog = mockVeileder.createRequest()
-            .body(NyMeldingDTO().setTekst("tekst2").setDialogId(dialog.id))
-            .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.fnr)
-            .then()
-            .statusCode(200)
-            .extract()
-            .`as`<DialogDTO>(DialogDTO::class.java)
+        mockVeileder.sendEnMelding(mockBruker, dialog.id)
 
-        // Setter sendt til å være 1 sekund tidligere pga. grace period
-        settHenvendelseSendtForNSekundSiden(sammeDialog.henvendelser[0].id, 1)
-        settHenvendelseSendtForNSekundSiden(sammeDialog.henvendelser[1].id, 1)
-
-//        scheduleRessurs.sendBrukernotifikasjonerForUlesteDialoger()
-        minsideVarselService.sendPendingVarsler()
-
-        val opprettVarsel = hentOpprettetVarselKafkaTopic()
-
-        assertTrue(
-            kafkaTestService.harKonsumertAlleMeldinger(
-                minsideVarselTopic,
-                minsideVarselConsumer
-            )
-        )
-
-        assertThat(opprettVarsel.tekster.first().tekst)
-            .isEqualTo(BrukernotifikasjonTekst.NY_MELDING_TEKST)
+        minsideVarselService.sendPendingVarslerCron()
+        val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
+        assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(NY_MELDING_TEKST)
 
         val brukernotifikasjonEntity =
-            brukernotifikasjonRepository!!.hentBrukernotifikasjonForDialogId(
-                dialog.getId().toLong(),
-                BrukernotifikasjonsType.BESKJED
-            ).get(0)
+            brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(
+                dialog.id.toLong(),
+                BESKJED
+            )[0]
 
         assertSoftly {
-            assertions: SoftAssertions? ->
-            assertions!!.assertThat(brukernotifikasjonEntity.dialogId).isEqualTo(dialog.id.toLong())
-            assertions.assertThat<BrukernotifikasjonsType?>(brukernotifikasjonEntity.type)
-                .isEqualTo(BrukernotifikasjonsType.BESKJED)
-            assertions.assertThat<BrukernotifikasjonBehandlingStatus?>(brukernotifikasjonEntity.status)
-                .isEqualTo(BrukernotifikasjonBehandlingStatus.SENDT)
+            assertions: SoftAssertions ->
+            assertions.assertThat(brukernotifikasjonEntity.dialogId).isEqualTo(dialog.id.toLong())
+            assertions.assertThat(brukernotifikasjonEntity.type).isEqualTo(BESKJED)
+            assertions.assertThat(brukernotifikasjonEntity.status).isEqualTo(SENDT)
         }
 
-        mockBruker.createRequest()
-            .put("/veilarbdialog/api/dialog/{dialogId}/les", dialog.id)
-            .then()
-            .statusCode(200)
+        mockBruker.lesMelding(dialog.id)
 
         minsideVarselService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
-
-        val doneRecord = hentInaktiveringFraKafka()
-
-        assertTrue(
-            kafkaTestService.harKonsumertAlleMeldinger(
-                minsideVarselTopic,
-                minsideVarselConsumer
-            )
-        )
-
-        assertThat(opprettVarsel.varselId).isEqualTo(doneRecord.varselId)
+        val inaktivering = assertInaktiveringPublisertPåKafka()
+        assertThat(opprettVarsel.varselId).isEqualTo(inaktivering.varselId)
     }
 
     @Test
@@ -268,152 +203,106 @@ internal class DialogBeskjedTest(
         val mockBruker = MockNavService.createHappyBruker()
         val mockVeileder = MockNavService.createVeileder(mockBruker)
 
-        val dialog = mockVeileder.createRequest()
-            .body(NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift"))
-            .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.getFnr())
-            .then()
-            .statusCode(200)
-            .extract()
-            .`as`<DialogDTO>(DialogDTO::class.java)
+        // Send 2 meldinger på samme dialog
+        val dialog = mockVeileder.sendEnMelding(mockBruker)
+        mockVeileder.sendEnMelding(mockBruker, dialogId = dialog.id)
 
-
-        // Setter sendt til å være 1 sekund tidligere pga. grace period
-        settHenvendelseSendtForNSekundSiden(dialog.getHenvendelser().get(0).getId(), 1)
-
-        minsideVarselService.sendPendingVarsler()
-
-        val opprettVarsel = hentOpprettetVarselKafkaTopic()
-
-        assertTrue(
-            kafkaTestService.harKonsumertAlleMeldinger(
-                minsideVarselTopic,
-                minsideVarselConsumer,
-            )
-        )
-
-        assertThat(opprettVarsel.tekster.first().tekst)
-            .isEqualTo(BrukernotifikasjonTekst.NY_MELDING_TEKST)
-
-        // Hy henvendelse samme dialog
-        val sammedialog = mockVeileder.createRequest()
-            .body(NyMeldingDTO().setTekst("tekst2").setDialogId(dialog.getId()))
-            .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.getFnr())
-            .then()
-            .statusCode(200)
-            .extract()
-            .`as`<DialogDTO>(DialogDTO::class.java)
-
-        mockVeileder.sendEnMelding(mockBruker)
-        // Setter sendt til å være 1 sekund tidligere pga. grace period
-        settHenvendelseSendtForNSekundSiden(sammedialog.henvendelser[1].id, 1)
-
-        minsideVarselService.sendPendingVarsler()
-
-        // Ingen nye beskjeder siden forrige henvendelse ikke er lest
-        assertTrue(
-            kafkaTestService.harKonsumertAlleMeldinger(
-                minsideVarselTopic,
-                minsideVarselConsumer,
-            )
-        )
-
-        mockBruker.createRequest()
-            .put("/veilarbdialog/api/dialog/{dialogId}/les", dialog.getId())
-            .then()
-            .statusCode(200)
-
-        minsideVarselService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
-
-        val doneRecord = hentInaktiveringFraKafka()
-
-        assertTrue(
-            kafkaTestService.harKonsumertAlleMeldinger(
-                minsideVarselTopic,
-                minsideVarselConsumer,
-            )
-        )
-
-        assertThat(opprettVarsel.varselId).isEqualTo(doneRecord.varselId)
+        minsideVarselService.sendPendingVarslerCron()
+        assertOpprettetVarselPublisertPåKafka()
     }
 
-
     @Test
-    @Throws(InterruptedException::class)
-    fun nyNotifikasjonPaaSammeDialogNaarFoersteErLest() {
+    fun `les skal inaktivere varsel selvom varsel ikke ble publisert på kafka`() {
         val mockBruker = MockNavService.createHappyBruker()
         val mockVeileder = MockNavService.createVeileder(mockBruker)
 
-        val dialog = mockVeileder.createRequest()
-            .body(NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift"))
-            .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.getFnr())
-            .then()
-            .statusCode(200)
-            .extract()
-            .`as`<DialogDTO>(DialogDTO::class.java)
+        val dialog = mockVeileder.sendEnMelding(mockBruker) // PENDING
+        mockBruker.lesMelding(dialog.id) // PENDING -> SKAL_AVSLUTTES
+        minsideVarselService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes() // SKAL_AVSLUTTES -> AVSLUTTET
 
-        settHenvendelseSendtForNSekundSiden(dialog.henvendelser[0].id, 1)
-        minsideVarselService.sendPendingVarsler()
+        assertInaktiveringPublisertPåKafka()
+    }
 
-        val opprettVarsel = hentOpprettetVarselKafkaTopic()
+    @Test
+    @Throws(InterruptedException::class)
+    fun `flere meldinger på samme dialog skal ikke sende flere notifikasjoner hvis det er under 30 min siden forrige varsel`() {
+        val mockBruker = MockNavService.createHappyBruker()
+        val mockVeileder = MockNavService.createVeileder(mockBruker)
 
-        assertTrue(
-            kafkaTestService!!.harKonsumertAlleMeldinger(
-                minsideVarselTopic,
-                minsideVarselConsumer,
-            )
-        )
+        val dialog = mockVeileder.sendEnMelding(mockBruker)
+        minsideVarselService.sendPendingVarslerCron()
 
-        assertThat(opprettVarsel.tekster.first().tekst)
-            .isEqualTo(BrukernotifikasjonTekst.NY_MELDING_TEKST)
-
-        mockBruker.createRequest()
-            .put("/veilarbdialog/api/dialog/{dialogId}/les", dialog.getId())
-            .then()
-            .statusCode(200)
-
-        minsideVarselService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
-
-        hentInaktiveringFraKafka()
-
-        assertTrue(
-            kafkaTestService.harKonsumertAlleMeldinger(
-                minsideVarselTopic,
-                minsideVarselConsumer,
-            )
-        )
+        val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
+        assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(NY_MELDING_TEKST)
 
         // Hy henvendelse samme dialog
-        val sammeDialog = mockVeileder.createRequest()
-            .body(NyMeldingDTO().setTekst("tekst2").setDialogId(dialog.id))
-            .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.fnr)
-            .then()
-            .statusCode(200)
-            .extract()
-            .`as`<DialogDTO?>(DialogDTO::class.java)
+        mockVeileder.sendEnMelding(mockBruker, dialog.id)
+        minsideVarselService.sendPendingVarslerCron()
 
-        minsideVarselService.sendPendingVarsler()
-
-        // Ny beskjed siden forrige henvendelse er lest
-        org.junit.jupiter.api.Assertions.assertFalse(
+        assertTrue(
             kafkaTestService.harKonsumertAlleMeldinger(
                 minsideVarselTopic,
-                minsideVarselConsumer
+                minsideVarselConsumer,
             )
         )
     }
 
-    // Setter sendt til å være N sekund tidligere pga. grace period
-    private fun settHenvendelseSendtForNSekundSiden(henvendelseId: String?, sekunderSiden: Int) {
+    @Test
+    @Throws(InterruptedException::class)
+    fun `flere meldinger på samme dialog skal sende flere notifikasjoner hvis det er overt 30 min siden forrige varsel`() {
+        val mockBruker = MockNavService.createHappyBruker()
+        val mockVeileder = MockNavService.createVeileder(mockBruker)
+
+        val dialog = mockVeileder.sendEnMelding(mockBruker)
+        settBrukernotifikasjonOpprettetForNMinuttSiden(dialog.id, 31)
+        minsideVarselService.sendPendingVarslerCron()
+
+        val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
+        assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(NY_MELDING_TEKST)
+
+        // Hy henvendelse samme dialog
+        mockVeileder.sendEnMelding(mockBruker, dialog.id)
+        minsideVarselService.sendPendingVarslerCron()
+
+        assertOpprettetVarselPublisertPåKafka()
+    }
+
+    @Test
+    @Throws(InterruptedException::class)
+    fun `flere meldinger på samme dialog når første er lest skal sende notifikasjon selvom det er under 30 min siden`() {
+        val mockBruker = MockNavService.createHappyBruker()
+        val mockVeileder = MockNavService.createVeileder(mockBruker)
+
+        val dialog = mockVeileder.sendEnMelding(mockBruker)
+        settBrukernotifikasjonOpprettetForNMinuttSiden(dialog.id, 1)
+        minsideVarselService.sendPendingVarslerCron()
+
+        val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
+        assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(NY_MELDING_TEKST)
+
+        mockBruker.lesMelding(dialog.id)
+        minsideVarselService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
+
+        assertInaktiveringPublisertPåKafka()
+
+        // Hy henvendelse samme dialog
+        mockVeileder.sendEnMelding(mockBruker, dialog.id)
+        minsideVarselService.sendPendingVarslerCron()
+
+        assertOpprettetVarselPublisertPåKafka()
+    }
+
+    private fun settBrukernotifikasjonOpprettetForNMinuttSiden(henvendelseId: String?, minutterSiden: Int) {
         val namedJdbcTemplate = NamedParameterJdbcTemplate(jdbcTemplate)
-        val nySendt = Date.from(Instant.now().minus(sekunderSiden.toLong(), ChronoUnit.SECONDS))
+        val justertOpprettet = Date.from(Instant.now().minus(minutterSiden.toLong(), ChronoUnit.MINUTES))
         val update = namedJdbcTemplate.update(
             """
-                                UPDATE HENVENDELSE 
-                                SET SENDT = :sendt
-                                WHERE HENVENDELSE_ID = :henvendelseId
+                UPDATE BRUKERNOTIFIKASJON 
+                SET opprettet = :sendt
+                WHERE DIALOG_ID = :henvendelseId
                         
                         """.trimIndent(),
-            MapSqlParameterSource("sendt", nySendt)
+            MapSqlParameterSource("sendt", justertOpprettet)
                 .addValue("henvendelseId", henvendelseId, Types.BIGINT)
         )
         assertThat(update).isEqualTo(1)
