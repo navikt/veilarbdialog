@@ -1,5 +1,5 @@
 # Veilarbdialog
-Backend applikasjon for aktivitetsplan. Tilbyr REST tjenester for å hente/opprette/endre dialoger.
+Backend applikasjon for arbeidsrettet-dialog. Tilbyr REST tjenester for å hente/opprette/endre dialoger.
 
 ### Komme i gang
 
