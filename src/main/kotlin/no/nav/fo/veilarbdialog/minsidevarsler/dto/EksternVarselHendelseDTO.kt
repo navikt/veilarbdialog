@@ -49,7 +49,10 @@ class Venter(
     varseltype: Varseltype,
     varselId: MinSideVarselId,
 ): EksternVarselOppdatering(varselId, VarselHendelseEventType.venter_ekstern, varseltype)
-
+class Kasellert(
+    varseltype: Varseltype,
+    varselId: MinSideVarselId,
+): EksternVarselOppdatering(varselId, VarselHendelseEventType.kansellert_ekstern, varseltype)
 
 fun JsonNode.deserialiserEksternVarselHendelse(): EksternVarselOppdatering {
     val eksternStatus = EksternVarselStatus.valueOf(this["status"].asText())
@@ -75,9 +78,8 @@ fun JsonNode.deserialiserEksternVarselHendelse(): EksternVarselOppdatering {
                 this["feilmelding"].asText()
             )
         }
-        EksternVarselStatus.venter -> {
-            Venter(varseltype, varselId)
-        }
+        EksternVarselStatus.venter -> Venter(varseltype, varselId)
+        EksternVarselStatus.kansellert -> Kasellert(varseltype, varselId)
     }
 }
 
@@ -90,5 +92,6 @@ enum class EksternVarselStatus {
     bestilt,
     sendt,
     feilet,
-    venter // Vi tror det skjer når meldinger batches?
+    venter, // Bestilling av varsling på sms/epost er lagt til i intern kø
+    kansellert // Det underliggende varselet ble inaktivert før bestilling ble oversendt til altinn
 }

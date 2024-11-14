@@ -1,11 +1,14 @@
 package no.nav.fo.veilarbdialog.minsidevarsler
 
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.AVSLUTTET
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringMetrikk
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Bestilt
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselOppdatering
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Feilet
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.InternVarselHendelseDTO
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.Kasellert
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Renotifikasjon
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Sendt
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.VarselFraAnnenApp
@@ -65,6 +68,9 @@ open class MinsideVarselHendelseConsumer(
                 log.info("Varsel fullført for varselId={}", varselId);
             }
             is Venter -> {}
+            is Kasellert -> {
+                brukernotifikasjonRepository.updateStatus(varselId, AVSLUTTET)
+            }
         }
 
         kvitteringMetrikk.incrementBrukernotifikasjonKvitteringMottatt(varsel.hendelseType);

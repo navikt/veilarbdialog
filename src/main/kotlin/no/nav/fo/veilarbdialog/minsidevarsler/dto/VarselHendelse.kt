@@ -13,6 +13,7 @@ enum class VarselHendelseEventType {
     slettet,
     sendt_ekstern,
     renotifikasjon_ekstern,
+    kansellert_ekstern,
     bestilt_ekstern,
     feilet_ekstern,
     venter_ekstern

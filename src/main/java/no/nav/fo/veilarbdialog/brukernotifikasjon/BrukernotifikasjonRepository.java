@@ -137,7 +137,7 @@ public class BrukernotifikasjonRepository {
 
     }
 
-    void updateStatus(@NonNull MinSideVarselId varselId, @NonNull BrukernotifikasjonBehandlingStatus status) {
+    public void updateStatus(@NonNull MinSideVarselId varselId, @NonNull BrukernotifikasjonBehandlingStatus status) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", varselId.getValue().toString())
                 .addValue("status", status.name());
