@@ -6,11 +6,11 @@ import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.MinsideVarselService;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
-import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
@@ -56,7 +56,7 @@ class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
     private SistePeriodeDAO sistePeriodeDAO;
 
     @Autowired
-    BrukernotifikasjonService brukernotifikasjonService;
+    MinsideVarselService minsideVarselService;
 
     @Autowired
     BrukernotifikasjonRepository brukernotifikasjonRepository;
@@ -158,7 +158,7 @@ class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
         opprettEllerEndreOppfolgingsperiodeForBruker(startOppfolging);
 
-        DialogDTO dialogDTO = dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setOverskrift("The Three Trials").setTekst("Defeat the Sword Master of Melee Island"));
+        DialogDTO dialogDTO = dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setOverskrift("The Three Trials").setTekst("Defeat the Sword Master of Melee Island"));
 
         OppfolgingsperiodeV1 stopOppfolging = OppfolgingsperiodeV1.builder()
                 .uuid(mockBruker.getOppfolgingsperiode())

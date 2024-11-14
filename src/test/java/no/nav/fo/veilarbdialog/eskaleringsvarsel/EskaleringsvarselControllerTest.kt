@@ -5,7 +5,7 @@ import io.restassured.response.Response
 import no.nav.common.json.JsonUtils
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService
+import no.nav.fo.veilarbdialog.brukernotifikasjon.MinsideVarselService
 import no.nav.fo.veilarbdialog.domain.DialogDTO
 import no.nav.fo.veilarbdialog.domain.HenvendelseDTO
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto
@@ -16,7 +16,6 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder
-import no.nav.fo.veilarbdialog.minsidevarsler.ScheduleSendBrukernotifikasjonerForUlesteDialoger
 import no.nav.fo.veilarbdialog.util.DialogTestService
 import no.nav.fo.veilarbdialog.util.KafkaTestService
 import no.nav.tms.varsel.action.InaktiverVarsel
@@ -54,9 +53,7 @@ internal class EskaleringsvarselControllerTest(
     @Autowired
     var kafkaTestService: KafkaTestService,
     @Autowired
-    var brukernotifikasjonService: BrukernotifikasjonService,
-    @Autowired
-    var scheduleSendBrukernotifikasjonerForUlesteDialoger: ScheduleSendBrukernotifikasjonerForUlesteDialoger,
+    var minsideVarselService: MinsideVarselService,
 
     ) : SpringBootTestBase() {
     private val log = LoggerFactory.getLogger(EskaleringsvarselController::class.java)
@@ -395,10 +392,10 @@ internal class EskaleringsvarselControllerTest(
 
         dialogTestService.startEskalering(veileder, startEskaleringDto)
 
-        Thread.sleep(2000L)
+//        Thread.sleep(2000L)
         // Batchen bestiller beskjeder ved nye dialoger (etter 1000 ms)
-        scheduleSendBrukernotifikasjonerForUlesteDialoger.sendBrukernotifikasjonerForUlesteDialoger()
-        brukernotifikasjonService.sendPendingVarsler()
+//        scheduleSendBrukernotifikasjonerForUlesteDialoger.sendBrukernotifikasjonerForUlesteDialoger()
+        minsideVarselService.sendPendingVarsler()
 
         // sjekk at det er blitt sendt en oppgave
         ventPåVarselOpprettelsePåKafka()
@@ -428,7 +425,7 @@ internal class EskaleringsvarselControllerTest(
             .post("/veilarbdialog/api/eskaleringsvarsel/start")
             .then()
             .extract().response()
-        brukernotifikasjonService.sendPendingVarsler()
+        minsideVarselService.sendPendingVarsler()
         return response
     }
 
@@ -444,7 +441,7 @@ internal class EskaleringsvarselControllerTest(
             .extract()
             .response()
             .`as`<DialogDTO?>(DialogDTO::class.java)
-        brukernotifikasjonService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
+        minsideVarselService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
     }
 
     private fun requireGjeldende(veileder: MockVeileder, mockBruker: MockBruker): GjeldendeEskaleringsvarselDto {

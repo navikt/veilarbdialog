@@ -45,7 +45,8 @@ public class BrukernotifikasjonRepository {
                     rs.getString("smstekst"), // TODO: Denne brukes ikke
                     rs.getString("eposttittel"),// TODO: Denne brukes ikke
                     rs.getString("epostbody"),// TODO: Denne brukes ikke
-                    DatabaseUtils.hentMaybeURL(rs, "lenke")
+                    DatabaseUtils.hentMaybeURL(rs, "lenke"),
+                    rs.getBoolean("skal_batches")
             );
 
     Long opprettVarselIPendingStatus(DialogVarsel varsel) {
@@ -59,12 +60,13 @@ public class BrukernotifikasjonRepository {
                 .addValue("status", BrukernotifikasjonBehandlingStatus.PENDING.name())
                 .addValue("varsel_kvittering_status", VarselKvitteringStatus.IKKE_SATT.name())
                 .addValue("melding", varsel.getMelding())
-                .addValue("lenke", varsel.getLink().toExternalForm());
+                .addValue("lenke", varsel.getLink().toExternalForm())
+                .addValue("skalBatches", varsel.getSkalBatches());
 
         jdbcTemplate.update("" +
                         " INSERT INTO brukernotifikasjon " +
-                        "        (event_id, DIALOG_ID, foedselsnummer, oppfolgingsperiode_id, type, status, varsel_kvittering_status, opprettet, melding, lenke) " +
-                        " VALUES (:event_id, :dialog_id, :foedselsnummer, :oppfolgingsperiode_id, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :lenke) ",
+                        "        (event_id, DIALOG_ID, foedselsnummer, oppfolgingsperiode_id, type, status, varsel_kvittering_status, opprettet, melding, lenke, skal_batches) " +
+                        " VALUES (:event_id, :dialog_id, :foedselsnummer, :oppfolgingsperiode_id, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :lenke, :skalBatches) ",
                 params, keyHolder, new String[]{"id"});
 
         Number generatedKey = keyHolder.getKey();

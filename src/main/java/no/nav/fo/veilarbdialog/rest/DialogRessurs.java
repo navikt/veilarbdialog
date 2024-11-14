@@ -119,19 +119,19 @@ public class DialogRessurs {
     }
 
     @PostMapping
-    public DialogDTO nyHenvendelse(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
-        Person bruker = nyHenvendelseDTO.getFnr() != null ? Person.fnr(nyHenvendelseDTO.getFnr()) : getContextUserIdent();
+    public DialogDTO nyMelding(@RequestBody NyMeldingDTO nyMeldingDTO) {
+        Person bruker = nyMeldingDTO.getFnr() != null ? Person.fnr(nyMeldingDTO.getFnr()) : getContextUserIdent();
         sjekkTilgangOgAuditlog(bruker.eksternBrukerId());
 
-        var dialogData = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
-        if (nyHenvendelseDTO.getVenterPaaSvarFraNav() != null) {
-            dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyHenvendelseDTO.getVenterPaaSvarFraNav());
+        var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, true);
+        if (nyMeldingDTO.getVenterPaaSvarFraNav() != null) {
+            dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyMeldingDTO.getVenterPaaSvarFraNav());
             dialogDataService.sendPaaKafka(dialogData.getAktorId());
         }
-        if (nyHenvendelseDTO.getVenterPaaSvarFraBruker() != null) {
+        if (nyMeldingDTO.getVenterPaaSvarFraBruker() != null) {
             var dialogStatus = DialogStatus.builder()
                     .dialogId(dialogData.getId())
-                    .venterPaSvar(nyHenvendelseDTO.getVenterPaaSvarFraBruker())
+                    .venterPaSvar(nyMeldingDTO.getVenterPaaSvarFraBruker())
                     .build();
 
             dialogData = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);

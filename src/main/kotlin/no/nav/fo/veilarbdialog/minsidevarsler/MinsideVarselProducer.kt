@@ -18,7 +18,8 @@ data class PendingVarsel(
     val melding: String,
     val lenke: URL,
     val type: BrukernotifikasjonsType,
-    val fnr: Fnr
+    val fnr: Fnr,
+    val skalBatches: Boolean
 )
 
 @Service
@@ -53,7 +54,8 @@ open class MinsideVarselProducer(
                 smsVarslingstekst = null
                 epostVarslingstittel = null
                 epostVarslingstekst = null
-                utsettSendingTil = ZonedDateTime.now().plusMinutes(5)
+                kanBatches = varsel.skalBatches
+                utsettSendingTil = if (varsel.skalBatches) null else ZonedDateTime.now().plusMinutes(5)
             }
             produsent = Produsent(
                 cluster = cluster,

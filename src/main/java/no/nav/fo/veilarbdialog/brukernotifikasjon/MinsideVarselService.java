@@ -7,7 +7,6 @@ import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
 import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
-import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel;
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
@@ -27,12 +26,11 @@ import java.util.UUID;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class BrukernotifikasjonService {
+public class MinsideVarselService {
     private final Logger secureLogs = LoggerFactory.getLogger("SecureLog");
 
     private final OppfolgingV2Client oppfolgingClient;
     private final BrukernotifikasjonRepository brukernotifikasjonRepository;
-    private final VarselDAO varselDAO;
     private final MinsideVarselProducer minsideVarselProducer;
 
     public BrukernotifikasjonEntity puttVarselIOutbox(DialogVarsel varsel, AktorId aktorId) {
@@ -42,7 +40,6 @@ public class BrukernotifikasjonService {
         }
 
         Long id = brukernotifikasjonRepository.opprettVarselIPendingStatus(varsel);
-        varselDAO.oppdaterSisteVarselForBruker(aktorId.get());
         log.info("Minside varsel opprettet i PENDING status {}", varsel.getVarselId());
         return hentBrukernotifikasjon(id);
     }
@@ -75,7 +72,8 @@ public class BrukernotifikasjonService {
                             brukernotifikasjonEntity.melding(),
                             brukernotifikasjonEntity.lenke(),
                             brukernotifikasjonEntity.type(),
-                            brukernotifikasjonEntity.fnr()
+                            brukernotifikasjonEntity.fnr(),
+                            brukernotifikasjonEntity.skalBatches()
                     ));
                     brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.varselId(), BrukernotifikasjonBehandlingStatus.SENDT);
                 }

@@ -25,6 +25,7 @@ public record BrukernotifikasjonEntity(
         String smsText,
         String epostTittel,
         String epostBody,
-        URL lenke
+        URL lenke,
+        Boolean skalBatches
 ) {
 }

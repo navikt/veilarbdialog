@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.service;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.MinsideVarselService;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
@@ -29,7 +29,7 @@ public class DialogStatusService {
     private final BrukernotifikasjonRepository brukernotifikasjonRepository;
     private final EskaleringsvarselRepository eskaleringsvarselRepository;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
-    private final BrukernotifikasjonService brukernotifikasjonService;
+    private final MinsideVarselService minsideVarselService;
     private final IAuthService auth;
 
     private String getEndretAv() {
@@ -65,13 +65,13 @@ public class DialogStatusService {
 
         brukernotifikasjonRepository
                 .hentBrukernotifikasjonForDialogId(dialogData.getId(), BrukernotifikasjonsType.BESKJED).forEach(
-                        varsel -> brukernotifikasjonService.setVarselTilSkalAvsluttes(varsel.varselId())
+                        varsel -> minsideVarselService.setVarselTilSkalAvsluttes(varsel.varselId())
                 );
 
         eskaleringsvarselRepository.hentGjeldende(AktorId.of(dialogData.getAktorId())).ifPresent(
                 eskaleringsvarselEntity -> {
                     if (eskaleringsvarselEntity.tilhorendeDialogId() == dialogData.getId()) {
-                        brukernotifikasjonService.setVarselTilSkalAvsluttes(eskaleringsvarselEntity.tilhorendeBrukernotifikasjonId());
+                        minsideVarselService.setVarselTilSkalAvsluttes(eskaleringsvarselEntity.tilhorendeBrukernotifikasjonId());
                     }
                 }
         );

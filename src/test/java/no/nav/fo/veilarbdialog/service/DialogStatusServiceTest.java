@@ -2,7 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import no.nav.fo.veilarbdialog.TestDataBuilder;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
+import no.nav.fo.veilarbdialog.brukernotifikasjon.MinsideVarselService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
@@ -32,7 +32,7 @@ class DialogStatusServiceTest {
     private final BrukernotifikasjonRepository brukernotifikasjonRepository = mock(BrukernotifikasjonRepository.class);
     private final EskaleringsvarselRepository eskaleringsvarselRepository = mock(EskaleringsvarselRepository.class);
     private final FunksjonelleMetrikker funksjonelleMetrikker = mock(FunksjonelleMetrikker.class);
-    private final BrukernotifikasjonService brukernotifikasjonService = mock(BrukernotifikasjonService.class);
+    private final MinsideVarselService minsideVarselService = mock(MinsideVarselService.class);
     private final DialogStatusService dialogStatusService = new DialogStatusService(
             statusDAO,
             dialogDAO,
@@ -40,7 +40,7 @@ class DialogStatusServiceTest {
             brukernotifikasjonRepository,
             eskaleringsvarselRepository,
             funksjonelleMetrikker,
-            brukernotifikasjonService,
+            minsideVarselService,
             authService
     );
 
