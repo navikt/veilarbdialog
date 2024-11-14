@@ -153,9 +153,7 @@ internal class DialogBeskjedTest(
 
     @Test
     fun kan_ikke_varsles() {
-        val bruker = MockNavService.createHappyBruker()
-        val reservertKrr: BrukerOptions? = bruker.getBrukerOptions().toBuilder().erReservertKrr(true).build()
-        MockNavService.updateBruker(bruker, reservertKrr)
+        val bruker = MockNavService.createBruker(BrukerOptions.happyBruker().toBuilder().erReservertKrr(true).build())
         val veileder = MockNavService.createVeileder(bruker)
 
         veileder.createRequest()
