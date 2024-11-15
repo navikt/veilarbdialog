@@ -10,6 +10,7 @@ import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +31,7 @@ class DialogStatusServiceTest {
     private final VarselDAO varselDao = mock(VarselDAO.class);
     private final IAuthService authService = mock(IAuthService.class);
     private final BrukernotifikasjonRepository brukernotifikasjonRepository = mock(BrukernotifikasjonRepository.class);
+    private final MinsideVarselDao minsideVarselDao = mock(MinsideVarselDao.class);
     private final EskaleringsvarselRepository eskaleringsvarselRepository = mock(EskaleringsvarselRepository.class);
     private final FunksjonelleMetrikker funksjonelleMetrikker = mock(FunksjonelleMetrikker.class);
     private final MinsideVarselService minsideVarselService = mock(MinsideVarselService.class);
@@ -41,6 +43,7 @@ class DialogStatusServiceTest {
             eskaleringsvarselRepository,
             funksjonelleMetrikker,
             minsideVarselService,
+            minsideVarselDao,
             authService
     );
 

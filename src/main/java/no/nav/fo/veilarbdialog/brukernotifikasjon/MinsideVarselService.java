@@ -10,6 +10,8 @@ import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel;
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.PendingMinsideVarsel;
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client;
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselProducer;
 import no.nav.fo.veilarbdialog.minsidevarsler.PendingVarsel;
@@ -25,6 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.PENDING;
+import static no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT;
 
 @Service
 @Slf4j
@@ -34,25 +37,38 @@ public class MinsideVarselService {
 
     private final OppfolgingV2Client oppfolgingClient;
     private final BrukernotifikasjonRepository brukernotifikasjonRepository;
+    private final MinsideVarselDao minsideVarselDao;
     private final MinsideVarselProducer minsideVarselProducer;
 
-    public BrukernotifikasjonEntity puttVarselIOutbox(DialogVarsel varsel, AktorId aktorId) {
+    public void puttVarselIOutbox(DialogVarsel varsel, AktorId aktorId) {
         if (!kanVarsles(varsel.getFoedselsnummer())) {
             log.warn("Kan ikke varsle bruker: {}. Se årsak i SecureLog", aktorId.get());
             throw new BrukerKanIkkeVarslesException();
         }
 
-        List<BrukernotifikasjonEntity> eksisterendeVarsel = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(varsel.getDialogId(), varsel.getType());
-        if (!eksisterendeVarsel.isEmpty()) {
-            // Hvis det er sendt eller skal sendes varsel for denne dialogen siste halvtimen, ikke opprett nytt varsel
-            var uteståendeVarslerForDialogId = eksisterendeVarsel.stream().anyMatch(
-                    it -> (it.status() == PENDING ||  it.status() == BrukernotifikasjonBehandlingStatus.SENDT)
-                            && it.opprettet().isAfter(LocalDateTime.now().minusMinutes(30)));
-            if (uteståendeVarslerForDialogId) return null;
-        }
-        Long id = brukernotifikasjonRepository.opprettVarselIPendingStatus(varsel);
+        if (varsel instanceof DialogVarsel.VarselOmNyMelding varselOmNyMelding && skalThrottles(varselOmNyMelding)) {
+            log.info("Minside varsel IKKE sendt ut pga nylig varsel i samme dialog {}", varsel.getVarselId());
+            return;
+        };
+
+        minsideVarselDao.opprettVarselIPendingStatus(varsel);
         log.info("Minside varsel opprettet i PENDING status {}", varsel.getVarselId());
-        return hentBrukernotifikasjon(id);
+    }
+
+    public Boolean skalThrottles(DialogVarsel.VarselOmNyMelding varsel) {
+        List<BrukernotifikasjonEntity> eksisterendeVarsel = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(varsel.getDialogId(), varsel.getType());
+        var eksisterendeNyTypeVarsel = minsideVarselDao.getVarslerForDialog(varsel.getDialogId());
+        if (!eksisterendeVarsel.isEmpty() || !eksisterendeNyTypeVarsel.isEmpty()) {
+            // Hvis det er sendt eller skal sendes varsel for denne dialogen siste halvtimen, ikke opprett nytt varsel
+            var uteståendeVarslerGammel = eksisterendeVarsel.stream().anyMatch(
+                    it -> (it.status() == PENDING ||  it.status() == SENDT)
+                            && it.opprettet().isAfter(LocalDateTime.now().minusMinutes(30)));
+            var uteståendeVarslerNy = eksisterendeNyTypeVarsel.stream().anyMatch(
+                    it -> (it.getStatus() == PENDING ||  it.getStatus() == SENDT)
+                            && it.getOpprettet().isAfter(LocalDateTime.now().minusMinutes(30)));
+            return uteståendeVarslerGammel || uteståendeVarslerNy;
+        }
+        return false;
     }
 
     public void setVarselTilSkalAvsluttes(long brukernotifikasjonId) {
@@ -86,10 +102,24 @@ public class MinsideVarselService {
                             brukernotifikasjonEntity.fnr(),
                             brukernotifikasjonEntity.skalBatches()
                     ));
-                    brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.varselId(), BrukernotifikasjonBehandlingStatus.SENDT);
+                    brukernotifikasjonRepository.updateStatus(brukernotifikasjonEntity.varselId(), SENDT);
                 }
         );
-        return pendingBrukernotifikasjoner.size();
+        List<PendingVarsel> pendingVarsler = minsideVarselDao.hentPendingVarsler();
+        pendingVarsler.stream().forEach( varsel -> {
+                    minsideVarselProducer.publiserVarselPåKafka(new PendingVarsel(
+                            varsel.getVarselId(),
+                            varsel.getMelding(),
+                            varsel.getLenke(),
+                            varsel.getType(),
+                            varsel.getFnr(),
+                            varsel.getSkalBatches()
+                    ));
+                    minsideVarselDao.updateStatus(varsel.getVarselId(), SENDT);
+                }
+        );
+
+        return pendingBrukernotifikasjoner.size() + pendingVarsler.size();
     }
 
     @Scheduled(
@@ -102,6 +132,13 @@ public class MinsideVarselService {
         skalAvsluttesNotifikasjoner.stream().forEach( varselSomSkalAvsluttes ->  {
                     minsideVarselProducer.publiserInaktiveringsMeldingPåKafka(varselSomSkalAvsluttes.varselId());
                     brukernotifikasjonRepository.updateStatus(varselSomSkalAvsluttes.varselId(), BrukernotifikasjonBehandlingStatus.AVSLUTTET);
+                }
+        );
+
+        var varslerIderSomSkalAvsluttes = minsideVarselDao.hentVarslerSomSkalAvsluttes();
+        varslerIderSomSkalAvsluttes.stream().forEach( varselSomSkalAvsluttes ->  {
+                    minsideVarselProducer.publiserInaktiveringsMeldingPåKafka(varselSomSkalAvsluttes);
+                    minsideVarselDao.updateStatus(varselSomSkalAvsluttes, BrukernotifikasjonBehandlingStatus.AVSLUTTET);
                 }
         );
     }

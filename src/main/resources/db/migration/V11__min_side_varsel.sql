@@ -25,12 +25,12 @@ create unique index brukernotifikasjon_varsel_id
 create index bmin_side_varsel_status_idx
     on min_side_varsel (status);
 
-grant select on min_side_varsel to datastream;
+-- grant select on min_side_varsel to datastream;
 
 create table min_side_varsel_dialog_mapping (
-    varsel_id varchar(40) references min_side_varsel(varsel_id),
+    varsel_id uuid references min_side_varsel(varsel_id),
     dialog_id bigint references dialog(dialog_id)
-)
+);
 
-grant select on min_side_varsel_dialog_mapping to datastream;
+-- grant select on min_side_varsel_dialog_mapping to datastream;
 

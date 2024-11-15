@@ -5,6 +5,7 @@ import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
 import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogSqlParameterSource;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -31,6 +32,9 @@ public class EskaleringsvarselRepository {
             rs.getLong("id"),
             rs.getLong("tilhorende_dialog_id"),
             rs.getLong("tilhorende_brukernotifikasjon_id"),
+            Optional.ofNullable(DatabaseUtils.hentMaybeUUID( rs,"tilhorende_minside_varsel"))
+                    .map(MinSideVarselId::new)
+                    .orElseGet(null),
             rs.getString("aktor_id"),
             rs.getString("opprettet_av"),
             DatabaseUtils.hentZonedDateTime(rs, "opprettet_dato"),
@@ -40,7 +44,7 @@ public class EskaleringsvarselRepository {
             rs.getString("avsluttet_begrunnelse")
     );
 
-    public EskaleringsvarselEntity opprett(long tilhorendeDialogId, long tilhorendeBrukernotifikasjonsId, String aktorId, String opprettetAv, String opprettetBegrunnelse) {
+    public EskaleringsvarselEntity opprett(long tilhorendeDialogId, MinSideVarselId varselId, String aktorId, String opprettetAv, String opprettetBegrunnelse) {
         ZonedDateTime opprettetDato = ZonedDateTime.now();
         var params = new VeilarbDialogSqlParameterSource()
                 .addValue("aktorId", aktorId)
@@ -48,14 +52,14 @@ public class EskaleringsvarselRepository {
                 .addValue("opprettetDato", opprettetDato)
                 .addValue("dialogId", tilhorendeDialogId)
                 .addValue("begrunnelse", opprettetBegrunnelse)
-                .addValue("brukernotifikasjonsId", tilhorendeBrukernotifikasjonsId);
+                .addValue("varselId", varselId.getValue().toString());
 
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         Long key;
         String sql = """
           INSERT INTO ESKALERINGSVARSEL (
-                    AKTOR_ID, GJELDENDE, OPPRETTET_AV, OPPRETTET_DATO, TILHORENDE_DIALOG_ID, TILHORENDE_BRUKERNOTIFIKASJON_ID, OPPRETTET_BEGRUNNELSE)
-          VALUES ( :aktorId, :aktorId,   :opprettetAv, :opprettetDato, :dialogId,            :brukernotifikasjonsId,           :begrunnelse)
+                    AKTOR_ID, GJELDENDE, OPPRETTET_AV, OPPRETTET_DATO, TILHORENDE_DIALOG_ID, tilhorende_minside_varsel, OPPRETTET_BEGRUNNELSE)
+          VALUES ( :aktorId, :aktorId,   :opprettetAv, :opprettetDato, :dialogId,            :varselId,           :begrunnelse)
                 """;
         try {
             jdbc.update(sql, params, keyHolder, new String[]{"id"});
@@ -72,7 +76,8 @@ public class EskaleringsvarselRepository {
         return new EskaleringsvarselEntity(
                 key,
                 tilhorendeDialogId,
-                tilhorendeBrukernotifikasjonsId,
+                0,
+                varselId,
                 aktorId,
                 opprettetAv,
                 opprettetDato,

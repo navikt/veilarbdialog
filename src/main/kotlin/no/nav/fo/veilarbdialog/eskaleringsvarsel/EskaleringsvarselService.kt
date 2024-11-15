@@ -84,19 +84,17 @@ open class EskaleringsvarselService(
             sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(AktorId.of(dialogData.aktorId))
 
         val varselOmMuligStans = DialogVarsel.varselOmMuligStans(
-            dialogData.id,
             stansVarsel.fnr,
             gjeldendeOppfolgingsperiodeId,
             dialogDataService.utledDialogLink(dialogData.id)
         )
 
-        val brukernotifikasjonEntity: BrukernotifikasjonEntity =
-            minsideVarselService.puttVarselIOutbox(varselOmMuligStans, AktorId.of(dialogData.aktorId))
-                ?: throw AktivEskaleringException("Det finnes allerede et oppgavevarsel for dialogId ${dialogData.id}.")
+        minsideVarselService.puttVarselIOutbox(varselOmMuligStans, AktorId.of(dialogData.aktorId))
+            ?: throw AktivEskaleringException("Det finnes allerede et oppgavevarsel for dialogId ${dialogData.id}.")
 
         val eskaleringsvarselEntity = eskaleringsvarselRepository.opprett(
             dialogData.id,
-            brukernotifikasjonEntity.id,
+            varselId,
             dialogData.aktorId,
             authService.getLoggedInnUser().get(),
             stansVarsel.begrunnelse

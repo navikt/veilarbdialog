@@ -7,27 +7,43 @@ import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import java.net.URL
 import java.util.UUID
 
-class DialogVarsel(
+sealed class DialogVarsel(
     val varselId: MinSideVarselId ,
-    val dialogId: Long ,
     val foedselsnummer: Fnr ,
     val melding: String ,
     val oppfolgingsperiodeId: UUID ,
     val type: BrukernotifikasjonsType,
-    val link: URL,
+    val lenke: URL,
     val skalBatches: Boolean
 ) {
+    class VarselOmMuligStans(
+        varsel: MinSideVarselId,
+        fnr: Fnr,
+        melding: String,
+        oppfolgingsperiodeId: UUID,
+        type: BrukernotifikasjonsType,
+        link: URL,
+        skalBatches: Boolean
+    ): DialogVarsel(varsel, fnr, melding, oppfolgingsperiodeId, type, link, skalBatches)
+    class VarselOmNyMelding(
+        val dialogId: Long,
+        varsel: MinSideVarselId,
+        fnr: Fnr,
+        melding: String,
+        oppfolgingsperiodeId: UUID,
+        type: BrukernotifikasjonsType,
+        link: URL,
+        skalBatches: Boolean
+    ): DialogVarsel(varsel, fnr, melding, oppfolgingsperiodeId, type, link, skalBatches)
 
     companion object {
         fun varselOmMuligStans(
-            dialogId: Long,
             fnr: Fnr,
             oppfolgingsperiode: UUID,
             link: URL
         ): DialogVarsel {
-            return DialogVarsel(
+            return VarselOmMuligStans(
                 MinSideVarselId(UUID.randomUUID()),
-                dialogId,
                 fnr,
                 BrukernotifikasjonTekst.NAV_VURDERER_Å_STANSE_PENGENE_DINE_TEKST,
                 oppfolgingsperiode,
@@ -43,9 +59,9 @@ class DialogVarsel(
             oppfolgingsperiode: UUID,
             link: URL
         ): DialogVarsel {
-            return DialogVarsel(
-                MinSideVarselId(UUID.randomUUID()),
+            return VarselOmNyMelding(
                 dialogId,
+                MinSideVarselId(UUID.randomUUID()),
                 fnr,
                 BrukernotifikasjonTekst.NY_MELDING_TEKST,
                 oppfolgingsperiode,
@@ -55,5 +71,4 @@ class DialogVarsel(
             )
         }
     }
-
 }

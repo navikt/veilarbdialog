@@ -14,6 +14,7 @@ import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,7 @@ public class DialogStatusService {
     private final EskaleringsvarselRepository eskaleringsvarselRepository;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final MinsideVarselService minsideVarselService;
+    private final MinsideVarselDao minsideVarselDao;
     private final IAuthService auth;
 
     private String getEndretAv() {
@@ -67,6 +69,7 @@ public class DialogStatusService {
                 .hentBrukernotifikasjonForDialogId(dialogData.getId(), BrukernotifikasjonsType.BESKJED).forEach(
                         varsel -> minsideVarselService.setVarselTilSkalAvsluttes(varsel.varselId())
                 );
+        minsideVarselDao.setDialogVarslerTilSkalAvsluttes(dialogData.getId());
 
         eskaleringsvarselRepository.hentGjeldende(AktorId.of(dialogData.getAktorId())).ifPresent(
                 eskaleringsvarselEntity -> {

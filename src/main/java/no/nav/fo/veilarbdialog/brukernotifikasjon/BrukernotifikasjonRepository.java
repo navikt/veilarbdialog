@@ -49,34 +49,6 @@ public class BrukernotifikasjonRepository {
                     rs.getBoolean("skal_batches")
             );
 
-    Long opprettVarselIPendingStatus(DialogVarsel varsel) {
-        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("event_id", varsel.getVarselId().getValue().toString())
-                .addValue("dialog_id", varsel.getDialogId())
-                .addValue("foedselsnummer", varsel.getFoedselsnummer().get())
-                .addValue("oppfolgingsperiode_id", varsel.getOppfolgingsperiodeId().toString())
-                .addValue("type", varsel.getType().name())
-                .addValue("status", BrukernotifikasjonBehandlingStatus.PENDING.name())
-                .addValue("varsel_kvittering_status", VarselKvitteringStatus.IKKE_SATT.name())
-                .addValue("melding", varsel.getMelding())
-                .addValue("lenke", varsel.getLink().toExternalForm())
-                .addValue("skalBatches", varsel.getSkalBatches());
-
-        jdbcTemplate.update("" +
-                        " INSERT INTO brukernotifikasjon " +
-                        "        (event_id, DIALOG_ID, foedselsnummer, oppfolgingsperiode_id, type, status, varsel_kvittering_status, opprettet, melding, lenke, skal_batches) " +
-                        " VALUES (:event_id, :dialog_id, :foedselsnummer, :oppfolgingsperiode_id, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :lenke, :skalBatches) ",
-                params, keyHolder, new String[]{"id"});
-
-        Number generatedKey = keyHolder.getKey();
-        if (generatedKey == null) {
-            throw new DataAccessResourceFailureException("Generated key not present");
-        } else {
-            return generatedKey.longValue();
-        }
-    }
-
     Optional<BrukernotifikasjonEntity> hentBrukernotifikasjon(long id) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id);
