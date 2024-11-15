@@ -9,6 +9,7 @@ import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselOppdatering
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Feilet
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.InternVarselHendelseDTO
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Kasellert
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Renotifikasjon
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Sendt
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.VarselFraAnnenApp
@@ -25,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional
 open class MinsideVarselHendelseConsumer(
     @Value("\${spring.application.name}")
     private val appname: String,
-    private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
+    private val minsideVarselDao: MinsideVarselDao,
     private val kvitteringMetrikk: KvitteringMetrikk,
 ) {
 
@@ -50,7 +51,7 @@ open class MinsideVarselHendelseConsumer(
         var varselId = varsel.varselId
         log.info("Konsumerer minside-varsel-hendelse varselId={}, type={}", varselId, varsel.hendelseType.name);
 
-        if (!brukernotifikasjonRepository.finnesBrukernotifikasjon(varselId)) {
+        if (!minsideVarselDao.finnesBrukernotifikasjon(varselId)) {
             log.warn("Mottok kvittering for brukernotifikasjon varselId={} som ikke finnes i våre systemer", varselId);
             throw IllegalArgumentException("Ugyldig varselId.")
         }
@@ -60,18 +61,20 @@ open class MinsideVarselHendelseConsumer(
             is Bestilt -> {}
             is Feilet -> {
                 log.error("varsel feilet for notifikasjon varselId={} med feilmelding {}", varselId, varsel.feilmelding);
-                brukernotifikasjonRepository.setEksternVarselFeilet(varselId);
+                minsideVarselDao.setEksternVarselFeilet(varselId)
+//                brukernotifikasjonRepository.setEksternVarselFeilet(varselId);
             }
             is Renotifikasjon -> {
                 log.info("Minside varsel renotifkasjon sendt i kanal {} for varselId={}", varsel.kanal.name, varselId)
             }
             is Sendt -> {
-                brukernotifikasjonRepository.setEksternVarselSendtOk(varselId)
+                minsideVarselDao.setEksternVarselSendtOk(varselId)
+//                brukernotifikasjonRepository.setEksternVarselSendtOk(varselId)
                 log.info("Minside varsel sendt i kanal {} for varselId={}", varsel.kanal.name,  varselId)
             }
             is Venter -> {}
             is Kasellert -> {
-                brukernotifikasjonRepository.updateStatus(varselId, AVSLUTTET)
+                minsideVarselDao.updateStatus(varselId, AVSLUTTET)
             }
         }
 

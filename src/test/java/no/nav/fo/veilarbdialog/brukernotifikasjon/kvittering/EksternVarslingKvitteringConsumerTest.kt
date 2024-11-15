@@ -9,6 +9,7 @@ import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselHendelseDTO
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselKanal
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselStatus
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao
 import no.nav.tms.varsel.action.Varseltype
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions
@@ -29,7 +30,7 @@ import java.util.UUID
 @ExtendWith(MockitoExtension::class)
 open class EksternVarslingKvitteringConsumerTest(
     @Mock
-    private val brukernotifikasjonRepository: BrukernotifikasjonRepository,
+    private val minsideVarselDao: MinsideVarselDao,
     @Mock
     private val kvitteringMetrikk: KvitteringMetrikk,
 ) {
@@ -47,7 +48,7 @@ open class EksternVarslingKvitteringConsumerTest(
 
     @BeforeEach
     fun setup() {
-        eksternVarslingKvitteringConsumer = MinsideVarselHendelseConsumer(APP_NAME, brukernotifikasjonRepository, kvitteringMetrikk)
+        eksternVarslingKvitteringConsumer = MinsideVarselHendelseConsumer(APP_NAME, minsideVarselDao, kvitteringMetrikk)
     }
 
     @Test
@@ -67,7 +68,7 @@ open class EksternVarslingKvitteringConsumerTest(
 
         val consumerRecord = createConsumerRecord(varselHendelse)
         eksternVarslingKvitteringConsumer!!.consume(consumerRecord)
-        Mockito.verifyNoInteractions(brukernotifikasjonRepository, kvitteringMetrikk)
+        Mockito.verifyNoInteractions(minsideVarselDao, kvitteringMetrikk)
     }
 
     //    @Test
@@ -91,13 +92,13 @@ open class EksternVarslingKvitteringConsumerTest(
         val varselId = MinSideVarselId(UUID.randomUUID())
         val doknotifikasjonStatus = createDoknotifikasjonStatus(varselId, EksternVarselStatus.sendt)
 
-        Mockito.`when`<Boolean?>(brukernotifikasjonRepository.finnesBrukernotifikasjon(varselId)).thenReturn(false)
+        Mockito.`when`<Boolean?>(minsideVarselDao.finnesBrukernotifikasjon(varselId)).thenReturn(false)
 
         val consumerRecord: ConsumerRecord<String, String> = createConsumerRecord(doknotifikasjonStatus)
-        Assertions.assertThrows<IllegalArgumentException?>(IllegalArgumentException::class.java,
-            Executable { eksternVarslingKvitteringConsumer!!.consume(consumerRecord) })
-        Mockito.verify<BrukernotifikasjonRepository?>(brukernotifikasjonRepository).finnesBrukernotifikasjon(varselId)
-        Mockito.verifyNoMoreInteractions(brukernotifikasjonRepository)
+        Assertions.assertThrows(IllegalArgumentException::class.java)
+            { eksternVarslingKvitteringConsumer!!.consume(consumerRecord) }
+        Mockito.verify(minsideVarselDao).finnesBrukernotifikasjon(varselId)
+        Mockito.verifyNoMoreInteractions(minsideVarselDao)
     }
 
     private fun createConsumerRecord(varselHendelse: EksternVarselHendelseDTO): ConsumerRecord<String, String> {

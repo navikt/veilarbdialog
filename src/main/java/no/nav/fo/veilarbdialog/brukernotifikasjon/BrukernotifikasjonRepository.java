@@ -128,7 +128,7 @@ public class BrukernotifikasjonRepository {
                set
                 VARSEL_FEILET = current_timestamp,
                 VARSEL_KVITTERING_STATUS = :varselKvitteringStatus
-                    where EVENT_ID = :varlselId
+                    where varsel_id = :varlselId
                  """, param);
     }
 
