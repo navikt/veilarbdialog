@@ -2,7 +2,6 @@ package no.nav.fo.veilarbdialog.rest
 
 import no.nav.common.json.JsonUtils
 import no.nav.fo.veilarbdialog.SpringBootTestBase
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository
 import no.nav.fo.veilarbdialog.domain.DialogDTO
 import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
@@ -38,8 +37,6 @@ import java.time.temporal.ChronoUnit
 import java.util.Date
 
 internal class DialogBeskjedTest(
-//    @Autowired
-//    var brukernotifikasjonRepository: BrukernotifikasjonRepository,
     @Autowired
     val minsideVarselDao: MinsideVarselDao,
     @Autowired

@@ -52,7 +52,7 @@ public class EskaleringsvarselRepository {
                 .addValue("opprettetDato", opprettetDato)
                 .addValue("dialogId", tilhorendeDialogId)
                 .addValue("begrunnelse", opprettetBegrunnelse)
-                .addValue("varselId", varselId.getValue().toString());
+                .addValue("varselId", varselId.getValue());
 
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         Long key;

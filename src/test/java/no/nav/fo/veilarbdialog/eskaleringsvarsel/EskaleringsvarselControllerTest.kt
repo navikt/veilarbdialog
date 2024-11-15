@@ -23,7 +23,9 @@ import no.nav.tms.varsel.action.OpprettVarsel
 import no.nav.tms.varsel.action.Sensitivitet
 import org.apache.kafka.clients.consumer.Consumer
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
+import org.assertj.core.api.SoftAssertions.assertSoftly
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -131,7 +133,7 @@ internal class EskaleringsvarselControllerTest(
         }
 
 
-        val gjeldende = requireGjeldende(veileder, bruker)
+        val gjeldende = assertAktivitVarsel(veileder, bruker)
 
         Assertions.assertThat(startEskalering.id).isEqualTo(gjeldende.id)
         Assertions.assertThat(startEskalering.tilhorendeDialogId).isEqualTo(gjeldende.tilhorendeDialogId)
@@ -141,7 +143,7 @@ internal class EskaleringsvarselControllerTest(
 
         val opprettVarsel = ventPåVarselOpprettelsePåKafka()
 
-        SoftAssertions.assertSoftly { assertions ->
+        assertSoftly { assertions ->
             assertions.assertThat(opprettVarsel.ident).isEqualTo(bruker.fnr);
             assertions.assertThat(opprettVarsel.produsent.appnavn).isEqualTo(applicationName);
             assertions.assertThat(opprettVarsel.produsent.namespace).isEqualTo(namespace);
@@ -160,44 +162,42 @@ internal class EskaleringsvarselControllerTest(
     }
 
     @Test
-    fun stop_eskalering_med_henvendelse() {
+    fun `skal kunne stoppe eskalering med medling`() {
         val bruker = MockNavService.createHappyBruker()
         val veileder = MockNavService.createVeileder(bruker)
         val avsluttBegrunnelse = "Du har gjort aktiviteten vi ba om."
-        val brukerFnr = Fnr.of(bruker.getFnr())
+        val brukerFnr = Fnr.of(bruker.fnr)
 
         val startEskaleringDto = lagEskaleringsVarsel(bruker)
-        val eskaleringsvarsel = dialogTestService!!.startEskalering(veileder, startEskaleringDto)
+        val eskaleringsvarsel = dialogTestService.startEskalering(veileder, startEskaleringDto)
 
         val stopEskaleringDto = StopEskaleringDto(brukerFnr, avsluttBegrunnelse, true)
         stopEskalering(veileder, stopEskaleringDto)
 
         val dialogDTO = dialogTestService.hentDialog(veileder, eskaleringsvarsel.tilhorendeDialogId)
 
-        SoftAssertions.assertSoftly { assertions: SoftAssertions? ->
+        assertSoftly { assertions ->
             val henvendelser = dialogDTO.henvendelser
-            assertions!!.assertThat<HenvendelseDTO?>(henvendelser).hasSize(2)
+            assertions.assertThat<HenvendelseDTO?>(henvendelser).hasSize(2)
 
-            val stopEskaleringHendvendelse = dialogDTO.henvendelser.get(1)
+            val stopEskaleringHendvendelse = dialogDTO.henvendelser[1]
             assertions.assertThat(stopEskaleringHendvendelse.tekst).isEqualTo(avsluttBegrunnelse)
             assertions.assertThat(stopEskaleringHendvendelse.avsenderId).isEqualTo(veileder.navIdent)
         }
 
-        ingenGjeldende(veileder, bruker)
+        assertIngenAktiveVarsel(veileder, bruker)
 
         val inaktivering = ventPåVarselInaktiveringPåKafka()
 
-        SoftAssertions.assertSoftly { assertions: SoftAssertions? ->
-            assertions!!.assertThat(inaktivering.produsent.appnavn).isEqualTo(applicationName)
+        assertSoftly { assertions ->
+            assertions.assertThat(inaktivering.produsent.appnavn).isEqualTo(applicationName)
             assertions.assertThat(inaktivering.produsent.namespace).isEqualTo(namespace)
-            //            assertions.assertThat(nokkelInput.getEventId()).isNotEmpty();
-//            assertions.assertThat(LocalDateTime.ofInstant(Instant.ofEpochMilli(doneInput.getTidspunkt()), ZoneOffset.UTC)).isCloseTo(LocalDateTime.now(ZoneOffset.UTC), within(10, ChronoUnit.SECONDS));
             assertions.assertAll()
         }
     }
 
     @Test
-    fun stop_eskalering_uten_henvendelse() {
+    fun `skal kunne stoppe eskalering uten å sende melding`() {
         val bruker = MockNavService.createHappyBruker()
         val veileder = MockNavService.createVeileder(bruker)
         val avsluttBegrunnelse = "Fordi ..."
@@ -211,54 +211,45 @@ internal class EskaleringsvarselControllerTest(
 
         val dialogDTO = dialogTestService.hentDialog(veileder, eskaleringsvarsel.tilhorendeDialogId)
 
-        SoftAssertions.assertSoftly { assertions: SoftAssertions? ->
-            val hendvendelser = dialogDTO.henvendelser
-            assertions!!.assertThat<HenvendelseDTO?>(hendvendelser).hasSize(1)
+        assertSoftly { assertions ->
+            assertions.assertThat<HenvendelseDTO?>(dialogDTO.henvendelser).hasSize(1)
         }
 
-        ingenGjeldende(veileder, bruker)
+        assertIngenAktiveVarsel(veileder, bruker)
 
         val inaktivering = ventPåVarselInaktiveringPåKafka()
 
-        SoftAssertions.assertSoftly { assertions: SoftAssertions? ->
-            assertions!!.assertThat(inaktivering.produsent.appnavn).isEqualTo(applicationName)
+        assertSoftly { assertions ->
+            assertions.assertThat(inaktivering.produsent.appnavn).isEqualTo(applicationName)
             assertions.assertThat(inaktivering.produsent.namespace).isEqualTo(namespace)
-            //            assertions.assertThat(nokkelInput.getEventId()).isNotEmpty();
-//            assertions.assertThat(LocalDateTime.ofInstant(Instant.ofEpochMilli(doneInput.getTidspunkt()), ZoneOffset.UTC)).isCloseTo(LocalDateTime.now(ZoneOffset.UTC), within(10, ChronoUnit.SECONDS));
             assertions.assertAll()
         }
     }
 
     @Test
-    fun bruker_kan_ikke_varsles() {
-        val bruker = MockNavService.createHappyBruker()
-        val reservertKrr: BrukerOptions? = bruker.getBrukerOptions().toBuilder().erReservertKrr(true).build()
-        MockNavService.updateBruker(bruker, reservertKrr)
-
+    fun `kan ikke opprette varsel på bruker som er reservert i krr`() {
+        val reservertKrr: BrukerOptions? = BrukerOptions.happyBruker().toBuilder().erReservertKrr(true).build()
+        val bruker = MockNavService.createBruker(reservertKrr)
         val veileder = MockNavService.createVeileder(bruker)
 
         val startEskaleringDto = lagEskaleringsVarsel(bruker)
         val response = tryStartEskalering(veileder, startEskaleringDto)
 
-        Assertions.assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value())
-
-        ingenGjeldende(veileder, bruker)
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value())
+        assertIngenAktiveVarsel(veileder, bruker)
     }
 
     @Test
-    fun bruker_ikke_under_oppfolging() {
-        val bruker = MockNavService.createHappyBruker()
-        val reservertKrr: BrukerOptions? = bruker.getBrukerOptions().toBuilder().underOppfolging(false).build()
-        MockNavService.updateBruker(bruker, reservertKrr)
-
+    fun `kan ikke opprette varsel på bruker som ikke er under oppfølging`() {
+        val reservertKrr: BrukerOptions? = BrukerOptions.happyBruker().toBuilder().underOppfolging(false).build()
+        val bruker = MockNavService.createBruker(reservertKrr)
         val veileder = MockNavService.createVeileder(bruker)
 
         val startEskaleringDto = lagEskaleringsVarsel(bruker)
         val response = tryStartEskalering(veileder, startEskaleringDto)
 
-        Assertions.assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value())
-
-        ingenGjeldende(veileder, bruker)
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value())
+        assertIngenAktiveVarsel(veileder, bruker)
     }
 
     @Test
@@ -266,9 +257,9 @@ internal class EskaleringsvarselControllerTest(
         val bruker = MockNavService.createHappyBruker()
         val veileder = MockNavService.createVeileder(bruker)
         val startEskaleringDto = lagEskaleringsVarsel(bruker)
-        dialogTestService!!.startEskalering(veileder, startEskaleringDto)
+        dialogTestService.startEskalering(veileder, startEskaleringDto)
         val response = tryStartEskalering(veileder, startEskaleringDto)
-        Assertions.assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value())
+        assertThat(response.statusCode()).isEqualTo(HttpStatus.CONFLICT.value())
     }
 
     @Test
@@ -276,28 +267,27 @@ internal class EskaleringsvarselControllerTest(
         val bruker = MockNavService.createHappyBruker()
         val veileder = MockNavService.createVeileder(bruker)
         val startEskaleringDto = lagEskaleringsVarsel(bruker)
-        dialogTestService!!.startEskalering(veileder, startEskaleringDto)
-        val stopEskaleringDto =
-            StopEskaleringDto(Fnr.of(bruker.getFnr()), "avsluttbegrunnelse", false)
+        dialogTestService.startEskalering(veileder, startEskaleringDto)
+        val stopEskaleringDto = StopEskaleringDto(Fnr.of(bruker.fnr), "avsluttbegrunnelse", false)
         stopEskalering(veileder, stopEskaleringDto)
-        dialogTestService!!.startEskalering(veileder, startEskaleringDto)
+        dialogTestService.startEskalering(veileder, startEskaleringDto)
         stopEskalering(veileder, stopEskaleringDto)
-        dialogTestService!!.startEskalering(veileder, startEskaleringDto)
+        dialogTestService.startEskalering(veileder, startEskaleringDto)
         stopEskalering(veileder, stopEskaleringDto)
-        dialogTestService!!.startEskalering(veileder, startEskaleringDto)
+        dialogTestService.startEskalering(veileder, startEskaleringDto)
 
 
         val eskaleringsvarselDtos = hentHistorikk(veileder, bruker)
         Assertions.assertThat<EskaleringsvarselDto?>(eskaleringsvarselDtos).hasSize(4)
-        val eldste = eskaleringsvarselDtos!!.get(3)
+        val eldste = eskaleringsvarselDtos!![3]
 
-        SoftAssertions.assertSoftly { assertions: SoftAssertions? ->
-            assertions!!.assertThat(eldste.tilhorendeDialogId).isNotNull()
+        assertSoftly { assertions ->
+            assertions.assertThat(eldste.tilhorendeDialogId).isNotNull()
             assertions.assertThat(eldste.id).isNotNull()
-            assertions.assertThat(eldste.opprettetAv).isEqualTo(veileder.getNavIdent())
+            assertions.assertThat(eldste.opprettetAv).isEqualTo(veileder.navIdent)
             assertions.assertThat(eldste.opprettetBegrunnelse).isEqualTo("begrunnelse")
             assertions.assertThat(eldste.avsluttetBegrunnelse).isEqualTo("avsluttbegrunnelse")
-            assertions.assertThat(eldste.avsluttetAv).isEqualTo(veileder.getNavIdent())
+            assertions.assertThat(eldste.avsluttetAv).isEqualTo(veileder.navIdent)
             assertions.assertThat(eldste.opprettetDato)
                 .isCloseTo(ZonedDateTime.now(), Assertions.within(5, ChronoUnit.SECONDS))
             assertions.assertThat(eldste.avsluttetDato)
@@ -320,7 +310,7 @@ internal class EskaleringsvarselControllerTest(
         for (i in 0 until antallKall) {
             bakgrunnService.submit(Runnable {
                 try {
-                    dialogTestService!!.startEskalering(veileder, startEskaleringDto)
+                    dialogTestService.startEskalering(veileder, startEskaleringDto)
                 } catch (e: Exception) {
                     log.warn("Feil i tråd.", e)
                 } finally {
@@ -330,7 +320,7 @@ internal class EskaleringsvarselControllerTest(
         }
         latch.await()
 
-        requireGjeldende(veileder, bruker)
+        assertAktivitVarsel(veileder, bruker)
 
         ventPåVarselOpprettelsePåKafka()
         kafkaTestService.harKonsumertAlleMeldinger(minsidevarselTopic, minsideVarselConsumer)
@@ -444,7 +434,7 @@ internal class EskaleringsvarselControllerTest(
         minsideVarselService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes()
     }
 
-    private fun requireGjeldende(veileder: MockVeileder, mockBruker: MockBruker): GjeldendeEskaleringsvarselDto {
+    private fun assertAktivitVarsel(veileder: MockVeileder, mockBruker: MockBruker): GjeldendeEskaleringsvarselDto {
         val response = veileder.createRequest()
             .param("fnr", mockBruker.fnr)
             .`when`()
@@ -458,7 +448,7 @@ internal class EskaleringsvarselControllerTest(
     }
 
 
-    private fun ingenGjeldende(veileder: MockVeileder, mockBruker: MockBruker) {
+    private fun assertIngenAktiveVarsel(veileder: MockVeileder, mockBruker: MockBruker) {
         veileder.createRequest()
             .param("fnr", mockBruker.fnr)
             .`when`()
