@@ -84,6 +84,7 @@ public class MinsideVarselService {
     @Transactional
     public void setSkalAvsluttesForVarslerIPeriode(UUID oppfolgingsperiode) {
         brukernotifikasjonRepository.setSkalAvsluttesForVarslerIPeriode(oppfolgingsperiode);
+        minsideVarselDao.setSkalAvsluttesForVarslerIPeriode(oppfolgingsperiode);
     }
 
     @Scheduled(

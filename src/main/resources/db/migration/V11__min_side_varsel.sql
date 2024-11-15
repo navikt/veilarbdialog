@@ -3,7 +3,7 @@ create table min_side_varsel
 (
     varsel_id                uuid               not null primary key ,
     foedselsnummer           varchar(255)                                              not null,
-    oppfolgingsperiode_id    varchar(255)                                              not null,
+    oppfolgingsperiode_id    uuid                                                      not null,
     type                     varchar(255)                                              not null,
     status                   varchar(255)                                              not null,
     varsel_kvittering_status varchar(255) default NULL::character varying              not null,

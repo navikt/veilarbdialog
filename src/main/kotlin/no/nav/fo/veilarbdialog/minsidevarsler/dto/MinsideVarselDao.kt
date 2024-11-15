@@ -5,6 +5,8 @@ import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
 import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.IKKE_SATT
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.AVSLUTTET
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES
 import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Repository
 import java.net.URL
 import java.sql.ResultSet
 import java.time.LocalDateTime
+import java.util.UUID
 
 @Repository
 open class MinsideVarselDao(
@@ -61,7 +64,7 @@ open class MinsideVarselDao(
         val params = mapOf(
             "status" to PENDING.name,
             "varselKvitteringStatus" to IKKE_SATT.name,
-            "oppfolgingsperiodeId" to pendingMinsideVarsel.oppfolgingsperiodeId.toString(),
+            "oppfolgingsperiodeId" to pendingMinsideVarsel.oppfolgingsperiodeId,
             "type" to pendingMinsideVarsel.type.name,
             "skalBatches" to pendingMinsideVarsel.skalBatches,
             "melding" to pendingMinsideVarsel.melding,
@@ -154,6 +157,29 @@ open class MinsideVarselDao(
         } catch (e: EmptyResultDataAccessException) {
             emptyList()
         }
+    }
+
+    open fun setSkalAvsluttesForVarslerIPeriode(oppfolgingsperiodeUuid: UUID) {
+        val skalAvsluttes = mapOf(
+            "oppfolgingsperiode" to oppfolgingsperiodeUuid,
+            "fra_status" to SENDT.name,
+            "til_status" to SKAL_AVSLUTTES.name
+        )
+
+        val skalAvbrytes = mapOf(
+            "oppfolgingsperiode" to oppfolgingsperiodeUuid,
+            "fra_status" to PENDING.name,
+            "til_status" to AVSLUTTET.name
+        )
+
+        val sql = """
+                UPDATE min_side_varsel 
+                SET STATUS = :til_status 
+                WHERE OPPFOLGINGSPERIODE_ID = :oppfolgingsperiode and status = :fra_status
+        """
+
+        template.update(sql, skalAvbrytes)
+        template.update(sql, skalAvsluttes)
     }
 
     private fun kobleTilDialog(varselOmNyMelding: VarselOmNyMelding) {

@@ -15,6 +15,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
@@ -37,6 +38,7 @@ import java.util.concurrent.TimeoutException;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.fo.veilarbdialog.util.KafkaTestService.DEFAULT_WAIT_TIMEOUT;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
@@ -51,15 +53,11 @@ class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
     @Value("${application.topic.inn.oppfolgingsperiode}")
     String oppfolgingsperiodeTopic;
 
-
     @Autowired
     private SistePeriodeDAO sistePeriodeDAO;
 
     @Autowired
-    MinsideVarselService minsideVarselService;
-
-    @Autowired
-    BrukernotifikasjonRepository brukernotifikasjonRepository;
+    MinsideVarselDao minsideVarselDao;
 
     @Autowired
     EskaleringsvarselService eskaleringsvarselService;
@@ -133,15 +131,15 @@ class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
         opprettEllerEndreOppfolgingsperiodeForBruker(stopOppfolging);
 
-        BrukernotifikasjonEntity brukernotifikasjon = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(startEskalering.tilhorendeDialogId(), BrukernotifikasjonsType.OPPGAVE).get(0);
+        var varselStatus = minsideVarselDao.getMinsideVarselForForhåndsvarsel(startEskalering.id());
 
-        Assertions.assertThat(brukernotifikasjon.status()).isEqualTo(BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES);
+        assertThat(varselStatus.getStatus()).isEqualTo(BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES);
 
         List<EskaleringsvarselEntity> historikk = eskaleringsvarselService.historikk(Fnr.of(mockBruker.getFnr()));
         Assertions.assertThat(historikk).hasSize(1);
-        Assertions.assertThat(historikk.get(0).avsluttetDato()).isNotNull();
-        Assertions.assertThat(historikk.get(0).avsluttetAv()).isEqualTo("SYSTEM");
-        Assertions.assertThat(historikk.get(0).avsluttetBegrunnelse()).isEqualToIgnoringCase("OPPFOLGING AVSLUTTET");
+        assertThat(historikk.getFirst().avsluttetDato()).isNotNull();
+        assertThat(historikk.getFirst().avsluttetAv()).isEqualTo("SYSTEM");
+        assertThat(historikk.getFirst().avsluttetBegrunnelse()).isEqualToIgnoringCase("OPPFOLGING AVSLUTTET");
 
     }
 
