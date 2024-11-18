@@ -143,8 +143,8 @@ internal class DialogBeskjedTest(
         val mockVeileder = MockNavService.createVeileder(mockBruker)
 
         mockVeileder.sendEnMelding(mockBruker)
-        minsideVarselService.sendPendingVarslerCron()
-
+        val sendteMeldinger = minsideVarselService.sendPendingVarslerCron()
+        assertThat(sendteMeldinger).isEqualTo(1)
         val varselOpprettelse = assertOpprettetVarselPublisertPåKafka()
         assertThat(varselOpprettelse.eksternVarsling?.kanBatches).isTrue()
     }
@@ -156,7 +156,7 @@ internal class DialogBeskjedTest(
 
         veileder.createRequest()
             .body(NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift"))
-            .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.getFnr())
+            .post("/veilarbdialog/api/dialog?fnr={fnr}", bruker.fnr)
             .then()
             .statusCode(409)
     }
