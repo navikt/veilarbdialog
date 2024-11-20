@@ -21,6 +21,7 @@ import no.nav.fo.veilarbdialog.util.KafkaTestService
 import no.nav.tms.varsel.action.Varseltype
 import org.apache.kafka.clients.producer.RecordMetadata
 import org.assertj.core.api.SoftAssertions
+import org.assertj.core.api.SoftAssertions.assertSoftly
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
@@ -42,7 +43,7 @@ internal class EksternVarslingKvitteringTest(
     @Value("\${spring.application.name}")
     var appname: String,
     @Autowired
-    var kvitteringsProducer: KafkaTemplate<String?, String?>,
+    var minsideVarselHendelseProducer: KafkaTemplate<String?, String?>,
 ) : SpringBootTestBase() {
 
     companion object {
@@ -79,8 +80,8 @@ internal class EksternVarslingKvitteringTest(
             VarselKvitteringStatus.IKKE_SATT
         )
 
-        val ferdigstiltMelding = eksternVarselHendelseSendt(opprinneligBrukernotifikasjon.varselId)
-        val ferdigstiltRecordMetadata = sendKvitteringsMelding(ferdigstiltMelding)
+        val sendtHendelse = eksternVarselHendelseSendt(opprinneligBrukernotifikasjon.varselId)
+        val ferdigstiltRecordMetadata = sendKvitteringsMelding(sendtHendelse)
         assertExpectedBrukernotifikasjonStatus(
             forhåndsVarsel.id,
             opprinneligBrukernotifikasjon,
@@ -88,8 +89,8 @@ internal class EksternVarslingKvitteringTest(
             VarselKvitteringStatus.OK
         )
 
-        val feiletMelding = eksternVarselHendelseFeilet(opprinneligBrukernotifikasjon.varselId)
-        val feiletRecordMetadata = sendKvitteringsMelding(feiletMelding)
+        val feiletHendelse = eksternVarselHendelseFeilet(opprinneligBrukernotifikasjon.varselId)
+        val feiletRecordMetadata = sendKvitteringsMelding(feiletHendelse)
         assertExpectedBrukernotifikasjonStatus(
             forhåndsVarsel.id,
             opprinneligBrukernotifikasjon,
@@ -100,8 +101,8 @@ internal class EksternVarslingKvitteringTest(
 
     @Throws(ExecutionException::class, InterruptedException::class)
     private fun sendKvitteringsMelding(melding: EksternVarselHendelseDTO?): RecordMetadata {
-        val send = kvitteringsProducer.send(minsideVarselHendelseTopic, JsonUtils.toJson(melding))
-        kvitteringsProducer.flush()
+        val send = minsideVarselHendelseProducer.send(minsideVarselHendelseTopic, JsonUtils.toJson(melding))
+        minsideVarselHendelseProducer.flush()
 
         return send.get()!!.recordMetadata
     }
@@ -119,7 +120,7 @@ internal class EksternVarslingKvitteringTest(
 
         val brukernotifikasjonEtterProsessering = minsideVarslDao.getMinsideVarselForForhåndsvarsel(forhåndsVarselId)
 
-        SoftAssertions.assertSoftly{ assertions ->
+        assertSoftly{ assertions ->
             assertions.assertThat(brukernotifikasjonEtterProsessering.varselId.value).isEqualTo(opprinneligBrukernotifikasjon.varselId.value)
             assertions.assertThat(brukernotifikasjonEtterProsessering.kvitteringStatus).isEqualTo(expectedStatus)
             assertions.assertAll()

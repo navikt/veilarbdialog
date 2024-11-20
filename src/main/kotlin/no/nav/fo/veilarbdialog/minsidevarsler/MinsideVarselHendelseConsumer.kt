@@ -45,7 +45,6 @@ open class MinsideVarselHendelseConsumer(
 
     private fun behandleInternVarselHendelse(varsel: InternVarselHendelseDTO) {
         log.info("Minside varsel (intern) av type {} er {} varselId {}", varsel.varseltype, varsel.eventName, varsel.varselId)
-        // TODO: Inaktiver beskjeder som har blitt inaktivert "utenfra" her
         when (varsel.eventName) {
             InternVarselHendelseType.opprettet -> {}
             InternVarselHendelseType.inaktivert -> {

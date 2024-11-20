@@ -205,9 +205,9 @@ open class MinsideVarselService(
     }
 
     open fun finnesBrukernotifikasjon(varselId: MinSideVarselId): Boolean {
-        val finnesIGammelTabell =brukernotifikasjonRepository.finnesBrukernotifikasjon(varselId)
+        val finnesIGammelTabell = brukernotifikasjonRepository.finnesBrukernotifikasjon(varselId)
         val finnesINyTabell = minsideVarselDao.finnesBrukernotifikasjon(varselId)
-        return finnesIGammelTabell && finnesINyTabell
+        return finnesIGammelTabell || finnesINyTabell
     }
 
     open fun setEksternVarselFeilet(varselId: MinSideVarselId) {
