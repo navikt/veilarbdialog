@@ -5,19 +5,15 @@ import lombok.extern.slf4j.Slf4j
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.AVSLUTTET
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.PENDING
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType.BESKJED
-import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity
-import no.nav.fo.veilarbdialog.clients.veilarboppfolging.ManuellStatusV2DTO
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.DialogVarselStatus
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client
@@ -28,8 +24,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.UUID
-import java.util.function.Consumer
-import java.util.function.Function
 
 @Service
 @Slf4j
@@ -217,17 +211,17 @@ open class MinsideVarselService(
         minsideVarselDao.setEksternVarselFeilet(varselId)
     }
 
-    open fun setEksternVarselSendtOk(varselId: MinSideVarselId) {
+    open fun setEksternVarselKvitteringStatusOk(varselId: MinSideVarselId) {
         // Gammel tabell
-        brukernotifikasjonRepository.setEksternVarselSendtOk(varselId)
+        brukernotifikasjonRepository.setVarselKvitteringStatusOk(varselId)
         // Ny tabell
-        minsideVarselDao.setEksternVarselSendtOk(varselId)
+        minsideVarselDao.setEksternVarselKvitteringStatusOk(varselId)
     }
 
-    open fun setEksternVarselAvsluttet(varselId: MinSideVarselId) {
-        // Gammel tabell
+    fun setVarselstatusFerdigbehandlet(varselId: MinSideVarselId) {
+        // gammel tabell
         brukernotifikasjonRepository.updateStatus(varselId, AVSLUTTET)
-        // Ny tabell
+        // ny tabell
         minsideVarselDao.updateStatus(varselId, AVSLUTTET)
     }
 }

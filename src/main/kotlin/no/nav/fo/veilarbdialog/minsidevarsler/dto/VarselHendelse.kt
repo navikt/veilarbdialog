@@ -16,7 +16,8 @@ enum class VarselHendelseEventType {
     kansellert_ekstern,
     bestilt_ekstern,
     feilet_ekstern,
-    venter_ekstern
+    venter_ekstern,
+    ferdigstilt_ekstern
 }
 
 const val EksternStatusOppdatertEventName = "eksternStatusOppdatert"

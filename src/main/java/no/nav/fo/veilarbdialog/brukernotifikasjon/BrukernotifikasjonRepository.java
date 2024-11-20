@@ -4,17 +4,14 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
-import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel;
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -132,7 +129,7 @@ public class BrukernotifikasjonRepository {
                  """, param);
     }
 
-    public void setEksternVarselSendtOk(MinSideVarselId varlselId) {
+    public void setVarselKvitteringStatusOk(MinSideVarselId varlselId) {
         MapSqlParameterSource param = new MapSqlParameterSource()
             .addValue("varlselId", varlselId.getValue().toString())
             .addValue("varselKvitteringStatusOk", VarselKvitteringStatus.OK.name());
@@ -140,7 +137,22 @@ public class BrukernotifikasjonRepository {
         jdbcTemplate.update("""
             update BRUKERNOTIFIKASJON
             set
-            BEKREFTET_SENDT = CURRENT_TIMESTAMP,
+            ferdig_behandlet = CURRENT_TIMESTAMP,
+            avsluttet = CURRENT_TIMESTAMP,
+            VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
+            where EVENT_ID = :varlselId
+            """, param);
+    }
+
+    public void setVarselKvitteringSendtOk(MinSideVarselId varlselId) {
+        MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("varlselId", varlselId.getValue().toString())
+                .addValue("varselKvitteringStatusOk", VarselKvitteringStatus.OK.name());
+
+        jdbcTemplate.update("""
+            update BRUKERNOTIFIKASJON
+            set
+            bekreftet_sendt = CURRENT_TIMESTAMP,
             VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
             where EVENT_ID = :varlselId
             """, param);
@@ -163,4 +175,6 @@ public class BrukernotifikasjonRepository {
         jdbcTemplate.update(sql, skalAvbrytes);
         jdbcTemplate.update(sql, skalAvsluttes);
     }
+
+
 }

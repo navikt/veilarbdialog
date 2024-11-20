@@ -1,20 +1,7 @@
 package no.nav.fo.veilarbdialog.minsidevarsler
 
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.AVSLUTTET
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringMetrikk
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.Bestilt
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselOppdatering
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.Feilet
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.InternVarselHendelseDTO
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.InternVarselHendelseType
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.Kasellert
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.Renotifikasjon
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.Sendt
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.VarselFraAnnenApp
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.Venter
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.deserialiserVarselHendelse
-import no.nav.tms.varsel.action.Varseltype
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.*
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -48,7 +35,9 @@ open class MinsideVarselHendelseConsumer(
         when (varsel.eventName) {
             InternVarselHendelseType.opprettet -> {}
             InternVarselHendelseType.inaktivert -> {
-                minsideVarselService.setEksternVarselAvsluttet(varsel.varselId)
+                // sett varselstatus ferdig
+                minsideVarselService.setVarselstatusFerdigbehandlet(varsel.varselId)
+               // minsideVarselService.setEksternVarselAvsluttet(varsel.varselId)
             }
             InternVarselHendelseType.slettet -> {}
         }
@@ -74,12 +63,12 @@ open class MinsideVarselHendelseConsumer(
                 log.info("Minside varsel renotifkasjon sendt i kanal {} for varselId={}", varsel.kanal.name, varselId)
             }
             is Sendt -> {
-                minsideVarselService.setEksternVarselSendtOk(varselId)
+                minsideVarselService.setEksternVarselKvitteringStatusOk(varselId)
                 log.info("Minside varsel sendt i kanal {} for varselId={}", varsel.kanal.name,  varselId)
             }
             is Venter -> {}
-            is Kasellert -> {
-                minsideVarselService.setEksternVarselAvsluttet(varselId)
+            is Kasellert, is Ferdigstilt -> {
+                minsideVarselService.setEksternVarselKvitteringStatusOk(varselId)
             }
         }
 

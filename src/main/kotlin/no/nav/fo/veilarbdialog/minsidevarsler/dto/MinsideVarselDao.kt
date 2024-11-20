@@ -56,7 +56,7 @@ open class MinsideVarselDao(
 
     open fun updateStatus(varselId: MinSideVarselId, status: BrukernotifikasjonBehandlingStatus): Int {
         val params = mapOf("varselId" to varselId.value, "status" to status.name)
-        val sql = """UPDATE min_side_varsel SET status = :status WHERE varsel_id = :varselId"""
+        val sql = """UPDATE min_side_varsel SET status = :status, oppdatert = current_timestamp WHERE varsel_id = :varselId"""
         return template.update(sql, params)
     }
 
@@ -104,19 +104,19 @@ open class MinsideVarselDao(
         template.update("""
              update min_side_varsel
                set
-                VARSEL_FEILET = current_timestamp,
+                oppdatert = current_timestamp,
                 VARSEL_KVITTERING_STATUS = :varselKvitteringStatus
                     where varsel_id = :varlselId
                  """, params);
     }
-    open fun setEksternVarselSendtOk(varlselId: MinSideVarselId) {
+    open fun setEksternVarselKvitteringStatusOk(varlselId: MinSideVarselId) {
         var params = mapOf(
             "varlselId" to varlselId.value,
             "varselKvitteringStatusOk" to VarselKvitteringStatus.OK.name
         )
         template.update("""
             update min_side_varsel
-            set BEKREFTET_SENDT = CURRENT_TIMESTAMP,
+            set oppdatert = CURRENT_TIMESTAMP,
             VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
             where varsel_id = :varlselId
         """, params);
@@ -174,7 +174,8 @@ open class MinsideVarselDao(
 
         val sql = """
                 UPDATE min_side_varsel 
-                SET STATUS = :til_status 
+                SET STATUS = :til_status, 
+                oppdatert = CURRENT_TIMESTAMP
                 WHERE OPPFOLGINGSPERIODE_ID = :oppfolgingsperiode and status = :fra_status
         """
 
