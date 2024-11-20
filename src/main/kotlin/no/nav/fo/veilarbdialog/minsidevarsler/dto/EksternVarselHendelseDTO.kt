@@ -20,6 +20,7 @@ data class EksternVarselHendelseDTO(
     val feilmelding: String? = null,
     val kanal: EksternVarselKanal? = null
 )
+
 object VarselFraAnnenApp: VarselHendelse()
 sealed class EksternVarselOppdatering(
     val varselId: MinSideVarselId,

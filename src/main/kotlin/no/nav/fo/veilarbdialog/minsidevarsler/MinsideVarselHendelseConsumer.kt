@@ -52,8 +52,8 @@ open class MinsideVarselHendelseConsumer(
         log.info("Konsumerer minside-varsel-hendelse varselId={}, type={}", varselId, varsel.hendelseType.name);
 
         if (!minsideVarselDao.finnesBrukernotifikasjon(varselId)) {
-            log.warn("Mottok kvittering for brukernotifikasjon varselId={} som ikke finnes i våre systemer", varselId);
-            throw IllegalArgumentException("Ugyldig varselId.")
+            log.warn("Mottok kvittering for brukernotifikasjon varselId={} som ikke finnes i våre systemer", varselId)
+            return
         }
 
         log.info("Minside varsel (ekstern) av type {} er {} varselId {}", varsel.varseltype, varsel.hendelseType, varselId);
