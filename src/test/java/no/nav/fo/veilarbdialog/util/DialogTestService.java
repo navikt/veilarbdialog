@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.util;
 
 import io.restassured.response.Response;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.MinsideVarselService;
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
@@ -68,7 +68,7 @@ public class DialogTestService {
         EskaleringsvarselDto eskaleringsvarselDto = response.as(EskaleringsvarselDto.class);
         assertNotNull(eskaleringsvarselDto);
         // Scheduled task
-        minsideVarselService.sendPendingVarslerCron();
+        minsideVarselService.sendPendingVarslerCronImpl();
         return eskaleringsvarselDto;
     }
 

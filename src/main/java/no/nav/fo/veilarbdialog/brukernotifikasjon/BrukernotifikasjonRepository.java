@@ -49,7 +49,7 @@ public class BrukernotifikasjonRepository {
                     rs.getBoolean("skal_batches")
             );
 
-    Optional<BrukernotifikasjonEntity> hentBrukernotifikasjon(long id) {
+    public Optional<BrukernotifikasjonEntity> hentBrukernotifikasjon(long id) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id);
         String sql = """
@@ -90,7 +90,7 @@ public class BrukernotifikasjonRepository {
         }
     }
 
-    List<BrukernotifikasjonEntity> hentPendingVarsler() {
+    public List<BrukernotifikasjonEntity> hentPendingVarsler() {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("pending", BrukernotifikasjonBehandlingStatus.PENDING.name());
         String sql = """
@@ -99,7 +99,7 @@ public class BrukernotifikasjonRepository {
         return jdbcTemplate.query(sql, params, rowmapper);
     }
 
-    List<BrukernotifikasjonEntity> hentVarslerSomSkalAvsluttes() {
+    public List<BrukernotifikasjonEntity> hentVarslerSomSkalAvsluttes() {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("skal_avsluttes", BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES.name());
         String sql = """
@@ -147,7 +147,7 @@ public class BrukernotifikasjonRepository {
     }
 
 
-    void setSkalAvsluttesForVarslerIPeriode(UUID oppfolgingsperiodeUuid) {
+    public void setSkalAvsluttesForVarslerIPeriode(UUID oppfolgingsperiodeUuid) {
         MapSqlParameterSource skalAvsluttes = new MapSqlParameterSource()
                 .addValue("oppfolgingsperiode", oppfolgingsperiodeUuid.toString())
                 .addValue("fra_status", BrukernotifikasjonBehandlingStatus.SENDT.name())

@@ -1,8 +1,6 @@
 package no.nav.fo.veilarbdialog.minsidevarsler
 
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.AVSLUTTET
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringMetrikk
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.Bestilt
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselOppdatering

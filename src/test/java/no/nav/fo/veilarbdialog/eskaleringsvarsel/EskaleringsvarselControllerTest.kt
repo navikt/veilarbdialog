@@ -5,7 +5,7 @@ import io.restassured.response.Response
 import no.nav.common.json.JsonUtils
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
-import no.nav.fo.veilarbdialog.brukernotifikasjon.MinsideVarselService
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
 import no.nav.fo.veilarbdialog.domain.DialogDTO
 import no.nav.fo.veilarbdialog.domain.HenvendelseDTO
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto
@@ -385,7 +385,7 @@ internal class EskaleringsvarselControllerTest(
 //        Thread.sleep(2000L)
         // Batchen bestiller beskjeder ved nye dialoger (etter 1000 ms)
 //        scheduleSendBrukernotifikasjonerForUlesteDialoger.sendBrukernotifikasjonerForUlesteDialoger()
-        minsideVarselService.sendPendingVarslerCron()
+        minsideVarselService.sendPendingVarslerCronImpl()
 
         // sjekk at det er blitt sendt en oppgave
         ventPåVarselOpprettelsePåKafka()
@@ -415,7 +415,7 @@ internal class EskaleringsvarselControllerTest(
             .post("/veilarbdialog/api/eskaleringsvarsel/start")
             .then()
             .extract().response()
-        minsideVarselService.sendPendingVarslerCron()
+        minsideVarselService.sendPendingVarslerCronImpl()
         return response
     }
 

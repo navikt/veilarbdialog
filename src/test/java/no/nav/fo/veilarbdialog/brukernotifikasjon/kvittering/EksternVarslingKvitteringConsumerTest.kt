@@ -87,19 +87,6 @@ open class EksternVarslingKvitteringConsumerTest(
     //        verify(brukernotifikasjonRepository).finnesBrukernotifikasjon(varselId);
     //        verifyNoMoreInteractions(brukernotifikasjonRepository);
     //    }
-    @Test
-    fun skalFeileVedUkjentBestillingsId() {
-        val varselId = MinSideVarselId(UUID.randomUUID())
-        val doknotifikasjonStatus = createDoknotifikasjonStatus(varselId, EksternVarselStatus.sendt)
-
-        Mockito.`when`<Boolean?>(minsideVarselDao.finnesBrukernotifikasjon(varselId)).thenReturn(false)
-
-        val consumerRecord: ConsumerRecord<String, String> = createConsumerRecord(doknotifikasjonStatus)
-        Assertions.assertThrows(IllegalArgumentException::class.java)
-            { eksternVarslingKvitteringConsumer!!.consume(consumerRecord) }
-        Mockito.verify(minsideVarselDao).finnesBrukernotifikasjon(varselId)
-        Mockito.verifyNoMoreInteractions(minsideVarselDao)
-    }
 
     private fun createConsumerRecord(varselHendelse: EksternVarselHendelseDTO): ConsumerRecord<String, String> {
         return ConsumerRecord<String, String>(

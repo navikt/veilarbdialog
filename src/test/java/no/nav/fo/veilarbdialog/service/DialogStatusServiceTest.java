@@ -2,7 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import no.nav.fo.veilarbdialog.TestDataBuilder;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.MinsideVarselService;
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
@@ -28,22 +28,15 @@ class DialogStatusServiceTest {
     private final StatusDAO statusDAO = mock(StatusDAO.class);
     private final DialogDAO dialogDAO = mock(DialogDAO.class);
     private final DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
-    private final VarselDAO varselDao = mock(VarselDAO.class);
     private final IAuthService authService = mock(IAuthService.class);
-    private final BrukernotifikasjonRepository brukernotifikasjonRepository = mock(BrukernotifikasjonRepository.class);
-    private final MinsideVarselDao minsideVarselDao = mock(MinsideVarselDao.class);
-    private final EskaleringsvarselRepository eskaleringsvarselRepository = mock(EskaleringsvarselRepository.class);
     private final FunksjonelleMetrikker funksjonelleMetrikker = mock(FunksjonelleMetrikker.class);
     private final MinsideVarselService minsideVarselService = mock(MinsideVarselService.class);
     private final DialogStatusService dialogStatusService = new DialogStatusService(
             statusDAO,
             dialogDAO,
             dataVarehusDAO,
-            brukernotifikasjonRepository,
-            eskaleringsvarselRepository,
             funksjonelleMetrikker,
             minsideVarselService,
-            minsideVarselDao,
             authService
     );
 

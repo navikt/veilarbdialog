@@ -23,7 +23,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst.NY_MELDING_TEKST
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType.BESKJED
-import no.nav.fo.veilarbdialog.brukernotifikasjon.MinsideVarselService
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
@@ -98,7 +98,7 @@ internal class DialogBeskjedTest(
 
         val dialog = mockVeileder.sendEnMelding(mockBruker)
 
-        minsideVarselService.sendPendingVarslerCron()
+        minsideVarselService.sendPendingVarslerCronImpl()
         val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
 
         assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(NY_MELDING_TEKST)
@@ -143,7 +143,7 @@ internal class DialogBeskjedTest(
         val mockVeileder = MockNavService.createVeileder(mockBruker)
 
         mockVeileder.sendEnMelding(mockBruker)
-        val sendteMeldinger = minsideVarselService.sendPendingVarslerCron()
+        val sendteMeldinger = minsideVarselService.sendPendingVarslerCronImpl()
         assertThat(sendteMeldinger).isEqualTo(1)
         val varselOpprettelse = assertOpprettetVarselPublisertPåKafka()
         assertThat(varselOpprettelse.eksternVarsling?.kanBatches).isTrue()
@@ -170,7 +170,7 @@ internal class DialogBeskjedTest(
         // Hy henvendelse samme dialog
         mockVeileder.sendEnMelding(mockBruker, dialog.id)
 
-        val sendteVarsler = minsideVarselService.sendPendingVarslerCron()
+        val sendteVarsler = minsideVarselService.sendPendingVarslerCronImpl()
         assertThat(sendteVarsler).isEqualTo(1).withFailMessage("Skal sende ut 1 varsel som stod i PENDING")
         val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
         assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(NY_MELDING_TEKST)
@@ -192,7 +192,7 @@ internal class DialogBeskjedTest(
     }
 
     @Test
-    fun ingenDobleNotifikasjonerPaaSammeDialogMedIntervall() {
+    fun `ingen dobble minsiede-varsler på samme dialog med intervall`() {
         val mockBruker = MockNavService.createHappyBruker()
         val mockVeileder = MockNavService.createVeileder(mockBruker)
 
@@ -200,7 +200,7 @@ internal class DialogBeskjedTest(
         val dialog = mockVeileder.sendEnMelding(mockBruker)
         mockVeileder.sendEnMelding(mockBruker, dialogId = dialog.id)
 
-        val sendteVarsler = minsideVarselService.sendPendingVarslerCron()
+        val sendteVarsler = minsideVarselService.sendPendingVarslerCronImpl()
         assertThat(sendteVarsler).isEqualTo(1).withFailMessage("Skal sende 1 og bare 1 varsel")
         assertOpprettetVarselPublisertPåKafka()
     }
@@ -224,14 +224,14 @@ internal class DialogBeskjedTest(
         val mockVeileder = MockNavService.createVeileder(mockBruker)
 
         val dialog = mockVeileder.sendEnMelding(mockBruker)
-        minsideVarselService.sendPendingVarslerCron()
+        minsideVarselService.sendPendingVarslerCronImpl()
 
         val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
         assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(NY_MELDING_TEKST)
 
         // Hy henvendelse samme dialog
         mockVeileder.sendEnMelding(mockBruker, dialog.id)
-        minsideVarselService.sendPendingVarslerCron()
+        minsideVarselService.sendPendingVarslerCronImpl()
 
         assertTrue(
             kafkaTestService.harKonsumertAlleMeldinger(
@@ -249,14 +249,14 @@ internal class DialogBeskjedTest(
 
         val dialog = mockVeileder.sendEnMelding(mockBruker)
         settBrukernotifikasjonOpprettetForNMinuttSiden(dialog.id, 31)
-        minsideVarselService.sendPendingVarslerCron()
+        minsideVarselService.sendPendingVarslerCronImpl()
 
         val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
         assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(NY_MELDING_TEKST)
 
         // Hy henvendelse samme dialog
         mockVeileder.sendEnMelding(mockBruker, dialog.id)
-        minsideVarselService.sendPendingVarslerCron()
+        minsideVarselService.sendPendingVarslerCronImpl()
 
         assertOpprettetVarselPublisertPåKafka()
     }
@@ -269,7 +269,7 @@ internal class DialogBeskjedTest(
 
         val dialog = mockVeileder.sendEnMelding(mockBruker)
         settBrukernotifikasjonOpprettetForNMinuttSiden(dialog.id, 1)
-        minsideVarselService.sendPendingVarslerCron()
+        minsideVarselService.sendPendingVarslerCronImpl()
 
         val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
         assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(NY_MELDING_TEKST)
@@ -281,7 +281,7 @@ internal class DialogBeskjedTest(
 
         // Hy henvendelse samme dialog
         mockVeileder.sendEnMelding(mockBruker, dialog.id)
-        minsideVarselService.sendPendingVarslerCron()
+        minsideVarselService.sendPendingVarslerCronImpl()
 
         assertOpprettetVarselPublisertPåKafka()
     }
