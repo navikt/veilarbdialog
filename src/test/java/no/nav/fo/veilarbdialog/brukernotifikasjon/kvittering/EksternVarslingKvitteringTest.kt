@@ -70,7 +70,7 @@ internal class EksternVarslingKvitteringTest(
 
         val opprinneligBrukernotifikasjon = minsideVarslDao.getMinsideVarselForForhåndsvarsel(forhåndsVarsel.id)
 
-        val oversendtMelding = bestiltStatus(opprinneligBrukernotifikasjon.varselId)
+        val oversendtMelding = eksternVarselHendelseBestilt(opprinneligBrukernotifikasjon.varselId)
         val oversendtRecordMetadata = sendKvitteringsMelding(oversendtMelding)
         assertExpectedBrukernotifikasjonStatus(
             forhåndsVarsel.id,
@@ -79,7 +79,7 @@ internal class EksternVarslingKvitteringTest(
             VarselKvitteringStatus.IKKE_SATT
         )
 
-        val ferdigstiltMelding = sendtStatus(opprinneligBrukernotifikasjon.varselId)
+        val ferdigstiltMelding = eksternVarselHendelseSendt(opprinneligBrukernotifikasjon.varselId)
         val ferdigstiltRecordMetadata = sendKvitteringsMelding(ferdigstiltMelding)
         assertExpectedBrukernotifikasjonStatus(
             forhåndsVarsel.id,
@@ -88,7 +88,7 @@ internal class EksternVarslingKvitteringTest(
             VarselKvitteringStatus.OK
         )
 
-        val feiletMelding = feiletStatus(opprinneligBrukernotifikasjon.varselId)
+        val feiletMelding = eksternVarselHendelseFeilet(opprinneligBrukernotifikasjon.varselId)
         val feiletRecordMetadata = sendKvitteringsMelding(feiletMelding)
         assertExpectedBrukernotifikasjonStatus(
             forhåndsVarsel.id,
@@ -140,15 +140,15 @@ internal class EksternVarslingKvitteringTest(
         )
     }
 
-    private fun sendtStatus(bestillingsId: MinSideVarselId): EksternVarselHendelseDTO {
+    private fun eksternVarselHendelseSendt(bestillingsId: MinSideVarselId): EksternVarselHendelseDTO {
         return lagVarselHendelseMelding(bestillingsId, EksternVarselStatus.sendt)
     }
 
-    private fun feiletStatus(bestillingsId: MinSideVarselId): EksternVarselHendelseDTO {
+    private fun eksternVarselHendelseFeilet(bestillingsId: MinSideVarselId): EksternVarselHendelseDTO {
         return lagVarselHendelseMelding(bestillingsId, EksternVarselStatus.feilet)
     }
 
-    private fun bestiltStatus(eventId: MinSideVarselId): EksternVarselHendelseDTO {
+    private fun eksternVarselHendelseBestilt(eventId: MinSideVarselId): EksternVarselHendelseDTO {
         return lagVarselHendelseMelding(eventId, EksternVarselStatus.bestilt)
     }
 }

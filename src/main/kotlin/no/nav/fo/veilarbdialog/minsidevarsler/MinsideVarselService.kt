@@ -6,6 +6,7 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.AVSLUTTET
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.PENDING
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES
@@ -81,19 +82,6 @@ open class MinsideVarselService(
         return false
     }
 
-    private fun setVarselTilSkalAvsluttesGammel(brukernotifikasjonId: Long) {
-        brukernotifikasjonRepository.hentBrukernotifikasjon(brukernotifikasjonId)
-            .map { it.varselId }
-            .ifPresent { varselId -> this.setVarselTilSkalAvsluttesIGammelTabell(varselId) }
-    }
-
-    private fun setVarselTilSkalAvsluttesIGammelTabell(varselId: MinSideVarselId) {
-        // Gammel tabell
-        brukernotifikasjonRepository.updateStatus(varselId, SKAL_AVSLUTTES)
-//         Ny tabell
-//        minsideVarselDao.updateStatus(varselId, SKAL_AVSLUTTES)
-    }
-
     @Transactional
     open fun setSkalAvsluttesForVarslerIPeriode(oppfolgingsperiode: UUID) {
         brukernotifikasjonRepository.setSkalAvsluttesForVarslerIPeriode(oppfolgingsperiode)
@@ -151,14 +139,14 @@ open class MinsideVarselService(
             )
             brukernotifikasjonRepository.updateStatus(
                 varselSomSkalAvsluttes.varselId,
-                BrukernotifikasjonBehandlingStatus.AVSLUTTET
+                AVSLUTTET
             )
         }
 
         val varslerIderSomSkalAvsluttes = minsideVarselDao.hentVarslerSomSkalAvsluttes()
         varslerIderSomSkalAvsluttes.stream().forEach { varselSomSkalAvsluttes ->
             minsideVarselProducer.publiserInaktiveringsMeldingPåKafka(varselSomSkalAvsluttes)
-            minsideVarselDao.updateStatus(varselSomSkalAvsluttes, BrukernotifikasjonBehandlingStatus.AVSLUTTET)
+            minsideVarselDao.updateStatus(varselSomSkalAvsluttes, AVSLUTTET)
         }
     }
 
@@ -192,7 +180,9 @@ open class MinsideVarselService(
             minsideVarselDao.updateStatus(eskaleringsvarselEntity.tilhorendeVarselId, SKAL_AVSLUTTES)
         } else {
             // Gammel tabell
-            setVarselTilSkalAvsluttesGammel(eskaleringsvarselEntity.tilhorendeBrukernotifikasjonId())
+            brukernotifikasjonRepository.hentBrukernotifikasjon(eskaleringsvarselEntity.tilhorendeBrukernotifikasjonId())
+                .map { it.varselId }
+                .ifPresent { varselId -> brukernotifikasjonRepository.updateStatus(varselId, SKAL_AVSLUTTES) }
         }
     }
 
@@ -201,7 +191,7 @@ open class MinsideVarselService(
         // Gammel tabell
         brukernotifikasjonRepository
             .hentBrukernotifikasjonForDialogId(dialogId, BESKJED)
-            .forEach { varsel -> setVarselTilSkalAvsluttesIGammelTabell(varsel.varselId()) }
+            .forEach { varsel -> brukernotifikasjonRepository.updateStatus(varsel.varselId, SKAL_AVSLUTTES) }
         // Ny tabell
         minsideVarselDao.setDialogVarslerTilSkalAvsluttes(dialogId)
 
@@ -212,5 +202,32 @@ open class MinsideVarselService(
                     inaktiverVarselForhåndsvarsel(eskaleringsvarselEntity)
                 }
             }
+    }
+
+    open fun finnesBrukernotifikasjon(varselId: MinSideVarselId): Boolean {
+        val finnesIGammelTabell =brukernotifikasjonRepository.finnesBrukernotifikasjon(varselId)
+        val finnesINyTabell = minsideVarselDao.finnesBrukernotifikasjon(varselId)
+        return finnesIGammelTabell && finnesINyTabell
+    }
+
+    open fun setEksternVarselFeilet(varselId: MinSideVarselId) {
+        // Gammel tabell
+        brukernotifikasjonRepository.setEksternVarselFeilet(varselId)
+        // Ny tabell
+        minsideVarselDao.setEksternVarselFeilet(varselId)
+    }
+
+    open fun setEksternVarselSendtOk(varselId: MinSideVarselId) {
+        // Gammel tabell
+        brukernotifikasjonRepository.setEksternVarselSendtOk(varselId)
+        // Ny tabell
+        minsideVarselDao.setEksternVarselSendtOk(varselId)
+    }
+
+    open fun setEksternVarselAvsluttet(varselId: MinSideVarselId) {
+        // Gammel tabell
+        brukernotifikasjonRepository.updateStatus(varselId, AVSLUTTET)
+        // Ny tabell
+        minsideVarselDao.updateStatus(varselId, AVSLUTTET)
     }
 }

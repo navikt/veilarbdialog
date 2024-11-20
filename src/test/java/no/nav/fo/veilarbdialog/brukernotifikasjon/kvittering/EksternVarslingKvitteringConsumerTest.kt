@@ -4,6 +4,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.common.json.JsonUtils
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselHendelseConsumer
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternStatusOppdatertEventName
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselHendelseDTO
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselKanal
@@ -30,7 +31,7 @@ import java.util.UUID
 @ExtendWith(MockitoExtension::class)
 open class EksternVarslingKvitteringConsumerTest(
     @Mock
-    private val minsideVarselDao: MinsideVarselDao,
+    private val minsideVarselService: MinsideVarselService,
     @Mock
     private val kvitteringMetrikk: KvitteringMetrikk,
 ) {
@@ -48,7 +49,7 @@ open class EksternVarslingKvitteringConsumerTest(
 
     @BeforeEach
     fun setup() {
-        eksternVarslingKvitteringConsumer = MinsideVarselHendelseConsumer(APP_NAME, minsideVarselDao, kvitteringMetrikk)
+        eksternVarslingKvitteringConsumer = MinsideVarselHendelseConsumer(APP_NAME, minsideVarselService, kvitteringMetrikk)
     }
 
     @Test
@@ -68,7 +69,7 @@ open class EksternVarslingKvitteringConsumerTest(
 
         val consumerRecord = createConsumerRecord(varselHendelse)
         eksternVarslingKvitteringConsumer!!.consume(consumerRecord)
-        Mockito.verifyNoInteractions(minsideVarselDao, kvitteringMetrikk)
+        Mockito.verifyNoInteractions(minsideVarselService, kvitteringMetrikk)
     }
 
     //    @Test
