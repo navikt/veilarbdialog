@@ -118,14 +118,14 @@ public class BrukernotifikasjonRepository {
 
     public void setEksternVarselFeilet(MinSideVarselId varselId) {
         MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("varlselId", varselId.getValue().toString())
+                .addValue("varselId", varselId.getValue().toString())
                 .addValue("varselKvitteringStatus", VarselKvitteringStatus.FEILET.toString());
         jdbcTemplate.update("""
              update BRUKERNOTIFIKASJON
                set
                 VARSEL_FEILET = current_timestamp,
                 VARSEL_KVITTERING_STATUS = :varselKvitteringStatus
-                    where varsel_id = :varlselId
+                    where event_id = :varselId
                  """, param);
     }
 
