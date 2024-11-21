@@ -2,11 +2,13 @@ package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering
 
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.tomakehurst.wiremock.client.WireMock
-import lombok.SneakyThrows
 import no.nav.common.json.JsonUtils
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus
+import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarselHendelseUtil.eksternVarselHendelseBestilt
+import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarselHendelseUtil.eksternVarselHendelseFeilet
+import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarselHendelseUtil.eksternVarselHendelseSendt
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.DialogVarselStatus
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternStatusOppdatertEventName
@@ -20,15 +22,16 @@ import no.nav.fo.veilarbdialog.util.DialogTestService
 import no.nav.fo.veilarbdialog.util.KafkaTestService
 import no.nav.tms.varsel.action.Varseltype
 import org.apache.kafka.clients.producer.RecordMetadata
-import org.assertj.core.api.SoftAssertions
 import org.assertj.core.api.SoftAssertions.assertSoftly
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
+import java.util.UUID
 import java.util.concurrent.ExecutionException
 
 internal class EksternVarslingKvitteringTest(
@@ -59,7 +62,6 @@ internal class EksternVarslingKvitteringTest(
         Assertions.assertTrue(WireMock.findUnmatchedRequests().isEmpty())
     }
 
-    @SneakyThrows
     @Test
     fun skal_oppdatere_brukernotifikasjon() {
         val bruker = MockNavService.createHappyBruker()
@@ -71,8 +73,8 @@ internal class EksternVarslingKvitteringTest(
 
         val opprinneligBrukernotifikasjon = minsideVarslDao.getMinsideVarselForForhåndsvarsel(forhåndsVarsel.id)
 
-        val oversendtMelding = eksternVarselHendelseBestilt(opprinneligBrukernotifikasjon.varselId)
-        val oversendtRecordMetadata = sendKvitteringsMelding(oversendtMelding)
+        val bestiltHendelse = eksternVarselHendelseBestilt(opprinneligBrukernotifikasjon.varselId, appname)
+        val oversendtRecordMetadata = publiserVarselHendelsePåKafka(bestiltHendelse)
         assertExpectedBrukernotifikasjonStatus(
             forhåndsVarsel.id,
             opprinneligBrukernotifikasjon,
@@ -80,8 +82,8 @@ internal class EksternVarslingKvitteringTest(
             VarselKvitteringStatus.IKKE_SATT
         )
 
-        val sendtHendelse = eksternVarselHendelseSendt(opprinneligBrukernotifikasjon.varselId)
-        val ferdigstiltRecordMetadata = sendKvitteringsMelding(sendtHendelse)
+        val sendtHendelse = eksternVarselHendelseSendt(opprinneligBrukernotifikasjon.varselId, appname)
+        val ferdigstiltRecordMetadata = publiserVarselHendelsePåKafka(sendtHendelse)
         assertExpectedBrukernotifikasjonStatus(
             forhåndsVarsel.id,
             opprinneligBrukernotifikasjon,
@@ -89,8 +91,8 @@ internal class EksternVarslingKvitteringTest(
             VarselKvitteringStatus.OK
         )
 
-        val feiletHendelse = eksternVarselHendelseFeilet(opprinneligBrukernotifikasjon.varselId)
-        val feiletRecordMetadata = sendKvitteringsMelding(feiletHendelse)
+        val feiletHendelse = eksternVarselHendelseFeilet(opprinneligBrukernotifikasjon.varselId, appname)
+        val feiletRecordMetadata = publiserVarselHendelsePåKafka(feiletHendelse)
         assertExpectedBrukernotifikasjonStatus(
             forhåndsVarsel.id,
             opprinneligBrukernotifikasjon,
@@ -100,7 +102,7 @@ internal class EksternVarslingKvitteringTest(
     }
 
     @Throws(ExecutionException::class, InterruptedException::class)
-    private fun sendKvitteringsMelding(melding: EksternVarselHendelseDTO?): RecordMetadata {
+    private fun publiserVarselHendelsePåKafka(melding: EksternVarselHendelseDTO?): RecordMetadata {
         val send = minsideVarselHendelseProducer.send(minsideVarselHendelseTopic, JsonUtils.toJson(melding))
         minsideVarselHendelseProducer.flush()
 
@@ -127,29 +129,4 @@ internal class EksternVarslingKvitteringTest(
         }
     }
 
-    private fun lagVarselHendelseMelding(varselId: MinSideVarselId, status: EksternVarselStatus): EksternVarselHendelseDTO {
-        return EksternVarselHendelseDTO(
-            EksternStatusOppdatertEventName,
-            "dab",
-            appname,
-            Varseltype.Beskjed,
-            varselId.value,
-            status,
-            false,
-            null,
-            EksternVarselKanal.SMS
-        )
-    }
-
-    private fun eksternVarselHendelseSendt(bestillingsId: MinSideVarselId): EksternVarselHendelseDTO {
-        return lagVarselHendelseMelding(bestillingsId, EksternVarselStatus.sendt)
-    }
-
-    private fun eksternVarselHendelseFeilet(bestillingsId: MinSideVarselId): EksternVarselHendelseDTO {
-        return lagVarselHendelseMelding(bestillingsId, EksternVarselStatus.feilet)
-    }
-
-    private fun eksternVarselHendelseBestilt(eventId: MinSideVarselId): EksternVarselHendelseDTO {
-        return lagVarselHendelseMelding(eventId, EksternVarselStatus.bestilt)
-    }
 }
