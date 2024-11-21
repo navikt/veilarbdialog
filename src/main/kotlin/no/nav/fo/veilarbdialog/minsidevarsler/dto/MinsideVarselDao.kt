@@ -123,14 +123,14 @@ open class MinsideVarselDao(
     }
 
     /* Only used in tests */
-    open fun getMinsideVarselForForhåndsvarsel(forhåndsVarselId: Long): DialogVarselStatus {
+    open fun getMinsideVarselForForhåndsvarsel(forhåndsVarselId: Long): DialogVarselEntity {
         val params = mapOf("id" to forhåndsVarselId)
         val sql = """
             SELECT min_side_varsel.varsel_id, min_side_varsel.status, min_side_varsel.opprettet, min_side_varsel.varsel_kvittering_status FROM eskaleringsvarsel
                 JOIN min_side_varsel ON min_side_varsel.varsel_id = eskaleringsvarsel.tilhorende_minside_varsel
         """.trimIndent()
         return template.queryForObject(sql, params) { rs, _ ->
-            DialogVarselStatus(
+            DialogVarselEntity(
                 rs.getVarselId(),
                 rs.getStatus(),
                 rs.getOpprettet(),
@@ -139,7 +139,7 @@ open class MinsideVarselDao(
         }
     }
 
-    open fun getVarslerForDialog(dialogId: Long): List<DialogVarselStatus> {
+    open fun getVarslerForDialog(dialogId: Long): List<DialogVarselEntity> {
         val params = mapOf("dialogId" to dialogId)
         val sql = """SELECT mapping.varsel_id, min_side_varsel.status, min_side_varsel.opprettet,  min_side_varsel.varsel_kvittering_status
             |    FROM min_side_varsel_dialog_mapping mapping JOIN min_side_varsel 
@@ -147,7 +147,7 @@ open class MinsideVarselDao(
             |    WHERE dialog_id = :dialogId""".trimMargin()
         return try {
             template.query(sql, params) { rs, _ ->
-                DialogVarselStatus(
+                DialogVarselEntity(
                     rs.getVarselId(),
                     rs.getStatus(),
                     rs.getOpprettet(),
@@ -194,20 +194,23 @@ open class MinsideVarselDao(
         """.trimIndent()
         template.update(sql, params)
     }
+
+    fun hentVarselEntity(varselId: MinSideVarselId): DialogVarselEntity? {
+        val sql = """
+            SELECT * FROM min_side_varsel where id = :varselId
+        """.trimIndent()
+        val params = mapOf("varselId" to varselId)
+        try {
+            return template.queryForObject(sql, params) { rs, _ -> DialogVarselEntity(rs.getVarselId(), rs.getStatus(), rs.getOpprettet(), rs.getKvitteringsStatus()) }
+        } catch (e: EmptyResultDataAccessException) {
+            return null
+        }
+    }
 }
 
-class DialogVarselStatus(
+class DialogVarselEntity(
     val varselId: MinSideVarselId,
     val status: BrukernotifikasjonBehandlingStatus,
     val opprettet: LocalDateTime,
     val kvitteringStatus: VarselKvitteringStatus
-)
-
-data class PendingMinsideVarsel(
-    val varselId: MinSideVarselId,
-    val lenke: URL,
-    val skalBatches: Boolean,
-    val type: BrukernotifikasjonsType,
-    val melding: String,
-    val fnr: Fnr
 )

@@ -6,17 +6,18 @@ import no.nav.common.json.JsonUtils
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.*
 import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus
-import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.FEILET
-import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.OK
-import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.IKKE_SATT
-import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarselHendelseUtil.eksternVarselHendelseBestilt
-import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarselHendelseUtil.eksternVarselHendelseFeilet
-import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarselHendelseUtil.eksternVarselHendelseSendt
+import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.*
+import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseBestilt
+import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseFeilet
+import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseSendt
+import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.lagInternVarselHendelseMelding
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.DialogVarselStatus
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselHendelseDTO
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.DialogVarselEntity
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.InternVarselHendelseType
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
 import no.nav.fo.veilarbdialog.util.DialogTestService
@@ -45,6 +46,8 @@ internal class EksternVarslingKvitteringTest(
     var appname: String,
     @Autowired
     var minsideVarselHendelseProducer: KafkaTemplate<String?, String?>,
+    @Autowired
+    var minsideVarselService: MinsideVarselService,
 ) : SpringBootTestBase() {
 
     companion object {
@@ -61,7 +64,7 @@ internal class EksternVarslingKvitteringTest(
     }
 
     @Test
-    fun skal_oppdatere_brukernotifikasjon() {
+    fun skal_oppdatere_brukernotifikasjonVedKvitteringsStatusOppdateringer() {
         val bruker = MockNavService.createHappyBruker()
         val veileder = MockNavService.createVeileder(bruker)
 
@@ -69,42 +72,86 @@ internal class EksternVarslingKvitteringTest(
             StartEskaleringDto(Fnr.of(bruker.fnr), "begrunnelse", "overskrift", "henvendelseTekst", null)
         val forhåndsVarsel = dialogTestService.startEskalering(veileder, startEskaleringDto)
 
-        val opprinneligBrukernotifikasjon = minsideVarslDao.getMinsideVarselForForhåndsvarsel(forhåndsVarsel.id)
+        var (bestiltHendelse, varselId) = minsideVarslDao.getMinsideVarselForForhåndsvarsel(forhåndsVarsel.id).let {
+            eksternVarselHendelseBestilt(it.varselId, appname) to it.varselId
+        }
 
-        val bestiltHendelse = eksternVarselHendelseBestilt(opprinneligBrukernotifikasjon.varselId, appname)
         val bestiltRecordMetadata = publiserVarselHendelsePåKafka(bestiltHendelse)
         assertErKonsummert(bestiltRecordMetadata)
-        assertExpectedVarselStatuser(
-            forhåndsVarsel.id,
-            opprinneligBrukernotifikasjon,
-            IKKE_SATT,
-            SENDT
-        )
+        minsideVarslDao.getMinsideVarselForForhåndsvarsel(forhåndsVarsel.id).let {
+            assertExpectedVarselStatuser(
+                it,
+                kvitteringsStatus = IKKE_SATT,
+                status = SENDT
+            )
+        }
 
-        val sendtHendelse = eksternVarselHendelseSendt(opprinneligBrukernotifikasjon.varselId, appname)
+        val sendtHendelse = eksternVarselHendelseSendt(varselId, appname)
         val ferdigstiltRecordMetadata = publiserVarselHendelsePåKafka(sendtHendelse)
         assertErKonsummert(ferdigstiltRecordMetadata)
-        assertExpectedVarselStatuser(
-            forhåndsVarsel.id,
-            opprinneligBrukernotifikasjon,
-            OK,
-            SENDT
-        )
+        minsideVarslDao.getMinsideVarselForForhåndsvarsel(forhåndsVarsel.id).let {
+            assertExpectedVarselStatuser(
+                it,
+                kvitteringsStatus = OK,
+                status = SENDT
+            )
+        }
 
-        val feiletHendelse = eksternVarselHendelseFeilet(opprinneligBrukernotifikasjon.varselId, appname)
+
+        val feiletHendelse = eksternVarselHendelseFeilet(varselId, appname)
         val feiletRecordMetadata = publiserVarselHendelsePåKafka(feiletHendelse)
         assertErKonsummert(feiletRecordMetadata)
-        assertExpectedVarselStatuser(
-            forhåndsVarsel.id,
-            opprinneligBrukernotifikasjon,
-            FEILET,
-            SENDT
-        )
+        minsideVarslDao.getMinsideVarselForForhåndsvarsel(forhåndsVarsel.id). let {
+            assertExpectedVarselStatuser(
+                it,
+                kvitteringsStatus = FEILET,
+                status = SENDT
+            )
+        }
+
+
+    }
+
+    @Test
+    fun skal_oppdatere_brukernotifikasjonVedVarselStatusOppdateringer() {
+        val bruker = MockNavService.createHappyBruker()
+        val veileder = MockNavService.createVeileder(bruker)
+        val melding = NyMeldingDTO().setFnr(bruker.fnr).setOverskrift("Overskrift").setTekst("Tekst")
+        val opprettetDialog = dialogTestService.opprettDialogSomVeileder(veileder, bruker, melding)
+
+        var varselId = minsideVarslDao.getVarslerForDialog(opprettetDialog.id.toLong()).first().let {
+            assertExpectedVarselStatuser(
+                it,
+                kvitteringsStatus = IKKE_SATT,
+                status = PENDING
+            )
+            it.varselId
+        }
+        minsideVarselService.sendPendingVarslerCronImpl()
+
+        minsideVarslDao.getVarslerForDialog(opprettetDialog.id.toLong()).first().let {
+            assertExpectedVarselStatuser(
+                it,
+                kvitteringsStatus = IKKE_SATT,
+                status = SENDT
+            )
+        }
+
+        val internVarselHendelseMelding =
+            lagInternVarselHendelseMelding(varselId, InternVarselHendelseType.opprettet, appname)
+        publiserVarselHendelsePåKafka(internVarselHendelseMelding)
+        minsideVarslDao.hentVarselEntity(varselId).let {
+            assertExpectedVarselStatuser(
+                it!!,
+                kvitteringsStatus = IKKE_SATT,
+                status = SENDT
+            )
+        }
 
     }
 
     @Throws(ExecutionException::class, InterruptedException::class)
-    private fun publiserVarselHendelsePåKafka(melding: EksternVarselHendelseDTO?): RecordMetadata {
+    private fun publiserVarselHendelsePåKafka(melding: TestVarselHendelseDTO?): RecordMetadata {
         val send = minsideVarselHendelseProducer.send(minsideVarselHendelseTopic, JsonUtils.toJson(melding))
         minsideVarselHendelseProducer.flush()
 
@@ -120,16 +167,14 @@ internal class EksternVarslingKvitteringTest(
     }
 
     private fun assertExpectedVarselStatuser(
-        forhåndsVarselId: Long,
-        opprinneligBrukernotifikasjon: DialogVarselStatus,
+        actualVarsel: DialogVarselEntity,
         kvitteringsStatus: VarselKvitteringStatus,
         status: BrukernotifikasjonBehandlingStatus
-        ) {
-        val varselEtterProsessering = minsideVarslDao.getMinsideVarselForForhåndsvarsel(forhåndsVarselId)
+    ) {
+
         assertSoftly{ assertions ->
-            assertions.assertThat(varselEtterProsessering.varselId.value).isEqualTo(opprinneligBrukernotifikasjon.varselId.value)
-            assertions.assertThat(varselEtterProsessering.kvitteringStatus).isEqualTo(kvitteringsStatus)
-            assertions.assertThat(varselEtterProsessering.status).isEqualTo(status)
+            assertions.assertThat(actualVarsel.kvitteringStatus).isEqualTo(kvitteringsStatus)
+            assertions.assertThat(actualVarsel.status).isEqualTo(status)
             assertions.assertAll()
         }
     }

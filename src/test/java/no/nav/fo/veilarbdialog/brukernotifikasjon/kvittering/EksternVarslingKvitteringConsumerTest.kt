@@ -2,10 +2,9 @@ package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering
 
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.common.json.JsonUtils
-import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.EksternVarselHendelseUtil.eksternVarselHendelseSendt
+import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseSendt
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselHendelseConsumer
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselHendelseDTO
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions
@@ -84,7 +83,7 @@ open class EksternVarslingKvitteringConsumerTest(
             Mockito.verifyNoMoreInteractions(minsideVarselService);
         }
 
-    private fun createConsumerRecord(varselHendelse: EksternVarselHendelseDTO): ConsumerRecord<String, String> {
+    private fun createConsumerRecord(varselHendelse: TestVarselHendelseDTO): ConsumerRecord<String, String> {
         return ConsumerRecord<String, String>(
             minsideVarselHendelseTopic,
             0,

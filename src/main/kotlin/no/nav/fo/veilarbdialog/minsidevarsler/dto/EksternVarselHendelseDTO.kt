@@ -1,25 +1,10 @@
 package no.nav.fo.veilarbdialog.minsidevarsler.dto
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.tms.varsel.action.Varseltype
 import java.util.*
 
 sealed class VarselHendelse
-
-/* Kun brukt i tester foreløpig */
-data class EksternVarselHendelseDTO(
-    @JsonProperty("@event_name")
-    val eventName: String,
-    val namespace: String,
-    val appnavn: String,
-    val varseltype: Varseltype,
-    val varselId: UUID,
-    val status: EksternVarselStatus,
-    val renotifikasjon: Boolean? = null, // Også kalt "revarsling"
-    val feilmelding: String? = null,
-    val kanal: EksternVarselKanal? = null
-)
 
 object VarselFraAnnenApp: VarselHendelse()
 sealed class EksternVarselOppdatering(
