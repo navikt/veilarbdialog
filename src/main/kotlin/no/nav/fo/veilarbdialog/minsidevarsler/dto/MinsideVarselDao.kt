@@ -195,11 +195,11 @@ open class MinsideVarselDao(
         template.update(sql, params)
     }
 
-    fun hentVarselEntity(varselId: MinSideVarselId): DialogVarselEntity? {
+    open fun hentVarselEntity(varselId: MinSideVarselId): DialogVarselEntity? {
         val sql = """
-            SELECT * FROM min_side_varsel where id = :varselId
+            SELECT * FROM min_side_varsel where varsel_id = :varselId
         """.trimIndent()
-        val params = mapOf("varselId" to varselId)
+        val params = mapOf("varselId" to varselId.value)
         try {
             return template.queryForObject(sql, params) { rs, _ -> DialogVarselEntity(rs.getVarselId(), rs.getStatus(), rs.getOpprettet(), rs.getKvitteringsStatus()) }
         } catch (e: EmptyResultDataAccessException) {

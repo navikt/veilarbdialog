@@ -137,14 +137,24 @@ internal class EksternVarslingKvitteringTest(
             )
         }
 
-        val internVarselHendelseMelding =
-            lagInternVarselHendelseMelding(varselId, InternVarselHendelseType.opprettet, appname)
-        publiserVarselHendelsePåKafka(internVarselHendelseMelding)
+        val opprettetHendelse = lagInternVarselHendelseMelding(varselId, InternVarselHendelseType.opprettet, appname)
+        publiserVarselHendelsePåKafka(opprettetHendelse)
         minsideVarslDao.hentVarselEntity(varselId).let {
             assertExpectedVarselStatuser(
                 it!!,
                 kvitteringsStatus = IKKE_SATT,
                 status = SENDT
+            )
+        }
+
+        val inaktivertHendelse = lagInternVarselHendelseMelding(varselId, InternVarselHendelseType.inaktivert, appname)
+        val record = publiserVarselHendelsePåKafka(inaktivertHendelse)
+        assertErKonsummert(record)
+        minsideVarslDao.hentVarselEntity(varselId).let {
+            assertExpectedVarselStatuser(
+                it!!,
+                kvitteringsStatus = IKKE_SATT,
+                status = AVSLUTTET
             )
         }
 

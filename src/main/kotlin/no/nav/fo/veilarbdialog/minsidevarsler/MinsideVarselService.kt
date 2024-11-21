@@ -218,7 +218,7 @@ open class MinsideVarselService(
         minsideVarselDao.setEksternVarselKvitteringStatusOk(varselId)
     }
 
-    fun setVarselstatusFerdigbehandlet(varselId: MinSideVarselId) {
+    open fun setVarselstatusFerdigbehandlet(varselId: MinSideVarselId) {
         // gammel tabell
         brukernotifikasjonRepository.updateStatus(varselId, AVSLUTTET)
         // ny tabell
