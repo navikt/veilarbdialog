@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service
 @Service
 open class VarselUtenKvitteringMetrikkCron(
     val minsideVarselDao: MinsideVarselDao,
-    val brukernotifikasjonRepository: BrukernotifikasjonRepository
+    val brukernotifikasjonRepository: BrukernotifikasjonRepository,
     val kvitteringMetrikk: KvitteringMetrikk
 ) {
 
