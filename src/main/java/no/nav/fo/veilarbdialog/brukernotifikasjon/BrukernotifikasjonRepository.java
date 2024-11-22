@@ -14,6 +14,8 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -176,5 +178,20 @@ public class BrukernotifikasjonRepository {
         jdbcTemplate.update(sql, skalAvsluttes);
     }
 
+    public int hentAntallUkvitterteVarslerForsoktSendt(long timerForsinkelse) {
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+                .addValue("date", new Date(Instant.now().minusSeconds(60 * 60 * timerForsinkelse).toEpochMilli()));
+
+        // language=SQL
+        String sql = """
+             select count(*)
+             from BRUKERNOTIFIKASJON
+             where VARSEL_KVITTERING_STATUS = 'IKKE_SATT'
+             and STATUS = 'SENDT'
+             and FORSOKT_SENDT < :date
+            """;
+
+        return jdbcTemplate.queryForObject(sql, parameterSource, int.class);
+    }
 
 }
