@@ -78,7 +78,7 @@ open class SendGamleVarslerService(
                     from DIALOG d
                         left join HENVENDELSE h on h.DIALOG_ID = d.DIALOG_ID
                         left join VARSEL v on v.AKTOR_ID = d.AKTOR_ID
-                        left join min_side_varsel_mapping m on m.dialog_id = d.DIALOG_ID
+                        left join min_side_varsel_dialog_mapping m on m.dialog_id = d.DIALOG_ID
                     where h.AVSENDER_TYPE = :avsenderType -- Bare meldinger fra veileder
                         and m.dialogId is null -- Ikke meldinger på ny varsel-løsning
                         and (d.LEST_AV_BRUKER_TID is null or h.SENDT > d.LEST_AV_BRUKER_TID) -- Melding er nyere enn siste lest av bruker
