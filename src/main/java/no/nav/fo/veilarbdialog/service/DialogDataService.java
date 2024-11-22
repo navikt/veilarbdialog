@@ -98,6 +98,7 @@ public class DialogDataService {
         );
         if (skalSendeMinsideVarsel) {
             minsideVarselService.puttVarselIOutbox(varselOmNyMelding, aktorId);
+            log.info("Minside varsel opprettet i PENDING status {} dialogId {}", varselOmNyMelding.getVarselId(), dialog.getId());
         }
 
 

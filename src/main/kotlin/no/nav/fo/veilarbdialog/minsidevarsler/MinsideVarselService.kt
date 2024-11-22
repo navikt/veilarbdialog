@@ -53,7 +53,6 @@ open class MinsideVarselService(
         }
 
         minsideVarselDao.opprettVarselIPendingStatus(varsel)
-        log.info("Minside varsel opprettet i PENDING status {}", varsel.varselId)
     }
 
     private fun skalThrottles(varsel: DialogVarsel.VarselOmNyMelding): Boolean {
