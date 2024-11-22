@@ -64,6 +64,7 @@ open class MinsideVarselProducer(
             )
         }
         kafkaTemplate.send(topic, varsel.varselId.value.toString(), melding)
+        log.info("Minside varsel opprettelse publisert for varselId: {}", varsel.varselId);
     }
 
     open fun publiserInaktiveringsMeldingPåKafka(inativerVarselId: MinSideVarselId) {

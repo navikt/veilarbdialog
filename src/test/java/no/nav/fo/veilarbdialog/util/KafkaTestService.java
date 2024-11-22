@@ -1,7 +1,6 @@
 package no.nav.fo.veilarbdialog.util;
 
 import lombok.SneakyThrows;
-import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -27,29 +26,16 @@ import static org.awaitility.Awaitility.await;
 public class KafkaTestService {
 
     public static final Duration DEFAULT_WAIT_TIMEOUT = Duration.ofSeconds(3);
-    private final ConsumerFactory<SpecificRecordBase, SpecificRecordBase> avroAvroConsumerFactory;
     private final ConsumerFactory<String, String> stringStringConsumerFactory;
     private final Admin kafkaAdminClient;
     private @Value("${spring.kafka.consumer.group-id}") String aivenGroupId;
 
     public KafkaTestService(
-            @Qualifier("avroAvroConsumerFactory") ConsumerFactory<SpecificRecordBase, SpecificRecordBase> avroAvroConsumerFactory,
             @Qualifier("stringStringConsumerFactory") ConsumerFactory<String, String> stringStringConsumerFactory,
             Admin kafkaAdminClient
     ) {
-        this.avroAvroConsumerFactory = avroAvroConsumerFactory;
         this.stringStringConsumerFactory = stringStringConsumerFactory;
         this.kafkaAdminClient = kafkaAdminClient;
-    }
-
-
-    public Consumer createAvroAvroConsumer(String topic) {
-        String randomGroup = UUID.randomUUID().toString();
-        Properties modifisertConfig = new Properties();
-        modifisertConfig.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
-        Consumer newConsumer = avroAvroConsumerFactory.createConsumer(randomGroup, null, null, modifisertConfig);
-        seekToEnd(topic, newConsumer);
-        return newConsumer;
     }
 
     public Consumer<String, String> createStringStringConsumer(String topic) {
@@ -60,7 +46,6 @@ public class KafkaTestService {
         seekToEnd(topic, newConsumer);
         return newConsumer;
     }
-
 
 
     private void seekToEnd(String topic, Consumer newConsumer) {
