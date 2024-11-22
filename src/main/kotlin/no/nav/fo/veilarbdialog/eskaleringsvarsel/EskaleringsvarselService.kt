@@ -98,8 +98,8 @@ open class EskaleringsvarselService(
         )
 
         funksjonelleMetrikker.nyBrukernotifikasjon(true, BrukernotifikasjonsType.OPPGAVE)
-        log.info("Eskaleringsvarsel sendt varselId={}", varselOmMuligStans.varselId)
-        log.info("Minside varsel opprettet i PENDING status {} forhåndsvarselId", varselOmMuligStans.varselId, eskaleringsvarselEntity.varselId)
+        log.info("Eskaleringsvarsel sendt forhåndsvarselId={}", varselOmMuligStans.varselId)
+        log.info("Minside varsel opprettet i PENDING status {} forhåndsvarselId {}", varselOmMuligStans.varselId, eskaleringsvarselEntity.varselId)
 
         bigQueryClient.logEvent(eskaleringsvarselEntity, EventType.FORHAANDSVARSEL_OPPRETTET, stansVarsel.begrunnelseType)
         return eskaleringsvarselEntity

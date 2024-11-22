@@ -35,9 +35,7 @@ open class MinsideVarselHendelseConsumer(
         when (varsel.eventName) {
             InternVarselHendelseType.opprettet -> {}
             InternVarselHendelseType.inaktivert -> {
-                // sett varselstatus ferdig
                 minsideVarselService.setVarselstatusFerdigbehandlet(varsel.varselId)
-               // minsideVarselService.setEksternVarselAvsluttet(varsel.varselId)
             }
             InternVarselHendelseType.slettet -> {}
         }
