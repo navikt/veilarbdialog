@@ -4,7 +4,7 @@ import lombok.SneakyThrows;
 import no.nav.common.json.JsonUtils;
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
-import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import org.assertj.core.api.Assertions;
@@ -33,7 +33,7 @@ class IdMappingConsumerTest extends SpringBootTestBase {
         MockBruker mockBruker = MockNavService.createHappyBruker();
 
         String arenaId = "ARENATA123";
-        NyHenvendelseDTO nyHenvendelseDTO = new NyHenvendelseDTO()
+        NyMeldingDTO nyHenvendelseDTO = new NyMeldingDTO()
                 .setTekst("tekst")
                 .setAktivitetId(arenaId);
 

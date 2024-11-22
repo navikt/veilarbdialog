@@ -1,10 +1,10 @@
 package no.nav.fo.veilarbdialog.util;
 
 import io.restassured.response.Response;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
-import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto;
@@ -23,13 +23,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class DialogTestService {
 
     @Autowired
-    BrukernotifikasjonService brukernotifikasjonService;
+    MinsideVarselService minsideVarselService;
 
-    public DialogDTO opprettDialogSomBruker(MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
+    public DialogDTO opprettDialogSomBruker(MockBruker bruker, NyMeldingDTO nyHenvendelseDTO) {
         return opprettDialog(bruker, bruker, nyHenvendelseDTO);
     }
 
-    public DialogDTO opprettDialogSomVeileder(MockVeileder veileder, MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
+    public DialogDTO opprettDialogSomVeileder(MockVeileder veileder, MockBruker bruker, NyMeldingDTO nyHenvendelseDTO) {
         return opprettDialog(veileder, bruker, nyHenvendelseDTO);
     }
 
@@ -42,7 +42,7 @@ public class DialogTestService {
                 .as(DialogDTO.class);
     }
 
-    private DialogDTO opprettDialog(RestassuredUser restassuredUser, MockBruker bruker, NyHenvendelseDTO nyHenvendelseDTO) {
+    private DialogDTO opprettDialog(RestassuredUser restassuredUser, MockBruker bruker, NyMeldingDTO nyHenvendelseDTO) {
         Response response = restassuredUser.createRequest()
                 .body(nyHenvendelseDTO)
                 .when()
@@ -68,7 +68,7 @@ public class DialogTestService {
         EskaleringsvarselDto eskaleringsvarselDto = response.as(EskaleringsvarselDto.class);
         assertNotNull(eskaleringsvarselDto);
         // Scheduled task
-        brukernotifikasjonService.sendPendingBrukernotifikasjoner();
+        minsideVarselService.sendPendingVarslerCronImpl();
         return eskaleringsvarselDto;
     }
 
@@ -106,6 +106,6 @@ public class DialogTestService {
                     .then()
                     .assertThat().statusCode(HttpStatus.OK.value())
                     .extract().response();
-            brukernotifikasjonService.sendDoneBrukernotifikasjoner();
+            minsideVarselService.sendInktiveringPåKafkaPåVarslerSomSkalAvsluttes();
     }
 }

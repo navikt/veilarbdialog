@@ -2,7 +2,7 @@ package no.nav.fo.veilarbdialog.internapi;
 
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
-import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
@@ -24,7 +24,7 @@ class InternApiControllerTest extends SpringBootTestBase {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
 
-        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomVeileder(mockVeileder, mockBruker, new NyHenvendelseDTO().setTekst("tekst"));
+        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomVeileder(mockVeileder, mockBruker, new NyMeldingDTO().setTekst("tekst"));
 
         Dialog dialog = mockVeileder.createRequest()
                 .get("http://localhost/veilarbdialog/internal/api/v1/dialog/{dialogId}", opprettetDialog.getId())
@@ -43,15 +43,15 @@ class InternApiControllerTest extends SpringBootTestBase {
             d.assertAll();
         });
 
-        DialogDTO opprettetDialog2 = dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst2"));
+        DialogDTO opprettetDialog2 = dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("tekst2"));
 
         // Sett bruker under KVP
         BrukerOptions kvpOptions = mockBruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
         MockNavService.updateBruker(mockBruker, kvpOptions);
-        dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst3"));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("tekst3"));
 
         // Opprett henvendelse/melding med kontorsperre på en dialog uten kontorsperre
-        dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst4").setDialogId(opprettetDialog2.getId()));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("tekst4").setDialogId(opprettetDialog2.getId()));
 
         // Veileder med tilgang til mockbrukers enhet
         List<Dialog> dialoger = mockVeileder.createRequest()
@@ -133,7 +133,7 @@ class InternApiControllerTest extends SpringBootTestBase {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeilederUtenBruker = MockNavService.createVeileder();
 
-        dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setTekst("tekst"));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("tekst"));
 
         mockVeilederUtenBruker.createRequest()
                 .get("http://localhost/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}",

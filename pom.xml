@@ -267,12 +267,6 @@
             <version>${kotlin.version}</version>
         </dependency>
 
-        <!-- Kafka NB hvis vi drar inn common-java-modules:kafka kan vi ta bort denne -->
-        <dependency>
-            <groupId>io.confluent</groupId>
-            <artifactId>kafka-avro-serializer</artifactId>
-            <version>7.3.1</version>
-        </dependency>
         <!-- Spring Kafka -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
@@ -293,7 +287,7 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
-            <version>2.43.2</version>
+            <version>2.43.3</version>
         </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
@@ -388,6 +382,11 @@
             <groupId>net.javacrumbs.shedlock</groupId>
             <artifactId>shedlock-provider-jdbc-template</artifactId>
             <version>${shedlock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.tms.varsel</groupId>
+            <artifactId>kotlin-builder</artifactId>
+            <version>2.1.0</version>
         </dependency>
 
     </dependencies>

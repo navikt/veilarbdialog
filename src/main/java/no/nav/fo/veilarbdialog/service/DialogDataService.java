@@ -8,13 +8,14 @@ import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService;
 import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
+import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import no.nav.fo.veilarbdialog.service.exceptions.NyHenvendelsePåHistoriskDialogException;
 import no.nav.poao.dab.spring_auth.IAuthService;
@@ -51,7 +52,7 @@ public class DialogDataService {
     private final SistePeriodeService sistePeriodeService;
     private final Unleash unleash;
 
-    private final BrukernotifikasjonService brukernotifikasjonService;
+    private final MinsideVarselService minsideVarselService;
 
     @Value("${application.dialog.url}")
     private String dialogUrl;
@@ -70,14 +71,13 @@ public class DialogDataService {
     }
 
     @Transactional
-    public DialogData opprettHenvendelse(NyHenvendelseDTO henvendelseData, Person bruker) {
+    public DialogData opprettMelding(NyMeldingDTO henvendelseData, Person bruker, Boolean skalSendeMinsideVarsel) {
         var aktivitetsId = AktivitetId.of(henvendelseData.getAktivitetId());
         AktorId aktorId = hentAktoerIdForPerson(bruker);
         Fnr fnr = hentFnrForPerson(bruker);
-        if (!brukernotifikasjonService.kanVarsles(fnr)) {
+        if (!minsideVarselService.kanVarsles(fnr)) {
             throw new ResponseStatusException(CONFLICT, "Bruker kan ikke varsles.");
         }
-
 
         DialogData dialog = Optional.ofNullable(hentDialog(henvendelseData.getDialogId(), aktivitetsId))
                 .orElseGet(() -> opprettDialog(henvendelseData, aktorId.get()));
@@ -90,6 +90,17 @@ public class DialogDataService {
         dialog = markerDialogSomLest(dialog.getId());
 
         sendPaaKafka(aktorId.get());
+        var varselOmNyMelding = DialogVarsel.Companion.varselOmNyMelding(
+              dialog.getId(),
+                fnr,
+                dialog.getOppfolgingsperiode(),
+                utledDialogLink(dialog.getId())
+        );
+        if (skalSendeMinsideVarsel) {
+            minsideVarselService.puttVarselIOutbox(varselOmNyMelding, aktorId);
+            log.info("Minside varsel opprettet i PENDING status {} dialogId {}", varselOmNyMelding.getVarselId(), dialog.getId());
+        }
+
 
         if (unleash.isEnabled("veilarbdialog.dialogvarsling")) {
             var eventType = auth.erEksternBruker() ? NY_DIALOGMELDING_FRA_BRUKER_TIL_NAV : NY_DIALOGMELDING_FRA_NAV_TIL_BRUKER;
@@ -116,10 +127,6 @@ public class DialogDataService {
         long dialogId = dialogStatus.dialogId;
         var dialogData = hentDialogSomKanOppdateres(dialogId);
         return dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
-    }
-
-    public void markerSomParagra8(long dialogId) {
-        dialogStatusService.markerSomParagraf8(dialogId);
     }
 
     private DialogData opprettHenvendelseForDialog(DialogData dialogData, boolean viktigMelding, String tekst) {
@@ -230,7 +237,7 @@ public class DialogDataService {
         dialogStatusService.settDialogTilHistorisk(dialogData);
     }
 
-    public DialogData opprettDialog(NyHenvendelseDTO nyHenvendelseDTO, String aktorId) {
+    public DialogData opprettDialog(NyMeldingDTO nyHenvendelseDTO, String aktorId) {
         UUID gjeldendeOppfolgingsperiode = sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(AktorId.of(aktorId));
         var dialogData = DialogData.builder()
                 .oppfolgingsperiode(gjeldendeOppfolgingsperiode)
@@ -259,7 +266,7 @@ public class DialogDataService {
         return nyDialog;
     }
 
-    private void slettKladd(NyHenvendelseDTO nyHenvendelseDTO, Person person) {
+    private void slettKladd(NyMeldingDTO nyHenvendelseDTO, Person person) {
         if (person instanceof Person.Fnr) {
             kladdService.deleteKladd(person.get(), nyHenvendelseDTO.getDialogId(), nyHenvendelseDTO.getAktivitetId());
         }

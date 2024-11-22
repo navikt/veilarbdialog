@@ -4,18 +4,18 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Types;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,7 +29,9 @@ public class BrukernotifikasjonRepository {
     private static final RowMapper<BrukernotifikasjonEntity> rowmapper = (rs, rowNum) ->
             new BrukernotifikasjonEntity(
                     rs.getLong("id"),
-                    DatabaseUtils.hentMaybeUUID(rs, "event_id"),
+                    Optional.ofNullable(DatabaseUtils.hentMaybeUUID(rs, "event_id"))
+                            .map(MinSideVarselId::new)
+                            .orElse(null),
                     rs.getLong("dialog_id"),
                     Fnr.of(rs.getString("foedselsnummer")),
                     DatabaseUtils.hentMaybeUUID(rs, "oppfolgingsperiode_id"),
@@ -39,40 +41,14 @@ public class BrukernotifikasjonRepository {
                     DatabaseUtils.hentLocalDateTime(rs, "opprettet"),
                     DatabaseUtils.hentLocalDateTime(rs, "forsokt_sendt"),
                     rs.getString("melding"),
-                    rs.getString("smstekst"),
-                    rs.getString("eposttittel"),
-                    rs.getString("epostbody"),
-                    DatabaseUtils.hentMaybeURL(rs, "lenke")
+                    rs.getString("smstekst"), // TODO: Denne brukes ikke
+                    rs.getString("eposttittel"),// TODO: Denne brukes ikke
+                    rs.getString("epostbody"),// TODO: Denne brukes ikke
+                    DatabaseUtils.hentMaybeURL(rs, "lenke"),
+                    rs.getBoolean("skal_batches")
             );
 
-    Long opprettBrukernotifikasjon(BrukernotifikasjonInsert insert) {
-        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-        SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("event_id", insert.eventId().toString())
-                .addValue("dialog_id", insert.dialogId())
-                .addValue("foedselsnummer", insert.foedselsnummer().get())
-                .addValue("oppfolgingsperiode_id", insert.oppfolgingsperiodeId().toString())
-                .addValue("type", insert.type().name())
-                .addValue("status", insert.status().name())
-                .addValue("varsel_kvittering_status", VarselKvitteringStatus.IKKE_SATT.name())
-                .addValue("melding", insert.melding())
-                .addValue("lenke", insert.link().toExternalForm());
-
-        jdbcTemplate.update("" +
-                        " INSERT INTO brukernotifikasjon " +
-                        "        (event_id, DIALOG_ID, foedselsnummer, oppfolgingsperiode_id, type, status, varsel_kvittering_status, opprettet, melding, lenke) " +
-                        " VALUES (:event_id, :dialog_id, :foedselsnummer, :oppfolgingsperiode_id, :type, :status, :varsel_kvittering_status, CURRENT_TIMESTAMP, :melding, :lenke) ",
-                params, keyHolder, new String[]{"id"});
-
-        Number generatedKey = keyHolder.getKey();
-        if (generatedKey == null) {
-            throw new DataAccessResourceFailureException("Generated key not present");
-        } else {
-            return generatedKey.longValue();
-        }
-    }
-
-    Optional<BrukernotifikasjonEntity> hentBrukernotifikasjon(long id) {
+    public Optional<BrukernotifikasjonEntity> hentBrukernotifikasjon(long id) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id);
         String sql = """
@@ -85,12 +61,12 @@ public class BrukernotifikasjonRepository {
         }
     }
 
-    public boolean finnesBrukernotifikasjon(String eventId) {
+    public boolean finnesBrukernotifikasjon(MinSideVarselId varselId) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("brukernotifikasjon_id", eventId);
+                .addValue("varlselId", varselId.getValue().toString());
         String sql = """
             SELECT COUNT(*) FROM BRUKERNOTIFIKASJON
-            WHERE EVENT_ID=:brukernotifikasjon_id
+            WHERE EVENT_ID=:varlselId
         """;
         int antall = jdbcTemplate.queryForObject(sql, params, int.class);
         return antall > 0;
@@ -113,7 +89,7 @@ public class BrukernotifikasjonRepository {
         }
     }
 
-    List<BrukernotifikasjonEntity> hentPendingBrukernotifikasjoner() {
+    public List<BrukernotifikasjonEntity> hentPendingVarsler() {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("pending", BrukernotifikasjonBehandlingStatus.PENDING.name());
         String sql = """
@@ -122,7 +98,7 @@ public class BrukernotifikasjonRepository {
         return jdbcTemplate.query(sql, params, rowmapper);
     }
 
-    List<BrukernotifikasjonEntity> hentPendingDoneBrukernotifikasjoner() {
+    public List<BrukernotifikasjonEntity> hentVarslerSomSkalAvsluttes() {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("skal_avsluttes", BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES.name());
         String sql = """
@@ -132,51 +108,60 @@ public class BrukernotifikasjonRepository {
 
     }
 
-    void updateStatus(@NonNull Long id, @NonNull BrukernotifikasjonBehandlingStatus status) {
+    public void updateStatus(@NonNull MinSideVarselId varselId, @NonNull BrukernotifikasjonBehandlingStatus status) {
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", id)
+                .addValue("id", varselId.getValue().toString())
                 .addValue("status", status.name());
         String sql = """
-                UPDATE BRUKERNOTIFIKASJON SET STATUS = :status WHERE id = :id
+                UPDATE BRUKERNOTIFIKASJON SET STATUS = :status WHERE event_id = :id
                 """;
         jdbcTemplate.update(sql, params);
     }
 
-    public void setEksternVarselFeilet(String bestillingsId) {
+    public void setEksternVarselFeilet(MinSideVarselId varselId) {
         MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("bestillingsId", bestillingsId)
+                .addValue("varselId", varselId.getValue().toString())
                 .addValue("varselKvitteringStatus", VarselKvitteringStatus.FEILET.toString());
         jdbcTemplate.update("""
              update BRUKERNOTIFIKASJON
                set
                 VARSEL_FEILET = current_timestamp,
                 VARSEL_KVITTERING_STATUS = :varselKvitteringStatus
-                    where EVENT_ID = :bestillingsId
+                    where event_id = :varselId
                  """, param);
     }
 
-    public void setEksternVarselSendtOk(String bestillingsId) {
+    public void setVarselKvitteringStatusOk(MinSideVarselId varlselId) {
         MapSqlParameterSource param = new MapSqlParameterSource()
-                .addValue("bestillingsId", bestillingsId)
-                .addValue("varselKvitteringStatusOk", VarselKvitteringStatus.OK.name())
-                .addValue("varselKvitteringStatusFeilet", VarselKvitteringStatus.FEILET.name())
-                .addValue("brukernotifikasjonBehandlingStatusAvsluttet", BrukernotifikasjonBehandlingStatus.AVSLUTTET.name());
+            .addValue("varlselId", varlselId.getValue().toString())
+            .addValue("varselKvitteringStatusOk", VarselKvitteringStatus.OK.name());
 
         jdbcTemplate.update("""
-                   update BRUKERNOTIFIKASJON
-                    set
-                       BEKREFTET_SENDT = CURRENT_TIMESTAMP,
-                       VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
-                       where BRUKERNOTIFIKASJON.VARSEL_KVITTERING_STATUS != :varselKvitteringStatusFeilet
-                       and STATUS != :brukernotifikasjonBehandlingStatusAvsluttet
-                       and EVENT_ID = :bestillingsId
-                       """
-                , param
-        );
+            update BRUKERNOTIFIKASJON
+            set
+            ferdig_behandlet = CURRENT_TIMESTAMP,
+            avsluttet = CURRENT_TIMESTAMP,
+            VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
+            where EVENT_ID = :varlselId
+            """, param);
+    }
+
+    public void setVarselKvitteringSendtOk(MinSideVarselId varlselId) {
+        MapSqlParameterSource param = new MapSqlParameterSource()
+                .addValue("varlselId", varlselId.getValue().toString())
+                .addValue("varselKvitteringStatusOk", VarselKvitteringStatus.OK.name());
+
+        jdbcTemplate.update("""
+            update BRUKERNOTIFIKASJON
+            set
+            bekreftet_sendt = CURRENT_TIMESTAMP,
+            VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
+            where EVENT_ID = :varlselId
+            """, param);
     }
 
 
-    void bestillDoneForPeriode(UUID oppfolgingsperiodeUuid) {
+    public void setSkalAvsluttesForVarslerIPeriode(UUID oppfolgingsperiodeUuid) {
         MapSqlParameterSource skalAvsluttes = new MapSqlParameterSource()
                 .addValue("oppfolgingsperiode", oppfolgingsperiodeUuid.toString())
                 .addValue("fra_status", BrukernotifikasjonBehandlingStatus.SENDT.name())
@@ -192,4 +177,21 @@ public class BrukernotifikasjonRepository {
         jdbcTemplate.update(sql, skalAvbrytes);
         jdbcTemplate.update(sql, skalAvsluttes);
     }
+
+    public int hentAntallUkvitterteVarslerForsoktSendt(long timerForsinkelse) {
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+                .addValue("date", new Date(Instant.now().minusSeconds(60 * 60 * timerForsinkelse).toEpochMilli()));
+
+        // language=SQL
+        String sql = """
+             select count(*)
+             from BRUKERNOTIFIKASJON
+             where VARSEL_KVITTERING_STATUS = 'IKKE_SATT'
+             and STATUS = 'SENDT'
+             and FORSOKT_SENDT < :date
+            """;
+
+        return jdbcTemplate.queryForObject(sql, parameterSource, int.class);
+    }
+
 }

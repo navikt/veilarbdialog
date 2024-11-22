@@ -10,21 +10,20 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record BrukernotifikasjonEntity(
-        long id,
+public record MinSideVarselEntity(
         MinSideVarselId varselId,
-        long dialogId,
         Fnr fnr,
         UUID oppfolgingsPeriodeId,
         BrukernotifikasjonsType type,
         BrukernotifikasjonBehandlingStatus status,
         VarselKvitteringStatus varselKvitteringStatus,
         LocalDateTime opprettet,
+        LocalDateTime varselFeilet,
+        LocalDateTime avsluttet,
+        LocalDateTime bekreftetSendt,
         LocalDateTime forsoktSendt,
+        LocalDateTime ferdigBehandlet,
         String melding,
-        String smsText,
-        String epostTittel,
-        String epostBody,
         URL lenke,
         Boolean skalBatches
 ) {

@@ -5,16 +5,13 @@ import no.nav.common.json.JsonUtils;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.entity.BrukernotifikasjonEntity;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
-import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
@@ -37,6 +34,7 @@ import java.util.concurrent.TimeoutException;
 import static java.time.temporal.ChronoUnit.MILLIS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static no.nav.fo.veilarbdialog.util.KafkaTestService.DEFAULT_WAIT_TIMEOUT;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
@@ -51,15 +49,11 @@ class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
     @Value("${application.topic.inn.oppfolgingsperiode}")
     String oppfolgingsperiodeTopic;
 
-
     @Autowired
     private SistePeriodeDAO sistePeriodeDAO;
 
     @Autowired
-    BrukernotifikasjonService brukernotifikasjonService;
-
-    @Autowired
-    BrukernotifikasjonRepository brukernotifikasjonRepository;
+    MinsideVarselDao minsideVarselDao;
 
     @Autowired
     EskaleringsvarselService eskaleringsvarselService;
@@ -133,15 +127,15 @@ class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
         opprettEllerEndreOppfolgingsperiodeForBruker(stopOppfolging);
 
-        BrukernotifikasjonEntity brukernotifikasjon = brukernotifikasjonRepository.hentBrukernotifikasjonForDialogId(startEskalering.tilhorendeDialogId(), BrukernotifikasjonsType.OPPGAVE).get(0);
+        var varselStatus = minsideVarselDao.getMinsideVarselForForhåndsvarsel(startEskalering.id());
 
-        Assertions.assertThat(brukernotifikasjon.status()).isEqualTo(BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES);
+        assertThat(varselStatus.getStatus()).isEqualTo(BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES);
 
         List<EskaleringsvarselEntity> historikk = eskaleringsvarselService.historikk(Fnr.of(mockBruker.getFnr()));
         Assertions.assertThat(historikk).hasSize(1);
-        Assertions.assertThat(historikk.get(0).avsluttetDato()).isNotNull();
-        Assertions.assertThat(historikk.get(0).avsluttetAv()).isEqualTo("SYSTEM");
-        Assertions.assertThat(historikk.get(0).avsluttetBegrunnelse()).isEqualToIgnoringCase("OPPFOLGING AVSLUTTET");
+        assertThat(historikk.getFirst().avsluttetDato()).isNotNull();
+        assertThat(historikk.getFirst().avsluttetAv()).isEqualTo("SYSTEM");
+        assertThat(historikk.getFirst().avsluttetBegrunnelse()).isEqualToIgnoringCase("OPPFOLGING AVSLUTTET");
 
     }
 
@@ -158,7 +152,7 @@ class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
         opprettEllerEndreOppfolgingsperiodeForBruker(startOppfolging);
 
-        DialogDTO dialogDTO = dialogTestService.opprettDialogSomBruker(mockBruker, new NyHenvendelseDTO().setOverskrift("The Three Trials").setTekst("Defeat the Sword Master of Melee Island"));
+        DialogDTO dialogDTO = dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setOverskrift("The Three Trials").setTekst("Defeat the Sword Master of Melee Island"));
 
         OppfolgingsperiodeV1 stopOppfolging = OppfolgingsperiodeV1.builder()
                 .uuid(mockBruker.getOppfolgingsperiode())
