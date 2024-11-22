@@ -19,7 +19,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import java.net.URL
 import java.sql.ResultSet
+import java.time.Instant
 import java.time.LocalDateTime
+import java.util.Date
 import java.util.UUID
 
 @Repository
@@ -205,6 +207,21 @@ open class MinsideVarselDao(
         } catch (e: EmptyResultDataAccessException) {
             return null
         }
+    }
+
+    open fun hentAntallUkvitterteVarslerForsoktSendt(timerForsinkelse: Long): Int {
+        val parameterSource = mapOf("date" to Date(Instant.now().minusSeconds(60 * 60 * timerForsinkelse).toEpochMilli()))
+
+        // language=SQL
+        val sql = """
+             select count(*)
+             from min_side_varsel
+             where varsel_kvittering_status = 'IKKE_SATT'
+             and status = 'SENDT'
+             and oppdatert < :date
+            """
+
+        return template.queryForObject(sql, parameterSource, Int::class.java);
     }
 }
 

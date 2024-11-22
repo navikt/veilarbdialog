@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class KvitteringMetrikk {
     private final MeterRegistry meterRegistry;
+    private static final String BRUKERNOTIFIKASJON_MANGLER_KVITTERING = "brukernotifikasjon_mangler_kvittering";
     private static final String VARSEL_HENDELSE = "varsel_hendelse";
     private static final String HENDELSE_TYPE = "hendelse_type";
     private static final List<String> hendelseTyper = List.of(
@@ -24,10 +25,13 @@ public class KvitteringMetrikk {
         VarselHendelseEventType.slettet.name()
     );
 
+    private final AtomicInteger forsinkedeBestillinger = new AtomicInteger();
+
     public KvitteringMetrikk(MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
 
         hendelseTyper.forEach(hendelseNavn -> meterRegistry.counter(VARSEL_HENDELSE, HENDELSE_TYPE, hendelseNavn));
+        Gauge.builder(BRUKERNOTIFIKASJON_MANGLER_KVITTERING, forsinkedeBestillinger, AtomicInteger::doubleValue).register(meterRegistry);
     }
 
     public void incrementBrukernotifikasjonKvitteringMottatt(VarselHendelseEventType hendelseEventType) {
@@ -35,5 +39,9 @@ public class KvitteringMetrikk {
                 .tag(HENDELSE_TYPE, hendelseEventType.name())
                 .register(meterRegistry)
                 .increment();
+    }
+
+    public void countForsinkedeVarslerSisteDognet(int antall) {
+        forsinkedeBestillinger.setPlain(antall);
     }
 }

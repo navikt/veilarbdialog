@@ -224,4 +224,5 @@ open class MinsideVarselService(
         // ny tabell
         minsideVarselDao.updateStatus(varselId, AVSLUTTET)
     }
+
 }
