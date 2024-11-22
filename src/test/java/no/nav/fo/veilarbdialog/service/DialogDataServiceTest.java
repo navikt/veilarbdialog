@@ -2,7 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
-import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
@@ -33,7 +33,7 @@ class DialogDataServiceTest extends SpringBootTestBase {
     @Test
     void opprettDialog_kontorsperrePaBruker_returnererKontorsperretDialogAvhengigAvTilgang() {
 
-        NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
+        NyMeldingDTO nyHenvendelse = new NyMeldingDTO()
                 .setTekst("tekst")
                 .setOverskrift("overskrift");
 
@@ -77,12 +77,12 @@ class DialogDataServiceTest extends SpringBootTestBase {
     }
 
     @Test
-    void opprettHenvendelse_brukerManglerTilgangTilPerson_Forbidden403() {
+    void opprettMelding_brukerManglerTilgangTilPerson_Forbidden403() {
 
         BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
         MockNavService.updateBruker(bruker, brukerOptionsKvp);
 
-        NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
+        NyMeldingDTO nyHenvendelse = new NyMeldingDTO()
                 .setTekst("tekst")
                 .setOverskrift("overskrift");
 
@@ -100,7 +100,7 @@ class DialogDataServiceTest extends SpringBootTestBase {
         BrukerOptions brukerOptionsKvp = bruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
         MockNavService.updateBruker(bruker, brukerOptionsKvp);
 
-        NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
+        NyMeldingDTO nyHenvendelse = new NyMeldingDTO()
                 .setTekst("tekst")
                 .setOverskrift("overskrift")
                 .setAktivitetId("12345");

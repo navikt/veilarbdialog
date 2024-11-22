@@ -26,7 +26,7 @@ import static org.awaitility.Awaitility.await;
 @Service
 public class KafkaTestService {
 
-    public static final Duration DEFAULT_WAIT_TIMEOUT = Duration.ofSeconds(5);
+    public static final Duration DEFAULT_WAIT_TIMEOUT = Duration.ofSeconds(3);
     private final ConsumerFactory<SpecificRecordBase, SpecificRecordBase> avroAvroConsumerFactory;
     private final ConsumerFactory<String, String> stringStringConsumerFactory;
     private final Admin kafkaAdminClient;
@@ -52,7 +52,7 @@ public class KafkaTestService {
         return newConsumer;
     }
 
-    public Consumer createStringStringConsumer(String topic) {
+    public Consumer<String, String> createStringStringConsumer(String topic) {
         String randomGroup = UUID.randomUUID().toString();
         Properties modifisertConfig = new Properties();
         modifisertConfig.setProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");

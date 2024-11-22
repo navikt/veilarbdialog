@@ -2,9 +2,7 @@ package no.nav.fo.veilarbdialog.service;
 
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.AktorId;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
@@ -12,7 +10,6 @@ import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.stereotype.Service;
@@ -26,10 +23,8 @@ public class DialogStatusService {
     private final StatusDAO statusDAO;
     private final DialogDAO dialogDAO;
     private final DataVarehusDAO dataVarehusDAO;
-    private final BrukernotifikasjonRepository brukernotifikasjonRepository;
-    private final EskaleringsvarselRepository eskaleringsvarselRepository;
     private final FunksjonelleMetrikker funksjonelleMetrikker;
-    private final BrukernotifikasjonService brukernotifikasjonService;
+    private final MinsideVarselService minsideVarselService;
     private final IAuthService auth;
 
     private String getEndretAv() {
@@ -63,18 +58,7 @@ public class DialogStatusService {
             return dialogData;
         }
 
-        brukernotifikasjonRepository
-                .hentBrukernotifikasjonForDialogId(dialogData.getId(), BrukernotifikasjonsType.BESKJED).forEach(
-                        brukernotifikasjon -> brukernotifikasjonService.bestillDone(brukernotifikasjon.id())
-                );
-
-        eskaleringsvarselRepository.hentGjeldende(AktorId.of(dialogData.getAktorId())).ifPresent(
-                eskaleringsvarselEntity -> {
-                    if (eskaleringsvarselEntity.tilhorendeDialogId() == dialogData.getId()) {
-                        brukernotifikasjonService.bestillDone(eskaleringsvarselEntity.tilhorendeBrukernotifikasjonId());
-                    }
-                }
-        );
+        minsideVarselService.inaktiverVarselForDialogEllerForhåndsvarsel(dialogData.getId(), AktorId.of(dialogData.getAktorId()));
 
         statusDAO.markerSomLestAvBruker(dialogData.getId());
 

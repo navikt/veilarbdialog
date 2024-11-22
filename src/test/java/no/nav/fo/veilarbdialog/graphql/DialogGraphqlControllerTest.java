@@ -5,7 +5,7 @@ import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
-import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
@@ -15,8 +15,6 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.RestassuredUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,7 +49,7 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     }
     private DialogDTO nyTraad(RestassuredUser user, AktivitetId aktivitetId) {
         return user.createRequest()
-                .body(new NyHenvendelseDTO().setTekst("tekst").setAktivitetId(aktivitetId != null ? aktivitetId.getId() : null))
+                .body(new NyMeldingDTO().setTekst("tekst").setAktivitetId(aktivitetId != null ? aktivitetId.getId() : null))
                 .queryParam("aktorId", bruker.getAktorId())
                 .post("/veilarbdialog/api/dialog")
                 .then()

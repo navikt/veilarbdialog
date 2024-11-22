@@ -1,11 +1,14 @@
 package no.nav.fo.veilarbdialog.eskaleringsvarsel.entity;
 
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
+
 import java.time.ZonedDateTime;
 
 public record EskaleringsvarselEntity(
         long varselId,
         long tilhorendeDialogId,
         long tilhorendeBrukernotifikasjonId,
+        MinSideVarselId tilhorendeVarselId,
         String aktorId,
         String opprettetAv,
         ZonedDateTime opprettetDato,
