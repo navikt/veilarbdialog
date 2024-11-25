@@ -34,7 +34,7 @@ public class EskaleringsvarselRepository {
             rs.getLong("tilhorende_brukernotifikasjon_id"),
             Optional.ofNullable(DatabaseUtils.hentMaybeUUID( rs,"tilhorende_minside_varsel"))
                     .map(MinSideVarselId::new)
-                    .orElseGet(null),
+                    .orElse(null),
             rs.getString("aktor_id"),
             rs.getString("opprettet_av"),
             DatabaseUtils.hentZonedDateTime(rs, "opprettet_dato"),
