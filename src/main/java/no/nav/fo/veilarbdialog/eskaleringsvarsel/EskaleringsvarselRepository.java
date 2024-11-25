@@ -17,7 +17,9 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -148,6 +150,10 @@ public class EskaleringsvarselRepository {
         } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
             return Optional.empty();
         }
+    }
+
+    public List<EskaleringsvarselEntity> hentGjeldendeVarslerEldreEnn(LocalDateTime tidspunkt) {
+        return new ArrayList<EskaleringsvarselEntity>();
     }
 
 

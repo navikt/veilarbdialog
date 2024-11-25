@@ -7,8 +7,10 @@ import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr
 import no.nav.common.types.identer.NavIdent
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
-import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
-import no.nav.fo.veilarbdialog.domain.*
+import no.nav.fo.veilarbdialog.domain.DialogStatus
+import no.nav.fo.veilarbdialog.domain.Egenskap
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
+import no.nav.fo.veilarbdialog.domain.Person
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
@@ -19,6 +21,7 @@ import no.nav.fo.veilarbdialog.eventsLogger.BigQueryClient
 import no.nav.fo.veilarbdialog.eventsLogger.EventType
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client
 import no.nav.fo.veilarbdialog.service.DialogDataService
@@ -26,6 +29,7 @@ import no.nav.poao.dab.spring_auth.IAuthService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.*
 
 @Slf4j
@@ -135,6 +139,10 @@ open class EskaleringsvarselService(
     open fun hentGjeldende(fnr: Fnr?): Optional<EskaleringsvarselEntity?> {
         val aktorId = aktorOppslagClient.hentAktorId(fnr)
         return eskaleringsvarselRepository.hentGjeldende(aktorId)
+    }
+
+    open fun hentGjeldendeVarslerEldreEnn(tidspunkt: LocalDateTime): List<EskaleringsvarselEntity> {
+        return eskaleringsvarselRepository.hentGjeldendeVarslerEldreEnn(tidspunkt)
     }
 
     open fun historikk(fnr: Fnr?): List<EskaleringsvarselEntity> {
