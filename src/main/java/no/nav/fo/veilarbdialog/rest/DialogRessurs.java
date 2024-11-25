@@ -36,9 +36,7 @@ public class DialogRessurs {
     private final RestMapper restMapper;
     private final HttpServletRequest httpServletRequest;
     private final KontorsperreFilter kontorsperreFilter;
-    private final KvpService kvpService;
     private final IAuthService auth;
-    private final PersonService personService;
 
     @GetMapping
     @AuthorizeFnr(auditlogMessage = "hent dialoger")

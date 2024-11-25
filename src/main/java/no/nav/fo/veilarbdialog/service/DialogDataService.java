@@ -75,7 +75,7 @@ public class DialogDataService {
         var aktivitetsId = AktivitetId.of(henvendelseData.getAktivitetId());
         AktorId aktorId = hentAktoerIdForPerson(bruker);
         Fnr fnr = hentFnrForPerson(bruker);
-        if (!minsideVarselService.kanVarsles(fnr)) {
+        if (skalSendeMinsideVarsel && !minsideVarselService.kanVarsles(fnr)) {
             throw new ResponseStatusException(CONFLICT, "Bruker kan ikke varsles.");
         }
 
