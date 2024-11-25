@@ -67,7 +67,7 @@ public class KasserRessurs {
 
     private int kjorHvisTilgang(AktorId aktorId, String kasseringAv, String id, IntSupplier oppdaterteDialoger) {
         Id veilederIdent = auth.getInnloggetVeilederIdent();
-        auth.sjekkTilgangTilPerson(aktorId, TilgangsType.SKRIVE);
+        auth.sjekkTilgangTilPerson(aktorId, TilgangsType.LESE);
         List<String> godkjente = Arrays.asList(godkjenteIdenter.split(","));
         if (!godkjente.contains(veilederIdent.get())) {
             log.error("[KASSERING] {} har ikke tilgang til kassering av {} dialoger", veilederIdent, aktorId);
