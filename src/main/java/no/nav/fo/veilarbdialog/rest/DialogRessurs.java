@@ -124,7 +124,8 @@ public class DialogRessurs {
         Person bruker = nyMeldingDTO.getFnr() != null ? Person.fnr(nyMeldingDTO.getFnr()) : getContextUserIdent();
         sjekkTilgangOgAuditlog(bruker.eksternBrukerId());
 
-        var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, !auth.erEksternBruker());
+        var skalSendeMelding = !auth.erEksternBruker();
+        var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, skalSendeMelding);
         if (nyMeldingDTO.getVenterPaaSvarFraNav() != null) {
             dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyMeldingDTO.getVenterPaaSvarFraNav());
             dialogDataService.sendPaaKafka(dialogData.getAktorId());
