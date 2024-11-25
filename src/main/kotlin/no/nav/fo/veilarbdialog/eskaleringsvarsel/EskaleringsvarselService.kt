@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.eskaleringsvarsel
 
 import lombok.RequiredArgsConstructor
 import lombok.extern.slf4j.Slf4j
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import no.nav.common.client.aktoroppslag.AktorOppslagClient
 import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr
@@ -24,9 +25,11 @@ import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client
+import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenUtboksService
 import no.nav.fo.veilarbdialog.service.DialogDataService
 import no.nav.poao.dab.spring_auth.IAuthService
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -45,9 +48,19 @@ open class EskaleringsvarselService(
     private val sistePeriodeService: SistePeriodeService,
     private val funksjonelleMetrikker: FunksjonelleMetrikker,
     private val bigQueryClient: BigQueryClient,
+    private val oversiktenUtboksService: OversiktenUtboksService
 ) {
 
     private val log = LoggerFactory.getLogger(EskaleringsvarselService::class.java)
+
+    @Scheduled(cron = "0 0 1 * * *")
+    @SchedulerLock(name = "utgåtte_varsler_til_oversikten_scheduledTask", lockAtMostFor = "PT2M")
+    open fun sendUtgåtteVarslerTilOversikten() {
+        val varselUtgåttEtterDager = 14
+        val tidspunktUtgått = LocalDateTime.now().minusDays(varselUtgåttEtterDager.toLong())
+        val varsler = eskaleringsvarselRepository.hentGjeldendeVarslerEldreEnn(tidspunktUtgått)
+        oversiktenUtboksService.sendMeldingTilOversikten(varsler.toList())
+    }
 
     @Transactional
     open fun start(stansVarsel: StartEskaleringDto): EskaleringsvarselEntity {
@@ -139,10 +152,6 @@ open class EskaleringsvarselService(
     open fun hentGjeldende(fnr: Fnr?): Optional<EskaleringsvarselEntity?> {
         val aktorId = aktorOppslagClient.hentAktorId(fnr)
         return eskaleringsvarselRepository.hentGjeldende(aktorId)
-    }
-
-    open fun hentGjeldendeVarslerEldreEnn(tidspunkt: LocalDateTime): List<EskaleringsvarselEntity> {
-        return eskaleringsvarselRepository.hentGjeldendeVarslerEldreEnn(tidspunkt)
     }
 
     open fun historikk(fnr: Fnr?): List<EskaleringsvarselEntity> {
