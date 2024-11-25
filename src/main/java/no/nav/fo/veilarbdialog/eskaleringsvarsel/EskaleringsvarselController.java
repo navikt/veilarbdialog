@@ -12,6 +12,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
+import no.nav.poao.dab.spring_auth.TilgangsType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class EskaleringsvarselController {
     @PostMapping(value = "/start")
     @OnlyInternBruker
     public EskaleringsvarselDto start(@RequestBody StartEskaleringDto startEskaleringDto) {
-        authService.sjekkTilgangTilPerson(startEskaleringDto.fnr());
+        authService.sjekkTilgangTilPerson(startEskaleringDto.fnr(), TilgangsType.LESE);
         EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselService.start(startEskaleringDto);
         return EskaleringsvarselDto.fromEntity(eskaleringsvarselEntity);
     }
@@ -45,7 +46,7 @@ public class EskaleringsvarselController {
     @PatchMapping("/stop")
     @OnlyInternBruker
     public void stop(@RequestBody StopEskaleringDto stopEskaleringDto) {
-        authService.sjekkTilgangTilPerson(stopEskaleringDto.fnr());
+        authService.sjekkTilgangTilPerson(stopEskaleringDto.fnr(), TilgangsType.LESE);
         NavIdent navIdent = authService.getInnloggetVeilederIdent();
 
         Optional<EskaleringsvarselEntity> eskaleringsvarselEntity = eskaleringsvarselService.stop(stopEskaleringDto, navIdent);
@@ -67,7 +68,7 @@ public class EskaleringsvarselController {
             fodselsnummer = fnr;
         }
 
-        authService.sjekkTilgangTilPerson(fodselsnummer);
+        authService.sjekkTilgangTilPerson(fodselsnummer, TilgangsType.LESE);
 
         Optional<EskaleringsvarselEntity> maybeGjeldende = eskaleringsvarselService.hentGjeldende(fodselsnummer);
 
