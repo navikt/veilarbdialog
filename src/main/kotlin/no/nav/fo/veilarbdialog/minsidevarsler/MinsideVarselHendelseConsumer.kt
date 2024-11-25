@@ -39,22 +39,23 @@ open class MinsideVarselHendelseConsumer(
             }
             InternVarselHendelseType.slettet -> {}
         }
+        kvitteringMetrikk.incrementBrukernotifikasjonKvitteringMottatt(varsel.getHendelseType())
     }
 
     private fun behandleEksternVarselHendelse(varsel: EksternVarselOppdatering) {
-        var varselId = varsel.varselId
-        log.info("Konsumerer minside-varsel-hendelse varselId={}, type={}", varselId, varsel.hendelseType.name);
+        val varselId = varsel.varselId
+        log.info("Konsumerer minside-varsel-hendelse varselId={}, type={}", varselId, varsel.hendelseType.name)
 
         if (!minsideVarselService.finnesBrukernotifikasjon(varselId)) {
             log.warn("Mottok kvittering for brukernotifikasjon varselId={} som ikke finnes i våre systemer", varselId)
             return
         }
 
-        log.info("Minside varsel (ekstern) av type {} er {} varselId {}", varsel.varseltype, varsel.hendelseType, varselId);
+        log.info("Minside varsel (ekstern) av type {} er {} varselId {}", varsel.varseltype, varsel.hendelseType, varselId)
         when (varsel) {
             is Bestilt -> {}
             is Feilet -> {
-                log.error("varsel feilet for notifikasjon varselId={} med feilmelding {}", varselId, varsel.feilmelding);
+                log.error("varsel feilet for notifikasjon varselId={} med feilmelding {}", varselId, varsel.feilmelding)
                 minsideVarselService.setEksternVarselFeilet(varselId)
             }
             is Renotifikasjon -> {
@@ -70,6 +71,6 @@ open class MinsideVarselHendelseConsumer(
             }
         }
 
-        kvitteringMetrikk.incrementBrukernotifikasjonKvitteringMottatt(varsel.hendelseType);
+        kvitteringMetrikk.incrementBrukernotifikasjonKvitteringMottatt(varsel.hendelseType)
     }
 }
