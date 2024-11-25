@@ -10,6 +10,7 @@ import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
+import no.nav.poao.dab.spring_auth.TilgangsType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +67,7 @@ public class KasserRessurs {
 
     private int kjorHvisTilgang(AktorId aktorId, String kasseringAv, String id, IntSupplier oppdaterteDialoger) {
         Id veilederIdent = auth.getInnloggetVeilederIdent();
-        auth.sjekkTilgangTilPerson(aktorId);
+        auth.sjekkTilgangTilPerson(aktorId, TilgangsType.SKRIVE);
         List<String> godkjente = Arrays.asList(godkjenteIdenter.split(","));
         if (!godkjente.contains(veilederIdent.get())) {
             log.error("[KASSERING] {} har ikke tilgang til kassering av {} dialoger", veilederIdent, aktorId);

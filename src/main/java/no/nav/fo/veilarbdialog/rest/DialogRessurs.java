@@ -12,6 +12,7 @@ import no.nav.fo.veilarbdialog.util.DialogResource;
 import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
+import no.nav.poao.dab.spring_auth.TilgangsType;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -57,7 +58,7 @@ public class DialogRessurs {
     @PostMapping("antallUleste")
     public AntallUlesteDTO antallUlestePost(@RequestBody(required = false) FnrDto fnrDto) {
         var fnr = fnrDto != null && fnrDto.fnr != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
-        auth.sjekkTilgangTilPerson(fnr.eksternBrukerId());
+        auth.sjekkTilgangTilPerson(fnr.eksternBrukerId(), TilgangsType.LESE);
         return innterAntallUleste(fnr);
     }
 
@@ -80,7 +81,7 @@ public class DialogRessurs {
     @PostMapping("sistOppdatert")
     public SistOppdatertDTO sistOppdatertPost(@RequestBody(required = false) FnrDto fnrDto) {
         var fnr = fnrDto != null && fnrDto.fnr != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
-        auth.sjekkTilgangTilPerson(fnr.eksternBrukerId());
+        auth.sjekkTilgangTilPerson(fnr.eksternBrukerId(), TilgangsType.LESE);
         return internSistOppdatert(fnr);
     }
 
@@ -106,7 +107,7 @@ public class DialogRessurs {
         var subject = auth.getLoggedInnUser();
         try {
             if (auth.erEksternBruker()) {
-                auth.sjekkTilgangTilPerson(bruker);
+                auth.sjekkTilgangTilPerson(bruker, TilgangsType.SKRIVE);
             } else {
                 auth.sjekkInternbrukerHarSkriveTilgangTilPerson(bruker);
             }
