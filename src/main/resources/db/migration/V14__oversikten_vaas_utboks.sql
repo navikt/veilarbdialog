@@ -5,5 +5,5 @@ create table oversikten_vaas_utboks (
     utsending_status             text            not null,
     melding                      json            not null,
     kategori                     text            not null,
-    melding_key                  text            not null
+    melding_key                  uuid            not null
 )
