@@ -10,7 +10,7 @@ data class SendingEntity(
     val tidspunktSendt: ZonedDateTime? = null,
     val utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES,
     val meldingSomJson: String,
-    val kategori: OversiktenUtboksService.Kategori,
+    val kategori: Kategori,
     val meldingKey: UUID,
 )
 

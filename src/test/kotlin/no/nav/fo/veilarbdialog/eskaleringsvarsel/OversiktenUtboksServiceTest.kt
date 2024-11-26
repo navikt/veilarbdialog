@@ -4,9 +4,9 @@ import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
+import no.nav.fo.veilarbdialog.oversiktenVaas.Kategori
 import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenUtboksRepository
 import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenUtboksService
-import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenUtboksService.Kategori.UTGATT_VARSEL
 import no.nav.fo.veilarbdialog.oversiktenVaas.SendingEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -43,7 +43,7 @@ open class OversiktenUtboksServiceTest: SpringBootTestBase() {
         SendingEntity(
             fnr = Fnr.of(bruker.fnr),
             meldingSomJson = "{}",
-            kategori = UTGATT_VARSEL,
+            kategori = Kategori.UTGATT_VARSEL,
             meldingKey = UUID.randomUUID(),
         )
 
