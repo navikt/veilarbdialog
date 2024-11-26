@@ -20,11 +20,11 @@ open class OversiktenUtboksService(
 
     @Scheduled(cron = "0 */5 * * * *") // Hvert 5. minutt
     @SchedulerLock(name = "oversikten_utboks_scheduledTask", lockAtMostFor = "PT3M")
-    open fun sendUtgåtteVarslerTilOversikten() {
+    open fun sendUsendteMeldingerTilOversikten() {
         val meldingerSomSkalSendes = oversiktenUtboksRepository.hentAlleSomSkalSendes()
         meldingerSomSkalSendes.forEach { melding ->
             oversiktenProducer.sendMelding(melding.meldingKey.toString(), melding.meldingSomJson)
-            // TODO: Marker sendt
+            oversiktenUtboksRepository.markerSomSendt(melding.meldingKey)
         }
     }
 

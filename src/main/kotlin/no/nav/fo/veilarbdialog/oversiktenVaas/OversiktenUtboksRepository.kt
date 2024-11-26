@@ -41,6 +41,21 @@ open class OversiktenUtboksRepository(
         return jdbc.query(sql, rowMapper)
     }
 
+    open fun markerSomSendt(meldingKey: UUID) {
+        val sql = """
+           UPDATE oversikten_vaas_utboks
+           SET utsending_status = 'SENDT',
+           tidspunkt_sendt = now()
+           WHERE melding_key = :melding_key
+        """.trimIndent()
+
+        val params = VeilarbDialogSqlParameterSource().apply {
+            addValue("melding_key", meldingKey)
+        }
+
+        jdbc.update(sql, params)
+    }
+
     private val rowMapper = RowMapper { rs: ResultSet, rowNum: Int ->
         SendingEntity(
             fnr = Fnr.of(rs.getString("fnr")),
