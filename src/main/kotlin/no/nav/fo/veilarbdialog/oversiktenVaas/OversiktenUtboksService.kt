@@ -18,8 +18,8 @@ open class OversiktenUtboksService(
         gjeldendeEskaleringsvarsler.forEach {
             val fnr =  aktorOppslagClient.hentFnr(AktorId(it.aktorId))
             val melding = it.tilMelding(Operasjon.START, fnr)
-            val sending = Sending(meldingSomJson = JsonUtils.toJson(melding), fnr = fnr)
-            oversiktenUtboksRepository.lagreSending(sending)
+            val sendingEntity = SendingEntity(meldingSomJson = JsonUtils.toJson(melding), fnr = fnr)
+            oversiktenUtboksRepository.lagreSending(sendingEntity)
         }
 
     }

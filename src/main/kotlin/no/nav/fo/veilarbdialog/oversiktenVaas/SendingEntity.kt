@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.oversiktenVaas
 import no.nav.common.types.identer.Fnr
 import java.time.ZonedDateTime
 
-data class Sending(
+data class SendingEntity(
     val fnr: Fnr,
     val opprettet: ZonedDateTime = ZonedDateTime.now(),
     val tidspunktSendt: ZonedDateTime? = null,
