@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service
 open class OversiktenUtboksService(
 ) {
 
-    fun sendMeldingTilOversikten (eskaleringsvarsler: List<EskaleringsvarselEntity> ) {
+    fun sendMeldingTilOversikten(eskaleringsvarsler: List<EskaleringsvarselEntity> ) {
 
     }
-
 }

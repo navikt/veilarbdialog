@@ -153,9 +153,15 @@ public class EskaleringsvarselRepository {
     }
 
     public List<EskaleringsvarselEntity> hentGjeldendeVarslerEldreEnn(LocalDateTime tidspunkt) {
-        return new ArrayList<EskaleringsvarselEntity>();
+        String sql = """
+                SELECT * FROM ESKALERINGSVARSEL
+                WHERE opprettet_dato < :tidspunkt
+                AND gjeldende IS NOT NULL
+                """;
+        var params = new MapSqlParameterSource()
+                .addValue("tidspunkt", tidspunkt);
+        return jdbc.query(sql, params, rowMapper);
     }
-
 
     public List<EskaleringsvarselEntity> hentHistorikk(AktorId aktorId) {
         MapSqlParameterSource params = new MapSqlParameterSource()
