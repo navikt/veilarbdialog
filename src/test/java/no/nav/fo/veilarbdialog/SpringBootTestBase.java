@@ -6,6 +6,7 @@ import io.getunleash.Unleash;
 import io.restassured.RestAssured;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.util.DialogTestService;
@@ -60,6 +61,9 @@ public abstract class SpringBootTestBase {
 
     @Autowired
     protected DialogDataService dialogDataService;
+
+    @Autowired
+    protected EskaleringsvarselRepository eskaleringsvarselRepository;
 
     @LocalServerPort
     protected int port;
