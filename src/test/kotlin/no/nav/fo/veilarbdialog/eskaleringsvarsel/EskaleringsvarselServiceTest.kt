@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test
 
 class EskaleringsvarselServiceTest: SpringBootTestBase() {
 
-    private val veileder = MockNavService.createVeileder()
     private val bruker = MockNavService.createHappyBruker()
+    private val veileder = MockNavService.createVeileder(bruker)
 
     @Test
     fun `Gjeldende eskaleringsvarsel eldre enn 14 dager skal sendes til oversikten-utboks`() {
