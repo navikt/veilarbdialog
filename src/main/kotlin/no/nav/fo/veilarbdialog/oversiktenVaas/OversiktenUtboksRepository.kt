@@ -1,8 +1,14 @@
 package no.nav.fo.veilarbdialog.oversiktenVaas
 
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
+import no.nav.fo.veilarbdialog.util.DatabaseUtils
+import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
+import java.sql.ResultSet
+import java.util.*
 
 @Repository
 open class OversiktenUtboksRepository(
@@ -24,5 +30,13 @@ open class OversiktenUtboksRepository(
         }
 
         jdbc.update(sql, params)
+    }
+
+    open fun hentAlleSomSkalSendes(): List<Sending> {
+        val sql =  """
+            SELECT * FROM oversikten_vaas_utboks WHERE utsending_status = SKAL_SENDES
+        """.trimIndent()
+
+        return emptyList()
     }
 }
