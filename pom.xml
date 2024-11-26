@@ -229,7 +229,7 @@
             <artifactId>brukernotifikasjon-schemas</artifactId>
             <version>v2.5.2</version>
         </dependency>
-        
+
         <!-- EXTERNAL DEPENDENCIES -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

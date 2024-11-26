@@ -137,7 +137,7 @@ class DialogStatusServiceTest {
 
     @Test
     void nar_jeg_setter_venter_pa_nav_forventer_jeg_at_venter_pa_nav_blir_satt() {
-        DialogData dialogData = getDialogData().withVenterPaNavSiden(null);f
+        DialogData dialogData = getDialogData().withVenterPaNavSiden(null);
 
         dialogStatusService.oppdaterVenterPaNavSiden(dialogData, false);
 
