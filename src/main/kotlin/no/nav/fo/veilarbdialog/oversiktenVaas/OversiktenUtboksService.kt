@@ -7,6 +7,7 @@ import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.*
 
 @Service
 open class OversiktenUtboksService(
@@ -18,7 +19,7 @@ open class OversiktenUtboksService(
         gjeldendeEskaleringsvarsler.forEach {
             val fnr =  aktorOppslagClient.hentFnr(AktorId(it.aktorId))
             val melding = it.tilMelding(Operasjon.START, fnr)
-            val sendingEntity = SendingEntity(meldingSomJson = JsonUtils.toJson(melding), fnr = fnr)
+            val sendingEntity = SendingEntity(meldingSomJson = JsonUtils.toJson(melding), fnr = fnr, kategori = melding.kategori, meldingKey = UUID.randomUUID())
             oversiktenUtboksRepository.lagreSending(sendingEntity)
         }
 

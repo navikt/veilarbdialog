@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
+import java.util.*
 
 @Repository
 open class OversiktenUtboksRepository(
@@ -15,8 +16,8 @@ open class OversiktenUtboksRepository(
     open fun lagreSending(sendingEntity: SendingEntity) {
         val sql = """ 
             INSERT INTO oversikten_vaas_utboks (
-                    fnr, opprettet, tidspunkt_sendt, utsending_status, melding)
-            VALUES ( :fnr, :opprettet, :tidspunkt_sendt, :utsending_status, :melding::json)
+                    fnr, opprettet, tidspunkt_sendt, utsending_status, melding, kategori, melding_key)
+            VALUES ( :fnr, :opprettet, :tidspunkt_sendt, :utsending_status, :melding::json, :kategori, :melding_key)
         """.trimIndent()
 
         val params = VeilarbDialogSqlParameterSource().apply {
@@ -25,6 +26,8 @@ open class OversiktenUtboksRepository(
             addValue("tidspunkt_sendt", sendingEntity.tidspunktSendt)
             addValue("utsending_status", sendingEntity.utsendingStatus.name)
             addValue("melding", sendingEntity.meldingSomJson)
+            addValue("kategori", sendingEntity.kategori.name)
+            addValue("melding_key", sendingEntity.meldingKey)
         }
 
         jdbc.update(sql, params)
@@ -44,7 +47,9 @@ open class OversiktenUtboksRepository(
             opprettet = DatabaseUtils.hentZonedDateTime(rs, "opprettet"),
             tidspunktSendt = DatabaseUtils.hentZonedDateTime(rs, "tidspunkt_sendt"),
             utsendingStatus = UtsendingStatus.valueOf(rs.getString("utsending_status")),
-            meldingSomJson = rs.getString("melding")
+            meldingSomJson = rs.getString("melding"),
+            kategori = OversiktenUtboksService.Kategori.valueOf(rs.getString("kategori")),
+            meldingKey = UUID.fromString(rs.getString("melding_key"))
         )
     }
 }

@@ -2,13 +2,16 @@ package no.nav.fo.veilarbdialog.oversiktenVaas
 
 import no.nav.common.types.identer.Fnr
 import java.time.ZonedDateTime
+import java.util.*
 
 data class SendingEntity(
     val fnr: Fnr,
     val opprettet: ZonedDateTime = ZonedDateTime.now(),
     val tidspunktSendt: ZonedDateTime? = null,
     val utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES,
-    val meldingSomJson: String
+    val meldingSomJson: String,
+    val kategori: OversiktenUtboksService.Kategori,
+    val meldingKey: UUID,
 )
 
 enum class UtsendingStatus {
