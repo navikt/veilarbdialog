@@ -42,8 +42,6 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(oversiktenUtboksRepository.hentAlleSomSkalSendes()).isEmpty()
     }
 
-
-
     fun opprettEskaleringsvarselEldreEnn(tidspunkt: ZonedDateTime, erGjeldende : Boolean = true) {
         dialogTestService.opprettDialogSomVeileder(veileder, bruker, NyMeldingDTO().setTekst("").setOverskrift(""))
         dialogTestService.startEskalering(veileder, StartEskaleringDto(Fnr.of(bruker.fnr),"", "", "", "" ))
