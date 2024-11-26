@@ -25,7 +25,7 @@ import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client
-import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenUtboksService
+import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenService
 import no.nav.fo.veilarbdialog.service.DialogDataService
 import no.nav.poao.dab.spring_auth.IAuthService
 import org.slf4j.LoggerFactory
@@ -48,7 +48,7 @@ open class EskaleringsvarselService(
     private val sistePeriodeService: SistePeriodeService,
     private val funksjonelleMetrikker: FunksjonelleMetrikker,
     private val bigQueryClient: BigQueryClient,
-    private val oversiktenUtboksService: OversiktenUtboksService
+    private val oversiktenService: OversiktenService
 ) {
 
     private val log = LoggerFactory.getLogger(EskaleringsvarselService::class.java)
@@ -59,7 +59,7 @@ open class EskaleringsvarselService(
         val varselUtgåttEtterDager = 14
         val tidspunktUtgått = LocalDateTime.now().minusDays(varselUtgåttEtterDager.toLong())
         val varsler = eskaleringsvarselRepository.hentGjeldendeVarslerEldreEnn(tidspunktUtgått)
-        oversiktenUtboksService.sendMeldingTilOversikten(varsler.toList())
+        oversiktenService.sendMeldingTilOversikten(varsler.toList())
     }
 
     @Transactional

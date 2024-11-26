@@ -6,7 +6,7 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
 import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenMelding
 import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenUtboksRepository
-import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenUtboksService
+import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenService
 import no.nav.fo.veilarbdialog.oversiktenVaas.SendingEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -14,13 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import java.util.*
 
-open class OversiktenUtboksServiceTest: SpringBootTestBase() {
+open class OversiktenServiceTest: SpringBootTestBase() {
 
     @Autowired
     private lateinit var oversiktenUtboksRepository: OversiktenUtboksRepository
 
     @Autowired
-    private lateinit var oversiktenUtboksService: OversiktenUtboksService
+    private lateinit var oversiktenService: OversiktenService
 
     @Value("\${application.topic.ut.oversikten}")
     private lateinit var oversiktenTopic: String
@@ -33,7 +33,7 @@ open class OversiktenUtboksServiceTest: SpringBootTestBase() {
         val melding = melding(bruker)
         oversiktenUtboksRepository.lagreSending(melding)
 
-        oversiktenUtboksService.sendUsendteMeldingerTilOversikten()
+        oversiktenService.sendUsendteMeldingerTilOversikten()
 
         kafkaTestService.assertHasNewRecord(oversiktenTopic, consumer)
         assertThat(oversiktenUtboksRepository.hentAlleSomSkalSendes()).isEmpty()
