@@ -1,13 +1,9 @@
-package no.nav.fo.veilarbdialog.eskaleringsvarsel
+package no.nav.fo.veilarbdialog.oversiktenVaas
 
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
-import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenMelding
-import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenUtboksRepository
-import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenService
-import no.nav.fo.veilarbdialog.oversiktenVaas.SendingEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,9 +11,6 @@ import org.springframework.beans.factory.annotation.Value
 import java.util.*
 
 open class OversiktenServiceTest: SpringBootTestBase() {
-
-    @Autowired
-    private lateinit var oversiktenUtboksRepository: OversiktenUtboksRepository
 
     @Autowired
     private lateinit var oversiktenService: OversiktenService
