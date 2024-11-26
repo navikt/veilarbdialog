@@ -28,7 +28,7 @@ open class OversiktenUtboksService(
         }
     }
 
-    fun sendMeldingTilOversikten(gjeldendeEskaleringsvarsler: List<EskaleringsvarselEntity> ) {
+    open fun sendMeldingTilOversikten(gjeldendeEskaleringsvarsler: List<EskaleringsvarselEntity> ) {
         gjeldendeEskaleringsvarsler.forEach {
             val fnr =  aktorOppslagClient.hentFnr(AktorId(it.aktorId))
             val melding = utgåttVarselMelding(Operasjon.START, fnr)
