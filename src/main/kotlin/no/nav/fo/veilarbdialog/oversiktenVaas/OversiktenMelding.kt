@@ -18,7 +18,7 @@ data class OversiktenUtboksMelding(
             hendelse = Hendelse(
                 beskrivelse = "Bruker har et utgått varsel",
                 dato = LocalDateTime.now(),
-                lenke = "url",
+                lenke = "aktivitetsplan",
             )
         )
     }
