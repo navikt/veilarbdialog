@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.oversiktenVaas
 
 import no.nav.common.client.aktoroppslag.AktorOppslagClient
+import no.nav.common.json.JsonUtils
 import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
@@ -17,7 +18,7 @@ open class OversiktenUtboksService(
         gjeldendeEskaleringsvarsler.forEach {
             val fnr =  aktorOppslagClient.hentFnr(AktorId(it.aktorId))
             val melding = it.tilMelding(Operasjon.START, fnr)
-            val sending = Sending(melding = melding, fnr = fnr)
+            val sending = Sending(meldingSomJson = JsonUtils.toJson(melding), fnr = fnr)
             oversiktenUtboksRepository.lagreSending(sending)
         }
 

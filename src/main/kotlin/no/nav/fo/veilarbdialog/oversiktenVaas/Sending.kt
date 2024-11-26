@@ -8,7 +8,7 @@ data class Sending(
     val opprettet: ZonedDateTime = ZonedDateTime.now(),
     val tidspunktSendt: ZonedDateTime? = null,
     val utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES,
-    val melding: OversiktenUtboksService.OversiktenUtboksMelding
+    val meldingSomJson: String
 )
 
 enum class UtsendingStatus {
