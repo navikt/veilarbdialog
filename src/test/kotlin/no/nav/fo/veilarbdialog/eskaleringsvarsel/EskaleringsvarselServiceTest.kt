@@ -5,11 +5,15 @@ import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
+import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenMelding
+import no.nav.fo.veilarbdialog.oversiktenVaas.UtsendingStatus
 import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogSqlParameterSource
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 
 class EskaleringsvarselServiceTest: SpringBootTestBase() {
 
@@ -24,8 +28,17 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     @Test
     fun `Gjeldende eskaleringsvarsel som er 14 dager eller eldre skal sendes til oversikten-utboks`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(14))
+
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
-        assertThat(oversiktenUtboksRepository.hentAlleSomSkalSendes()).hasSize(1)
+
+        val meldingerIUtboks = oversiktenUtboksRepository.hentAlleSomSkalSendes()
+        assertThat(meldingerIUtboks).hasSize(1)
+        val melding = meldingerIUtboks.first()
+        assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
+        assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
+        assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
+        assertThat(melding.tidspunktSendt).isNull()
+        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
     }
 
     @Test
