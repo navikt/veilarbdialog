@@ -63,7 +63,7 @@ open class OversiktenUtboksRepository(
             tidspunktSendt = DatabaseUtils.hentZonedDateTime(rs, "tidspunkt_sendt"),
             utsendingStatus = UtsendingStatus.valueOf(rs.getString("utsending_status")),
             meldingSomJson = rs.getString("melding"),
-            kategori = Kategori.valueOf(rs.getString("kategori")),
+            kategori = OversiktenMelding.Kategori.valueOf(rs.getString("kategori")),
             meldingKey = UUID.fromString(rs.getString("melding_key"))
         )
     }

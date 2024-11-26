@@ -29,7 +29,7 @@ open class OversiktenUtboksService(
     open fun sendMeldingTilOversikten(gjeldendeEskaleringsvarsler: List<EskaleringsvarselEntity>) {
         gjeldendeEskaleringsvarsler.forEach {
             val fnr = aktorOppslagClient.hentFnr(AktorId(it.aktorId))
-            val melding = OversiktenUtboksMelding.forUtgattVarsel(fnr.toString())
+            val melding = OversiktenMelding.forUtgattVarsel(fnr.toString())
             val sendingEntity = SendingEntity(
                 meldingSomJson = JsonUtils.toJson(melding),
                 fnr = fnr,

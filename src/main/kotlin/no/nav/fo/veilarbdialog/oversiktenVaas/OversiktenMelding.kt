@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.oversiktenVaas
 import java.time.LocalDateTime
 
 
-data class OversiktenUtboksMelding(
+data class OversiktenMelding(
     val personID: String,
     val avsender: String = "veilarbdialog",
     val kategori: Kategori,
@@ -11,7 +11,7 @@ data class OversiktenUtboksMelding(
     val hendelse: Hendelse
 ) {
     companion object {
-        fun forUtgattVarsel(fnr: String) = OversiktenUtboksMelding(
+        fun forUtgattVarsel(fnr: String) = OversiktenMelding(
             personID = fnr,
             kategori = Kategori.UTGATT_VARSEL,
             operasjon = Operasjon.START,
@@ -22,21 +22,21 @@ data class OversiktenUtboksMelding(
             )
         )
     }
-}
 
-data class Hendelse (
-    val beskrivelse: String,
-    val dato: LocalDateTime,
-    val lenke: String,
-    val detaljer: String? = null,
-)
+    data class Hendelse (
+        val beskrivelse: String,
+        val dato: LocalDateTime,
+        val lenke: String,
+        val detaljer: String? = null,
+    )
 
-enum class Kategori {
-    UTGATT_VARSEL
-}
+    enum class Kategori {
+        UTGATT_VARSEL
+    }
 
-enum class Operasjon {
-    START,
-    OPPDATER,
-    STOPP
+    enum class Operasjon {
+        START,
+        OPPDATER,
+        STOPP
+    }
 }
