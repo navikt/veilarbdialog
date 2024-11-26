@@ -6,7 +6,7 @@ import java.time.ZonedDateTime
 data class Sending(
     val fnr: Fnr,
     val opprettet: ZonedDateTime = ZonedDateTime.now(),
-    val tidspunktSendt: ZonedDateTime,
+    val tidspunktSendt: ZonedDateTime? = null,
     val utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES,
     val melding: OversiktenUtboksService.OversiktenUtboksMelding
 )
