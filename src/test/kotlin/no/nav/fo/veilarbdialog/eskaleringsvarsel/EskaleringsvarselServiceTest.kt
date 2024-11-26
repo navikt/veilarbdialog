@@ -5,9 +5,9 @@ import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
+import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogSqlParameterSource
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import java.time.ZonedDateTime
 
 class EskaleringsvarselServiceTest: SpringBootTestBase() {
@@ -34,10 +34,9 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
             SET opprettet_dato = :dato
             WHERE gjeldende = :aktorId
         """.trimIndent()
-        val params = MapSqlParameterSource().apply {
-            addValue("dato", tidspunkt)
-            addValue("aktorId", bruker.aktorId)
-        }
-        jdbcTemplate.update(sql, params)
+        val params = VeilarbDialogSqlParameterSource()
+            .addValue("dato", tidspunkt)
+            .addValue("aktorId", bruker.aktorId)
+        namedParameterJdbcTemplate.update(sql, params)
     }
 }
