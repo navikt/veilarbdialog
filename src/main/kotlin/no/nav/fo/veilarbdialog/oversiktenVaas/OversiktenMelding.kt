@@ -2,7 +2,6 @@ package no.nav.fo.veilarbdialog.oversiktenVaas
 
 import java.time.LocalDateTime
 
-
 data class OversiktenMelding(
     val personID: String,
     val avsender: String = "veilarbdialog",
@@ -11,14 +10,17 @@ data class OversiktenMelding(
     val hendelse: Hendelse
 ) {
     companion object {
-        fun forUtgattVarsel(fnr: String) = OversiktenMelding(
+        private fun baseUrlVeilarbpersonflate(erProd: Boolean) =
+            if (erProd) "https://veilarbpersonflate.intern.nav.no" else "https://veilarbpersonflate.intern.dev.nav.no"
+
+        fun forUtgattVarsel(fnr: String, erProd: Boolean) = OversiktenMelding(
             personID = fnr,
             kategori = Kategori.UTGATT_VARSEL,
             operasjon = Operasjon.START,
             hendelse = Hendelse(
                 beskrivelse = "Bruker har et utgått varsel",
                 dato = LocalDateTime.now(),
-                lenke = "aktivitetsplan",
+                lenke = "${baseUrlVeilarbpersonflate(erProd)}/aktivitetsplan",
             )
         )
     }

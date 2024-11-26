@@ -4,6 +4,7 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import no.nav.common.client.aktoroppslag.AktorOppslagClient
 import no.nav.common.json.JsonUtils
 import no.nav.common.types.identer.AktorId
+import no.nav.common.utils.EnvironmentUtils
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -27,9 +28,10 @@ open class OversiktenService(
     }
 
     open fun sendMeldingTilOversikten(gjeldendeEskaleringsvarsler: List<EskaleringsvarselEntity>) {
+        val erProd = EnvironmentUtils.isProduction().orElse(false)
         gjeldendeEskaleringsvarsler.forEach {
             val fnr = aktorOppslagClient.hentFnr(AktorId(it.aktorId))
-            val melding = OversiktenMelding.forUtgattVarsel(fnr.toString())
+            val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), erProd)
             val sendingEntity = SendingEntity(
                 meldingSomJson = JsonUtils.toJson(melding),
                 fnr = fnr,
