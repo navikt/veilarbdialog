@@ -1,23 +1,31 @@
 package no.nav.fo.veilarbdialog.oversiktenVaas
 
+import no.nav.common.client.aktoroppslag.AktorOppslagClient
+import no.nav.common.types.identer.AktorId
+import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
 open class OversiktenUtboksService(
+    private val aktorOppslagClient: AktorOppslagClient,
+    private val  oversiktenUtboksRepository: OversiktenUtboksRepository
 ) {
 
     fun sendMeldingTilOversikten(gjeldendeEskaleringsvarsler: List<EskaleringsvarselEntity> ) {
         gjeldendeEskaleringsvarsler.forEach {
-            val melding = it.tilMelding(Operasjon.START)
+            val fnr =  aktorOppslagClient.hentFnr(AktorId(it.aktorId))
+            val melding = it.tilMelding(Operasjon.START, fnr)
+            val sending = Sending(melding = melding, fnr = fnr)
+            oversiktenUtboksRepository.lagreSending(sending)
         }
 
     }
 
-    private fun EskaleringsvarselEntity.tilMelding(operasjon: Operasjon) =
+    private fun EskaleringsvarselEntity.tilMelding(operasjon: Operasjon, fnr: Fnr) =
         OversiktenUtboksMelding(
-            personID = this.aktorId, // TODO: map til fnr
+            personID = fnr.get(),
             kategori = Kategori.UTGATT_VARSEL,
             operasjon = operasjon,
             hendelse = Hendelse(

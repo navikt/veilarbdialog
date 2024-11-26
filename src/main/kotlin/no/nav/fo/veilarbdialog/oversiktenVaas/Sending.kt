@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.oversiktenVaas
 
-import no.nav.fo.veilarbdialog.domain.Person.Fnr
+import no.nav.common.types.identer.Fnr
 import java.time.ZonedDateTime
 
 data class Sending(
