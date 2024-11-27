@@ -43,18 +43,24 @@ open class OversiktenService(
         return oversiktenForsendingEntity.meldingKey
     }
 
-    open fun sendStoppMeldingOmUtgåttVarsel(fnr: Fnr){
-        // TODO: Hent start melding og gjenbruk key
-        val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.STOPP, erProd)
+    open fun sendStoppMeldingOmUtgåttVarsel(fnr: Fnr, meldingKeyStartMelding: UUID) {
+        val opprinneligStartMelding = oversiktenForsendingRepository.hentForsendinger(meldingKeyStartMelding, OversiktenMelding.Operasjon.START).let {
+            check(it.size <= 1) { "Skal ikke kunne eksistere flere enn én startmeldinger" }
+            it.first()
+        }
+
+        val sluttmelding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.STOPP, erProd)
         val oversiktenForsendingEntity = OversiktenForsendingEntity(
-            meldingSomJson = JsonUtils.toJson(melding),
+            meldingSomJson = JsonUtils.toJson(sluttmelding),
             fnr = fnr,
-            kategori = melding.kategori,
-            meldingKey = UUID.randomUUID()
+            kategori = sluttmelding.kategori,
+            meldingKey = opprinneligStartMelding.meldingKey
         )
+
         try  {
             oversiktenProducer.sendMelding(oversiktenForsendingEntity.meldingKey.toString(), oversiktenForsendingEntity.meldingSomJson)
-            oversiktenForsendingRepository.markerSomSendt(oversiktenForsendingEntity.meldingKey)
+            val sendtForsending = oversiktenForsendingEntity.tilSendtForsending()
+            oversiktenForsendingRepository.lagreForsending(sendtForsending)
         } catch (e: Exception){
             oversiktenForsendingRepository.lagreForsending(oversiktenForsendingEntity)
         }

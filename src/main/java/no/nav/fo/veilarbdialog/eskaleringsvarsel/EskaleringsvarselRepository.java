@@ -123,6 +123,23 @@ public class EskaleringsvarselRepository {
         }
     }
 
+    public Optional<EskaleringsvarselEntity> hentGjeldende(UUID oppfolgingsperiodeUuid) {
+        String sql = """
+                SELECT * FROM ESKALERINGSVARSEL E
+                INNER JOIN DIALOG ON DIALOG.DIALOG_ID = E.TILHORENDE_DIALOG_ID
+                WHERE DIALOG.OPPFOLGINGSPERIODE_UUID = :oppfolgingsperiodeUuid
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("oppfolgingsperiodeUuid", oppfolgingsperiodeUuid.toString());
+
+        try {
+            return Optional.ofNullable(jdbc.queryForObject(sql, params, rowMapper));
+        } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
+            return Optional.empty();
+        }
+    }
+
+
     public boolean stopPeriode(UUID oppfolgingsperiodeUuid) {
         String sql = """
                 UPDATE ESKALERINGSVARSEL

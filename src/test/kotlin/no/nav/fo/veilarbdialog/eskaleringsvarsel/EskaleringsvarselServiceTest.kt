@@ -92,24 +92,37 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SENDT)
     }
 
+
+    @Test
+    fun `Melding om stopp skal ikke sendes til oversikten-utboks dersom startmelding ikke ble sendt`() {
+        opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
+        assertThat(oversiktenForsendingRepository.hentAlleSomSkalSendes()).hasSize(0)
+
+        eskaleringsvarselService.stop(StopEskaleringDto(Fnr.of(bruker.fnr), "", false), NavIdent(veileder.navIdent))
+
+        val stoppMeldinger = oversiktenForsendingRepository.hentAlleSomSkalSendes()
+        assertThat(stoppMeldinger).hasSize(0)
+    }
+
     @Test
     fun `Melding om stopp når oppfølgingsperiode avsluttes skal sendes til oversikten-utboks`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
         val meldingerIUtboks = oversiktenForsendingRepository.hentAlleSomSkalSendes()
         assertThat(meldingerIUtboks).hasSize(1)
+        val meldingKey = meldingerIUtboks[0].meldingKey
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
         eskaleringsvarselService.stop(bruker.oppfolgingsperiode)
 
-        val meldingerIUtboksEtterStopp = oversiktenForsendingRepository.hentAlleSomSkalSendes()
-        assertThat(meldingerIUtboksEtterStopp).hasSize(1)
-        val melding = meldingerIUtboksEtterStopp.first()
+        val stoppMeldinger = oversiktenForsendingRepository.hentForsendinger(meldingKey, OversiktenMelding.Operasjon.STOPP)
+        assertThat(stoppMeldinger).hasSize(1)
+        val melding = stoppMeldinger.first()
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
         assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
-        assertThat(melding.tidspunktSendt).isNull()
-        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
+        assertThat(melding.tidspunktSendt).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
+        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SENDT)
     }
 
     fun opprettEskaleringsvarselEldreEnn(tidspunkt: ZonedDateTime, erGjeldende : Boolean = true) {

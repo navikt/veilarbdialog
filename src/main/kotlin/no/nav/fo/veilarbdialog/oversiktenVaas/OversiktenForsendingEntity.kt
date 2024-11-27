@@ -12,7 +12,9 @@ data class OversiktenForsendingEntity(
     val utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES,
     val meldingSomJson: String,
     val kategori: OversiktenMelding.Kategori,
-)
+) {
+    fun tilSendtForsending() = this.copy(tidspunktSendt = ZonedDateTime.now(), utsendingStatus = UtsendingStatus.SENDT)
+}
 
 typealias MeldingKey = UUID
 

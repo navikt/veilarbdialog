@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
+import kotlin.jvm.optionals.getOrNull
 
 @Slf4j
 @RequiredArgsConstructor
@@ -139,7 +140,9 @@ open class EskaleringsvarselService(
         }
 
         eskaleringsvarselRepository.stop(eskaleringsvarsel.varselId, stopVarselDto.begrunnelse, avsluttetAv)
-        oversiktenService.sendStoppMeldingOmUtgåttVarsel(Fnr.of(stopVarselDto.fnr.get()))
+        if (eskaleringsvarsel.oversiktenSendingUuid != null) {
+            oversiktenService.sendStoppMeldingOmUtgåttVarsel(Fnr.of(stopVarselDto.fnr.get()), eskaleringsvarsel.oversiktenSendingUuid)
+        }
         minsideVarselService.inaktiverVarselForhåndsvarsel(eskaleringsvarsel)
         val eskaleringsvarselEntity = eskaleringsvarselRepository.hentVarsel(eskaleringsvarsel.varselId)
         eskaleringsvarselEntity.ifPresent { varsel ->
@@ -150,7 +153,14 @@ open class EskaleringsvarselService(
 
     @Transactional
     open fun stop(oppfolgingsperiode: UUID?): Boolean {
-        // TODO send stop medling til eskalerings oversikten
+        val eskaleringsvarsel = eskaleringsvarselRepository.hentGjeldende(oppfolgingsperiode).getOrNull()
+        eskaleringsvarsel?.let {
+            if (it.oversiktenSendingUuid != null) {
+                val fnr = aktorOppslagClient.hentFnr(AktorId(eskaleringsvarsel.aktorId))
+                oversiktenService.sendStoppMeldingOmUtgåttVarsel(fnr, it.oversiktenSendingUuid)
+            }
+        }
+
         return eskaleringsvarselRepository.stopPeriode(oppfolgingsperiode)
     }
 
