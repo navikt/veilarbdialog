@@ -5,13 +5,13 @@ import java.time.ZonedDateTime
 import java.util.*
 
 data class SendingEntity(
+    val uuid: UUID,
     val fnr: Fnr,
     val opprettet: ZonedDateTime = ZonedDateTime.now(),
     val tidspunktSendt: ZonedDateTime? = null,
     val utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES,
     val meldingSomJson: String,
     val kategori: OversiktenMelding.Kategori,
-    val meldingKey: UUID,
 )
 
 enum class UtsendingStatus {

@@ -59,9 +59,10 @@ open class EskaleringsvarselService(
         val varselUtgåttEtterDager = 14
         val tidspunktUtgått = LocalDateTime.now().minusDays(varselUtgåttEtterDager.toLong())
         val varsler = eskaleringsvarselRepository.hentUsendteGjeldendeVarslerEldreEnn(tidspunktUtgått)
-        oversiktenService.sendStartMeldingOmUtgåttVarsel(varsler.toList())
-        varsler.forEach {
-            eskaleringsvarselRepository.markerVarselSomSendt(AktorId.of(it.aktorId), LocalDateTime.now())
+
+        varsler.forEach { varsel ->
+            val oversiktenSendingUuid = oversiktenService.sendStartMeldingOmUtgåttVarsel(varsel)
+            eskaleringsvarselRepository.markerVarselSomSendt(varsel.varselId, oversiktenSendingUuid)
         }
     }
 

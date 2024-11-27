@@ -31,7 +31,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
         Mockito.verify(oversiktenProducer, Mockito.times(1))
-            .sendMelding(melding.meldingKey.toString(), melding.meldingSomJson)
+            .sendMelding(melding.uuid.toString(), melding.meldingSomJson)
     }
 
     @Test
@@ -59,7 +59,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
             fnr = Fnr.of(bruker.fnr),
             meldingSomJson = "{}",
             kategori = OversiktenMelding.Kategori.UTGATT_VARSEL,
-            meldingKey = UUID.randomUUID(),
+            uuid = UUID.randomUUID(),
             utsendingStatus = utsendingStatus
         )
 }

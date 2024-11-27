@@ -24,24 +24,23 @@ open class OversiktenService(
     open fun sendUsendteMeldingerTilOversikten() {
         val meldingerSomSkalSendes = oversiktenUtboksRepository.hentAlleSomSkalSendes()
         meldingerSomSkalSendes.forEach { melding ->
-            oversiktenProducer.sendMelding(melding.meldingKey.toString(), melding.meldingSomJson)
-            oversiktenUtboksRepository.markerSomSendt(melding.meldingKey)
+            oversiktenProducer.sendMelding(melding.uuid.toString(), melding.meldingSomJson)
+            oversiktenUtboksRepository.markerSomSendt(melding.uuid)
             melding.fnr
         }
     }
 
-    open fun sendStartMeldingOmUtgåttVarsel(gjeldendeEskaleringsvarsler: List<EskaleringsvarselEntity>) {
-        gjeldendeEskaleringsvarsler.forEach {
-            val fnr = aktorOppslagClient.hentFnr(AktorId(it.aktorId))
-            val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.START, erProd)
-            val sendingEntity = SendingEntity(
-                meldingSomJson = JsonUtils.toJson(melding),
-                fnr = fnr,
-                kategori = melding.kategori,
-                meldingKey = UUID.randomUUID()
-            )
-            oversiktenUtboksRepository.lagreSending(sendingEntity)
-        }
+    open fun sendStartMeldingOmUtgåttVarsel(eskaleringsvarsel: EskaleringsvarselEntity): UUID {
+        val fnr = aktorOppslagClient.hentFnr(AktorId(eskaleringsvarsel.aktorId))
+        val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.START, erProd)
+        val sendingEntity = SendingEntity(
+            meldingSomJson = JsonUtils.toJson(melding),
+            fnr = fnr,
+            kategori = melding.kategori,
+            uuid = UUID.randomUUID()
+        )
+        oversiktenUtboksRepository.lagreSending(sendingEntity)
+        return sendingEntity.uuid
     }
 
     open fun sendStoppMeldingOmUtgåttVarsel(fnr: Fnr){
@@ -51,11 +50,11 @@ open class OversiktenService(
             meldingSomJson = JsonUtils.toJson(melding),
             fnr = fnr,
             kategori = melding.kategori,
-            meldingKey = UUID.randomUUID()
+            uuid = UUID.randomUUID()
         )
         try  {
-            oversiktenProducer.sendMelding(sendingEntity.meldingKey.toString(), sendingEntity.meldingSomJson)
-            oversiktenUtboksRepository.markerSomSendt(sendingEntity.meldingKey)
+            oversiktenProducer.sendMelding(sendingEntity.uuid.toString(), sendingEntity.meldingSomJson)
+            oversiktenUtboksRepository.markerSomSendt(sendingEntity.uuid)
         }catch (e: Exception){
             oversiktenUtboksRepository.lagreSending(sendingEntity)
         }

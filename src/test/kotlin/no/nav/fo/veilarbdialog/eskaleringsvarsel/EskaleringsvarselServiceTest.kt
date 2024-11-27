@@ -43,7 +43,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.tidspunktSendt).isNull()
         assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
         val eskaleringsvarsel = eskaleringsvarselRepository.hentGjeldende(AktorId(bruker.aktorId)).get()
-        assertThat(eskaleringsvarsel.sendtTilOversikten).isTrue()
+        assertThat(eskaleringsvarsel.oversiktenSendingUuid).isEqualTo(melding.uuid)
     }
 
     @Test

@@ -16,8 +16,8 @@ open class OversiktenUtboksRepository(
     open fun lagreSending(sendingEntity: SendingEntity) {
         val sql = """ 
             INSERT INTO oversikten_utboks (
-                    fnr, opprettet, tidspunkt_sendt, utsending_status, melding, kategori, melding_key)
-            VALUES ( :fnr, :opprettet, :tidspunkt_sendt, :utsending_status, :melding::json, :kategori, :melding_key)
+                    fnr, opprettet, tidspunkt_sendt, utsending_status, melding, kategori, uuid)
+            VALUES ( :fnr, :opprettet, :tidspunkt_sendt, :utsending_status, :melding::json, :kategori, :uuid)
         """.trimIndent()
 
         val params = VeilarbDialogSqlParameterSource().apply {
@@ -27,7 +27,7 @@ open class OversiktenUtboksRepository(
             addValue("utsending_status", sendingEntity.utsendingStatus.name)
             addValue("melding", sendingEntity.meldingSomJson)
             addValue("kategori", sendingEntity.kategori.name)
-            addValue("melding_key", sendingEntity.meldingKey)
+            addValue("uuid", sendingEntity.uuid)
         }
 
         jdbc.update(sql, params)
@@ -57,16 +57,16 @@ open class OversiktenUtboksRepository(
         return jdbc.queryForList(sql, params, SendingEntity::class.java)
     }
 
-    open fun markerSomSendt(meldingKey: UUID) {
+    open fun markerSomSendt(uuid: UUID) {
         val sql = """
            UPDATE oversikten_utboks
            SET utsending_status = 'SENDT',
            tidspunkt_sendt = now()
-           WHERE melding_key = :melding_key
+           WHERE uuid = :uuid
         """.trimIndent()
 
         val params = VeilarbDialogSqlParameterSource().apply {
-            addValue("melding_key", meldingKey)
+            addValue("uuid", uuid)
         }
 
         jdbc.update(sql, params)
@@ -80,7 +80,7 @@ open class OversiktenUtboksRepository(
             utsendingStatus = UtsendingStatus.valueOf(rs.getString("utsending_status")),
             meldingSomJson = rs.getString("melding"),
             kategori = OversiktenMelding.Kategori.valueOf(rs.getString("kategori")),
-            meldingKey = UUID.fromString(rs.getString("melding_key"))
+            uuid = UUID.fromString(rs.getString("uuid"))
         )
     }
 }

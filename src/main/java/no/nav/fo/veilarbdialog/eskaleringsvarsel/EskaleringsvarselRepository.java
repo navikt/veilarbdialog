@@ -44,7 +44,7 @@ public class EskaleringsvarselRepository {
             DatabaseUtils.hentZonedDateTime(rs, "avsluttet_dato"),
             rs.getString("avsluttet_av"),
             rs.getString("avsluttet_begrunnelse"),
-            rs.getBoolean("sendt_til_oversikten")
+            DatabaseUtils.hentMaybeUUID(rs, "oversikten_sending_uuid")
     );
 
     public EskaleringsvarselEntity opprett(long tilhorendeDialogId, MinSideVarselId varselId, String aktorId, String opprettetAv, String opprettetBegrunnelse) {
@@ -88,7 +88,7 @@ public class EskaleringsvarselRepository {
                 null,
                 null,
                 null,
-                false
+                null
                 );
     }
 
@@ -159,7 +159,7 @@ public class EskaleringsvarselRepository {
                 SELECT * FROM ESKALERINGSVARSEL
                 WHERE opprettet_dato < :tidspunkt
                 AND gjeldende IS NOT NULL
-                AND sendt_til_oversikten IS FALSE
+                AND oversikten_sending_uuid IS NULL
                 """;
         var params = new MapSqlParameterSource()
                 .addValue("tidspunkt", tidspunkt);
@@ -176,18 +176,15 @@ public class EskaleringsvarselRepository {
         return  jdbc.query(sql, params, rowMapper);
     }
 
-    public void markerVarselSomSendt(AktorId aktorId, LocalDateTime tidspunkt) {
+    public void markerVarselSomSendt(long varselId, UUID oversiktenSendingUuid) {
         String sql = """
                 UPDATE ESKALERINGSVARSEL
-                SET sendt_til_oversikten = true
-                WHERE opprettet_dato < :tidspunkt
-                AND gjeldende IS NOT NULL
-                AND sendt_til_oversikten IS FALSE
-                AND AKTOR_ID = :aktor_id
+                SET oversikten_sending_uuid = :oversiktenSendingUuid
+                WHERE id = :varselId
                 """;
         var params = new MapSqlParameterSource()
-                .addValue("aktor_id", aktorId.get())
-                .addValue("tidspunkt", tidspunkt);
+                .addValue("oversiktenSendingUuid", oversiktenSendingUuid)
+                .addValue("varselId", varselId);
 
         jdbc.update(sql, params);
     }
