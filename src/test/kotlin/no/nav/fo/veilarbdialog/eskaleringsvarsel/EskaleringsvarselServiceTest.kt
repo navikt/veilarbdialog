@@ -58,6 +58,18 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(oversiktenUtboksRepository.hentAlleSomSkalSendes()).isEmpty()
     }
 
+    @Test
+    fun `Ikke send eskaleringsvarsel til oversikten hvis den allerede er sendt`() {
+        opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
+        eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
+        val meldingerIUtboks = oversiktenUtboksRepository.hentAlleSomSkalSendes()
+        assertThat(meldingerIUtboks).hasSize(1)
+
+        eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
+
+        assertThat(meldingerIUtboks).hasSize(1)
+    }
+
     fun opprettEskaleringsvarselEldreEnn(tidspunkt: ZonedDateTime, erGjeldende : Boolean = true) {
         dialogTestService.opprettDialogSomVeileder(veileder, bruker, NyMeldingDTO().setTekst("").setOverskrift(""))
         dialogTestService.startEskalering(veileder, StartEskaleringDto(Fnr.of(bruker.fnr),"", "", "", "" ))
