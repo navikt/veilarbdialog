@@ -174,7 +174,7 @@ public class EskaleringsvarselRepository {
         return  jdbc.query(sql, params, rowMapper);
     }
 
-    public EskaleringsvarselEntity markerVarselSomSendt(AktorId aktorId, LocalDateTime tidspunkt) {
+    public void markerVarselSomSendt(AktorId aktorId, LocalDateTime tidspunkt) {
         String sql = """
                 UPDATE ESKALERINGSVARSEL 
                 SET sendt_til_oversikten = true
@@ -187,6 +187,6 @@ public class EskaleringsvarselRepository {
                 .addValue("aktor_id", aktorId)
                 .addValue("tidspunkt", tidspunkt);
 
-        return jdbc.query(sql, params, rowMapper);
+        jdbc.query(sql, params, rowMapper);
     }
 }
