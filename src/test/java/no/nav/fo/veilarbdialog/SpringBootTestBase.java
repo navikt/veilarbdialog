@@ -9,6 +9,7 @@ import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
+import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenService;
 import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenUtboksRepository;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.util.DialogTestService;
@@ -72,6 +73,9 @@ public abstract class SpringBootTestBase {
 
     @Autowired
     protected OversiktenUtboksRepository oversiktenUtboksRepository;
+
+    @Autowired
+    protected OversiktenService oversiktenService;
 
     @LocalServerPort
     protected int port;

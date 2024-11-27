@@ -13,9 +13,6 @@ import java.util.*
 
 open class OversiktenServiceTest: SpringBootTestBase() {
 
-    @Autowired
-    private lateinit var oversiktenService: OversiktenService
-
     @MockBean
     private lateinit var oversiktenProducer: OversiktenProducer
 
