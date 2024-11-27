@@ -33,7 +33,6 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.time.ZonedDateTime
 import java.util.*
 
 @Slf4j
@@ -60,7 +59,7 @@ open class EskaleringsvarselService(
         val varselUtgåttEtterDager = 14
         val tidspunktUtgått = LocalDateTime.now().minusDays(varselUtgåttEtterDager.toLong())
         val varsler = eskaleringsvarselRepository.hentUsendteGjeldendeVarslerEldreEnn(tidspunktUtgått)
-        oversiktenService.sendMeldingTilOversikten(varsler.toList())
+        oversiktenService.sendStartMeldingOmUtgåttVarsel(varsler.toList())
         varsler.forEach {
             eskaleringsvarselRepository.markerVarselSomSendt(AktorId.of(it.aktorId), LocalDateTime.now())
         }
@@ -139,8 +138,8 @@ open class EskaleringsvarselService(
         }
 
         eskaleringsvarselRepository.stop(eskaleringsvarsel.varselId, stopVarselDto.begrunnelse, avsluttetAv)
+        oversiktenService.sendStoppMeldingOmUtgåttVarsel(Fnr.of(stopVarselDto.fnr.get()))
         minsideVarselService.inaktiverVarselForhåndsvarsel(eskaleringsvarsel)
-
         val eskaleringsvarselEntity = eskaleringsvarselRepository.hentVarsel(eskaleringsvarsel.varselId)
         eskaleringsvarselEntity.ifPresent { varsel ->
             bigQueryClient.logEvent(varsel, EventType.FORHAANDSVARSEL_INAKTIVERT)
@@ -150,6 +149,7 @@ open class EskaleringsvarselService(
 
     @Transactional
     open fun stop(oppfolgingsperiode: UUID?): Boolean {
+        // TODO send stop medling til eskalerings oversikten
         return eskaleringsvarselRepository.stopPeriode(oppfolgingsperiode)
     }
 

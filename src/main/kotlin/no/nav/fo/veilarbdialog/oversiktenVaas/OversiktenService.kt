@@ -4,6 +4,7 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import no.nav.common.client.aktoroppslag.AktorOppslagClient
 import no.nav.common.json.JsonUtils
 import no.nav.common.types.identer.AktorId
+import no.nav.common.types.identer.Fnr
 import no.nav.common.utils.EnvironmentUtils
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
 import org.springframework.scheduling.annotation.Scheduled
@@ -16,6 +17,7 @@ open class OversiktenService(
     private val oversiktenUtboksRepository: OversiktenUtboksRepository,
     private val oversiktenProducer: OversiktenProducer
 ) {
+    private val erProd = EnvironmentUtils.isProduction().orElse(false)
 
     @Scheduled(cron = "0 */5 * * * *") // Hvert 5. minutt
     @SchedulerLock(name = "oversikten_utboks_scheduledTask", lockAtMostFor = "PT3M")
@@ -23,24 +25,37 @@ open class OversiktenService(
         val meldingerSomSkalSendes = oversiktenUtboksRepository.hentAlleSomSkalSendes()
         meldingerSomSkalSendes.forEach { melding ->
             oversiktenProducer.sendMelding(melding.meldingKey.toString(), melding.meldingSomJson)
-            // TODO: Håndtering for om melding faktisk er sendt?
             oversiktenUtboksRepository.markerSomSendt(melding.meldingKey)
-            // TODO: Marker i eskaleringsvarsel-tabell at varsel er sendt
             melding.fnr
         }
     }
 
-    open fun sendMeldingTilOversikten(gjeldendeEskaleringsvarsler: List<EskaleringsvarselEntity>) {
-        val erProd = EnvironmentUtils.isProduction().orElse(false)
+    open fun sendStartMeldingOmUtgåttVarsel(gjeldendeEskaleringsvarsler: List<EskaleringsvarselEntity>) {
         gjeldendeEskaleringsvarsler.forEach {
             val fnr = aktorOppslagClient.hentFnr(AktorId(it.aktorId))
-            val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), erProd)
+            val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.START, erProd)
             val sendingEntity = SendingEntity(
                 meldingSomJson = JsonUtils.toJson(melding),
                 fnr = fnr,
                 kategori = melding.kategori,
                 meldingKey = UUID.randomUUID()
             )
+            oversiktenUtboksRepository.lagreSending(sendingEntity)
+        }
+    }
+
+    open fun sendStoppMeldingOmUtgåttVarsel(fnr: Fnr){
+        val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.STOPP, erProd)
+        val sendingEntity = SendingEntity(
+            meldingSomJson = JsonUtils.toJson(melding),
+            fnr = fnr,
+            kategori = melding.kategori,
+            meldingKey = UUID.randomUUID()
+        )
+        try  {
+            oversiktenProducer.sendMelding(sendingEntity.meldingKey.toString(), sendingEntity.meldingSomJson)
+            oversiktenUtboksRepository.markerSomSendt(sendingEntity.meldingKey)
+        }catch (e: Exception){
             oversiktenUtboksRepository.lagreSending(sendingEntity)
         }
     }
