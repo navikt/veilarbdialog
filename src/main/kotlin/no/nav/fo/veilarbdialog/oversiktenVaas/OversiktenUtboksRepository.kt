@@ -41,6 +41,22 @@ open class OversiktenUtboksRepository(
         return jdbc.query(sql, rowMapper)
     }
 
+    open fun hentSendinger(fnr: Fnr, kategori: OversiktenMelding.Kategori, operasjon: OversiktenMelding.Operasjon): List<SendingEntity> {
+        val sql = """
+            SELECT * FROM oversikten_utboks
+            WHERE fnr = :fnr
+            AND kategori = :kategori
+        """.trimIndent()
+
+        val params = VeilarbDialogSqlParameterSource().apply {
+            addValue("fnr", fnr.get())
+            addValue("kategori", kategori.name)
+//            addValue("operasjon", operasjon.name)
+        }
+
+        return jdbc.queryForList(sql, params, SendingEntity::class.java)
+    }
+
     open fun markerSomSendt(meldingKey: UUID) {
         val sql = """
            UPDATE oversikten_utboks

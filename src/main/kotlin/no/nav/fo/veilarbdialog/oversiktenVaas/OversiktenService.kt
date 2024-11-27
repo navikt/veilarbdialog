@@ -45,6 +45,7 @@ open class OversiktenService(
     }
 
     open fun sendStoppMeldingOmUtgåttVarsel(fnr: Fnr){
+        // TODO: Hent start melding og gjenbruk key
         val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.STOPP, erProd)
         val sendingEntity = SendingEntity(
             meldingSomJson = JsonUtils.toJson(melding),
