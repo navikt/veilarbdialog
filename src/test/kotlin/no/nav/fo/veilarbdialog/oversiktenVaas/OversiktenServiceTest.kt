@@ -23,7 +23,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
 
     @BeforeEach
     fun beforeEach() {
-        jdbcTemplate.execute("TRUNCATE TABLE oversikten_vaas_utboks")
+        jdbcTemplate.execute("TRUNCATE TABLE oversikten_utboks")
     }
 
     @Test

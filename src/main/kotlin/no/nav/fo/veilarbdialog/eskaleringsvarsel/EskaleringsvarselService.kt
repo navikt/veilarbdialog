@@ -33,6 +33,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.*
 
 @Slf4j
@@ -58,7 +59,7 @@ open class EskaleringsvarselService(
     open fun sendUtgåtteVarslerTilOversikten() {
         val varselUtgåttEtterDager = 14
         val tidspunktUtgått = LocalDateTime.now().minusDays(varselUtgåttEtterDager.toLong())
-        val varsler = eskaleringsvarselRepository.hentGjeldendeVarslerEldreEnn(tidspunktUtgått)
+        val varsler = eskaleringsvarselRepository.hentUsendteGjeldendeVarslerEldreEnn(tidspunktUtgått)
         oversiktenService.sendMeldingTilOversikten(varsler.toList())
     }
 
@@ -157,5 +158,10 @@ open class EskaleringsvarselService(
     open fun historikk(fnr: Fnr?): List<EskaleringsvarselEntity> {
         val aktorId = aktorOppslagClient.hentAktorId(fnr)
         return eskaleringsvarselRepository.hentHistorikk(aktorId)
+    }
+
+    open fun markerVarselSomSendt(fnr: Fnr, tidspunkt: LocalDateTime) {
+        val aktorId = aktorOppslagClient.hentAktorId(fnr)
+        return eskaleringsvarselRepository.markerVarselSomSendt(aktorId, tidspunkt)
     }
 }

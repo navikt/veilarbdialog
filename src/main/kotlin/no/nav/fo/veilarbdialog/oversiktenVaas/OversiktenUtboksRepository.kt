@@ -15,7 +15,7 @@ open class OversiktenUtboksRepository(
 ) {
     open fun lagreSending(sendingEntity: SendingEntity) {
         val sql = """ 
-            INSERT INTO oversikten_vaas_utboks (
+            INSERT INTO oversikten_utboks (
                     fnr, opprettet, tidspunkt_sendt, utsending_status, melding, kategori, melding_key)
             VALUES ( :fnr, :opprettet, :tidspunkt_sendt, :utsending_status, :melding::json, :kategori, :melding_key)
         """.trimIndent()
@@ -35,7 +35,7 @@ open class OversiktenUtboksRepository(
 
     open fun hentAlleSomSkalSendes(): List<SendingEntity> {
         val sql = """
-            SELECT * FROM oversikten_vaas_utboks WHERE utsending_status = 'SKAL_SENDES'
+            SELECT * FROM oversikten_utboks WHERE utsending_status = 'SKAL_SENDES'
         """.trimIndent()
 
         return jdbc.query(sql, rowMapper)
@@ -43,7 +43,7 @@ open class OversiktenUtboksRepository(
 
     open fun markerSomSendt(meldingKey: UUID) {
         val sql = """
-           UPDATE oversikten_vaas_utboks
+           UPDATE oversikten_utboks
            SET utsending_status = 'SENDT',
            tidspunkt_sendt = now()
            WHERE melding_key = :melding_key

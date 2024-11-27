@@ -152,11 +152,12 @@ public class EskaleringsvarselRepository {
         }
     }
 
-    public List<EskaleringsvarselEntity> hentGjeldendeVarslerEldreEnn(LocalDateTime tidspunkt) {
+    public List<EskaleringsvarselEntity> hentUsendteGjeldendeVarslerEldreEnn(LocalDateTime tidspunkt) {
         String sql = """
                 SELECT * FROM ESKALERINGSVARSEL
                 WHERE opprettet_dato < :tidspunkt
                 AND gjeldende IS NOT NULL
+                AND sendt_til_oversikten IS FALSE
                 """;
         var params = new MapSqlParameterSource()
                 .addValue("tidspunkt", tidspunkt);
@@ -173,4 +174,19 @@ public class EskaleringsvarselRepository {
         return  jdbc.query(sql, params, rowMapper);
     }
 
+    public EskaleringsvarselEntity markerVarselSomSendt(AktorId aktorId, LocalDateTime tidspunkt) {
+        String sql = """
+                UPDATE ESKALERINGSVARSEL 
+                SET sendt_til_oversikten = true
+                WHERE opprettet_dato < :tidspunkt
+                AND gjeldende IS NOT NULL
+                AND sendt_til_oversikten IS FALSE
+                AND AKTOR_ID = :aktor_id
+                """;
+        var params = new MapSqlParameterSource()
+                .addValue("aktor_id", aktorId)
+                .addValue("tidspunkt", tidspunkt);
+
+        return jdbc.query(sql, params, rowMapper);
+    }
 }

@@ -23,7 +23,10 @@ open class OversiktenService(
         val meldingerSomSkalSendes = oversiktenUtboksRepository.hentAlleSomSkalSendes()
         meldingerSomSkalSendes.forEach { melding ->
             oversiktenProducer.sendMelding(melding.meldingKey.toString(), melding.meldingSomJson)
+            // TODO: Håndtering for om melding faktisk er sendt?
             oversiktenUtboksRepository.markerSomSendt(melding.meldingKey)
+            // TODO: Marker i eskaleringsvarsel-tabell at varsel er sendt
+            melding.fnr
         }
     }
 
