@@ -61,6 +61,9 @@ open class EskaleringsvarselService(
         val tidspunktUtgått = LocalDateTime.now().minusDays(varselUtgåttEtterDager.toLong())
         val varsler = eskaleringsvarselRepository.hentUsendteGjeldendeVarslerEldreEnn(tidspunktUtgått)
         oversiktenService.sendMeldingTilOversikten(varsler.toList())
+        varsler.forEach {
+            eskaleringsvarselRepository.markerVarselSomSendt(AktorId.of(it.aktorId), LocalDateTime.now())
+        }
     }
 
     @Transactional
@@ -158,10 +161,5 @@ open class EskaleringsvarselService(
     open fun historikk(fnr: Fnr?): List<EskaleringsvarselEntity> {
         val aktorId = aktorOppslagClient.hentAktorId(fnr)
         return eskaleringsvarselRepository.hentHistorikk(aktorId)
-    }
-
-    open fun markerVarselSomSendt(fnr: Fnr, tidspunkt: LocalDateTime) {
-        val aktorId = aktorOppslagClient.hentAktorId(fnr)
-        return eskaleringsvarselRepository.markerVarselSomSendt(aktorId, tidspunkt)
     }
 }

@@ -178,7 +178,7 @@ public class EskaleringsvarselRepository {
 
     public void markerVarselSomSendt(AktorId aktorId, LocalDateTime tidspunkt) {
         String sql = """
-                UPDATE ESKALERINGSVARSEL 
+                UPDATE ESKALERINGSVARSEL
                 SET sendt_til_oversikten = true
                 WHERE opprettet_dato < :tidspunkt
                 AND gjeldende IS NOT NULL
@@ -186,9 +186,9 @@ public class EskaleringsvarselRepository {
                 AND AKTOR_ID = :aktor_id
                 """;
         var params = new MapSqlParameterSource()
-                .addValue("aktor_id", aktorId)
+                .addValue("aktor_id", aktorId.get())
                 .addValue("tidspunkt", tidspunkt);
 
-        jdbc.query(sql, params, rowMapper);
+        jdbc.update(sql, params);
     }
 }
