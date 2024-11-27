@@ -81,6 +81,27 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
         eskaleringsvarselService.stop(StopEskaleringDto(Fnr.of(bruker.fnr), "", false), NavIdent(veileder.navIdent))
+
+        val meldingerIUtboksEtterStopp = oversiktenUtboksRepository.hentAlleSomSkalSendes()
+        assertThat(meldingerIUtboksEtterStopp).hasSize(1)
+        val melding = meldingerIUtboksEtterStopp.first()
+        assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
+        assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
+        assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
+        assertThat(melding.tidspunktSendt).isNull()
+        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
+    }
+
+    @Test
+    fun `Melding om stopp når oppfølgingsperiode avsluttes skal sendes til oversikten-utboks`() {
+        opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
+        eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
+        val meldingerIUtboks = oversiktenUtboksRepository.hentAlleSomSkalSendes()
+        assertThat(meldingerIUtboks).hasSize(1)
+        oversiktenService.sendUsendteMeldingerTilOversikten()
+
+        eskaleringsvarselService.stop(bruker.oppfolgingsperiode)
+
         val meldingerIUtboksEtterStopp = oversiktenUtboksRepository.hentAlleSomSkalSendes()
         assertThat(meldingerIUtboksEtterStopp).hasSize(1)
         val melding = meldingerIUtboksEtterStopp.first()
