@@ -10,40 +10,40 @@ import java.sql.ResultSet
 import java.util.*
 
 @Repository
-open class OversiktenUtboksRepository(
+open class OversiktenForsendingRepository(
     private val jdbc: NamedParameterJdbcTemplate
 ) {
-    open fun lagreSending(sendingEntity: SendingEntity) {
+    open fun lagreSending(oversiktenForsendingEntity: OversiktenForsendingEntity) {
         val sql = """ 
-            INSERT INTO oversikten_utboks (
+            INSERT INTO oversikten_forsending (
                     fnr, opprettet, tidspunkt_sendt, utsending_status, melding, kategori, uuid)
             VALUES ( :fnr, :opprettet, :tidspunkt_sendt, :utsending_status, :melding::json, :kategori, :uuid)
         """.trimIndent()
 
         val params = VeilarbDialogSqlParameterSource().apply {
-            addValue("fnr", sendingEntity.fnr.get())
-            addValue("opprettet", sendingEntity.opprettet)
-            addValue("tidspunkt_sendt", sendingEntity.tidspunktSendt)
-            addValue("utsending_status", sendingEntity.utsendingStatus.name)
-            addValue("melding", sendingEntity.meldingSomJson)
-            addValue("kategori", sendingEntity.kategori.name)
-            addValue("uuid", sendingEntity.uuid)
+            addValue("fnr", oversiktenForsendingEntity.fnr.get())
+            addValue("opprettet", oversiktenForsendingEntity.opprettet)
+            addValue("tidspunkt_sendt", oversiktenForsendingEntity.tidspunktSendt)
+            addValue("utsending_status", oversiktenForsendingEntity.utsendingStatus.name)
+            addValue("melding", oversiktenForsendingEntity.meldingSomJson)
+            addValue("kategori", oversiktenForsendingEntity.kategori.name)
+            addValue("uuid", oversiktenForsendingEntity.uuid)
         }
 
         jdbc.update(sql, params)
     }
 
-    open fun hentAlleSomSkalSendes(): List<SendingEntity> {
+    open fun hentAlleSomSkalSendes(): List<OversiktenForsendingEntity> {
         val sql = """
-            SELECT * FROM oversikten_utboks WHERE utsending_status = 'SKAL_SENDES'
+            SELECT * FROM oversikten_forsending WHERE utsending_status = 'SKAL_SENDES'
         """.trimIndent()
 
         return jdbc.query(sql, rowMapper)
     }
 
-    open fun hentSendinger(fnr: Fnr, kategori: OversiktenMelding.Kategori, operasjon: OversiktenMelding.Operasjon): List<SendingEntity> {
+    open fun hentForsendinger(fnr: Fnr, kategori: OversiktenMelding.Kategori, operasjon: OversiktenMelding.Operasjon): List<OversiktenForsendingEntity> {
         val sql = """
-            SELECT * FROM oversikten_utboks
+            SELECT * FROM oversikten_forsending
             WHERE fnr = :fnr
             AND kategori = :kategori
         """.trimIndent()
@@ -54,12 +54,12 @@ open class OversiktenUtboksRepository(
 //            addValue("operasjon", operasjon.name)
         }
 
-        return jdbc.queryForList(sql, params, SendingEntity::class.java)
+        return jdbc.queryForList(sql, params, OversiktenForsendingEntity::class.java)
     }
 
     open fun markerSomSendt(uuid: UUID) {
         val sql = """
-           UPDATE oversikten_utboks
+           UPDATE oversikten_forsending
            SET utsending_status = 'SENDT',
            tidspunkt_sendt = now()
            WHERE uuid = :uuid
@@ -73,7 +73,7 @@ open class OversiktenUtboksRepository(
     }
 
     private val rowMapper = RowMapper { rs: ResultSet, rowNum: Int ->
-        SendingEntity(
+        OversiktenForsendingEntity(
             fnr = Fnr.of(rs.getString("fnr")),
             opprettet = DatabaseUtils.hentZonedDateTime(rs, "opprettet"),
             tidspunktSendt = DatabaseUtils.hentZonedDateTime(rs, "tidspunkt_sendt"),

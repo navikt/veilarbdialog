@@ -7,7 +7,6 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.util.*
 
@@ -20,13 +19,13 @@ open class OversiktenServiceTest: SpringBootTestBase() {
 
     @BeforeEach
     fun beforeEach() {
-        jdbcTemplate.execute("TRUNCATE TABLE oversikten_utboks")
+        jdbcTemplate.execute("TRUNCATE TABLE oversikten_forsending")
     }
 
     @Test
     fun `Skal sende usendte meldinger`() {
         val melding = melding(bruker)
-        oversiktenUtboksRepository.lagreSending(melding)
+        oversiktenForsendingRepository.lagreSending(melding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
@@ -37,7 +36,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     @Test
     fun `Skal ikke sende melding som er markert som SENDT`() {
         val melding = melding(bruker, utsendingStatus = UtsendingStatus.SENDT)
-        oversiktenUtboksRepository.lagreSending(melding)
+        oversiktenForsendingRepository.lagreSending(melding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
@@ -47,7 +46,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     @Test
     fun `Skal ikke sende melding som er markert som SKAL_IKKE_SENDES`() {
         val melding = melding(bruker, utsendingStatus = UtsendingStatus.SKAL_IKKE_SENDES)
-        oversiktenUtboksRepository.lagreSending(melding)
+        oversiktenForsendingRepository.lagreSending(melding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
@@ -55,7 +54,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     }
 
     private fun melding(bruker: MockBruker, utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES) =
-        SendingEntity(
+        OversiktenForsendingEntity(
             fnr = Fnr.of(bruker.fnr),
             meldingSomJson = "{}",
             kategori = OversiktenMelding.Kategori.UTGATT_VARSEL,

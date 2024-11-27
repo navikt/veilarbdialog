@@ -4,7 +4,7 @@ import no.nav.common.types.identer.Fnr
 import java.time.ZonedDateTime
 import java.util.*
 
-data class SendingEntity(
+data class OversiktenForsendingEntity(
     val uuid: UUID,
     val fnr: Fnr,
     val opprettet: ZonedDateTime = ZonedDateTime.now(),

@@ -25,7 +25,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
 
     @BeforeEach
     fun beforeEach() {
-        jdbcTemplate.execute("TRUNCATE TABLE oversikten_utboks")
+        jdbcTemplate.execute("TRUNCATE TABLE oversikten_forsending")
     }
 
     @Test
@@ -34,7 +34,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
 
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
 
-        val meldingerIUtboks = oversiktenUtboksRepository.hentAlleSomSkalSendes()
+        val meldingerIUtboks = oversiktenForsendingRepository.hentAlleSomSkalSendes()
         assertThat(meldingerIUtboks).hasSize(1)
         val melding = meldingerIUtboks.first()
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
@@ -50,21 +50,21 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     fun `Gjeldende eskaleringsvarsel som er yngre enn 14 dager skal ikke sendes til oversikten-utboks`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(13))
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
-        assertThat(oversiktenUtboksRepository.hentAlleSomSkalSendes()).isEmpty()
+        assertThat(oversiktenForsendingRepository.hentAlleSomSkalSendes()).isEmpty()
     }
 
     @Test
     fun `ikke-gjeldende eskaleringsvarsel skal ikke sendes til oversikten-utboks`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(14), false)
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
-        assertThat(oversiktenUtboksRepository.hentAlleSomSkalSendes()).isEmpty()
+        assertThat(oversiktenForsendingRepository.hentAlleSomSkalSendes()).isEmpty()
     }
 
     @Test
     fun `Ikke send eskaleringsvarsel til oversikten hvis den allerede er sendt`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
-        val meldingerIUtboks = oversiktenUtboksRepository.hentAlleSomSkalSendes()
+        val meldingerIUtboks = oversiktenForsendingRepository.hentAlleSomSkalSendes()
         assertThat(meldingerIUtboks).hasSize(1)
 
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
@@ -76,14 +76,14 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     fun `Melding om stopp skal sendes til oversikten-utboks`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
-        val meldingerIUtboks = oversiktenUtboksRepository.hentAlleSomSkalSendes()
+        val meldingerIUtboks = oversiktenForsendingRepository.hentAlleSomSkalSendes()
         assertThat(meldingerIUtboks).hasSize(1)
         oversiktenService.sendUsendteMeldingerTilOversikten()
-        assertThat(oversiktenUtboksRepository.hentAlleSomSkalSendes()).hasSize(0)
+        assertThat(oversiktenForsendingRepository.hentAlleSomSkalSendes()).hasSize(0)
 
         eskaleringsvarselService.stop(StopEskaleringDto(Fnr.of(bruker.fnr), "", false), NavIdent(veileder.navIdent))
 
-        val meldingerIUtboksEtterStopp = oversiktenUtboksRepository.hentSendinger(Fnr.of(bruker.fnr), OversiktenMelding.Kategori.UTGATT_VARSEL, OversiktenMelding.Operasjon.STOPP )
+        val meldingerIUtboksEtterStopp = oversiktenForsendingRepository.hentForsendinger(Fnr.of(bruker.fnr), OversiktenMelding.Kategori.UTGATT_VARSEL, OversiktenMelding.Operasjon.STOPP )
         assertThat(meldingerIUtboksEtterStopp).hasSize(1)
         val melding = meldingerIUtboksEtterStopp.first()
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
@@ -97,13 +97,13 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     fun `Melding om stopp når oppfølgingsperiode avsluttes skal sendes til oversikten-utboks`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
-        val meldingerIUtboks = oversiktenUtboksRepository.hentAlleSomSkalSendes()
+        val meldingerIUtboks = oversiktenForsendingRepository.hentAlleSomSkalSendes()
         assertThat(meldingerIUtboks).hasSize(1)
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
         eskaleringsvarselService.stop(bruker.oppfolgingsperiode)
 
-        val meldingerIUtboksEtterStopp = oversiktenUtboksRepository.hentAlleSomSkalSendes()
+        val meldingerIUtboksEtterStopp = oversiktenForsendingRepository.hentAlleSomSkalSendes()
         assertThat(meldingerIUtboksEtterStopp).hasSize(1)
         val melding = meldingerIUtboksEtterStopp.first()
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
