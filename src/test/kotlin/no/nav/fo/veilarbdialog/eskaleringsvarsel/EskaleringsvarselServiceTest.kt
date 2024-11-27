@@ -43,7 +43,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.tidspunktSendt).isNull()
         assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
         val eskaleringsvarsel = eskaleringsvarselRepository.hentGjeldende(AktorId(bruker.aktorId)).get()
-        assertThat(eskaleringsvarsel.oversiktenSendingUuid).isEqualTo(melding.uuid)
+        assertThat(eskaleringsvarsel.oversiktenSendingUuid).isEqualTo(melding.meldingKey)
     }
 
     @Test
@@ -76,14 +76,13 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     fun `Melding om stopp skal sendes til oversikten-utboks`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
-        val meldingerIUtboks = oversiktenForsendingRepository.hentAlleSomSkalSendes()
-        assertThat(meldingerIUtboks).hasSize(1)
+        val meldingKey = oversiktenForsendingRepository.hentAlleSomSkalSendes()[0].meldingKey
         oversiktenService.sendUsendteMeldingerTilOversikten()
         assertThat(oversiktenForsendingRepository.hentAlleSomSkalSendes()).hasSize(0)
 
         eskaleringsvarselService.stop(StopEskaleringDto(Fnr.of(bruker.fnr), "", false), NavIdent(veileder.navIdent))
 
-        val meldingerIUtboksEtterStopp = oversiktenForsendingRepository.hentForsendinger(Fnr.of(bruker.fnr), OversiktenMelding.Kategori.UTGATT_VARSEL, OversiktenMelding.Operasjon.STOPP )
+        val meldingerIUtboksEtterStopp = oversiktenForsendingRepository.hentForsendinger(meldingKey)
         assertThat(meldingerIUtboksEtterStopp).hasSize(1)
         val melding = meldingerIUtboksEtterStopp.first()
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)

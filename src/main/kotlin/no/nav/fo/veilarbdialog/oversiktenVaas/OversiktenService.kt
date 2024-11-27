@@ -24,23 +24,23 @@ open class OversiktenService(
     open fun sendUsendteMeldingerTilOversikten() {
         val forsendingerSomSkalSendes = oversiktenForsendingRepository.hentAlleSomSkalSendes()
         forsendingerSomSkalSendes.forEach { forsending ->
-            oversiktenProducer.sendMelding(forsending.uuid.toString(), forsending.meldingSomJson)
-            oversiktenForsendingRepository.markerSomSendt(forsending.uuid)
+            oversiktenProducer.sendMelding(forsending.meldingKey.toString(), forsending.meldingSomJson)
+            oversiktenForsendingRepository.markerSomSendt(forsending.meldingKey)
             forsending.fnr
         }
     }
 
-    open fun sendStartMeldingOmUtgåttVarsel(eskaleringsvarsel: EskaleringsvarselEntity): UUID {
+    open fun sendStartMeldingOmUtgåttVarsel(eskaleringsvarsel: EskaleringsvarselEntity): MeldingKey {
         val fnr = aktorOppslagClient.hentFnr(AktorId(eskaleringsvarsel.aktorId))
         val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.START, erProd)
         val oversiktenForsendingEntity = OversiktenForsendingEntity(
             meldingSomJson = JsonUtils.toJson(melding),
             fnr = fnr,
             kategori = melding.kategori,
-            uuid = UUID.randomUUID()
+            meldingKey = UUID.randomUUID()
         )
         oversiktenForsendingRepository.lagreSending(oversiktenForsendingEntity)
-        return oversiktenForsendingEntity.uuid
+        return oversiktenForsendingEntity.meldingKey
     }
 
     open fun sendStoppMeldingOmUtgåttVarsel(fnr: Fnr){
@@ -50,11 +50,11 @@ open class OversiktenService(
             meldingSomJson = JsonUtils.toJson(melding),
             fnr = fnr,
             kategori = melding.kategori,
-            uuid = UUID.randomUUID()
+            meldingKey = UUID.randomUUID()
         )
         try  {
-            oversiktenProducer.sendMelding(oversiktenForsendingEntity.uuid.toString(), oversiktenForsendingEntity.meldingSomJson)
-            oversiktenForsendingRepository.markerSomSendt(oversiktenForsendingEntity.uuid)
+            oversiktenProducer.sendMelding(oversiktenForsendingEntity.meldingKey.toString(), oversiktenForsendingEntity.meldingSomJson)
+            oversiktenForsendingRepository.markerSomSendt(oversiktenForsendingEntity.meldingKey)
         }catch (e: Exception){
             oversiktenForsendingRepository.lagreSending(oversiktenForsendingEntity)
         }

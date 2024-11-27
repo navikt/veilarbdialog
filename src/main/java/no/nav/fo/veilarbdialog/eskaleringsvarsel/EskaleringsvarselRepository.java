@@ -44,7 +44,7 @@ public class EskaleringsvarselRepository {
             DatabaseUtils.hentZonedDateTime(rs, "avsluttet_dato"),
             rs.getString("avsluttet_av"),
             rs.getString("avsluttet_begrunnelse"),
-            DatabaseUtils.hentMaybeUUID(rs, "oversikten_forsending_uuid")
+            DatabaseUtils.hentMaybeUUID(rs, "oversikten_forsending_melding_key")
     );
 
     public EskaleringsvarselEntity opprett(long tilhorendeDialogId, MinSideVarselId varselId, String aktorId, String opprettetAv, String opprettetBegrunnelse) {
@@ -159,7 +159,7 @@ public class EskaleringsvarselRepository {
                 SELECT * FROM ESKALERINGSVARSEL
                 WHERE opprettet_dato < :tidspunkt
                 AND gjeldende IS NOT NULL
-                AND oversikten_forsending_uuid IS NULL
+                AND oversikten_forsending_melding_key IS NULL
                 """;
         var params = new MapSqlParameterSource()
                 .addValue("tidspunkt", tidspunkt);
@@ -179,7 +179,7 @@ public class EskaleringsvarselRepository {
     public void markerVarselSomSendt(long varselId, UUID oversiktenSendingUuid) {
         String sql = """
                 UPDATE ESKALERINGSVARSEL
-                SET oversikten_forsending_uuid = :oversiktenSendingUuid
+                SET oversikten_forsending_melding_key = :oversiktenSendingUuid
                 WHERE id = :varselId
                 """;
         var params = new MapSqlParameterSource()

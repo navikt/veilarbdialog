@@ -5,7 +5,7 @@ import java.time.ZonedDateTime
 import java.util.*
 
 data class OversiktenForsendingEntity(
-    val uuid: UUID,
+    val meldingKey: MeldingKey,
     val fnr: Fnr,
     val opprettet: ZonedDateTime = ZonedDateTime.now(),
     val tidspunktSendt: ZonedDateTime? = null,
@@ -13,6 +13,8 @@ data class OversiktenForsendingEntity(
     val meldingSomJson: String,
     val kategori: OversiktenMelding.Kategori,
 )
+
+typealias MeldingKey = UUID
 
 enum class UtsendingStatus {
     SKAL_SENDES,
