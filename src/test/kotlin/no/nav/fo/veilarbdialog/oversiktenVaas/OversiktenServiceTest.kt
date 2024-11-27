@@ -25,7 +25,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     @Test
     fun `Skal sende usendte meldinger`() {
         val melding = melding(bruker)
-        oversiktenForsendingRepository.lagreSending(melding)
+        oversiktenForsendingRepository.lagreForsending(melding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
@@ -36,7 +36,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     @Test
     fun `Skal ikke sende melding som er markert som SENDT`() {
         val melding = melding(bruker, utsendingStatus = UtsendingStatus.SENDT)
-        oversiktenForsendingRepository.lagreSending(melding)
+        oversiktenForsendingRepository.lagreForsending(melding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
@@ -46,7 +46,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     @Test
     fun `Skal ikke sende melding som er markert som SKAL_IKKE_SENDES`() {
         val melding = melding(bruker, utsendingStatus = UtsendingStatus.SKAL_IKKE_SENDES)
-        oversiktenForsendingRepository.lagreSending(melding)
+        oversiktenForsendingRepository.lagreForsending(melding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 

@@ -14,7 +14,7 @@ import java.util.*
 open class OversiktenForsendingRepository(
     private val jdbc: NamedParameterJdbcTemplate
 ) {
-    open fun lagreSending(oversiktenForsendingEntity: OversiktenForsendingEntity) {
+    open fun lagreForsending(oversiktenForsendingEntity: OversiktenForsendingEntity) {
         val sql = """ 
             INSERT INTO oversikten_forsending (
                     fnr, opprettet, tidspunkt_sendt, utsending_status, melding, kategori, melding_key)
@@ -42,17 +42,19 @@ open class OversiktenForsendingRepository(
         return jdbc.query(sql, rowMapper)
     }
 
-    open fun hentForsendinger(meldingKey: MeldingKey): List<OversiktenForsendingEntity> {
+    open fun hentForsendinger(meldingKey: MeldingKey, operasjon: OversiktenMelding.Operasjon): List<OversiktenForsendingEntity> {
         val sql = """
             select * from oversikten_forsending
             where melding_key = :melding_key
+            and melding->>'operasjon' = :operasjon
         """.trimIndent()
 
         val params = MapSqlParameterSource().apply {
             addValue("melding_key", meldingKey)
+            addValue("operasjon", operasjon.name)
         }
 
-        return jdbc.queryForList(sql, params, OversiktenForsendingEntity::class.java)
+        return jdbc.query(sql, params, rowMapper)
     }
 
     open fun markerSomSendt(meldingKey: MeldingKey) {

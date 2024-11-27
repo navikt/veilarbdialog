@@ -82,9 +82,9 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
 
         eskaleringsvarselService.stop(StopEskaleringDto(Fnr.of(bruker.fnr), "", false), NavIdent(veileder.navIdent))
 
-        val meldingerIUtboksEtterStopp = oversiktenForsendingRepository.hentForsendinger(meldingKey)
-        assertThat(meldingerIUtboksEtterStopp).hasSize(1)
-        val melding = meldingerIUtboksEtterStopp.first()
+        val stoppMeldinger = oversiktenForsendingRepository.hentForsendinger(meldingKey, OversiktenMelding.Operasjon.STOPP)
+        assertThat(stoppMeldinger).hasSize(1)
+        val melding = stoppMeldinger.first()
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
         assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))

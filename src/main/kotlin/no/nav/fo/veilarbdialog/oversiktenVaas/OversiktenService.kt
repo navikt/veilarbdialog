@@ -39,7 +39,7 @@ open class OversiktenService(
             kategori = melding.kategori,
             meldingKey = UUID.randomUUID()
         )
-        oversiktenForsendingRepository.lagreSending(oversiktenForsendingEntity)
+        oversiktenForsendingRepository.lagreForsending(oversiktenForsendingEntity)
         return oversiktenForsendingEntity.meldingKey
     }
 
@@ -55,8 +55,8 @@ open class OversiktenService(
         try  {
             oversiktenProducer.sendMelding(oversiktenForsendingEntity.meldingKey.toString(), oversiktenForsendingEntity.meldingSomJson)
             oversiktenForsendingRepository.markerSomSendt(oversiktenForsendingEntity.meldingKey)
-        }catch (e: Exception){
-            oversiktenForsendingRepository.lagreSending(oversiktenForsendingEntity)
+        } catch (e: Exception){
+            oversiktenForsendingRepository.lagreForsending(oversiktenForsendingEntity)
         }
     }
 }
