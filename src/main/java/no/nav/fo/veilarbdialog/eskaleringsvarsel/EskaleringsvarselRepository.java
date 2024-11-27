@@ -43,7 +43,8 @@ public class EskaleringsvarselRepository {
             rs.getString("opprettet_begrunnelse"),
             DatabaseUtils.hentZonedDateTime(rs, "avsluttet_dato"),
             rs.getString("avsluttet_av"),
-            rs.getString("avsluttet_begrunnelse")
+            rs.getString("avsluttet_begrunnelse"),
+            rs.getBoolean("sendt_til_oversikten")
     );
 
     public EskaleringsvarselEntity opprett(long tilhorendeDialogId, MinSideVarselId varselId, String aktorId, String opprettetAv, String opprettetBegrunnelse) {
@@ -86,7 +87,8 @@ public class EskaleringsvarselRepository {
                 opprettetBegrunnelse,
                 null,
                 null,
-                null
+                null,
+                false
                 );
     }
 

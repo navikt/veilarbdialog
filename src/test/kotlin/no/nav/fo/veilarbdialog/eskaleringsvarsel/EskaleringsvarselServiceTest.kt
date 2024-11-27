@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.eskaleringsvarsel
 
+import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
@@ -39,6 +40,8 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
         assertThat(melding.tidspunktSendt).isNull()
         assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
+        val eskaleringsvarsel = eskaleringsvarselRepository.hentGjeldende(AktorId(bruker.aktorId)).get()
+        assertThat(eskaleringsvarsel.sendtTilOversikten).isTrue()
     }
 
     @Test

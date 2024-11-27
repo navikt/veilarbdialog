@@ -15,6 +15,7 @@ public record EskaleringsvarselEntity(
         String opprettetBegrunnelse,
         ZonedDateTime avsluttetDato,
         String avsluttetAv,
-        String avsluttetBegrunnelse
+        String avsluttetBegrunnelse,
+        boolean sendtTilOversikten
 ) {
 }
