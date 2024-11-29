@@ -57,7 +57,7 @@ open class EskaleringsvarselService(
     @Scheduled(cron = "0 */20 * * * *")
     @SchedulerLock(name = "utgåtte_varsler_til_oversikten_scheduledTask", lockAtMostFor = "PT2M")
     open fun sendUtgåtteVarslerTilOversikten() {
-        val varselUtgåttEtterDager = 14
+        val varselUtgåttEtterDager = 10
         val tidspunktUtgått = LocalDateTime.now().minusDays(varselUtgåttEtterDager.toLong())
         val varsler = eskaleringsvarselRepository.hentUsendteGjeldendeVarslerEldreEnn(tidspunktUtgått)
         log.info("skal sende ${varsler.size} utgåtte varsler til oversikten")
