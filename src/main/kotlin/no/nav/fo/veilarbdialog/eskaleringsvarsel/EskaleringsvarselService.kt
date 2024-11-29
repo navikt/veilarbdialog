@@ -155,7 +155,8 @@ open class EskaleringsvarselService(
     }
 
     @Transactional
-    open fun stop(oppfolgingsperiode: UUID?): Boolean {
+    open fun stoppEskaleringsvarselFordiOppfolgingsperiodenErAvsluttet(oppfolgingsperiode: UUID?): Boolean {
+        log.info("Skal stoppe eskaleringsvarsel fordi oppfølgingsperioden er avsluttet")
         val eskaleringsvarsel = eskaleringsvarselRepository.hentGjeldende(oppfolgingsperiode).getOrNull()
         eskaleringsvarsel?.let {
             if (it.oversiktenSendingUuid != null) {

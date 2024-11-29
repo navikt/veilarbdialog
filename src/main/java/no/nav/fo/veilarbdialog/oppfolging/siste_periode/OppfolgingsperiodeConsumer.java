@@ -28,7 +28,7 @@ class OppfolgingsperiodeConsumer {
         OppfolgingsperiodeV1 oppfolgingsperiodeV1 = JsonUtils.fromJson(consumerRecord.value(), OppfolgingsperiodeV1.class);
 
         if (oppfolgingsperiodeV1.sluttDato != null) {
-            avsluttEskaleringsverslerOgAktiveBrukernotifikasjoner(oppfolgingsperiodeV1);
+            avsluttEskaleringsvarslerOgAktiveBrukernotifikasjoner(oppfolgingsperiodeV1);
             settDialogerTilHistorisk(oppfolgingsperiodeV1);
         }
 
@@ -40,8 +40,8 @@ class OppfolgingsperiodeConsumer {
                         oppfolgingsperiodeV1.sluttDato));
     }
 
-    private void avsluttEskaleringsverslerOgAktiveBrukernotifikasjoner(OppfolgingsperiodeV1 oppfolgingsperiodeV1) {
-        eskaleringsvarselService.stop(oppfolgingsperiodeV1.uuid);
+    private void avsluttEskaleringsvarslerOgAktiveBrukernotifikasjoner(OppfolgingsperiodeV1 oppfolgingsperiodeV1) {
+        eskaleringsvarselService.stoppEskaleringsvarselFordiOppfolgingsperiodenErAvsluttet(oppfolgingsperiodeV1.uuid);
         minsideVarselService.setSkalAvsluttesForVarslerIPeriode(oppfolgingsperiodeV1.uuid);
     }
 

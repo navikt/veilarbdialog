@@ -114,7 +114,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         val meldingKey = meldinger[0].meldingKey
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
-        eskaleringsvarselService.stop(bruker.oppfolgingsperiode)
+        eskaleringsvarselService.stoppEskaleringsvarselFordiOppfolgingsperiodenErAvsluttet(bruker.oppfolgingsperiode)
 
         val stoppMeldinger = oversiktenMeldingMedMetadataRepository.hent(meldingKey, OversiktenMelding.Operasjon.STOPP)
         assertThat(stoppMeldinger).hasSize(1)
