@@ -127,6 +127,7 @@ public class EskaleringsvarselRepository {
                 SELECT * FROM ESKALERINGSVARSEL E
                 INNER JOIN DIALOG ON DIALOG.DIALOG_ID = E.TILHORENDE_DIALOG_ID
                 WHERE DIALOG.OPPFOLGINGSPERIODE_UUID = :oppfolgingsperiodeUuid
+                and gjeldende is not null
                 """;
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("oppfolgingsperiodeUuid", oppfolgingsperiodeUuid.toString());
