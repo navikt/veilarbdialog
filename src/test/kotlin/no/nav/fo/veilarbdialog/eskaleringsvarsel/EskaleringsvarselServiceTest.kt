@@ -97,11 +97,11 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     @Test
     fun `Melding om stopp skal ikke sendes til oversikten dersom startmelding ikke ble sendt`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
-        assertThat(oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()).hasSize(0)
+        assertThat(hentAlleOversiktenMeldinger()).hasSize(0)
 
         eskaleringsvarselService.stop(StopEskaleringDto(Fnr.of(bruker.fnr), "", false), NavIdent(veileder.navIdent))
 
-        val stoppMeldinger = oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()
+        val stoppMeldinger = hentAlleOversiktenMeldinger()
         assertThat(stoppMeldinger).hasSize(0)
     }
 
