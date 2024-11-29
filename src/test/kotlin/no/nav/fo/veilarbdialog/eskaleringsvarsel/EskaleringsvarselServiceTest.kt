@@ -29,8 +29,8 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     }
 
     @Test
-    fun `Gjeldende eskaleringsvarsel som er 14 dager eller eldre skal sendes til oversikten-utboks`() {
-        opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(14))
+    fun `Gjeldende eskaleringsvarsel som er 10 dager eller eldre skal sendes til oversikten-utboks`() {
+        opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(10))
 
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
 
@@ -47,15 +47,15 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     }
 
     @Test
-    fun `Gjeldende eskaleringsvarsel som er yngre enn 14 dager skal ikke sendes til oversikten-utboks`() {
-        opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(13))
+    fun `Gjeldende eskaleringsvarsel som er yngre enn 10 dager skal ikke sendes til oversikten-utboks`() {
+        opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(9))
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
         assertThat(oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()).isEmpty()
     }
 
     @Test
     fun `ikke-gjeldende eskaleringsvarsel skal ikke sendes til oversikten-utboks`() {
-        opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(14), false)
+        opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(10), false)
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
         assertThat(oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()).isEmpty()
     }
