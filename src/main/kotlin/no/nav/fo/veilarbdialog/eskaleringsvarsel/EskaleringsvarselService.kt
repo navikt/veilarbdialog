@@ -62,8 +62,8 @@ open class EskaleringsvarselService(
         val varsler = eskaleringsvarselRepository.hentUsendteGjeldendeVarslerEldreEnn(tidspunktUtgått)
 
         varsler.forEach { varsel ->
-            val oversiktenSendingUuid = oversiktenService.sendStartMeldingOmUtgåttVarsel(varsel)
-            eskaleringsvarselRepository.markerVarselSomSendt(varsel.varselId, oversiktenSendingUuid)
+            val oversiktenMeldingKey = oversiktenService.sendStartMeldingOmUtgåttVarsel(varsel)
+            eskaleringsvarselRepository.markerVarselSomSendt(varsel.varselId, oversiktenMeldingKey)
         }
     }
 

@@ -11,40 +11,40 @@ import java.sql.ResultSet
 import java.util.*
 
 @Repository
-open class OversiktenForsendingRepository(
+open class OversiktenMeldingMedMetadataRepository(
     private val jdbc: NamedParameterJdbcTemplate
 ) {
-    open fun lagreForsending(oversiktenForsendingEntity: OversiktenForsendingEntity) {
+    open fun lagre(oversiktenMeldingMedMetadata: OversiktenMeldingMedMetadata) {
         val sql = """ 
-            INSERT INTO oversikten_forsending (
+            INSERT INTO oversikten_melding_med_metadata (
                     fnr, opprettet, tidspunkt_sendt, utsending_status, melding, kategori, melding_key)
             VALUES ( :fnr, :opprettet, :tidspunkt_sendt, :utsending_status, :melding::json, :kategori, :melding_key)
         """.trimIndent()
 
         val params = VeilarbDialogSqlParameterSource().apply {
-            addValue("fnr", oversiktenForsendingEntity.fnr.get())
-            addValue("opprettet", oversiktenForsendingEntity.opprettet)
-            addValue("tidspunkt_sendt", oversiktenForsendingEntity.tidspunktSendt)
-            addValue("utsending_status", oversiktenForsendingEntity.utsendingStatus.name)
-            addValue("melding", oversiktenForsendingEntity.meldingSomJson)
-            addValue("kategori", oversiktenForsendingEntity.kategori.name)
-            addValue("melding_key", oversiktenForsendingEntity.meldingKey)
+            addValue("fnr", oversiktenMeldingMedMetadata.fnr.get())
+            addValue("opprettet", oversiktenMeldingMedMetadata.opprettet)
+            addValue("tidspunkt_sendt", oversiktenMeldingMedMetadata.tidspunktSendt)
+            addValue("utsending_status", oversiktenMeldingMedMetadata.utsendingStatus.name)
+            addValue("melding", oversiktenMeldingMedMetadata.meldingSomJson)
+            addValue("kategori", oversiktenMeldingMedMetadata.kategori.name)
+            addValue("melding_key", oversiktenMeldingMedMetadata.meldingKey)
         }
 
         jdbc.update(sql, params)
     }
 
-    open fun hentAlleSomSkalSendes(): List<OversiktenForsendingEntity> {
+    open fun hentAlleSomSkalSendes(): List<OversiktenMeldingMedMetadata> {
         val sql = """
-            SELECT * FROM oversikten_forsending WHERE utsending_status = 'SKAL_SENDES'
+            SELECT * FROM oversikten_melding_med_metadata WHERE utsending_status = 'SKAL_SENDES'
         """.trimIndent()
 
         return jdbc.query(sql, rowMapper)
     }
 
-    open fun hentForsendinger(meldingKey: MeldingKey, operasjon: OversiktenMelding.Operasjon): List<OversiktenForsendingEntity> {
+    open fun hent(meldingKey: MeldingKey, operasjon: OversiktenMelding.Operasjon): List<OversiktenMeldingMedMetadata> {
         val sql = """
-            select * from oversikten_forsending
+            select * from oversikten_melding_med_metadata
             where melding_key = :melding_key
             and melding->>'operasjon' = :operasjon
         """.trimIndent()
@@ -59,7 +59,7 @@ open class OversiktenForsendingRepository(
 
     open fun markerSomSendt(meldingKey: MeldingKey) {
         val sql = """
-           UPDATE oversikten_forsending
+           UPDATE oversikten_melding_med_metadata
            SET utsending_status = 'SENDT',
            tidspunkt_sendt = now()
            WHERE melding_key = :melding_key
@@ -73,7 +73,7 @@ open class OversiktenForsendingRepository(
     }
 
     private val rowMapper = RowMapper { rs: ResultSet, rowNum: Int ->
-        OversiktenForsendingEntity(
+        OversiktenMeldingMedMetadata(
             fnr = Fnr.of(rs.getString("fnr")),
             opprettet = DatabaseUtils.hentZonedDateTime(rs, "opprettet"),
             tidspunktSendt = DatabaseUtils.hentZonedDateTime(rs, "tidspunkt_sendt"),

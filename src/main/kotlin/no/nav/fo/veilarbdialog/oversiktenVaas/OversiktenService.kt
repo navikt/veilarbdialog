@@ -14,43 +14,43 @@ import java.util.*
 @Service
 open class OversiktenService(
     private val aktorOppslagClient: AktorOppslagClient,
-    private val oversiktenForsendingRepository: OversiktenForsendingRepository,
+    private val oversiktenMeldingMedMetadataRepository: OversiktenMeldingMedMetadataRepository,
     private val oversiktenProducer: OversiktenProducer
 ) {
     private val erProd = EnvironmentUtils.isProduction().orElse(false)
 
     @Scheduled(cron = "0 */5 * * * *") // Hvert 5. minutt
-    @SchedulerLock(name = "oversikten_forsending_scheduledTask", lockAtMostFor = "PT3M")
+    @SchedulerLock(name = "oversikten_melding_med_metadata_scheduledTask", lockAtMostFor = "PT3M")
     open fun sendUsendteMeldingerTilOversikten() {
-        val forsendingerSomSkalSendes = oversiktenForsendingRepository.hentAlleSomSkalSendes()
-        forsendingerSomSkalSendes.forEach { forsending ->
-            oversiktenProducer.sendMelding(forsending.meldingKey.toString(), forsending.meldingSomJson)
-            oversiktenForsendingRepository.markerSomSendt(forsending.meldingKey)
-            forsending.fnr
+        val meldingerMedMetadata = oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()
+        meldingerMedMetadata.forEach { meldingMedMetadata ->
+            oversiktenProducer.sendMelding(meldingMedMetadata.meldingKey.toString(), meldingMedMetadata.meldingSomJson)
+            oversiktenMeldingMedMetadataRepository.markerSomSendt(meldingMedMetadata.meldingKey)
+            meldingMedMetadata.fnr
         }
     }
 
     open fun sendStartMeldingOmUtgåttVarsel(eskaleringsvarsel: EskaleringsvarselEntity): MeldingKey {
         val fnr = aktorOppslagClient.hentFnr(AktorId(eskaleringsvarsel.aktorId))
         val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.START, erProd)
-        val oversiktenForsendingEntity = OversiktenForsendingEntity(
+        val oversiktenMeldingMedMetadata = OversiktenMeldingMedMetadata(
             meldingSomJson = JsonUtils.toJson(melding),
             fnr = fnr,
             kategori = melding.kategori,
             meldingKey = UUID.randomUUID()
         )
-        oversiktenForsendingRepository.lagreForsending(oversiktenForsendingEntity)
-        return oversiktenForsendingEntity.meldingKey
+        oversiktenMeldingMedMetadataRepository.lagre(oversiktenMeldingMedMetadata)
+        return oversiktenMeldingMedMetadata.meldingKey
     }
 
     open fun sendStoppMeldingOmUtgåttVarsel(fnr: Fnr, meldingKeyStartMelding: UUID) {
-        val opprinneligStartMelding = oversiktenForsendingRepository.hentForsendinger(meldingKeyStartMelding, OversiktenMelding.Operasjon.START).let {
+        val opprinneligStartMelding = oversiktenMeldingMedMetadataRepository.hent(meldingKeyStartMelding, OversiktenMelding.Operasjon.START).let {
             check(it.size <= 1) { "Skal ikke kunne eksistere flere enn én startmeldinger" }
             it.first()
         }
 
         val sluttmelding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.STOPP, erProd)
-        val oversiktenForsendingEntity = OversiktenForsendingEntity(
+        val oversiktenMeldingMedMetadata = OversiktenMeldingMedMetadata(
             meldingSomJson = JsonUtils.toJson(sluttmelding),
             fnr = fnr,
             kategori = sluttmelding.kategori,
@@ -58,11 +58,11 @@ open class OversiktenService(
         )
 
         try  {
-            oversiktenProducer.sendMelding(oversiktenForsendingEntity.meldingKey.toString(), oversiktenForsendingEntity.meldingSomJson)
-            val sendtForsending = oversiktenForsendingEntity.tilSendtForsending()
-            oversiktenForsendingRepository.lagreForsending(sendtForsending)
+            oversiktenProducer.sendMelding(oversiktenMeldingMedMetadata.meldingKey.toString(), oversiktenMeldingMedMetadata.meldingSomJson)
+            val sendtMeldingMedMetadata = oversiktenMeldingMedMetadata.tilSendtMeldingMedMetadata()
+            oversiktenMeldingMedMetadataRepository.lagre(sendtMeldingMedMetadata)
         } catch (e: Exception){
-            oversiktenForsendingRepository.lagreForsending(oversiktenForsendingEntity)
+            oversiktenMeldingMedMetadataRepository.lagre(oversiktenMeldingMedMetadata)
         }
     }
 }

@@ -4,7 +4,7 @@ import no.nav.common.types.identer.Fnr
 import java.time.ZonedDateTime
 import java.util.*
 
-data class OversiktenForsendingEntity(
+data class OversiktenMeldingMedMetadata(
     val meldingKey: MeldingKey,
     val fnr: Fnr,
     val opprettet: ZonedDateTime = ZonedDateTime.now(),
@@ -13,7 +13,7 @@ data class OversiktenForsendingEntity(
     val meldingSomJson: String,
     val kategori: OversiktenMelding.Kategori,
 ) {
-    fun tilSendtForsending() = this.copy(tidspunktSendt = ZonedDateTime.now(), utsendingStatus = UtsendingStatus.SENDT)
+    fun tilSendtMeldingMedMetadata() = this.copy(tidspunktSendt = ZonedDateTime.now(), utsendingStatus = UtsendingStatus.SENDT)
 }
 
 typealias MeldingKey = UUID

@@ -10,7 +10,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenService;
-import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenForsendingRepository;
+import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenMeldingMedMetadataRepository;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.util.DialogTestService;
 import no.nav.fo.veilarbdialog.util.KafkaTestService;
@@ -72,7 +72,7 @@ public abstract class SpringBootTestBase {
     protected EskaleringsvarselService eskaleringsvarselService;
 
     @Autowired
-    protected OversiktenForsendingRepository oversiktenForsendingRepository;
+    protected OversiktenMeldingMedMetadataRepository oversiktenMeldingMedMetadataRepository;
 
     @Autowired
     protected OversiktenService oversiktenService;

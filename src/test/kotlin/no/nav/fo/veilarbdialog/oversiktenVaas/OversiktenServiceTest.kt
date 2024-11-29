@@ -19,13 +19,13 @@ open class OversiktenServiceTest: SpringBootTestBase() {
 
     @BeforeEach
     fun beforeEach() {
-        jdbcTemplate.execute("TRUNCATE TABLE oversikten_forsending")
+        jdbcTemplate.execute("TRUNCATE TABLE oversikten_melding_med_metadata")
     }
 
     @Test
     fun `Skal sende usendte meldinger`() {
         val melding = melding(bruker)
-        oversiktenForsendingRepository.lagreForsending(melding)
+        oversiktenMeldingMedMetadataRepository.lagre(melding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
@@ -36,7 +36,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     @Test
     fun `Skal ikke sende melding som er markert som SENDT`() {
         val melding = melding(bruker, utsendingStatus = UtsendingStatus.SENDT)
-        oversiktenForsendingRepository.lagreForsending(melding)
+        oversiktenMeldingMedMetadataRepository.lagre(melding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
@@ -46,7 +46,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     @Test
     fun `Skal ikke sende melding som er markert som SKAL_IKKE_SENDES`() {
         val melding = melding(bruker, utsendingStatus = UtsendingStatus.SKAL_IKKE_SENDES)
-        oversiktenForsendingRepository.lagreForsending(melding)
+        oversiktenMeldingMedMetadataRepository.lagre(melding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
@@ -54,7 +54,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     }
 
     private fun melding(bruker: MockBruker, utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES) =
-        OversiktenForsendingEntity(
+        OversiktenMeldingMedMetadata(
             fnr = Fnr.of(bruker.fnr),
             meldingSomJson = "{}",
             kategori = OversiktenMelding.Kategori.UTGATT_VARSEL,
