@@ -72,7 +72,7 @@ open class OversiktenMeldingMedMetadataRepository(
         jdbc.update(sql, params)
     }
 
-    private val rowMapper = RowMapper { rs: ResultSet, rowNum: Int ->
+    open val rowMapper = RowMapper { rs: ResultSet, rowNum: Int ->
         OversiktenMeldingMedMetadata(
             fnr = Fnr.of(rs.getString("fnr")),
             opprettet = DatabaseUtils.hentZonedDateTime(rs, "opprettet"),

@@ -9,6 +9,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
 import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenMelding
+import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenMeldingMedMetadata
 import no.nav.fo.veilarbdialog.oversiktenVaas.UtsendingStatus
 import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogSqlParameterSource
 import org.assertj.core.api.Assertions.assertThat
@@ -29,32 +30,32 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     }
 
     @Test
-    fun `Gjeldende eskaleringsvarsel som er 10 dager eller eldre skal sendes til oversikten-utboks`() {
+    fun `Gjeldende eskaleringsvarsel som er 10 dager eller eldre skal sendes til oversikten`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(10))
 
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
 
-        val meldingerIUtboks = oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()
-        assertThat(meldingerIUtboks).hasSize(1)
-        val melding = meldingerIUtboks.first()
+        val meldinger = hentAlleOversiktenMeldinger()
+        assertThat(meldinger).hasSize(1)
+        val melding = meldinger.first()
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
         assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
-        assertThat(melding.tidspunktSendt).isNull()
-        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
+        assertThat(melding.tidspunktSendt).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
+        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SENDT)
         val eskaleringsvarsel = eskaleringsvarselRepository.hentGjeldende(AktorId(bruker.aktorId)).get()
         assertThat(eskaleringsvarsel.oversiktenSendingUuid).isEqualTo(melding.meldingKey)
     }
 
     @Test
-    fun `Gjeldende eskaleringsvarsel som er yngre enn 10 dager skal ikke sendes til oversikten-utboks`() {
+    fun `Gjeldende eskaleringsvarsel som er yngre enn 10 dager skal ikke sendes til oversikten`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(9))
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
         assertThat(oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()).isEmpty()
     }
 
     @Test
-    fun `ikke-gjeldende eskaleringsvarsel skal ikke sendes til oversikten-utboks`() {
+    fun `ikke-gjeldende eskaleringsvarsel skal ikke sendes til oversikten`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(10), false)
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
         assertThat(oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()).isEmpty()
@@ -64,19 +65,19 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     fun `Ikke send eskaleringsvarsel til oversikten hvis den allerede er sendt`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
-        val meldingerIUtboks = oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()
-        assertThat(meldingerIUtboks).hasSize(1)
+        val meldinger = hentAlleOversiktenMeldinger()
+        assertThat(meldinger).hasSize(1)
 
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
 
-        assertThat(meldingerIUtboks).hasSize(1)
+        assertThat(meldinger).hasSize(1)
     }
 
     @Test
-    fun `Melding om stopp skal sendes til oversikten-utboks`() {
+    fun `Melding om stopp skal sendes til oversikten`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
-        val meldingKey = oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()[0].meldingKey
+        val meldingKey = hentAlleOversiktenMeldinger()[0].meldingKey
         oversiktenService.sendUsendteMeldingerTilOversikten()
         assertThat(oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()).hasSize(0)
 
@@ -94,7 +95,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
 
 
     @Test
-    fun `Melding om stopp skal ikke sendes til oversikten-utboks dersom startmelding ikke ble sendt`() {
+    fun `Melding om stopp skal ikke sendes til oversikten dersom startmelding ikke ble sendt`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
         assertThat(oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()).hasSize(0)
 
@@ -105,12 +106,12 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     }
 
     @Test
-    fun `Melding om stopp når oppfølgingsperiode avsluttes skal sendes til oversikten-utboks`() {
+    fun `Melding om stopp når oppfølgingsperiode avsluttes skal sendes til oversikten`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
-        val meldingerIUtboks = oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()
-        assertThat(meldingerIUtboks).hasSize(1)
-        val meldingKey = meldingerIUtboks[0].meldingKey
+        val meldinger = hentAlleOversiktenMeldinger()
+        assertThat(meldinger).hasSize(1)
+        val meldingKey = meldinger[0].meldingKey
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
         eskaleringsvarselService.stop(bruker.oppfolgingsperiode)
@@ -123,6 +124,13 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
         assertThat(melding.tidspunktSendt).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
         assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SENDT)
+    }
+
+    fun hentAlleOversiktenMeldinger(): List<OversiktenMeldingMedMetadata> {
+        val sql = """
+            SELECT * FROM oversikten_melding_med_metadata
+        """.trimIndent()
+        return namedParameterJdbcTemplate.query(sql, oversiktenMeldingMedMetadataRepository.rowMapper)
     }
 
     fun opprettEskaleringsvarselEldreEnn(tidspunkt: ZonedDateTime, erGjeldende : Boolean = true) {
