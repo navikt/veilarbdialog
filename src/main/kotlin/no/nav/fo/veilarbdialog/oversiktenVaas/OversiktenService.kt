@@ -42,15 +42,16 @@ open class OversiktenService(
             kategori = melding.kategori,
             meldingKey = UUID.randomUUID()
         )
-        oversiktenMeldingMedMetadataRepository.lagre(oversiktenMeldingMedMetadata)
+        sendMeldingOgLagre(oversiktenMeldingMedMetadata)
         return oversiktenMeldingMedMetadata.meldingKey
     }
 
     open fun sendStoppMeldingOmUtgåttVarsel(fnr: Fnr, meldingKeyStartMelding: UUID) {
-        val opprinneligStartMelding = oversiktenMeldingMedMetadataRepository.hent(meldingKeyStartMelding, OversiktenMelding.Operasjon.START).let {
-            check(it.size <= 1) { "Skal ikke kunne eksistere flere enn én startmeldinger" }
-            it.first()
-        }
+        val opprinneligStartMelding =
+            oversiktenMeldingMedMetadataRepository.hent(meldingKeyStartMelding, OversiktenMelding.Operasjon.START).let {
+                check(it.size <= 1) { "Skal ikke kunne eksistere flere enn én startmeldinger" }
+                it.first()
+            }
 
         val sluttmelding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.STOPP, erProd)
         val oversiktenMeldingMedMetadata = OversiktenMeldingMedMetadata(
@@ -59,14 +60,17 @@ open class OversiktenService(
             kategori = sluttmelding.kategori,
             meldingKey = opprinneligStartMelding.meldingKey
         )
+        sendMeldingOgLagre(oversiktenMeldingMedMetadata)
+    }
 
-        try  {
-            oversiktenProducer.sendMelding(oversiktenMeldingMedMetadata.meldingKey.toString(), oversiktenMeldingMedMetadata.meldingSomJson)
-            val sendtMeldingMedMetadata = oversiktenMeldingMedMetadata.tilSendtMeldingMedMetadata()
+    private fun sendMeldingOgLagre(meldingMedMetadata: OversiktenMeldingMedMetadata) {
+        try {
+            oversiktenProducer.sendMelding(meldingMedMetadata.meldingKey.toString(), meldingMedMetadata.meldingSomJson)
+            val sendtMeldingMedMetadata = meldingMedMetadata.tilSendtMeldingMedMetadata()
             oversiktenMeldingMedMetadataRepository.lagre(sendtMeldingMedMetadata)
-            log.info("Sendt stoppmelding til oversikten")
-        } catch (e: Exception){
-            oversiktenMeldingMedMetadataRepository.lagre(oversiktenMeldingMedMetadata)
+            log.info("sendt melding til oversikten")
+        } catch (e: Exception) {
+            oversiktenMeldingMedMetadataRepository.lagre(meldingMedMetadata)
         }
     }
 }
