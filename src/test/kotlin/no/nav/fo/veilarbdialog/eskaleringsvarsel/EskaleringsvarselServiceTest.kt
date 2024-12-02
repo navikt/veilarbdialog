@@ -41,8 +41,8 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
         assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
-        assertThat(melding.tidspunktSendt).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
-        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SENDT)
+        assertThat(melding.tidspunktSendt).isNull()
+        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
         val eskaleringsvarsel = eskaleringsvarselRepository.hentGjeldende(AktorId(bruker.aktorId)).get()
         assertThat(eskaleringsvarsel.oversiktenSendingUuid).isEqualTo(melding.meldingKey)
     }
@@ -74,7 +74,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     }
 
     @Test
-    fun `Melding om stopp skal sendes til oversikten`() {
+    fun `Melding om stopp skal lagres i oversiktens utboks`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
         eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
         val meldingKey = hentAlleOversiktenMeldinger()[0].meldingKey
@@ -89,8 +89,8 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
         assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
-        assertThat(melding.tidspunktSendt).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
-        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SENDT)
+        assertThat(melding.tidspunktSendt).isNull()
+        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
     }
 
 
@@ -122,8 +122,8 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
         assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
-        assertThat(melding.tidspunktSendt).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
-        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SENDT)
+        assertThat(melding.tidspunktSendt).isNull()
+        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
     }
 
     fun hentAlleOversiktenMeldinger(): List<OversiktenMeldingMedMetadata> {

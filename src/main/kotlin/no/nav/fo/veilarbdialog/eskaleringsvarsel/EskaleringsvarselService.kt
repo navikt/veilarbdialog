@@ -63,7 +63,7 @@ open class EskaleringsvarselService(
         log.info("skal sende ${varsler.size} utgåtte varsler til oversikten")
 
         varsler.forEach { varsel ->
-            val oversiktenMeldingKey = oversiktenService.sendStartMeldingOmUtgåttVarsel(varsel)
+            val oversiktenMeldingKey = oversiktenService.lagreStartMeldingOmUtgåttVarselIUtboks(varsel)
             eskaleringsvarselRepository.markerVarselSomSendt(varsel.varselId, oversiktenMeldingKey)
         }
         log.info("sendte ${varsler.size} utgåtte varsler til oversikten")
@@ -144,7 +144,7 @@ open class EskaleringsvarselService(
         eskaleringsvarselRepository.stop(eskaleringsvarsel.varselId, stopVarselDto.begrunnelse, avsluttetAv)
         if (eskaleringsvarsel.oversiktenSendingUuid != null) {
             log.info("Sender stopp melding til oversikten for eskaleringsvarselId={}", eskaleringsvarsel.varselId)
-            oversiktenService.sendStoppMeldingOmUtgåttVarsel(Fnr.of(stopVarselDto.fnr.get()), eskaleringsvarsel.oversiktenSendingUuid)
+            oversiktenService.lagreStoppMeldingOmUtgåttVarselIUtboks(Fnr.of(stopVarselDto.fnr.get()), eskaleringsvarsel.oversiktenSendingUuid)
         }
         minsideVarselService.inaktiverVarselForhåndsvarsel(eskaleringsvarsel)
         val eskaleringsvarselEntity = eskaleringsvarselRepository.hentVarsel(eskaleringsvarsel.varselId)
@@ -161,7 +161,7 @@ open class EskaleringsvarselService(
         eskaleringsvarsel?.let {
             if (it.oversiktenSendingUuid != null) {
                 val fnr = aktorOppslagClient.hentFnr(AktorId(eskaleringsvarsel.aktorId))
-                oversiktenService.sendStoppMeldingOmUtgåttVarsel(fnr, it.oversiktenSendingUuid)
+                oversiktenService.lagreStoppMeldingOmUtgåttVarselIUtboks(fnr, it.oversiktenSendingUuid)
                 log.info("Sender stopp melding til oversikten for eskaleringsvarselId={}", it.varselId)
             }
         }

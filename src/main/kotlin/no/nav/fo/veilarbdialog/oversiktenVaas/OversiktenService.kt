@@ -21,7 +21,7 @@ open class OversiktenService(
     private val log = LoggerFactory.getLogger(OversiktenService::class.java)
     private val erProd = EnvironmentUtils.isProduction().orElse(false)
 
-    @Scheduled(cron = "0 */5 * * * *") // Hvert 5. minutt
+    @Scheduled(cron = "0 */1 * * * *") // Hvert minutt
     @SchedulerLock(name = "oversikten_melding_med_metadata_scheduledTask", lockAtMostFor = "PT3M")
     open fun sendUsendteMeldingerTilOversikten() {
         val meldingerMedMetadata = oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()
@@ -33,7 +33,7 @@ open class OversiktenService(
         }
     }
 
-    open fun sendStartMeldingOmUtgåttVarsel(eskaleringsvarsel: EskaleringsvarselEntity): MeldingKey {
+    open fun lagreStartMeldingOmUtgåttVarselIUtboks(eskaleringsvarsel: EskaleringsvarselEntity): MeldingKey {
         val fnr = aktorOppslagClient.hentFnr(AktorId(eskaleringsvarsel.aktorId))
         val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.START, erProd)
         val oversiktenMeldingMedMetadata = OversiktenMeldingMedMetadata(
@@ -42,17 +42,16 @@ open class OversiktenService(
             kategori = melding.kategori,
             meldingKey = UUID.randomUUID()
         )
-        sendMeldingOgLagre(oversiktenMeldingMedMetadata)
+        oversiktenMeldingMedMetadataRepository.lagre(oversiktenMeldingMedMetadata)
         return oversiktenMeldingMedMetadata.meldingKey
     }
 
-    open fun sendStoppMeldingOmUtgåttVarsel(fnr: Fnr, meldingKeyStartMelding: UUID) {
+    open fun lagreStoppMeldingOmUtgåttVarselIUtboks(fnr: Fnr, meldingKeyStartMelding: UUID) {
         val opprinneligStartMelding =
             oversiktenMeldingMedMetadataRepository.hent(meldingKeyStartMelding, OversiktenMelding.Operasjon.START).let {
                 check(it.size <= 1) { "Skal ikke kunne eksistere flere enn én startmeldinger" }
                 it.first()
             }
-
         val sluttmelding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.STOPP, erProd)
         val oversiktenMeldingMedMetadata = OversiktenMeldingMedMetadata(
             meldingSomJson = JsonUtils.toJson(sluttmelding),
@@ -60,17 +59,6 @@ open class OversiktenService(
             kategori = sluttmelding.kategori,
             meldingKey = opprinneligStartMelding.meldingKey
         )
-        sendMeldingOgLagre(oversiktenMeldingMedMetadata)
-    }
-
-    private fun sendMeldingOgLagre(meldingMedMetadata: OversiktenMeldingMedMetadata) {
-        try {
-            oversiktenProducer.sendMelding(meldingMedMetadata.meldingKey.toString(), meldingMedMetadata.meldingSomJson)
-            val sendtMeldingMedMetadata = meldingMedMetadata.tilSendtMeldingMedMetadata()
-            oversiktenMeldingMedMetadataRepository.lagre(sendtMeldingMedMetadata)
-            log.info("sendt melding til oversikten")
-        } catch (e: Exception) {
-            oversiktenMeldingMedMetadataRepository.lagre(meldingMedMetadata)
-        }
+        oversiktenMeldingMedMetadataRepository.lagre(oversiktenMeldingMedMetadata)
     }
 }
