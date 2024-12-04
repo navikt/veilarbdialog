@@ -12,7 +12,7 @@ open class BigQueryMetrikkCron(
     private val antallUtgattDAO: AntallUtgattDAO,
 ) {
 
-    @Scheduled(cron = "0 */10 * * * *") // TODO: sendre til cron = "@midnight" før prod
+    @Scheduled(cron = "@midnight")
     @SchedulerLock(name = "utgåtteVarsler_bigquery_metrikker", lockAtMostFor = "PT2M")
     open fun hentUtgåtteVarslerCron() {
         val antallUtgåtteVarsler = antallUtgattDAO.hentAntallUtgåtteVarsler()
