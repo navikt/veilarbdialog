@@ -18,5 +18,4 @@ open class BigQueryMetrikkCron(
         val antallUtgåtteVarsler = antallUtgattDAO.hentAntallUtgåtteVarsler()
         bigQueryClient.logAntallUtgåtteVarsler(antallUtgåtteVarsler)
     }
-
 }
