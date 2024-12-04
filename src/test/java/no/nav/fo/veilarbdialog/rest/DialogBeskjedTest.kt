@@ -28,6 +28,7 @@ import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder
+import no.nav.fo.veilarbdialog.mock_nav_modell.RestassuredUser
 import no.nav.tms.varsel.action.InaktiverVarsel
 import no.nav.tms.varsel.action.Varseltype
 import org.assertj.core.api.Assertions.assertThat
@@ -120,7 +121,7 @@ internal class DialogBeskjedTest(
         Assertions.assertThat(mockBruker.fnr).isEqualTo(opprettVarsel.ident)
     }
 
-    private fun MockVeileder.sendEnMelding(mockBruker: MockBruker, dialogId: String? = null): DialogDTO {
+    private fun RestassuredUser.sendEnMelding(mockBruker: MockBruker, dialogId: String? = null): DialogDTO {
         return this.createRequest()
             .body(NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift").setDialogId(dialogId))
             .post("/veilarbdialog/api/dialog?fnr={fnr}", mockBruker.fnr)
@@ -259,6 +260,14 @@ internal class DialogBeskjedTest(
         minsideVarselService.sendPendingVarslerCronImpl()
 
         assertOpprettetVarselPublisertPåKafka()
+    }
+
+    @Test
+    fun `meldinger fra bruker skal ikke opprette varsel`() {
+        val mockBruker = MockNavService.createHappyBruker()
+        mockBruker.sendEnMelding(mockBruker)
+        val sendteMeldinger = minsideVarselService.sendPendingVarslerCronImpl()
+        assertThat(sendteMeldinger).isEqualTo(0)
     }
 
     @Test

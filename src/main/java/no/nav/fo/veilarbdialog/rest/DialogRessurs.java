@@ -36,9 +36,7 @@ public class DialogRessurs {
     private final RestMapper restMapper;
     private final HttpServletRequest httpServletRequest;
     private final KontorsperreFilter kontorsperreFilter;
-    private final KvpService kvpService;
     private final IAuthService auth;
-    private final PersonService personService;
 
     @GetMapping
     @AuthorizeFnr(auditlogMessage = "hent dialoger")
@@ -124,7 +122,8 @@ public class DialogRessurs {
         Person bruker = nyMeldingDTO.getFnr() != null ? Person.fnr(nyMeldingDTO.getFnr()) : getContextUserIdent();
         sjekkTilgangOgAuditlog(bruker.eksternBrukerId());
 
-        var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, true);
+        var skalSendeMelding = !auth.erEksternBruker();
+        var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, skalSendeMelding);
         if (nyMeldingDTO.getVenterPaaSvarFraNav() != null) {
             dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyMeldingDTO.getVenterPaaSvarFraNav());
             dialogDataService.sendPaaKafka(dialogData.getAktorId());
