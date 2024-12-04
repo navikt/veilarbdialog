@@ -11,7 +11,7 @@ open class AntallUtgattDAO(
         val sql = """
             select count(*) as antallUtgåtte from eskaleringsvarsel 
             where gjeldende is not null 
-            and opprettet_dato > now() - INTERVAL '10 days';
+            and opprettet_dato < now() - INTERVAL '10 days';
         """.trimIndent()
         return template.queryForObject(sql, Int::class.java ) ?: 0
     }
