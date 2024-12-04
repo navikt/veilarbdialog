@@ -20,10 +20,10 @@ interface BigQueryClient {
 
 class BigQueryClientImplementation(projectId: String): BigQueryClient {
     val FORHAANSVARSEL_EVENTS = "FORHAANDSVARSEL_EVENTS"
-    val FORHAANDSVARSEL_ANTALL_UDELT = "FORHAANDSVARSEL_ANTALL_UDELT"
+    val FORHAANDSVARSEL_ANTALL_UTGATT = "FORHAANDSVARSEL_ANTALL_UTGATT"
     val DATASET_NAME = "dialog_metrikker"
     val forhaandsvarselEventsTable = TableId.of(DATASET_NAME, FORHAANSVARSEL_EVENTS)
-    val antallUtgåtteVarslerTable = TableId.of(DATASET_NAME, FORHAANDSVARSEL_ANTALL_UDELT)
+    val antallUtgåtteVarslerTable = TableId.of(DATASET_NAME, FORHAANDSVARSEL_ANTALL_UTGATT)
 
     private fun TableId.insertRequest(row: Map<String, Any>): InsertAllRequest {
         return InsertAllRequest.newBuilder(this).addRow(row).build()
