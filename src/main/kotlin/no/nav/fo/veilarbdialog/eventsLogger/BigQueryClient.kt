@@ -5,6 +5,7 @@ import com.google.cloud.bigquery.InsertAllRequest
 import com.google.cloud.bigquery.TableId
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
 import org.slf4j.LoggerFactory
+import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
 enum class EventType {
@@ -14,12 +15,14 @@ enum class EventType {
 
 interface BigQueryClient {
     fun logEvent(eskaleringsvarselEntity: EskaleringsvarselEntity, eventType: EventType, begrunnelseType: String? = null)
+    fun logAntallUtgåtteVarsler(antall: Int)
 }
 
 class BigQueryClientImplementation(projectId: String): BigQueryClient {
     val FORHAANSVARSEL_EVENTS = "FORHAANDSVARSEL_EVENTS"
     val DATASET_NAME = "dialog_metrikker"
     val forhaandsvarselEventsTable = TableId.of(DATASET_NAME, FORHAANSVARSEL_EVENTS)
+    val antallUtgåtteVarslerTable = TableId.of(DATASET_NAME, FORHAANSVARSEL_EVENTS)
 
     private fun TableId.insertRequest(row: Map<String, Any>): InsertAllRequest {
         return InsertAllRequest.newBuilder(this).addRow(row).build()
@@ -46,7 +49,15 @@ class BigQueryClientImplementation(projectId: String): BigQueryClient {
             .onFailure {
                 log.warn("Kunne ikke lage event i bigquery", it)
             }
+    }
 
+    override fun logAntallUtgåtteVarsler(antall: Int) {
+        val antallRow = mapOf(
+            "antall" to antall,
+            "timestamp" to ZonedDateTime.now().withZoneSameInstant(ZoneOffset.UTC).toOffsetDateTime().toString(),
+        )
+        val antallInsertRequest = antallUtgåtteVarslerTable.insertRequest(antallRow)
+        insertWhileToleratingErrors(antallInsertRequest)
     }
 
     private fun insertWhileToleratingErrors(insertRequest: InsertAllRequest) {
