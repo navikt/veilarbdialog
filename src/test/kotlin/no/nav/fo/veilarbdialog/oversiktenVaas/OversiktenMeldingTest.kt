@@ -17,7 +17,7 @@ class OversiktenMeldingTest {
         assertThat(melding.personID).isEqualTo(fnr)
         assertThat(melding.operasjon).isEqualTo(OversiktenMelding.Operasjon.START)
         assertThat(melding.hendelse.beskrivelse).isEqualTo("Bruker har et utgått varsel")
-        assertThat(melding.hendelse.lenke).isEqualTo("https://veilarbpersonflate.intern.dev.nav.no/aktivitetsplan")
+        assertThat(melding.hendelse.lenke).isEqualTo("https://veilarbpersonflate.ansatt.dev.nav.no/aktivitetsplan")
         assertThat(melding.hendelse.dato).isCloseTo(LocalDateTime.now(), within(100, ChronoUnit.MILLIS))
     }
 
