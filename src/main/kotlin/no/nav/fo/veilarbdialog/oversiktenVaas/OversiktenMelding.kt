@@ -11,7 +11,7 @@ data class OversiktenMelding(
 ) {
     companion object {
         private fun baseUrlVeilarbpersonflate(erProd: Boolean) =
-            if (erProd) "https://veilarbpersonflate.intern.nav.no" else "https://veilarbpersonflate.intern.dev.nav.no"
+            if (erProd) "https://veilarbpersonflate.intern.nav.no" else "https://veilarbpersonflate.ansatt.dev.nav.no"
 
         fun forUtgattVarsel(fnr: String, operasjon: Operasjon, erProd: Boolean) = OversiktenMelding(
             personID = fnr,
