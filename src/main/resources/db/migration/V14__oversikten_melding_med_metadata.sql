@@ -8,3 +8,4 @@ create table oversikten_melding_med_metadata (
     kategori                     text            not null
 );
 create index oversikten_melding_med_metadata_melding_key_idx on oversikten_melding_med_metadata(melding_key);
+create index oversikten_melding_med_metadata_utsending_status_idx on oversikten_melding_med_metadata(utsending_status);
