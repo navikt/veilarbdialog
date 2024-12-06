@@ -8,18 +8,20 @@ data class OversiktenMeldingMedMetadata(
     val meldingKey: MeldingKey,
     val fnr: Fnr,
     val opprettet: ZonedDateTime = ZonedDateTime.now(),
-    val tidspunktSendt: ZonedDateTime? = null,
-    val utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES,
+    val tidspunktStartet: ZonedDateTime? = null,
+    val tidspunktStoppet: ZonedDateTime? = null,
+    val utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_STARTES,
     val meldingSomJson: String,
     val kategori: OversiktenMelding.Kategori,
 ) {
-    fun tilSendtMeldingMedMetadata() = this.copy(tidspunktSendt = ZonedDateTime.now(), utsendingStatus = UtsendingStatus.SENDT)
 }
 
 typealias MeldingKey = UUID
 
 enum class UtsendingStatus {
-    SKAL_SENDES,
-    SENDT,
-    SKAL_IKKE_SENDES
+    SKAL_STARTES,
+    SKAL_STOPPES,
+    STARTET,
+    STOPPET,
+    ABORTERT
 }
