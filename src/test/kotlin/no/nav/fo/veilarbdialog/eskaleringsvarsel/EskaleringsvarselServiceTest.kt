@@ -33,7 +33,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     fun `Gjeldende eskaleringsvarsel som er 10 dager eller eldre skal sendes til oversikten`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(10))
 
-        eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
+        eskaleringsvarselService.sendUtgåtteVarslerTilOversiktenOutbox()
 
         val meldinger = hentAlleOversiktenMeldinger()
         assertThat(meldinger).hasSize(1)
@@ -50,25 +50,25 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     @Test
     fun `Gjeldende eskaleringsvarsel som er yngre enn 10 dager skal ikke sendes til oversikten`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(9))
-        eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
+        eskaleringsvarselService.sendUtgåtteVarslerTilOversiktenOutbox()
         assertThat(oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()).isEmpty()
     }
 
     @Test
     fun `ikke-gjeldende eskaleringsvarsel skal ikke sendes til oversikten`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(10), false)
-        eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
+        eskaleringsvarselService.sendUtgåtteVarslerTilOversiktenOutbox()
         assertThat(oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()).isEmpty()
     }
 
     @Test
     fun `Ikke send eskaleringsvarsel til oversikten hvis den allerede er sendt`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
-        eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
+        eskaleringsvarselService.sendUtgåtteVarslerTilOversiktenOutbox()
         val meldinger = hentAlleOversiktenMeldinger()
         assertThat(meldinger).hasSize(1)
 
-        eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
+        eskaleringsvarselService.sendUtgåtteVarslerTilOversiktenOutbox()
 
         assertThat(meldinger).hasSize(1)
     }
@@ -76,7 +76,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     @Test
     fun `Melding om stopp skal lagres i oversiktens utboks`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
-        eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
+        eskaleringsvarselService.sendUtgåtteVarslerTilOversiktenOutbox()
         val meldingKey = hentAlleOversiktenMeldinger()[0].meldingKey
         oversiktenService.sendUsendteMeldingerTilOversikten()
         assertThat(oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()).hasSize(0)
@@ -108,7 +108,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     @Test
     fun `Melding om stopp når oppfølgingsperiode avsluttes skal sendes til oversikten`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
-        eskaleringsvarselService.sendUtgåtteVarslerTilOversikten()
+        eskaleringsvarselService.sendUtgåtteVarslerTilOversiktenOutbox()
         val meldinger = hentAlleOversiktenMeldinger()
         assertThat(meldinger).hasSize(1)
         val meldingKey = meldinger[0].meldingKey

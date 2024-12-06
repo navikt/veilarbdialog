@@ -55,18 +55,18 @@ open class EskaleringsvarselService(
     private val log = LoggerFactory.getLogger(EskaleringsvarselService::class.java)
 
     @Scheduled(cron = "0 */20 * * * *")
-    @SchedulerLock(name = "utgåtte_varsler_til_oversikten_scheduledTask", lockAtMostFor = "PT2M")
-    open fun sendUtgåtteVarslerTilOversikten() {
+    @SchedulerLock(name = "utgåtte_varsler_til_outbox_scheduledTask", lockAtMostFor = "PT2M")
+    open fun sendUtgåtteVarslerTilOversiktenOutbox() {
         val varselUtgåttEtterDager = 10
         val tidspunktUtgått = LocalDateTime.now().minusDays(varselUtgåttEtterDager.toLong())
         val varsler = eskaleringsvarselRepository.hentUsendteGjeldendeVarslerEldreEnn(tidspunktUtgått)
-        log.info("skal sende ${varsler.size} utgåtte varsler til oversikten")
+        log.info("skal sende ${varsler.size} utgåtte varsler til outbox")
 
         varsler.forEach { varsel ->
             val oversiktenMeldingKey = oversiktenService.lagreStartMeldingOmUtgåttVarselIUtboks(varsel)
             eskaleringsvarselRepository.markerVarselSomSendt(varsel.varselId, oversiktenMeldingKey)
         }
-        log.info("sendte ${varsler.size} utgåtte varsler til oversikten")
+        log.info("sendte ${varsler.size} utgåtte varsler til outbox")
     }
 
     @Transactional
