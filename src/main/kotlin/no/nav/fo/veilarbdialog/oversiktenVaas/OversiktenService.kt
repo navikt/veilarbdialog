@@ -28,8 +28,8 @@ open class OversiktenService(
         val meldingerMedMetadata = oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()
         log.info("Sender ${meldingerMedMetadata.size} meldinger til oversikten")
         meldingerMedMetadata.forEach { meldingMedMetadata ->
-            oversiktenProducer.sendMelding(meldingMedMetadata.meldingKey.toString(), meldingMedMetadata.meldingSomJson)
             oversiktenMeldingMedMetadataRepository.markerSomSendt(meldingMedMetadata.meldingKey)
+            oversiktenProducer.sendMelding(meldingMedMetadata.meldingKey.toString(), meldingMedMetadata.meldingSomJson)
             meldingMedMetadata.fnr
         }
     }
