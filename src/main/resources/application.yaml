@@ -151,6 +151,7 @@ application:
       minside:
         varsel: min-side.aapen-brukervarsel-v1
       endringPaaDialog: dab.endring-paa-dialog-v1
+      oversikten: obo.portefolje-hendelsesfilter-v1
   brukernotifikasjon:
     grace:
       periode:

@@ -17,6 +17,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +42,8 @@ public class EskaleringsvarselRepository {
             rs.getString("opprettet_begrunnelse"),
             DatabaseUtils.hentZonedDateTime(rs, "avsluttet_dato"),
             rs.getString("avsluttet_av"),
-            rs.getString("avsluttet_begrunnelse")
+            rs.getString("avsluttet_begrunnelse"),
+            DatabaseUtils.hentMaybeUUID(rs, "oversikten_melding_med_metadata_melding_key")
     );
 
     public EskaleringsvarselEntity opprett(long tilhorendeDialogId, MinSideVarselId varselId, String aktorId, String opprettetAv, String opprettetBegrunnelse) {
@@ -84,6 +86,7 @@ public class EskaleringsvarselRepository {
                 opprettetBegrunnelse,
                 null,
                 null,
+                null,
                 null
                 );
     }
@@ -119,6 +122,24 @@ public class EskaleringsvarselRepository {
         }
     }
 
+    public Optional<EskaleringsvarselEntity> hentGjeldende(UUID oppfolgingsperiodeUuid) {
+        String sql = """
+                SELECT * FROM ESKALERINGSVARSEL E
+                INNER JOIN DIALOG ON DIALOG.DIALOG_ID = E.TILHORENDE_DIALOG_ID
+                WHERE DIALOG.OPPFOLGINGSPERIODE_UUID = :oppfolgingsperiodeUuid
+                and gjeldende is not null
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("oppfolgingsperiodeUuid", oppfolgingsperiodeUuid.toString());
+
+        try {
+            return Optional.ofNullable(jdbc.queryForObject(sql, params, rowMapper));
+        } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
+            return Optional.empty();
+        }
+    }
+
+
     public boolean stopPeriode(UUID oppfolgingsperiodeUuid) {
         String sql = """
                 UPDATE ESKALERINGSVARSEL
@@ -150,6 +171,17 @@ public class EskaleringsvarselRepository {
         }
     }
 
+    public List<EskaleringsvarselEntity> hentUsendteGjeldendeVarslerEldreEnn(LocalDateTime tidspunkt) {
+        String sql = """
+                SELECT * FROM ESKALERINGSVARSEL
+                WHERE opprettet_dato < :tidspunkt
+                AND gjeldende IS NOT NULL
+                AND oversikten_melding_med_metadata_melding_key IS NULL
+                """;
+        var params = new MapSqlParameterSource()
+                .addValue("tidspunkt", tidspunkt);
+        return jdbc.query(sql, params, rowMapper);
+    }
 
     public List<EskaleringsvarselEntity> hentHistorikk(AktorId aktorId) {
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -161,4 +193,16 @@ public class EskaleringsvarselRepository {
         return  jdbc.query(sql, params, rowMapper);
     }
 
+    public void markerVarselSomSendt(long varselId, UUID oversiktenSendingMeldingKey) {
+        String sql = """
+                UPDATE ESKALERINGSVARSEL
+                SET oversikten_melding_med_metadata_melding_key = :oversiktenSendingUuid
+                WHERE id = :varselId
+                """;
+        var params = new MapSqlParameterSource()
+                .addValue("oversiktenSendingUuid", oversiktenSendingMeldingKey)
+                .addValue("varselId", varselId);
+
+        jdbc.update(sql, params);
+    }
 }

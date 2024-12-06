@@ -2,13 +2,16 @@ package no.nav.fo.veilarbdialog.eskaleringsvarsel
 
 import lombok.RequiredArgsConstructor
 import lombok.extern.slf4j.Slf4j
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import no.nav.common.client.aktoroppslag.AktorOppslagClient
 import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr
 import no.nav.common.types.identer.NavIdent
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
-import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
-import no.nav.fo.veilarbdialog.domain.*
+import no.nav.fo.veilarbdialog.domain.DialogStatus
+import no.nav.fo.veilarbdialog.domain.Egenskap
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
+import no.nav.fo.veilarbdialog.domain.Person
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
@@ -19,14 +22,19 @@ import no.nav.fo.veilarbdialog.eventsLogger.BigQueryClient
 import no.nav.fo.veilarbdialog.eventsLogger.EventType
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client
+import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenService
 import no.nav.fo.veilarbdialog.service.DialogDataService
 import no.nav.poao.dab.spring_auth.IAuthService
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import java.util.*
+import kotlin.jvm.optionals.getOrNull
 
 @Slf4j
 @RequiredArgsConstructor
@@ -41,9 +49,25 @@ open class EskaleringsvarselService(
     private val sistePeriodeService: SistePeriodeService,
     private val funksjonelleMetrikker: FunksjonelleMetrikker,
     private val bigQueryClient: BigQueryClient,
+    private val oversiktenService: OversiktenService
 ) {
 
     private val log = LoggerFactory.getLogger(EskaleringsvarselService::class.java)
+
+    @Scheduled(cron = "0 */20 * * * *")
+    @SchedulerLock(name = "utgåtte_varsler_til_outbox_scheduledTask", lockAtMostFor = "PT2M")
+    open fun sendUtgåtteVarslerTilOversiktenOutbox() {
+        val varselUtgåttEtterDager = 10
+        val tidspunktUtgått = LocalDateTime.now().minusDays(varselUtgåttEtterDager.toLong())
+        val varsler = eskaleringsvarselRepository.hentUsendteGjeldendeVarslerEldreEnn(tidspunktUtgått)
+        log.info("skal sende ${varsler.size} utgåtte varsler til outbox")
+
+        varsler.forEach { varsel ->
+            val oversiktenMeldingKey = oversiktenService.lagreStartMeldingOmUtgåttVarselIUtboks(varsel)
+            eskaleringsvarselRepository.markerVarselSomSendt(varsel.varselId, oversiktenMeldingKey)
+        }
+        log.info("sendte ${varsler.size} utgåtte varsler til outbox")
+    }
 
     @Transactional
     open fun start(stansVarsel: StartEskaleringDto): EskaleringsvarselEntity {
@@ -118,8 +142,11 @@ open class EskaleringsvarselService(
         }
 
         eskaleringsvarselRepository.stop(eskaleringsvarsel.varselId, stopVarselDto.begrunnelse, avsluttetAv)
+        if (eskaleringsvarsel.oversiktenSendingUuid != null) {
+            log.info("Sender stopp melding til oversikten for eskaleringsvarselId={}", eskaleringsvarsel.varselId)
+            oversiktenService.lagreStoppMeldingOmUtgåttVarselIUtboks(Fnr.of(stopVarselDto.fnr.get()), eskaleringsvarsel.oversiktenSendingUuid)
+        }
         minsideVarselService.inaktiverVarselForhåndsvarsel(eskaleringsvarsel)
-
         val eskaleringsvarselEntity = eskaleringsvarselRepository.hentVarsel(eskaleringsvarsel.varselId)
         eskaleringsvarselEntity.ifPresent { varsel ->
             bigQueryClient.logEvent(varsel, EventType.FORHAANDSVARSEL_INAKTIVERT)
@@ -128,7 +155,17 @@ open class EskaleringsvarselService(
     }
 
     @Transactional
-    open fun stop(oppfolgingsperiode: UUID?): Boolean {
+    open fun stoppEskaleringsvarselFordiOppfolgingsperiodenErAvsluttet(oppfolgingsperiode: UUID?): Boolean {
+        log.info("Skal stoppe eskaleringsvarsel fordi oppfølgingsperioden er avsluttet")
+        val eskaleringsvarsel = eskaleringsvarselRepository.hentGjeldende(oppfolgingsperiode).getOrNull()
+        eskaleringsvarsel?.let {
+            if (it.oversiktenSendingUuid != null) {
+                val fnr = aktorOppslagClient.hentFnr(AktorId(eskaleringsvarsel.aktorId))
+                oversiktenService.lagreStoppMeldingOmUtgåttVarselIUtboks(fnr, it.oversiktenSendingUuid)
+                log.info("Sender stopp melding til oversikten for eskaleringsvarselId={}", it.varselId)
+            }
+        }
+
         return eskaleringsvarselRepository.stopPeriode(oppfolgingsperiode)
     }
 
