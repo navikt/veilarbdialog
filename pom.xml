@@ -227,7 +227,7 @@
         <dependency>
             <groupId>com.github.navikt</groupId>
             <artifactId>brukernotifikasjon-schemas</artifactId>
-            <version>v2.5.2</version>
+            <version>3.0.0</version>
         </dependency>
 
         <!-- EXTERNAL DEPENDENCIES -->
