@@ -47,8 +47,8 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     }
 
     @Test
-    fun `Skal ikke sende melding som er markert som SENDT`() {
-        val melding = melding(bruker, utsendingStatus = UtsendingStatus.SENDT)
+    fun `Skal ikke sende melding som er markert som STARTET`() {
+        val melding = melding(bruker, utsendingStatus = UtsendingStatus.STARTET)
         oversiktenMeldingMedMetadataRepository.lagre(melding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
@@ -57,8 +57,18 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     }
 
     @Test
-    fun `Skal ikke sende melding som er markert som SKAL_IKKE_SENDES`() {
-        val melding = melding(bruker, utsendingStatus = UtsendingStatus.SKAL_IKKE_SENDES)
+    fun `Skal ikke sende melding som er markert som STOPPET`() {
+        val melding = melding(bruker, utsendingStatus = UtsendingStatus.STOPPET)
+        oversiktenMeldingMedMetadataRepository.lagre(melding)
+
+        oversiktenService.sendUsendteMeldingerTilOversikten()
+
+        Mockito.verifyNoInteractions(oversiktenProducer)
+    }
+
+    @Test
+    fun `Skal ikke sende melding som er markert som er ABORTERT`() {
+        val melding = melding(bruker, utsendingStatus = UtsendingStatus.ABORTERT)
         oversiktenMeldingMedMetadataRepository.lagre(melding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()

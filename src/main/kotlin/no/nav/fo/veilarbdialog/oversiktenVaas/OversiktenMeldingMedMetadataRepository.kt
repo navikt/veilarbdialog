@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
+import java.sql.Types
 import java.util.*
 
 @Repository
@@ -17,14 +18,13 @@ open class OversiktenMeldingMedMetadataRepository(
     open fun lagre(oversiktenMeldingMedMetadata: OversiktenMeldingMedMetadata) {
         val sql = """ 
             INSERT INTO oversikten_melding_med_metadata (
-                    fnr, opprettet, tidspunkt_sendt, utsending_status, melding, kategori, melding_key)
-            VALUES ( :fnr, :opprettet, :tidspunkt_sendt, :utsending_status, :melding::json, :kategori, :melding_key)
+                    fnr, opprettet, utsending_status, melding, kategori, melding_key)
+            VALUES ( :fnr, :opprettet, :utsending_status::OVERSIKTEN_UTSENDING_STATUS, :melding::json, :kategori, :melding_key)
         """.trimIndent()
 
         val params = VeilarbDialogSqlParameterSource().apply {
             addValue("fnr", oversiktenMeldingMedMetadata.fnr.get())
             addValue("opprettet", oversiktenMeldingMedMetadata.opprettet)
-            addValue("tidspunkt_sendt", oversiktenMeldingMedMetadata.tidspunktSendt)
             addValue("utsending_status", oversiktenMeldingMedMetadata.utsendingStatus.name)
             addValue("melding", oversiktenMeldingMedMetadata.meldingSomJson)
             addValue("kategori", oversiktenMeldingMedMetadata.kategori.name)
@@ -36,7 +36,7 @@ open class OversiktenMeldingMedMetadataRepository(
 
     open fun hentAlleSomSkalSendes(): List<OversiktenMeldingMedMetadata> {
         val sql = """
-            SELECT * FROM oversikten_melding_med_metadata WHERE utsending_status = 'SKAL_SENDES'
+            SELECT * FROM oversikten_melding_med_metadata WHERE utsending_status IN ('SKAL_STARTES', 'SKAL_STOPPES')
         """.trimIndent()
 
         return jdbc.query(sql, rowMapper)
@@ -57,11 +57,26 @@ open class OversiktenMeldingMedMetadataRepository(
         return jdbc.query(sql, params, rowMapper)
     }
 
-    open fun markerSomSendt(meldingKey: MeldingKey) {
+    open fun markerSomStartet(meldingKey: MeldingKey) {
         val sql = """
            UPDATE oversikten_melding_med_metadata
-           SET utsending_status = 'SENDT',
-           tidspunkt_sendt = now()
+           SET utsending_status = 'STARTET',
+           tidspunkt_startet = now()
+           WHERE melding_key = :melding_key
+        """.trimIndent()
+
+        val params = VeilarbDialogSqlParameterSource().apply {
+            addValue("melding_key", meldingKey)
+        }
+
+        jdbc.update(sql, params)
+    }
+
+    open fun markerSomStoppet(meldingKey: MeldingKey) {
+        val sql = """
+           UPDATE oversikten_melding_med_metadata
+           SET utsending_status = 'STOPPET',
+           tidspunkt_stoppet = now()
            WHERE melding_key = :melding_key
         """.trimIndent()
 
@@ -76,7 +91,6 @@ open class OversiktenMeldingMedMetadataRepository(
         OversiktenMeldingMedMetadata(
             fnr = Fnr.of(rs.getString("fnr")),
             opprettet = DatabaseUtils.hentZonedDateTime(rs, "opprettet"),
-            tidspunktSendt = DatabaseUtils.hentZonedDateTime(rs, "tidspunkt_sendt"),
             utsendingStatus = UtsendingStatus.valueOf(rs.getString("utsending_status")),
             meldingSomJson = rs.getString("melding"),
             kategori = OversiktenMelding.Kategori.valueOf(rs.getString("kategori")),

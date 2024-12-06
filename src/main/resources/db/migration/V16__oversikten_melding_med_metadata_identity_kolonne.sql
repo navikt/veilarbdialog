@@ -1,5 +1,5 @@
 drop table oversikten_melding_med_metadata;
-CREATE TYPE OVERSIKTEN_UTSENDING_STATUS AS ENUM ('SKAL_STARTES', 'SKAL_STOPPES', 'STARTET', 'STOPPET');
+CREATE TYPE OVERSIKTEN_UTSENDING_STATUS AS ENUM ('SKAL_STARTES', 'SKAL_STOPPES', 'STARTET', 'STOPPET', 'ABORTERT');
 create table oversikten_melding_med_metadata (
                                                  melding_key                  uuid not null,
                                                  fnr                          varchar(11)     not null,
