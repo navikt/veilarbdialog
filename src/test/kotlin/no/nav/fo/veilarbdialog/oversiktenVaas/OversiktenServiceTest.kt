@@ -7,6 +7,8 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.util.*
 
@@ -24,13 +26,24 @@ open class OversiktenServiceTest: SpringBootTestBase() {
 
     @Test
     fun `Skal sende usendte meldinger`() {
-        val melding = melding(bruker)
-        oversiktenMeldingMedMetadataRepository.lagre(melding)
+        val startMelding = melding(bruker, utsendingStatus = UtsendingStatus.SKAL_STARTES)
+        val stoppMelding = melding(bruker, utsendingStatus = UtsendingStatus.SKAL_STOPPES)
+
+        val startetMelding = melding(bruker, utsendingStatus = UtsendingStatus.STARTET)
+        val stoppetMelding = melding(bruker, utsendingStatus = UtsendingStatus.STOPPET)
+
+        oversiktenMeldingMedMetadataRepository.lagre(startMelding)
+        oversiktenMeldingMedMetadataRepository.lagre(stoppMelding)
+        oversiktenMeldingMedMetadataRepository.lagre(startetMelding)
+        oversiktenMeldingMedMetadataRepository.lagre(stoppetMelding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
-        Mockito.verify(oversiktenProducer, Mockito.times(1))
-            .sendMelding(melding.meldingKey.toString(), melding.meldingSomJson)
+        verify(oversiktenProducer, Mockito.times(1))
+            .sendMelding(startMelding.meldingKey.toString(), startMelding.meldingSomJson)
+        verify(oversiktenProducer, Mockito.times(1))
+            .sendMelding(stoppMelding.meldingKey.toString(), stoppMelding.meldingSomJson)
+        verifyNoMoreInteractions(oversiktenProducer)
     }
 
     @Test
@@ -53,12 +66,12 @@ open class OversiktenServiceTest: SpringBootTestBase() {
         Mockito.verifyNoInteractions(oversiktenProducer)
     }
 
-    private fun melding(bruker: MockBruker, utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES) =
+    private fun melding(bruker: MockBruker, meldingKey: UUID = UUID.randomUUID(), utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_STARTES) =
         OversiktenMeldingMedMetadata(
             fnr = Fnr.of(bruker.fnr),
             meldingSomJson = "{}",
             kategori = OversiktenMelding.Kategori.UTGATT_VARSEL,
-            meldingKey = UUID.randomUUID(),
+            meldingKey = meldingKey,
             utsendingStatus = utsendingStatus
         )
 }
