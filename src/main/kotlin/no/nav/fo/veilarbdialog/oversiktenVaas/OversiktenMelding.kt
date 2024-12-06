@@ -13,13 +13,13 @@ data class OversiktenMelding(
         private fun baseUrlVeilarbpersonflate(erProd: Boolean) =
             if (erProd) "https://veilarbpersonflate.intern.nav.no" else "https://veilarbpersonflate.ansatt.dev.nav.no"
 
-        fun forUtgattVarsel(fnr: String, operasjon: Operasjon, erProd: Boolean) = OversiktenMelding(
+        fun forUtgattVarsel(fnr: String, operasjon: Operasjon, tidspunktUtgått: LocalDateTime, erProd: Boolean) = OversiktenMelding(
             personID = fnr,
             kategori = Kategori.UTGATT_VARSEL,
             operasjon = operasjon,
             hendelse = Hendelse(
                 beskrivelse = "Bruker har et utgått varsel",
-                dato = LocalDateTime.now(),
+                dato = tidspunktUtgått,
                 lenke = "${baseUrlVeilarbpersonflate(erProd)}/aktivitetsplan",
             )
         )

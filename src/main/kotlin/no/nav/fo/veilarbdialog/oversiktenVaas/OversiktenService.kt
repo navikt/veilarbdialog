@@ -10,6 +10,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.*
 
 @Service
@@ -35,7 +36,8 @@ open class OversiktenService(
 
     open fun lagreStartMeldingOmUtgåttVarselIUtboks(eskaleringsvarsel: EskaleringsvarselEntity): MeldingKey {
         val fnr = aktorOppslagClient.hentFnr(AktorId(eskaleringsvarsel.aktorId))
-        val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.START, erProd)
+        val utgåttTidspunkt = eskaleringsvarsel.opprettetDato.plusDays(10).toLocalDateTime()
+        val melding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.START, utgåttTidspunkt, erProd)
         val oversiktenMeldingMedMetadata = OversiktenMeldingMedMetadata(
             meldingSomJson = JsonUtils.toJson(melding),
             fnr = fnr,
@@ -52,7 +54,7 @@ open class OversiktenService(
                 check(it.size <= 1) { "Skal ikke kunne eksistere flere enn én startmeldinger" }
                 it.first()
             }
-        val sluttmelding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.STOPP, erProd)
+        val sluttmelding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.STOPP, LocalDateTime.now(), erProd)
         val oversiktenMeldingMedMetadata = OversiktenMeldingMedMetadata(
             meldingSomJson = JsonUtils.toJson(sluttmelding),
             fnr = fnr,
