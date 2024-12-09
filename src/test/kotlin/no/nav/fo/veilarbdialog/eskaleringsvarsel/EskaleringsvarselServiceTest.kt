@@ -88,7 +88,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
         assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
-        assertThat(melding.tidspunktStartet).isNull()
+        assertThat(melding.tidspunktSendt).isNull()
         assertThat(melding.tidspunktStoppet).isNull()
         assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_STOPPES)
     }
@@ -122,7 +122,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
         assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
-        assertThat(melding.tidspunktStartet).isNull()
+        assertThat(melding.tidspunktSendt).isNull()
         assertThat(melding.tidspunktStoppet).isNull()
         assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_STOPPES)
     }

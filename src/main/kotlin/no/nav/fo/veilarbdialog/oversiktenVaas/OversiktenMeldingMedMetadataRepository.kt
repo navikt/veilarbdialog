@@ -34,7 +34,7 @@ open class OversiktenMeldingMedMetadataRepository(
         jdbc.update(sql, params)
     }
 
-    open fun hentAlleSomSkalSendes(): List<OversiktenMeldingMedMetadata> {
+    open fun hentAlleSomSkalSendes(): List<LagretOversiktenMeldingMedMetadata> {
         val sql = """
             SELECT * FROM oversikten_melding_med_metadata WHERE utsending_status IN ('SKAL_STARTES', 'SKAL_STOPPES')
         """.trimIndent()
@@ -42,7 +42,7 @@ open class OversiktenMeldingMedMetadataRepository(
         return jdbc.query(sql, rowMapper)
     }
 
-    open fun hent(meldingKey: MeldingKey, operasjon: OversiktenMelding.Operasjon): List<OversiktenMeldingMedMetadata> {
+    open fun hent(meldingKey: MeldingKey, operasjon: OversiktenMelding.Operasjon): List<LagretOversiktenMeldingMedMetadata> {
         val sql = """
             select * from oversikten_melding_med_metadata
             where melding_key = :melding_key
@@ -57,44 +57,31 @@ open class OversiktenMeldingMedMetadataRepository(
         return jdbc.query(sql, params, rowMapper)
     }
 
-    open fun markerSomStartet(meldingKey: MeldingKey) {
+    open fun markerSomSendt(id: Long) {
         val sql = """
            UPDATE oversikten_melding_med_metadata
-           SET utsending_status = 'STARTET',
-           tidspunkt_startet = now()
-           WHERE melding_key = :melding_key
+           SET utsending_status = 'SENDT',
+           tidspunkt_sendt = now()
+           WHERE id = :id
         """.trimIndent()
 
         val params = VeilarbDialogSqlParameterSource().apply {
-            addValue("melding_key", meldingKey)
-        }
-
-        jdbc.update(sql, params)
-    }
-
-    open fun markerSomStoppet(meldingKey: MeldingKey) {
-        val sql = """
-           UPDATE oversikten_melding_med_metadata
-           SET utsending_status = 'STOPPET',
-           tidspunkt_stoppet = now()
-           WHERE melding_key = :melding_key
-        """.trimIndent()
-
-        val params = VeilarbDialogSqlParameterSource().apply {
-            addValue("melding_key", meldingKey)
+            addValue("id", id)
         }
 
         jdbc.update(sql, params)
     }
 
     open val rowMapper = RowMapper { rs: ResultSet, rowNum: Int ->
-        OversiktenMeldingMedMetadata(
+        LagretOversiktenMeldingMedMetadata(
+            id = rs.getLong("id"),
             fnr = Fnr.of(rs.getString("fnr")),
             opprettet = DatabaseUtils.hentZonedDateTime(rs, "opprettet"),
             utsendingStatus = UtsendingStatus.valueOf(rs.getString("utsending_status")),
             meldingSomJson = rs.getString("melding"),
             kategori = OversiktenMelding.Kategori.valueOf(rs.getString("kategori")),
-            meldingKey = UUID.fromString(rs.getString("melding_key"))
+            meldingKey = UUID.fromString(rs.getString("melding_key")),
+            tidspunktSendt = DatabaseUtils.hentZonedDateTime(rs, "tidspunkt_sendt")
         )
     }
 }

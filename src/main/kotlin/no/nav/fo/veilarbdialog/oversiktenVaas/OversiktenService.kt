@@ -28,11 +28,7 @@ open class OversiktenService(
         val meldingerMedMetadata = oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()
         log.info("Sender ${meldingerMedMetadata.size} meldinger til oversikten")
         meldingerMedMetadata.forEach { meldingMedMetadata ->
-            when(meldingMedMetadata.utsendingStatus) {
-                UtsendingStatus.SKAL_STARTES -> oversiktenMeldingMedMetadataRepository.markerSomStartet(meldingMedMetadata.meldingKey)
-                UtsendingStatus.SKAL_STOPPES -> oversiktenMeldingMedMetadataRepository.markerSomStoppet(meldingMedMetadata.meldingKey)
-                else -> {}
-            }
+            oversiktenMeldingMedMetadataRepository.markerSomSendt(meldingMedMetadata.id)
             oversiktenProducer.sendMelding(meldingMedMetadata.meldingKey.toString(), meldingMedMetadata.meldingSomJson)
             meldingMedMetadata.fnr
         }
@@ -55,7 +51,7 @@ open class OversiktenService(
     open fun lagreStoppMeldingOmUtgåttVarselIUtboks(fnr: Fnr, meldingKeyStartMelding: UUID) {
         val opprinneligStartMelding =
             oversiktenMeldingMedMetadataRepository.hent(meldingKeyStartMelding, OversiktenMelding.Operasjon.START).let {
-                check(it.size <= 1) { "Skal ikke kunne eksistere flere enn én stoppmeldinger" }
+                check(it.size <= 1) { "Skal ikke kunne eksistere flere enn én startmelding" }
                 it.first()
             }
         val sluttmelding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.STOPP, LocalDateTime.now(), erProd)

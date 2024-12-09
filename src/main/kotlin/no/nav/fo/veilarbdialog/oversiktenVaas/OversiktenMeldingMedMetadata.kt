@@ -4,24 +4,40 @@ import no.nav.common.types.identer.Fnr
 import java.time.ZonedDateTime
 import java.util.*
 
-data class OversiktenMeldingMedMetadata(
+
+open class OversiktenMeldingMedMetadata(
     val meldingKey: MeldingKey,
     val fnr: Fnr,
     val opprettet: ZonedDateTime = ZonedDateTime.now(),
-    val tidspunktStartet: ZonedDateTime? = null,
-    val tidspunktStoppet: ZonedDateTime? = null,
-    val utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_STARTES,
+    val tidspunktSendt: ZonedDateTime? = null,
+    val utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES,
     val meldingSomJson: String,
     val kategori: OversiktenMelding.Kategori,
-) {
-}
+)
+
+class LagretOversiktenMeldingMedMetadata(
+    val id: Long,
+    meldingKey: MeldingKey,
+    fnr: Fnr,
+    opprettet: ZonedDateTime,
+    tidspunktSendt: ZonedDateTime?,
+    utsendingStatus: UtsendingStatus,
+    meldingSomJson: String,
+    kategori: OversiktenMelding.Kategori,
+) : OversiktenMeldingMedMetadata(
+    meldingKey = meldingKey,
+    fnr = fnr,
+    opprettet = opprettet,
+    tidspunktSendt = tidspunktSendt,
+    utsendingStatus = utsendingStatus,
+    meldingSomJson = meldingSomJson,
+    kategori = kategori
+)
 
 typealias MeldingKey = UUID
 
 enum class UtsendingStatus {
-    SKAL_STARTES,
-    SKAL_STOPPES,
-    STARTET,
-    STOPPET,
-    ABORTERT
+    SKAL_SENDES,
+    SENDT,
+    SKAL_IKKE_SENDES
 }
