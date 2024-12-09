@@ -4,9 +4,11 @@ import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
+import org.mockito.Mockito.*
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.util.*
 
@@ -24,13 +26,18 @@ open class OversiktenServiceTest: SpringBootTestBase() {
 
     @Test
     fun `Skal sende usendte meldinger`() {
-        val melding = melding(bruker)
+        val melding = melding(bruker, utsendingStatus = UtsendingStatus.SKAL_SENDES)
+
+        val sendtMelding = melding(bruker, utsendingStatus = UtsendingStatus.SENDT)
+
         oversiktenMeldingMedMetadataRepository.lagre(melding)
+        oversiktenMeldingMedMetadataRepository.lagre(sendtMelding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
-        Mockito.verify(oversiktenProducer, Mockito.times(1))
+        verify(oversiktenProducer, Mockito.times(1))
             .sendMelding(melding.meldingKey.toString(), melding.meldingSomJson)
+        verifyNoMoreInteractions(oversiktenProducer)
     }
 
     @Test
@@ -53,12 +60,29 @@ open class OversiktenServiceTest: SpringBootTestBase() {
         Mockito.verifyNoInteractions(oversiktenProducer)
     }
 
-    private fun melding(bruker: MockBruker, utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES) =
+
+    @Test
+    fun `Nye meldinger skal ikke påvirke andre meldinger`() {
+        val førsteMelding = melding(bruker, utsendingStatus = UtsendingStatus.SENDT)
+        val førsteMeldingID = oversiktenMeldingMedMetadataRepository.lagre(førsteMelding)
+        val andreMelding = melding(meldingKey = førsteMelding.meldingKey, bruker = bruker, utsendingStatus = UtsendingStatus.SKAL_SENDES)
+        oversiktenMeldingMedMetadataRepository.lagre(andreMelding)
+
+        oversiktenService.sendUsendteMeldingerTilOversikten()
+
+        val førsteMeldingEtterAndreMeldingErSendt = oversiktenMeldingMedMetadataRepository.hent(førsteMeldingID)
+        assertThat(førsteMelding.tidspunktSendt).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.tidspunktSendt)
+        verify(oversiktenProducer, times(1)).sendMelding(andreMelding.meldingKey.toString(), andreMelding.meldingSomJson)
+        verifyNoMoreInteractions(oversiktenProducer)
+    }
+
+    private fun melding(bruker: MockBruker, meldingKey: UUID = UUID.randomUUID(), utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES) =
         OversiktenMeldingMedMetadata(
             fnr = Fnr.of(bruker.fnr),
             meldingSomJson = "{}",
             kategori = OversiktenMelding.Kategori.UTGATT_VARSEL,
-            meldingKey = UUID.randomUUID(),
-            utsendingStatus = utsendingStatus
+            meldingKey = meldingKey,
+            utsendingStatus = utsendingStatus,
+            operasjon = OversiktenMelding.Operasjon.START
         )
 }
