@@ -13,6 +13,7 @@ open class OversiktenMeldingMedMetadata(
     val utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES,
     val meldingSomJson: String,
     val kategori: OversiktenMelding.Kategori,
+    val operasjon: OversiktenMelding.Operasjon
 )
 
 class LagretOversiktenMeldingMedMetadata(
@@ -24,6 +25,7 @@ class LagretOversiktenMeldingMedMetadata(
     utsendingStatus: UtsendingStatus,
     meldingSomJson: String,
     kategori: OversiktenMelding.Kategori,
+    operasjon: OversiktenMelding.Operasjon
 ) : OversiktenMeldingMedMetadata(
     meldingKey = meldingKey,
     fnr = fnr,
@@ -31,7 +33,8 @@ class LagretOversiktenMeldingMedMetadata(
     tidspunktSendt = tidspunktSendt,
     utsendingStatus = utsendingStatus,
     meldingSomJson = meldingSomJson,
-    kategori = kategori
+    kategori = kategori,
+    operasjon = operasjon
 )
 
 typealias MeldingKey = UUID

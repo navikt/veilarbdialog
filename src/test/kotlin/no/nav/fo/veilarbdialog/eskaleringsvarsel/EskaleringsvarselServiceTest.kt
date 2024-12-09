@@ -41,7 +41,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.fnr.get()).isEqualTo(bruker.fnr)
         assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
-        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_STARTES)
+        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
         val eskaleringsvarsel = eskaleringsvarselRepository.hentGjeldende(AktorId(bruker.aktorId)).get()
         assertThat(eskaleringsvarsel.oversiktenSendingUuid).isEqualTo(melding.meldingKey)
     }
@@ -89,8 +89,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
         assertThat(melding.tidspunktSendt).isNull()
-        assertThat(melding.tidspunktStoppet).isNull()
-        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_STOPPES)
+        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
     }
 
 
@@ -123,8 +122,7 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.kategori).isEqualTo(OversiktenMelding.Kategori.UTGATT_VARSEL)
         assertThat(melding.opprettet).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.SECONDS))
         assertThat(melding.tidspunktSendt).isNull()
-        assertThat(melding.tidspunktStoppet).isNull()
-        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_STOPPES)
+        assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
     }
 
     fun hentAlleOversiktenMeldinger(): List<OversiktenMeldingMedMetadata> {
