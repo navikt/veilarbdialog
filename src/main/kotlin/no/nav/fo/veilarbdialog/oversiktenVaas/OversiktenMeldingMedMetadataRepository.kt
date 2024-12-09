@@ -34,8 +34,9 @@ open class OversiktenMeldingMedMetadataRepository(
         }
 
         val keyHolder = GeneratedKeyHolder()
-        jdbc.update(sql, params, keyHolder)
-        return keyHolder.getKeyAs(Long::class.java) ?: throw IllegalStateException("Kunne ikke hente ut nøkkel til lagret melding")
+        jdbc.update(sql, params, keyHolder, arrayOf("id"))
+
+        return keyHolder.key?.toLong() ?: throw IllegalStateException("Kunne ikke hente ut nøkkel til lagret melding")
     }
 
     open fun hentAlleSomSkalSendes(): List<LagretOversiktenMeldingMedMetadata> {
@@ -59,6 +60,18 @@ open class OversiktenMeldingMedMetadataRepository(
         }
 
         return jdbc.query(sql, params, rowMapper)
+    }
+
+    open fun hent(id : Long ) : LagretOversiktenMeldingMedMetadata {
+        val sql = """
+            SELECT * FROM oversikten_melding_med_metadata WHERE id = :id
+        """.trimIndent()
+
+        val params = VeilarbDialogSqlParameterSource().apply {
+            addValue("id", id)
+        }
+
+        return jdbc.queryForObject(sql, params, rowMapper)
     }
 
     open fun markerSomSendt(id: Long) {

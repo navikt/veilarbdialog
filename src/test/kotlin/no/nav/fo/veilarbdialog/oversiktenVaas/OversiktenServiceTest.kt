@@ -4,11 +4,11 @@ import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.Mockito.*
 import org.springframework.boot.test.mock.mockito.MockBean
 import java.util.*
 
@@ -64,14 +64,16 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     @Test
     fun `Nye meldinger skal ikke påvirke andre meldinger`() {
         val førsteMelding = melding(bruker, utsendingStatus = UtsendingStatus.SENDT)
-        oversiktenMeldingMedMetadataRepository.lagre(førsteMelding)
+        val førsteMeldingID = oversiktenMeldingMedMetadataRepository.lagre(førsteMelding)
         val andreMelding = melding(meldingKey = førsteMelding.meldingKey, bruker = bruker, utsendingStatus = UtsendingStatus.SKAL_SENDES)
         oversiktenMeldingMedMetadataRepository.lagre(andreMelding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
-        val førsteMeldingEtterAndreMeldingErSendt = oversiktenMeldingMedMetadataRepository.hent(meldingKey = førsteMelding.meldingKey, operasjon = OversiktenMelding.Operasjon.START)
-        Mockito.verifyNoInteractions(oversiktenProducer)
+        val førsteMeldingEtterAndreMeldingErSendt = oversiktenMeldingMedMetadataRepository.hent(førsteMeldingID)
+        assertThat(førsteMelding.tidspunktSendt).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.tidspunktSendt)
+        verify(oversiktenProducer, times(1)).sendMelding(andreMelding.meldingKey.toString(), andreMelding.meldingSomJson)
+        verifyNoMoreInteractions(oversiktenProducer)
     }
 
     private fun melding(bruker: MockBruker, meldingKey: UUID = UUID.randomUUID(), utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES) =
