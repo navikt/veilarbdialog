@@ -6,6 +6,7 @@ import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogSqlParameterSource
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 import java.sql.Types
@@ -15,11 +16,11 @@ import java.util.*
 open class OversiktenMeldingMedMetadataRepository(
     private val jdbc: NamedParameterJdbcTemplate
 ) {
-    open fun lagre(oversiktenMeldingMedMetadata: OversiktenMeldingMedMetadata) {
+    open fun lagre(oversiktenMeldingMedMetadata: OversiktenMeldingMedMetadata): Long {
         val sql = """ 
             INSERT INTO oversikten_melding_med_metadata (
-                    fnr, opprettet, utsending_status, melding, kategori, melding_key)
-            VALUES ( :fnr, :opprettet, :utsending_status::OVERSIKTEN_UTSENDING_STATUS, :melding::json, :kategori, :melding_key)
+                    fnr, opprettet, utsending_status, melding, kategori, melding_key, operasjon)
+            VALUES ( :fnr, :opprettet, :utsending_status::OVERSIKTEN_UTSENDING_STATUS, :melding::json, :kategori::OVERSIKTEN_KATEGORI, :melding_key, :operasjon::OVERSIKTEN_OPERASJON)
         """.trimIndent()
 
         val params = VeilarbDialogSqlParameterSource().apply {
@@ -29,14 +30,17 @@ open class OversiktenMeldingMedMetadataRepository(
             addValue("melding", oversiktenMeldingMedMetadata.meldingSomJson)
             addValue("kategori", oversiktenMeldingMedMetadata.kategori.name)
             addValue("melding_key", oversiktenMeldingMedMetadata.meldingKey)
+            addValue("operasjon", oversiktenMeldingMedMetadata.operasjon.name)
         }
 
-        jdbc.update(sql, params)
+        val keyHolder = GeneratedKeyHolder()
+        jdbc.update(sql, params, keyHolder)
+        return keyHolder.getKeyAs(Long::class.java) ?: throw IllegalStateException("Kunne ikke hente ut nøkkel til lagret melding")
     }
 
     open fun hentAlleSomSkalSendes(): List<LagretOversiktenMeldingMedMetadata> {
         val sql = """
-            SELECT * FROM oversikten_melding_med_metadata WHERE utsending_status IN ('SKAL_STARTES', 'SKAL_STOPPES')
+            SELECT * FROM oversikten_melding_med_metadata WHERE utsending_status = 'SKAL_SENDES'
         """.trimIndent()
 
         return jdbc.query(sql, rowMapper)
@@ -81,7 +85,8 @@ open class OversiktenMeldingMedMetadataRepository(
             meldingSomJson = rs.getString("melding"),
             kategori = OversiktenMelding.Kategori.valueOf(rs.getString("kategori")),
             meldingKey = UUID.fromString(rs.getString("melding_key")),
-            tidspunktSendt = DatabaseUtils.hentZonedDateTime(rs, "tidspunkt_sendt")
+            tidspunktSendt = DatabaseUtils.hentZonedDateTime(rs, "tidspunkt_sendt"),
+            operasjon = OversiktenMelding.Operasjon.valueOf(rs.getString("operasjon")),
         )
     }
 }

@@ -37,8 +37,6 @@ open class OversiktenServiceTest: SpringBootTestBase() {
 
         verify(oversiktenProducer, Mockito.times(1))
             .sendMelding(melding.meldingKey.toString(), melding.meldingSomJson)
-        verify(oversiktenProducer, Mockito.times(1))
-            .sendMelding(sendtMelding.meldingKey.toString(), sendtMelding.meldingSomJson)
         verifyNoMoreInteractions(oversiktenProducer)
     }
 
@@ -64,12 +62,15 @@ open class OversiktenServiceTest: SpringBootTestBase() {
 
 
     @Test
-    fun `Melding om stopp skal ikke påvirke start-melding`() {
-        val melding = melding(bruker, utsendingStatus = UtsendingStatus.SKAL_SENDES)
-        oversiktenMeldingMedMetadataRepository.lagre(melding)
+    fun `Nye meldinger skal ikke påvirke andre meldinger`() {
+        val førsteMelding = melding(bruker, utsendingStatus = UtsendingStatus.SENDT)
+        oversiktenMeldingMedMetadataRepository.lagre(førsteMelding)
+        val andreMelding = melding(meldingKey = førsteMelding.meldingKey, bruker = bruker, utsendingStatus = UtsendingStatus.SKAL_SENDES)
+        oversiktenMeldingMedMetadataRepository.lagre(andreMelding)
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
+        val førsteMeldingEtterAndreMeldingErSendt = oversiktenMeldingMedMetadataRepository.hent(meldingKey = førsteMelding.meldingKey, operasjon = OversiktenMelding.Operasjon.START)
         Mockito.verifyNoInteractions(oversiktenProducer)
     }
 
@@ -79,6 +80,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
             meldingSomJson = "{}",
             kategori = OversiktenMelding.Kategori.UTGATT_VARSEL,
             meldingKey = meldingKey,
-            utsendingStatus = utsendingStatus
+            utsendingStatus = utsendingStatus,
+            operasjon = OversiktenMelding.Operasjon.START
         )
 }
