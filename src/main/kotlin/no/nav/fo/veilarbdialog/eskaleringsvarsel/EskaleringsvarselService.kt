@@ -66,7 +66,9 @@ open class EskaleringsvarselService(
             val oversiktenMeldingKey = oversiktenService.lagreStartMeldingOmUtgåttVarselIUtboks(varsel)
             eskaleringsvarselRepository.knyttVarselTilOversiktenMelding(varsel.varselId, oversiktenMeldingKey)
         }
-        log.info("sendte ${varsler.size} utgåtte varsler til outbox")
+        if(varsler.isNotEmpty()) {
+            log.info("sendte ${varsler.size} utgåtte varsler til outbox")
+        }
     }
 
     @Transactional
