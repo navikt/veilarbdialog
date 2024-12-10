@@ -54,7 +54,7 @@ open class EskaleringsvarselService(
 
     private val log = LoggerFactory.getLogger(EskaleringsvarselService::class.java)
 
-    @Scheduled(cron = "0 */20 * * * *")
+//    @Scheduled(cron = "0 */20 * * * *")
     @SchedulerLock(name = "utgåtte_varsler_til_outbox_scheduledTask", lockAtMostFor = "PT2M")
     open fun sendUtgåtteVarslerTilOversiktenOutbox() {
         val varselUtgåttEtterDager = 10

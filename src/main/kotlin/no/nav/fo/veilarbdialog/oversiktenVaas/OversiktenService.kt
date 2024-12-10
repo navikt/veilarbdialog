@@ -22,7 +22,7 @@ open class OversiktenService(
     private val log = LoggerFactory.getLogger(OversiktenService::class.java)
     private val erProd = EnvironmentUtils.isProduction().orElse(false)
 
-    @Scheduled(cron = "0 */1 * * * *") // Hvert minutt
+//    @Scheduled(cron = "0 */1 * * * *") // Hvert minutt
     @SchedulerLock(name = "oversikten_melding_med_metadata_scheduledTask", lockAtMostFor = "PT3M")
     open fun sendUsendteMeldingerTilOversikten() {
         val meldingerMedMetadata = oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()
