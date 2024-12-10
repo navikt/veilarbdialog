@@ -1,7 +1,6 @@
 update eskaleringsvarsel set oversikten_melding_med_metadata_melding_key = null;
 drop table oversikten_melding_med_metadata;
 
--- Eller
 CREATE TYPE OVERSIKTEN_UTSENDING_STATUS AS ENUM ('SKAL_SENDES', 'SENDT', 'SKAL_IKKE_SENDES');
 CREATE TYPE OVERSIKTEN_OPERASJON AS ENUM ('START', 'OPPDATER', 'STOPP');
 CREATE TYPE OVERSIKTEN_KATEGORI AS ENUM ('UTGATT_VARSEL');
