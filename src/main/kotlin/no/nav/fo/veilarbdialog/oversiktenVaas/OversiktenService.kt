@@ -26,7 +26,9 @@ open class OversiktenService(
     @SchedulerLock(name = "oversikten_melding_med_metadata_scheduledTask", lockAtMostFor = "PT3M")
     open fun sendUsendteMeldingerTilOversikten() {
         val meldingerMedMetadata = oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()
-        log.info("Sender ${meldingerMedMetadata.size} meldinger til oversikten")
+        if(meldingerMedMetadata.isNotEmpty()) {
+            log.info("Sender ${meldingerMedMetadata.size} meldinger til oversikten")
+        }
         meldingerMedMetadata.forEach { meldingMedMetadata ->
             oversiktenMeldingMedMetadataRepository.markerSomSendt(meldingMedMetadata.id)
             oversiktenProducer.sendMelding(meldingMedMetadata.meldingKey.toString(), meldingMedMetadata.meldingSomJson)
