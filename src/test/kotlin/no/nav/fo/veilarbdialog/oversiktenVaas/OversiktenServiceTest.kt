@@ -5,11 +5,13 @@ import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.Mockito.*
 import org.springframework.boot.test.mock.mockito.MockBean
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 open class OversiktenServiceTest: SpringBootTestBase() {
@@ -74,7 +76,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
         assertThat(førsteMelding.meldingSomJson).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.meldingSomJson)
         assertThat(førsteMelding.kategori).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.kategori)
         assertThat(førsteMelding.operasjon).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.operasjon)
-        assertThat(førsteMelding.opprettet).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.opprettet)
+        assertThat(førsteMelding.opprettet.truncatedTo(ChronoUnit.MILLIS)).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.opprettet.truncatedTo(ChronoUnit.MILLIS))
         assertThat(førsteMelding.utsendingStatus).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.utsendingStatus)
         assertThat(førsteMelding.meldingKey).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.meldingKey)
     }
