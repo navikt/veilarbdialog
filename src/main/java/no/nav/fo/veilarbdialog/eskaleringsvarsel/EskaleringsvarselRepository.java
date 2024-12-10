@@ -193,7 +193,7 @@ public class EskaleringsvarselRepository {
         return  jdbc.query(sql, params, rowMapper);
     }
 
-    public void markerVarselSomSendt(long varselId, UUID oversiktenSendingMeldingKey) {
+    public void knyttVarselTilOversiktenMelding(long varselId, UUID oversiktenSendingMeldingKey) {
         String sql = """
                 UPDATE ESKALERINGSVARSEL
                 SET oversikten_melding_med_metadata_melding_key = :oversiktenSendingUuid

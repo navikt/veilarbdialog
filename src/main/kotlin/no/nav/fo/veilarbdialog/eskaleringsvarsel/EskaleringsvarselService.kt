@@ -64,7 +64,7 @@ open class EskaleringsvarselService(
 
         varsler.forEach { varsel ->
             val oversiktenMeldingKey = oversiktenService.lagreStartMeldingOmUtgåttVarselIUtboks(varsel)
-            eskaleringsvarselRepository.markerVarselSomSendt(varsel.varselId, oversiktenMeldingKey)
+            eskaleringsvarselRepository.knyttVarselTilOversiktenMelding(varsel.varselId, oversiktenMeldingKey)
         }
         log.info("sendte ${varsler.size} utgåtte varsler til outbox")
     }
