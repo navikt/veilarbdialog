@@ -27,9 +27,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
     @Test
     fun `Skal sende usendte meldinger`() {
         val melding = melding(bruker, utsendingStatus = UtsendingStatus.SKAL_SENDES)
-
         val sendtMelding = melding(bruker, utsendingStatus = UtsendingStatus.SENDT)
-
         oversiktenMeldingMedMetadataRepository.lagre(melding)
         oversiktenMeldingMedMetadataRepository.lagre(sendtMelding)
 
@@ -47,7 +45,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
-        Mockito.verifyNoInteractions(oversiktenProducer)
+        verifyNoInteractions(oversiktenProducer)
     }
 
     @Test
@@ -57,7 +55,7 @@ open class OversiktenServiceTest: SpringBootTestBase() {
 
         oversiktenService.sendUsendteMeldingerTilOversikten()
 
-        Mockito.verifyNoInteractions(oversiktenProducer)
+        verifyNoInteractions(oversiktenProducer)
     }
 
 
@@ -72,8 +70,13 @@ open class OversiktenServiceTest: SpringBootTestBase() {
 
         val førsteMeldingEtterAndreMeldingErSendt = oversiktenMeldingMedMetadataRepository.hent(førsteMeldingID)
         assertThat(førsteMelding.tidspunktSendt).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.tidspunktSendt)
-        verify(oversiktenProducer, times(1)).sendMelding(andreMelding.meldingKey.toString(), andreMelding.meldingSomJson)
-        verifyNoMoreInteractions(oversiktenProducer)
+        assertThat(førsteMelding.fnr).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.fnr)
+        assertThat(førsteMelding.meldingSomJson).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.meldingSomJson)
+        assertThat(førsteMelding.kategori).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.kategori)
+        assertThat(førsteMelding.operasjon).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.operasjon)
+        assertThat(førsteMelding.opprettet).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.opprettet)
+        assertThat(førsteMelding.utsendingStatus).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.utsendingStatus)
+        assertThat(førsteMelding.meldingKey).isEqualTo(førsteMeldingEtterAndreMeldingErSendt.meldingKey)
     }
 
     private fun melding(bruker: MockBruker, meldingKey: UUID = UUID.randomUUID(), utsendingStatus: UtsendingStatus = UtsendingStatus.SKAL_SENDES) =

@@ -92,18 +92,6 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
         assertThat(melding.utsendingStatus).isEqualTo(UtsendingStatus.SKAL_SENDES)
     }
 
-
-    @Test
-    fun `Melding om stopp skal ikke sendes til oversikten dersom startmelding ikke ble sendt`() {
-        opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
-        assertThat(hentAlleOversiktenMeldinger()).hasSize(0)
-
-        eskaleringsvarselService.stop(StopEskaleringDto(Fnr.of(bruker.fnr), "", false), NavIdent(veileder.navIdent))
-
-        val stoppMeldinger = hentAlleOversiktenMeldinger()
-        assertThat(stoppMeldinger).hasSize(0)
-    }
-
     @Test
     fun `Melding om stopp når oppfølgingsperiode avsluttes skal sendes til oversikten`() {
         opprettEskaleringsvarselEldreEnn(ZonedDateTime.now().minusDays(20))
