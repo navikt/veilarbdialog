@@ -26,10 +26,12 @@ open class OversiktenService(
     @SchedulerLock(name = "oversikten_melding_med_metadata_scheduledTask", lockAtMostFor = "PT3M")
     open fun sendUsendteMeldingerTilOversikten() {
         val meldingerMedMetadata = oversiktenMeldingMedMetadataRepository.hentAlleSomSkalSendes()
-        log.info("Sender ${meldingerMedMetadata.size} meldinger til oversikten")
+        if(meldingerMedMetadata.isNotEmpty()) {
+            log.info("Sender ${meldingerMedMetadata.size} meldinger til oversikten")
+        }
         meldingerMedMetadata.forEach { meldingMedMetadata ->
+            oversiktenMeldingMedMetadataRepository.markerSomSendt(meldingMedMetadata.id)
             oversiktenProducer.sendMelding(meldingMedMetadata.meldingKey.toString(), meldingMedMetadata.meldingSomJson)
-            oversiktenMeldingMedMetadataRepository.markerSomSendt(meldingMedMetadata.meldingKey)
             meldingMedMetadata.fnr
         }
     }
@@ -42,24 +44,21 @@ open class OversiktenService(
             meldingSomJson = JsonUtils.toJson(melding),
             fnr = fnr,
             kategori = melding.kategori,
-            meldingKey = UUID.randomUUID()
+            meldingKey = UUID.randomUUID(),
+            operasjon = melding.operasjon,
         )
         oversiktenMeldingMedMetadataRepository.lagre(oversiktenMeldingMedMetadata)
         return oversiktenMeldingMedMetadata.meldingKey
     }
 
-    open fun lagreStoppMeldingOmUtgåttVarselIUtboks(fnr: Fnr, meldingKeyStartMelding: UUID) {
-        val opprinneligStartMelding =
-            oversiktenMeldingMedMetadataRepository.hent(meldingKeyStartMelding, OversiktenMelding.Operasjon.START).let {
-                check(it.size <= 1) { "Skal ikke kunne eksistere flere enn én startmeldinger" }
-                it.first()
-            }
-        val sluttmelding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.STOPP, LocalDateTime.now(), erProd)
+    open fun lagreStoppMeldingOmUtgåttVarselIUtboks(fnr: Fnr, meldingKey: UUID) {
+        val stoppMelding = OversiktenMelding.forUtgattVarsel(fnr.toString(), OversiktenMelding.Operasjon.STOPP, LocalDateTime.now(), erProd)
         val oversiktenMeldingMedMetadata = OversiktenMeldingMedMetadata(
-            meldingSomJson = JsonUtils.toJson(sluttmelding),
+            meldingSomJson = JsonUtils.toJson(stoppMelding),
             fnr = fnr,
-            kategori = sluttmelding.kategori,
-            meldingKey = opprinneligStartMelding.meldingKey
+            kategori = stoppMelding.kategori,
+            meldingKey = meldingKey,
+            operasjon = stoppMelding.operasjon,
         )
         oversiktenMeldingMedMetadataRepository.lagre(oversiktenMeldingMedMetadata)
     }
