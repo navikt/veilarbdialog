@@ -214,6 +214,21 @@ class DialogRessursTest extends SpringBootTestBase {
     }
 
     @Test
+    void nyHenvendelse_fraVeileder_venter_på_svar_fra_bruker(){
+        NyMeldingDTO dialog = new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift").setVenterPaaSvarFraBruker(true).setFnr(bruker.getFnr());
+
+        var dialogIRespons = veileder.createRequest()
+                .body(dialog)
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        assertThat(dialogIRespons.isVenterPaSvar()).isTrue();
+    }
+
+    @Test
     void nyHenvendelse_veilederSvarerPaaBrukersHenvendelse_venterIkkePaaNav() {
         DialogDTO brukersDialog = nyMelding(bruker, bruker, new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift"));
         NyMeldingDTO veiledersHenvendelse = new NyMeldingDTO().setTekst("tekst").setDialogId(brukersDialog.getId());
