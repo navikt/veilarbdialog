@@ -221,14 +221,6 @@
             <scope>test</scope>
         </dependency>
 
-
-        <!--Tjenester-->
-        <dependency>
-            <groupId>com.github.navikt</groupId>
-            <artifactId>brukernotifikasjon-schemas</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-
         <!-- EXTERNAL DEPENDENCIES -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
