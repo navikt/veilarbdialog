@@ -2,10 +2,7 @@ package no.nav.fo.veilarbdialog.rest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.EksternBrukerId;
-import no.nav.common.types.identer.EnhetId;
-import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.kvp.KvpService;
@@ -15,6 +12,7 @@ import no.nav.fo.veilarbdialog.util.DialogResource;
 import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
+import no.nav.poao.dab.spring_auth.TilgangsType;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -38,9 +36,7 @@ public class DialogRessurs {
     private final RestMapper restMapper;
     private final HttpServletRequest httpServletRequest;
     private final KontorsperreFilter kontorsperreFilter;
-    private final KvpService kvpService;
     private final IAuthService auth;
-    private final PersonService personService;
 
     @GetMapping
     @AuthorizeFnr(auditlogMessage = "hent dialoger")
@@ -60,7 +56,7 @@ public class DialogRessurs {
     @PostMapping("antallUleste")
     public AntallUlesteDTO antallUlestePost(@RequestBody(required = false) FnrDto fnrDto) {
         var fnr = fnrDto != null && fnrDto.fnr != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
-        auth.sjekkTilgangTilPerson(fnr.eksternBrukerId());
+        auth.sjekkTilgangTilPerson(fnr.eksternBrukerId(), TilgangsType.LESE);
         return innterAntallUleste(fnr);
     }
 
@@ -83,7 +79,7 @@ public class DialogRessurs {
     @PostMapping("sistOppdatert")
     public SistOppdatertDTO sistOppdatertPost(@RequestBody(required = false) FnrDto fnrDto) {
         var fnr = fnrDto != null && fnrDto.fnr != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
-        auth.sjekkTilgangTilPerson(fnr.eksternBrukerId());
+        auth.sjekkTilgangTilPerson(fnr.eksternBrukerId(), TilgangsType.LESE);
         return internSistOppdatert(fnr);
     }
 
@@ -109,7 +105,7 @@ public class DialogRessurs {
         var subject = auth.getLoggedInnUser();
         try {
             if (auth.erEksternBruker()) {
-                auth.sjekkTilgangTilPerson(bruker);
+                auth.sjekkTilgangTilPerson(bruker, TilgangsType.SKRIVE);
             } else {
                 auth.sjekkInternbrukerHarSkriveTilgangTilPerson(bruker);
             }
@@ -122,19 +118,20 @@ public class DialogRessurs {
     }
 
     @PostMapping
-    public DialogDTO nyHenvendelse(@RequestBody NyHenvendelseDTO nyHenvendelseDTO) {
-        Person bruker = nyHenvendelseDTO.getFnr() != null ? Person.fnr(nyHenvendelseDTO.getFnr()) : getContextUserIdent();
+    public DialogDTO nyMelding(@RequestBody NyMeldingDTO nyMeldingDTO) {
+        Person bruker = nyMeldingDTO.getFnr() != null ? Person.fnr(nyMeldingDTO.getFnr()) : getContextUserIdent();
         sjekkTilgangOgAuditlog(bruker.eksternBrukerId());
 
-        var dialogData = dialogDataService.opprettHenvendelse(nyHenvendelseDTO, bruker);
-        if (nyHenvendelseDTO.getVenterPaaSvarFraNav() != null) {
-            dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyHenvendelseDTO.getVenterPaaSvarFraNav());
+        var skalSendeMelding = !auth.erEksternBruker();
+        var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, skalSendeMelding);
+        if (nyMeldingDTO.getVenterPaaSvarFraNav() != null) {
+            dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyMeldingDTO.getVenterPaaSvarFraNav());
             dialogDataService.sendPaaKafka(dialogData.getAktorId());
         }
-        if (nyHenvendelseDTO.getVenterPaaSvarFraBruker() != null) {
+        if (nyMeldingDTO.getVenterPaaSvarFraBruker() != null) {
             var dialogStatus = DialogStatus.builder()
                     .dialogId(dialogData.getId())
-                    .venterPaSvar(nyHenvendelseDTO.getVenterPaaSvarFraBruker())
+                    .venterPaSvar(nyMeldingDTO.getVenterPaaSvarFraBruker())
                     .build();
 
             dialogData = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);

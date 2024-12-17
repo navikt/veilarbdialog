@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.poao.dab.spring_auth.IAuthService;
+import no.nav.poao.dab.spring_auth.TilgangsType;
 import no.nav.veilarbdialog.internapi.api.InternalApi;
 import no.nav.veilarbdialog.internapi.model.Dialog;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class InternApiController implements InternalApi {
     @Override
     public ResponseEntity<Dialog> hentDialog(Integer dialogId) {
         DialogData dialogData = internApiService.hentDialog(dialogId);
-        auth.sjekkTilgangTilPerson(AktorId.of(dialogData.getAktorId()));
+        auth.sjekkTilgangTilPerson(AktorId.of(dialogData.getAktorId()), TilgangsType.LESE);
         Dialog dialog = InternDialogMapper.mapTilDialog(dialogData);
 
         return ResponseEntity.of(Optional.ofNullable(dialog));
@@ -37,7 +38,7 @@ public class InternApiController implements InternalApi {
                 .findAny()
                 .map(DialogData::getAktorId)
                 .map(AktorId::of)
-                .ifPresent(auth::sjekkTilgangTilPerson);
+                .ifPresent((dialogOwner) -> auth.sjekkTilgangTilPerson(dialogOwner, TilgangsType.LESE));
 
         List<Dialog> dialoger = dialogData
                 .stream()

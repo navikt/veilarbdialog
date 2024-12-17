@@ -1,9 +1,8 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
-import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
-import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
@@ -27,7 +26,7 @@ class KladdRessursTest extends SpringBootTestBase  {
 
     @Test
     void skal_kunne_hente_kladder() {
-        NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
+        NyMeldingDTO nyHenvendelse = new NyMeldingDTO()
                 .setTekst("tekst")
                 .setOverskrift("overskrift");
         var traad = dialogTestService.opprettDialogSomVeileder(veileder, bruker, nyHenvendelse);

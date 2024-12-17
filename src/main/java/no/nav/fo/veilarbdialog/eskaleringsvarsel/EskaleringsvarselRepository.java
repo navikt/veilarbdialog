@@ -5,6 +5,7 @@ import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.NavIdent;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
 import no.nav.fo.veilarbdialog.util.DatabaseUtils;
 import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogSqlParameterSource;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -16,6 +17,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -31,16 +33,20 @@ public class EskaleringsvarselRepository {
             rs.getLong("id"),
             rs.getLong("tilhorende_dialog_id"),
             rs.getLong("tilhorende_brukernotifikasjon_id"),
+            Optional.ofNullable(DatabaseUtils.hentMaybeUUID( rs,"tilhorende_minside_varsel"))
+                    .map(MinSideVarselId::new)
+                    .orElse(null),
             rs.getString("aktor_id"),
             rs.getString("opprettet_av"),
             DatabaseUtils.hentZonedDateTime(rs, "opprettet_dato"),
             rs.getString("opprettet_begrunnelse"),
             DatabaseUtils.hentZonedDateTime(rs, "avsluttet_dato"),
             rs.getString("avsluttet_av"),
-            rs.getString("avsluttet_begrunnelse")
+            rs.getString("avsluttet_begrunnelse"),
+            DatabaseUtils.hentMaybeUUID(rs, "oversikten_melding_med_metadata_melding_key")
     );
 
-    public EskaleringsvarselEntity opprett(long tilhorendeDialogId, long tilhorendeBrukernotifikasjonsId, String aktorId, String opprettetAv, String opprettetBegrunnelse) {
+    public EskaleringsvarselEntity opprett(long tilhorendeDialogId, MinSideVarselId varselId, String aktorId, String opprettetAv, String opprettetBegrunnelse) {
         ZonedDateTime opprettetDato = ZonedDateTime.now();
         var params = new VeilarbDialogSqlParameterSource()
                 .addValue("aktorId", aktorId)
@@ -48,14 +54,14 @@ public class EskaleringsvarselRepository {
                 .addValue("opprettetDato", opprettetDato)
                 .addValue("dialogId", tilhorendeDialogId)
                 .addValue("begrunnelse", opprettetBegrunnelse)
-                .addValue("brukernotifikasjonsId", tilhorendeBrukernotifikasjonsId);
+                .addValue("varselId", varselId.getValue());
 
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         Long key;
         String sql = """
           INSERT INTO ESKALERINGSVARSEL (
-                    AKTOR_ID, GJELDENDE, OPPRETTET_AV, OPPRETTET_DATO, TILHORENDE_DIALOG_ID, TILHORENDE_BRUKERNOTIFIKASJON_ID, OPPRETTET_BEGRUNNELSE)
-          VALUES ( :aktorId, :aktorId,   :opprettetAv, :opprettetDato, :dialogId,            :brukernotifikasjonsId,           :begrunnelse)
+                    AKTOR_ID, GJELDENDE, OPPRETTET_AV, OPPRETTET_DATO, TILHORENDE_DIALOG_ID, tilhorende_minside_varsel, OPPRETTET_BEGRUNNELSE)
+          VALUES ( :aktorId, :aktorId,   :opprettetAv, :opprettetDato, :dialogId,            :varselId,           :begrunnelse)
                 """;
         try {
             jdbc.update(sql, params, keyHolder, new String[]{"id"});
@@ -72,11 +78,13 @@ public class EskaleringsvarselRepository {
         return new EskaleringsvarselEntity(
                 key,
                 tilhorendeDialogId,
-                tilhorendeBrukernotifikasjonsId,
+                0,
+                varselId,
                 aktorId,
                 opprettetAv,
                 opprettetDato,
                 opprettetBegrunnelse,
+                null,
                 null,
                 null,
                 null
@@ -114,6 +122,24 @@ public class EskaleringsvarselRepository {
         }
     }
 
+    public Optional<EskaleringsvarselEntity> hentGjeldende(UUID oppfolgingsperiodeUuid) {
+        String sql = """
+                SELECT * FROM ESKALERINGSVARSEL E
+                INNER JOIN DIALOG ON DIALOG.DIALOG_ID = E.TILHORENDE_DIALOG_ID
+                WHERE DIALOG.OPPFOLGINGSPERIODE_UUID = :oppfolgingsperiodeUuid
+                and gjeldende is not null
+                """;
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("oppfolgingsperiodeUuid", oppfolgingsperiodeUuid.toString());
+
+        try {
+            return Optional.ofNullable(jdbc.queryForObject(sql, params, rowMapper));
+        } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
+            return Optional.empty();
+        }
+    }
+
+
     public boolean stopPeriode(UUID oppfolgingsperiodeUuid) {
         String sql = """
                 UPDATE ESKALERINGSVARSEL
@@ -145,6 +171,17 @@ public class EskaleringsvarselRepository {
         }
     }
 
+    public List<EskaleringsvarselEntity> hentUsendteGjeldendeVarslerEldreEnn(LocalDateTime tidspunkt) {
+        String sql = """
+                SELECT * FROM ESKALERINGSVARSEL
+                WHERE opprettet_dato < :tidspunkt
+                AND gjeldende IS NOT NULL
+                AND oversikten_melding_med_metadata_melding_key IS NULL
+                """;
+        var params = new MapSqlParameterSource()
+                .addValue("tidspunkt", tidspunkt);
+        return jdbc.query(sql, params, rowMapper);
+    }
 
     public List<EskaleringsvarselEntity> hentHistorikk(AktorId aktorId) {
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -156,4 +193,16 @@ public class EskaleringsvarselRepository {
         return  jdbc.query(sql, params, rowMapper);
     }
 
+    public void knyttVarselTilOversiktenMelding(long varselId, UUID oversiktenSendingMeldingKey) {
+        String sql = """
+                UPDATE ESKALERINGSVARSEL
+                SET oversikten_melding_med_metadata_melding_key = :oversiktenSendingUuid
+                WHERE id = :varselId
+                """;
+        var params = new MapSqlParameterSource()
+                .addValue("oversiktenSendingUuid", oversiktenSendingMeldingKey)
+                .addValue("varselId", varselId);
+
+        jdbc.update(sql, params);
+    }
 }

@@ -1,7 +1,6 @@
 package no.nav.fo.veilarbdialog.config.kafka;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -25,22 +24,6 @@ import static org.springframework.util.backoff.FixedBackOff.UNLIMITED_ATTEMPTS;
 @EnableKafka
 @Configuration
 public class KafkaAivenConfig {
-
-    // *********** produser brukernotifikasjoner START ****************
-    @Bean
-    <K extends SpecificRecordBase,V extends SpecificRecordBase> ProducerFactory<K, V> avroAvroProducerFactory(KafkaProperties kafkaProperties) {
-        Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties(new DefaultSslBundleRegistry());
-        producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
-        producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-        producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, io.confluent.kafka.serializers.KafkaAvroSerializer.class);
-        return new DefaultKafkaProducerFactory<>(producerProperties);
-    }
-
-    @Bean
-    <K,V> KafkaTemplate<K,V> kafkaAvroAvroTemplate(ProducerFactory<K,V> avroAvroProducerFactory) {
-        return new KafkaTemplate<>(avroAvroProducerFactory);
-    }
-    // *********** produser brukernotifikasjoner SLUTT ****************
 
     // ************ konsumer siste_oppfolgings_periode og aktivitetskort-idmappinger START ***************
     @Bean
@@ -79,33 +62,6 @@ public class KafkaAivenConfig {
     }
 
     // ************ konsumer siste_oppfolgings_periode og aktivitetskort-idmappinger SLUTT ***************
-
-
-    // ************ konsumer ekstern-varsel-kvittering START ***************
-
-    @Bean("stringAvroConsumerFactory")
-    <V extends SpecificRecordBase> ConsumerFactory<String, V> stringAvroConsumerFactory(KafkaProperties kafkaProperties) {
-        Map<String, Object> consumerProperties = kafkaProperties.buildConsumerProperties(new DefaultSslBundleRegistry());
-        consumerProperties.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, org.apache.kafka.common.serialization.StringDeserializer.class);
-        consumerProperties.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, io.confluent.kafka.serializers.KafkaAvroDeserializer.class);
-        return new DefaultKafkaConsumerFactory<>(consumerProperties);
-    }
-
-    @Bean
-    <V extends SpecificRecordBase> ConcurrentKafkaListenerContainerFactory<String, V> stringAvroKafkaListenerContainerFactory(
-            @Qualifier("stringAvroConsumerFactory") ConsumerFactory<String, V> stringAvroConsumerFactory) {
-        ConcurrentKafkaListenerContainerFactory<String, V> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(stringAvroConsumerFactory);
-        factory.getContainerProperties()
-                .setAuthExceptionRetryInterval(Duration.ofSeconds(10L));
-
-        factory.setConcurrency(3);
-        factory.setCommonErrorHandler(errorHandler());
-        return factory;
-    }
-
-    // ************ konsumer ekstern-varsel-kvittering SLUTT ***************
-
 
     // ************ produser endring-paa-dialog-v1 START ***************
     @Bean

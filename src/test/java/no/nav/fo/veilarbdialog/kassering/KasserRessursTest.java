@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.kassering;
 import io.restassured.response.ValidatableResponse;
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
-import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
@@ -17,16 +17,16 @@ class KasserRessursTest extends SpringBootTestBase {
     MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
     @Test
     void bruker_skal_ikke_kunne_kassere() {
-        NyHenvendelseDTO nyHenvendelseDTO = new NyHenvendelseDTO().setTekst("Lol");
-        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomBruker(mockBruker, nyHenvendelseDTO);
+        NyMeldingDTO nyMeldingDTO = new NyMeldingDTO().setTekst("Lol");
+        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomBruker(mockBruker, nyMeldingDTO);
         kasserDialog(mockBruker, Long.parseLong(opprettetDialog.getId()))
                 .statusCode(403);
     }
 
     @Test
     void veileder_som_ikke_er_lista_skal_ikke_kunne_kassere() {
-        NyHenvendelseDTO nyHenvendelseDTO = new NyHenvendelseDTO().setTekst("Lol");
-        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomBruker(mockBruker, nyHenvendelseDTO);
+        NyMeldingDTO nyMeldingDTO = new NyMeldingDTO().setTekst("Lol");
+        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomBruker(mockBruker, nyMeldingDTO);
         kasserDialog(mockVeileder, Long.parseLong(opprettetDialog.getId()))
                 .statusCode(403);
     }

@@ -29,13 +29,13 @@ class DialogRessursTest extends SpringBootTestBase {
     }
 
     private void veilederSenderMelding() {
-        nyHenvendelse(veileder, bruker);
+        nyMelding(veileder, bruker);
     }
 
-    private DialogDTO nyHenvendelse(RestassuredUser avsender, MockBruker bruker) {
-        return nyHenvendelse(avsender, bruker, new NyHenvendelseDTO().setTekst("tekst"));
+    private DialogDTO nyMelding(RestassuredUser avsender, MockBruker bruker) {
+        return nyMelding(avsender, bruker, new NyMeldingDTO().setTekst("tekst"));
     }
-    private DialogDTO nyHenvendelse(RestassuredUser avsender, MockBruker bruker, NyHenvendelseDTO henvendelseDTO) {
+    private DialogDTO nyMelding(RestassuredUser avsender, MockBruker bruker, NyMeldingDTO henvendelseDTO) {
         var erVeileder = avsender instanceof MockVeileder;
         var postfix = erVeileder ? "?fnr={fnr}" : null;
         var request = avsender.createRequest()
@@ -53,7 +53,7 @@ class DialogRessursTest extends SpringBootTestBase {
                 .as(DialogDTO.class);
     }
 
-    private DialogDTO nyHenvendelseUtenFnrIUrl(RestassuredUser avsender, NyHenvendelseDTO henvendelseDTO) {
+    private DialogDTO nyHenvendelseUtenFnrIUrl(RestassuredUser avsender, NyMeldingDTO henvendelseDTO) {
         return avsender.createRequest()
                 .body(henvendelseDTO)
                 .post("/veilarbdialog/api/dialog")
@@ -158,8 +158,8 @@ class DialogRessursTest extends SpringBootTestBase {
         var kvpBruker = MockNavService.createBruker(brukerOptions);
         var veileder = MockNavService.createVeileder(kvpBruker);
         veileder.setNasjonalTilgang(true);
-        dialogTestService.opprettDialogSomVeileder(veileder, kvpBruker, new NyHenvendelseDTO().setTekst("hei"));
-        dialogTestService.opprettDialogSomBruker(kvpBruker, new NyHenvendelseDTO().setTekst("hallo"));
+        dialogTestService.opprettDialogSomVeileder(veileder, kvpBruker, new NyMeldingDTO().setTekst("hei"));
+        dialogTestService.opprettDialogSomBruker(kvpBruker, new NyMeldingDTO().setTekst("hallo"));
 
         var dialoger = veileder.createRequest()
                 .get("/veilarbdialog/api/dialog?fnr={fnr}&ekskluderDialogerMedKontorsperre=true", kvpBruker.getFnr())
@@ -178,8 +178,8 @@ class DialogRessursTest extends SpringBootTestBase {
         var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
         var kvpBruker = MockNavService.createBruker(brukerOptions);
         var veileder = MockNavService.createVeileder(kvpBruker);
-        dialogTestService.opprettDialogSomVeileder(veileder, kvpBruker, new NyHenvendelseDTO().setTekst("hei"));
-        dialogTestService.opprettDialogSomBruker(kvpBruker, new NyHenvendelseDTO().setTekst("hallo"));
+        dialogTestService.opprettDialogSomVeileder(veileder, kvpBruker, new NyMeldingDTO().setTekst("hei"));
+        dialogTestService.opprettDialogSomBruker(kvpBruker, new NyMeldingDTO().setTekst("hallo"));
 
         var dialoger = hentDialoger(veileder, kvpBruker);
 
@@ -188,7 +188,7 @@ class DialogRessursTest extends SpringBootTestBase {
 
     @Test
     void nyHenvendelse_fraBruker_venterPaaNav() {
-        DialogDTO dialog = nyHenvendelse(bruker, bruker);
+        DialogDTO dialog = nyMelding(bruker, bruker);
 
         //Bruker skal ikke vite om nav har ferdig behandlet dialogen
         assertThat(dialog.isVenterPaSvar()).isFalse();
@@ -205,7 +205,7 @@ class DialogRessursTest extends SpringBootTestBase {
     @Test
     void nyHenvendelse_fraVeileder_venterIkkePaaNoen() {
         //Veileder kan sende en beskjed som bruker ikke trenger å svare på, veileder må eksplisitt markere at dialogen venter på brukeren
-        DialogDTO dialog = nyHenvendelse(veileder, bruker, new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"));
+        DialogDTO dialog = nyMelding(veileder, bruker, new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift"));
 
         assertThat(dialog.isVenterPaSvar()).isFalse();
         assertThat(dialog.isFerdigBehandlet()).isTrue();
@@ -214,43 +214,58 @@ class DialogRessursTest extends SpringBootTestBase {
     }
 
     @Test
+    void nyHenvendelse_fraVeileder_venter_på_svar_fra_bruker(){
+        NyMeldingDTO dialog = new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift").setVenterPaaSvarFraBruker(true).setFnr(bruker.getFnr());
+
+        var dialogIRespons = veileder.createRequest()
+                .body(dialog)
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(DialogDTO.class);
+
+        assertThat(dialogIRespons.isVenterPaSvar()).isTrue();
+    }
+
+    @Test
     void nyHenvendelse_veilederSvarerPaaBrukersHenvendelse_venterIkkePaaNav() {
-        DialogDTO brukersDialog = nyHenvendelse(bruker, bruker, new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift"));
-        NyHenvendelseDTO veiledersHenvendelse = new NyHenvendelseDTO().setTekst("tekst").setDialogId(brukersDialog.getId());
-        DialogDTO veiledersDialog = nyHenvendelse(veileder, bruker, veiledersHenvendelse);
+        DialogDTO brukersDialog = nyMelding(bruker, bruker, new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift"));
+        NyMeldingDTO veiledersHenvendelse = new NyMeldingDTO().setTekst("tekst").setDialogId(brukersDialog.getId());
+        DialogDTO veiledersDialog = nyMelding(veileder, bruker, veiledersHenvendelse);
         assertThat(veiledersDialog.isFerdigBehandlet()).isTrue();
     }
 
     @Test
     void nyHenvendelse_brukerSvarerPaaVeiledersHenvendelse_venterPaNav() {
-        NyHenvendelseDTO veiledersHenvendelse = new NyHenvendelseDTO().setTekst("tekst").setOverskrift("overskrift");
-        DialogDTO veiledersDialog = nyHenvendelse(veileder, bruker, veiledersHenvendelse);
+        NyMeldingDTO veiledersHenvendelse = new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift");
+        DialogDTO veiledersDialog = nyMelding(veileder, bruker, veiledersHenvendelse);
 
         assertThat(veiledersDialog.isFerdigBehandlet()).isTrue();
-        NyHenvendelseDTO brukersHenvendelse = new NyHenvendelseDTO().setTekst("tekst").setDialogId(veiledersDialog.getId());
-        nyHenvendelse(bruker, bruker, brukersHenvendelse);
+        NyMeldingDTO brukersHenvendelse = new NyMeldingDTO().setTekst("tekst").setDialogId(veiledersDialog.getId());
+        nyMelding(bruker, bruker, brukersHenvendelse);
         veiledersDialog = hentDialog(veileder, veiledersDialog.getId());
         assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
     }
 
     @Test
     void nyHenvendelse_egenvurdering_venterIkkePaaSvarFraNav() {
-        NyHenvendelseDTO egenVurdering = new NyHenvendelseDTO()
+        NyMeldingDTO egenVurdering = new NyMeldingDTO()
                 .setTekst("Jeg skal klare meg selv")
                 .setOverskrift("Egenvurdering")
                 .setVenterPaaSvarFraNav(false);
-        DialogDTO brukersEgenvurdering = nyHenvendelse(bruker, bruker, egenVurdering);
+        DialogDTO brukersEgenvurdering = nyMelding(bruker, bruker, egenVurdering);
         DialogDTO veiledersDialog = hentDialog(veileder, brukersEgenvurdering.getId());
         assertThat(veiledersDialog.isFerdigBehandlet()).isTrue();
     }
 
     @Test
     void nyHenvendelse_egenvurdering_venterPaaSvarFraNav() {
-        NyHenvendelseDTO egenVurdering = new NyHenvendelseDTO()
+        NyMeldingDTO egenVurdering = new NyMeldingDTO()
                 .setTekst("Jeg trenger hjelp fra Nav")
                 .setOverskrift("Egenvurdering")
                 .setVenterPaaSvarFraNav(true);
-        DialogDTO brukersEgenvurdering = nyHenvendelse(bruker, bruker, egenVurdering);
+        DialogDTO brukersEgenvurdering = nyMelding(bruker, bruker, egenVurdering);
         DialogDTO veiledersDialog = hentDialog(veileder, brukersEgenvurdering.getId());
         assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
 
@@ -258,10 +273,10 @@ class DialogRessursTest extends SpringBootTestBase {
 
     @Test
     void nyHenvendelse_egenvurdering_venterPaaSvarFraNav_default() {
-        NyHenvendelseDTO egenVurdering = new NyHenvendelseDTO()
+        NyMeldingDTO egenVurdering = new NyMeldingDTO()
                 .setOverskrift("Egenvurdering")
                 .setTekst("Jeg trenger hjelp fra Nav");
-        DialogDTO brukersEgenvurdering = nyHenvendelse(bruker, bruker, egenVurdering);
+        DialogDTO brukersEgenvurdering = nyMelding(bruker, bruker, egenVurdering);
         DialogDTO veiledersDialog = hentDialog(veileder, brukersEgenvurdering.getId());
         assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
     }
@@ -269,7 +284,7 @@ class DialogRessursTest extends SpringBootTestBase {
     @Test
     void nyHenvendelse_fraVeileder_kanVentePaaBeggeParter() {
         //Veileder kan sende en beskjed som bruker ikke trenger å svare på, veileder må eksplisitt markere at dialogen venter på brukeren
-        DialogDTO dialog = nyHenvendelse(veileder, bruker, new NyHenvendelseDTO()
+        DialogDTO dialog = nyMelding(veileder, bruker, new NyMeldingDTO()
                 .setTekst("tekst")
                 .setOverskrift("overskrift")
                 .setVenterPaaSvarFraBruker(Boolean.TRUE)
@@ -281,13 +296,13 @@ class DialogRessursTest extends SpringBootTestBase {
 
     @Test
     void bruker_skal_kunne_sende_henvedelse_uten_fnr_i_url() {
-        var melding = new NyHenvendelseDTO().setTekst("tekst");
+        var melding = new NyMeldingDTO().setTekst("tekst");
         nyHenvendelseUtenFnrIUrl(bruker, melding);
     }
 
     @Test
     void veileder_skal_kunne_sende_henvedelse_uten_fnr_i_url() {
-        var melding = new NyHenvendelseDTO().setTekst("tekst").setFnr(bruker.getFnr());
+        var melding = new NyMeldingDTO().setTekst("tekst").setFnr(bruker.getFnr());
         nyHenvendelseUtenFnrIUrl(veileder, melding);
     }
 
@@ -296,7 +311,7 @@ class DialogRessursTest extends SpringBootTestBase {
         var oppfølgingsenhet = "enhetTilKvpBruker";
         var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
         var kvpBruker = MockNavService.createBruker(brukerOptions);
-        var melding = new NyHenvendelseDTO().setFnr(kvpBruker.getFnr()).setTekst("LOL");
+        var melding = new NyMeldingDTO().setFnr(kvpBruker.getFnr()).setTekst("LOL");
         veileder.createRequest()
                 .body(melding)
                 .post("/veilarbdialog/api/dialog")
@@ -306,13 +321,13 @@ class DialogRessursTest extends SpringBootTestBase {
 
     @Test
     void veileder_kan_ikke_sende_henvendelse_på_historisk_dialog() {
-        NyHenvendelseDTO henvendelseFørHistorisk = new NyHenvendelseDTO()
+        NyMeldingDTO henvendelseFørHistorisk = new NyMeldingDTO()
                 .setTekst("tekst")
                 .setOverskrift("overskrift");
         var dialog = dialogTestService.opprettDialogSomVeileder(veileder, bruker, henvendelseFørHistorisk);
         dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), new Date());
 
-        var melding = new NyHenvendelseDTO().setFnr(bruker.getFnr()).setTekst("LOL").setDialogId(dialog.getId());
+        var melding = new NyMeldingDTO().setFnr(bruker.getFnr()).setTekst("LOL").setDialogId(dialog.getId());
         veileder.createRequest()
                 .body(melding)
                 .post("/veilarbdialog/api/dialog")
@@ -322,13 +337,13 @@ class DialogRessursTest extends SpringBootTestBase {
 
     @Test
     void bruker_kan_ikke_sende_henvendelse_på_historisk_dialog() {
-        NyHenvendelseDTO henvendelseFørHistorisk = new NyHenvendelseDTO()
+        NyMeldingDTO henvendelseFørHistorisk = new NyMeldingDTO()
                 .setTekst("tekst")
                 .setOverskrift("overskrift");
         var dialog = dialogTestService.opprettDialogSomBruker(bruker, henvendelseFørHistorisk);
         dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), new Date());
 
-        var melding = new NyHenvendelseDTO().setFnr(bruker.getFnr()).setTekst("LOL").setDialogId(dialog.getId());
+        var melding = new NyMeldingDTO().setFnr(bruker.getFnr()).setTekst("LOL").setDialogId(dialog.getId());
         bruker.createRequest()
                 .body(melding)
                 .post("/veilarbdialog/api/dialog")

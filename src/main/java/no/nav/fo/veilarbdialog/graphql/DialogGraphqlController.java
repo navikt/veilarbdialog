@@ -13,6 +13,7 @@ import no.nav.fo.veilarbdialog.rest.RestMapper;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.service.KladdService;
 import no.nav.poao.dab.spring_auth.AuthService;
+import no.nav.poao.dab.spring_auth.TilgangsType;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.HttpStatus;
@@ -42,7 +43,7 @@ public class DialogGraphqlController {
     @QueryMapping
     public List<DialogDTO> dialoger(@Argument String fnr, @Argument Optional<Boolean> bareMedAktiviteter) {
         var targetFnr = Fnr.of(getContextUserIdent(fnr).get());
-        authService.sjekkTilgangTilPerson(targetFnr);
+        authService.sjekkTilgangTilPerson(targetFnr, TilgangsType.LESE);
         return dialogDataService.hentDialogerForBruker(Person.fnr(targetFnr.get()))
                 .stream()
                 .filter(bareMedAktiviteterFilter(bareMedAktiviteter))
@@ -53,7 +54,7 @@ public class DialogGraphqlController {
     @QueryMapping
     public GjeldendeEskaleringsvarselDto stansVarsel(@Argument String fnr) {
         var targetFnr = Fnr.of(getContextUserIdent(fnr).get());
-        authService.sjekkTilgangTilPerson(targetFnr);
+        authService.sjekkTilgangTilPerson(targetFnr, TilgangsType.LESE);
         return eskaleringsvarselService.hentGjeldende(targetFnr)
                 .map(varsel -> new GjeldendeEskaleringsvarselDto(
                         varsel.varselId(),
@@ -67,7 +68,7 @@ public class DialogGraphqlController {
     @QueryMapping
     public List<KladdDTO> kladder(@Argument String fnr) {
         var targetFnr = Fnr.of(getContextUserIdent(fnr).get());
-        authService.sjekkTilgangTilPerson(targetFnr);
+        authService.sjekkTilgangTilPerson(targetFnr, TilgangsType.LESE);
         return kladdService.hentKladder(targetFnr.get())
                 .stream()
                 .map(kladd -> KladdDTO.builder()
@@ -83,7 +84,7 @@ public class DialogGraphqlController {
     public List<EskaleringsvarselDto> stansVarselHistorikk(@Argument String fnr) {
         var targetFnr = Fnr.of(getContextUserIdent(fnr).get());
         if (!authService.erInternBruker()) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Bruker kan ikke hente stansVarselHistorikk");
-        authService.sjekkTilgangTilPerson(targetFnr);
+        authService.sjekkTilgangTilPerson(targetFnr, TilgangsType.LESE);
         return eskaleringsvarselService.historikk(targetFnr)
                 .stream().map(EskaleringsvarselDto::fromEntity)
                 .toList();

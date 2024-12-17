@@ -4,7 +4,7 @@ import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.json.JsonUtils;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonService;
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -19,7 +19,7 @@ import java.util.Date;
 class OppfolgingsperiodeConsumer {
     private final SistePeriodeDAO sistePeriodeDAO;
     private final EskaleringsvarselService eskaleringsvarselService;
-    private final BrukernotifikasjonService brukernotifikasjonService;
+    private final MinsideVarselService minsideVarselService;
     private final DialogDataService dialogDataService;
 
     @KafkaListener(topics = "${application.topic.inn.oppfolgingsperiode}", containerFactory = "stringStringKafkaListenerContainerFactory", autoStartup = "${app.kafka.enabled:false}")
@@ -28,7 +28,7 @@ class OppfolgingsperiodeConsumer {
         OppfolgingsperiodeV1 oppfolgingsperiodeV1 = JsonUtils.fromJson(consumerRecord.value(), OppfolgingsperiodeV1.class);
 
         if (oppfolgingsperiodeV1.sluttDato != null) {
-            avsluttEskaleringsverslerOgAktiveBrukernotifikasjoner(oppfolgingsperiodeV1);
+            avsluttEskaleringsvarslerOgAktiveBrukernotifikasjoner(oppfolgingsperiodeV1);
             settDialogerTilHistorisk(oppfolgingsperiodeV1);
         }
 
@@ -40,9 +40,9 @@ class OppfolgingsperiodeConsumer {
                         oppfolgingsperiodeV1.sluttDato));
     }
 
-    private void avsluttEskaleringsverslerOgAktiveBrukernotifikasjoner(OppfolgingsperiodeV1 oppfolgingsperiodeV1) {
-        eskaleringsvarselService.stop(oppfolgingsperiodeV1.uuid);
-        brukernotifikasjonService.bestillDoneForOppfolgingsperiode(oppfolgingsperiodeV1.uuid);
+    private void avsluttEskaleringsvarslerOgAktiveBrukernotifikasjoner(OppfolgingsperiodeV1 oppfolgingsperiodeV1) {
+        eskaleringsvarselService.stoppEskaleringsvarselFordiOppfolgingsperiodenErAvsluttet(oppfolgingsperiodeV1.uuid);
+        minsideVarselService.setSkalAvsluttesForVarslerIPeriode(oppfolgingsperiodeV1.uuid);
     }
 
     private void settDialogerTilHistorisk(OppfolgingsperiodeV1 oppfolgingAvsluttetDto) {

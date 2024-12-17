@@ -6,7 +6,11 @@ import io.getunleash.Unleash;
 import io.restassured.RestAssured;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
+import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
+import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenService;
+import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenMeldingMedMetadataRepository;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.util.DialogTestService;
 import no.nav.fo.veilarbdialog.util.KafkaTestService;
@@ -60,6 +64,18 @@ public abstract class SpringBootTestBase {
 
     @Autowired
     protected DialogDataService dialogDataService;
+
+    @Autowired
+    protected EskaleringsvarselRepository eskaleringsvarselRepository;
+
+    @Autowired
+    protected EskaleringsvarselService eskaleringsvarselService;
+
+    @Autowired
+    protected OversiktenMeldingMedMetadataRepository oversiktenMeldingMedMetadataRepository;
+
+    @Autowired
+    protected OversiktenService oversiktenService;
 
     @LocalServerPort
     protected int port;

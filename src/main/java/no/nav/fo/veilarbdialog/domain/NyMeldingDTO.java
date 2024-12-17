@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @Accessors(chain = true)
-public class NyHenvendelseDTO {
+public class NyMeldingDTO {
 
     private String tekst;
     private String dialogId;

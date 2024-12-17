@@ -8,6 +8,7 @@ import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.service.KladdService;
 import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_auth.IAuthService;
+import no.nav.poao.dab.spring_auth.TilgangsType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +42,7 @@ public class KladdRessurs {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void oppdaterKladd(@RequestBody KladdDTO kladd) {
         var fnr = getContextUserIdent(kladd);
-        authService.sjekkTilgangTilPerson(Fnr.of(fnr));
+        authService.sjekkTilgangTilPerson(Fnr.of(fnr), TilgangsType.LESE);
         kladdService.upsertKladd(fnr, somKladd(kladd));
     }
 

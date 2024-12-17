@@ -5,7 +5,7 @@ import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.domain.Avsender;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.HenvendelseDTO;
-import no.nav.fo.veilarbdialog.domain.NyHenvendelseDTO;
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
@@ -36,7 +36,7 @@ class RestServiceTest extends SpringBootTestBase {
     @Test
     void nyHenvendelse_dialogFinnesIkke_bruker() {
         String tekst = "tekst", overskrift = "overskrift";
-        final NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
+        final NyMeldingDTO nyHenvendelse = new NyMeldingDTO()
                 .setTekst(tekst)
                 .setOverskrift(overskrift);
 
@@ -77,7 +77,7 @@ class RestServiceTest extends SpringBootTestBase {
     @Test
     void nyHenvendelse_dialogFinnesIkke_veileder() {
         String tekst = "tekst", overskrift = "overskrift";
-        final NyHenvendelseDTO nyHenvendelse = new NyHenvendelseDTO()
+        final NyMeldingDTO nyHenvendelse = new NyMeldingDTO()
                 .setTekst(tekst)
                 .setOverskrift(overskrift);
 
