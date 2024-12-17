@@ -5,18 +5,17 @@ import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.Mockito.*
-import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.temporal.ChronoUnit
 import java.util.*
 
 open class OversiktenServiceTest: SpringBootTestBase() {
 
-    @MockBean
+    @MockitoBean
     private lateinit var oversiktenProducer: OversiktenProducer
 
     private val bruker = MockNavService.createHappyBruker()
