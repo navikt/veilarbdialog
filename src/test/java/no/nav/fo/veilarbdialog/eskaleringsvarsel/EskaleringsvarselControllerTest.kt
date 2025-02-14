@@ -110,7 +110,7 @@ internal class EskaleringsvarselControllerTest(
         val henvendelseTekst = "Henvendelsestekst... lang tekst"
 
         // Tekst som brukes i eventet på DittNav. Påkrevd, ingen default
-        val brukernotifikasjonEventTekst = "Viktig oppgave. NAV vurderer å stanse pengene dine. Se hva du må gjøre."
+        val brukernotifikasjonEventTekst = "Viktig oppgave. Nav vurderer å stanse pengene dine. Se hva du må gjøre."
         // Påloggingsnivå for å lese eventet på DittNav. Dersom eventteksten er sensitiv, må denne være 4.
         val sikkerhetsNivaa =  Sensitivitet.High
         // Lenke som blir aktivert når bruker klikker på eventet
