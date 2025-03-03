@@ -81,7 +81,7 @@ public class KafkaTestService {
         }
 
         long commitedOffset = offsetAndMetadata.offset();
-        return commitedOffset >= producerOffset;
+        return commitedOffset >= producerOffset + 1;
     }
 
     @SneakyThrows
