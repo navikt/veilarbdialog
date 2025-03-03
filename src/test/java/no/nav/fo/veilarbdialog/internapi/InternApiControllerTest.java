@@ -14,13 +14,14 @@ import org.springframework.http.HttpStatus;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class InternApiControllerTest extends SpringBootTestBase {
 
     @Test
-    void hentDialoger() {
+    void hentDialoger() throws InterruptedException {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
 
@@ -61,7 +62,9 @@ class InternApiControllerTest extends SpringBootTestBase {
                 .extract()
                 .response()
                 .jsonPath().getList(".", Dialog.class);
+        TimeUnit.SECONDS.sleep(1);
         assertThat(dialoger).hasSize(3);
+        TimeUnit.SECONDS.sleep(1);
         assertThat(dialoger.get(1).getHenvendelser()).hasSize(2);
 
         // Veileder uten tilgang til mockbrukers enhet
