@@ -27,7 +27,7 @@ class InternApiControllerTest extends SpringBootTestBase {
 
         DialogDTO dialog1 = dialogTestService.opprettDialogSomVeileder(mockVeileder, mockBruker, new NyMeldingDTO().setTekst("dialog 1 - henvendelse 1"));
 
-        Dialog dialog = mockVeileder.createRequest()
+        Dialog hentetDialog1 = mockVeileder.createRequest()
                 .get("http://localhost/veilarbdialog/internal/api/v1/dialog/{dialogId}", dialog1.getId())
                 .then()
                 .statusCode(200)
@@ -36,11 +36,11 @@ class InternApiControllerTest extends SpringBootTestBase {
                 .as(Dialog.class);
 
         SoftAssertions.assertSoftly(d -> {
-            d.assertThat(dialog.getAktivitetId()).isEqualTo(null);
-            d.assertThat(Date.from(dialog.getOpprettetDato().toInstant())).isEqualTo(dialog1.getOpprettetDato());
-            d.assertThat(dialog.getHenvendelser().get(0).getTekst()).isEqualTo(dialog1.getHenvendelser().get(0).getTekst());
-            d.assertThat(dialog.getHenvendelser().get(0).getLestAvBruker()).isEqualTo(false);
-            d.assertThat(dialog.getHenvendelser().get(0).getLestAvVeileder()).isEqualTo(true);
+            d.assertThat(hentetDialog1.getAktivitetId()).isEqualTo(null);
+            d.assertThat(Date.from(hentetDialog1.getOpprettetDato().toInstant())).isEqualTo(dialog1.getOpprettetDato());
+            d.assertThat(hentetDialog1.getHenvendelser().getFirst().getTekst()).isEqualTo(dialog1.getHenvendelser().getFirst().getTekst());
+            d.assertThat(hentetDialog1.getHenvendelser().getFirst().getLestAvBruker()).isEqualTo(false);
+            d.assertThat(hentetDialog1.getHenvendelser().getFirst().getLestAvVeileder()).isEqualTo(true);
             d.assertAll();
         });
 
