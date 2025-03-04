@@ -25,10 +25,10 @@ class InternApiControllerTest extends SpringBootTestBase {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
 
-        DialogDTO opprettetDialog = dialogTestService.opprettDialogSomVeileder(mockVeileder, mockBruker, new NyMeldingDTO().setTekst("tekst"));
+        DialogDTO dialog1 = dialogTestService.opprettDialogSomVeileder(mockVeileder, mockBruker, new NyMeldingDTO().setTekst("dialog 1 - henvendelse 1"));
 
         Dialog dialog = mockVeileder.createRequest()
-                .get("http://localhost/veilarbdialog/internal/api/v1/dialog/{dialogId}", opprettetDialog.getId())
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog/{dialogId}", dialog1.getId())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -37,22 +37,22 @@ class InternApiControllerTest extends SpringBootTestBase {
 
         SoftAssertions.assertSoftly(d -> {
             d.assertThat(dialog.getAktivitetId()).isEqualTo(null);
-            d.assertThat(Date.from(dialog.getOpprettetDato().toInstant())).isEqualTo(opprettetDialog.getOpprettetDato());
-            d.assertThat(dialog.getHenvendelser().get(0).getTekst()).isEqualTo(opprettetDialog.getHenvendelser().get(0).getTekst());
+            d.assertThat(Date.from(dialog.getOpprettetDato().toInstant())).isEqualTo(dialog1.getOpprettetDato());
+            d.assertThat(dialog.getHenvendelser().get(0).getTekst()).isEqualTo(dialog1.getHenvendelser().get(0).getTekst());
             d.assertThat(dialog.getHenvendelser().get(0).getLestAvBruker()).isEqualTo(false);
             d.assertThat(dialog.getHenvendelser().get(0).getLestAvVeileder()).isEqualTo(true);
             d.assertAll();
         });
 
-        DialogDTO opprettetDialog2 = dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("tekst2"));
+        DialogDTO dialog2 = dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("dialog 2 - henvendelse 1"));
 
         // Sett bruker under KVP
         BrukerOptions kvpOptions = mockBruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
         MockNavService.updateBruker(mockBruker, kvpOptions);
-        dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("tekst3"));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("dialog3 - henvendelse 1"));
 
         // Opprett henvendelse/melding med kontorsperre på en dialog uten kontorsperre
-        dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("tekst4").setDialogId(opprettetDialog2.getId()));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("dialog 2 - henvendelse 2 kvp").setDialogId(dialog2.getId()));
 
         // Veileder med tilgang til mockbrukers enhet
         List<Dialog> dialoger = mockVeileder.createRequest()
@@ -62,30 +62,32 @@ class InternApiControllerTest extends SpringBootTestBase {
                 .extract()
                 .response()
                 .jsonPath().getList(".", Dialog.class);
-        assertThat(dialoger).hasSize(3);
-        Dialog dialogX = dialoger.stream().filter( d -> Objects.equals(d.getDialogId(), opprettetDialog2.getId())).findFirst().get();
-        assertThat(dialogX.getHenvendelser()).hasSize(2);
+        assertThat(dialoger).hasSize(3); // 3 dialoger totalt
+
+        Dialog hentetDialog2MedTilgang = dialoger.stream().filter( d -> Objects.equals(d.getDialogId(), dialog2.getId())).findFirst().get(); // hent dialog2
+        assertThat(hentetDialog2MedTilgang.getHenvendelser()).hasSize(2); // sjekk at dialog2 har 2 henvendelser
 
         // Veileder uten tilgang til mockbrukers enhet
-        MockVeileder mockVeileder2 = MockNavService.createNKS();
-        List<Dialog> dialoger2 = mockVeileder2.createRequest()
+        MockVeileder veilederUtenTilgangTilEnhet = MockNavService.createNKS();
+        List<Dialog> dialogListe2 = veilederUtenTilgangTilEnhet.createRequest()
                 .get("http://localhost/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}", mockBruker.getAktorId())
                 .then()
                 .statusCode(200)
                 .extract()
                 .response()
                 .jsonPath().getList(".", Dialog.class);
-        assertThat(dialoger2).hasSize(2);
-        assertThat(dialoger2.get(1).getHenvendelser()).hasSize(1);
+        assertThat(dialogListe2).hasSize(2);
+        Dialog hentetDialog2UtenTilgang = dialogListe2.stream().filter( d -> Objects.equals(d.getDialogId(), dialog2.getId())).findFirst().get();
+        assertThat(hentetDialog2UtenTilgang.getHenvendelser()).hasSize(1); // Forventer kun 1 henvendelse på dialog 2
 
-        Dialog dialog2 = mockVeileder2.createRequest()
-                .get("http://localhost/veilarbdialog/internal/api/v1/dialog/{dialogId}", opprettetDialog2.getId())
+        Dialog hentetDialog2UtenTilgangViaDirekteURL = veilederUtenTilgangTilEnhet.createRequest()
+                .get("http://localhost/veilarbdialog/internal/api/v1/dialog/{dialogId}", dialog2.getId())
                 .then()
                 .statusCode(200)
                 .extract()
                 .response()
                 .as(Dialog.class);
-        assertThat(dialog2.getHenvendelser()).hasSize(1);
+        assertThat(hentetDialog2UtenTilgangViaDirekteURL.getHenvendelser()).hasSize(1);
 
         // Test request parameter(e)
         List<Dialog> dialoger3 = mockVeileder.createRequest()
