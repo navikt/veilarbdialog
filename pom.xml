@@ -230,7 +230,7 @@
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>9.2.6</version>
+            <version>10.0.2</version>
         </dependency>
 
         <!-- LOGGING -->
