@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,7 +63,8 @@ class InternApiControllerTest extends SpringBootTestBase {
                 .response()
                 .jsonPath().getList(".", Dialog.class);
         assertThat(dialoger).hasSize(3);
-        assertThat(dialoger.get(1).getHenvendelser()).hasSize(2);
+        Dialog dialogX = dialoger.stream().filter( d -> Objects.equals(d.getDialogId(), opprettetDialog2.getId())).findFirst().get();
+        assertThat(dialogX.getHenvendelser()).hasSize(2);
 
         // Veileder uten tilgang til mockbrukers enhet
         MockVeileder mockVeileder2 = MockNavService.createNKS();
