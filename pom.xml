@@ -21,7 +21,7 @@
 
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
-        <common.version>3.2025.01.14_14.19-79b3041cae56</common.version>
+        <common.version>3.2025.03.07_13.21-bb112c97720d</common.version>
         <dab.common.version>2024.11.14-10.46.174740baf5c7</dab.common.version>
         <poao.tilgang.version>2025.03.04_14.22-6bd90058fa5b</poao.tilgang.version>
         <shedlock.version>6.3.0</shedlock.version>
@@ -230,7 +230,7 @@
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>10.0.2</version>
+            <version>10.1.0</version>
         </dependency>
 
         <!-- LOGGING -->
@@ -275,7 +275,7 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>libraries-bom</artifactId>
-            <version>26.55.0</version>
+            <version>26.56.0</version>
             <type>pom</type>
         </dependency>
 
@@ -301,7 +301,7 @@
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
-            <version>3.12.0</version>
+            <version>3.12.1</version>
             <scope>test</scope>
         </dependency>
 
