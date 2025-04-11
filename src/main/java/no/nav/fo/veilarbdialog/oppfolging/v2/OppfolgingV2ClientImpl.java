@@ -43,8 +43,8 @@ public class OppfolgingV2ClientImpl implements OppfolgingV2Client {
     @Override
     @Timed
     public Optional<OppfolgingPeriodeMinimalDTO> fetchGjeldendePeriode(AktorId aktorId) {
-        Fnr fnr = aktorOppslagClient.hentFnr(aktorId);
-        String uri = "/v3/oppfolging/periode/hent-gjeldende";
+        var fnr = aktorOppslagClient.hentFnr(aktorId);
+        var uri = "/v3/oppfolging/periode/hent-gjeldende-periode";
         var fnrDto = new FnrDto(fnr.get());
         var requestBody = RequestBody.create(JsonUtils.toJson(fnrDto), MediaType.parse("application/json"));
         var response = veilarboppfolgingClientWrapper.postAndReceive(uri, requestBody, OppfolgingPeriodeMinimalDTO.class);
