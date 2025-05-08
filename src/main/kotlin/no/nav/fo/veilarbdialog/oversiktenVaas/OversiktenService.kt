@@ -30,9 +30,8 @@ open class OversiktenService(
             log.info("Sender ${meldingerMedMetadata.size} meldinger til oversikten")
         }
         meldingerMedMetadata.forEach { meldingMedMetadata ->
-            oversiktenMeldingMedMetadataRepository.markerSomSendt(meldingMedMetadata.id)
             oversiktenProducer.sendMelding(meldingMedMetadata.meldingKey.toString(), meldingMedMetadata.meldingSomJson)
-            meldingMedMetadata.fnr
+            oversiktenMeldingMedMetadataRepository.markerSomSendt(meldingMedMetadata.id)
         }
     }
 
