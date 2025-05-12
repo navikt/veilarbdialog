@@ -33,7 +33,7 @@ public class WireMockUtil {
         if (oppfolgingFeiler) {
             wireMock.stubFor(post("/veilarboppfolging/api/v3/hent-oppfolging")
                     .willReturn(aResponse().withStatus(500)));
-            wireMock.stubFor(post("/veilarboppfolging/api/v3/oppfolging/periode/hent-gjeldende")
+            wireMock.stubFor(post("/veilarboppfolging/api/v3/oppfolging/periode/hent-gjeldende-periode")
                     .willReturn(aResponse().withStatus(500)));
             wireMock.stubFor(post("/veilarboppfolging/api/v3/oppfolging/hent-perioder")
                     .willReturn(aResponse().withStatus(500)));
@@ -58,7 +58,7 @@ public class WireMockUtil {
             String gjeldendePeriode = JsonUtils.toJson(oppfolgingsperiode);
 
             String oppfolgingsperioder = JsonUtils.toJson(List.of(oppfolgingsperiode, gammelPeriode));
-            wireMock.stubFor(post("/veilarboppfolging/api/v3/oppfolging/periode/hent-gjeldende")
+            wireMock.stubFor(post("/veilarboppfolging/api/v3/oppfolging/periode/hent-gjeldende-periode")
                     .willReturn(ok()
                             .withHeader("Content-Type", "text/json")
                             .withBody(gjeldendePeriode)));
@@ -68,7 +68,7 @@ public class WireMockUtil {
                             .withBody(oppfolgingsperioder)));
 
         } else {
-            wireMock.stubFor(post("/veilarboppfolging/api/v3/oppfolging/periode/hent-gjeldende")
+            wireMock.stubFor(post("/veilarboppfolging/api/v3/oppfolging/periode/hent-gjeldende-periode")
                     .willReturn(aResponse().withStatus(204)));
         }
     }
