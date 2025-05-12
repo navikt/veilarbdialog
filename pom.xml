@@ -21,7 +21,7 @@
 
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
-        <common.version>3.2025.03.07_13.21-bb112c97720d</common.version>
+        <common.version>3.2025.03.25_13.00-69496eec5820</common.version>
         <dab.common.version>2024.11.14-10.46.174740baf5c7</dab.common.version>
         <poao.tilgang.version>2025.03.17_10.46-e6359712fa6d</poao.tilgang.version>
         <shedlock.version>6.6.1</shedlock.version>
