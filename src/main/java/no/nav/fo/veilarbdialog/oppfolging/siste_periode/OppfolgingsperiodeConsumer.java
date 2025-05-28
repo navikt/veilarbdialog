@@ -29,7 +29,7 @@ class OppfolgingsperiodeConsumer {
 
         if (oppfolgingsperiodeV1.sluttDato != null) {
             avsluttEskaleringsvarslerOgAktiveBrukernotifikasjoner(oppfolgingsperiodeV1);
-            settDialogerTilHistorisk(oppfolgingsperiodeV1);
+            settDialogerForOppfolgingsperiodeTilHistorisk(oppfolgingsperiodeV1);
         }
 
         sistePeriodeDAO.upsertOppfolgingsperiode(
@@ -45,8 +45,7 @@ class OppfolgingsperiodeConsumer {
         minsideVarselService.setSkalAvsluttesForVarslerIPeriode(oppfolgingsperiodeV1.uuid);
     }
 
-    private void settDialogerTilHistorisk(OppfolgingsperiodeV1 oppfolgingAvsluttetDto) {
-        Date sluttDato = new Date(oppfolgingAvsluttetDto.getSluttDato().toInstant().toEpochMilli());
-        dialogDataService.settDialogerTilHistoriske(oppfolgingAvsluttetDto.getAktorId(), sluttDato);
+    private void settDialogerForOppfolgingsperiodeTilHistorisk(OppfolgingsperiodeV1 oppfolgingAvsluttetDto) {
+        dialogDataService.settDialogerTilHistoriske(oppfolgingAvsluttetDto.getAktorId(), oppfolgingAvsluttetDto.uuid);
     }
 }

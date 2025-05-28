@@ -325,7 +325,7 @@ class DialogRessursTest extends SpringBootTestBase {
                 .setTekst("tekst")
                 .setOverskrift("overskrift");
         var dialog = dialogTestService.opprettDialogSomVeileder(veileder, bruker, henvendelseFørHistorisk);
-        dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), new Date());
+        dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), dialog.getOppfolgingsperiode());
 
         var melding = new NyMeldingDTO().setFnr(bruker.getFnr()).setTekst("LOL").setDialogId(dialog.getId());
         veileder.createRequest()
@@ -341,7 +341,7 @@ class DialogRessursTest extends SpringBootTestBase {
                 .setTekst("tekst")
                 .setOverskrift("overskrift");
         var dialog = dialogTestService.opprettDialogSomBruker(bruker, henvendelseFørHistorisk);
-        dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), new Date());
+        dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), dialog.getOppfolgingsperiode());
 
         var melding = new NyMeldingDTO().setFnr(bruker.getFnr()).setTekst("LOL").setDialogId(dialog.getId());
         bruker.createRequest()

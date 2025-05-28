@@ -212,8 +212,8 @@ public class DialogDataService {
         sendPaaKafka(aktoerId);
     }
 
-    public void settDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
-        dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
+    public void settDialogerTilHistoriske(String aktoerId, UUID oppfolgingsperiodeId) {
+        dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, oppfolgingsperiodeId)
                 .forEach(this::oppdaterDialogTilHistorisk);
 
         sendPaaKafka(aktoerId);
