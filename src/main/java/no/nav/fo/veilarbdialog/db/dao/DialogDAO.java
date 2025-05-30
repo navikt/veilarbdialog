@@ -58,13 +58,13 @@ public class DialogDAO {
     }
 
     @Transactional(readOnly = true)
-    public List<DialogData> hentDialogerSomSkalAvsluttesForAktorId(String aktorId, Date avsluttetDato) {
+    public List<DialogData> hentDialogerSomSkalAvsluttesForAktorId(String aktorId, UUID oppfolgingsperiodeId) {
         return jdbc.query("select * from DIALOG where " +
                         "AKTOR_ID = :aktorId and " +
                         "HISTORISK = 0 and " +
-                        "OPPRETTET_DATO < :avsluttetDato",
+                        "OPPFOLGINGSPERIODE_UUID = :oppfolgingsperiode_uuid",
                 new MapSqlParameterSource("aktorId", aktorId)
-                    .addValue("avsluttetDato", avsluttetDato),
+                    .addValue("oppfolgingsperiode_uuid", oppfolgingsperiodeId.toString()),
                 this::mapRow);
     }
 

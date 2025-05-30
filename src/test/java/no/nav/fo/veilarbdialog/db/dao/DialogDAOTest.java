@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static no.nav.fo.veilarbdialog.TestDataBuilder.nyDialog;
@@ -121,36 +122,40 @@ class DialogDAOTest extends BaseDAOTest {
     @Test
      void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedAlleredeHistoriske() {
        String aktorId = AktorIdProvider.getNext();
+       UUID periodeId = UUID.randomUUID();
+
         DialogData dialog = nyDialog(aktorId)
                 .toBuilder()
                 .overskrift("ny")
+                .oppfolgingsperiode(periodeId)
                 .build();
 
         DialogData historiskDialog = nyDialog(aktorId)
                 .toBuilder()
                 .historisk(true)
                 .overskrift("historisk")
+                .oppfolgingsperiode(periodeId)
                 .build();
 
         dialogDAO.opprettDialog(dialog);
         dialogDAO.opprettDialog(historiskDialog);
 
-        List<DialogData> dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktorId, new Date(System.currentTimeMillis() + 1000));
+        List<DialogData> dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktorId, periodeId);
         assertThat(dialoger).hasSize(1);
         assertThat(dialoger.get(0).getOverskrift()).isEqualTo("ny");
     }
 
     @Test
-     void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerNyereEnnUtmeldingstidspunkt() {
+     void hentDialogerSomSkalAvsluttesForAktorIdTarIkkeMedDialogerForEnAnnenOppfolgingsperiode() {
        String aktorId = AktorIdProvider.getNext();
-        var dialog = nyDialog(aktorId).toBuilder().opprettetDato(Date.from(Instant.now().minusSeconds(5))).overskrift("gammel").build();
+        UUID gammelPeriodeId = UUID.randomUUID();
+        UUID nyPeriodeId = UUID.randomUUID();
+        var dialog = nyDialog(aktorId).toBuilder().oppfolgingsperiode(gammelPeriodeId).opprettetDato(Date.from(Instant.now().minusSeconds(5))).overskrift("gammel").build();
         dialogDAO.opprettDialog(dialog);
 
-        Date avslutningsdato = new Date();
+        dialogDAO.opprettDialog(nyDialog(aktorId).withOppfolgingsperiode(nyPeriodeId).withOpprettetDato(Date.from(Instant.now().plusSeconds(5))).withOverskrift("ny"));
 
-        dialogDAO.opprettDialog(nyDialog(aktorId).withOpprettetDato(Date.from(Instant.now().plusSeconds(5))).withOverskrift("ny"));
-
-        List<DialogData> dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktorId, avslutningsdato);
+        List<DialogData> dialoger = dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktorId, gammelPeriodeId);
         assertThat(dialoger).hasSize(1);
         assertThat(dialoger.get(0).getOverskrift()).isEqualTo("gammel");
     }
