@@ -23,8 +23,8 @@
 
         <common.version>3.2025.05.30_07.00-bef2e550fb22</common.version>
         <dab.common.version>2024.11.14-10.46.174740baf5c7</dab.common.version>
-        <poao.tilgang.version>2025.05.22_11.16-06c841fea2ec</poao.tilgang.version>
-        <shedlock.version>6.8.0</shedlock.version>
+        <poao.tilgang.version>2025.06.06_07.18-71cefb1c2699</poao.tilgang.version>
+        <shedlock.version>6.9.0</shedlock.version>
         <okhttp.version>4.12.0</okhttp.version>
 
         <sonar.projectKey>navikt_veilarbdialog</sonar.projectKey>
@@ -270,7 +270,7 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
-            <version>2.50.1</version>
+            <version>2.51.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
