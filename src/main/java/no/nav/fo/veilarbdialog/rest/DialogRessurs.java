@@ -1,6 +1,10 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +27,24 @@ import java.util.Optional;
 import static java.lang.Math.toIntExact;
 import static java.util.stream.Collectors.toList;
 
-
+@SecuritySchemes(
+    {
+        @SecurityScheme(
+            name = "Bearer token Entra (AAD)",
+            type = SecuritySchemeType.HTTP,
+            scheme = "bearer",
+            bearerFormat = "Bearer {token}",
+            in = SecuritySchemeIn.HEADER
+        ),
+        @SecurityScheme(
+                name = "Bearer token ID-Porten (eksternbrukere)",
+                type = SecuritySchemeType.HTTP,
+                scheme = "bearer",
+                bearerFormat = "Bearer {token}",
+                in = SecuritySchemeIn.HEADER
+        )
+    }
+)
 @Tag(name = "Dialog(tråd) og meldings API")
 @Transactional
 @RestController
