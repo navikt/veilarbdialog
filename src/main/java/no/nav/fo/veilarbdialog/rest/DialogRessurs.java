@@ -31,17 +31,19 @@ import static java.util.stream.Collectors.toList;
     {
         @SecurityScheme(
             name = "Bearer token Entra (AAD)",
+            description = "Entra token for ansatte/system-brukere",
             type = SecuritySchemeType.HTTP,
             scheme = "bearer",
             bearerFormat = "Bearer {token}",
             in = SecuritySchemeIn.HEADER
         ),
         @SecurityScheme(
-                name = "Bearer token ID-Porten (eksternbrukere)",
-                type = SecuritySchemeType.HTTP,
-                scheme = "bearer",
-                bearerFormat = "Bearer {token}",
-                in = SecuritySchemeIn.HEADER
+            name = "Bearer token ID-Porten (eksternbrukere)",
+            description = "ID-Porten token for eksterne brukere",
+            type = SecuritySchemeType.HTTP,
+            scheme = "bearer",
+            bearerFormat = "Bearer {token}",
+            in = SecuritySchemeIn.HEADER
         )
     }
 )
