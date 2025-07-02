@@ -40,6 +40,8 @@ public class DialogRessurs {
     private final KontorsperreFilter kontorsperreFilter;
     private final IAuthService auth;
 
+    @Deprecated
+    @Operation(summary = "Bruk graphql api-et istedet")
     @GetMapping
     @AuthorizeFnr(auditlogMessage = "hent dialoger")
     public List<DialogDTO> hentDialoger(@RequestParam(value = "ekskluderDialogerMedKontorsperre", required = false) boolean ekskluderDialogerMedKontorsperre) {
@@ -55,6 +57,7 @@ public class DialogRessurs {
                 .collect(toList());
     }
 
+    @Operation(summary = "Antall uleste dialoger for en bruker")
     @PostMapping("antallUleste")
     public AntallUlesteDTO antallUlestePost(@RequestBody(required = false) FnrDto fnrDto) {
         var fnr = fnrDto != null && fnrDto.fnr != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
@@ -62,6 +65,7 @@ public class DialogRessurs {
         return innterAntallUleste(fnr);
     }
 
+    @Operation(deprecated = true, summary = "Bruk POST (uten fnr i url) istedet")
     @GetMapping("antallUleste")
     @AuthorizeFnr(auditlogMessage = "hent antall uleste")
     public AntallUlesteDTO antallUleste() {
@@ -78,6 +82,9 @@ public class DialogRessurs {
         return new AntallUlesteDTO(toIntExact(antall));
     }
 
+    @Operation(
+            summary = "Timestamp for siste hendelse på en bruker",
+            description = "Brukes for å sjekke om dialog-tråder skal hentes på nytt")
     @PostMapping("sistOppdatert")
     public SistOppdatertDTO sistOppdatertPost(@RequestBody(required = false) FnrDto fnrDto) {
         var fnr = fnrDto != null && fnrDto.fnr != null ? Person.fnr(fnrDto.fnr) : getContextUserIdent();
@@ -85,6 +92,7 @@ public class DialogRessurs {
         return internSistOppdatert(fnr);
     }
 
+    @Operation(deprecated = true, summary = "Bruk POST (uten fnr i url) istedet")
     @GetMapping("sistOppdatert")
     @AuthorizeFnr()
     public SistOppdatertDTO sistOppdatert() {
@@ -122,10 +130,10 @@ public class DialogRessurs {
     @Operation(
         summary = "Oppretter en ny dialog tråd og/eller en ny melding i oppgitt dialogtråd",
         description = """
-            Oppretter en ny melding i en dialog-tråd. Hvis dialog-tråden (dialogId er null) ikke finnes blir den opprettet.
+            Oppretter en ny melding i en dialog-tråd. Hvis dialog-tråden (dialogId er null) ikke finnes blir den opprettet. En dialog-tråd kan ha 1 eller flere meldinger.
             - Hvis dialogId ikke er satt, opprettes en ny dialogtråd.
-            - Hvis fnr er satt i body brukes det alltid, hvis ikke brukes (ekstern)-brukerens ident fra innlogget token. Unngå å bruke fnr eller aktorId i URL.
-            - Det sendes ut SMS varsel til bruker hvis det er ansatt/system som sender meldingen.
+            - Hvis fnr er satt i body brukes det alltid, hvis ikke brukes (ekstern)-brukerens ident fra innlogget token. Unngå å bruke fnr eller aktorId i URL selvom det er mulig.
+            - Det sendes ut SMS varsel til bruker hvis det er ansatt/system som sender meldingen (med throttling så bruker ikke spammes ned).
         """
     )
     @PostMapping
