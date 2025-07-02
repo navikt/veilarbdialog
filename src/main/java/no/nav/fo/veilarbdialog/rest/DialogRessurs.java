@@ -1,13 +1,13 @@
 package no.nav.fo.veilarbdialog.rest;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.types.identer.EksternBrukerId;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
-import no.nav.fo.veilarbdialog.service.PersonService;
 import no.nav.fo.veilarbdialog.util.DialogResource;
 import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
@@ -23,6 +23,8 @@ import java.util.Optional;
 import static java.lang.Math.toIntExact;
 import static java.util.stream.Collectors.toList;
 
+
+@Tag(name = "Dialog(tråd) og meldings API")
 @Transactional
 @RestController
 @RequestMapping(
@@ -117,8 +119,19 @@ public class DialogRessurs {
         auth.auditlog(true, subject , bruker, "ny melding");
     }
 
+    @Operation(
+        summary = "Oppretter en ny dialog tråd og/eller en ny melding i oppgitt dialogtråd",
+        description = """
+            Oppretter en ny melding i en og/ i dialogen.
+            - Hvis dialogId ikke er satt, opprettes en ny dialogtråd.
+            - Hvis fnr er satt i body brukes det alltid, hvis ikke brukes (ekstern)-brukerens ident fra innlogget token. Unngå å bruke fnr eller aktorId i URL.
+            - Det sendes ut SMS varsel til bruker hvis det er ansatt/system som sender meldingen.
+        """
+    )
     @PostMapping
-    public DialogDTO nyMelding(@RequestBody NyMeldingDTO nyMeldingDTO) {
+    public DialogDTO nyMelding(
+            @RequestBody NyMeldingDTO nyMeldingDTO
+    ) {
         Person bruker = nyMeldingDTO.getFnr() != null ? Person.fnr(nyMeldingDTO.getFnr()) : getContextUserIdent();
         sjekkTilgangOgAuditlog(bruker.eksternBrukerId());
 
