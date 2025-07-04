@@ -153,7 +153,7 @@ public class DialogRessurs {
     @Operation(
         summary = "Oppretter en ny dialog tråd og/eller en ny melding i oppgitt dialogtråd",
         description = """
-            Oppretter en ny melding i en dialog-tråd. Hvis dialog-tråden (dialogId er null) ikke finnes blir den opprettet. En dialog-tråd kan ha 1 eller flere meldinger.
+            Oppretter en ny melding i en dialog-tråd. Hvis dialog-tråden ikke finnes (dialogId er null) blir den opprettet. Hvis dialogId er ulik null men det ikke finnes noen dialoger på id-en blir den ignorert og det blir opprettet en ny dialog (på en ny id). En dialog-tråd kan ha 1 eller flere meldinger.
             - Hvis dialogId ikke er satt, opprettes en ny dialogtråd.
             - Hvis fnr er satt i body brukes det alltid, hvis ikke brukes (ekstern)-brukerens ident fra innlogget token. Unngå å bruke fnr eller aktorId i URL selvom det er mulig.
             - Det sendes ut SMS varsel til bruker hvis det er ansatt/system som sender meldingen (med throttling så bruker ikke spammes ned).
