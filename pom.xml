@@ -24,7 +24,7 @@
         <common.version>3.2025.06.23_14.50-3af3985d8555</common.version>
         <dab.common.version>2024.11.14-10.46.174740baf5c7</dab.common.version>
         <poao.tilgang.version>2025.07.04_08.56-814fa50f6740</poao.tilgang.version>
-        <shedlock.version>6.9.0</shedlock.version>
+        <shedlock.version>6.9.2</shedlock.version>
         <okhttp.version>4.12.0</okhttp.version>
 
         <sonar.projectKey>navikt_veilarbdialog</sonar.projectKey>
@@ -480,7 +480,7 @@
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <!-- RELEASE_VERSION -->
-                <version>7.13.0</version>
+                <version>7.14.0</version>
                 <!-- /RELEASE_VERSION -->
                 <executions>
                     <execution>
