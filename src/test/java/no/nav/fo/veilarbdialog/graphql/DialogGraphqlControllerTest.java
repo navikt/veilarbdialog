@@ -49,7 +49,7 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
     }
     private DialogDTO nyTraad(RestassuredUser user, AktivitetId aktivitetId) {
         return user.createRequest()
-                .body(new NyMeldingDTO().setTekst("tekst").setAktivitetId(aktivitetId != null ? aktivitetId.getId() : null))
+                .body(new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift").setAktivitetId(aktivitetId != null ? aktivitetId.getId() : null))
                 .queryParam("aktorId", bruker.getAktorId())
                 .post("/veilarbdialog/api/dialog")
                 .then()

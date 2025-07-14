@@ -33,7 +33,7 @@ class DialogRessursTest extends SpringBootTestBase {
     }
 
     private DialogDTO nyMelding(RestassuredUser avsender, MockBruker bruker) {
-        return nyMelding(avsender, bruker, new NyMeldingDTO().setTekst("tekst"));
+        return nyMelding(avsender, bruker, new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift dialog"));
     }
     private DialogDTO nyMelding(RestassuredUser avsender, MockBruker bruker, NyMeldingDTO henvendelseDTO) {
         var erVeileder = avsender instanceof MockVeileder;
@@ -158,8 +158,8 @@ class DialogRessursTest extends SpringBootTestBase {
         var kvpBruker = MockNavService.createBruker(brukerOptions);
         var veileder = MockNavService.createVeileder(kvpBruker);
         veileder.setNasjonalTilgang(true);
-        dialogTestService.opprettDialogSomVeileder(veileder, kvpBruker, new NyMeldingDTO().setTekst("hei"));
-        dialogTestService.opprettDialogSomBruker(kvpBruker, new NyMeldingDTO().setTekst("hallo"));
+        dialogTestService.opprettDialogSomVeileder(veileder, kvpBruker, new NyMeldingDTO().setTekst("hei").setOverskrift("overskrift dialog 3"));
+        dialogTestService.opprettDialogSomBruker(kvpBruker, new NyMeldingDTO().setTekst("hallo").setOverskrift("overskrift dialog 2"));
 
         var dialoger = veileder.createRequest()
                 .get("/veilarbdialog/api/dialog?fnr={fnr}&ekskluderDialogerMedKontorsperre=true", kvpBruker.getFnr())
@@ -178,8 +178,8 @@ class DialogRessursTest extends SpringBootTestBase {
         var brukerOptions = BrukerOptions.builder().erUnderKvp(true).underOppfolging(true).erManuell(false).kanVarsles(true).oppfolgingsEnhet(oppfølgingsenhet).build();
         var kvpBruker = MockNavService.createBruker(brukerOptions);
         var veileder = MockNavService.createVeileder(kvpBruker);
-        dialogTestService.opprettDialogSomVeileder(veileder, kvpBruker, new NyMeldingDTO().setTekst("hei"));
-        dialogTestService.opprettDialogSomBruker(kvpBruker, new NyMeldingDTO().setTekst("hallo"));
+        dialogTestService.opprettDialogSomVeileder(veileder, kvpBruker, new NyMeldingDTO().setTekst("hei").setOverskrift("overskrift"));
+        dialogTestService.opprettDialogSomBruker(kvpBruker, new NyMeldingDTO().setTekst("hallo").setOverskrift("overskrift"));
 
         var dialoger = hentDialoger(veileder, kvpBruker);
 
@@ -296,13 +296,13 @@ class DialogRessursTest extends SpringBootTestBase {
 
     @Test
     void bruker_skal_kunne_sende_henvedelse_uten_fnr_i_url() {
-        var melding = new NyMeldingDTO().setTekst("tekst");
+        var melding = new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift");
         nyHenvendelseUtenFnrIUrl(bruker, melding);
     }
 
     @Test
     void veileder_skal_kunne_sende_henvedelse_uten_fnr_i_url() {
-        var melding = new NyMeldingDTO().setTekst("tekst").setFnr(bruker.getFnr());
+        var melding = new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift").setFnr(bruker.getFnr());
         nyHenvendelseUtenFnrIUrl(veileder, melding);
     }
 

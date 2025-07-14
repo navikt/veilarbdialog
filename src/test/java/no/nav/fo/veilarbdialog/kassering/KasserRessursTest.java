@@ -17,7 +17,7 @@ class KasserRessursTest extends SpringBootTestBase {
     MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
     @Test
     void bruker_skal_ikke_kunne_kassere() {
-        NyMeldingDTO nyMeldingDTO = new NyMeldingDTO().setTekst("Lol");
+        NyMeldingDTO nyMeldingDTO = new NyMeldingDTO().setTekst("Lol").setOverskrift("overskrift dialog 2");
         DialogDTO opprettetDialog = dialogTestService.opprettDialogSomBruker(mockBruker, nyMeldingDTO);
         kasserDialog(mockBruker, Long.parseLong(opprettetDialog.getId()))
                 .statusCode(403);
@@ -25,7 +25,7 @@ class KasserRessursTest extends SpringBootTestBase {
 
     @Test
     void veileder_som_ikke_er_lista_skal_ikke_kunne_kassere() {
-        NyMeldingDTO nyMeldingDTO = new NyMeldingDTO().setTekst("Lol");
+        NyMeldingDTO nyMeldingDTO = new NyMeldingDTO().setTekst("Lol").setOverskrift("overskrift dialog 2");
         DialogDTO opprettetDialog = dialogTestService.opprettDialogSomBruker(mockBruker, nyMeldingDTO);
         kasserDialog(mockVeileder, Long.parseLong(opprettetDialog.getId()))
                 .statusCode(403);

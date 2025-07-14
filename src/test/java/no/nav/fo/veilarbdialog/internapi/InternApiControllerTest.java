@@ -25,7 +25,7 @@ class InternApiControllerTest extends SpringBootTestBase {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeileder = MockNavService.createVeileder(mockBruker);
 
-        DialogDTO dialog1 = dialogTestService.opprettDialogSomVeileder(mockVeileder, mockBruker, new NyMeldingDTO().setTekst("dialog 1 - henvendelse 1"));
+        DialogDTO dialog1 = dialogTestService.opprettDialogSomVeileder(mockVeileder, mockBruker, new NyMeldingDTO().setTekst("dialog 1 - henvendelse 1").setOverskrift("overskrift dialog 1"));
 
         Dialog hentetDialog1 = mockVeileder.createRequest()
                 .get("http://localhost/veilarbdialog/internal/api/v1/dialog/{dialogId}", dialog1.getId())
@@ -44,12 +44,12 @@ class InternApiControllerTest extends SpringBootTestBase {
             d.assertAll();
         });
 
-        DialogDTO dialog2 = dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("dialog 2 - henvendelse 1"));
+        DialogDTO dialog2 = dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("dialog 2 - henvendelse 1").setOverskrift("overskrift dialog 2"));
 
         // Sett bruker under KVP
         BrukerOptions kvpOptions = mockBruker.getBrukerOptions().toBuilder().erUnderKvp(true).build();
         MockNavService.updateBruker(mockBruker, kvpOptions);
-        dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("dialog3 - henvendelse 1"));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("dialog3 - henvendelse 1").setOverskrift("overskrift dialog 3"));
 
         // Opprett henvendelse/melding med kontorsperre på en dialog uten kontorsperre
         dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("dialog 2 - henvendelse 2 kvp").setDialogId(dialog2.getId()));
@@ -137,7 +137,7 @@ class InternApiControllerTest extends SpringBootTestBase {
         MockBruker mockBruker = MockNavService.createHappyBruker();
         MockVeileder mockVeilederUtenBruker = MockNavService.createVeileder();
 
-        dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("tekst"));
+        dialogTestService.opprettDialogSomBruker(mockBruker, new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift"));
 
         mockVeilederUtenBruker.createRequest()
                 .get("http://localhost/veilarbdialog/internal/api/v1/dialog?aktorId={aktorId}",

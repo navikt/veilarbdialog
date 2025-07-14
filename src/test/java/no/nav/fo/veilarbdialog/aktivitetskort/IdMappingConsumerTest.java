@@ -35,6 +35,7 @@ class IdMappingConsumerTest extends SpringBootTestBase {
         String arenaId = "ARENATA123";
         NyMeldingDTO nyHenvendelseDTO = new NyMeldingDTO()
                 .setTekst("tekst")
+                .setOverskrift("En arena aktivitet")
                 .setAktivitetId(arenaId);
 
         DialogDTO opprettetDialog = dialogTestService.opprettDialogSomBruker(mockBruker, nyHenvendelseDTO);
