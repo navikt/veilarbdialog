@@ -253,6 +253,12 @@ public class DialogDataService {
                 .opprettetDato(new Date())
                 .build();
 
+        if (StringUtils.isEmpty(dialogData.getOverskrift())) {
+            throw new IllegalArgumentException("Dialog må ha en overskrift");
+        }
+        if (StringUtils.isEmpty(dialogData.getAktorId())) {
+            throw new IllegalArgumentException("Dialog må ha en aktørId");
+        }
         DialogData nyDialog = dialogDAO.opprettDialog(dialogData);
         dialogStatusService.oppdaterDatavarehus(nyDialog);
 

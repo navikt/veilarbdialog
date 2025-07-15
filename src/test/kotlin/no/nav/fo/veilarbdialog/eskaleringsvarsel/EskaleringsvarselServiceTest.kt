@@ -121,8 +121,8 @@ class EskaleringsvarselServiceTest: SpringBootTestBase() {
     }
 
     fun opprettEskaleringsvarselEldreEnn(tidspunkt: ZonedDateTime, erGjeldende : Boolean = true) {
-        dialogTestService.opprettDialogSomVeileder(veileder, bruker, NyMeldingDTO().setTekst("").setOverskrift(""))
-        dialogTestService.startEskalering(veileder, StartEskaleringDto(Fnr.of(bruker.fnr),"", "", "", "" ))
+        dialogTestService.opprettDialogSomVeileder(veileder, bruker, NyMeldingDTO().setTekst("text").setOverskrift("overskrift"))
+        dialogTestService.startEskalering(veileder, StartEskaleringDto(Fnr.of(bruker.fnr),"", "varsel om stans av ytelse", "", "" ))
 
         val sqlGjeldende = """
             UPDATE eskaleringsvarsel
