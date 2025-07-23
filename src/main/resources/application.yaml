@@ -89,18 +89,20 @@ logging:
 
 management:
   endpoint:
+    metrics:
+      access: read_only
     health:
       show-details: always
     prometheus:
-      enabled: true
+      access: read_only
   endpoints:
     web:
       exposure:
         include: "health,info,prometheus"
       base-path: "/internal"
-  metrics:
-    export:
-      prometheus:
+  prometheus:
+    metrics:
+      export:
         enabled: true
 
 application:
