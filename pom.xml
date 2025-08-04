@@ -25,7 +25,7 @@
         <dab.common.version>2024.11.14-10.46.174740baf5c7</dab.common.version>
         <poao.tilgang.version>2025.07.04_08.56-814fa50f6740</poao.tilgang.version>
         <shedlock.version>6.9.2</shedlock.version>
-        <okhttp.version>4.12.0</okhttp.version>
+        <okhttp.version>5.1.0</okhttp.version>
 
         <sonar.projectKey>navikt_veilarbdialog</sonar.projectKey>
         <sonar.organization>navikt</sonar.organization>
