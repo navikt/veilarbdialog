@@ -137,11 +137,7 @@ public class DialogRessurs {
     private void sjekkTilgangOgAuditlog(EksternBrukerId bruker) {
         var subject = auth.getLoggedInnUser();
         try {
-            if (auth.erEksternBruker()) {
-                auth.sjekkTilgangTilPerson(bruker, TilgangsType.SKRIVE);
-            } else {
-                auth.sjekkInternbrukerHarSkriveTilgangTilPerson(bruker);
-            }
+            auth.sjekkTilgangTilPerson(bruker, TilgangsType.SKRIVE);
         } catch (Exception e) {
             auth.auditlog(false, subject , bruker, "ny melding");
             throw e;
