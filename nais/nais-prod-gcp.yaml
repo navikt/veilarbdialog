@@ -67,7 +67,7 @@ spec:
         - application: arbeidssokerregistrering-for-veileder
           namespace: paw
           cluster: prod-gcp
-        - application: paw-arbeidssoekerregisteret-egenvurdering-dialog-tjeneste
+        - application: egenvurdering-dialog-tjeneste
           namespace: paw
           cluster: prod-gcp
         - application: veilarbpersonflate
