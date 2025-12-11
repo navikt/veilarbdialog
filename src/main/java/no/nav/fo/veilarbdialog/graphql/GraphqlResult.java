@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.graphql;
 
 import lombok.Data;
+import no.nav.domain.DialogDtoGraphql;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
@@ -29,7 +30,7 @@ class Extension {
 
 @Data
 class Dialoger {
-    List<DialogDTO> dialoger;
+    List<DialogDtoGraphql> dialoger;
     GjeldendeEskaleringsvarselDto stansVarsel;
     List<KladdDTO> kladder;
     List<EskaleringsvarselDto> stansVarselHistorikk;

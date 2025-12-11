@@ -8,10 +8,7 @@ import no.nav.fo.veilarbdialog.domain.KladdDTO;
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto;
-import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker;
-import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
-import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder;
-import no.nav.fo.veilarbdialog.mock_nav_modell.RestassuredUser;
+import no.nav.fo.veilarbdialog.mock_nav_modell.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -34,23 +31,34 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
         return graphqlRequest(user, fnr, query, false);
     }
 
-    private GraphqlResult graphqlRequest(RestassuredUser user, String fnr,  String query, Boolean bareMedAktiviteter) {
+    private GraphqlResult graphqlRequest(RestassuredUser user, String fnr, String query, Boolean bareMedAktiviteter) {
         return user.createRequest()
-            .body("{ \"query\": \""+ query  +"\", \"variables\": { \"fnr\": \"" + fnr + "\", \"bareMedAktiviteter\": " + bareMedAktiviteter + "} }")
-            .post("/veilarbdialog/graphql")
-            .then()
-            .statusCode(200)
-            .extract()
-            .as(GraphqlResult.class);
+                .body("{ \"query\": \"" + query + "\", \"variables\": { \"fnr\": \"" + fnr + "\", \"bareMedAktiviteter\": " + bareMedAktiviteter + "} }")
+                .post("/veilarbdialog/graphql")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(GraphqlResult.class);
     }
 
     private DialogDTO nyTraad(RestassuredUser user) {
         return nyTraad(user, null);
     }
+
     private DialogDTO nyTraad(RestassuredUser user, AktivitetId aktivitetId) {
         return user.createRequest()
                 .body(new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift").setAktivitetId(aktivitetId != null ? aktivitetId.getId() : null))
                 .queryParam("aktorId", bruker.getAktorId())
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(200)
+                .extract().as(DialogDTO.class);
+    }
+
+    private DialogDTO nyTraad(RestassuredUser user, AktivitetId aktivitetId, MockBruker mockBruker) {
+        return user.createRequest()
+                .body(new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift").setAktivitetId(aktivitetId != null ? aktivitetId.getId() : null))
+                .queryParam("aktorId", mockBruker.getAktorId())
                 .post("/veilarbdialog/api/dialog")
                 .then()
                 .statusCode(200)
@@ -187,70 +195,105 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
         assertThat(result.errors.get(0).message).isEqualTo("Ikke tilgang");
     }
 
+    @Test
+    void veileder_skal_kunne_hente_dialoger_med_kontorsperre_hvis_har_tilgang() {
+        var kvpBruker = MockNavService.createBruker(BrukerOptions.happyBrukerBuilder().erUnderKvp(true).build());
+        var kvpVeileder = MockNavService.createVeileder(kvpBruker);
+        nyTraad(kvpVeileder, null, kvpBruker);
+        var result = graphqlRequest(kvpVeileder, kvpBruker.getFnr(), allDialogFields);
+        assertThat(result.data.dialoger).hasSize(1);
+        assertThat(result.data.dialoger.getFirst().getKontorsperreEnhetId()).isNotNull();
+        assertThat(result.errors).isNull();
+    }
+
+    @Test
+    void veileder_skal_ikke_kunne_hente_dialoger_med_kontorsperre_hvis_ikke_tilgang() {
+        var kvpBruker = MockNavService.createBruker(BrukerOptions.happyBrukerBuilder().erUnderKvp(true).build());
+        var kvpVeileder = MockNavService.createVeileder(kvpBruker);
+        var annenVeileder = MockNavService.createVeileder();
+        nyTraad(kvpVeileder, null, kvpBruker);
+        var result = graphqlRequest(annenVeileder, kvpBruker.getFnr(), allDialogFields);
+        assertThat(result.data.dialoger).isNull();
+    }
+
+    @Test
+    void bruker_skal_kunne_hente_dialoger_med_kontorsperre() {
+        var kvpBruker = MockNavService.createBruker(BrukerOptions.happyBrukerBuilder().erUnderKvp(true).build());
+        var kvpVeileder = MockNavService.createVeileder(kvpBruker);
+        nyTraad(kvpVeileder, null, kvpBruker);
+        var result = graphqlRequest(kvpBruker, kvpBruker.getFnr(), allDialogFields);
+        assertThat(result.data.dialoger).hasSize(1);
+        assertThat(result.data.dialoger.getFirst().getKontorsperreEnhetId()).isNotNull();
+        assertThat(result.errors).isNull();
+    }
+
     static String varselOmStans = """
-        query($fnr: String!) {
-            stansVarsel(fnr: $fnr) {
-                id,
-                tilhorendeDialogId,
-                opprettetDato,
-                opprettetAv,
-                opprettetBegrunnelse
-            }
-        }
-    """.trim().replace("\n", "");
-
-    static String kladderQuery = """
-        query($fnr: String!) {
-            kladder(fnr: $fnr) {
-                overskrift,
-                tekst,
-                dialogId,
-                aktivitetId
-            }
-        }
-    """.trim().replace("\n", "");
-
-    static String varselOmStansHistorikk = """
-        query($fnr: String!) {
-            stansVarselHistorikk(fnr: $fnr) {
-                id,
-                tilhorendeDialogId,
-                opprettetDato,
-                opprettetAv,
-                opprettetBegrunnelse,
-                avsluttetDato,
-                avsluttetAv,
-                avsluttetBegrunnelse
-            }
-        }
-    """.trim().replace("\n", "");
-
-    static String allDialogFields = """
-            query($fnr: String!, $bareMedAktiviteter: Boolean) {
-                dialoger(fnr: $fnr, bareMedAktiviteter: $bareMedAktiviteter) {
-                    aktivitetId,
-                    oppfolgingsperiode,
-                    opprettetDato,
-                    egenskaper,
-                    erLestAvBruker,
-                    ferdigBehandlet,
-                    historisk,
-                    lest,
-                    lestAvBrukerTidspunkt,
-                    sisteTekst,
-                    sisteDato,
-                    venterPaSvar,
-                    henvendelser {
+                query($fnr: String!) {
+                    stansVarsel(fnr: $fnr) {
                         id,
-                        lest,
-                        avsender,
-                        avsenderId,
-                        dialogId,
-                        sendt,
-                        viktig,
-                        tekst
+                        tilhorendeDialogId,
+                        opprettetDato,
+                        opprettetAv,
+                        opprettetBegrunnelse
                     }
                 }
-            }   
-        """.trim().replace("\n", "");
+            """.trim().replace("\n", "");
+
+    static String kladderQuery = """
+                query($fnr: String!) {
+                    kladder(fnr: $fnr) {
+                        overskrift,
+                        tekst,
+                        dialogId,
+                        aktivitetId
+                    }
+                }
+            """.trim().replace("\n", "");
+
+    static String varselOmStansHistorikk = """
+                query($fnr: String!) {
+                    stansVarselHistorikk(fnr: $fnr) {
+                        id,
+                        tilhorendeDialogId,
+                        opprettetDato,
+                        opprettetAv,
+                        opprettetBegrunnelse,
+                        avsluttetDato,
+                        avsluttetAv,
+                        avsluttetBegrunnelse
+                    }
+                }
+            """.trim().replace("\n", "");
+
+    static String allDialogFields = """
+                query($fnr: String!, $bareMedAktiviteter: Boolean) {
+                    dialoger(fnr: $fnr, bareMedAktiviteter: $bareMedAktiviteter) {
+                        id,
+                        aktivitetId,
+                        overskrift,
+                        oppfolgingsperiode,
+                        opprettetDato,
+                        egenskaper,
+                        erLestAvBruker,
+                        ferdigBehandlet,
+                        historisk,
+                        lest,
+                        lestAvBrukerTidspunkt,
+                        sisteTekst,
+                        sisteDato,
+                        venterPaSvar,
+                        henvendelser {
+                            id,
+                            lest,
+                            avsender,
+                            avsenderId,
+                            dialogId,
+                            sendt,
+                            viktig,
+                            tekst
+                        },
+                        kontorsperreEnhetId
+                    }
+                }   
+            """.trim().replace("\n", "");
 }
