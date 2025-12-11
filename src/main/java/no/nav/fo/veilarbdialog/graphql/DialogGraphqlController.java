@@ -45,7 +45,7 @@ public class DialogGraphqlController {
                 .stream()
                 .filter(bareMedAktiviteterFilter(bareMedAktiviteter))
                 .filter(kontorsperreFilter::tilgangTilEnhet)
-                .map((it) -> DialogDtoGraphql.Companion.mapTilDialogDtoGraphql(it, authService.erEksternBruker()))
+                .map(it -> DialogDtoGraphql.Companion.mapTilDialogDtoGraphql(it, authService.erEksternBruker()))
                 .toList();
     }
 
