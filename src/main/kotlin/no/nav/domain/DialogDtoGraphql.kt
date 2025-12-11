@@ -8,7 +8,7 @@ import java.util.*
 data class DialogDtoGraphql(
     val id: String,
     val aktivitetId: String?,
-    val overskrift: String,
+    val overskrift: String?,
     val sisteTekst: String?,
     val sisteDato: Date,
     val opprettetDato: Date,
