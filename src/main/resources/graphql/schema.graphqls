@@ -78,4 +78,5 @@ type DialogDTO {
 
     henvendelser: [HenvendelseDTO]
     egenskaper: [Egenskap]
+    kontorsperreEnhetId: String
 }

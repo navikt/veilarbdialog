@@ -2,13 +2,14 @@ package no.nav.fo.veilarbdialog.graphql;
 
 import lombok.AllArgsConstructor;
 import no.nav.common.types.identer.Fnr;
-import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.domain.DialogDtoGraphql;
+import no.nav.fo.veilarbdialog.domain.DialogData;
+import no.nav.fo.veilarbdialog.domain.KladdDTO;
+import no.nav.fo.veilarbdialog.domain.Person;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.GjeldendeEskaleringsvarselDto;
-import no.nav.fo.veilarbdialog.eskaleringsvarsel.entity.EskaleringsvarselEntity;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
-import no.nav.fo.veilarbdialog.rest.KladdRessurs;
 import no.nav.fo.veilarbdialog.rest.RestMapper;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.service.KladdService;
@@ -17,16 +18,12 @@ import no.nav.poao.dab.spring_auth.TilgangsType;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-
-import static java.lang.Math.toIntExact;
-import static no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto.fromEntity;
 
 @AllArgsConstructor
 @Controller
@@ -41,14 +38,15 @@ public class DialogGraphqlController {
 
 
     @QueryMapping
-    public List<DialogDTO> dialoger(@Argument String fnr, @Argument Optional<Boolean> bareMedAktiviteter) {
+    public List<DialogDtoGraphql> dialoger(@Argument String fnr, @Argument Optional<Boolean> bareMedAktiviteter) {
         var targetFnr = Fnr.of(getContextUserIdent(fnr).get());
         authService.sjekkTilgangTilPerson(targetFnr, TilgangsType.LESE);
         return dialogDataService.hentDialogerForBruker(Person.fnr(targetFnr.get()))
                 .stream()
                 .filter(bareMedAktiviteterFilter(bareMedAktiviteter))
                 .filter(kontorsperreFilter::tilgangTilEnhet)
-                .map(restMapper::somDialogDTO).toList();
+                .map(it -> DialogDtoGraphql.Companion.mapTilDialogDtoGraphql(it, authService.erEksternBruker()))
+                .toList();
     }
 
     @QueryMapping
