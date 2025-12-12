@@ -6,21 +6,21 @@ import no.nav.fo.veilarbdialog.domain.HenvendelseData
 import java.util.*
 
 data class DialogDtoGraphql(
-    val id: String,
+    val id: String?,
     val aktivitetId: String?,
     val overskrift: String?,
     val sisteTekst: String?,
-    val sisteDato: Date,
-    val opprettetDato: Date,
-    val historisk: Boolean,
-    val lest: Boolean,
-    val venterPaSvar: Boolean,
-    val ferdigBehandlet: Boolean,
+    val sisteDato: Date?,
+    val opprettetDato: Date?,
+    val historisk: Boolean?,
+    val lest: Boolean?,
+    val venterPaSvar: Boolean?,
+    val ferdigBehandlet: Boolean?,
     val lestAvBrukerTidspunkt: Date?,
-    val erLestAvBruker: Boolean,
+    val erLestAvBruker: Boolean?,
     val oppfolgingsperiode: UUID?,
-    val henvendelser: List<HenvendelseDtoGraphQl>,
-    val egenskaper: List<Egenskap>,
+    val henvendelser: List<HenvendelseDtoGraphQl>?,
+    val egenskaper: List<Egenskap>?,
     val kontorsperreEnhetId: String?
 ) {
     companion object {
