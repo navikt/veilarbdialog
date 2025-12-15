@@ -6,6 +6,7 @@ import lombok.With;
 import no.nav.common.types.identer.EnhetId;
 import no.nav.fo.veilarbdialog.kvp.NoeMedKontorEnhet;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 import static java.util.Optional.ofNullable;
@@ -38,6 +39,7 @@ public class DialogData implements NoeMedKontorEnhet {
     Date eldsteUlesteTidspunktForBruker;
     UUID oppfolgingsperiode;
 
+    @Nullable
     List<HenvendelseData> henvendelser;
 
     List<EgenskapType> egenskaper;
@@ -46,6 +48,7 @@ public class DialogData implements NoeMedKontorEnhet {
         return ofNullable(egenskaper).orElseGet(Collections::emptyList);
     }
 
+    @Nullable
     public List<HenvendelseData> getHenvendelser() {
         return ofNullable(henvendelser).orElseGet(Collections::emptyList);
     }

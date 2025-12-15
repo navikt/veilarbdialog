@@ -26,7 +26,7 @@ data class DialogDtoGraphql(
     companion object {
         fun mapTilDialogDtoGraphql(dialogData: DialogData?, erEksternBruker: Boolean): DialogDtoGraphql? {
             if (dialogData == null) return null
-            val sisteHenvendelse = dialogData.henvendelser.maxBy { it.sendt }
+            val sisteHenvendelse = dialogData.henvendelser?.maxBy { it.sendt }
 
             return DialogDtoGraphql(
                 id = dialogData.id.toString(),
@@ -42,8 +42,8 @@ data class DialogDtoGraphql(
                 erLestAvBruker = if (erEksternBruker) false else dialogData.erLestAvBruker(),
                 lestAvBrukerTidspunkt = if (erEksternBruker) null else dialogData.lestAvBrukerTidspunkt,
                 oppfolgingsperiode = dialogData.oppfolgingsperiode,
-                henvendelser = dialogData.henvendelser.map { HenvendelseDtoGraphQl.mapTilHenvendelseDtoGraphql(it, erEksternBruker) },
-                egenskaper = dialogData.egenskaper.map { Egenskap.valueOf(it.name) },
+                henvendelser = dialogData.henvendelser?.map { HenvendelseDtoGraphQl.mapTilHenvendelseDtoGraphql(it, erEksternBruker) } ?: emptyList(),
+                egenskaper = dialogData.egenskaper?.map { Egenskap.valueOf(it.name) } ?: emptyList(),
                 kontorsperreEnhetId = dialogData.kontorsperreEnhetId
             )
         }
