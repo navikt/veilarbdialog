@@ -4,6 +4,7 @@ import no.nav.fo.veilarbdialog.domain.DialogData
 import no.nav.fo.veilarbdialog.domain.Egenskap
 import no.nav.fo.veilarbdialog.domain.HenvendelseData
 import java.util.*
+import kotlin.time.Instant
 
 data class DialogDtoGraphql(
     val id: String?,
@@ -26,7 +27,7 @@ data class DialogDtoGraphql(
     companion object {
         fun mapTilDialogDtoGraphql(dialogData: DialogData?, erEksternBruker: Boolean): DialogDtoGraphql? {
             if (dialogData == null) return null
-            val sisteHenvendelse = dialogData.henvendelser?.maxBy { it.sendt }
+            val sisteHenvendelse = dialogData.henvendelser?.maxBy { it.sendt ?: Date.from(java.time.Instant.MIN) }
 
             return DialogDtoGraphql(
                 id = dialogData.id.toString(),
