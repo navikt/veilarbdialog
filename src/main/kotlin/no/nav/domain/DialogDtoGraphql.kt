@@ -3,8 +3,10 @@ package no.nav.domain
 import no.nav.fo.veilarbdialog.domain.DialogData
 import no.nav.fo.veilarbdialog.domain.Egenskap
 import no.nav.fo.veilarbdialog.domain.HenvendelseData
+import org.slf4j.LoggerFactory
 import java.util.*
-import kotlin.time.Instant
+
+val logger = LoggerFactory.getLogger(DialogDtoGraphql::class.java)
 
 data class DialogDtoGraphql(
     val id: String?,
@@ -25,7 +27,7 @@ data class DialogDtoGraphql(
     val kontorsperreEnhetId: String?
 ) {
     companion object {
-        fun mapTilDialogDtoGraphql(dialogData: DialogData?, erEksternBruker: Boolean): DialogDtoGraphql? {
+        fun mapTilDialogDtoGraphql(dialogData: DialogData?, erEksternBruker: Boolean): DialogDtoGraphql? = runCatching {
             if (dialogData == null) return null
             val sisteHenvendelse = dialogData.henvendelser?.maxBy { it.sendt ?: Date.from(java.time.Instant.MIN) }
 
@@ -47,7 +49,9 @@ data class DialogDtoGraphql(
                 egenskaper = dialogData.egenskaper?.map { Egenskap.valueOf(it.name) } ?: emptyList(),
                 kontorsperreEnhetId = dialogData.kontorsperreEnhetId
             )
-        }
+        }.onFailure {
+            logger.error("Klarte ikke mappe felter i graphql dto", it)
+        }.getOrThrow()
     }
 }
 
