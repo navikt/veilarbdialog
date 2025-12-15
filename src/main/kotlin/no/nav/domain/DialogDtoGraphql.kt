@@ -51,14 +51,14 @@ data class DialogDtoGraphql(
 }
 
 data class HenvendelseDtoGraphQl(
-    val id: String,
+    val id: String?,
     val dialogId: String?,
-    val avsender: String,
+    val avsender: String?,
     val avsenderId: String?,
-    val sendt: Date,
-    val lest: Boolean,
-    val viktig: Boolean,
-    val tekst: String,
+    val sendt: Date?,
+    val lest: Boolean?,
+    val viktig: Boolean?,
+    val tekst: String?,
 ) {
     companion object {
         fun mapTilHenvendelseDtoGraphql(henvendelseData: HenvendelseData, eksternBruker: Boolean): HenvendelseDtoGraphQl {
