@@ -29,7 +29,7 @@ data class DialogDtoGraphql(
     companion object {
         fun mapTilDialogDtoGraphql(dialogData: DialogData?, erEksternBruker: Boolean): DialogDtoGraphql? = runCatching {
             if (dialogData == null) return null
-            val sisteHenvendelse = dialogData.henvendelser?.maxBy { it.sendt ?: Date.from(java.time.Instant.MIN) }
+            val sisteHenvendelse = dialogData.henvendelser?.maxByOrNull { it.sendt ?: Date.from(java.time.Instant.MIN) }
 
             return DialogDtoGraphql(
                 id = dialogData.id.toString(),
