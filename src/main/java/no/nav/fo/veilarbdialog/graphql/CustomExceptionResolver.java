@@ -3,11 +3,13 @@ package no.nav.fo.veilarbdialog.graphql;
 import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
 import org.springframework.graphql.execution.ErrorType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+@Slf4j
 @Component
 class CustomExceptionResolver extends DataFetcherExceptionResolverAdapter {
 
@@ -22,7 +24,8 @@ class CustomExceptionResolver extends DataFetcherExceptionResolverAdapter {
             else error.errorType(ErrorType.FORBIDDEN).message("Ikke tilgang");
             return error.build();
         } else {
-            return error.errorType(ErrorType.INTERNAL_ERROR).message("Ukjent feil").build();
+            log.error("Uforventet feil på graphql endepunkt", ex);
+            return error.errorType(ErrorType.INTERNAL_ERROR).message("Ukjent feil: " + ex.getMessage()).build();
         }
     }
 }

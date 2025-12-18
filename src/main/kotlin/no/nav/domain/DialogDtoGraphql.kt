@@ -3,7 +3,10 @@ package no.nav.domain
 import no.nav.fo.veilarbdialog.domain.DialogData
 import no.nav.fo.veilarbdialog.domain.Egenskap
 import no.nav.fo.veilarbdialog.domain.HenvendelseData
+import org.slf4j.LoggerFactory
 import java.util.*
+
+val logger = LoggerFactory.getLogger(DialogDtoGraphql::class.java)
 
 data class DialogDtoGraphql(
     val id: String?,
@@ -24,9 +27,9 @@ data class DialogDtoGraphql(
     val kontorsperreEnhetId: String?
 ) {
     companion object {
-        fun mapTilDialogDtoGraphql(dialogData: DialogData?, erEksternBruker: Boolean): DialogDtoGraphql? {
+        fun mapTilDialogDtoGraphql(dialogData: DialogData?, erEksternBruker: Boolean): DialogDtoGraphql? = runCatching {
             if (dialogData == null) return null
-            val sisteHenvendelse = dialogData.henvendelser.maxBy { it.sendt }
+            val sisteHenvendelse = dialogData.henvendelser?.maxByOrNull { it.sendt ?: Date.from(java.time.Instant.MIN) }
 
             return DialogDtoGraphql(
                 id = dialogData.id.toString(),
@@ -42,23 +45,25 @@ data class DialogDtoGraphql(
                 erLestAvBruker = if (erEksternBruker) false else dialogData.erLestAvBruker(),
                 lestAvBrukerTidspunkt = if (erEksternBruker) null else dialogData.lestAvBrukerTidspunkt,
                 oppfolgingsperiode = dialogData.oppfolgingsperiode,
-                henvendelser = dialogData.henvendelser.map { HenvendelseDtoGraphQl.mapTilHenvendelseDtoGraphql(it, erEksternBruker) },
-                egenskaper = dialogData.egenskaper.map { Egenskap.valueOf(it.name) },
+                henvendelser = dialogData.henvendelser?.map { HenvendelseDtoGraphQl.mapTilHenvendelseDtoGraphql(it, erEksternBruker) } ?: emptyList(),
+                egenskaper = dialogData.egenskaper?.map { Egenskap.valueOf(it.name) } ?: emptyList(),
                 kontorsperreEnhetId = dialogData.kontorsperreEnhetId
             )
-        }
+        }.onFailure {
+            logger.error("Klarte ikke mappe felter i graphql dto", it)
+        }.getOrThrow()
     }
 }
 
 data class HenvendelseDtoGraphQl(
-    val id: String,
+    val id: String?,
     val dialogId: String?,
-    val avsender: String,
+    val avsender: String?,
     val avsenderId: String?,
-    val sendt: Date,
-    val lest: Boolean,
-    val viktig: Boolean,
-    val tekst: String,
+    val sendt: Date?,
+    val lest: Boolean?,
+    val viktig: Boolean?,
+    val tekst: String?,
 ) {
     companion object {
         fun mapTilHenvendelseDtoGraphql(henvendelseData: HenvendelseData, eksternBruker: Boolean): HenvendelseDtoGraphQl {
