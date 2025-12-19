@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.mock_nav_modell;
 
 import no.nav.common.json.JsonUtils;
+import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingPeriodeMinimalDTO;
 
 import java.time.ZonedDateTime;
@@ -24,7 +25,7 @@ public class WireMockUtil {
 
         oppfolging(fnr, underOppfolging, oppfolgingFeiler, mockBruker.getOppfolgingsperiode());
         manuell(fnr, erManuell, erReservertKrr, kanVarsles);
-        kvp(aktorId, erUnderKvp, mockBruker.getBrukerOptions().getOppfolgingsEnhet());
+        kvp(Fnr.of(fnr), erUnderKvp, mockBruker.getBrukerOptions().getOppfolgingsEnhet());
         aktor(fnr, aktorId);
         dialogvarsler();
     }
@@ -76,19 +77,28 @@ public class WireMockUtil {
     private static void manuell(String fnr, boolean erManuell, boolean erReservertKrr, boolean kanVarsles) {
         wireMock.stubFor(post("/veilarboppfolging/api/v3/manuell/hent-status")
                 .willReturn(ok()
-                        .withHeader("Content-Type", "text/json")
+                        .withHeader("Content-Type", "application/json")
                         .withBody("{\"erUnderManuellOppfolging\":" + erManuell + ",\"krrStatus\":{\"kanVarsles\":" + kanVarsles + ",\"erReservert\":" + erReservertKrr + "}}")));
     }
 
-    private static void kvp(String aktorId, boolean erUnderKvp, String enhet) {
+    private static void kvp(Fnr fnr, boolean erUnderKvp, String enhet) {
         if (erUnderKvp) {
-            wireMock.stubFor(get("/veilarboppfolging/api/v2/kvp?aktorId=" + aktorId)
+            wireMock.stubFor(post("/veilarboppfolging/api/graphql")
+                    .withRequestBody(matchingJsonPath("$.variables.fnr", equalTo(fnr.get())))
                     .willReturn(ok()
-                            .withHeader("Content-Type", "text/json")
-                            .withBody("{\"enhet\":\"" + enhet + "\"}")));
+                            .withHeader("Content-Type", "application/json")
+                            .withBody(String.format("""
+                    { "data": { "brukerStatus": { "kontorSperre": { "kontorId": "%s" } } }, "errors:": null }
+                """, enhet))));
         } else {
-            wireMock.stubFor(get("/veilarboppfolging/api/v2/kvp?aktorId=" + aktorId)
-                    .willReturn(aResponse().withStatus(204)));
+            wireMock.stubFor(post("/veilarboppfolging/api/graphql")
+                    .withRequestBody(matchingJsonPath("$.variables.fnr", equalTo(fnr.get())))
+                    .willReturn(aResponse()
+                            .withStatus(200)
+                            .withBody("""
+                               { "data": { "brukerStatus": { "kontorSperre": null } }, "errors:": null }
+                             """)
+                    ));
         }
     }
 
