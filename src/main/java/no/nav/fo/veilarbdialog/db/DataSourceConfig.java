@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
+import java.util.Collections;
 
 @Profile("!local")
 @Configuration
@@ -50,6 +51,8 @@ public class DataSourceConfig {
 
         var flyway = new Flyway(Flyway.configure()
                 .dataSource(dataSource)
+                // This replaces the 'flyway.postgresql.transactional.lock=false' property
+                .configuration(Collections.singletonMap("flyway.postgresql.transactional.lock", "false"))
                 .table("schema_version")
                 .validateMigrationNaming(true));
 
