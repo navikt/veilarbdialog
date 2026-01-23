@@ -22,7 +22,7 @@
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
         <common.version>3.2025.10.10_08.21-bb7c7830d93c</common.version>
-        <dab.common.version>2025.12.15-10.38.4f649aa03352</dab.common.version>
+        <dab.common.version>2026.01.23-09.13.0ae37d64f02d</dab.common.version>
         <poao.tilgang.version>2025.11.03_13.40-18456d0598be</poao.tilgang.version>
         <shedlock.version>6.10.0</shedlock.version>
         <okhttp.version>4.12.0</okhttp.version>
@@ -308,7 +308,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-contract-stub-runner</artifactId>
-            <version>5.0.0</version>
+            <version>4.3.0</version>
             <scope>test</scope>
         </dependency>
 
