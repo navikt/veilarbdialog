@@ -88,9 +88,6 @@ spec:
         - application: aia-backend
           namespace: paw
           cluster: dev-gcp
-        - application: start-samtale
-          namespace: pto
-          cluster: dev-gcp
         - application: veilarbaktivitet
           namespace: dab
           cluster: dev-gcp
