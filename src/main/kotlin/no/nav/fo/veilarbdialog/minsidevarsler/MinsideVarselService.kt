@@ -18,7 +18,6 @@ import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client
 import no.nav.util.TeamLog.teamLog
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
