@@ -45,6 +45,8 @@ spec:
       destinations:
         - id: elastic
         - id: loki
+  secureLogs:
+    enabled: true
   kafka:
     pool: nav-prod
   tokenx:
@@ -106,8 +108,6 @@ spec:
           namespace: poao
         - application: please
           namespace: dab
-        - application: logging
-          namespace: nais-system
   gcp:
     sqlInstances:
       - name: veilarbdialog

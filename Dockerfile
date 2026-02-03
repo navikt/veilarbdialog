@@ -12,6 +12,8 @@ ENV TZ="Europe/Oslo"
 ENV APP_JAR=veilarbdialog.jar
 WORKDIR /app
 COPY target/veilarbdialog.jar ./
+RUN /bin/mkdir /secure-logs
+RUN chown nonroot /secure-logs
 EXPOSE 8080
 USER nonroot
 ENTRYPOINT set -x \
