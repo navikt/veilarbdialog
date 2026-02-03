@@ -15,6 +15,7 @@ import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.service.KladdService;
 import no.nav.poao.dab.spring_auth.AuthService;
 import no.nav.poao.dab.spring_auth.TilgangsType;
+import no.nav.util.TeamLog;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,7 @@ public class DialogGraphqlController {
     public List<DialogDtoGraphql> dialoger(@Argument String fnr, @Argument Optional<Boolean> bareMedAktiviteter) {
         var targetFnr = Fnr.of(getContextUserIdent(fnr).get());
         authService.sjekkTilgangTilPerson(targetFnr, TilgangsType.LESE);
+        TeamLog.teamLog.info("Test av TeamLogs");
         return dialogDataService.hentDialogerForBruker(Person.fnr(targetFnr.get()))
                 .stream()
                 .filter(bareMedAktiviteterFilter(bareMedAktiviteter))

@@ -17,8 +17,6 @@ import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import no.nav.poao.dab.spring_auth.TilgangsType;
-import no.nav.util.TeamLog;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -161,7 +159,6 @@ public class DialogRessurs {
     public DialogDTO nyMelding(
             @RequestBody NyMeldingDTO nyMeldingDTO
     ) {
-        TeamLog.teamLog.info("Test av TeamLogs");
         Person bruker = nyMeldingDTO.getFnr() != null ? Person.fnr(nyMeldingDTO.getFnr()) : getContextUserIdent();
         sjekkTilgangOgAuditlog(bruker.eksternBrukerId());
 
