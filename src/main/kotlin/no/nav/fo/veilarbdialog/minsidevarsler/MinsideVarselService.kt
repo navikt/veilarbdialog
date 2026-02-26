@@ -17,7 +17,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarsles
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao
 import no.nav.fo.veilarbdialog.oppfolging.v2.OppfolgingV2Client
-import org.slf4j.Logger
+import no.nav.util.TeamLog.teamLog
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -35,12 +35,11 @@ open class MinsideVarselService(
     private val minsideVarselProducer: MinsideVarselProducer,
     private val eskaleringsvarselRepository: EskaleringsvarselRepository,
 ) {
-    private val secureLogs: Logger = LoggerFactory.getLogger("SecureLog")
     private val log = LoggerFactory.getLogger(MinsideVarselService::class.java)
 
     open fun puttVarselIOutbox(varsel: DialogVarsel, aktorId: AktorId) {
         if (!kanVarsles(varsel.foedselsnummer)) {
-            log.warn("Kan ikke varsle bruker: {}. Se årsak i SecureLog", aktorId.get())
+            log.warn("Kan ikke varsle bruker: {}. Se årsak i TeamLog", aktorId.get())
             throw BrukerKanIkkeVarslesException()
         }
 
@@ -156,7 +155,7 @@ open class MinsideVarselService(
         val kanVarsles = !erManuell && !erReservertIKrr
 
         if (!kanVarsles) {
-            secureLogs.warn(
+            teamLog.warn(
                 "bruker med fnr: {} kan ikke varsles, statuser erManuell: {}, erReservertIKrr: {}}",
                 fnr,
                 erManuell,

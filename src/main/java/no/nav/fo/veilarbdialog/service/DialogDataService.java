@@ -80,13 +80,13 @@ public class DialogDataService {
         }
 
         DialogData dialog = Optional.ofNullable(hentDialog(henvendelseData.getDialogId(), aktivitetsId))
-                .orElseGet(() -> opprettDialog(henvendelseData, aktorId.get()));
+                .orElseGet(() -> opprettDialog(henvendelseData, fnr, aktorId.get()));
 
         if(dialog.isHistorisk()) throw new NyHenvendelsePåHistoriskDialogException();
 
         slettKladd(henvendelseData, bruker);
 
-        opprettHenvendelseForDialog(dialog, henvendelseData.getEgenskaper() != null && !henvendelseData.getEgenskaper().isEmpty(), henvendelseData.getTekst());
+        opprettHenvendelseForDialog(dialog, fnr, henvendelseData.getEgenskaper() != null && !henvendelseData.getEgenskaper().isEmpty(), henvendelseData.getTekst());
         dialog = markerDialogSomLest(dialog.getId());
 
         sendPaaKafka(aktorId.get());
@@ -129,14 +129,14 @@ public class DialogDataService {
         return dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
     }
 
-    private DialogData opprettHenvendelseForDialog(DialogData dialogData, boolean viktigMelding, String tekst) {
+    private DialogData opprettHenvendelseForDialog(DialogData dialogData, Fnr fnr, boolean viktigMelding, String tekst) {
         HenvendelseData opprettet = dialogDAO.opprettHenvendelse(HenvendelseData.builder()
                 .dialogId(dialogData.getId())
                 .avsenderId(auth.getLoggedInnUser().get())
                 .viktig(viktigMelding)
                 .avsenderType(auth.erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER)
                 .tekst(tekst)
-                .kontorsperreEnhetId(kvpService.kontorsperreEnhetId(dialogData.getAktorId()))
+                .kontorsperreEnhetId(kvpService.kontorsperreEnhetId(fnr))
                 .sendt(new Date())
                 .build());
 
@@ -237,7 +237,7 @@ public class DialogDataService {
         dialogStatusService.settDialogTilHistorisk(dialogData);
     }
 
-    public DialogData opprettDialog(NyMeldingDTO nyHenvendelseDTO, String aktorId) {
+    public DialogData opprettDialog(NyMeldingDTO nyHenvendelseDTO, Fnr fnr, String aktorId) {
         UUID gjeldendeOppfolgingsperiode = sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(AktorId.of(aktorId));
         var dialogData = DialogData.builder()
                 .oppfolgingsperiode(gjeldendeOppfolgingsperiode)
@@ -249,7 +249,7 @@ public class DialogDataService {
                         .stream()
                         .map(egenskap -> EgenskapType.valueOf(egenskap.name()))
                         .collect(Collectors.toList()))
-                .kontorsperreEnhetId(kvpService.kontorsperreEnhetId(aktorId))
+                .kontorsperreEnhetId(kvpService.kontorsperreEnhetId(fnr))
                 .opprettetDato(new Date())
                 .build();
 
