@@ -3,19 +3,16 @@ package no.nav.fo.veilarbdialog.config;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.io.IOException;
 
 import static java.lang.String.format;
-import static no.nav.fo.veilarbdialog.config.EnhanceSecureLogsFilter.SECURELOGS_ER_INTERN_BRUKER;
-import static no.nav.fo.veilarbdialog.config.EnhanceSecureLogsFilter.SECURELOGS_INNLOGGET_BRUKER_IDENT;
+import static no.nav.fo.veilarbdialog.config.EnhanceTeamLogsFilter.TEAMLOGS_ER_INTERN_BRUKER;
+import static no.nav.fo.veilarbdialog.config.EnhanceTeamLogsFilter.TEAMLOGS_INNLOGGET_BRUKER_IDENT;
+import static no.nav.util.TeamLog.teamLog;
 
-public class SecureRequestLoggerFilter implements Filter {
-
-    private final Logger secureLog = LoggerFactory.getLogger("SecureLog");
+public class TeamLogsRequestLoggerFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -29,17 +26,17 @@ public class SecureRequestLoggerFilter implements Filter {
                 httpRequest.getMethod(),
                 httpRequest.getServerName(),
                 httpRequest.getRequestURI(),
-                MDC.get(SECURELOGS_ER_INTERN_BRUKER),
-                MDC.get(SECURELOGS_INNLOGGET_BRUKER_IDENT),
+                MDC.get(TEAMLOGS_ER_INTERN_BRUKER),
+                MDC.get(TEAMLOGS_INNLOGGET_BRUKER_IDENT),
                 httpRequest.getQueryString()
         );
-        secureLog.info(msg);
+        teamLog.info(msg);
     }
 
     @Override
     public void destroy() {
-        MDC.remove(SECURELOGS_ER_INTERN_BRUKER);
-        MDC.remove(SECURELOGS_INNLOGGET_BRUKER_IDENT);
+        MDC.remove(TEAMLOGS_ER_INTERN_BRUKER);
+        MDC.remove(TEAMLOGS_INNLOGGET_BRUKER_IDENT);
 
         Filter.super.destroy();
     }

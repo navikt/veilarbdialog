@@ -39,7 +39,7 @@ data class DialogDtoGraphql(
                 sisteDato = sisteHenvendelse?.sendt ?: dialogData.opprettetDato,
                 opprettetDato = dialogData.opprettetDato,
                 historisk = dialogData.isHistorisk,
-                lest = dialogData.erLestAvBruker(),
+                lest = if (erEksternBruker) dialogData.erLestAvBruker() else dialogData.erNyesteHenvendelseLestAvVeileder(),
                 venterPaSvar = dialogData.venterPaSvarFraBruker(),
                 ferdigBehandlet = if (erEksternBruker) true else dialogData.erFerdigbehandlet(),
                 erLestAvBruker = if (erEksternBruker) false else dialogData.erLestAvBruker(),

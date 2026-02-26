@@ -45,8 +45,6 @@ spec:
       destinations:
         - id: elastic
         - id: loki
-  secureLogs:
-    enabled: true
   kafka:
     pool: nav-dev
   tokenx:
@@ -88,9 +86,6 @@ spec:
         - application: aia-backend
           namespace: paw
           cluster: dev-gcp
-        - application: start-samtale
-          namespace: pto
-          cluster: dev-gcp
         - application: veilarbaktivitet
           namespace: dab
           cluster: dev-gcp
@@ -99,6 +94,9 @@ spec:
           cluster: dev-gcp
         - application: poao-admin
           namespace: poao
+          cluster: dev-gcp
+        - application: pam-dir-api
+          namespace: teampam
           cluster: dev-gcp
     outbound:
       external:
@@ -111,6 +109,8 @@ spec:
           namespace: poao
         - application: please
           namespace: dab
+        - application: logging
+          namespace: nais-system
   gcp:
     sqlInstances:
       - name: veilarbdialog
