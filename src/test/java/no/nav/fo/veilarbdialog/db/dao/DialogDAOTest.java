@@ -113,7 +113,7 @@ class DialogDAOTest extends BaseDAOTest {
     @Test
      void kanHenteDialogPaaArenaAktivitetId() {
        String aktorId = AktorIdProvider.getNext();
-        var aktivitetId = AktivitetId.of("ARENATA123");
+        var aktivitetId = AktivitetId.of("ARENATA234");
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isEmpty();
         dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().aktivitetId(aktivitetId).build());
         assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isPresent();
