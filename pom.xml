@@ -18,6 +18,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <tomcat.version>10.1.50</tomcat.version>
 
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
@@ -348,7 +349,7 @@
         <dependency>
             <groupId>io.zonky.test</groupId>
             <artifactId>embedded-postgres</artifactId>
-            <version>2.2.0</version>
+            <version>2.1.1</version>
             <scope>test</scope>
         </dependency>
 
