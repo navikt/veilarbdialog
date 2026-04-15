@@ -61,40 +61,28 @@ spec:
       rules:
         - application: veilarbapi
           namespace: pto
-          cluster: prod-gcp
         - application: arbeidssokerregistrering-for-veileder
           namespace: paw
-          cluster: prod-gcp
         - application: egenvurdering-dialog-tjeneste
           namespace: paw
-          cluster: prod-gcp
         - application: veilarbpersonflate
           namespace: poao
-          cluster: prod-gcp
         - application: mulighetsrommet-api
           namespace: team-mulighetsrommet
-          cluster: prod-gcp
-        - application: veilarbdirigent
-          namespace: pto
-          cluster: prod-fss
         - application: aktivitetsplan
           namespace: pto
-          cluster: prod-gcp
         - application: arbeidsrettet-dialog
           namespace: pto
-          cluster: prod-gcp
         - application: aia-backend
           namespace: paw
-          cluster: prod-gcp
         - application: veilarbaktivitet
           namespace: dab
-          cluster: prod-gcp
         - application: inngar
           namespace: dab
-          cluster: prod-gcp
         - application: poao-admin
           namespace: poao
-          cluster: prod-gcp
+        - application: pam-dir-api
+          namespace: teampam
     outbound:
       external:
         - host: dab-unleash-api.nav.cloud.nais.io
