@@ -17,7 +17,6 @@ import no.nav.fo.veilarbdialog.util.EnumUtils
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
-import java.net.URL
 import java.sql.ResultSet
 import java.time.Instant
 import java.time.LocalDateTime
@@ -26,7 +25,7 @@ import java.util.UUID
 
 @Repository
 open class MinsideVarselDao(
-    val template: NamedParameterJdbcTemplate
+    private val template: NamedParameterJdbcTemplate
 ) {
     private fun ResultSet.getVarselId() = MinSideVarselId(DatabaseUtils.hentMaybeUUID(this, "varsel_id"))
     private fun ResultSet.getStatus() = EnumUtils.valueOf(BrukernotifikasjonBehandlingStatus::class.java, this.getString("status"))
@@ -94,8 +93,8 @@ open class MinsideVarselDao(
             SELECT COUNT(*) FROM min_side_varsel
             WHERE varsel_id = :varselId
         """;
-        var antall = template.queryForObject(sql, params, Int::class.java);
-        return antall > 0;
+        val antall = template.queryForObject(sql, params, Int::class.java) ?: 0
+        return antall > 0
     }
 
     open fun setEksternVarselFeilet(varselId: MinSideVarselId) {
@@ -221,7 +220,7 @@ open class MinsideVarselDao(
              and oppdatert < :date
             """
 
-        return template.queryForObject(sql, parameterSource, Int::class.java);
+        return template.queryForObject(sql, parameterSource, Int::class.java) ?: 0
     }
 }
 

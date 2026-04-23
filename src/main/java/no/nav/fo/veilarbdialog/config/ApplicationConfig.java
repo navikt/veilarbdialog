@@ -9,7 +9,7 @@ import no.nav.common.auth.context.AuthContextHolder;
 import no.nav.common.auth.context.AuthContextHolderThreadLocal;
 import no.nav.common.job.leader_election.LeaderElectionClient;
 import no.nav.common.job.leader_election.ShedLockLeaderElectionClient;
-import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
+import org.springframework.boot.micrometer.metrics.autoconfigure.MeterRegistryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

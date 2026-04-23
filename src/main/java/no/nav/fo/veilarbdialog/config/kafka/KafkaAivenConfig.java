@@ -3,8 +3,7 @@ package no.nav.fo.veilarbdialog.config.kafka;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
-import org.springframework.boot.ssl.DefaultSslBundleRegistry;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -54,7 +53,7 @@ public class KafkaAivenConfig {
 
     @Bean("stringStringConsumerFactory")
     ConsumerFactory<String, String> stringStringConsumerFactory(KafkaProperties kafkaProperties) {
-        Map<String, Object> consumerProperties = kafkaProperties.buildConsumerProperties(new DefaultSslBundleRegistry());
+        Map<String, Object> consumerProperties = kafkaProperties.buildConsumerProperties();
         consumerProperties.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, org.apache.kafka.common.serialization.StringDeserializer.class);
         consumerProperties.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, org.apache.kafka.common.serialization.StringDeserializer.class);
 
@@ -71,7 +70,7 @@ public class KafkaAivenConfig {
 
     @Bean
     ProducerFactory<String,String> stringStringProducerFactory(KafkaProperties kafkaProperties) {
-        Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties(new DefaultSslBundleRegistry());
+        Map<String, Object> producerProperties = kafkaProperties.buildProducerProperties();
         producerProperties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         producerProperties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);
         producerProperties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, org.apache.kafka.common.serialization.StringSerializer.class);

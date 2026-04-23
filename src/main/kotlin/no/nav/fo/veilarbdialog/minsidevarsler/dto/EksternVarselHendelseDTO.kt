@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.minsidevarsler.dto
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import no.nav.tms.varsel.action.Varseltype
 import java.util.*
 
@@ -47,12 +47,12 @@ class Ferdigstilt(
 
 
 fun JsonNode.deserialiserEksternVarselHendelse(): EksternVarselOppdatering {
-    val eksternStatus = EksternVarselStatus.valueOf(this["status"].asText())
-    val varselId = MinSideVarselId(UUID.fromString(this["varselId"].asText()))
-    val varseltype = Varseltype.valueOf(this["varseltype"].asText().replaceFirstChar { it.titlecase()})
+    val eksternStatus = EksternVarselStatus.valueOf(this["status"].asString())
+    val varselId = MinSideVarselId(UUID.fromString(this["varselId"].asString()))
+    val varseltype = Varseltype.valueOf(this["varseltype"].asString().replaceFirstChar { it.titlecase()})
     return when (eksternStatus) {
         EksternVarselStatus.sendt -> {
-            val kanal = EksternVarselKanal.valueOf(this["kanal"].asText())
+            val kanal = EksternVarselKanal.valueOf(this["kanal"].asString())
             when (this["renotifikasjon"].asBoolean()) {
                 true -> Renotifikasjon(varseltype, varselId, kanal)
                 else -> {
@@ -67,7 +67,7 @@ fun JsonNode.deserialiserEksternVarselHendelse(): EksternVarselOppdatering {
             Feilet(
                 varseltype,
                 varselId,
-                this["feilmelding"].asText()
+                this["feilmelding"].asString()
             )
         }
         EksternVarselStatus.venter -> Venter(varseltype, varselId)

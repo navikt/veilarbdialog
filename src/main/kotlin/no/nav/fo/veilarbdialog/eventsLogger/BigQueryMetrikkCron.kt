@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 @Service
 @EnableScheduling
 open class BigQueryMetrikkCron(
-    val bigQueryClient: BigQueryClient,
+    private val bigQueryClient: BigQueryClient,
     private val antallUtgattDAO: AntallUtgattDAO,
 ) {
 

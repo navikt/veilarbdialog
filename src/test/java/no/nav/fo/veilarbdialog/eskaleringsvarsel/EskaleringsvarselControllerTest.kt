@@ -1,17 +1,20 @@
 package no.nav.fo.veilarbdialog.eskaleringsvarsel
 
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.restassured.response.Response
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 import no.nav.common.json.JsonUtils
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
-import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
 import no.nav.fo.veilarbdialog.domain.DialogDTO
 import no.nav.fo.veilarbdialog.domain.HenvendelseDTO
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.GjeldendeEskaleringsvarselDto
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StopEskaleringDto
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
 import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
@@ -27,7 +30,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
 import org.assertj.core.api.SoftAssertions.assertSoftly
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
@@ -35,11 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.kafka.test.utils.KafkaTestUtils
-import java.lang.Exception
-import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
 
 internal class EskaleringsvarselControllerTest(
     @Value("\${application.topic.ut.minside.varsel}")
@@ -60,16 +57,7 @@ internal class EskaleringsvarselControllerTest(
     ) : SpringBootTestBase() {
     private val log = LoggerFactory.getLogger(EskaleringsvarselController::class.java)
 
-    var minsideVarselConsumer: Consumer<String?, String?>? = null
-
-    companion object {
-        @JvmStatic
-        @BeforeAll
-        fun setupAll() {
-            JsonUtils.getMapper().registerKotlinModule()
-        }
-    }
-
+    var minsideVarselConsumer: Consumer<String, String>? = null
 
     @BeforeEach
     fun setupL() {
@@ -78,22 +66,22 @@ internal class EskaleringsvarselControllerTest(
 
     private fun ventPåVarselOpprettelsePåKafka(): OpprettVarsel {
         val brukernotifikasjonRecord =
-            KafkaTestUtils.getSingleRecord<String, String>(
-                minsideVarselConsumer,
+            KafkaTestUtils.getSingleRecord(
+                minsideVarselConsumer!!,
                 minsidevarselTopic,
                 KafkaTestService.DEFAULT_WAIT_TIMEOUT
             )
-        return JsonUtils.fromJson<OpprettVarsel>(brukernotifikasjonRecord.value(), OpprettVarsel::class.java)
+        return JsonUtils.fromJson(brukernotifikasjonRecord.value(), OpprettVarsel::class.java)
     }
 
     private fun ventPåVarselInaktiveringPåKafka(): InaktiverVarsel {
         val brukernotifikasjonRecord =
-            KafkaTestUtils.getSingleRecord<String?, String?>(
-                minsideVarselConsumer,
+            KafkaTestUtils.getSingleRecord(
+                minsideVarselConsumer!!,
                 minsidevarselTopic,
                 KafkaTestService.DEFAULT_WAIT_TIMEOUT
             )
-        return JsonUtils.fromJson<InaktiverVarsel>(brukernotifikasjonRecord.value(), InaktiverVarsel::class.java)
+        return JsonUtils.fromJson(brukernotifikasjonRecord.value(), InaktiverVarsel::class.java)
     }
 
 
@@ -363,7 +351,7 @@ internal class EskaleringsvarselControllerTest(
         val veileder = MockNavService.createVeileder(bruker)
 
         val startEskaleringDto = lagEskaleringsVarsel(bruker)
-        val startEskalering = dialogTestService!!.startEskalering(veileder, startEskaleringDto)
+        val startEskalering = dialogTestService.startEskalering(veileder, startEskaleringDto)
 
         lesHenvendelse(bruker, startEskalering.tilhorendeDialogId)
 
@@ -378,7 +366,7 @@ internal class EskaleringsvarselControllerTest(
         val veileder = MockNavService.createVeileder(bruker)
         val startEskaleringDto = lagEskaleringsVarsel(bruker)
         val initialEndOffsets =
-            KafkaTestUtils.getEndOffsets(minsideVarselConsumer, minsidevarselTopic)
+            KafkaTestUtils.getEndOffsets(minsideVarselConsumer!!, minsidevarselTopic)
 
         dialogTestService.startEskalering(veileder, startEskaleringDto)
 
@@ -390,7 +378,7 @@ internal class EskaleringsvarselControllerTest(
         // sjekk at det er blitt sendt en oppgave
         ventPåVarselOpprettelsePåKafka()
 
-        val afterOffsets = KafkaTestUtils.getEndOffsets(minsideVarselConsumer, minsidevarselTopic)
+        val afterOffsets = KafkaTestUtils.getEndOffsets(minsideVarselConsumer!!, minsidevarselTopic)
         // sjekk at det ikke ble sendt mer enn 1 varsel
         assertEquals(
             initialEndOffsets.entries.first().value + 1,
@@ -405,7 +393,7 @@ internal class EskaleringsvarselControllerTest(
             .get("/veilarbdialog/api/eskaleringsvarsel/historikk")
             .then()
             .assertThat().statusCode(HttpStatus.OK.value())
-            .extract().jsonPath().getList<EskaleringsvarselDto?>(".", EskaleringsvarselDto::class.java)
+            .extract().jsonPath().getList<EskaleringsvarselDto?>(".", EskaleringsvarselDto::class.java)?.filterNotNull()?.toMutableList()
     }
 
     private fun tryStartEskalering(veileder: MockVeileder, startEskaleringDto: StartEskaleringDto?): Response {
