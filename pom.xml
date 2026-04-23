@@ -18,7 +18,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <tomcat.version>11.0.20</tomcat.version>
+        <tomcat.version>11.0.21</tomcat.version>
 
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
