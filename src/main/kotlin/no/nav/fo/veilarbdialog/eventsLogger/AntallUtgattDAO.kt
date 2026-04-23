@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 open class AntallUtgattDAO(
-    val template: JdbcTemplate
+    private val template: JdbcTemplate
 ) {
     open fun hentAntallUtgåtteVarsler(): Int {
         val sql = """

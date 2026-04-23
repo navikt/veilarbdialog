@@ -17,7 +17,6 @@ import no.nav.fo.veilarbdialog.util.EnumUtils
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
-import java.net.URL
 import java.sql.ResultSet
 import java.time.Instant
 import java.time.LocalDateTime
@@ -26,7 +25,7 @@ import java.util.UUID
 
 @Repository
 open class MinsideVarselDao(
-    val template: NamedParameterJdbcTemplate
+    private val template: NamedParameterJdbcTemplate
 ) {
     private fun ResultSet.getVarselId() = MinSideVarselId(DatabaseUtils.hentMaybeUUID(this, "varsel_id"))
     private fun ResultSet.getStatus() = EnumUtils.valueOf(BrukernotifikasjonBehandlingStatus::class.java, this.getString("status"))
