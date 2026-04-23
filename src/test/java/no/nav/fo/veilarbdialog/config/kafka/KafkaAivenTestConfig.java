@@ -3,7 +3,6 @@ package no.nav.fo.veilarbdialog.config.kafka;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
-import org.springframework.boot.ssl.DefaultSslBundleRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
