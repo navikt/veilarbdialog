@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.7</version>
+        <version>4.0.5</version>
         <relativePath/>
     </parent>
 
@@ -18,21 +18,23 @@
 
     <properties>
         <java.version>21</java.version>
-        <tomcat.version>10.1.50</tomcat.version>
+        <tomcat.version>11.0.20</tomcat.version>
 
         <start-class>no.nav.fo.veilarbdialog.Application</start-class>
 
-        <common.version>3.2025.10.10_08.21-bb7c7830d93c</common.version>
-        <dab.common.version>2026.01.23-09.13.0ae37d64f02d</dab.common.version>
+        <common.version>4.2026.04.23_04.52-b638a8e5a942-beta</common.version>
+        <dab.common.version>2026.04.20-16.33.4a120cb625c2</dab.common.version>
         <poao.tilgang.version>2025.11.03_13.40-18456d0598be</poao.tilgang.version>
-        <shedlock.version>7.2.2</shedlock.version>
-        <okhttp.version>4.12.0</okhttp.version>
+        <shedlock.version>7.7.0</shedlock.version>
+        <okhttp.version>5.3.2</okhttp.version>
+        <jackson.version>3.1.2</jackson.version>
+        <jackson-annotations.version>2.21</jackson-annotations.version>
 
         <sonar.projectKey>navikt_veilarbdialog</sonar.projectKey>
         <sonar.organization>navikt</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
-        <kotlin.version>2.3.0</kotlin.version>
+        <kotlin.version>2.3.20</kotlin.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
     </properties>
@@ -112,12 +114,12 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.8.13</version>
+            <version>3.0.3</version>
         </dependency>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>2.2.42</version>
+            <version>2.2.48</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -132,7 +134,7 @@
         </dependency>
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
+            <artifactId>okhttp-jvm</artifactId>
             <version>${okhttp.version}</version>
         </dependency>
 
@@ -199,7 +201,6 @@
             <version>${common.version}</version>
         </dependency>
 
-
         <dependency>
             <groupId>no.nav.poao.dab</groupId>
             <artifactId>spring-a2-annotations</artifactId>
@@ -225,13 +226,36 @@
         <!-- EXTERNAL DEPENDENCIES -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
         </dependency>
 
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>11.2.1</version>
+            <version>12.2.1</version>
+        </dependency>
+
+        <!-- jackson -->
+
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson-annotations.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
 
         <!-- LOGGING -->
@@ -253,6 +277,10 @@
 
         <!-- Spring Kafka -->
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-kafka</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
@@ -271,12 +299,12 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
-            <version>2.57.2</version>
+            <version>2.65.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>libraries-bom</artifactId>
-            <version>26.74.0</version>
+            <version>26.80.0</version>
             <type>pom</type>
         </dependency>
 
@@ -290,6 +318,7 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
+            <version>6.0.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -309,7 +338,7 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-contract-stub-runner</artifactId>
-            <version>4.3.0</version>
+            <version>5.0.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -343,13 +372,13 @@
         <dependency>
             <groupId>io.zonky.test</groupId>
             <artifactId>embedded-database-spring-test</artifactId>
-            <version>2.7.1</version>
+            <version>2.8.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.zonky.test</groupId>
             <artifactId>embedded-postgres</artifactId>
-            <version>2.1.1</version>
+            <version>2.2.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -400,7 +429,7 @@
                     <dependency>
                         <groupId>org.projectlombok</groupId>
                         <artifactId>lombok</artifactId>
-                        <version>1.18.42</version>
+                        <version>1.18.44</version>
                         <scope>compile</scope>
                     </dependency>
                 </dependencies>

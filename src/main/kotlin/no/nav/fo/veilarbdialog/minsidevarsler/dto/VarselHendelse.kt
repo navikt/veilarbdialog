@@ -24,6 +24,7 @@ const val EksternStatusOppdatertEventName = "eksternStatusOppdatert"
 
 fun String.deserialiserVarselHendelse(appName: String): VarselHendelse {
     val jsonTree = JsonUtils.getMapper().readTree(this)
+        ?: throw IllegalArgumentException("Kunne ikke deserialisere varselhendelse: tom JSON")
     val eventName = jsonTree["@event_name"].asText()
     val appNavn = jsonTree["appnavn"].asText()
     if (appNavn != appName) return VarselFraAnnenApp

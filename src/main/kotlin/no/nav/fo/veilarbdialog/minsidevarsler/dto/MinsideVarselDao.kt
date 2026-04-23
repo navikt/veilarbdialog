@@ -94,8 +94,8 @@ open class MinsideVarselDao(
             SELECT COUNT(*) FROM min_side_varsel
             WHERE varsel_id = :varselId
         """;
-        var antall = template.queryForObject(sql, params, Int::class.java);
-        return antall > 0;
+        val antall = template.queryForObject(sql, params, Int::class.java) ?: 0
+        return antall > 0
     }
 
     open fun setEksternVarselFeilet(varselId: MinSideVarselId) {
@@ -221,7 +221,7 @@ open class MinsideVarselDao(
              and oppdatert < :date
             """
 
-        return template.queryForObject(sql, parameterSource, Int::class.java);
+        return template.queryForObject(sql, parameterSource, Int::class.java) ?: 0
     }
 }
 

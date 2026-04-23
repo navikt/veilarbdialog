@@ -1,15 +1,30 @@
 package no.nav.fo.veilarbdialog.rest
 
-import no.nav.common.json.JsonUtils
+import java.sql.Types
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.util.Date
 import no.nav.fo.veilarbdialog.SpringBootTestBase
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst.NY_MELDING_TEKST
 import no.nav.fo.veilarbdialog.domain.DialogDTO
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
+import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
+import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao
 import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
+import no.nav.fo.veilarbdialog.mock_nav_modell.RestassuredUser
 import no.nav.fo.veilarbdialog.util.KafkaTestService
+import no.nav.tms.varsel.action.InaktiverVarsel
 import no.nav.tms.varsel.action.OpprettVarsel
+import no.nav.tms.varsel.action.Varseltype
 import org.apache.kafka.clients.consumer.Consumer
 import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.SoftAssertions
+import org.assertj.core.api.SoftAssertions.assertSoftly
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,25 +32,9 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.kafka.test.utils.KafkaTestUtils
-import java.sql.Types
-import java.time.Instant
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst.NY_MELDING_TEKST
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType.BESKJED
-import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
-import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao
-import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
-import no.nav.fo.veilarbdialog.mock_nav_modell.MockVeileder
-import no.nav.fo.veilarbdialog.mock_nav_modell.RestassuredUser
-import no.nav.tms.varsel.action.InaktiverVarsel
-import no.nav.tms.varsel.action.Varseltype
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.SoftAssertions.assertSoftly
-import org.junit.jupiter.api.Assertions.assertTrue
-import java.time.temporal.ChronoUnit
-import java.util.Date
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.module.kotlin.jacksonObjectMapper
+import tools.jackson.module.kotlin.readValue
 
 internal class DialogBeskjedTest(
     @Autowired
@@ -47,10 +46,7 @@ internal class DialogBeskjedTest(
     @Value("\${application.topic.ut.minside.varsel}")
     private val minsideVarselTopic: String,
 ) : SpringBootTestBase() {
-
-    init {
-        JsonUtils.getMapper().registerKotlinModule()
-    }
+    private val kotlinMapper: ObjectMapper = jacksonObjectMapper()
 
     var minsideVarselConsumer: Consumer<String, String>? = null
 
@@ -61,8 +57,8 @@ internal class DialogBeskjedTest(
 
     private fun assertOpprettetVarselPublisertPåKafka(): OpprettVarsel {
         val brukernotifikasjonRecord =
-            KafkaTestUtils.getSingleRecord<String, String>(
-                minsideVarselConsumer,
+            KafkaTestUtils.getSingleRecord(
+                minsideVarselConsumer!!,
                 minsideVarselTopic,
                 KafkaTestService.DEFAULT_WAIT_TIMEOUT
             )
@@ -72,14 +68,12 @@ internal class DialogBeskjedTest(
                 minsideVarselConsumer,
             ), "Forventet at det ikke skulle være flere meldinger på minsideVarselTopic"
         )
-        val opprettVarsel =
-            JsonUtils.fromJson<OpprettVarsel>(brukernotifikasjonRecord.value(), OpprettVarsel::class.java)
-        return opprettVarsel
+        return kotlinMapper.readValue<OpprettVarsel>(brukernotifikasjonRecord.value())
     }
 
     private fun assertInaktiveringPublisertPåKafka(): InaktiverVarsel {
-        val doneRecord = KafkaTestUtils.getSingleRecord<String, String>(
-                minsideVarselConsumer,
+        val doneRecord = KafkaTestUtils.getSingleRecord(
+                minsideVarselConsumer!!,
                 minsideVarselTopic,
                 KafkaTestService.DEFAULT_WAIT_TIMEOUT
             )
@@ -89,7 +83,7 @@ internal class DialogBeskjedTest(
                 minsideVarselConsumer,
             )
         )
-        return JsonUtils.fromJson(doneRecord.value(), InaktiverVarsel::class.java)
+        return kotlinMapper.readValue<InaktiverVarsel>(doneRecord.value())
     }
 
     @Test

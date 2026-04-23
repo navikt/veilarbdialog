@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering
 
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.common.json.JsonUtils
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseSendt
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselHendelseConsumer
@@ -15,11 +14,11 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.node.ObjectNode
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.node.TextNode
 import java.lang.IllegalArgumentException
 import java.util.UUID
+import tools.jackson.databind.ObjectMapper
+import tools.jackson.databind.node.ObjectNode
+import tools.jackson.databind.node.StringNode
 
 /**
  * Tester noen caser som er vrien å teste med integrasjonstester (typisk async feilhåndtering)
@@ -39,7 +38,7 @@ open class EksternVarslingKvitteringConsumerTest(
         @JvmStatic
         fun setupAll() {
             // To make jackson json annotations work ("@eventName" instead of "eventName")
-            JsonUtils.getMapper().registerKotlinModule()
+            JsonUtils.getMapper()
         }
         val minsideVarselHendelseTopic = "topic"
         private const val APP_NAME = "veilarbdialog"
@@ -66,7 +65,7 @@ open class EksternVarslingKvitteringConsumerTest(
             val hendelseMedUkjentStatus = eksternVarselHendelseSendt(varselId, APP_NAME)
                 .let(JsonUtils::toJson)
                 .let { ObjectMapper().readTree(it) as ObjectNode }
-                .set("status", TextNode("lol"))
+                .set("status", StringNode("lol"))
                 .toString()
             val consumerRecord = ConsumerRecord<String, String>(
                 minsideVarselHendelseTopic, 0, 1,

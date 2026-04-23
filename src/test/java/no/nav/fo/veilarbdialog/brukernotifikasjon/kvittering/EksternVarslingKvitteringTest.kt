@@ -1,6 +1,5 @@
 package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering
 
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.common.json.JsonUtils
 import no.nav.common.types.identer.Fnr
@@ -45,7 +44,7 @@ internal class EksternVarslingKvitteringTest(
     @Value("\${spring.application.name}")
     var appname: String,
     @Autowired
-    var minsideVarselHendelseProducer: KafkaTemplate<String?, String?>,
+    var minsideVarselHendelseProducer: KafkaTemplate<String, String>,
     @Autowired
     var minsideVarselService: MinsideVarselService,
 ) : SpringBootTestBase() {
@@ -54,7 +53,7 @@ internal class EksternVarslingKvitteringTest(
         @BeforeAll
         @JvmStatic
         fun setupAll() {
-            JsonUtils.getMapper().registerKotlinModule()
+            JsonUtils.getMapper()
         }
     }
 

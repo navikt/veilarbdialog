@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.minsidevarsler.dto
 
-import com.fasterxml.jackson.databind.JsonNode
+import tools.jackson.databind.JsonNode
 import no.nav.tms.varsel.action.Varseltype
 import java.util.*
 
