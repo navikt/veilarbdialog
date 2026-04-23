@@ -103,8 +103,11 @@ public class DialogDataService {
 
 
         if (unleash.isEnabled("veilarbdialog.dialogvarsling")) {
+            log.info("toggle er enabled");
             var eventType = auth.erEksternBruker() ? NY_DIALOGMELDING_FRA_BRUKER_TIL_NAV : NY_DIALOGMELDING_FRA_NAV_TIL_BRUKER;
             dialogVarslerClient.varsleLyttere(fnr, eventType);
+        } else {
+            log.info("toggle er disabled");
         }
 
         return dialog;
