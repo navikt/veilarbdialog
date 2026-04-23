@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering
 
+import java.util.UUID
 import no.nav.common.json.JsonUtils
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseSendt
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselHendelseConsumer
@@ -7,15 +8,12 @@ import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
-import java.lang.IllegalArgumentException
-import java.util.UUID
 import tools.jackson.databind.ObjectMapper
 import tools.jackson.databind.node.ObjectNode
 import tools.jackson.databind.node.StringNode
@@ -34,12 +32,6 @@ open class EksternVarslingKvitteringConsumerTest(
     var eksternVarslingKvitteringConsumer: MinsideVarselHendelseConsumer? = null
 
     companion object {
-        @BeforeAll
-        @JvmStatic
-        fun setupAll() {
-            // To make jackson json annotations work ("@eventName" instead of "eventName")
-            JsonUtils.getMapper()
-        }
         val minsideVarselHendelseTopic = "topic"
         private const val APP_NAME = "veilarbdialog"
     }

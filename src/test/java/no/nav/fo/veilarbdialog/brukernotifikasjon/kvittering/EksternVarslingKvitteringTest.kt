@@ -1,13 +1,18 @@
 package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import java.util.concurrent.ExecutionException
 import no.nav.common.json.JsonUtils
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.*
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.AVSLUTTET
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.PENDING
+import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
 import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus
-import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.*
+import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.FEILET
+import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.IKKE_SATT
+import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.OK
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseBestilt
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseFeilet
 import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseSendt
@@ -25,12 +30,10 @@ import org.apache.kafka.clients.producer.RecordMetadata
 import org.assertj.core.api.SoftAssertions.assertSoftly
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
-import java.util.concurrent.ExecutionException
 
 internal class EksternVarslingKvitteringTest(
     @Autowired
@@ -48,14 +51,6 @@ internal class EksternVarslingKvitteringTest(
     @Autowired
     var minsideVarselService: MinsideVarselService,
 ) : SpringBootTestBase() {
-
-    companion object {
-        @BeforeAll
-        @JvmStatic
-        fun setupAll() {
-            JsonUtils.getMapper()
-        }
-    }
 
     @AfterEach
     fun assertNoUnkowns() {

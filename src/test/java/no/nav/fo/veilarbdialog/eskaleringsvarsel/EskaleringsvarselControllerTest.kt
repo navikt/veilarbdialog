@@ -5,6 +5,7 @@ import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
+import no.nav.common.json.JsonUtils
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.domain.DialogDTO
@@ -36,9 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.kafka.test.utils.KafkaTestUtils
-import tools.jackson.databind.ObjectMapper
-import tools.jackson.module.kotlin.jacksonObjectMapper
-import tools.jackson.module.kotlin.readValue
 
 internal class EskaleringsvarselControllerTest(
     @Value("\${application.topic.ut.minside.varsel}")
@@ -58,7 +56,6 @@ internal class EskaleringsvarselControllerTest(
 
     ) : SpringBootTestBase() {
     private val log = LoggerFactory.getLogger(EskaleringsvarselController::class.java)
-    private val kotlinMapper: ObjectMapper = jacksonObjectMapper()
 
     var minsideVarselConsumer: Consumer<String, String>? = null
 
@@ -74,7 +71,7 @@ internal class EskaleringsvarselControllerTest(
                 minsidevarselTopic,
                 KafkaTestService.DEFAULT_WAIT_TIMEOUT
             )
-        return kotlinMapper.readValue<OpprettVarsel>(brukernotifikasjonRecord.value())
+        return JsonUtils.fromJson(brukernotifikasjonRecord.value(), OpprettVarsel::class.java)
     }
 
     private fun ventPåVarselInaktiveringPåKafka(): InaktiverVarsel {
@@ -84,7 +81,7 @@ internal class EskaleringsvarselControllerTest(
                 minsidevarselTopic,
                 KafkaTestService.DEFAULT_WAIT_TIMEOUT
             )
-        return kotlinMapper.readValue<InaktiverVarsel>(brukernotifikasjonRecord.value())
+        return JsonUtils.fromJson(brukernotifikasjonRecord.value(), InaktiverVarsel::class.java)
     }
 
 

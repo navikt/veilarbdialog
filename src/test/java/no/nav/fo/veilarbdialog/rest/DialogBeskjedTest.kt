@@ -4,6 +4,7 @@ import java.sql.Types
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Date
+import no.nav.common.json.JsonUtils
 import no.nav.fo.veilarbdialog.SpringBootTestBase
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst.NY_MELDING_TEKST
@@ -32,9 +33,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.kafka.test.utils.KafkaTestUtils
-import tools.jackson.databind.ObjectMapper
-import tools.jackson.module.kotlin.jacksonObjectMapper
-import tools.jackson.module.kotlin.readValue
 
 internal class DialogBeskjedTest(
     @Autowired
@@ -46,7 +44,6 @@ internal class DialogBeskjedTest(
     @Value("\${application.topic.ut.minside.varsel}")
     private val minsideVarselTopic: String,
 ) : SpringBootTestBase() {
-    private val kotlinMapper: ObjectMapper = jacksonObjectMapper()
 
     var minsideVarselConsumer: Consumer<String, String>? = null
 
@@ -68,7 +65,7 @@ internal class DialogBeskjedTest(
                 minsideVarselConsumer,
             ), "Forventet at det ikke skulle være flere meldinger på minsideVarselTopic"
         )
-        return kotlinMapper.readValue<OpprettVarsel>(brukernotifikasjonRecord.value())
+        return JsonUtils.fromJson(brukernotifikasjonRecord.value(), OpprettVarsel::class.java)
     }
 
     private fun assertInaktiveringPublisertPåKafka(): InaktiverVarsel {
@@ -83,7 +80,7 @@ internal class DialogBeskjedTest(
                 minsideVarselConsumer,
             )
         )
-        return kotlinMapper.readValue<InaktiverVarsel>(doneRecord.value())
+        return JsonUtils.fromJson(doneRecord.value(), InaktiverVarsel::class.java)
     }
 
     @Test
