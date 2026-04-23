@@ -83,7 +83,6 @@ open class MinsideVarselService(
     @Scheduled(initialDelay = 60000, fixedDelay = 5000)
     @SchedulerLock(name = "varsler_oppgave_kafka_scheduledTask", lockAtMostFor = "PT2M")
     open fun sendPendingVarslerCron() {
-        log.info("Kjører jobb for varsler")
         sendPendingVarslerCronImpl()
     }
 
