@@ -83,7 +83,7 @@ public class DialogStatusService {
         return dialogDAO.hentDialog(dialogData.getId());
     }
 
-    public DialogData oppdaterVenterPaSvarFraBrukerSiden(DialogData dialogData, Boolean venterPaSvar) {
+    public DialogData oppdaterVenterPaSvarFraBrukerSiden(DialogData dialogData, boolean venterPaSvar) {
         if (dialogData.venterPaSvarFraBruker() == venterPaSvar) {
             return dialogData;
         }

@@ -60,7 +60,6 @@ public class DialogDataService {
     @Value("${application.dialog.url}")
     private String dialogUrl;
 
-
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person) {
         AktorId aktorId = hentAktoerIdForPerson(person);
@@ -73,23 +72,14 @@ public class DialogDataService {
         return dataVarehusDAO.hentSisteEndringSomIkkeErDine(bruker.get(), endretAv.get());
     }
 
-
-
     public DialogData getOrCreateDialogTråd(NyDialogEllerMelding henvendelseData, Optional<DialogData> dialogData) {
         if (henvendelseData instanceof NyDialog opprettDialogData) {
-            return opprettDialog(opprettDialogData, opprettDialogData.getFnr(), opprettDialogData.getAktorId());
+            return opprettDialog(opprettDialogData);
         } else if (dialogData.isPresent()) {
             return dialogData.get();
         } else {
-            throw new IllegalArgumentException("Opprett-hendelse kan være NyDialog hvis dialog-tråd ikke finnes fra før men fikk null");
+            throw new FantIkkeDialogTrådException(((NyMelding) henvendelseData).getDialogId() + "");
         }
-    }
-
-    private Long getDialogId(NyDialogEllerMelding data) {
-        if (data instanceof NyMelding nyMelding){
-            return nyMelding.getDialogId();
-        }
-        return null;
     }
 
     private @NotNull DialogVarsel toVarselMelding(DialogData dialog, Fnr fnr) {
@@ -149,7 +139,7 @@ public class DialogDataService {
     }
 
     public DialogData opprettEskaleringsvarselDialogOgMelding(NyEskaleringsVarselDialog data) {
-        var dialog = opprettDialog(data, data.getFnr(), data.getAktorId());
+        var dialog = opprettDialog(data);
         var opprettetMelding = opprettMeldingForDialog(data, dialog.getId());
         dialogStatusService.oppdaterDialogTrådStatuserForNyMelding(dialog, opprettetMelding);
         varsleWebsocketLyttereHvisToggletPaa(data.getFnr());
@@ -189,7 +179,7 @@ public class DialogDataService {
         return dialogStatusService.oppdaterVenterPaNavSiden(dialogData, ferdigBehandlet);
     }
 
-    public DialogData oppdaterVentePaSvarTidspunkt(long dialogId,  Boolean venterPåSvarFraBruker) {
+    public DialogData oppdaterVentePaSvarTidspunkt(long dialogId,  boolean venterPåSvarFraBruker) {
         var dialogData = hentDialogSomKanOppdateres(dialogId);
         return dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, venterPåSvarFraBruker);
     }
@@ -301,18 +291,18 @@ public class DialogDataService {
         dialogStatusService.settDialogTilHistorisk(dialogData);
     }
 
-    public DialogData opprettDialog(NyDialog nyHenvendelseDTO, Fnr fnr, AktorId aktorId) {
-        UUID gjeldendeOppfolgingsperiode = sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(aktorId);
+    public DialogData opprettDialog(NyDialog nyHenvendelseDTO) {
+        UUID gjeldendeOppfolgingsperiode = sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(nyHenvendelseDTO.getAktorId());
         var dialogData = DialogData.builder()
                 .oppfolgingsperiode(gjeldendeOppfolgingsperiode)
                 .overskrift(nyHenvendelseDTO.getOverskrift())
-                .aktorId(aktorId.get())
+                .aktorId(nyHenvendelseDTO.getAktorId().get())
                 .aktivitetId(AktivitetId.of(nyHenvendelseDTO.getAktivitetId()))
                 .egenskaper(nyHenvendelseDTO instanceof NyEskaleringsVarselDialog
                         ? List.of(EgenskapType.ESKALERINGSVARSEL)
                         : Collections.emptyList()
                 )
-                .kontorsperreEnhetId(kvpService.kontorsperreEnhetId(fnr))
+                .kontorsperreEnhetId(kvpService.kontorsperreEnhetId(nyHenvendelseDTO.getFnr()))
                 .opprettetDato(new Date())
                 .build();
 

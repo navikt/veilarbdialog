@@ -39,8 +39,6 @@ public class HttpExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(feilmelding);
     }
 
-
-
     @ExceptionHandler({ResponseStatusException.class})
     public ResponseEntity<String> handleResponseStatusException(ResponseStatusException e) {
         return ResponseEntity.status(e.getStatusCode().value()).body(e.getReason());
