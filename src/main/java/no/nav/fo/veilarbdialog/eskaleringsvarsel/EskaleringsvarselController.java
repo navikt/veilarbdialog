@@ -38,7 +38,7 @@ public class EskaleringsvarselController {
     @PostMapping(value = "/start")
     @OnlyInternBruker
     public EskaleringsvarselDto start(@RequestBody StartEskaleringDto startEskaleringDto) {
-        authService.sjekkTilgangTilPerson(startEskaleringDto.fnr(), TilgangsType.LESE);
+        authService.sjekkTilgangTilPerson(startEskaleringDto.fnr(), TilgangsType.SKRIVE);
         EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselService.start(startEskaleringDto);
         return EskaleringsvarselDto.fromEntity(eskaleringsvarselEntity);
     }
@@ -46,7 +46,7 @@ public class EskaleringsvarselController {
     @PatchMapping("/stop")
     @OnlyInternBruker
     public void stop(@RequestBody StopEskaleringDto stopEskaleringDto) {
-        authService.sjekkTilgangTilPerson(stopEskaleringDto.fnr(), TilgangsType.LESE);
+        authService.sjekkTilgangTilPerson(stopEskaleringDto.fnr(), TilgangsType.SKRIVE);
         NavIdent navIdent = authService.getInnloggetVeilederIdent();
 
         Optional<EskaleringsvarselEntity> eskaleringsvarselEntity = eskaleringsvarselService.stop(stopEskaleringDto, navIdent);
