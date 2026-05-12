@@ -8,6 +8,7 @@ import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 object DialogDomainMapper {
     @JvmStatic
     fun tilNyMeldingEllerDialog(data: NyMeldingDTO, fantDialog: Boolean, fnr: Fnr, aktorId: AktorId, avsenderId: String, avsenderType: AvsenderType): NyDialogEllerMelding {
+        if (data.dialogId != null && !fantDialog) throw FantIkkeDialogTrådException(data.dialogId)
         return if (data.dialogId != null && fantDialog) {
             when (avsenderType) {
                 AvsenderType.BRUKER -> NyMeldingFraBruker(

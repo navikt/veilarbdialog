@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.config;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.fo.veilarbdialog.dialog.FantIkkeDialogTrådException;
 import no.nav.fo.veilarbdialog.dialog.UgyldigDialogInputException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerIkkeUnderOppfolgingException;
@@ -30,6 +31,15 @@ public class HttpExceptionHandler extends ResponseEntityExceptionHandler {
         log.warn(feilmelding);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(feilmelding);
     }
+
+    @ExceptionHandler({FantIkkeDialogTrådException.class})
+    public ResponseEntity<String> handleFantIkkeDialogException(FantIkkeDialogTrådException e) {
+        String feilmelding = String.format("Fant ikke dialogtråd med id: %s  %s - %s ", e.getDialogId(),  e.getClass().getSimpleName(), e.getMessage());
+        log.warn(feilmelding);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(feilmelding);
+    }
+
+
 
     @ExceptionHandler({ResponseStatusException.class})
     public ResponseEntity<String> handleResponseStatusException(ResponseStatusException e) {
