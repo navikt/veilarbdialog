@@ -161,27 +161,8 @@ public class DialogRessurs {
     ) {
         Person bruker = nyMeldingDTO.getFnr() != null ? Person.fnr(nyMeldingDTO.getFnr()) : getContextUserIdent();
         sjekkTilgangOgAuditlog(bruker.eksternBrukerId());
-
         var skalSendeMinsideVarsel = !auth.erEksternBruker();
         var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, skalSendeMinsideVarsel);
-
-        // Kunne dette vært flyttet til DialogStatusService?
-        // Skal bruker få lov til å sette disse?
-        // Er det ikke bare ved start at disse skal kunne settes?
-        /*
-        if (nyMeldingDTO.getVenterPaaSvarFraNav() != null) {
-            dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyMeldingDTO.getVenterPaaSvarFraNav());
-            dialogDataService.sendPaaKafka(dialogData.getAktorId());
-        }
-        if (nyMeldingDTO.getVenterPaaSvarFraBruker() != null) {
-            var dialogStatus = DialogStatus.builder()
-                    .dialogId(dialogData.getId())
-                    .venterPaSvar(nyMeldingDTO.getVenterPaaSvarFraBruker())
-                    .build();
-
-            dialogData = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
-            dialogDataService.sendPaaKafka(dialogData.getAktorId());
-        }*/
         // Vi er ikke helt sikre på hvotfor dette er sånn
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)

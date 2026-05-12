@@ -9,6 +9,7 @@ import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
 import no.nav.fo.veilarbdialog.dialog.*;
+import no.nav.fo.veilarbdialog.dialog.exceptions.FantIkkeDialogTrådException;
 import no.nav.fo.veilarbdialog.dialog.opprett.*;
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService;
 import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
@@ -114,7 +115,7 @@ public class DialogDataService {
         }
 
         var maybeDialog = hentDialog(nyDialogEllerMeldingDto.getDialogId(), aktivitetsId, aktorId);
-        if (maybeDialog.isEmpty() && nyDialogEllerMeldingDto.getDialogId() != null) throw new IllegalArgumentException("Fant ikke dialog å sende melding på");
+        if (maybeDialog.isEmpty() && nyDialogEllerMeldingDto.getDialogId() != null) throw new FantIkkeDialogTrådException(nyDialogEllerMeldingDto.getDialogId());
         if(maybeDialog.isPresent() && maybeDialog.get().isHistorisk()) throw new NyHenvendelsePåHistoriskDialogException();
 
         var henvendelseData = DialogDomainMapper.tilNyMeldingEllerDialog(
@@ -130,10 +131,8 @@ public class DialogDataService {
         var opprettetMelding = opprettMeldingForDialog(henvendelseData, dialog.getId());
         dialogStatusService.oppdaterDialogTrådStatuserForNyMelding(dialog, opprettetMelding);
         dialog = markerDialogSomLest(dialog.getId());
-        sendPaaKafka(aktorId.get());
         sendUtMinsideVarselHvisDetSkalSendesUt(dialog, fnr, aktorId, skalSendeMinsideVarsel);
         varsleWebsocketLyttereHvisToggletPaa(fnr);
-
 
         if (henvendelseData instanceof NyDialogFraVeileder nyDialog) {
             oppdaterFerdigbehandletTidspunkt(dialog.getId(), !nyDialog.getVenterPaaSvarFraNav());
@@ -142,6 +141,9 @@ public class DialogDataService {
         if (henvendelseData instanceof NyDialogFraBruker nyDialog) {
             oppdaterFerdigbehandletTidspunkt(dialog.getId(), !nyDialog.getVenterPaaSvarFraNav());
         }
+
+        // Vent med å sende på kafka til alle statuser er oppdatert
+        sendPaaKafka(aktorId.get());
 
         return dialog;
     }
@@ -153,8 +155,9 @@ public class DialogDataService {
         varsleWebsocketLyttereHvisToggletPaa(data.getFnr());
         oppdaterVentePaSvarTidspunkt(dialog.getId(), true);
         oppdaterFerdigbehandletTidspunkt(dialog.getId(),true);
-        sendPaaKafka(data.getAktorId().get());
         markerDialogSomLest(dialog.getId());
+        // Vent med å sende på kafka til alle statuser er oppdatert
+        sendPaaKafka(data.getAktorId().get());
         return dialog;
     }
 
