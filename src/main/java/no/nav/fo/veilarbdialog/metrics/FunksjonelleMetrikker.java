@@ -48,10 +48,10 @@ public class FunksjonelleMetrikker {
         reportDialogMedMetadata("dialog.veileder.ny", nyDialog);
     }
 
-    public void oppdaterVenterSvar(DialogStatus nyStatus) {
+    public void oppdaterVenterSvar(Boolean venterPaSvar) {
         client.report(
                 new Event("dialog.veileder.oppdater.VenterSvarFraBruker")
-                        .addFieldToReport("venter", nyStatus.venterPaSvar)
+                        .addFieldToReport("venter", venterPaSvar)
         );
     }
 

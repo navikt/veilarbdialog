@@ -1,16 +1,12 @@
 package no.nav.fo.veilarbdialog.service;
 
 import no.nav.fo.veilarbdialog.TestDataBuilder;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonRepository;
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
-import no.nav.fo.veilarbdialog.db.dao.VarselDAO;
 import no.nav.fo.veilarbdialog.domain.*;
-import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
 import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
-import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinsideVarselDao;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,7 +41,7 @@ class DialogStatusServiceTest {
         DialogData dialogData = TestDataBuilder.nyDialog();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, new Date());
 
-        dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
+        dialogStatusService.oppdaterDialogTrådStatuserForNyMelding(dialogData, henvendelseData);
 
         verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), henvendelseData.getSendt(), henvendelseData.getSendt());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -61,7 +57,7 @@ class DialogStatusServiceTest {
         Date uniktTidspunkt = new Date();
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, new Date());
 
-        dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
+        dialogStatusService.oppdaterDialogTrådStatuserForNyMelding(dialogData, henvendelseData);
 
         verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), uniktTidspunkt, dialogData.getVenterPaNavSiden());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -77,7 +73,7 @@ class DialogStatusServiceTest {
 
         HenvendelseData henvendelseData = nyHenvendelseFraBruker(dialogData, new Date());
 
-        dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
+        dialogStatusService.oppdaterDialogTrådStatuserForNyMelding(dialogData, henvendelseData);
 
         verify(statusDAO, only()).setNyMeldingFraBruker(dialogData.getId(), dialogData.getSisteUlestAvVeilederTidspunkt(), dialogData.getVenterPaNavSiden());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -90,7 +86,7 @@ class DialogStatusServiceTest {
         DialogData dialogData = TestDataBuilder.nyDialog();
         HenvendelseData henvendelseData = nyHenvendelseFraVeileder(dialogData, new Date());
 
-        dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
+        dialogStatusService.oppdaterDialogTrådStatuserForNyMelding(dialogData, henvendelseData);
 
         verify(statusDAO, only()).setEldsteUlesteForBruker(dialogData.getId(), henvendelseData.getSendt());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -103,7 +99,7 @@ class DialogStatusServiceTest {
         DialogData dialogData = TestDataBuilder.nyDialog().withEldsteUlesteTidspunktForBruker(new Date());
         HenvendelseData henvendelseData = nyHenvendelseFraVeileder(dialogData, new Date());
 
-        dialogStatusService.nyHenvendelse(dialogData, henvendelseData);
+        dialogStatusService.oppdaterDialogTrådStatuserForNyMelding(dialogData, henvendelseData);
 
         verify(statusDAO, only()).setEldsteUlesteForBruker(dialogData.getId(), dialogData.getEldsteUlesteTidspunktForBruker());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -151,8 +147,7 @@ class DialogStatusServiceTest {
     void nar_jeg_fjerner_venter_pa_svar_forventer_jeg_at_venter_pa_svar_fra_bruker_er_null() {
         DialogData dialogData = getDialogData();
 
-        DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), false, false);
-        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
+        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, false);
 
         verify(statusDAO, only()).setVenterPaSvarFraBrukerTilNull(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());
@@ -164,8 +159,7 @@ class DialogStatusServiceTest {
     void naar_jeg_setter_venter_pa_svar_fra_bruker_forventer_jeg_at_venter_pa_svar_fra_bruker_blir_satt() {
         DialogData dialogData = getDialogData().withVenterPaSvarFraBrukerSiden(null);
 
-        DialogStatus dialogStatus = new DialogStatus(dialogData.getId(), true, true);
-        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, dialogStatus);
+        dialogStatusService.oppdaterVenterPaSvarFraBrukerSiden(dialogData, true);
 
         verify(statusDAO, only()).setVenterPaSvarFraBrukerTilNaa(dialogData.getId());
         verify(dialogDAO, only()).hentDialog(dialogData.getId());

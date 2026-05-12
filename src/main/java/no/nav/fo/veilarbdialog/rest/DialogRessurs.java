@@ -130,7 +130,7 @@ public class DialogRessurs {
     @GetMapping("{dialogId}")
     @AuthorizeFnr(auditlogMessage = "hent dialog", resourceIdParamName = "dialogId", resourceType = DialogResource.class)
     public DialogDTO hentDialog(@PathVariable Long dialogId) {
-        DialogData dialogData = dialogDataService.hentDialog(dialogId);
+        DialogData dialogData = dialogDataService.hentDialogUtenTilgangsSjekk(dialogId);
         return restMapper.somDialogDTO(dialogData);
     }
 
@@ -162,8 +162,13 @@ public class DialogRessurs {
         Person bruker = nyMeldingDTO.getFnr() != null ? Person.fnr(nyMeldingDTO.getFnr()) : getContextUserIdent();
         sjekkTilgangOgAuditlog(bruker.eksternBrukerId());
 
-        var skalSendeMelding = !auth.erEksternBruker();
-        var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, skalSendeMelding);
+        var skalSendeMinsideVarsel = !auth.erEksternBruker();
+        var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, skalSendeMinsideVarsel);
+
+        // Kunne dette vært flyttet til DialogStatusService?
+        // Skal bruker få lov til å sette disse?
+        // Er det ikke bare ved start at disse skal kunne settes?
+        /*
         if (nyMeldingDTO.getVenterPaaSvarFraNav() != null) {
             dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyMeldingDTO.getVenterPaaSvarFraNav());
             dialogDataService.sendPaaKafka(dialogData.getAktorId());
@@ -176,7 +181,7 @@ public class DialogRessurs {
 
             dialogData = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
             dialogDataService.sendPaaKafka(dialogData.getAktorId());
-        }
+        }*/
         // Vi er ikke helt sikre på hvotfor dette er sånn
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
@@ -196,11 +201,7 @@ public class DialogRessurs {
     @OnlyInternBruker
     @Transactional
     public DialogDTO oppdaterVenterPaSvar(@PathVariable Long dialogId, @PathVariable boolean venter) {
-        var dialogStatus = DialogStatus.builder()
-                .dialogId(dialogId)
-                .venterPaSvar(venter)
-                .build();
-        var dialog = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
+        var dialog = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogId, venter);
         dialogDataService.sendPaaKafka(dialog.getAktorId());
         return markerSomLest(dialogId);
     }

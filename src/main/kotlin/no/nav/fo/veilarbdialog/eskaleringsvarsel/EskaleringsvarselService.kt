@@ -8,6 +8,8 @@ import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr
 import no.nav.common.types.identer.NavIdent
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
+import no.nav.fo.veilarbdialog.dialog.NyEskaleringsVarselDialog
+import no.nav.fo.veilarbdialog.domain.AvsenderType
 import no.nav.fo.veilarbdialog.domain.DialogStatus
 import no.nav.fo.veilarbdialog.domain.Egenskap
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
@@ -77,39 +79,30 @@ open class EskaleringsvarselService(
         if (hentGjeldende(stansVarsel.fnr).isPresent) {
             throw AktivEskaleringException("Brukeren har allerede en aktiv eskalering.")
         }
-
         if (!minsideVarselService.kanVarsles(stansVarsel.fnr)) {
             funksjonelleMetrikker.nyBrukernotifikasjon(false, BrukernotifikasjonsType.OPPGAVE)
             throw BrukerKanIkkeVarslesException()
         }
-
         if (!oppfolgingClient.erUnderOppfolging(stansVarsel.fnr)) {
             throw BrukerIkkeUnderOppfolgingException()
         }
 
-        val nyMeldingDTO = NyMeldingDTO()
-            .setTekst(stansVarsel.tekst)
-            .setOverskrift(stansVarsel.overskrift)
-            .setEgenskaper(java.util.List.of<Egenskap>(Egenskap.ESKALERINGSVARSEL))
+        val aktorId = aktorOppslagClient.hentAktorId(stansVarsel.fnr);
+        val fnr = stansVarsel.fnr;
+        val melding = NyEskaleringsVarselDialog(
+            overskrift = stansVarsel.overskrift,
+            aktivitetId = null,
+            tekst = stansVarsel.tekst,
+            fnr = fnr,
+            aktorId = aktorId,
+            avsenderId = authService.getInnloggetVeilederIdent().get(),
+        )
 
-        var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, Person.fnr(stansVarsel.fnr.get()), false)
-
-        val dialogStatus = DialogStatus.builder()
-            .dialogId(dialogData.id)
-            .venterPaSvar(true)
-            .build()
-
-        dialogData = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus)
-        dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.id, true)
-        dialogDataService.sendPaaKafka(dialogData.aktorId)
-        dialogDataService.markerDialogSomLest(dialogData.id)
-
-        val gjeldendeOppfolgingsperiodeId =
-            sistePeriodeService.hentGjeldendeOppfolgingsperiodeMedFallback(AktorId.of(dialogData.aktorId))
+        val dialogData = dialogDataService.opprettEskaleringsvarselDialogOgMelding(melding)
 
         val varselOmMuligStans = DialogVarsel.varselOmMuligStans(
             stansVarsel.fnr,
-            gjeldendeOppfolgingsperiodeId,
+            dialogData.oppfolgingsperiode!!,
             dialogDataService.utledDialogLink(dialogData.id)
         )
 
