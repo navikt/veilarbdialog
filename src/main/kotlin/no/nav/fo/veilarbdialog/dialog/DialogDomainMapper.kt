@@ -2,6 +2,16 @@ package no.nav.fo.veilarbdialog.dialog
 
 import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr
+import no.nav.fo.veilarbdialog.dialog.exceptions.FantIkkeDialogTrådException
+import no.nav.fo.veilarbdialog.dialog.exceptions.UgyldigDialogInputException
+import no.nav.fo.veilarbdialog.dialog.opprett.NyDialog
+import no.nav.fo.veilarbdialog.dialog.opprett.NyDialogEllerMelding
+import no.nav.fo.veilarbdialog.dialog.opprett.NyDialogFraBruker
+import no.nav.fo.veilarbdialog.dialog.opprett.NyDialogFraVeileder
+import no.nav.fo.veilarbdialog.dialog.opprett.NyEskaleringsVarselDialog
+import no.nav.fo.veilarbdialog.dialog.opprett.NyMelding
+import no.nav.fo.veilarbdialog.dialog.opprett.NyMeldingFraBruker
+import no.nav.fo.veilarbdialog.dialog.opprett.NyMeldingFraVeileder
 import no.nav.fo.veilarbdialog.domain.AvsenderType
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 
@@ -32,7 +42,8 @@ object DialogDomainMapper {
                     tekst = data.tekst ?: throw UgyldigDialogInputException("Alle nye dialoger må ha tekst"),
                     fnr = fnr,
                     aktorId = aktorId,
-                    overskrift = data.overskrift ?: throw UgyldigDialogInputException("Alle nye dialoger må ha overskrift"),
+                    overskrift = data.overskrift
+                        ?: throw UgyldigDialogInputException("Alle nye dialoger må ha overskrift"),
                     aktivitetId = data.aktivitetId,
                     avsenderId = avsenderId,
                     venterPaaSvarFraNav = data.venterPaaSvarFraNav ?: true,
@@ -41,7 +52,8 @@ object DialogDomainMapper {
                     tekst = data.tekst ?: throw UgyldigDialogInputException("Alle nye dialoger må ha tekst"),
                     fnr = fnr,
                     aktorId = aktorId,
-                    overskrift = data.overskrift ?: throw UgyldigDialogInputException("Alle nye dialoger må ha overskrift"),
+                    overskrift = data.overskrift
+                        ?: throw UgyldigDialogInputException("Alle nye dialoger må ha overskrift"),
                     aktivitetId = data.aktivitetId,
                     // TODO: Verifiser at false er riktig default!!!!
                     venterPaaSvarFraBruker = data.venterPaaSvarFraBruker ?: false,

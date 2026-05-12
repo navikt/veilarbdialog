@@ -8,10 +8,7 @@ import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr
 import no.nav.common.types.identer.NavIdent
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
-import no.nav.fo.veilarbdialog.dialog.NyEskaleringsVarselDialog
-import no.nav.fo.veilarbdialog.domain.AvsenderType
-import no.nav.fo.veilarbdialog.domain.DialogStatus
-import no.nav.fo.veilarbdialog.domain.Egenskap
+import no.nav.fo.veilarbdialog.dialog.opprett.NyEskaleringsVarselDialog
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 import no.nav.fo.veilarbdialog.domain.Person
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto

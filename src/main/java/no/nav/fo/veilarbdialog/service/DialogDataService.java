@@ -9,6 +9,7 @@ import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
 import no.nav.fo.veilarbdialog.dialog.*;
+import no.nav.fo.veilarbdialog.dialog.opprett.*;
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService;
 import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;

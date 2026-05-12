@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.dialog
+package no.nav.fo.veilarbdialog.dialog.opprett
 
 import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr

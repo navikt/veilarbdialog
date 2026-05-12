@@ -1,8 +1,8 @@
 package no.nav.fo.veilarbdialog.config;
 
 import lombok.extern.slf4j.Slf4j;
-import no.nav.fo.veilarbdialog.dialog.FantIkkeDialogTrådException;
-import no.nav.fo.veilarbdialog.dialog.UgyldigDialogInputException;
+import no.nav.fo.veilarbdialog.dialog.exceptions.FantIkkeDialogTrådException;
+import no.nav.fo.veilarbdialog.dialog.exceptions.UgyldigDialogInputException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerIkkeUnderOppfolgingException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
