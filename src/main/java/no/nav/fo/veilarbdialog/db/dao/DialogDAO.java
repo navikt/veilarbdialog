@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.db.dao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.types.identer.AktorId;
+import no.nav.domain.DialogId;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
 import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogResultSet;
@@ -81,10 +82,10 @@ public class DialogDAO {
     }
 
     @Transactional(readOnly = true)
-    public DialogData hentDialog(long dialogId, AktorId aktorId) {
+    public DialogData hentDialog(DialogId dialogId, AktorId aktorId) {
         try {
             return jdbc.queryForObject("select * from DIALOG where DIALOG_ID = :dialogId and aktor_id = :aktorId",
-                    new MapSqlParameterSource("dialogId", dialogId)
+                    new MapSqlParameterSource("dialogId", dialogId.getValue())
                             .addValue("aktorId", aktorId.get()),
                     this::mapRow);
         } catch (EmptyResultDataAccessException e) {

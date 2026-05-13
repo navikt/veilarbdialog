@@ -18,12 +18,12 @@ Opprett en issue i GitHub for eventuelle spørsmål.
 4. Bruk http://localhost:8080/veilarbdialog/swagger-ui/index.html.
 
 ## Dokumentasjon for håndtering av dialog-statuser 
-Sist oppdatert 12.05.25
+Sist oppdatert 12.05.26
 
 ### Ny melding (inkl ny dialogtråd) fra veileder
 - Insert `NY_HENVENDELSE_FRA_VEILEDER` i EVENT tabell
 - Sett ferdigBehandlet til true (`false` når den gjøres om til `Venter på svar fra Nav`)
-  - Fedigbehandlet finnes ikke i databasen, bare feltet `VENTER_PA_NAV_SIDEN`
+  - Ferdigbehandlet finnes ikke i databasen, bare feltet `VENTER_PA_NAV_SIDEN`
   - Blir kun oppdatert hvis tråden ikke allerede er satt til ferdigBehandlet
     - Å sette venterPaNav til `false` betyr å sette VENTER_PA_NAV_SIDEN til null
     - Å sette venterPaNav til `true` betyr å sette VENTER_PA_NAV_SIDEN til nå-tidspunkt

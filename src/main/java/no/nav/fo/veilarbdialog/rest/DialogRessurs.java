@@ -163,7 +163,7 @@ public class DialogRessurs {
         sjekkTilgangOgAuditlog(bruker.eksternBrukerId());
         var skalSendeMinsideVarsel = !auth.erEksternBruker();
         var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, skalSendeMinsideVarsel);
-        // Vi er ikke helt sikre på hvotfor dette er sånn
+        // Vi er ikke helt sikre på hvorfor dette er sånn
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;

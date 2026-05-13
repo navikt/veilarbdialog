@@ -8,6 +8,7 @@ import no.nav.common.client.aktoroppslag.AktorOppslagClient;
 import no.nav.common.types.identer.AktorId;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
+import no.nav.domain.DialogId;
 import no.nav.fo.veilarbdialog.dialog.*;
 import no.nav.fo.veilarbdialog.dialog.exceptions.FantIkkeDialogTrådException;
 import no.nav.fo.veilarbdialog.dialog.exceptions.UgyldigDialogInputException;
@@ -23,6 +24,7 @@ import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import no.nav.fo.veilarbdialog.service.exceptions.NyHenvendelsePåHistoriskDialogException;
 import no.nav.poao.dab.spring_auth.IAuthService;
+import no.nav.veilarbdialog.internapi.model.Dialog;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,22 +94,15 @@ public class DialogDataService {
         );
     }
 
-    private Optional<Long> getDialogId(NyMeldingDTO nyDialogEllerMeldingDto) {
-        var dialogString = nyDialogEllerMeldingDto.getDialogId();
-        if (dialogString == null || dialogString.isEmpty()) {
-            return Optional.empty();
-        } else {
-            try {
-                return Optional.of(Long.parseLong(dialogString));
-            } catch (NumberFormatException e) {
-                throw new UgyldigDialogInputException("DialogId må være et tall");
-            }
-        }
+    private Optional<DialogId> getDialogId(NyMeldingDTO nyDialogEllerMeldingDto) {
+        return Optional.ofNullable(
+                DialogId.fromValueOrThrow(nyDialogEllerMeldingDto.getDialogId())
+        );
     }
 
     /**
      * Varsler skal kun sendes ut når det er Nav som sender ut meldingen.
-     * Eskaleringsvarsel-service sender ut varsel selv og setter skalSendeMinsideVarsel til false for å unngå å sende ut felre varsler.
+     * Eskaleringsvarsel-service sender ut varsel selv og setter skalSendeMinsideVarsel til false for å unngå å sende ut flere varsler.
      * */
     @Transactional
     public DialogData opprettMelding(NyMeldingDTO nyDialogEllerMeldingDto, Person bruker, Boolean skalSendeMinsideVarsel) {
@@ -120,7 +115,7 @@ public class DialogDataService {
 
         var maybeDialogId = getDialogId(nyDialogEllerMeldingDto);
         var maybeDialog = hentDialog(maybeDialogId, aktivitetsId, aktorId);
-        if (maybeDialog.isEmpty() && nyDialogEllerMeldingDto.getDialogId() != null) throw new FantIkkeDialogTrådException(nyDialogEllerMeldingDto.getDialogId());
+        if (maybeDialog.isEmpty() && maybeDialogId.isPresent()) throw new FantIkkeDialogTrådException(nyDialogEllerMeldingDto.getDialogId());
         if(maybeDialog.isPresent() && maybeDialog.get().isHistorisk()) throw new NyHenvendelsePåHistoriskDialogException();
 
         var henvendelseData = DialogDomainMapper.tilNyMeldingEllerDialog(
@@ -222,7 +217,7 @@ public class DialogDataService {
         return dialogData;
     }
 
-    public Optional<DialogData> hentDialog(Optional<Long> dialogId, AktivitetId aktivitetId, AktorId aktorId) {
+    public Optional<DialogData> hentDialog(Optional<DialogId> dialogId, AktivitetId aktivitetId, AktorId aktorId) {
         return dialogId
                 .map(id -> hentDialog(id, aktorId))
                 .or(() -> Optional.ofNullable(aktivitetId)
@@ -296,7 +291,7 @@ public class DialogDataService {
         return dialogDAO.hentDialog(dialogId);
     }
 
-    public DialogData hentDialog(long dialogId, AktorId aktorId) {
+    public DialogData hentDialog(DialogId dialogId, AktorId aktorId) {
         return dialogDAO.hentDialog(dialogId, aktorId);
     }
 
