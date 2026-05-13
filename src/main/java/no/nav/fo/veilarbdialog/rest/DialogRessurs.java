@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import no.nav.common.types.identer.EksternBrukerId;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
@@ -134,18 +133,6 @@ public class DialogRessurs {
         return restMapper.somDialogDTO(dialogData);
     }
 
-    private void sjekkTilgangOgAuditlog(EksternBrukerId bruker) {
-        var subject = auth.getLoggedInnUser();
-        try {
-            auth.sjekkTilgangTilPerson(bruker, TilgangsType.SKRIVE);
-        } catch (Exception e) {
-            auth.auditlog(false, subject , bruker, "ny melding");
-            throw e;
-        }
-        // Litt tidlig audit-logging men men
-        auth.auditlog(true, subject , bruker, "ny melding");
-    }
-
     @Operation(
         summary = "Oppretter en ny dialog tråd og/eller en ny melding i oppgitt dialogtråd",
         description = """
@@ -160,7 +147,7 @@ public class DialogRessurs {
             @RequestBody NyMeldingDTO nyMeldingDTO
     ) {
         Person bruker = nyMeldingDTO.getFnr() != null ? Person.fnr(nyMeldingDTO.getFnr()) : getContextUserIdent();
-        sjekkTilgangOgAuditlog(bruker.eksternBrukerId());
+        auth.sjekkTilgangTilPerson(bruker.eksternBrukerId(), TilgangsType.SKRIVE);
 
         var skalSendeMelding = !auth.erEksternBruker();
         var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, skalSendeMelding);

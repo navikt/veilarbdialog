@@ -42,7 +42,7 @@ public class KladdRessurs {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void oppdaterKladd(@RequestBody KladdDTO kladd) {
         var fnr = getContextUserIdent(kladd);
-        authService.sjekkTilgangTilPerson(Fnr.of(fnr), TilgangsType.LESE);
+        authService.sjekkTilgangTilPerson(Fnr.of(fnr), TilgangsType.SKRIVE);
         kladdService.upsertKladd(fnr, somKladd(kladd));
     }
 
