@@ -7,6 +7,14 @@ const dialogIdInput = document.getElementById('dialogId');
 form.addEventListener('submit', handleSok);
 document.addEventListener('click', handleClick);
 
+function sanitize(value) {
+    return String(value).replace(/[^a-zA-ZæøåÆØÅ0-9 ?!\-.:T+]/g, '');
+}
+
+function sanitizeNumber(value) {
+    return Number(value);
+}
+
 function toHtml(statics, ...values) {
     let str = '';
     statics.forEach((fragment, i) => {
@@ -56,12 +64,12 @@ function handleData(json) {
 function lagDialog(dialog) {
     return toHtml`
 <tr>
-        <td>${dialog.id}</td>
-        <td>${dialog.henvendelser.length}</td>
-        <td>${dialog.overskrift}</td>
-        <td>${dialog.sisteDato}</td>
-        <td><button data-dialogid="${dialog.id}" data-action="GET">Se henvendelser</button></td>
-        <td><button data-dialogid="${dialog.id}" data-action="DEL">Kasser hele</button></td>
+        <td>${sanitizeNumber(dialog.id)}</td>
+        <td>${sanitizeNumber(dialog.henvendelser.length)}</td>
+        <td>${sanitize(dialog.overskrift)}</td>
+        <td>${sanitize(dialog.sisteDato)}</td>
+        <td><button data-dialogid="${sanitizeNumber(dialog.id)}" data-action="GET">Se henvendelser</button></td>
+        <td><button data-dialogid="${sanitizeNumber(dialog.id)}" data-action="DEL">Kasser hele</button></td>
         <td class="hidden-content">
             ${dialog.henvendelser.sort((h1, h2) => h1.sendt.localeCompare(h2.sendt)).map(lagHenvendelse).join('')}
         </td>
@@ -72,12 +80,12 @@ function lagDialog(dialog) {
 function lagHenvendelse(henvendelse) {
     return `
 <div>
-<p><b>HenvendelseId:</b>${henvendelse.id}</p>   
-<p><b>Avsender:</b>${henvendelse.avsender}</p>
-<p><b>AvsenderId:</b>${henvendelse.avsenderId}</p>   
-<p><b>Tekst:</b>${henvendelse.tekst}</p>     
-<p><b>Dato:</b>${henvendelse.sendt}</p>
-<button data-henvendelseid="${henvendelse.id}" data-action="DEL">Kasser henvendelse</button>     
+<p><b>HenvendelseId:</b>${sanitizeNumber(henvendelse.id)}</p>   
+<p><b>Avsender:</b>${sanitize(henvendelse.avsender)}</p>
+<p><b>AvsenderId:</b>${sanitize(henvendelse.avsenderId)}</p>   
+<p><b>Tekst:</b>${sanitize(henvendelse.tekst)}</p>     
+<p><b>Dato:</b>${sanitize(henvendelse.sendt)}</p>
+<button data-henvendelseid="${sanitizeNumber(henvendelse.id)}" data-action="DEL">Kasser henvendelse</button>     
 </div>`;
 }
 
