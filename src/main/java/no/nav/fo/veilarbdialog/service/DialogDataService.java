@@ -11,7 +11,6 @@ import no.nav.common.types.identer.Id;
 import no.nav.domain.DialogId;
 import no.nav.fo.veilarbdialog.dialog.*;
 import no.nav.fo.veilarbdialog.dialog.exceptions.FantIkkeDialogTrådException;
-import no.nav.fo.veilarbdialog.dialog.exceptions.UgyldigDialogInputException;
 import no.nav.fo.veilarbdialog.dialog.opprett.*;
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService;
 import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
@@ -24,7 +23,6 @@ import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import no.nav.fo.veilarbdialog.service.exceptions.NyHenvendelsePåHistoriskDialogException;
 import no.nav.poao.dab.spring_auth.IAuthService;
-import no.nav.veilarbdialog.internapi.model.Dialog;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
@@ -134,7 +132,7 @@ public class DialogDataService {
         sendUtMinsideVarselHvisDetSkalSendesUt(dialog, fnr, aktorId, skalSendeMinsideVarsel);
         varsleWebsocketLyttereHvisToggletPaa(fnr);
 
-        if (nyMeldingEllerDialog instanceof NyDialogFraVeileder nyDialog) {
+        if (nyMeldingEllerDialog instanceof NyDialogFraNav nyDialog) {
             oppdaterFerdigbehandletTidspunkt(dialog.getId(), !nyDialog.getVenterPaaSvarFraNav());
             dialog = oppdaterVentePaSvarTidspunkt(dialog.getId(), nyDialog.getVenterPaaSvarFraBruker());
         }
@@ -221,7 +219,7 @@ public class DialogDataService {
                 .map(id -> hentDialog(id, aktorId))
                 .or(() -> Optional.ofNullable(aktivitetId)
                         .filter(a -> StringUtils.isNotEmpty(a.getId()))
-                        .flatMap((id) -> hentDialogForAktivitetId(id, aktorId))
+                        .flatMap(id -> hentDialogForAktivitetId(id, aktorId))
                 );
     }
 

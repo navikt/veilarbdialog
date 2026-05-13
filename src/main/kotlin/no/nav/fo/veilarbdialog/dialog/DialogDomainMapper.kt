@@ -7,11 +7,11 @@ import no.nav.fo.veilarbdialog.dialog.exceptions.UgyldigDialogInputException
 import no.nav.fo.veilarbdialog.dialog.opprett.NyDialog
 import no.nav.fo.veilarbdialog.dialog.opprett.NyDialogEllerMelding
 import no.nav.fo.veilarbdialog.dialog.opprett.NyDialogFraBruker
-import no.nav.fo.veilarbdialog.dialog.opprett.NyDialogFraVeileder
+import no.nav.fo.veilarbdialog.dialog.opprett.NyDialogFraNav
 import no.nav.fo.veilarbdialog.dialog.opprett.NyEskaleringsVarselDialog
 import no.nav.fo.veilarbdialog.dialog.opprett.NyMelding
 import no.nav.fo.veilarbdialog.dialog.opprett.NyMeldingFraBruker
-import no.nav.fo.veilarbdialog.dialog.opprett.NyMeldingFraVeileder
+import no.nav.fo.veilarbdialog.dialog.opprett.NyMeldingFraNav
 import no.nav.fo.veilarbdialog.domain.AvsenderType
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 
@@ -28,7 +28,7 @@ object DialogDomainMapper {
                     aktorId = aktorId,
                     avsenderId = avsenderId,
                 )
-                AvsenderType.VEILEDER -> NyMeldingFraVeileder(
+                AvsenderType.VEILEDER -> NyMeldingFraNav(
                     tekst = data.tekst ?: throw UgyldigDialogInputException("Alle meldinger må ha overskrift"),
                     dialogId = runCatching { data.dialogId.toLong() }.getOrElse { throw UgyldigDialogInputException("Alle meldinger må ha en gyldig dialogId") },
                     fnr = fnr,
@@ -48,7 +48,7 @@ object DialogDomainMapper {
                     avsenderId = avsenderId,
                     venterPaaSvarFraNav = data.venterPaaSvarFraNav ?: true,
                 )
-                AvsenderType.VEILEDER -> NyDialogFraVeileder(
+                AvsenderType.VEILEDER -> NyDialogFraNav(
                     tekst = data.tekst ?: throw UgyldigDialogInputException("Alle nye dialoger må ha tekst"),
                     fnr = fnr,
                     aktorId = aktorId,
@@ -74,14 +74,14 @@ object DialogDomainMapper {
                 aktorId = data.aktorId,
                 avsenderId = data.avsenderId,
             )
-            is NyDialogFraVeileder -> NyMeldingFraVeileder(
+            is NyDialogFraNav -> NyMeldingFraNav(
                 tekst = data.tekst,
                 dialogId = dialogId,
                 fnr = data.fnr,
                 aktorId = data.aktorId,
                 avsenderId = data.avsenderId,
             )
-            is NyEskaleringsVarselDialog -> NyMeldingFraVeileder(
+            is NyEskaleringsVarselDialog -> NyMeldingFraNav(
                 tekst = data.tekst,
                 dialogId = dialogId,
                 fnr = data.fnr,

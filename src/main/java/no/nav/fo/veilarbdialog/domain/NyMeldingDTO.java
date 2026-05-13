@@ -4,9 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.Collections;
-import java.util.List;
-
 @Data
 @Accessors(chain = true)
 public class NyMeldingDTO {

@@ -13,7 +13,15 @@ import static java.util.Comparator.naturalOrder;
 @Data
 public class KafkaDialogMelding {
     private String aktorId;
+
+    /**
+     * Venter på svar fra bruker.
+     */
     private LocalDateTime tidspunktEldsteVentende;
+
+    /**
+     * Venter på svar fra Nav.
+     */
     private LocalDateTime tidspunktEldsteUbehandlede;
 
 
