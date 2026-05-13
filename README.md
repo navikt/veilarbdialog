@@ -23,6 +23,7 @@ Sist oppdatert 12.05.25
 ### Ny melding (inkl ny dialogtråd) fra veileder
 - Insert `NY_HENVENDELSE_FRA_VEILEDER` i EVENT tabell
 - Sett ferdigBehandlet til true (`false` når den gjøres om til `Venter på svar fra Nav`)
+  - Fedigbehandlet finnes ikke i databasen, bare feltet `VENTER_PA_NAV_SIDEN`
   - Blir kun oppdatert hvis tråden ikke allerede er satt til ferdigBehandlet
     - Å sette venterPaNav til `false` betyr å sette VENTER_PA_NAV_SIDEN til null
     - Å sette venterPaNav til `true` betyr å sette VENTER_PA_NAV_SIDEN til nå-tidspunkt
