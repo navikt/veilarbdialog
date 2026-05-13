@@ -10,6 +10,7 @@ import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.Id;
 import no.nav.fo.veilarbdialog.dialog.*;
 import no.nav.fo.veilarbdialog.dialog.exceptions.FantIkkeDialogTrådException;
+import no.nav.fo.veilarbdialog.dialog.exceptions.UgyldigDialogInputException;
 import no.nav.fo.veilarbdialog.dialog.opprett.*;
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService;
 import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
@@ -91,6 +92,19 @@ public class DialogDataService {
         );
     }
 
+    private Optional<Long> getDialogId(NyMeldingDTO nyDialogEllerMeldingDto) {
+        var dialogString = nyDialogEllerMeldingDto.getDialogId();
+        if (dialogString == null || dialogString.isEmpty()) {
+            return Optional.empty();
+        } else {
+            try {
+                return Optional.of(Long.parseLong(dialogString));
+            } catch (NumberFormatException e) {
+                throw new UgyldigDialogInputException("DialogId må være et tall");
+            }
+        }
+    }
+
     /**
      * Varsler skal kun sendes ut når det er Nav som sender ut meldingen.
      * Eskaleringsvarsel-service sender ut varsel selv og setter skalSendeMinsideVarsel til false for å unngå å sende ut felre varsler.
@@ -104,7 +118,8 @@ public class DialogDataService {
             throw new ResponseStatusException(CONFLICT, "Bruker kan ikke varsles.");
         }
 
-        var maybeDialog = hentDialog(nyDialogEllerMeldingDto.getDialogId(), aktivitetsId, aktorId);
+        var maybeDialogId = getDialogId(nyDialogEllerMeldingDto);
+        var maybeDialog = hentDialog(maybeDialogId, aktivitetsId, aktorId);
         if (maybeDialog.isEmpty() && nyDialogEllerMeldingDto.getDialogId() != null) throw new FantIkkeDialogTrådException(nyDialogEllerMeldingDto.getDialogId());
         if(maybeDialog.isPresent() && maybeDialog.get().isHistorisk()) throw new NyHenvendelsePåHistoriskDialogException();
 
@@ -207,15 +222,13 @@ public class DialogDataService {
         return dialogData;
     }
 
-    public Optional<DialogData> hentDialog(String dialogId, AktivitetId aktivitetId, AktorId aktorId) {
-        if (dialogId == null && aktivitetId == null) return Optional.empty();
-        if (dialogId != null && !dialogId.isEmpty()) {
-            return Optional.ofNullable(hentDialog(Long.parseLong(dialogId), aktorId));
-        } else {
-            return Optional.ofNullable(aktivitetId)
-                .filter(a -> StringUtils.isNotEmpty(a.getId()))
-                .flatMap((id) -> hentDialogForAktivitetId(id, aktorId));
-        }
+    public Optional<DialogData> hentDialog(Optional<Long> dialogId, AktivitetId aktivitetId, AktorId aktorId) {
+        return dialogId
+                .map(id -> hentDialog(id, aktorId))
+                .or(() -> Optional.ofNullable(aktivitetId)
+                        .filter(a -> StringUtils.isNotEmpty(a.getId()))
+                        .flatMap((id) -> hentDialogForAktivitetId(id, aktorId))
+                );
     }
 
     private DialogData markerDialogSomLestAvVeileder(long dialogId) {
