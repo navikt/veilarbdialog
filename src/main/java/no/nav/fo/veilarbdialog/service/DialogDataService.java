@@ -126,10 +126,10 @@ public class DialogDataService {
 
         if (henvendelseData instanceof NyDialogFraVeileder nyDialog) {
             oppdaterFerdigbehandletTidspunkt(dialog.getId(), !nyDialog.getVenterPaaSvarFraNav());
-            return oppdaterVentePaSvarTidspunkt(dialog.getId(), nyDialog.getVenterPaaSvarFraBruker());
+            dialog = oppdaterVentePaSvarTidspunkt(dialog.getId(), nyDialog.getVenterPaaSvarFraBruker());
         }
         if (henvendelseData instanceof NyDialogFraBruker nyDialog) {
-            oppdaterFerdigbehandletTidspunkt(dialog.getId(), !nyDialog.getVenterPaaSvarFraNav());
+            dialog =oppdaterFerdigbehandletTidspunkt(dialog.getId(), !nyDialog.getVenterPaaSvarFraNav());
         }
 
         // Vent med å sende på kafka til alle statuser er oppdatert
@@ -145,7 +145,7 @@ public class DialogDataService {
         varsleWebsocketLyttereHvisToggletPaa(data.getFnr());
         oppdaterVentePaSvarTidspunkt(dialog.getId(), true);
         oppdaterFerdigbehandletTidspunkt(dialog.getId(),true);
-        markerDialogSomLest(dialog.getId());
+        dialog = markerDialogSomLest(dialog.getId());
         // Vent med å sende på kafka til alle statuser er oppdatert
         sendPaaKafka(data.getAktorId().get());
         return dialog;
