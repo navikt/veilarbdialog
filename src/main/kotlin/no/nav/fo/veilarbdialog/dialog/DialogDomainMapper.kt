@@ -55,7 +55,9 @@ object DialogDomainMapper {
                     overskrift = data.overskrift
                         ?: throw UgyldigDialogInputException("Alle nye dialoger må ha overskrift"),
                     aktivitetId = data.aktivitetId,
-                    // TODO: Verifiser at false er riktig default!!!!
+                    // Sitat fra DialogRessursTest:
+                    // "Veileder kan sende en beskjed som bruker ikke trenger å svare på,
+                    // veileder må eksplisitt markere at dialogen venter på brukeren"
                     venterPaaSvarFraBruker = data.venterPaaSvarFraBruker ?: false,
                     venterPaaSvarFraNav = data.venterPaaSvarFraNav ?: false,
                     avsenderId = avsenderId,
