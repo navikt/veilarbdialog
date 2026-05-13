@@ -118,33 +118,32 @@ public class DialogDataService {
         if (maybeDialog.isEmpty() && maybeDialogId.isPresent()) throw new FantIkkeDialogTrådException(nyDialogEllerMeldingDto.getDialogId());
         if(maybeDialog.isPresent() && maybeDialog.get().isHistorisk()) throw new NyHenvendelsePåHistoriskDialogException();
 
-        var henvendelseData = DialogDomainMapper.tilNyMeldingEllerDialog(
+        var nyMeldingEllerDialog = DialogDomainMapper.tilNyMeldingEllerDialog(
                 nyDialogEllerMeldingDto,
                 maybeDialog.isPresent(),
                 fnr, aktorId,
                 auth.getLoggedInnUser().get(),
                 auth.erEksternBruker() ? AvsenderType.BRUKER : AvsenderType.VEILEDER
         );
-        var dialog = getOrCreateDialogTråd(henvendelseData, maybeDialog);
+        var dialog = getOrCreateDialogTråd(nyMeldingEllerDialog, maybeDialog);
 
         slettKladd(nyDialogEllerMeldingDto.getDialogId(), nyDialogEllerMeldingDto.getAktivitetId(), bruker);
-        var opprettetMelding = opprettMeldingForDialog(henvendelseData, dialog.getId());
+        var opprettetMelding = opprettMeldingForDialog(nyMeldingEllerDialog, dialog.getId());
         dialogStatusService.oppdaterDialogTrådStatuserForNyMelding(dialog, opprettetMelding);
         dialog = markerDialogSomLest(dialog.getId());
         sendUtMinsideVarselHvisDetSkalSendesUt(dialog, fnr, aktorId, skalSendeMinsideVarsel);
         varsleWebsocketLyttereHvisToggletPaa(fnr);
 
-        if (henvendelseData instanceof NyDialogFraVeileder nyDialog) {
+        if (nyMeldingEllerDialog instanceof NyDialogFraVeileder nyDialog) {
             oppdaterFerdigbehandletTidspunkt(dialog.getId(), !nyDialog.getVenterPaaSvarFraNav());
             dialog = oppdaterVentePaSvarTidspunkt(dialog.getId(), nyDialog.getVenterPaaSvarFraBruker());
         }
-        if (henvendelseData instanceof NyDialogFraBruker nyDialog) {
-            dialog =oppdaterFerdigbehandletTidspunkt(dialog.getId(), !nyDialog.getVenterPaaSvarFraNav());
+        if (nyMeldingEllerDialog instanceof NyDialogFraBruker nyDialog) {
+            dialog = oppdaterFerdigbehandletTidspunkt(dialog.getId(), !nyDialog.getVenterPaaSvarFraNav());
         }
 
         // Vent med å sende på kafka til alle statuser er oppdatert
         sendPaaKafka(aktorId.get());
-
         return dialog;
     }
 
