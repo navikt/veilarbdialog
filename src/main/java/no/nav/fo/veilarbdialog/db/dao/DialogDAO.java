@@ -2,6 +2,8 @@ package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import no.nav.common.types.identer.AktorId;
+import no.nav.domain.DialogId;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
 import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogResultSet;
@@ -80,6 +82,18 @@ public class DialogDAO {
     }
 
     @Transactional(readOnly = true)
+    public DialogData hentDialog(DialogId dialogId, AktorId aktorId) {
+        try {
+            return jdbc.queryForObject("select * from DIALOG where DIALOG_ID = :dialogId and aktor_id = :aktorId",
+                    new MapSqlParameterSource("dialogId", dialogId.getValue())
+                            .addValue("aktorId", aktorId.get()),
+                    this::mapRow);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    @Transactional(readOnly = true)
     public DialogData hentDialogGittHenvendelse(long henvendelseId) {
         try {
             return jdbc.queryForObject("select d.* from DIALOG d " +
@@ -116,18 +130,19 @@ public class DialogDAO {
 
     private String getIdQuery(AktivitetId aktivitetId) {
         if (aktivitetId instanceof TekniskId) {
-            return "select * from DIALOG where AKTIVITET_ID = :aktivitetId";
+            return "select * from DIALOG where AKTIVITET_ID = :aktivitetId and aktor_id = :aktorId";
         } else if (aktivitetId instanceof Arenaid) {
-            return "select * from DIALOG where ARENA_ID = :aktivitetId";
+            return "select * from DIALOG where ARENA_ID = :aktivitetId and aktor_id = :aktorId";
         } else {
             throw new UnsupportedOperationException("Uknown id-type");
         }
     }
     @Transactional(readOnly = true)
-    public Optional<DialogData> hentDialogForAktivitetId(AktivitetId aktivitetId) {
+    public Optional<DialogData> hentDialogForAktivitetId(AktivitetId aktivitetId, AktorId aktorId) {
         if (aktivitetId == null) return Optional.empty();
         return jdbc.query(getIdQuery(aktivitetId),
-                new MapSqlParameterSource("aktivitetId", aktivitetId.getId()),
+                new MapSqlParameterSource("aktivitetId", aktivitetId.getId())
+                        .addValue("aktorId", aktorId.get()),
                 this::mapRow)
                 .stream()
                 .findFirst();

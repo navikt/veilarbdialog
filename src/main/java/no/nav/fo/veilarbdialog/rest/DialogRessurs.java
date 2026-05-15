@@ -129,7 +129,7 @@ public class DialogRessurs {
     @GetMapping("{dialogId}")
     @AuthorizeFnr(auditlogMessage = "hent dialog", resourceIdParamName = "dialogId", resourceType = DialogResource.class)
     public DialogDTO hentDialog(@PathVariable Long dialogId) {
-        DialogData dialogData = dialogDataService.hentDialog(dialogId);
+        DialogData dialogData = dialogDataService.hentDialogUtenTilgangsSjekk(dialogId);
         return restMapper.somDialogDTO(dialogData);
     }
 
@@ -148,23 +148,9 @@ public class DialogRessurs {
     ) {
         Person bruker = nyMeldingDTO.getFnr() != null ? Person.fnr(nyMeldingDTO.getFnr()) : getContextUserIdent();
         auth.sjekkTilgangTilPerson(bruker.eksternBrukerId(), TilgangsType.SKRIVE);
-
-        var skalSendeMelding = !auth.erEksternBruker();
-        var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, skalSendeMelding);
-        if (nyMeldingDTO.getVenterPaaSvarFraNav() != null) {
-            dialogData = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogData.getId(), !nyMeldingDTO.getVenterPaaSvarFraNav());
-            dialogDataService.sendPaaKafka(dialogData.getAktorId());
-        }
-        if (nyMeldingDTO.getVenterPaaSvarFraBruker() != null) {
-            var dialogStatus = DialogStatus.builder()
-                    .dialogId(dialogData.getId())
-                    .venterPaSvar(nyMeldingDTO.getVenterPaaSvarFraBruker())
-                    .build();
-
-            dialogData = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
-            dialogDataService.sendPaaKafka(dialogData.getAktorId());
-        }
-        // Vi er ikke helt sikre på hvotfor dette er sånn
+        var skalSendeMinsideVarsel = !auth.erEksternBruker();
+        var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, skalSendeMinsideVarsel);
+        // Vi er ikke helt sikre på hvorfor dette er sånn
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
                 : null;
@@ -183,11 +169,7 @@ public class DialogRessurs {
     @OnlyInternBruker
     @Transactional
     public DialogDTO oppdaterVenterPaSvar(@PathVariable Long dialogId, @PathVariable boolean venter) {
-        var dialogStatus = DialogStatus.builder()
-                .dialogId(dialogId)
-                .venterPaSvar(venter)
-                .build();
-        var dialog = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogStatus);
+        var dialog = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogId, venter);
         dialogDataService.sendPaaKafka(dialog.getAktorId());
         return markerSomLest(dialogId);
     }

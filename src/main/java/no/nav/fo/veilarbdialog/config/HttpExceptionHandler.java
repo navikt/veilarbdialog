@@ -1,6 +1,8 @@
 package no.nav.fo.veilarbdialog.config;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.fo.veilarbdialog.dialog.exceptions.FantIkkeDialogTrådException;
+import no.nav.fo.veilarbdialog.dialog.exceptions.UgyldigDialogInputException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerIkkeUnderOppfolgingException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException;
@@ -21,6 +23,20 @@ public class HttpExceptionHandler extends ResponseEntityExceptionHandler {
         String feilmelding = String.format("Funksjonell feil under behandling: %s - %s ", e.getClass().getSimpleName(), e.getMessage());
         log.warn(feilmelding);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(feilmelding);
+    }
+
+    @ExceptionHandler({UgyldigDialogInputException.class})
+    public ResponseEntity<String> handleUgyldigDialogInputExceptions(Exception e) {
+        String feilmelding = String.format("Ugyldig dialog input: %s - %s ", e.getClass().getSimpleName(), e.getMessage());
+        log.warn(feilmelding);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(feilmelding);
+    }
+
+    @ExceptionHandler({FantIkkeDialogTrådException.class})
+    public ResponseEntity<String> handleFantIkkeDialogException(FantIkkeDialogTrådException e) {
+        String feilmelding = String.format("Fant ikke dialogtråd med id: %s  %s - %s ", e.getDialogId(),  e.getClass().getSimpleName(), e.getMessage());
+        log.warn(feilmelding);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(feilmelding);
     }
 
     @ExceptionHandler({ResponseStatusException.class})

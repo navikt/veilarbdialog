@@ -13,7 +13,6 @@ public class DialogStatus {
 
     public final long dialogId;
     public final boolean venterPaSvar;
-    public final boolean ferdigbehandlet;
 
 }
 

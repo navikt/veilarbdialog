@@ -5,7 +5,6 @@ import no.nav.common.metrics.Event;
 import no.nav.common.metrics.MetricsClient;
 import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -48,10 +47,10 @@ public class FunksjonelleMetrikker {
         reportDialogMedMetadata("dialog.veileder.ny", nyDialog);
     }
 
-    public void oppdaterVenterSvar(DialogStatus nyStatus) {
+    public void oppdaterVenterSvar(Boolean venterPaSvar) {
         client.report(
                 new Event("dialog.veileder.oppdater.VenterSvarFraBruker")
-                        .addFieldToReport("venter", nyStatus.venterPaSvar)
+                        .addFieldToReport("venter", venterPaSvar)
         );
     }
 

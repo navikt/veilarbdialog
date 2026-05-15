@@ -1,5 +1,6 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
+import no.nav.common.types.identer.AktorId;
 import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
@@ -103,20 +104,20 @@ class DialogDAOTest extends BaseDAOTest {
 
     @Test
      void kanHenteDialogPaaAktivitetId() {
-       String aktorId = AktorIdProvider.getNext();
+        String aktorId = AktorIdProvider.getNext();
         var aktivitetId = AktivitetId.of("aktivitetId");
-        assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isEmpty();
+        assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId, AktorId.of(aktorId))).isEmpty();
         dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().aktivitetId(aktivitetId).build());
-        assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isPresent();
+        assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId, AktorId.of(aktorId))).isPresent();
     }
 
     @Test
      void kanHenteDialogPaaArenaAktivitetId() {
        String aktorId = AktorIdProvider.getNext();
         var aktivitetId = AktivitetId.of("ARENATA234");
-        assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isEmpty();
+        assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId, AktorId.of(aktorId))).isEmpty();
         dialogDAO.opprettDialog(nyDialog(aktorId).toBuilder().aktivitetId(aktivitetId).build());
-        assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId)).isPresent();
+        assertThat(dialogDAO.hentDialogForAktivitetId(aktivitetId, AktorId.of(aktorId))).isPresent();
     }
 
     @Test

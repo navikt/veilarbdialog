@@ -4,9 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.util.Collections;
-import java.util.List;
-
 @Data
 @Accessors(chain = true)
 public class NyMeldingDTO {
@@ -23,8 +20,6 @@ public class NyMeldingDTO {
     private Boolean venterPaaSvarFraNav;
     @Schema(description = "Brukes internt av ansatte for å finne dialog-tråder som venter på svar fra brukere.")
     private Boolean venterPaaSvarFraBruker;
-    @Schema(description = "Egenskaper for spesielle typer dialog-meldinger (skal ikke brukes av eksterne konsumenter)", allowableValues =  {"ESKALERINGSVARSEL","PARAGRAF8"})
-    private List<Egenskap> egenskaper = Collections.emptyList();
     private String fnr;
 
 }
