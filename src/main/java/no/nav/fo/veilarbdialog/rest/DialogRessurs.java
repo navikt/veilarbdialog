@@ -170,7 +170,7 @@ public class DialogRessurs {
     @Transactional
     public DialogDTO oppdaterVenterPaSvar(@PathVariable Long dialogId, @PathVariable boolean venter) {
         var dialog = dialogDataService.oppdaterVentePaSvarTidspunkt(dialogId, venter);
-        dialogDataService.sendPaaKafka(dialog.getAktorId());
+        dialogDataService.sendDialogStatusTilPortefoljePaaKafka(dialog.getAktorId());
         return markerSomLest(dialogId);
     }
 
@@ -179,7 +179,7 @@ public class DialogRessurs {
     @OnlyInternBruker
     public DialogDTO oppdaterFerdigbehandlet(@PathVariable Long dialogId, @PathVariable boolean ferdigbehandlet) {
         var dialog = dialogDataService.oppdaterFerdigbehandletTidspunkt(dialogId, ferdigbehandlet);
-        dialogDataService.sendPaaKafka(dialog.getAktorId());
+        dialogDataService.sendDialogStatusTilPortefoljePaaKafka(dialog.getAktorId());
         return markerSomLest(dialogId);
     }
 

@@ -141,7 +141,7 @@ public class DialogDataService {
         }
 
         // Vent med å sende på kafka til alle statuser er oppdatert
-        sendPaaKafka(aktorId.get());
+        sendDialogStatusTilPortefoljePaaKafka(aktorId.get());
         return dialog;
     }
 
@@ -154,7 +154,7 @@ public class DialogDataService {
         oppdaterFerdigbehandletTidspunkt(dialog.getId(),true);
         dialog = markerDialogSomLest(dialog.getId());
         // Vent med å sende på kafka til alle statuser er oppdatert
-        sendPaaKafka(data.getAktorId().get());
+        sendDialogStatusTilPortefoljePaaKafka(data.getAktorId().get());
         return dialog;
     }
 
@@ -268,17 +268,17 @@ public class DialogDataService {
         dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
                 .forEach(this::oppdaterDialogTilHistorisk);
 
-        sendPaaKafka(aktoerId);
+        sendDialogStatusTilPortefoljePaaKafka(aktoerId);
     }
 
     public void settDialogerTilHistoriske(String aktoerId, UUID oppfolgingsperiodeId) {
         dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, oppfolgingsperiodeId)
                 .forEach(this::oppdaterDialogTilHistorisk);
 
-        sendPaaKafka(aktoerId);
+        sendDialogStatusTilPortefoljePaaKafka(aktoerId);
     }
 
-    public void sendPaaKafka(String aktorId) {
+    public void sendDialogStatusTilPortefoljePaaKafka(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
         var kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
         kafkaProducerService.sendDialogMelding(kafkaDialogMelding);

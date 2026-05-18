@@ -6,6 +6,7 @@ import no.nav.common.job.JobRunner;
 import no.nav.fo.veilarbdialog.service.KafkaRepubliseringService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +32,18 @@ public class AdminController {
                 kafkaRepubliseringService::republiserEndringPaaDialogMeldingerForBrukereMedAktivDialog
         );
     }
+
+    @PostMapping("/republiser/endring-paa-dialog/bruker")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void republiserDialogerPaaKafkaForAktor(@RequestBody RepubliserForBrukerRequest request) {
+        sjekkTilgangTilAdmin();
+        JobRunner.runAsync(
+                "republiser-endring-paa-dialog-en-bruker",
+                () -> kafkaRepubliseringService.republiserEndringPaaDialogMeldingerForBruker(request.aktorId())
+        );
+    }
+
+    public record RepubliserForBrukerRequest(String aktorId) {}
 
     private void sjekkTilgangTilAdmin() {
         if (!authContextHolder.erSystemBruker()) {
