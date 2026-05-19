@@ -1,27 +1,29 @@
 package no.nav.fo.veilarbdialog.rest;
 
+import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.auth.context.AuthContextHolder;
 import no.nav.common.job.JobRunner;
 import no.nav.fo.veilarbdialog.service.KafkaRepubliseringService;
+import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class AdminController {
 
-    public static final String PTO_ADMIN_SERVICE_USER = "srvpto-admin";
-
+    public static final String POAO_ADMIN = "poao-admin";
     private final AuthContextHolder authContextHolder;
-
     private final KafkaRepubliseringService kafkaRepubliseringService;
+    private final IAuthService authService;
 
     @PostMapping("/republiser/endring-paa-dialog")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -46,14 +48,8 @@ public class AdminController {
     public record RepubliserForBrukerRequest(String aktorId) {}
 
     private void sjekkTilgangTilAdmin() {
-        if (!authContextHolder.erSystemBruker()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-        String subject = authContextHolder.getUid()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-
-        if (!PTO_ADMIN_SERVICE_USER.equals(subject)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
+        if (!authContextHolder.erInternBruker()) throw new ForbiddenException("Må være internbruker");
+        // Poao-admin krever at man er medlem i en begrenset entra-gruppe
+        authService.sjekkAtApplikasjonErIAllowList(List.of(POAO_ADMIN));
     }
 }
