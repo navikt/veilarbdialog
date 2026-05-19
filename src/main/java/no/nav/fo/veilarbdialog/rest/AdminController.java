@@ -22,7 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminController {
 
-    public static final String POAO_ADMIN = "poao-admin";
+    // Noe galt med sjekken som gjør at namespace kommer med
+    public static final String POAO_ADMIN = "poao:poao-admin";
     private final AuthContextHolder authContextHolder;
     private final KafkaRepubliseringService kafkaRepubliseringService;
     private final IAuthService authService;
