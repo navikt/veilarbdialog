@@ -2,6 +2,7 @@ package no.nav.fo.veilarbdialog.rest;
 
 import jakarta.ws.rs.ForbiddenException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import no.nav.common.auth.context.AuthContextHolder;
 import no.nav.common.job.JobRunner;
 import no.nav.fo.veilarbdialog.service.KafkaRepubliseringService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -48,7 +50,10 @@ public class AdminController {
     public record RepubliserForBrukerRequest(String aktorId) {}
 
     private void sjekkTilgangTilAdmin() {
-        if (!authContextHolder.erInternBruker()) throw new ForbiddenException("Må være internbruker");
+        if (!authContextHolder.erInternBruker()) {
+            log.warn("Må være internBruker for å bruke admin, var; " + authContextHolder.getRole().map(Enum::name).orElse(""));
+            throw new ForbiddenException("Må være internbruker");
+        }
         // Poao-admin krever at man er medlem i en begrenset entra-gruppe
         authService.sjekkAtApplikasjonErIAllowList(List.of(POAO_ADMIN));
     }
