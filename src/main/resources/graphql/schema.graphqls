@@ -3,6 +3,7 @@ type Query {
     stansVarsel(fnr: String!): GjeldendeEskaleringsvarselDto
     kladder(fnr: String!): [Kladd]
     stansVarselHistorikk(fnr: String!): [EskaleringsvarselDto]
+    tilgang(fnr: String!): TilgangTilBrukerDto
 }
 
 type Kladd {
@@ -31,6 +32,10 @@ type EskaleringsvarselDto {
     avsluttetDato: ZonedDateTime,
     avsluttetAv: String,
     avsluttetBegrunnelse: String
+}
+
+type TilgangTilBrukerDto {
+    harSkrivetilgangTilBruker: Boolean
 }
 
 scalar Date

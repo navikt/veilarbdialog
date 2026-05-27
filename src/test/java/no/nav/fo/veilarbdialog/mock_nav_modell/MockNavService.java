@@ -1,11 +1,17 @@
 package no.nav.fo.veilarbdialog.mock_nav_modell;
 
+import no.nav.poao_tilgang.core.domain.AdGrupper;
+import no.nav.poao_tilgang.core.provider.NavEnhetTilgang;
+import no.nav.poao_tilgang.poao_tilgang_test_core.AdGruppeProviderImpl;
 import no.nav.poao_tilgang.poao_tilgang_test_core.NavAnsatt;
 import no.nav.poao_tilgang.poao_tilgang_test_core.NavContext;
 import no.nav.poao_tilgang.poao_tilgang_test_core.PrivatBruker;
 
+import static java.util.Collections.emptyList;
+
 public class MockNavService {
     public static final NavContext NAV_CONTEXT = new NavContext();
+    private static final AdGrupper tilgjengligeAdGrupper = new AdGruppeProviderImpl(NAV_CONTEXT).hentTilgjengeligeAdGrupper();
     public static MockBruker createHappyBruker() {
         return createBruker(BrukerOptions.happyBruker());
     }
@@ -52,6 +58,14 @@ public class MockNavService {
         NavAnsatt navAnsatt = NAV_CONTEXT.getNavAnsatt().nyFor(ny);
 
 
+        return new MockVeileder(navAnsatt.getNavIdent());
+    }
+
+    public static MockVeileder createVeilederMedLesetilgang() {
+        NavAnsatt navAnsatt = new NavAnsatt();
+        NAV_CONTEXT.getNavAnsatt().add(navAnsatt);
+        navAnsatt.getAdGrupper().add(tilgjengligeAdGrupper.getGosysNasjonal());
+        navAnsatt.getEnheter().add(new NavEnhetTilgang("0000", "NAV Viken", emptyList()));
         return new MockVeileder(navAnsatt.getNavIdent());
     }
 
