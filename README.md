@@ -42,3 +42,8 @@ Sist oppdatert 12.05.26
 - `ferdigBehandlet` er `venterPaNavSiden` (fra databasen) == null
 - Koden holder styr på **eldste uleste** for brukere men **nyeste uleste** for veiledere
 - "Funksjonelle metrikker" funker ikke etter at vi gikk over til GCP
+
+## Tilgangskontroll
+Appen bruker poao-tilgang for tilgangskontroll. For å kunne skrive en dialogmelding til bruker må innlogget veileder ha 
+tilgang til brukeren etter vanlige regler som finnes i tilgangsmaskinen. I tillegg kreves rollen `0000-GA-Modia-Oppfolging`. 
+Hvis veileder kun har rollen `0000-GA-BD06_ModiaGenerellTilgang` skal de få se dialogen, men de kan ikke skrive noe. 

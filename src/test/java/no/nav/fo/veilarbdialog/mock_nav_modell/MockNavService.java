@@ -66,7 +66,7 @@ public class MockNavService {
         NAV_CONTEXT.getNavAnsatt().add(navAnsatt);
         navAnsatt.getAdGrupper().add(tilgjengligeAdGrupper.getGosysNasjonal());
         navAnsatt.getEnheter().add(new NavEnhetTilgang("0000", "NAV Viken", emptyList()));
-        return  new MockVeileder(navAnsatt.getNavIdent());
+        return new MockVeileder(navAnsatt.getNavIdent());
     }
 
     private static String aktorIdFromFnr(String fnr) {
