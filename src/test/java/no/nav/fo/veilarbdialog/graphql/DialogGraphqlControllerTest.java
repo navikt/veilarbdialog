@@ -227,6 +227,31 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
         assertThat(result.errors).isNull();
     }
 
+    @Test
+    void bruker_skal_ha_skrivetilgang() {
+        var result = graphqlRequest(bruker, "", tilgangQuery);
+        assertThat(result.getData().tilgang).isNotNull();
+        assertThat(result.getData().tilgang.getHarSkrivetilgangTilBruker()).isTrue();
+        assertThat(result.errors).isNull();
+    }
+
+    @Test
+    void veileder_med_skrivetilgang_skal_ha_skrivetilgang() {
+        var result = graphqlRequest(veileder, bruker.getFnr(), tilgangQuery);
+        assertThat(result.getData().tilgang).isNotNull();
+        assertThat(result.getData().tilgang.getHarSkrivetilgangTilBruker()).isTrue();
+        assertThat(result.errors).isNull();
+    }
+
+    @Test
+    void veileder_uten_skrivetilgang_skal_ikke_ha_skrivetilgang() {
+        var veilederUtenTilgang = MockNavService.createVeilederMedLesetilgang();
+        var result = graphqlRequest(veilederUtenTilgang, bruker.getFnr(), tilgangQuery);
+        assertThat(result.getData().tilgang).isNotNull();
+        assertThat(result.getData().tilgang.getHarSkrivetilgangTilBruker()).isFalse();
+        assertThat(result.errors).isNull();
+    }
+
     static String varselOmStans = """
                 query($fnr: String!) {
                     stansVarsel(fnr: $fnr) {
@@ -295,5 +320,13 @@ public class DialogGraphqlControllerTest extends SpringBootTestBase {
                         kontorsperreEnhetId
                     }
                 }   
+            """.trim().replace("\n", "");
+
+    static String tilgangQuery = """
+                query($fnr: String!) {
+                    tilgang(fnr: $fnr) {
+                        harSkrivetilgangTilBruker
+                    }
+                }
             """.trim().replace("\n", "");
 }

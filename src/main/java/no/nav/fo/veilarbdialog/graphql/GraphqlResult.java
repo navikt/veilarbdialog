@@ -33,6 +33,7 @@ class Dialoger {
     GjeldendeEskaleringsvarselDto stansVarsel;
     List<KladdDTO> kladder;
     List<EskaleringsvarselDto> stansVarselHistorikk;
+    TilgangTilBrukerDto tilgang;
 }
 
 @Data

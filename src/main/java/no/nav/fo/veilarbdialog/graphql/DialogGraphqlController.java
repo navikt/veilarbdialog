@@ -13,6 +13,7 @@ import no.nav.fo.veilarbdialog.kvp.KontorsperreFilter;
 import no.nav.fo.veilarbdialog.rest.RestMapper;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
 import no.nav.fo.veilarbdialog.service.KladdService;
+import no.nav.poao.dab.spring_auth.AuthResult;
 import no.nav.poao.dab.spring_auth.AuthService;
 import no.nav.poao.dab.spring_auth.TilgangsType;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -86,6 +87,17 @@ public class DialogGraphqlController {
         return eskaleringsvarselService.historikk(targetFnr)
                 .stream().map(EskaleringsvarselDto::fromEntity)
                 .toList();
+    }
+
+    @QueryMapping
+    public TilgangTilBrukerDto tilgang(@Argument String fnr) {
+        var targetFnr = Fnr.of(getContextUserIdent(fnr).get());
+        var result = authService.harTilgangTilPerson(targetFnr, TilgangsType.SKRIVE);
+        if (result instanceof AuthResult.UserSuccessResult || result instanceof AuthResult.UnAuditedSuccessResult) {
+            return new TilgangTilBrukerDto(true);
+        } else {
+            return new TilgangTilBrukerDto(false);
+        }
     }
 
     private Predicate<DialogData> bareMedAktiviteterFilter(Optional<Boolean> bareMedAktiviteter) {
