@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class KvitteringMetrikk {
     private final MeterRegistry meterRegistry;
-    private static final String BRUKERNOTIFIKASJON_MANGLER_KVITTERING = "brukernotifikasjon_mangler_kvittering";
+    private static final String MINSIDEVARSEL_MANGLER_KVITTERING = "minsidevarsel_mangler_kvittering";
     private static final String VARSEL_HENDELSE = "varsel_hendelse";
     private static final String HENDELSE_TYPE = "hendelse_type";
     private static final List<String> hendelseTyper = List.of(
@@ -31,7 +31,7 @@ public class KvitteringMetrikk {
         this.meterRegistry = meterRegistry;
 
         hendelseTyper.forEach(hendelseNavn -> meterRegistry.counter(VARSEL_HENDELSE, HENDELSE_TYPE, hendelseNavn));
-        Gauge.builder(BRUKERNOTIFIKASJON_MANGLER_KVITTERING, forsinkedeBestillinger, AtomicInteger::doubleValue).register(meterRegistry);
+        Gauge.builder(MINSIDEVARSEL_MANGLER_KVITTERING, forsinkedeBestillinger, AtomicInteger::doubleValue).register(meterRegistry);
     }
 
     public void incrementMinSideVarselKvitteringMottatt(VarselHendelseEventType hendelseEventType) {

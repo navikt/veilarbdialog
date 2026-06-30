@@ -74,10 +74,10 @@ public class FunksjonelleMetrikker {
 
     public void nyMinSideVarsel(boolean kanVarsles, MinSideVarselType minSideVarselType) {
         client.report(
-                new Event("dialog.brukernotifikasjon")
+                new Event("dialog.minsidevarsel")
                         .addTagToReport("type", minSideVarselType.name())
                         .addTagToReport("kanVarsles", Boolean.toString(kanVarsles))
-                        .addFieldToReport("brukernotifikasjonstype", minSideVarselType.name())
+                        .addFieldToReport("minsidevarselstype", minSideVarselType.name())
                         .addFieldToReport("brukerKanVarsles", Boolean.toString(kanVarsles))
         );
     }
