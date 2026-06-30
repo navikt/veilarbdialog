@@ -3,7 +3,7 @@ package no.nav.fo.veilarbdialog.metrics;
 import lombok.RequiredArgsConstructor;
 import no.nav.common.metrics.Event;
 import no.nav.common.metrics.MetricsClient;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import org.springframework.stereotype.Service;
 
@@ -72,12 +72,12 @@ public class FunksjonelleMetrikker {
         );
     }
 
-    public void nyBrukernotifikasjon(boolean kanVarsles, BrukernotifikasjonsType brukernotifikasjonsType) {
+    public void nyMinSideVarsel(boolean kanVarsles, MinSideVarselType minSideVarselType) {
         client.report(
                 new Event("dialog.brukernotifikasjon")
-                        .addTagToReport("type", brukernotifikasjonsType.name())
+                        .addTagToReport("type", minSideVarselType.name())
                         .addTagToReport("kanVarsles", Boolean.toString(kanVarsles))
-                        .addFieldToReport("brukernotifikasjonstype", brukernotifikasjonsType.name())
+                        .addFieldToReport("brukernotifikasjonstype", minSideVarselType.name())
                         .addFieldToReport("brukerKanVarsles", Boolean.toString(kanVarsles))
         );
     }

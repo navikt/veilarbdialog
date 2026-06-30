@@ -6,8 +6,8 @@ import java.time.temporal.ChronoUnit
 import java.util.Date
 import no.nav.common.json.JsonUtils
 import no.nav.fo.veilarbdialog.SpringBootTestBase
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst.NY_MELDING_TEKST
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus.SENDT
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselTekst.NY_MELDING_TEKST
 import no.nav.fo.veilarbdialog.domain.DialogDTO
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
@@ -53,7 +53,7 @@ internal class DialogBeskjedTest(
     }
 
     private fun assertOpprettetVarselPublisertPåKafka(): OpprettVarsel {
-        val brukernotifikasjonRecord =
+        val minSideVarselRecord =
             KafkaTestUtils.getSingleRecord(
                 minsideVarselConsumer!!,
                 minsideVarselTopic,
@@ -65,7 +65,7 @@ internal class DialogBeskjedTest(
                 minsideVarselConsumer,
             ), "Forventet at det ikke skulle være flere meldinger på minsideVarselTopic"
         )
-        return JsonUtils.fromJson(brukernotifikasjonRecord.value(), OpprettVarsel::class.java)
+        return JsonUtils.fromJson(minSideVarselRecord.value(), OpprettVarsel::class.java)
     }
 
     private fun assertInaktiveringPublisertPåKafka(): InaktiverVarsel {
@@ -96,13 +96,12 @@ internal class DialogBeskjedTest(
         assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(NY_MELDING_TEKST)
         assertThat(opprettVarsel.type).isEqualTo(Varseltype.Beskjed)
 
-        val brukernotifikasjonEntity = minsideVarselDao.getVarslerForDialog(
+        val minSideVarselEntity = minsideVarselDao.getVarslerForDialog(
             dialog.id.toLong(),
         )[0]
 
         assertSoftly { assertions ->
-//            assertions.assertThat(brukernotifikasjonEntity.dialogId).isEqualTo(dialog.id.toLong())
-            assertions.assertThat(brukernotifikasjonEntity.status).isEqualTo(SENDT)
+            assertions.assertThat(minSideVarselEntity.status).isEqualTo(SENDT)
         }
 
         mockBruker.lesMelding(dialog.id)
@@ -167,13 +166,11 @@ internal class DialogBeskjedTest(
         val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
         assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(NY_MELDING_TEKST)
 
-        val brukernotifikasjonEntity = minsideVarselDao.getVarslerForDialog(dialog.id.toLong(),)[0]
+        val minSideVarselEntity = minsideVarselDao.getVarslerForDialog(dialog.id.toLong(),)[0]
 
         assertSoftly {
             assertions: SoftAssertions ->
-//            assertions.assertThat(brukernotifikasjonEntity.dialogId).isEqualTo(dialog.id.toLong())
-//            assertions.assertThat(brukernotifikasjonEntity.type).isEqualTo(BESKJED)
-            assertions.assertThat(brukernotifikasjonEntity.status).isEqualTo(SENDT)
+            assertions.assertThat(minSideVarselEntity.status).isEqualTo(SENDT)
         }
 
         mockBruker.lesMelding(dialog.id)
@@ -240,7 +237,7 @@ internal class DialogBeskjedTest(
         val mockVeileder = MockNavService.createVeileder(mockBruker)
 
         val dialog = mockVeileder.sendEnMelding(mockBruker)
-        settBrukernotifikasjonOpprettetForNMinuttSiden(dialog.id, 31)
+        settMinSideVarselOpprettetForNMinuttSiden(dialog.id, 31)
         minsideVarselService.sendPendingVarslerCronImpl()
 
         val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
@@ -268,7 +265,7 @@ internal class DialogBeskjedTest(
         val mockVeileder = MockNavService.createVeileder(mockBruker)
 
         val dialog = mockVeileder.sendEnMelding(mockBruker)
-        settBrukernotifikasjonOpprettetForNMinuttSiden(dialog.id, 1)
+        settMinSideVarselOpprettetForNMinuttSiden(dialog.id, 1)
         minsideVarselService.sendPendingVarslerCronImpl()
 
         val opprettVarsel = assertOpprettetVarselPublisertPåKafka()
@@ -286,7 +283,7 @@ internal class DialogBeskjedTest(
         assertOpprettetVarselPublisertPåKafka()
     }
 
-    private fun settBrukernotifikasjonOpprettetForNMinuttSiden(dialogId: String?, minutterSiden: Int) {
+    private fun settMinSideVarselOpprettetForNMinuttSiden(dialogId: String?, minutterSiden: Int) {
         val namedJdbcTemplate = NamedParameterJdbcTemplate(jdbcTemplate)
         val justertOpprettet = Date.from(Instant.now().minus(minutterSiden.toLong(), ChronoUnit.MINUTES))
 

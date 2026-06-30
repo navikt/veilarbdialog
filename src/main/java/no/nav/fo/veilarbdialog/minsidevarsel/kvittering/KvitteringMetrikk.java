@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering;
+package no.nav.fo.veilarbdialog.minsidevarsel.kvittering;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
@@ -34,7 +34,7 @@ public class KvitteringMetrikk {
         Gauge.builder(BRUKERNOTIFIKASJON_MANGLER_KVITTERING, forsinkedeBestillinger, AtomicInteger::doubleValue).register(meterRegistry);
     }
 
-    public void incrementBrukernotifikasjonKvitteringMottatt(VarselHendelseEventType hendelseEventType) {
+    public void incrementMinSideVarselKvitteringMottatt(VarselHendelseEventType hendelseEventType) {
         Counter.builder(VARSEL_HENDELSE)
                 .tag(HENDELSE_TYPE, hendelseEventType.name())
                 .register(meterRegistry)

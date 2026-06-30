@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.brukernotifikasjon;
+package no.nav.fo.veilarbdialog.minsidevarsel;
 
 public enum VarselKvitteringStatus {
     OK, FEILET, IKKE_SATT
