@@ -8,9 +8,7 @@ import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import no.nav.fo.veilarbdialog.domain.DialogStatus;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +21,6 @@ public class DialogStatusService {
     private final StatusDAO statusDAO;
     private final DialogDAO dialogDAO;
     private final DataVarehusDAO dataVarehusDAO;
-    private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final MinsideVarselService minsideVarselService;
     private final IAuthService auth;
 
@@ -49,7 +46,6 @@ public class DialogStatusService {
         }
         statusDAO.markerSomLestAvVeileder(dialogData.getId(), new Date());
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.LEST_AV_VEILEDER, getEndretAv());
-        funksjonelleMetrikker.markerDialogSomLestAvVeileder(dialogData);
         return dialogDAO.hentDialog(dialogData.getId());
     }
 
@@ -63,7 +59,6 @@ public class DialogStatusService {
         statusDAO.markerSomLestAvBruker(dialogData.getId());
 
         dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.LEST_AV_BRUKER, getEndretAv());
-        funksjonelleMetrikker.markerDialogSomLestAvBruker(dialogData);
         return dialogDAO.hentDialog(dialogData.getId());
     }
 
@@ -79,7 +74,6 @@ public class DialogStatusService {
             statusDAO.setVenterPaNavTilNaa(dialogData.getId());
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.VENTER_PAA_NAV, getEndretAv());
         }
-        funksjonelleMetrikker.oppdaterFerdigbehandletTidspunkt(dialogData, ferdigBehandlet);
         return dialogDAO.hentDialog(dialogData.getId());
     }
 
@@ -95,7 +89,6 @@ public class DialogStatusService {
             statusDAO.setVenterPaSvarFraBrukerTilNull(dialogData.getId());
             dataVarehusDAO.insertEvent(dialogData, DatavarehusEvent.BESVART_AV_BRUKER, getEndretAv());
         }
-        funksjonelleMetrikker.oppdaterVenterSvar(venterPaSvar);
         return dialogDAO.hentDialog(dialogData.getId());
     }
 
@@ -131,7 +124,6 @@ public class DialogStatusService {
         oppdaterVenterPaNavSiden(dialogData, true);
 
         statusDAO.setEldsteUlesteForBruker(dialogData.getId(), eldsteUlesteForBruker);
-        funksjonelleMetrikker.nyHenvendelseVeileder(dialogData);
     }
 
     private Date getEldsteUlesteForBruker(DialogData dialogData, HenvendelseData henvendelseData) {
@@ -164,7 +156,6 @@ public class DialogStatusService {
                 nyesteUlestAvVeileder,
                 venterPaNavSiden
         );
-        funksjonelleMetrikker.nyHenvendelseBruker(dialogData);
     }
 
     private Date hentTidspunktForNyesteUlestAvVeileder(DialogData dialogData, HenvendelseData henvendelseData) {
