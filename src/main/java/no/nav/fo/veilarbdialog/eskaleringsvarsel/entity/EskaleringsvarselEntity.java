@@ -8,7 +8,6 @@ import java.util.UUID;
 public record EskaleringsvarselEntity(
         long varselId,
         long tilhorendeDialogId,
-        long tilhorendeBrukernotifikasjonId,
         MinSideVarselId tilhorendeVarselId,
         String aktorId,
         String opprettetAv,

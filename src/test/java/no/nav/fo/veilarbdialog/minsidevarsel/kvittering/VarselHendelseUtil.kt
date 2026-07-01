@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering
+package no.nav.fo.veilarbdialog.minsidevarsel.kvittering
 
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.*
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.InternVarselHendelseType.*

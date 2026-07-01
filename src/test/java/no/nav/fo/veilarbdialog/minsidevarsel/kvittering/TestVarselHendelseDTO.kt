@@ -1,4 +1,4 @@
-package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering
+package no.nav.fo.veilarbdialog.minsidevarsel.kvittering
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.EksternVarselKanal

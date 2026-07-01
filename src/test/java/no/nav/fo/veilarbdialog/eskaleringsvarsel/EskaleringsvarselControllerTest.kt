@@ -65,23 +65,23 @@ internal class EskaleringsvarselControllerTest(
     }
 
     private fun ventPåVarselOpprettelsePåKafka(): OpprettVarsel {
-        val brukernotifikasjonRecord =
+        val minSideVarselRecord =
             KafkaTestUtils.getSingleRecord(
                 minsideVarselConsumer!!,
                 minsidevarselTopic,
                 KafkaTestService.DEFAULT_WAIT_TIMEOUT
             )
-        return JsonUtils.fromJson(brukernotifikasjonRecord.value(), OpprettVarsel::class.java)
+        return JsonUtils.fromJson(minSideVarselRecord.value(), OpprettVarsel::class.java)
     }
 
     private fun ventPåVarselInaktiveringPåKafka(): InaktiverVarsel {
-        val brukernotifikasjonRecord =
+        val minSideVarselRecord =
             KafkaTestUtils.getSingleRecord(
                 minsideVarselConsumer!!,
                 minsidevarselTopic,
                 KafkaTestService.DEFAULT_WAIT_TIMEOUT
             )
-        return JsonUtils.fromJson(brukernotifikasjonRecord.value(), InaktiverVarsel::class.java)
+        return JsonUtils.fromJson(minSideVarselRecord.value(), InaktiverVarsel::class.java)
     }
 
 
@@ -98,7 +98,7 @@ internal class EskaleringsvarselControllerTest(
         val henvendelseTekst = "Henvendelsestekst... lang tekst"
 
         // Tekst som brukes i eventet på DittNav. Påkrevd, ingen default
-        val brukernotifikasjonEventTekst = "Viktig oppgave. Nav vurderer å stanse pengene dine. Se hva du må gjøre."
+        val minSideVarselEventTekst = "Viktig oppgave. Nav vurderer å stanse pengene dine. Se hva du må gjøre."
         // Påloggingsnivå for å lese eventet på DittNav. Dersom eventteksten er sensitiv, må denne være 4.
         val sikkerhetsNivaa =  Sensitivitet.High
         // Lenke som blir aktivert når bruker klikker på eventet
@@ -140,7 +140,7 @@ internal class EskaleringsvarselControllerTest(
             assertions.assertThat(opprettVarsel.eksternVarsling).isNotNull();
             assertions.assertThat(opprettVarsel.sensitivitet).isEqualTo(sikkerhetsNivaa);
             assertions.assertThat(opprettVarsel.link).isEqualTo(eventLink);
-            assertions.assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(brukernotifikasjonEventTekst);
+            assertions.assertThat(opprettVarsel.tekster.first().tekst).isEqualTo(minSideVarselEventTekst);
 
             assertions.assertThat(opprettVarsel.eksternVarsling?.epostVarslingstittel).isNull();
             assertions.assertThat(opprettVarsel.eksternVarsling?.epostVarslingstekst).isNull();
@@ -372,7 +372,6 @@ internal class EskaleringsvarselControllerTest(
 
 //        Thread.sleep(2000L)
         // Batchen bestiller beskjeder ved nye dialoger (etter 1000 ms)
-//        scheduleSendBrukernotifikasjonerForUlesteDialoger.sendBrukernotifikasjonerForUlesteDialoger()
         minsideVarselService.sendPendingVarslerCronImpl()
 
         // sjekk at det er blitt sendt en oppgave

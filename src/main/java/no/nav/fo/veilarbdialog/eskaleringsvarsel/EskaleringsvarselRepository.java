@@ -32,7 +32,6 @@ public class EskaleringsvarselRepository {
     RowMapper<EskaleringsvarselEntity> rowMapper = (rs, rowNum) -> new EskaleringsvarselEntity(
             rs.getLong("id"),
             rs.getLong("tilhorende_dialog_id"),
-            rs.getLong("tilhorende_brukernotifikasjon_id"),
             Optional.ofNullable(DatabaseUtils.hentMaybeUUID( rs,"tilhorende_minside_varsel"))
                     .map(MinSideVarselId::new)
                     .orElse(null),
@@ -78,7 +77,6 @@ public class EskaleringsvarselRepository {
         return new EskaleringsvarselEntity(
                 key,
                 tilhorendeDialogId,
-                0,
                 varselId,
                 aktorId,
                 opprettetAv,

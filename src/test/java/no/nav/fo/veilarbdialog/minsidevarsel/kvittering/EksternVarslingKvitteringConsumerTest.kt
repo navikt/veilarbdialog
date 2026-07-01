@@ -1,8 +1,8 @@
-package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering
+package no.nav.fo.veilarbdialog.minsidevarsel.kvittering
 
 import java.util.UUID
 import no.nav.common.json.JsonUtils
-import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseSendt
+import no.nav.fo.veilarbdialog.minsidevarsel.kvittering.VarselHendelseUtil.eksternVarselHendelseSendt
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselHendelseConsumer
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId

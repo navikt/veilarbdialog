@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.minsidevarsler
 
-import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.KvitteringMetrikk
+import no.nav.fo.veilarbdialog.minsidevarsel.kvittering.KvitteringMetrikk
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.*
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -39,15 +39,15 @@ open class MinsideVarselHendelseConsumer(
             }
             InternVarselHendelseType.slettet -> {}
         }
-        kvitteringMetrikk.incrementBrukernotifikasjonKvitteringMottatt(varsel.getHendelseType())
+        kvitteringMetrikk.incrementMinSideVarselKvitteringMottatt(varsel.getHendelseType())
     }
 
     private fun behandleEksternVarselHendelse(varsel: EksternVarselOppdatering) {
         val varselId = varsel.varselId
         log.info("Konsumerer minside-varsel-hendelse varselId={}, type={}", varselId, varsel.hendelseType.name)
 
-        if (!minsideVarselService.finnesBrukernotifikasjon(varselId)) {
-            log.warn("Mottok kvittering for brukernotifikasjon varselId={} som ikke finnes i våre systemer", varselId)
+        if (!minsideVarselService.finnesVarsel(varselId)) {
+            log.warn("Mottok kvittering for minSideVarsel varselId={} som ikke finnes i våre systemer", varselId)
             return
         }
 
@@ -71,6 +71,6 @@ open class MinsideVarselHendelseConsumer(
             }
         }
 
-        kvitteringMetrikk.incrementBrukernotifikasjonKvitteringMottatt(varsel.hendelseType)
+        kvitteringMetrikk.incrementMinSideVarselKvitteringMottatt(varsel.hendelseType)
     }
 }

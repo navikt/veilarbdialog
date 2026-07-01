@@ -1,9 +1,9 @@
-package no.nav.fo.veilarbdialog.brukernotifikasjon.entity;
+package no.nav.fo.veilarbdialog.minsidevarsel.entity;
 
 import no.nav.common.types.identer.Fnr;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus;
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus;
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselType;
+import no.nav.fo.veilarbdialog.minsidevarsel.VarselKvitteringStatus;
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId;
 
 import java.net.URL;
@@ -14,8 +14,8 @@ public record MinSideVarselEntity(
         MinSideVarselId varselId,
         Fnr fnr,
         UUID oppfolgingsPeriodeId,
-        BrukernotifikasjonsType type,
-        BrukernotifikasjonBehandlingStatus status,
+        MinSideVarselType type,
+        MinSideVarselBehandlingStatus status,
         VarselKvitteringStatus varselKvitteringStatus,
         LocalDateTime opprettet,
         LocalDateTime varselFeilet,

@@ -1,14 +1,14 @@
 package no.nav.fo.veilarbdialog.minsidevarsler.dto
 
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.PENDING
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
-import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.IKKE_SATT
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus.PENDING
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselType
+import no.nav.fo.veilarbdialog.minsidevarsel.VarselKvitteringStatus.IKKE_SATT
 import no.nav.common.types.identer.Fnr
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.AVSLUTTET
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES
-import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus.AVSLUTTET
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus.SENDT
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus.SKAL_AVSLUTTES
+import no.nav.fo.veilarbdialog.minsidevarsel.VarselKvitteringStatus
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel.VarselOmNyMelding
 import no.nav.fo.veilarbdialog.minsidevarsler.PendingVarsel
@@ -28,7 +28,7 @@ open class MinsideVarselDao(
     private val template: NamedParameterJdbcTemplate
 ) {
     private fun ResultSet.getVarselId() = MinSideVarselId(DatabaseUtils.hentMaybeUUID(this, "varsel_id"))
-    private fun ResultSet.getStatus() = EnumUtils.valueOf(BrukernotifikasjonBehandlingStatus::class.java, this.getString("status"))
+    private fun ResultSet.getStatus() = EnumUtils.valueOf(MinSideVarselBehandlingStatus::class.java, this.getString("status"))
     private fun ResultSet.getKvitteringsStatus() = EnumUtils.valueOf(VarselKvitteringStatus::class.java, this.getString("varsel_kvittering_status"))
     private fun ResultSet.getOpprettet() = DatabaseUtils.hentLocalDateTime(this, "opprettet")
 
@@ -42,7 +42,7 @@ open class MinsideVarselDao(
                 varselId = rs.getVarselId(),
                 lenke = DatabaseUtils.hentMaybeURL(rs, "lenke"),
                 skalBatches = rs.getBoolean("skal_batches"),
-                type = EnumUtils.valueOf(BrukernotifikasjonsType::class.java, rs.getString("type")),
+                type = EnumUtils.valueOf(MinSideVarselType::class.java, rs.getString("type")),
                 melding = rs.getString("melding"),
                 fnr = Fnr.of(rs.getString("foedselsnummer")),
             )
@@ -55,7 +55,7 @@ open class MinsideVarselDao(
         return template.query(sql, params) { rs, _ -> rs.getVarselId() }
     }
 
-    open fun updateStatus(varselId: MinSideVarselId, status: BrukernotifikasjonBehandlingStatus): Int {
+    open fun updateStatus(varselId: MinSideVarselId, status: MinSideVarselBehandlingStatus): Int {
         val params = mapOf("varselId" to varselId.value, "status" to status.name)
         val sql = """UPDATE min_side_varsel SET status = :status, oppdatert = current_timestamp WHERE varsel_id = :varselId"""
         return template.update(sql, params)
@@ -87,7 +87,7 @@ open class MinsideVarselDao(
         varselFor.forEach { updateStatus(it.varselId, SKAL_AVSLUTTES) }
     }
 
-    open fun finnesBrukernotifikasjon(varselId: MinSideVarselId): Boolean {
+    open fun finnesVarsel(varselId: MinSideVarselId): Boolean {
         var params = mapOf("varselId" to varselId.value);
         var sql = """
             SELECT COUNT(*) FROM min_side_varsel
@@ -226,7 +226,7 @@ open class MinsideVarselDao(
 
 class DialogVarselEntity(
     val varselId: MinSideVarselId,
-    val status: BrukernotifikasjonBehandlingStatus,
+    val status: MinSideVarselBehandlingStatus,
     val opprettet: LocalDateTime,
     val kvitteringStatus: VarselKvitteringStatus
 )

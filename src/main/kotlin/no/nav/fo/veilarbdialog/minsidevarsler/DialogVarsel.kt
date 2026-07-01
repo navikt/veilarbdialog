@@ -1,18 +1,18 @@
 package no.nav.fo.veilarbdialog.minsidevarsler
 
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonTekst
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselTekst
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselType
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import java.net.URL
 import java.util.UUID
 
 sealed class DialogVarsel(
-    val varselId: MinSideVarselId ,
-    val foedselsnummer: Fnr ,
-    val melding: String ,
-    val oppfolgingsperiodeId: UUID ,
-    val type: BrukernotifikasjonsType,
+    val varselId: MinSideVarselId,
+    val foedselsnummer: Fnr,
+    val melding: String,
+    val oppfolgingsperiodeId: UUID,
+    val type: MinSideVarselType,
     val lenke: URL,
     val skalBatches: Boolean
 ) {
@@ -21,7 +21,7 @@ sealed class DialogVarsel(
         fnr: Fnr,
         melding: String,
         oppfolgingsperiodeId: UUID,
-        type: BrukernotifikasjonsType,
+        type: MinSideVarselType,
         link: URL,
         skalBatches: Boolean
     ): DialogVarsel(varsel, fnr, melding, oppfolgingsperiodeId, type, link, skalBatches)
@@ -31,7 +31,7 @@ sealed class DialogVarsel(
         fnr: Fnr,
         melding: String,
         oppfolgingsperiodeId: UUID,
-        type: BrukernotifikasjonsType,
+        type: MinSideVarselType,
         link: URL,
         skalBatches: Boolean
     ): DialogVarsel(varsel, fnr, melding, oppfolgingsperiodeId, type, link, skalBatches)
@@ -45,9 +45,9 @@ sealed class DialogVarsel(
             return VarselOmMuligStans(
                 MinSideVarselId(UUID.randomUUID()),
                 fnr,
-                BrukernotifikasjonTekst.NAV_VURDERER_Å_STANSE_PENGENE_DINE_TEKST,
+                MinSideVarselTekst.NAV_VURDERER_Å_STANSE_PENGENE_DINE_TEKST,
                 oppfolgingsperiode,
-                BrukernotifikasjonsType.OPPGAVE,
+                MinSideVarselType.OPPGAVE,
                 link,
                 false
             )
@@ -63,9 +63,9 @@ sealed class DialogVarsel(
                 dialogId,
                 MinSideVarselId(UUID.randomUUID()),
                 fnr,
-                BrukernotifikasjonTekst.NY_MELDING_TEKST,
+                MinSideVarselTekst.NY_MELDING_TEKST,
                 oppfolgingsperiode,
-                BrukernotifikasjonsType.BESKJED,
+                MinSideVarselType.BESKJED,
                 link,
                 true
             )
