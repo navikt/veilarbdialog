@@ -11,8 +11,6 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -28,7 +26,7 @@ class OppfolgingsperiodeConsumer {
         OppfolgingsperiodeV1 oppfolgingsperiodeV1 = JsonUtils.fromJson(consumerRecord.value(), OppfolgingsperiodeV1.class);
 
         if (oppfolgingsperiodeV1.sluttDato != null) {
-            avsluttEskaleringsvarslerOgAktiveBrukernotifikasjoner(oppfolgingsperiodeV1);
+            avsluttEskaleringsvarslerOgAktiveMinSideVarsler(oppfolgingsperiodeV1);
             settDialogerForOppfolgingsperiodeTilHistorisk(oppfolgingsperiodeV1);
         }
 
@@ -40,7 +38,7 @@ class OppfolgingsperiodeConsumer {
                         oppfolgingsperiodeV1.sluttDato));
     }
 
-    private void avsluttEskaleringsvarslerOgAktiveBrukernotifikasjoner(OppfolgingsperiodeV1 oppfolgingsperiodeV1) {
+    private void avsluttEskaleringsvarslerOgAktiveMinSideVarsler(OppfolgingsperiodeV1 oppfolgingsperiodeV1) {
         eskaleringsvarselService.stoppEskaleringsvarselFordiOppfolgingsperiodenErAvsluttet(oppfolgingsperiodeV1.uuid);
         minsideVarselService.setSkalAvsluttesForVarslerIPeriode(oppfolgingsperiodeV1.uuid);
     }

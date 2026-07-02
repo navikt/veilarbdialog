@@ -1,8 +1,8 @@
 package no.nav.fo.veilarbdialog.minsidevarsler
 
 import no.nav.common.types.identer.Fnr
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType.BESKJED
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselType
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselType.BESKJED
 import no.nav.fo.veilarbdialog.minsidevarsler.dto.MinSideVarselId
 import no.nav.tms.varsel.action.*
 import no.nav.tms.varsel.builder.VarselActionBuilder
@@ -17,7 +17,7 @@ data class PendingVarsel(
     val varselId: MinSideVarselId,
     val melding: String,
     val lenke: URL,
-    val type: BrukernotifikasjonsType,
+    val type: MinSideVarselType,
     val fnr: Fnr,
     val skalBatches: Boolean
 )

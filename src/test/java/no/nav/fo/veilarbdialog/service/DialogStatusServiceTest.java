@@ -6,7 +6,6 @@ import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.db.dao.StatusDAO;
 import no.nav.fo.veilarbdialog.domain.*;
-import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,13 +24,11 @@ class DialogStatusServiceTest {
     private final DialogDAO dialogDAO = mock(DialogDAO.class);
     private final DataVarehusDAO dataVarehusDAO = mock(DataVarehusDAO.class);
     private final IAuthService authService = mock(IAuthService.class);
-    private final FunksjonelleMetrikker funksjonelleMetrikker = mock(FunksjonelleMetrikker.class);
     private final MinsideVarselService minsideVarselService = mock(MinsideVarselService.class);
     private final DialogStatusService dialogStatusService = new DialogStatusService(
             statusDAO,
             dialogDAO,
             dataVarehusDAO,
-            funksjonelleMetrikker,
             minsideVarselService,
             authService
     );
