@@ -1,22 +1,22 @@
-package no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering
+package no.nav.fo.veilarbdialog.minsidevarsel.kvittering
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import java.util.concurrent.ExecutionException
 import no.nav.common.json.JsonUtils
 import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.AVSLUTTET
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.PENDING
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus.SENDT
-import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus
-import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.FEILET
-import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.IKKE_SATT
-import no.nav.fo.veilarbdialog.brukernotifikasjon.VarselKvitteringStatus.OK
-import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseBestilt
-import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseFeilet
-import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.eksternVarselHendelseSendt
-import no.nav.fo.veilarbdialog.brukernotifikasjon.kvittering.VarselHendelseUtil.lagInternVarselHendelseMelding
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus.AVSLUTTET
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus.PENDING
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus.SENDT
+import no.nav.fo.veilarbdialog.minsidevarsel.VarselKvitteringStatus
+import no.nav.fo.veilarbdialog.minsidevarsel.VarselKvitteringStatus.FEILET
+import no.nav.fo.veilarbdialog.minsidevarsel.VarselKvitteringStatus.IKKE_SATT
+import no.nav.fo.veilarbdialog.minsidevarsel.VarselKvitteringStatus.OK
+import no.nav.fo.veilarbdialog.minsidevarsel.kvittering.VarselHendelseUtil.eksternVarselHendelseBestilt
+import no.nav.fo.veilarbdialog.minsidevarsel.kvittering.VarselHendelseUtil.eksternVarselHendelseFeilet
+import no.nav.fo.veilarbdialog.minsidevarsel.kvittering.VarselHendelseUtil.eksternVarselHendelseSendt
+import no.nav.fo.veilarbdialog.minsidevarsel.kvittering.VarselHendelseUtil.lagInternVarselHendelseMelding
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
@@ -58,7 +58,7 @@ internal class EksternVarslingKvitteringTest(
     }
 
     @Test
-    fun skal_oppdatere_brukernotifikasjonVedKvitteringsStatusOppdateringer() {
+    fun skal_oppdatere_minSideVarselVedKvitteringsStatusOppdateringer() {
         val bruker = MockNavService.createHappyBruker()
         val veileder = MockNavService.createVeileder(bruker)
 
@@ -107,7 +107,7 @@ internal class EksternVarslingKvitteringTest(
     }
 
     @Test
-    fun skal_oppdatere_brukernotifikasjonVedVarselStatusOppdateringer() {
+    fun skal_oppdatere_minSideVarselVedVarselStatusOppdateringer() {
         val bruker = MockNavService.createHappyBruker()
         val veileder = MockNavService.createVeileder(bruker)
         val melding = NyMeldingDTO().setFnr(bruker.fnr).setOverskrift("Overskrift").setTekst("Tekst")
@@ -173,7 +173,7 @@ internal class EksternVarslingKvitteringTest(
     private fun assertExpectedVarselStatuser(
         actualVarsel: DialogVarselEntity,
         kvitteringsStatus: VarselKvitteringStatus,
-        status: BrukernotifikasjonBehandlingStatus
+        status: MinSideVarselBehandlingStatus
     ) {
 
         assertSoftly{ assertions ->

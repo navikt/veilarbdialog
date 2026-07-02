@@ -38,7 +38,7 @@ spec:
       description: feilet deploy?
       severity: warning
     - alert: Feil med ekstern varsel kvitering
-      expr: 'max(brukernotifikasjon_mangler_kvittering{application="veilarbdialog"}) > 0.8'
+      expr: 'max(minsidevarsel_mangler_kvittering{application="veilarbdialog"}) > 0.8'
       for: 10m
       action: https://logs.adeo.no/goto/6fc98f8662b9893c80c103ba3a30fbfa
       description: forskinget kvitering på externvarsel

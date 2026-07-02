@@ -18,7 +18,6 @@ import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.kvp.KvpService;
-import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker;
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import no.nav.fo.veilarbdialog.service.exceptions.NyHenvendelsePåHistoriskDialogException;
@@ -52,7 +51,6 @@ public class DialogDataService {
     private final KafkaProducerService kafkaProducerService;
     private final IAuthService auth;
     private final KladdService kladdService;
-    private final FunksjonelleMetrikker funksjonelleMetrikker;
     private final SistePeriodeService sistePeriodeService;
     private final Unleash unleash;
 
@@ -319,12 +317,6 @@ public class DialogDataService {
         }
         DialogData nyDialog = dialogDAO.opprettDialog(dialogData);
         dialogStatusService.oppdaterDatavarehus(nyDialog);
-
-        if (auth.erEksternBruker()) {
-            funksjonelleMetrikker.nyDialogBruker(nyDialog);
-        } else if (auth.erInternBruker()) {
-            funksjonelleMetrikker.nyDialogVeileder(nyDialog);
-        }
 
         return nyDialog;
     }

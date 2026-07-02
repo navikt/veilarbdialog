@@ -4,7 +4,7 @@ import lombok.SneakyThrows;
 import no.nav.common.json.JsonUtils;
 import no.nav.common.types.identer.Fnr;
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonBehandlingStatus;
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus;
 import no.nav.fo.veilarbdialog.domain.DialogDTO;
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
@@ -129,7 +129,7 @@ class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
         var varselStatus = minsideVarselDao.getMinsideVarselForForhåndsvarsel(startEskalering.id());
 
-        assertThat(varselStatus.getStatus()).isEqualTo(BrukernotifikasjonBehandlingStatus.SKAL_AVSLUTTES);
+        assertThat(varselStatus.getStatus()).isEqualTo(MinSideVarselBehandlingStatus.SKAL_AVSLUTTES);
 
         List<EskaleringsvarselEntity> historikk = eskaleringsvarselService.historikk(Fnr.of(mockBruker.getFnr()));
         Assertions.assertThat(historikk).hasSize(1);

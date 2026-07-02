@@ -7,7 +7,7 @@ import no.nav.common.client.aktoroppslag.AktorOppslagClient
 import no.nav.common.types.identer.AktorId
 import no.nav.common.types.identer.Fnr
 import no.nav.common.types.identer.NavIdent
-import no.nav.fo.veilarbdialog.brukernotifikasjon.BrukernotifikasjonsType
+import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselType
 import no.nav.fo.veilarbdialog.dialog.opprett.NyEskaleringsVarselDialog
 import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 import no.nav.fo.veilarbdialog.domain.Person
@@ -19,7 +19,6 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerIkkeUnderOppfo
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.BrukerKanIkkeVarslesException
 import no.nav.fo.veilarbdialog.eventsLogger.BigQueryClient
 import no.nav.fo.veilarbdialog.eventsLogger.EventType
-import no.nav.fo.veilarbdialog.metrics.FunksjonelleMetrikker
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel
 import no.nav.fo.veilarbdialog.minsidevarsler.MinsideVarselService
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService
@@ -46,7 +45,6 @@ open class EskaleringsvarselService(
     private val aktorOppslagClient: AktorOppslagClient,
     private val oppfolgingClient: OppfolgingV2Client,
     private val sistePeriodeService: SistePeriodeService,
-    private val funksjonelleMetrikker: FunksjonelleMetrikker,
     private val bigQueryClient: BigQueryClient,
     private val oversiktenService: OversiktenService
 ) {
@@ -77,7 +75,6 @@ open class EskaleringsvarselService(
             throw AktivEskaleringException("Brukeren har allerede en aktiv eskalering.")
         }
         if (!minsideVarselService.kanVarsles(stansVarsel.fnr)) {
-            funksjonelleMetrikker.nyBrukernotifikasjon(false, BrukernotifikasjonsType.OPPGAVE)
             throw BrukerKanIkkeVarslesException()
         }
         if (!oppfolgingClient.erUnderOppfolging(stansVarsel.fnr)) {
@@ -114,7 +111,6 @@ open class EskaleringsvarselService(
             stansVarsel.begrunnelse
         )
 
-        funksjonelleMetrikker.nyBrukernotifikasjon(true, BrukernotifikasjonsType.OPPGAVE)
         log.info("Eskaleringsvarsel sendt forhåndsvarselId={}", varselOmMuligStans.varselId)
         log.info("Minside varsel opprettet i PENDING status {} forhåndsvarselId {}", varselOmMuligStans.varselId, eskaleringsvarselEntity.varselId)
 
