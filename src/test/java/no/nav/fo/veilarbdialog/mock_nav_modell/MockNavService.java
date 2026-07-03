@@ -64,7 +64,9 @@ public class MockNavService {
     public static MockVeileder createVeilederMedLesetilgang() {
         NavAnsatt navAnsatt = new NavAnsatt();
         NAV_CONTEXT.getNavAnsatt().add(navAnsatt);
-        navAnsatt.getAdGrupper().add(tilgjengligeAdGrupper.getGosysNasjonal());
+        // etter at nasjonal-rollen forsvant fra poao-tilgang har det blitt lagt til at tilgang til enheten "NAV Viken"
+        // vil tilsvare nasjonal tilgang. Antar det er en midlertidig løsning frem til noen lager noe mer presist.
+        // https://github.com/navikt/poao-tilgang/blob/main/poao-tilgang-test-core/src/main/kotlin/no/nav/poao_tilgang/poao_tilgang_test_core/Providers.kt#L90
         navAnsatt.getEnheter().add(new NavEnhetTilgang("0000", "NAV Viken", emptyList()));
         return new MockVeileder(navAnsatt.getNavIdent());
     }
