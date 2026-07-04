@@ -18,11 +18,11 @@ spec:
   liveness:
     path: /veilarbdialog/internal/info
     port: 8080
-    initialDelay: 30
+    initialDelay: 90
   readiness:
     path: /veilarbdialog/internal/info
     port: 8080
-    initialDelay: 30
+    initialDelay: 90
   replicas:
     min: 2
     max: 8

@@ -5,7 +5,9 @@ import no.nav.fo.veilarbdialog.db.DataSourceConfig
 import java.sql.SQLException
 
 object LocalDatabaseSingleton {
-    val postgres = EmbeddedPostgres.start().postgresDatabase.also {
+    val postgres = EmbeddedPostgres.builder()
+        .setServerConfig("wal_level", "logical")
+        .start().postgresDatabase.also {
         try {
             it.getConnection().use { connection ->
                 connection.prepareStatement("""
