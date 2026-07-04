@@ -101,7 +101,7 @@ spec:
   gcp:
     sqlInstances:
       - name: veilarbdialog
-        type: POSTGRES_16
+        type: POSTGRES_17
         tier: db-custom-8-53248
         diskType: SSD
         diskAutoresize: true
