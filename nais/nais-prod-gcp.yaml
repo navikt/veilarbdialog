@@ -33,8 +33,6 @@ spec:
     requests:
       cpu: "1"
       memory: 1536Mi
-  strategy:
-    type: Recreate
   envFrom:
     #    - configmap: pto-config
     - secret: veilarbdialog-unleash-api-token
@@ -102,7 +100,7 @@ spec:
     sqlInstances:
       - name: veilarbdialog
         type: POSTGRES_18
-        tier: db-custom-8-53248
+        tier: db-custom-4-26624
         diskType: SSD
         diskAutoresize: true
         highAvailability: true
