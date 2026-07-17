@@ -74,7 +74,7 @@ data class HenvendelseDtoGraphQl(
                 avsenderId = if (eksternBruker) null else henvendelseData.avsenderId,
                 sendt = henvendelseData.sendt,
                 lest = if (eksternBruker) henvendelseData.lestAvBruker else henvendelseData.lestAvVeileder,
-                viktig = henvendelseData.viktig,
+                viktig = henvendelseData.viktig ?: false,
                 tekst = henvendelseData.tekst
             )
         }
