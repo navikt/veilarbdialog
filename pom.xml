@@ -27,7 +27,7 @@
         <poao.tilgang.version>4.2026.06.26_13.31-ba260c104ee7</poao.tilgang.version>
         <shedlock.version>7.7.0</shedlock.version>
         <okhttp.version>5.4.0</okhttp.version>
-        <jackson.version>3.2.0</jackson.version>
+        <jackson.version>3.2.1</jackson.version>
         <jackson-annotations.version>2.22</jackson-annotations.version>
 
         <sonar.projectKey>navikt_veilarbdialog</sonar.projectKey>
