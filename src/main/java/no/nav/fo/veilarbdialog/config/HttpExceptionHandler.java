@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.config;
 
 import lombok.extern.slf4j.Slf4j;
+import no.nav.fo.veilarbdialog.dialog.exceptions.AktivitetHarAlleredeDialogTrådException;
 import no.nav.fo.veilarbdialog.dialog.exceptions.FantIkkeDialogTrådException;
 import no.nav.fo.veilarbdialog.dialog.exceptions.UgyldigDialogInputException;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.exceptions.AktivEskaleringException;
@@ -37,6 +38,13 @@ public class HttpExceptionHandler extends ResponseEntityExceptionHandler {
         String feilmelding = String.format("Fant ikke dialogtråd med id: %s  %s - %s ", e.getDialogId(),  e.getClass().getSimpleName(), e.getMessage());
         log.warn(feilmelding);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(feilmelding);
+    }
+
+    @ExceptionHandler({AktivitetHarAlleredeDialogTrådException.class})
+    public ResponseEntity<String> handleAktivitetHarAlleredeDialogTrådException(AktivitetHarAlleredeDialogTrådException e) {
+        String feilmelding = String.format("Aktivitet med id: %s har allerede en dialogtråd: %s - %s ", e.getAktivitetId(), e.getClass().getSimpleName(), e.getMessage());
+        log.warn(feilmelding);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(feilmelding);
     }
 
     @ExceptionHandler({ResponseStatusException.class})

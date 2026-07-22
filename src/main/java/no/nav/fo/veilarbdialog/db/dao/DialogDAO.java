@@ -4,11 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.types.identer.AktorId;
 import no.nav.domain.DialogId;
+import no.nav.fo.veilarbdialog.dialog.exceptions.AktivitetHarAlleredeDialogTrådException;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
 import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogResultSet;
 import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogSqlParameterSource;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -158,7 +160,8 @@ public class DialogDAO {
         var arenaId = hasId && !isTekniskId  ? dialogData.getAktivitetId().getId() : null;
         var tekniskId = hasId && isTekniskId ? dialogData.getAktivitetId().getId() : null;
 
-        jdbc.update("insert into DIALOG (DIALOG_ID, AKTOR_ID, OPPRETTET_DATO, AKTIVITET_ID, ARENA_ID, OVERSKRIFT, HISTORISK, KONTORSPERRE_ENHET_ID, OPPDATERT, OPPFOLGINGSPERIODE_UUID) " +
+        try {
+            jdbc.update("insert into DIALOG (DIALOG_ID, AKTOR_ID, OPPRETTET_DATO, AKTIVITET_ID, ARENA_ID, OVERSKRIFT, HISTORISK, KONTORSPERRE_ENHET_ID, OPPDATERT, OPPFOLGINGSPERIODE_UUID) " +
                         "values (:dialogId, :aktorId, :opprettet , :tekniskId, :arenaId, :overskrift, :historisk, :kontorSperreEnhetId, :oppdatert, :oppfolgingsPeriode)",
                 new MapSqlParameterSource()
                      .addValue("dialogId", dialogId)
@@ -171,7 +174,11 @@ public class DialogDAO {
                     .addValue("kontorSperreEnhetId", dialogData.getKontorsperreEnhetId())
                     .addValue("oppdatert", dialogData.getOpprettetDato())
                     .addValue("oppfolgingsPeriode", dialogData.getOppfolgingsperiode().toString())
-        );
+            );
+        } catch (DuplicateKeyException e) {
+            var aktivitetid = dialogData.getAktivitetId();
+            throw new AktivitetHarAlleredeDialogTrådException(aktivitetid != null ? aktivitetid.getId() : null);
+        }
 
         dialogData.getEgenskaper()
                 .forEach(egenskapType -> updateDialogEgenskap(egenskapType, dialogId));
