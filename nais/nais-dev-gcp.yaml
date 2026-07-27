@@ -71,8 +71,12 @@ spec:
           namespace: team-mulighetsrommet
         - application: aktivitetsplan
           namespace: pto
+        - application: aktivitetsplan
+          namespace: dab
         - application: arbeidsrettet-dialog
           namespace: pto
+        - application: arbeidsrettet-dialog
+          namespace: dab
         - application: aia-backend
           namespace: paw
         - application: veilarbaktivitet
