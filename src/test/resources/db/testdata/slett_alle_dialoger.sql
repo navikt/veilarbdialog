@@ -8,3 +8,4 @@ delete from DIALOG where (select 1) = 1;
 delete from EVENT;
 delete from VARSEL;
 delete from KLADD;
+delete from outbox;

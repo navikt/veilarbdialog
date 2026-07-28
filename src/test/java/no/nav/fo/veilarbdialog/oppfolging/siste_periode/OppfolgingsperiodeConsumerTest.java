@@ -163,6 +163,7 @@ class OppfolgingsperiodeConsumerTest extends SpringBootTestBase {
 
         opprettEllerEndreOppfolgingsperiodeForBruker(stopOppfolging);
 
+        outboxService.sendUsendteMeldinger();
         KafkaTestUtils.getSingleRecord(endringPaaDialogConsumer, endringPaaDialogTopic, DEFAULT_WAIT_TIMEOUT);
 
 

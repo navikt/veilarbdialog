@@ -17,9 +17,11 @@ import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
 import no.nav.fo.veilarbdialog.db.dao.DataVarehusDAO;
 import no.nav.fo.veilarbdialog.db.dao.DialogDAO;
 import no.nav.fo.veilarbdialog.domain.*;
+import no.nav.common.json.JsonUtils;
 import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
+import no.nav.fo.veilarbdialog.outbox.OutboxService;
 import no.nav.fo.veilarbdialog.service.exceptions.NyHenvendelsePåHistoriskDialogException;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +50,7 @@ public class DialogDataService {
     private final DialogStatusService dialogStatusService;
     private final DataVarehusDAO dataVarehusDAO;
     private final KvpService kvpService;
-    private final KafkaProducerService kafkaProducerService;
+    private final OutboxService outboxService;
     private final IAuthService auth;
     private final KladdService kladdService;
     private final SistePeriodeService sistePeriodeService;
@@ -58,6 +60,9 @@ public class DialogDataService {
 
     @Value("${application.dialog.url}")
     private String dialogUrl;
+
+    @Value("${application.topic.ut.endringPaaDialog}")
+    private String endringPaaDialogTopic;
 
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person) {
@@ -279,7 +284,7 @@ public class DialogDataService {
     public void sendDialogStatusTilPortefoljePaaKafka(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
         var kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
-        kafkaProducerService.sendDialogMelding(kafkaDialogMelding);
+        outboxService.lagreIOutbox(endringPaaDialogTopic, aktorId, JsonUtils.toJson(kafkaDialogMelding));
     }
 
     public DialogData hentDialogUtenTilgangsSjekk(long dialogId) {
