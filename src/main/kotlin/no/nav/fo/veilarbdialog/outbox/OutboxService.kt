@@ -38,7 +38,6 @@ class OutboxSender(
 @Service
 class OutboxService(
     private val outboxDao: OutboxDao,
-    private val kafkaTemplate: KafkaTemplate<String, String>,
     private val eventPublisher: ApplicationEventPublisher,
     private val outboxSender: OutboxSender,
 ) {
