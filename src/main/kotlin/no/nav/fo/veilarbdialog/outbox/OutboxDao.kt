@@ -26,7 +26,8 @@ open class OutboxDao(
         val sql = """SELECT id, topic, key, payload 
             FROM outbox 
             ${if (event != null) "WHERE key = :key AND topic = :topic" else ""}
-            ORDER BY opprettet""".trimMargin()
+            ORDER BY opprettet
+            FOR UPDATE SKIP LOCKED""".trimMargin()
         val params = when {
             event != null -> mapOf("key" to event.key, "topic" to event.topic)
             else -> emptyMap<String, Any>()
