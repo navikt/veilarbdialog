@@ -22,9 +22,16 @@ open class OutboxDao(
         jdbc.update(sql, mapOf("topic" to topic, "key" to key, "payload" to payload))
     }
 
-    open fun hentUsendteMeldinger(): List<OutboxRecord> {
-        val sql = "SELECT id, topic, key, payload FROM outbox ORDER BY opprettet"
-        return jdbc.query(sql, emptyMap<String, Any>()) { rs, _ ->
+    open fun hentUsendteMeldinger(event: OutboxMeldingLagretEvent? = null): List<OutboxRecord> {
+        val sql = """SELECT id, topic, key, payload 
+            FROM outbox 
+            ${if (event != null) "WHERE key = :key AND topic = :topic" else ""}
+            ORDER BY opprettet""".trimMargin()
+        val params = when {
+            event != null -> mapOf("key" to event.key, "topic" to event.topic)
+            else -> emptyMap<String, Any>()
+        }
+        return jdbc.query(sql, params) { rs, _ ->
             OutboxRecord(
                 id = rs.getLong("id"),
                 topic = rs.getString("topic"),
