@@ -422,6 +422,7 @@
                 <configuration>
                     <compilerPlugins>
                         <plugin>lombok</plugin>
+                        <plugin>spring</plugin>
                     </compilerPlugins>
                     <pluginOptions>
                         <option>lombok:config=${project.basedir}/lombok.config</option>
@@ -438,6 +439,11 @@
                         <artifactId>lombok</artifactId>
                         <version>1.18.46</version>
                         <scope>compile</scope>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-allopen</artifactId>
+                        <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
                 <extensions>true</extensions> <!-- You can set this option
