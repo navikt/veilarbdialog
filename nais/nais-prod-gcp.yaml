@@ -61,6 +61,7 @@ spec:
       rules:
         - application: veilarbapi
           namespace: pto
+        - application: veilarbapi
         - application: arbeidssokerregistrering-for-veileder
           namespace: paw
         - application: egenvurdering-dialog-tjeneste
