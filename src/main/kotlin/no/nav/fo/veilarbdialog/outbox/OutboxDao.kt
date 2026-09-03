@@ -1,6 +1,6 @@
 package no.nav.fo.veilarbdialog.outbox
 
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import no.nav.fo.veilarbdialog.db.jdbc.OutboxJdbcRepository
 import org.springframework.stereotype.Repository
 
 data class OutboxRecord(
@@ -12,37 +12,28 @@ data class OutboxRecord(
 
 @Repository
 open class OutboxDao(
-    private val jdbc: NamedParameterJdbcTemplate
+    private val repository: OutboxJdbcRepository
 ) {
     open fun lagre(topic: String, key: String, payload: String) {
-        val sql = """
-            INSERT INTO outbox (topic, key, payload)
-            VALUES (:topic, :key, :payload)
-        """.trimIndent()
-        jdbc.update(sql, mapOf("topic" to topic, "key" to key, "payload" to payload))
+        repository.insert(topic, key, payload)
     }
 
     open fun hentUsendteMeldinger(event: OutboxMeldingLagretEvent? = null): List<OutboxRecord> {
-        val sql = """SELECT id, topic, key, payload 
-            FROM outbox 
-            ${if (event != null) "WHERE key = :key AND topic = :topic" else ""}
-            ORDER BY opprettet
-            FOR UPDATE SKIP LOCKED""".trimMargin()
-        val params = when {
-            event != null -> mapOf("key" to event.key, "topic" to event.topic)
-            else -> emptyMap<String, Any>()
+        val rows = when (event) {
+            null -> repository.findUsendte()
+            else -> repository.findUsendteForKeyAndTopic(event.key, event.topic)
         }
-        return jdbc.query(sql, params) { rs, _ ->
+        return rows.map { row ->
             OutboxRecord(
-                id = rs.getLong("id"),
-                topic = rs.getString("topic"),
-                key = rs.getString("key"),
-                payload = rs.getString("payload"),
+                id = row.id,
+                topic = row.topic,
+                key = row.messageKey,
+                payload = row.payload,
             )
         }
     }
 
     open fun slett(id: Long) {
-        jdbc.update("DELETE FROM outbox WHERE id = :id", mapOf("id" to id))
+        repository.deleteById(id)
     }
 }

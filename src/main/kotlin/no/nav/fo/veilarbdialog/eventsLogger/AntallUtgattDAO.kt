@@ -1,18 +1,13 @@
 package no.nav.fo.veilarbdialog.eventsLogger
 
-import org.springframework.jdbc.core.JdbcTemplate
+import no.nav.fo.veilarbdialog.db.jdbc.EskaleringsvarselJdbcRepository
 import org.springframework.stereotype.Repository
 
 @Repository
 open class AntallUtgattDAO(
-    private val template: JdbcTemplate
+    private val repository: EskaleringsvarselJdbcRepository
 ) {
     open fun hentAntallUtgåtteVarsler(): Int {
-        val sql = """
-            select count(*) as antallUtgåtte from eskaleringsvarsel 
-            where gjeldende is not null 
-            and opprettet_dato < now() - INTERVAL '10 days';
-        """.trimIndent()
-        return template.queryForObject(sql, Int::class.java ) ?: 0
+        return repository.tellUtgaatteVarsler()
     }
 }

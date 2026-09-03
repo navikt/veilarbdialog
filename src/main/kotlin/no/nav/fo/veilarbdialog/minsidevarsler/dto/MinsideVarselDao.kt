@@ -4,6 +4,9 @@ import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus.PENDI
 import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselType
 import no.nav.fo.veilarbdialog.minsidevarsel.VarselKvitteringStatus.IKKE_SATT
 import no.nav.common.types.identer.Fnr
+import no.nav.fo.veilarbdialog.db.jdbc.JdbcConverters
+import no.nav.fo.veilarbdialog.db.jdbc.MinSideVarselJdbcRepository
+import no.nav.fo.veilarbdialog.db.jdbc.MinSideVarselRow
 import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus
 import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus.AVSLUTTET
 import no.nav.fo.veilarbdialog.minsidevarsel.MinSideVarselBehandlingStatus.SENDT
@@ -12,70 +15,61 @@ import no.nav.fo.veilarbdialog.minsidevarsel.VarselKvitteringStatus
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel
 import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel.VarselOmNyMelding
 import no.nav.fo.veilarbdialog.minsidevarsler.PendingVarsel
-import no.nav.fo.veilarbdialog.util.DatabaseUtils
 import no.nav.fo.veilarbdialog.util.EnumUtils
 import org.springframework.dao.EmptyResultDataAccessException
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.dao.IncorrectResultSizeDataAccessException
 import org.springframework.stereotype.Repository
-import java.sql.ResultSet
-import java.time.Instant
 import java.time.LocalDateTime
-import java.util.Date
 import java.util.UUID
 
 @Repository
 open class MinsideVarselDao(
-    private val template: NamedParameterJdbcTemplate
+    private val repository: MinSideVarselJdbcRepository
 ) {
-    private fun ResultSet.getVarselId() = MinSideVarselId(DatabaseUtils.hentMaybeUUID(this, "varsel_id"))
-    private fun ResultSet.getStatus() = EnumUtils.valueOf(MinSideVarselBehandlingStatus::class.java, this.getString("status"))
-    private fun ResultSet.getKvitteringsStatus() = EnumUtils.valueOf(VarselKvitteringStatus::class.java, this.getString("varsel_kvittering_status"))
-    private fun ResultSet.getOpprettet() = DatabaseUtils.hentLocalDateTime(this, "opprettet")
+    private fun MinSideVarselRow.toVarselId() = MinSideVarselId(this.varselId)
+    private fun MinSideVarselRow.toStatus() = EnumUtils.valueOf(MinSideVarselBehandlingStatus::class.java, this.status)
+    private fun MinSideVarselRow.toKvitteringStatus() = EnumUtils.valueOf(VarselKvitteringStatus::class.java, this.varselKvitteringStatus)
+
+    private fun MinSideVarselRow.toPendingVarsel() = PendingVarsel(
+        varselId = toVarselId(),
+        lenke = JdbcConverters.parseUrlOrNull(lenke),
+        skalBatches = skalBatches ?: false,
+        type = EnumUtils.valueOf(MinSideVarselType::class.java, type),
+        melding = melding,
+        fnr = Fnr.of(foedselsnummer),
+    )
+
+    private fun MinSideVarselRow.toDialogVarselEntity() = DialogVarselEntity(
+        toVarselId(),
+        toStatus(),
+        opprettet,
+        toKvitteringStatus()
+    )
 
     open fun hentPendingVarsler(): List<PendingVarsel> {
-        val params = mapOf("pending" to PENDING.name)
-        val sql = """
-            SELECT * FROM min_side_varsel WHERE STATUS = :pending
-        """.trimIndent()
-        return template.query(sql, params) { rs, _ ->
-            PendingVarsel(
-                varselId = rs.getVarselId(),
-                lenke = DatabaseUtils.hentMaybeURL(rs, "lenke"),
-                skalBatches = rs.getBoolean("skal_batches"),
-                type = EnumUtils.valueOf(MinSideVarselType::class.java, rs.getString("type")),
-                melding = rs.getString("melding"),
-                fnr = Fnr.of(rs.getString("foedselsnummer")),
-            )
-        }
+        return repository.findByStatus(PENDING.name).map { it.toPendingVarsel() }
     }
 
     open fun hentVarslerSomSkalAvsluttes(): List<MinSideVarselId> {
-        val params = mapOf("skalAvsluttes" to SKAL_AVSLUTTES.name)
-        val sql = """SELECT * FROM min_side_varsel WHERE STATUS = :skalAvsluttes"""
-        return template.query(sql, params) { rs, _ -> rs.getVarselId() }
+        return repository.findByStatus(SKAL_AVSLUTTES.name).map { it.toVarselId() }
     }
 
     open fun updateStatus(varselId: MinSideVarselId, status: MinSideVarselBehandlingStatus): Int {
-        val params = mapOf("varselId" to varselId.value, "status" to status.name)
-        val sql = """UPDATE min_side_varsel SET status = :status, oppdatert = current_timestamp WHERE varsel_id = :varselId"""
-        return template.update(sql, params)
+        return repository.updateStatus(varselId.value, status.name)
     }
 
     open fun opprettVarselIPendingStatus(pendingMinsideVarsel: DialogVarsel) {
-        val params = mapOf(
-            "status" to PENDING.name,
-            "varselKvitteringStatus" to IKKE_SATT.name,
-            "oppfolgingsperiodeId" to pendingMinsideVarsel.oppfolgingsperiodeId,
-            "type" to pendingMinsideVarsel.type.name,
-            "skalBatches" to pendingMinsideVarsel.skalBatches,
-            "melding" to pendingMinsideVarsel.melding,
-            "fnr" to pendingMinsideVarsel.foedselsnummer.get(),
-            "lenke" to pendingMinsideVarsel.lenke.toExternalForm(),
-            "varselId" to pendingMinsideVarsel.varselId.value)
-        template.update("""
-            INSERT INTO min_side_varsel(varsel_id, foedselsnummer, oppfolgingsperiode_id, type, status, skal_batches, melding, varsel_kvittering_status, lenke, opprettet)
-            VALUES (:varselId, :fnr, :oppfolgingsperiodeId, :type, :status, :skalBatches, :melding, :varselKvitteringStatus, :lenke, CURRENT_TIMESTAMP)
-        """.trimIndent(), params)
+        repository.insert(
+            pendingMinsideVarsel.varselId.value,
+            pendingMinsideVarsel.foedselsnummer.get(),
+            pendingMinsideVarsel.oppfolgingsperiodeId,
+            pendingMinsideVarsel.type.name,
+            PENDING.name,
+            pendingMinsideVarsel.skalBatches,
+            pendingMinsideVarsel.melding,
+            IKKE_SATT.name,
+            pendingMinsideVarsel.lenke.toExternalForm()
+        )
 
         if (pendingMinsideVarsel is VarselOmNyMelding) {
             kobleTilDialog(pendingMinsideVarsel)
@@ -88,139 +82,44 @@ open class MinsideVarselDao(
     }
 
     open fun finnesVarsel(varselId: MinSideVarselId): Boolean {
-        var params = mapOf("varselId" to varselId.value);
-        var sql = """
-            SELECT COUNT(*) FROM min_side_varsel
-            WHERE varsel_id = :varselId
-        """;
-        val antall = template.queryForObject(sql, params, Int::class.java) ?: 0
-        return antall > 0
+        return repository.countByVarselId(varselId.value) > 0
     }
 
     open fun setEksternVarselFeilet(varselId: MinSideVarselId) {
-        val params = mapOf(
-            "varlselId" to varselId.value,
-            "varselKvitteringStatus" to VarselKvitteringStatus.FEILET.toString()
-        )
-        template.update("""
-             update min_side_varsel
-               set
-                oppdatert = current_timestamp,
-                VARSEL_KVITTERING_STATUS = :varselKvitteringStatus
-                    where varsel_id = :varlselId
-                 """, params);
+        repository.updateKvitteringStatus(varselId.value, VarselKvitteringStatus.FEILET.toString())
     }
+
     open fun setEksternVarselKvitteringStatusOk(varlselId: MinSideVarselId) {
-        var params = mapOf(
-            "varlselId" to varlselId.value,
-            "varselKvitteringStatusOk" to VarselKvitteringStatus.OK.name
-        )
-        template.update("""
-            update min_side_varsel
-            set oppdatert = CURRENT_TIMESTAMP,
-            VARSEL_KVITTERING_STATUS = :varselKvitteringStatusOk
-            where varsel_id = :varlselId
-        """, params);
+        repository.updateKvitteringStatus(varlselId.value, VarselKvitteringStatus.OK.name)
     }
 
     /* Only used in tests */
     open fun getMinsideVarselForForhåndsvarsel(forhåndsVarselId: Long): DialogVarselEntity {
-        val params = mapOf("id" to forhåndsVarselId)
-        val sql = """
-            SELECT min_side_varsel.varsel_id, min_side_varsel.status, min_side_varsel.opprettet, min_side_varsel.varsel_kvittering_status FROM eskaleringsvarsel
-                JOIN min_side_varsel ON min_side_varsel.varsel_id = eskaleringsvarsel.tilhorende_minside_varsel
-        """.trimIndent()
-        return template.queryForObject(sql, params) { rs, _ ->
-            DialogVarselEntity(
-                rs.getVarselId(),
-                rs.getStatus(),
-                rs.getOpprettet(),
-                rs.getKvitteringsStatus()
-            )
-        }
+        val rows = repository.findForForhandsvarsel()
+        if (rows.isEmpty()) throw EmptyResultDataAccessException(1)
+        if (rows.size > 1) throw IncorrectResultSizeDataAccessException(1, rows.size)
+        return rows.first().toDialogVarselEntity()
     }
 
     open fun getVarslerForDialog(dialogId: Long): List<DialogVarselEntity> {
-        val params = mapOf("dialogId" to dialogId)
-        val sql = """SELECT mapping.varsel_id, min_side_varsel.status, min_side_varsel.opprettet,  min_side_varsel.varsel_kvittering_status
-            |    FROM min_side_varsel_dialog_mapping mapping JOIN min_side_varsel 
-            |        ON min_side_varsel.varsel_id = mapping.varsel_id
-            |    WHERE dialog_id = :dialogId""".trimMargin()
-        return try {
-            template.query(sql, params) { rs, _ ->
-                DialogVarselEntity(
-                    rs.getVarselId(),
-                    rs.getStatus(),
-                    rs.getOpprettet(),
-                    rs.getKvitteringsStatus()
-                )
-            }
-        } catch (e: EmptyResultDataAccessException) {
-            emptyList()
-        }
+        return repository.findForDialog(dialogId).map { it.toDialogVarselEntity() }
     }
 
     open fun setSkalAvsluttesForVarslerIPeriode(oppfolgingsperiodeUuid: UUID) {
-        val skalAvsluttes = mapOf(
-            "oppfolgingsperiode" to oppfolgingsperiodeUuid,
-            "fra_status" to SENDT.name,
-            "til_status" to SKAL_AVSLUTTES.name
-        )
-
-        val skalAvbrytes = mapOf(
-            "oppfolgingsperiode" to oppfolgingsperiodeUuid,
-            "fra_status" to PENDING.name,
-            "til_status" to AVSLUTTET.name
-        )
-
-        val sql = """
-                UPDATE min_side_varsel 
-                SET STATUS = :til_status, 
-                oppdatert = CURRENT_TIMESTAMP
-                WHERE OPPFOLGINGSPERIODE_ID = :oppfolgingsperiode and status = :fra_status
-        """
-
-        template.update(sql, skalAvbrytes)
-        template.update(sql, skalAvsluttes)
+        repository.updateStatusForPeriode(oppfolgingsperiodeUuid, PENDING.name, AVSLUTTET.name)
+        repository.updateStatusForPeriode(oppfolgingsperiodeUuid, SENDT.name, SKAL_AVSLUTTES.name)
     }
 
     private fun kobleTilDialog(varselOmNyMelding: VarselOmNyMelding) {
-        val params = mapOf(
-            "varselId" to varselOmNyMelding.varselId.value,
-            "dialogId" to varselOmNyMelding.dialogId,
-        )
-        val sql = """
-            INSERT INTO min_side_varsel_dialog_mapping(varsel_id, dialog_id)
-            VALUES (:varselId, :dialogId)
-        """.trimIndent()
-        template.update(sql, params)
+        repository.insertMapping(varselOmNyMelding.varselId.value, varselOmNyMelding.dialogId)
     }
 
     open fun hentVarselEntity(varselId: MinSideVarselId): DialogVarselEntity? {
-        val sql = """
-            SELECT * FROM min_side_varsel where varsel_id = :varselId
-        """.trimIndent()
-        val params = mapOf("varselId" to varselId.value)
-        try {
-            return template.queryForObject(sql, params) { rs, _ -> DialogVarselEntity(rs.getVarselId(), rs.getStatus(), rs.getOpprettet(), rs.getKvitteringsStatus()) }
-        } catch (e: EmptyResultDataAccessException) {
-            return null
-        }
+        return repository.findVarsel(varselId.value).orElse(null)?.toDialogVarselEntity()
     }
 
     open fun hentAntallUkvitterteVarslerForsoktSendt(timerForsinkelse: Long): Int {
-        val parameterSource = mapOf("date" to Date(Instant.now().minusSeconds(60 * 60 * timerForsinkelse).toEpochMilli()))
-
-        // language=SQL
-        val sql = """
-             select count(*)
-             from min_side_varsel
-             where varsel_kvittering_status = 'IKKE_SATT'
-             and status = 'SENDT'
-             and oppdatert < :date
-            """
-
-        return template.queryForObject(sql, parameterSource, Int::class.java) ?: 0
+        return repository.countUkvitterteForsoktSendt(LocalDateTime.now().minusHours(timerForsinkelse))
     }
 }
 

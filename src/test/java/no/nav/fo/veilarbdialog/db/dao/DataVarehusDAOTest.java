@@ -4,22 +4,24 @@ import lombok.Data;
 import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.DatavarehusEvent;
 import no.nav.fo.veilarbdialog.domain.DialogData;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Import(DataVarehusDAO.class)
 class DataVarehusDAOTest extends BaseDAOTest {
 
-    private static DataVarehusDAO dataVarehusDAO;
+    @Autowired
+    private DataVarehusDAO dataVarehusDAO;
 
-    @BeforeAll
-    public static void setup() {
-        dataVarehusDAO = new DataVarehusDAO(jdbc.getJdbcTemplate());
-    }
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void insertEvent() {
@@ -28,7 +30,7 @@ class DataVarehusDAOTest extends BaseDAOTest {
         String loggedInUser = "SYSTEM";
         dataVarehusDAO.insertEvent(dialog, DatavarehusEvent.VENTER_PAA_BRUKER, loggedInUser);
 
-        DatavarehusData data = jdbc.getJdbcTemplate().queryForObject("select * from event where dialogid = 12345", new BeanPropertyRowMapper<>(DatavarehusData.class));
+        DatavarehusData data = jdbcTemplate.queryForObject("select * from event where dialogid = 12345", new BeanPropertyRowMapper<>(DatavarehusData.class));
 
         assertThat(data).isNotNull();
         assertThat(data.dialogId).isEqualTo(dialog.getId());

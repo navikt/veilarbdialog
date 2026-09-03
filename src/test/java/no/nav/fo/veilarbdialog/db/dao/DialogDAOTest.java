@@ -5,8 +5,9 @@ import no.nav.fo.veilarbdialog.domain.AktivitetId;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 
 import java.time.Instant;
 import java.util.Date;
@@ -19,14 +20,11 @@ import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
+@Import(DialogDAO.class)
 class DialogDAOTest extends BaseDAOTest {
 
-    private static DialogDAO dialogDAO;
-
-    @BeforeAll
-    public static void setup() {
-       dialogDAO = new DialogDAO(jdbc);
-    }
+    @Autowired
+    private DialogDAO dialogDAO;
 
     @Test
      void kan_opprette_dialog() {
