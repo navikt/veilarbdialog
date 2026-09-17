@@ -4,28 +4,29 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.types.identer.AktorId;
 import no.nav.domain.DialogId;
+import no.nav.fo.veilarbdialog.db.jdbc.DialogEgenskapRepository;
+import no.nav.fo.veilarbdialog.db.jdbc.DialogEntity;
+import no.nav.fo.veilarbdialog.db.jdbc.DialogRepository;
+import no.nav.fo.veilarbdialog.db.jdbc.HenvendelseEntity;
+import no.nav.fo.veilarbdialog.db.jdbc.HenvendelseRepository;
+import no.nav.fo.veilarbdialog.db.jdbc.JdbcConverters;
 import no.nav.fo.veilarbdialog.dialog.exceptions.AktivitetHarAlleredeDialogTrådException;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.util.EnumUtils;
-import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogResultSet;
-import no.nav.veilarbaktivitet.veilarbdbutil.VeilarbDialogSqlParameterSource;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static java.util.Optional.ofNullable;
+import static no.nav.fo.veilarbdialog.db.jdbc.JdbcConverters.parseUuidOrNull;
+import static no.nav.fo.veilarbdialog.db.jdbc.JdbcConverters.toBoolean;
+import static no.nav.fo.veilarbdialog.db.jdbc.JdbcConverters.toDate;
+import static no.nav.fo.veilarbdialog.db.jdbc.JdbcConverters.toInt;
+import static no.nav.fo.veilarbdialog.db.jdbc.JdbcConverters.toLocalDateTime;
 
 @Component
 @Transactional
@@ -33,147 +34,116 @@ import static java.util.Optional.ofNullable;
 @Slf4j
 public class DialogDAO {
 
-    private final NamedParameterJdbcTemplate jdbc;
+    private final DialogRepository dialogRepository;
+    private final HenvendelseRepository henvendelseRepository;
+    private final DialogEgenskapRepository dialogEgenskapRepository;
 
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForAktorId(String aktorId) {
-        return jdbc.query("select * from DIALOG where AKTOR_ID = :aktorId",
-                new MapSqlParameterSource("aktorId", aktorId),
-                this::mapRow);
+        return dialogRepository.findByAktorId(aktorId)
+                .stream()
+                .map(this::mapDialog)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForOppfolgingsperiodeId(UUID oppfolgingsperiodeId) {
-        return jdbc.query("select * from DIALOG where OPPFOLGINGSPERIODE_UUID = :oppfolgingsPeriodeId",
-                new MapSqlParameterSource("oppfolgingsPeriodeId", oppfolgingsperiodeId.toString()),
-                this::mapRow);
+        return dialogRepository.findByOppfolgingsperiodeUuid(oppfolgingsperiodeId.toString())
+                .stream()
+                .map(this::mapDialog)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<DialogData> hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(String aktorId, Date avsluttetDato) {
-        return jdbc.query("select * from DIALOG where " +
-                        "AKTOR_ID = :aktorId and " +
-                        "HISTORISK = 0 and " +
-                        "OPPRETTET_DATO < :avsluttetDato and " +
-                        "KONTORSPERRE_ENHET_ID is not null",
-                new MapSqlParameterSource("aktorId", aktorId)
-                    .addValue("avsluttetDato", avsluttetDato),
-                this::mapRow);
+        return dialogRepository.findKontorsperredeSomSkalAvsluttes(aktorId, toLocalDateTime(avsluttetDato))
+                .stream()
+                .map(this::mapDialog)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerSomSkalAvsluttesForAktorId(String aktorId, UUID oppfolgingsperiodeId) {
-        return jdbc.query("select * from DIALOG where " +
-                        "AKTOR_ID = :aktorId and " +
-                        "HISTORISK = 0 and " +
-                        "OPPFOLGINGSPERIODE_UUID = :oppfolgingsperiode_uuid",
-                new MapSqlParameterSource("aktorId", aktorId)
-                    .addValue("oppfolgingsperiode_uuid", oppfolgingsperiodeId.toString()),
-                this::mapRow);
+        return dialogRepository.findSomSkalAvsluttes(aktorId, oppfolgingsperiodeId.toString())
+                .stream()
+                .map(this::mapDialog)
+                .toList();
     }
 
     @Transactional(readOnly = true)
     public DialogData hentDialog(long dialogId) {
-        try {
-            return jdbc.queryForObject("select * from DIALOG where DIALOG_ID = :dialogId",
-                    new MapSqlParameterSource("dialogId", dialogId),
-                    this::mapRow);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
+        return dialogRepository.findById(dialogId)
+                .map(this::mapDialog)
+                .orElse(null);
     }
 
     @Transactional(readOnly = true)
     public DialogData hentDialog(DialogId dialogId, AktorId aktorId) {
-        try {
-            return jdbc.queryForObject("select * from DIALOG where DIALOG_ID = :dialogId and aktor_id = :aktorId",
-                    new MapSqlParameterSource("dialogId", dialogId.getValue())
-                            .addValue("aktorId", aktorId.get()),
-                    this::mapRow);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
+        return dialogRepository.findByDialogIdAndAktorId(dialogId.getValue(), aktorId.get())
+                .map(this::mapDialog)
+                .orElse(null);
     }
 
     @Transactional(readOnly = true)
     public DialogData hentDialogGittHenvendelse(long henvendelseId) {
-        try {
-            return jdbc.queryForObject("select d.* from DIALOG d " +
-                            "left join HENVENDELSE h on h.DIALOG_ID = d.DIALOG_ID " +
-                            "where h.HENVENDELSE_ID = :henvendelseId",
-                    new MapSqlParameterSource("henvendelseId", henvendelseId) ,
-                    this::mapRow);
-        } catch (EmptyResultDataAccessException e) {
-            return null;
-        }
+        return dialogRepository.findByHenvendelseId(henvendelseId)
+                .map(this::mapDialog)
+                .orElse(null);
     }
 
     @Transactional(readOnly = true)
     public HenvendelseData hentHenvendelse(long id) {
-        return jdbc.query("select * from HENVENDELSE h " +
-                        "left join DIALOG d on d.DIALOG_ID = h.DIALOG_ID " +
-                        "where h.HENVENDELSE_ID = :id",
-                new MapSqlParameterSource("id", id),
-                DialogDAO::mapHenvendelseRow)
-                .stream()
-                .findFirst()
+        return henvendelseRepository.findById(id)
+                .map(henvendelse -> dialogRepository.findById(henvendelse.getDialogId())
+                        .map(dialog -> mapHenvendelse(henvendelse, dialog))
+                        .orElseGet(() -> mapHenvendelse(henvendelse, null)))
                 .orElse(null);
     }
 
     public int kasserHenvendelse(long id) {
-        return jdbc.update("update HENVENDELSE set TEKST = '- Det var skrevet noe feil, og det er nå slettet. -' where HENVENDELSE_ID = :id",
-                new MapSqlParameterSource("id", id));
+        return henvendelseRepository.kasserHenvendelse(id);
     }
 
     public int kasserDialog(long id) {
-        return jdbc.update("update DIALOG set OVERSKRIFT = '- Det var skrevet noe feil, og det er nå slettet. -' where DIALOG_ID = :id",
-                new MapSqlParameterSource("id", id));
+        return dialogRepository.kasserDialog(id);
     }
 
-    private String getIdQuery(AktivitetId aktivitetId) {
+    @Transactional(readOnly = true)
+    public Optional<DialogData> hentDialogForAktivitetId(AktivitetId aktivitetId, AktorId aktorId) {
+        if (aktivitetId == null) {
+            return Optional.empty();
+        }
+        List<DialogEntity> dialoger;
         if (aktivitetId instanceof TekniskId) {
-            return "select * from DIALOG where AKTIVITET_ID = :aktivitetId and aktor_id = :aktorId";
+            dialoger = dialogRepository.findByAktivitetIdAndAktorId(aktivitetId.getId(), aktorId.get());
         } else if (aktivitetId instanceof Arenaid) {
-            return "select * from DIALOG where ARENA_ID = :aktivitetId and aktor_id = :aktorId";
+            dialoger = dialogRepository.findByArenaIdAndAktorId(aktivitetId.getId(), aktorId.get());
         } else {
             throw new UnsupportedOperationException("Uknown id-type");
         }
-    }
-    @Transactional(readOnly = true)
-    public Optional<DialogData> hentDialogForAktivitetId(AktivitetId aktivitetId, AktorId aktorId) {
-        if (aktivitetId == null) return Optional.empty();
-        return jdbc.query(getIdQuery(aktivitetId),
-                new MapSqlParameterSource("aktivitetId", aktivitetId.getId())
-                        .addValue("aktorId", aktorId.get()),
-                this::mapRow)
-                .stream()
-                .findFirst();
+        return dialoger.stream().findFirst().map(this::mapDialog);
     }
 
     public DialogData opprettDialog(DialogData dialogData) {
-        long dialogId = Optional
-                .ofNullable(jdbc.queryForObject("select nextval('DIALOG_ID_SEQ')", new MapSqlParameterSource(), Long.class))
-                .orElseThrow(IllegalStateException::new);
+        long dialogId = dialogRepository.nextDialogId();
 
         var hasId = dialogData.getAktivitetId() != null;
         var isTekniskId = dialogData.getAktivitetId() instanceof TekniskId;
-        var arenaId = hasId && !isTekniskId  ? dialogData.getAktivitetId().getId() : null;
+        var arenaId = hasId && !isTekniskId ? dialogData.getAktivitetId().getId() : null;
         var tekniskId = hasId && isTekniskId ? dialogData.getAktivitetId().getId() : null;
 
         try {
-            jdbc.update("insert into DIALOG (DIALOG_ID, AKTOR_ID, OPPRETTET_DATO, AKTIVITET_ID, ARENA_ID, OVERSKRIFT, HISTORISK, KONTORSPERRE_ENHET_ID, OPPDATERT, OPPFOLGINGSPERIODE_UUID) " +
-                        "values (:dialogId, :aktorId, :opprettet , :tekniskId, :arenaId, :overskrift, :historisk, :kontorSperreEnhetId, :oppdatert, :oppfolgingsPeriode)",
-                new MapSqlParameterSource()
-                     .addValue("dialogId", dialogId)
-                    .addValue("aktorId", dialogData.getAktorId())
-                    .addValue("opprettet",dialogData.getOpprettetDato())
-                    .addValue("tekniskId",tekniskId)
-                    .addValue("arenaId",arenaId)
-                    .addValue("overskrift", dialogData.getOverskrift())
-                    .addValue("historisk" ,dialogData.isHistorisk() ? 1 : 0)
-                    .addValue("kontorSperreEnhetId", dialogData.getKontorsperreEnhetId())
-                    .addValue("oppdatert", dialogData.getOpprettetDato())
-                    .addValue("oppfolgingsPeriode", dialogData.getOppfolgingsperiode().toString())
+            dialogRepository.insert(
+                    dialogId,
+                    dialogData.getAktorId(),
+                    toLocalDateTime(dialogData.getOpprettetDato()),
+                    tekniskId,
+                    arenaId,
+                    dialogData.getOverskrift(),
+                    toInt(dialogData.isHistorisk()),
+                    dialogData.getKontorsperreEnhetId(),
+                    toLocalDateTime(dialogData.getOpprettetDato()),
+                    JdbcConverters.toString(dialogData.getOppfolgingsperiode())
             );
         } catch (DuplicateKeyException e) {
             var aktivitetid = dialogData.getAktivitetId();
@@ -188,28 +158,21 @@ public class DialogDAO {
     }
 
     public void updateDialogEgenskap(EgenskapType type, long dialogId) {
-        jdbc.update("insert into DIALOG_EGENSKAP (DIALOG_ID, DIALOG_EGENSKAP_TYPE_KODE) " +
-                        "values (:dialogId, :dialogEgenskap)",
-                new MapSqlParameterSource("dialogId", dialogId)
-                    .addValue("dialogEgenskap", type.toString()));
+        dialogEgenskapRepository.insert(dialogId, type.toString());
     }
 
     public HenvendelseData opprettHenvendelse(HenvendelseData henvendelseData) {
-        long henvendelseId = Optional
-                .ofNullable(jdbc.queryForObject("select nextval('HENVENDELSE_ID_SEQ')", new MapSqlParameterSource(), Long.class))
-                .orElseThrow(IllegalStateException::new);
+        long henvendelseId = henvendelseRepository.nextHenvendelseId();
 
-        jdbc.update("insert into HENVENDELSE (HENVENDELSE_ID, DIALOG_ID, SENDT, TEKST, KONTORSPERRE_ENHET_ID, AVSENDER_ID, AVSENDER_TYPE, VIKTIG) " +
-                        "values (:henvendelseId, :dialogId, :sendt, :tekst, :kontorsperreEnhetId, :avsenderId, :avsenderType, :viktig)",
-                new VeilarbDialogSqlParameterSource()
-                        .addValue("henvendelseId", henvendelseId)
-                        .addValue("dialogId", henvendelseData.dialogId)
-                        .addValue("sendt", henvendelseData.sendt)
-                        .addValue("tekst", henvendelseData.tekst)
-                        .addValue("kontorsperreEnhetId", henvendelseData.kontorsperreEnhetId)
-                        .addValue("avsenderId", henvendelseData.avsenderId)
-                        .addValue("avsenderType", EnumUtils.getName(henvendelseData.avsenderType))
-                        .addValue("viktig", henvendelseData.viktig)
+        henvendelseRepository.insert(
+                henvendelseId,
+                henvendelseData.dialogId,
+                toLocalDateTime(henvendelseData.sendt),
+                henvendelseData.tekst,
+                henvendelseData.kontorsperreEnhetId,
+                henvendelseData.avsenderId,
+                EnumUtils.getName(henvendelseData.avsenderType),
+                toInt(henvendelseData.viktig)
         );
 
         log.info("opprettet henvendelse id:{} data:{}", henvendelseId, henvendelseData);
@@ -218,88 +181,63 @@ public class DialogDAO {
 
     @Transactional(readOnly = true)
     public List<String> hentAktorIderTilBrukereMedAktiveDialoger() {
-        return jdbc.queryForList("select distinct AKTOR_ID from DIALOG where HISTORISK = 0", new MapSqlParameterSource(), String.class);
+        return dialogRepository.findAktiveAktorIder();
     }
 
-    private static Date hentDato(ResultSet rs, String kolonneNavn) throws SQLException {
-        return ofNullable(rs.getTimestamp(kolonneNavn))
-                .map(Timestamp::getTime)
-                .map(Date::new)
-                .orElse(null);
-    }
+    private DialogData mapDialog(DialogEntity dialog) {
+        long dialogId = dialog.getDialogId();
+        List<EgenskapType> egenskaper = dialogEgenskapRepository.findTyperByDialogId(dialogId)
+                .stream()
+                .map(kode -> kode == null ? null : EgenskapType.valueOf(kode))
+                .toList();
 
-    private static UUID hentMaybeUUID(ResultSet rs, String kolonneNavn) throws SQLException {
-        String uuid = rs.getString(kolonneNavn);
-
-        if (StringUtils.isEmpty(uuid)) {
-            return null;
-        }
-
-        try {
-            return UUID.fromString(uuid);
-        } catch (IllegalArgumentException e) {
-            return  null;
-        }
-    }
-
-    public DialogData mapRow(ResultSet resultSet, int rowNum) throws SQLException {
-        var rs = new VeilarbDialogResultSet(resultSet);
-        var dialogId = rs.getLong("DIALOG_ID");
-        List<EgenskapType> egenskaper =
-                jdbc.query("select d.DIALOG_EGENSKAP_TYPE_KODE from DIALOG_EGENSKAP d where d.DIALOG_ID = :dialogId",
-                        new MapSqlParameterSource("dialogId", dialogId),
-                        (rsInner, rowNumInner) -> Optional
-                                .ofNullable(rsInner.getString("DIALOG_EGENSKAP_TYPE_KODE"))
-                                .map(EgenskapType::valueOf)
-                                .orElse(null));
-        var aktivitetId = Optional.ofNullable(rs.getString("AKTIVITET_ID"))
-                .orElse(rs.getString("ARENA_ID"));
+        String aktivitetId = dialog.getAktivitetId() != null ? dialog.getAktivitetId() : dialog.getArenaId();
 
         return DialogData.builder()
                 .id(dialogId)
-                .aktorId(rs.getString("AKTOR_ID"))
+                .aktorId(dialog.getAktorId())
                 .aktivitetId(AktivitetId.of(aktivitetId))
-                .overskrift(rs.getString("OVERSKRIFT"))
-                .lestAvBrukerTidspunkt(hentDato(rs, "LEST_AV_BRUKER_TID"))
-                .lestAvVeilederTidspunkt(hentDato(rs, "LEST_AV_VEILEDER_TID"))
-                .henvendelser(hentHenvendelser(dialogId))
-                .historisk(rs.getBoolean("HISTORISK"))
-                .opprettetDato(hentDato(rs, "OPPRETTET_DATO"))
-                .venterPaNavSiden(hentDato(rs, "VENTER_PA_NAV_SIDEN"))
-                .venterPaSvarFraBrukerSiden(hentDato(rs, "VENTER_PA_SVAR_FRA_BRUKER"))
-                .eldsteUlesteTidspunktForBruker(hentDato(rs, "ELDSTE_ULESTE_FOR_BRUKER"))
-                .sisteUlestAvVeilederTidspunkt(hentDato(rs, "ELDSTE_ULESTE_FOR_VEILEDER"))
-                .oppdatert(hentDato(rs, "OPPDATERT"))
-                .kontorsperreEnhetId(rs.getString("KONTORSPERRE_ENHET_ID"))
+                .overskrift(dialog.getOverskrift())
+                .lestAvBrukerTidspunkt(toDate(dialog.getLestAvBrukerTid()))
+                .lestAvVeilederTidspunkt(toDate(dialog.getLestAvVeilederTid()))
+                .henvendelser(hentHenvendelser(dialog))
+                .historisk(toBoolean(dialog.getHistorisk()))
+                .opprettetDato(toDate(dialog.getOpprettetDato()))
+                .venterPaNavSiden(toDate(dialog.getVenterPaNavSiden()))
+                .venterPaSvarFraBrukerSiden(toDate(dialog.getVenterPaSvarFraBruker()))
+                .eldsteUlesteTidspunktForBruker(toDate(dialog.getEldsteUlesteForBruker()))
+                .sisteUlestAvVeilederTidspunkt(toDate(dialog.getEldsteUlesteForVeileder()))
+                .oppdatert(toDate(dialog.getOppdatert()))
+                .kontorsperreEnhetId(dialog.getKontorsperreEnhetId())
                 .egenskaper(egenskaper)
-                .harUlestParagraf8Henvendelse(rs.getBoolean("ULESTPARAGRAF8VARSEL"))
-                .paragraf8VarselUUID(rs.getString("PARAGRAF8_VARSEL_UUID"))
-                .oppfolgingsperiode(hentMaybeUUID(rs, "OPPFOLGINGSPERIODE_UUID"))
+                .harUlestParagraf8Henvendelse(toBoolean(dialog.getUlestparagraf8varsel()))
+                .paragraf8VarselUUID(dialog.getParagraf8VarselUuid())
+                .oppfolgingsperiode(parseUuidOrNull(dialog.getOppfolgingsperiodeUuid()))
                 .build();
-
     }
 
-    private List<HenvendelseData> hentHenvendelser(long dialogId) {
-        return jdbc.query("select * from HENVENDELSE h " +
-                        "left join DIALOG d on d.DIALOG_ID = h.DIALOG_ID " +
-                        "where h.DIALOG_ID = :dialogId",
-                new MapSqlParameterSource("dialogId", dialogId),
-                DialogDAO::mapHenvendelseRow);
+    private List<HenvendelseData> hentHenvendelser(DialogEntity dialog) {
+        return henvendelseRepository.findByDialogId(dialog.getDialogId())
+                .stream()
+                .map(henvendelse -> mapHenvendelse(henvendelse, dialog))
+                .toList();
     }
 
-    public static HenvendelseData mapHenvendelseRow(ResultSet rs, int rowNum) throws SQLException {
-        Date henvendelseDato = hentDato(rs, "SENDT");
+    private static HenvendelseData mapHenvendelse(HenvendelseEntity henvendelse, DialogEntity dialog) {
+        Date henvendelseDato = toDate(henvendelse.getSendt());
+        Date eldsteUlesteForBruker = dialog == null ? null : toDate(dialog.getEldsteUlesteForBruker());
+        Date eldsteUlesteForVeileder = dialog == null ? null : toDate(dialog.getEldsteUlesteForVeileder());
         return HenvendelseData.builder()
-                .id(rs.getLong("HENVENDELSE_ID"))
-                .dialogId(rs.getLong("DIALOG_ID"))
+                .id(henvendelse.getHenvendelseId())
+                .dialogId(henvendelse.getDialogId())
                 .sendt(henvendelseDato)
-                .tekst(rs.getString("TEKST"))
-                .avsenderId(rs.getString("AVSENDER_ID"))
-                .avsenderType(EnumUtils.valueOf(AvsenderType.class, rs.getString("AVSENDER_TYPE")))
-                .lestAvBruker(erLest(hentDato(rs, "ELDSTE_ULESTE_FOR_BRUKER"), henvendelseDato))
-                .lestAvVeileder(erLest(hentDato(rs, "ELDSTE_ULESTE_FOR_VEILEDER"), henvendelseDato))
-                .kontorsperreEnhetId(rs.getString("KONTORSPERRE_ENHET_ID"))
-                .viktig(rs.getBoolean("VIKTIG"))
+                .tekst(henvendelse.getTekst())
+                .avsenderId(henvendelse.getAvsenderId())
+                .avsenderType(EnumUtils.valueOf(AvsenderType.class, henvendelse.getAvsenderType()))
+                .lestAvBruker(erLest(eldsteUlesteForBruker, henvendelseDato))
+                .lestAvVeileder(erLest(eldsteUlesteForVeileder, henvendelseDato))
+                .kontorsperreEnhetId(henvendelse.getKontorsperreEnhetId())
+                .viktig(toBoolean(henvendelse.getViktig()))
                 .build();
     }
 

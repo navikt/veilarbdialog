@@ -1,11 +1,13 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.JdbcTemplate;
+import no.nav.fo.veilarbdialog.db.jdbc.DialogRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+
+import static no.nav.fo.veilarbdialog.db.jdbc.JdbcConverters.toLocalDateTime;
 
 @Component
 @Transactional
@@ -13,108 +15,48 @@ import java.util.Date;
 @java.lang.SuppressWarnings("squid:S1192")
 public class StatusDAO {
 
-    private final JdbcTemplate jdbc;
+    private final DialogRepository dialogRepository;
 
     public void markerSomLestAvVeileder(long dialogId, Date lestTidspunkt) {
-        jdbc.update("update DIALOG set " +
-                        "ELDSTE_ULESTE_FOR_VEILEDER = ?, " +
-                        "LEST_AV_VEILEDER_TID = ? , " +
-                        "OPPDATERT = ? " +
-                        "where DIALOG_ID = ?",
-                null,
-                lestTidspunkt,
-                lestTidspunkt,
-                dialogId
-        );
+        dialogRepository.markerSomLestAvVeileder(dialogId, null, toLocalDateTime(lestTidspunkt));
     }
 
     public void markerSomLestAvBruker(long dialogId) {
-        jdbc.update("update DIALOG set " +
-                        "ULESTPARAGRAF8VARSEL = ?, " +
-                        "ELDSTE_ULESTE_FOR_BRUKER = ?, " +
-                        "LEST_AV_BRUKER_TID = CURRENT_TIMESTAMP , " +
-                        "OPPDATERT = CURRENT_TIMESTAMP " +
-                        "where DIALOG_ID = ?",
-                0,
-                null,
-                dialogId);
+        dialogRepository.markerSomLestAvBruker(dialogId);
     }
 
     public void setVenterPaNavTilNaa(long dialogId) {
-        jdbc.update("update DIALOG set " +
-                        "VENTER_PA_NAV_SIDEN = CURRENT_TIMESTAMP , " +
-                        "OPPDATERT = CURRENT_TIMESTAMP " +
-                        "where DIALOG_ID = ?",
-                dialogId);
+        dialogRepository.setVenterPaNavTilNaa(dialogId);
     }
 
     public void setVenterPaSvarFraBrukerTilNaa(long dialogId) {
-        jdbc.update("update DIALOG set " +
-                        "VENTER_PA_SVAR_FRA_BRUKER = CURRENT_TIMESTAMP , " +
-                        "OPPDATERT = CURRENT_TIMESTAMP " +
-                        "where DIALOG_ID = ?",
-                dialogId);
+        dialogRepository.setVenterPaSvarFraBrukerTilNaa(dialogId);
     }
 
     public void setVenterPaNavTilNull(long dialogId) {
-        jdbc.update("update DIALOG set " +
-                        "VENTER_PA_NAV_SIDEN = ?, " +
-                        "OPPDATERT = CURRENT_TIMESTAMP " +
-                        "where DIALOG_ID = ?",
-                null,
-                dialogId);
+        dialogRepository.setVenterPaNavTilNull(dialogId);
     }
 
     public void setVenterPaSvarFraBrukerTilNull(long dialogId) {
-        jdbc.update("update DIALOG set " +
-                        "VENTER_PA_SVAR_FRA_BRUKER = ?, " +
-                        "OPPDATERT = CURRENT_TIMESTAMP " +
-                        "where DIALOG_ID = ?",
-                null,
-                dialogId);
+        dialogRepository.setVenterPaSvarFraBrukerTilNull(dialogId);
     }
 
     public void setEldsteUlesteForBruker(long dialogId, Date date) {
-        jdbc.update("update DIALOG set " +
-                        "ELDSTE_ULESTE_FOR_BRUKER = ?, " +
-                        "OPPDATERT = CURRENT_TIMESTAMP " +
-                        "where DIALOG_ID = ?",
-                date,
-                dialogId);
+        dialogRepository.setEldsteUlesteForBruker(dialogId, toLocalDateTime(date));
     }
 
     public void setNyMeldingFraBruker(long dialogId, Date eldsteUlesteForVeileder, Date venterPaNavSiden) {
-        jdbc.update("update DIALOG set " +
-                        "VENTER_PA_SVAR_FRA_BRUKER = ?, " +
-                        "ELDSTE_ULESTE_FOR_VEILEDER = ?, " +
-                        "VENTER_PA_NAV_SIDEN = ?, " +
-                        "OPPDATERT = CURRENT_TIMESTAMP " +
-                        "where DIALOG_ID = ?",
-                null,
-                eldsteUlesteForVeileder,
-                venterPaNavSiden,
-                dialogId);
+        dialogRepository.setNyMeldingFraBruker(
+                dialogId,
+                toLocalDateTime(eldsteUlesteForVeileder),
+                toLocalDateTime(venterPaNavSiden));
     }
 
     public void setHistorisk(long dialogId) {
-        jdbc.update("update DIALOG set " +
-                        "VENTER_PA_SVAR_FRA_BRUKER = ?, " +
-                        "VENTER_PA_NAV_SIDEN = ?, " +
-                        "HISTORISK = ?, " +
-                        "OPPDATERT = CURRENT_TIMESTAMP " +
-                        "where DIALOG_ID = ?",
-                null,
-                null,
-                1,
-                dialogId);
+        dialogRepository.setHistorisk(dialogId);
     }
 
     public void markerSomParagraf8(long dialogId) {
-        jdbc.update("update DIALOG set " +
-                        "ULESTPARAGRAF8VARSEL = ? " +
-                        "where DIALOG_ID = ?",
-                1,
-                dialogId);
+        dialogRepository.markerSomParagraf8(dialogId);
     }
-
 }

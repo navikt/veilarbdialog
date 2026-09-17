@@ -4,9 +4,9 @@ import lombok.val;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
 import no.nav.fo.veilarbdialog.domain.DialogData;
 import no.nav.fo.veilarbdialog.domain.HenvendelseData;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 
 import java.time.Instant;
 import java.util.Date;
@@ -18,19 +18,16 @@ import static no.nav.fo.veilarbdialog.TestDataBuilder.nyHenvendelse;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@Import({DialogDAO.class, VarselDAO.class})
 class VarselDAOTest extends BaseDAOTest {
 
     private static final long TI_MINUTTER = 1000 * 60 * 10;
 
-    private static DialogDAO dialogDAO;
+    @Autowired
+    private DialogDAO dialogDAO;
 
-    private static VarselDAO varselDAO;
-
-    @BeforeAll
-    public static void setup() {
-        dialogDAO = new DialogDAO(jdbc);
-        varselDAO = new VarselDAO(jdbc);
-    }
+    @Autowired
+    private VarselDAO varselDAO;
 
     private DialogData opprettNyDialog(String aktorId) {
         return dialogDAO.opprettDialog(nyDialog(aktorId));

@@ -1,48 +1,36 @@
 package no.nav.fo.veilarbdialog.db.dao;
 
 import lombok.RequiredArgsConstructor;
+import no.nav.fo.veilarbdialog.db.jdbc.VarselRepository;
 import no.nav.fo.veilarbdialog.domain.AvsenderType;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class VarselDAO {
-    private final NamedParameterJdbcTemplate jdbc;
+
+    private final VarselRepository varselRepository;
 
     public List<String> hentAktorerMedUlesteMeldingerEtterSisteVarsel(long graceMillis) {
-        final Date grense = new Date(System.currentTimeMillis() - graceMillis);
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("avsenderType", AvsenderType.VEILEDER.name())
-                .addValue("enStundSiden", grense);
-        String sql = """
-                select d.AKTOR_ID
-                    from DIALOG d
-                        left join HENVENDELSE h on h.DIALOG_ID = d.DIALOG_ID
-                        left join VARSEL v on v.AKTOR_ID = d.AKTOR_ID
-                where h.AVSENDER_TYPE = :avsenderType
-                    and (d.LEST_AV_BRUKER_TID is null or h.SENDT > d.LEST_AV_BRUKER_TID)
-                    and (v.SENDT is null or h.SENDT > v.SENDT)
-                    and h.SENDT < :enStundSiden
-                group by d.AKTOR_ID
-                """;
-        return jdbc.queryForList(sql, params, String.class);
+        LocalDateTime grense = LocalDateTime.ofInstant(
+                new Date(System.currentTimeMillis() - graceMillis).toInstant(), ZoneId.systemDefault());
+        return varselRepository.findAktorerMedUlesteMeldingerEtterSisteVarsel(
+                AvsenderType.VEILEDER.name(), grense);
     }
 
     public void oppdaterSisteVarselForBruker(String aktorId) {
-        var param = new MapSqlParameterSource("aktorId", aktorId);
-        var rowsUpdated = jdbc.update("update VARSEL set SENDT = CURRENT_TIMESTAMP where AKTOR_ID = :aktorId" , param);
+        var rowsUpdated = varselRepository.oppdaterSisteVarsel(aktorId);
         if (rowsUpdated == 0) {
             opprettVarselForBruker(aktorId);
         }
     }
 
     private void opprettVarselForBruker(String aktorId) {
-        var param = new MapSqlParameterSource("aktorId", aktorId);
-        jdbc.update("INSERT INTO VARSEL (AKTOR_ID, SENDT) VALUES (:aktorId, CURRENT_TIMESTAMP)", param);
+        varselRepository.insert(aktorId);
     }
 }
