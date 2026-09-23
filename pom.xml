@@ -28,6 +28,7 @@
         <okhttp.version>5.5.0</okhttp.version>
         <jackson.version>3.2.2</jackson.version>
         <jackson-annotations.version>2.22</jackson-annotations.version>
+        <tomcat.version>11.0.26</tomcat.version>
 
         <sonar.projectKey>navikt_veilarbdialog</sonar.projectKey>
         <sonar.organization>navikt</sonar.organization>
