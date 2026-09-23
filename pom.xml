@@ -23,7 +23,7 @@
 
         <common.version>4.2026.09.01_09.49-e681e09ca089</common.version>
         <dab.common.version>2026.07.30-13.26.7337fce409f5</dab.common.version>
-        <poao.tilgang.version>4.2026.08.10_08.30-d5e29542d5bf</poao.tilgang.version>
+        <poao.tilgang.version>4.2026.09.14_09.01-2100e3faec2d</poao.tilgang.version>
         <shedlock.version>7.10.1</shedlock.version>
         <okhttp.version>5.5.0</okhttp.version>
         <jackson.version>3.2.2</jackson.version>
