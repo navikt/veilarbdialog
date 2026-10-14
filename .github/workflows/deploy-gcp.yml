@@ -29,7 +29,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Build maven artifacts
-        run: mvn -B package
+        run: mvn -B package -P '!coverage'
       - name: Slack Notification (test failure)
         if: failure()
         uses: rtCamp/action-slack-notify@v2

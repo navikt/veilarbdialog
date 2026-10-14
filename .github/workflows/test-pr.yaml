@@ -23,4 +23,4 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Run maven tests
-        run: mvn -B verify
+        run: mvn -B verify -P '!coverage'
