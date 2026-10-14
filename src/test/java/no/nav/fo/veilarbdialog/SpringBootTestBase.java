@@ -10,6 +10,7 @@ import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
 import no.nav.fo.veilarbdialog.outbox.OutboxService;
+import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenProducer;
 import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenService;
 import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenMeldingMedMetadataRepository;
 import no.nav.fo.veilarbdialog.service.DialogDataService;
@@ -24,6 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -80,6 +82,9 @@ public abstract class SpringBootTestBase {
 
     @Autowired
     protected OutboxService outboxService;
+
+    @MockitoSpyBean
+    protected OversiktenProducer oversiktenProducer;
 
     @LocalServerPort
     protected int port;

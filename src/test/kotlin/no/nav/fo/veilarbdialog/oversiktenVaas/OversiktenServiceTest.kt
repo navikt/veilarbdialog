@@ -7,22 +7,20 @@ import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.mockito.Mockito.*
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.temporal.ChronoUnit
 import java.util.*
 
 open class OversiktenServiceTest: SpringBootTestBase() {
-
-    @MockitoBean
-    private lateinit var oversiktenProducer: OversiktenProducer
 
     private val bruker = MockNavService.createHappyBruker()
 
     @BeforeEach
     fun beforeEach() {
         jdbcTemplate.execute("TRUNCATE TABLE oversikten_melding_med_metadata")
+        doNothing().`when`(oversiktenProducer).sendMelding(anyString(), anyString())
     }
 
     @Test

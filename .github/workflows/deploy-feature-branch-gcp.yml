@@ -27,7 +27,7 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
       - name: Veilarbdialog - Build maven artifacts
-        run: mvn -B package
+        run: mvn -B package -P '!coverage'
       - name: Push docker image to GAR
         uses: nais/docker-build-push@v0
         id: docker-build-push
