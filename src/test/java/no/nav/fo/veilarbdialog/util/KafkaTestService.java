@@ -53,11 +53,11 @@ public class KafkaTestService {
         newConsumer.assign(topicPartitions);
         newConsumer.seekToEnd(topicPartitions);
         topicPartitions.forEach(topicPartition -> newConsumer.position(topicPartition, Duration.ofSeconds(10)));
-        newConsumer.commitSync(Duration.ofSeconds(10));
+        newConsumer.commitSync(Duration.ofSeconds(5));
     }
 
     public void assertHasNewRecord(String topic, Consumer consumer) {
-        await().atMost(10, SECONDS).until(() -> {
+        await().atMost(5, SECONDS).until(() -> {
             var records = consumer.poll(Duration.ofMillis(10));
             return records.records(topic).iterator().hasNext();
         });
@@ -65,10 +65,6 @@ public class KafkaTestService {
 
     public void assertErKonsumertAiven(String topic, long producerOffset, int partition, int timeOutSeconds) {
         await().atMost(timeOutSeconds, SECONDS).until(() -> erKonsumert(topic, aivenGroupId, producerOffset, partition));
-    }
-
-    public void assertErKonsumertAiven(String topic, long producerOffset, int partition) {
-        await().atMost(DEFAULT_WAIT_TIMEOUT).until(() -> erKonsumert(topic, aivenGroupId, producerOffset, partition));
     }
 
     @SneakyThrows

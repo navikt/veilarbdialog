@@ -20,11 +20,8 @@ class KafkaProducerServiceTest extends SpringBootTestBase {
     @Value("${application.topic.ut.endringPaaDialog}")
     private String aivenEndringPaaDialogTopic;
 
-    @Value("${application.topic.ut.endringPaaDialog}")
-    private String onPremEndringPaaDialogTopic;
-
     @Test
-    void sendDialogMelding_skalSendeTilOnPremOgAiven() {
+    void sendDialogMelding_skalSendeTilTopic() {
         KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding
                 .builder()
                 .aktorId("123")
@@ -32,13 +29,11 @@ class KafkaProducerServiceTest extends SpringBootTestBase {
                 .tidspunktEldsteUbehandlede(LocalDateTime.now())
                 .build();
 
-        var aivenConsumer = kafkaTestService.createStringStringConsumer(aivenEndringPaaDialogTopic);
-        var onPremConsumer = kafkaTestService.createStringStringConsumer(onPremEndringPaaDialogTopic);
+        var kafkaConsumer = kafkaTestService.createStringStringConsumer(aivenEndringPaaDialogTopic);
 
         kafkaProducerService.sendDialogMelding(kafkaDialogMelding);
 
-        kafkaTestService.assertHasNewRecord(aivenEndringPaaDialogTopic, aivenConsumer);
-        kafkaTestService.assertHasNewRecord(onPremEndringPaaDialogTopic, onPremConsumer);
+        kafkaTestService.assertHasNewRecord(aivenEndringPaaDialogTopic, kafkaConsumer);
     }
 
 }
