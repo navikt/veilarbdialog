@@ -117,7 +117,6 @@ application:
   topic:
     inn:
       oppfolgingsperiode: pto.oppfolgingsperiode-v1
-      kvpavsluttet: pto.kvp-avsluttet-v1
       kvpperioder: pto.kvp-perioder-v1
       aktivitetskortIdMapping: dab.aktivitetskort-idmapping-v1
       minside:
