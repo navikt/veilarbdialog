@@ -9,3 +9,4 @@ delete from EVENT;
 delete from VARSEL;
 delete from KLADD;
 delete from outbox;
+delete from siste_oppfolgingsperiode;
