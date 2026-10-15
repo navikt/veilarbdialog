@@ -49,13 +49,14 @@ public class DialogDAO {
                 this::mapRow);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<DialogData> hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(String aktorId, Date avsluttetDato) {
         return jdbc.query("select * from DIALOG where " +
                         "AKTOR_ID = :aktorId and " +
                         "HISTORISK = 0 and " +
                         "OPPRETTET_DATO < :avsluttetDato and " +
-                        "KONTORSPERRE_ENHET_ID is not null",
+                        "KONTORSPERRE_ENHET_ID is not null " +
+                        "for update skip locked",
                 new MapSqlParameterSource("aktorId", aktorId)
                     .addValue("avsluttetDato", avsluttetDato),
                 this::mapRow);

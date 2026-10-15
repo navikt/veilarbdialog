@@ -268,8 +268,12 @@ public class DialogDataService {
     }
 
     public void settKontorsperredeDialogerTilHistoriske(String aktoerId, Date avsluttetDato) {
-        dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato)
-                .forEach(this::oppdaterDialogTilHistorisk);
+        List<DialogData> dialogerSomSkalAvsluttes = dialogDAO.hentKontorsperredeDialogerSomSkalAvsluttesForAktorId(aktoerId, avsluttetDato);
+        dialogerSomSkalAvsluttes.forEach(this::oppdaterDialogTilHistorisk);
+
+        if (dialogerSomSkalAvsluttes.isEmpty()) {
+            return;
+        }
 
         sendDialogStatusTilPortefoljePaaKafka(aktoerId);
     }

@@ -1,6 +1,7 @@
 package no.nav.fo.veilarbdialog.config.kafka;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
@@ -28,8 +29,19 @@ public class KafkaAivenConfig {
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, String> stringStringKafkaListenerContainerFactory(
             @Qualifier("stringStringConsumerFactory") ConsumerFactory<String, String> stringStringConsumerFactory) {
+        return createListenerContainerFactory(stringStringConsumerFactory);
+    }
+
+    @Bean
+    ConcurrentKafkaListenerContainerFactory<String, String> stringStringKafkaListenerContainerFactoryLatestOffset(
+            @Qualifier("stringStringConsumerFactoryLatestOffset") ConsumerFactory<String, String> stringStringConsumerFactoryLatestOffset) {
+        return createListenerContainerFactory(stringStringConsumerFactoryLatestOffset);
+    }
+
+    private ConcurrentKafkaListenerContainerFactory<String, String> createListenerContainerFactory(
+            ConsumerFactory<String, String> consumerFactory) {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(stringStringConsumerFactory);
+        factory.setConsumerFactory(consumerFactory);
         factory.getContainerProperties()
                 .setAuthExceptionRetryInterval(Duration.ofSeconds(10L));
 
@@ -53,10 +65,19 @@ public class KafkaAivenConfig {
 
     @Bean("stringStringConsumerFactory")
     ConsumerFactory<String, String> stringStringConsumerFactory(KafkaProperties kafkaProperties) {
+        return createStringStringConsumerFactory(kafkaProperties.buildConsumerProperties());
+    }
+
+    @Bean("stringStringConsumerFactoryLatestOffset")
+    ConsumerFactory<String, String> stringStringConsumerFactoryLatestOffset(KafkaProperties kafkaProperties) {
         Map<String, Object> consumerProperties = kafkaProperties.buildConsumerProperties();
+        consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest");
+        return createStringStringConsumerFactory(consumerProperties);
+    }
+
+    private ConsumerFactory<String, String> createStringStringConsumerFactory(Map<String, Object> consumerProperties) {
         consumerProperties.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, org.apache.kafka.common.serialization.StringDeserializer.class);
         consumerProperties.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, org.apache.kafka.common.serialization.StringDeserializer.class);
-
         return new DefaultKafkaConsumerFactory<>(consumerProperties);
     }
 
