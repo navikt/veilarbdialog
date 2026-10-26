@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.1.2</version>
         <relativePath/>
     </parent>
 
@@ -25,8 +25,8 @@
         <dab.common.version>2026.07.30-13.26.7337fce409f5</dab.common.version>
         <poao.tilgang.version>4.2026.10.02_08.32-32a40f5f5ced</poao.tilgang.version>
         <shedlock.version>7.10.1</shedlock.version>
-        <okhttp.version>5.5.0</okhttp.version>
-        <jackson.version>3.2.3</jackson.version>
+        <okhttp.version>5.5.1</okhttp.version>
+        <jackson.version>3.2.4</jackson.version>
         <jackson-annotations.version>2.22</jackson-annotations.version>
         <tomcat.version>11.0.26</tomcat.version>
 
@@ -240,7 +240,7 @@
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>12.3.0</version>
+            <version>12.3.1</version>
         </dependency>
 
         <!-- jackson -->
@@ -326,7 +326,7 @@
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>6.1.0</version>
+            <version>6.2.0</version>
             <scope>test</scope>
         </dependency>
 
