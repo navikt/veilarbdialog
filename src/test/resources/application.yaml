@@ -125,6 +125,7 @@ application:
       minside:
         varsel: aapen-brukervarsel-v1
       endringPaaDialog: dab.endring-paa-dialog-v1
+      sisteDialogHendelse: dab.siste-dialog-hendelse-v1
       oversikten: obo.portefolje-hendelsesfilter-v1
   minsidevarsel:
     grace:
