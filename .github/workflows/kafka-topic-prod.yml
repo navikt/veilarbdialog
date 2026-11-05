@@ -2,7 +2,8 @@ name: Deploy kafka topics to prod
 on:
   push:
     paths:
-      - "nais/kafka-topic/prod/*.yaml"
+      - "nais/kafka-topic/prod/endring-paa-dialog-v1-topic.yaml"
+      - "nais/kafka-topic/prod/siste-dialog-hendelse-v1-topic.yaml"
   workflow_dispatch:
 
 jobs:
@@ -10,15 +11,20 @@ jobs:
     name: Deploy kafka topics to prod
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    permissions:
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: List resource files
-        run: echo "RESOURCE_FILES=$(find nais/kafka-topic/prod -type f | tr '\n' ',' | sed 's/,$/\n/')" >> $GITHUB_ENV
       - name: Deploy kafka topics
-        uses: nais/deploy/actions/deploy@v3
+        uses: nais/deploy/actions/deploy@9850be311389ca754d9a9f2280615419d738c891
         env:
-          APIKEY: ${{ secrets.DAB_NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
-          RESOURCE: ${{ env.RESOURCE_FILES }}
+          RESOURCE: nais/kafka-topic/prod/endring-paa-dialog-v1-topic.yaml
+          PRINT_PAYLOAD: true
+      - name: Deploy kafka topics
+        uses: nais/deploy/actions/deploy@9850be311389ca754d9a9f2280615419d738c891
+        env:
+          CLUSTER: prod-gcp
+          RESOURCE: nais/kafka-topic/prod/siste-dialog-hendelse-v1-topic.yaml
           PRINT_PAYLOAD: true
