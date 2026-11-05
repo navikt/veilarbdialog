@@ -16,6 +16,6 @@ open class SisteDialogHendelseProducer(
 
     open fun sendSisteDialogHendelse(aktorId: String, hendelse: SisteDialogHendelse) {
         kafkaTemplate.send(topic, aktorId, JsonUtils.toJson(hendelse))
-        log.info("Siste dialog-hendelse publisert for aktorId: {}", aktorId)
+        log.info("Siste dialog-hendelse publisert for dialogId: {}, {}", hendelse.sisteMeldingBruker?.dialogId, hendelse.sisteMeldingVeileder?.dialogId)
     }
 }
