@@ -310,6 +310,17 @@ class DialogRessursTest extends SpringBootTestBase {
     }
 
     @Test
+    void dialog_med_for_lang_tekst_skal_feile_med_bad_request_400() {
+        var melding = new NyMeldingDTO().setTekst("tekst".repeat(1001)).setOverskrift("overskrift");
+        bruker.createRequest()
+                .body(melding)
+                .post("/veilarbdialog/api/dialog")
+                .then()
+                .statusCode(400)
+                .body(org.hamcrest.Matchers.equalTo("Ny melding kan ikke være mer enn 5000 tegn"));
+    }
+
+    @Test
     void veileder_skal_kunne_sende_henvedelse_uten_fnr_i_url() {
         var melding = new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift").setFnr(bruker.getFnr());
         nyHenvendelseUtenFnrIUrl(veileder, melding);

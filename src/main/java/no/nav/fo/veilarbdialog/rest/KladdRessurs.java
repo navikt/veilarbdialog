@@ -43,6 +43,7 @@ public class KladdRessurs {
     public void oppdaterKladd(@RequestBody KladdDTO kladd) {
         var fnr = getContextUserIdent(kladd);
         authService.sjekkTilgangTilPerson(Fnr.of(fnr), TilgangsType.SKRIVE);
+        validerKladdDTO(kladd);
         kladdService.upsertKladd(fnr, somKladd(kladd));
     }
 
@@ -84,4 +85,9 @@ public class KladdRessurs {
                 .build();
     }
 
+    private static void validerKladdDTO(KladdDTO kladd) {
+        if (kladd.getTekst() != null && kladd.getTekst().length() > 5000) {
+            throw new IllegalArgumentException("Kladd kan ikke være mer enn 5000 tegn");
+        }
+    }
 }

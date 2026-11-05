@@ -149,6 +149,7 @@ public class DialogRessurs {
         Person bruker = nyMeldingDTO.getFnr() != null ? Person.fnr(nyMeldingDTO.getFnr()) : getContextUserIdent();
         auth.sjekkTilgangTilPerson(bruker.eksternBrukerId(), TilgangsType.SKRIVE);
         var skalSendeMinsideVarsel = !auth.erEksternBruker();
+        validerNyMeldingDTO(nyMeldingDTO);
         var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, skalSendeMinsideVarsel);
         // Vi er ikke helt sikre på hvorfor dette er sånn
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
@@ -195,5 +196,11 @@ public class DialogRessurs {
                 .ofNullable(httpServletRequest.getParameter("aktorId"))
                 .map(Person::aktorId);
         return fnr.orElseGet(() -> aktorId.orElseThrow(RuntimeException::new));
+    }
+
+    private static void validerNyMeldingDTO(NyMeldingDTO nyMelding) {
+        if (nyMelding.getTekst() != null && nyMelding.getTekst().length() > 5000) {
+            throw new IllegalArgumentException("Ny melding kan ikke være mer enn 5000 tegn");
+        }
     }
 }

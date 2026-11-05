@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import no.nav.common.types.identer.Fnr;
 import no.nav.common.types.identer.NavIdent;
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.EskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.GjeldendeEskaleringsvarselDto;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.dto.StartEskaleringDto;
@@ -39,6 +40,7 @@ public class EskaleringsvarselController {
     @OnlyInternBruker
     public EskaleringsvarselDto start(@RequestBody StartEskaleringDto startEskaleringDto) {
         authService.sjekkTilgangTilPerson(startEskaleringDto.fnr(), TilgangsType.SKRIVE);
+        validerStartEskaleringDto(startEskaleringDto);
         EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselService.start(startEskaleringDto);
         return EskaleringsvarselDto.fromEntity(eskaleringsvarselEntity);
     }
@@ -91,4 +93,13 @@ public class EskaleringsvarselController {
         return new GjeldendeEskaleringsvarselDto(entity.varselId(), entity.tilhorendeDialogId(), entity.opprettetAv(), entity.opprettetDato(), entity.opprettetBegrunnelse());
     }
 
+    private static void validerStartEskaleringDto(StartEskaleringDto startEskalering) {
+        if (startEskalering.tekst() != null && startEskalering.tekst().length() > 5000) {
+            throw new IllegalArgumentException("Tekst i eskaleringsvarsel kan ikke være mer enn 5000 tegn");
+        }
+
+        if (startEskalering.begrunnelse() != null && startEskalering.begrunnelse().length() > 5000) {
+            throw new IllegalArgumentException("Begrunnelse i eskaleringsvarsel kan ikke være mer enn 5000 tegn");
+        }
+    }
 }
