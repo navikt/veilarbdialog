@@ -150,6 +150,20 @@ internal class EskaleringsvarselControllerTest(
     }
 
     @Test
+    fun start_eskalering_for_lang_tekst_feiler() {
+        val bruker = MockNavService.createHappyBruker()
+        val veileder = MockNavService.createVeileder(bruker)
+        val begrunnelse = "Fordi ..."
+        val overskrift = "Dialog tittel"
+        val henvendelseTekst = "Henvendelsestekst... lang tekst".repeat(1000)
+
+        val startEskaleringDto =
+            StartEskaleringDto(Fnr.of(bruker.fnr), begrunnelse, overskrift, henvendelseTekst, null)
+
+        dialogTestService.startEskaleringValideringsfeil(veileder, startEskaleringDto, "Tekst i eskaleringsvarsel kan ikke være mer enn 5000 tegn")
+    }
+
+    @Test
     fun `skal kunne stoppe eskalering med medling`() {
         val bruker = MockNavService.createHappyBruker()
         val veileder = MockNavService.createVeileder(bruker)

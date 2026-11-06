@@ -13,6 +13,7 @@ import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import no.nav.poao.dab.spring_auth.TilgangsType;
+import no.nav.util.InputSanitizer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +40,8 @@ public class EskaleringsvarselController {
     @OnlyInternBruker
     public EskaleringsvarselDto start(@RequestBody StartEskaleringDto startEskaleringDto) {
         authService.sjekkTilgangTilPerson(startEskaleringDto.fnr(), TilgangsType.SKRIVE);
-        EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselService.start(startEskaleringDto);
+        StartEskaleringDto sanitisertStartEskaleringDto =  validerOgSanitiserStartEskaleringDto(startEskaleringDto);
+        EskaleringsvarselEntity eskaleringsvarselEntity = eskaleringsvarselService.start(sanitisertStartEskaleringDto);
         return EskaleringsvarselDto.fromEntity(eskaleringsvarselEntity);
     }
 
@@ -49,7 +51,8 @@ public class EskaleringsvarselController {
         authService.sjekkTilgangTilPerson(stopEskaleringDto.fnr(), TilgangsType.SKRIVE);
         NavIdent navIdent = authService.getInnloggetVeilederIdent();
 
-        Optional<EskaleringsvarselEntity> eskaleringsvarselEntity = eskaleringsvarselService.stop(stopEskaleringDto, navIdent);
+        StopEskaleringDto sanitisertStopEskaleringDto = validerOgSanitiserStopEskaleringDto(stopEskaleringDto);
+        Optional<EskaleringsvarselEntity> eskaleringsvarselEntity = eskaleringsvarselService.stop(sanitisertStopEskaleringDto, navIdent);
         if (eskaleringsvarselEntity.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Ingen gjeldende eskaleringsvarsel");
         }
@@ -91,4 +94,33 @@ public class EskaleringsvarselController {
         return new GjeldendeEskaleringsvarselDto(entity.varselId(), entity.tilhorendeDialogId(), entity.opprettetAv(), entity.opprettetDato(), entity.opprettetBegrunnelse());
     }
 
+    private static StartEskaleringDto validerOgSanitiserStartEskaleringDto(StartEskaleringDto startEskalering) {
+        if (startEskalering.tekst() != null && startEskalering.tekst().length() > 5000) {
+            throw new IllegalArgumentException("Tekst i eskaleringsvarsel kan ikke være mer enn 5000 tegn");
+        }
+
+        if (startEskalering.begrunnelse() != null && startEskalering.begrunnelse().length() > 5000) {
+            throw new IllegalArgumentException("Begrunnelse i eskaleringsvarsel kan ikke være mer enn 5000 tegn");
+        }
+
+        return new StartEskaleringDto(
+                startEskalering.fnr(),
+                InputSanitizer.sanitize(startEskalering.begrunnelse()),
+                InputSanitizer.sanitize(startEskalering.overskrift()),
+                InputSanitizer.sanitize(startEskalering.tekst()),
+                InputSanitizer.sanitize(startEskalering.begrunnelseType())
+        );
+    }
+
+    private static StopEskaleringDto validerOgSanitiserStopEskaleringDto(StopEskaleringDto stopEskalering) {
+        if (stopEskalering.begrunnelse() != null && stopEskalering.begrunnelse().length() > 500) {
+            throw new IllegalArgumentException("Begrunnelse i stopp av eskaleringsvarsel kan ikke være mer enn 500 tegn");
+        }
+
+        return new StopEskaleringDto(
+                stopEskalering.fnr(),
+                InputSanitizer.sanitize(stopEskalering.begrunnelse()),
+                stopEskalering.skalSendeHenvendelse()
+        );
+    }
 }

@@ -9,6 +9,7 @@ import no.nav.fo.veilarbdialog.service.KladdService;
 import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import no.nav.poao.dab.spring_auth.TilgangsType;
+import no.nav.util.InputSanitizer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +44,8 @@ public class KladdRessurs {
     public void oppdaterKladd(@RequestBody KladdDTO kladd) {
         var fnr = getContextUserIdent(kladd);
         authService.sjekkTilgangTilPerson(Fnr.of(fnr), TilgangsType.SKRIVE);
-        kladdService.upsertKladd(fnr, somKladd(kladd));
+        KladdDTO sanitisertKladd = validerOgSanitiserKladdDTO(kladd);
+        kladdService.upsertKladd(fnr, somKladd(sanitisertKladd));
     }
 
     private String getContextUserIdent(KladdDTO kladd) {
@@ -84,4 +86,17 @@ public class KladdRessurs {
                 .build();
     }
 
+    private static KladdDTO validerOgSanitiserKladdDTO(KladdDTO kladd) {
+        if (kladd.getTekst() != null && kladd.getTekst().length() > 5000) {
+            throw new IllegalArgumentException("Kladd kan ikke være mer enn 5000 tegn");
+        }
+
+        return KladdDTO.builder()
+                .aktivitetId(kladd.getAktivitetId())
+                .dialogId(kladd.getDialogId())
+                .overskrift(InputSanitizer.sanitize(kladd.getOverskrift()))
+                .tekst(InputSanitizer.sanitize(kladd.getTekst()))
+                .fnr(kladd.getFnr())
+                .build();
+    }
 }

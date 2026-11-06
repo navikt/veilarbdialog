@@ -39,4 +39,19 @@ class KladdRessursTest extends SpringBootTestBase  {
         var kladder = dialogTestService.hentKladder(veileder, bruker);
         assertThat(kladder).hasSize(1);
     }
+
+    @Test
+    void skal_ikke_kunne_opprette_kladd_med_for_lang_tekst() {
+        NyMeldingDTO nyHenvendelse = new NyMeldingDTO()
+                .setTekst("tekst")
+                .setOverskrift("overskrift");
+        var traad = dialogTestService.opprettDialogSomVeileder(veileder, bruker, nyHenvendelse);
+        var kladd = KladdDTO.builder()
+                .dialogId(traad.getId())
+                .fnr(bruker.getFnr())
+                .aktivitetId(traad.getId()) // Workaround
+                .tekst("noen fine tegn. ".repeat(1000)).build();
+
+        dialogTestService.nyKladdSomIkkeValiderer(veileder, kladd, "Kladd kan ikke være mer enn 5000 tegn");
+    }
 }

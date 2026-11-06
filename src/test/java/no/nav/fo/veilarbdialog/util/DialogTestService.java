@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Service
@@ -72,12 +73,31 @@ public class DialogTestService {
         return eskaleringsvarselDto;
     }
 
+    public void startEskaleringValideringsfeil(MockVeileder veileder, StartEskaleringDto startEskaleringDto, String feilmelding) {
+        veileder.createRequest()
+                .body(startEskaleringDto)
+                .when()
+                .post("/veilarbdialog/api/eskaleringsvarsel/start")
+                .then()
+                .assertThat().statusCode(HttpStatus.BAD_REQUEST.value())
+                .assertThat().body(equalTo(feilmelding));
+    }
+
     public void nyKladd(RestassuredUser user, KladdDTO kladd) {
         user.createRequest()
                 .body(kladd)
                 .post("/veilarbdialog/api/kladd")
                 .then()
                 .statusCode(204);
+    }
+
+    public void nyKladdSomIkkeValiderer(RestassuredUser user, KladdDTO kladd, String feilmelding) {
+        user.createRequest()
+                .body(kladd)
+                .post("/veilarbdialog/api/kladd")
+                .then()
+                .statusCode(400)
+                .body(equalTo(feilmelding));
     }
 
     public void nyKladdMedFnrIUrl(RestassuredUser user, KladdDTO kladd) {
