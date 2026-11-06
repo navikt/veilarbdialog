@@ -16,6 +16,7 @@ import no.nav.poao.dab.spring_a2_annotations.auth.AuthorizeFnr;
 import no.nav.poao.dab.spring_a2_annotations.auth.OnlyInternBruker;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import no.nav.poao.dab.spring_auth.TilgangsType;
+import no.nav.util.InputSanitizer;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -149,8 +150,8 @@ public class DialogRessurs {
         Person bruker = nyMeldingDTO.getFnr() != null ? Person.fnr(nyMeldingDTO.getFnr()) : getContextUserIdent();
         auth.sjekkTilgangTilPerson(bruker.eksternBrukerId(), TilgangsType.SKRIVE);
         var skalSendeMinsideVarsel = !auth.erEksternBruker();
-        validerNyMeldingDTO(nyMeldingDTO);
-        var dialogData = dialogDataService.opprettMelding(nyMeldingDTO, bruker, skalSendeMinsideVarsel);
+        NyMeldingDTO sanitisertNyMeldingDTO = validerNyMeldingDTO(nyMeldingDTO);
+        var dialogData = dialogDataService.opprettMelding(sanitisertNyMeldingDTO, bruker, skalSendeMinsideVarsel);
         // Vi er ikke helt sikre på hvorfor dette er sånn
         return kontorsperreFilter.tilgangTilEnhet(dialogData) ?
                 restMapper.somDialogDTO(dialogData)
@@ -198,9 +199,18 @@ public class DialogRessurs {
         return fnr.orElseGet(() -> aktorId.orElseThrow(RuntimeException::new));
     }
 
-    private static void validerNyMeldingDTO(NyMeldingDTO nyMelding) {
+    private static NyMeldingDTO validerNyMeldingDTO(NyMeldingDTO nyMelding) {
         if (nyMelding.getTekst() != null && nyMelding.getTekst().length() > 5000) {
             throw new IllegalArgumentException("Ny melding kan ikke være mer enn 5000 tegn");
         }
+
+        return new NyMeldingDTO()
+                .setTekst(InputSanitizer.sanitize(nyMelding.getTekst()))
+                .setDialogId(nyMelding.getDialogId())
+                .setOverskrift(InputSanitizer.sanitize(nyMelding.getOverskrift()))
+                .setAktivitetId(nyMelding.getAktivitetId())
+                .setVenterPaaSvarFraNav(nyMelding.getVenterPaaSvarFraNav())
+                .setVenterPaaSvarFraBruker(nyMelding.getVenterPaaSvarFraBruker())
+                .setFnr(nyMelding.getFnr());
     }
 }
