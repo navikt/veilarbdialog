@@ -1,53 +1,59 @@
-package no.nav.fo.veilarbdialog.domain;
+package no.nav.fo.veilarbdialog.domain
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.Builder
+import lombok.Data
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.*
+import java.util.function.Function
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-
-import static java.util.Comparator.naturalOrder;
-
-@Builder
-@Data
-public class KafkaDialogMelding {
-    private String aktorId;
-
+data class KafkaDialogMelding(
+    private val aktorId: String? = null,
     /**
      * Venter på svar fra bruker.
      */
-    private LocalDateTime tidspunktEldsteVentende;
-
+    private val tidspunktEldsteVentende: LocalDateTime? = null,
     /**
      * Venter på svar fra Nav.
      */
-    private LocalDateTime tidspunktEldsteUbehandlede;
+    private val tidspunktEldsteUbehandlede: LocalDateTime? = null
+) {
 
-
-    public static KafkaDialogMelding mapTilDialogData(List<DialogData> dialoger, String aktorId) {
-        return KafkaDialogMelding.builder()
-                // Venter på svar fra bruker.
+    companion object {
+        fun mapTilDialogData(dialoger: MutableList<DialogData?>, aktorId: String?): KafkaDialogMelding? {
+            return KafkaDialogMelding // Venter på svar fra bruker.
                 // Oversikten bryr seg bare om denne har en dato eller er null
-                .tidspunktEldsteVentende(dialoger.stream()
-                        .filter(dialog -> !dialog.isHistorisk())
-                        .filter(DialogData::venterPaSvarFraBruker)
-                        .map(DialogData::getVenterPaSvarFraBrukerSiden)
-                        .min(naturalOrder())
-                        .map(dato -> LocalDateTime.ofInstant(dato.toInstant(), ZoneId.systemDefault()))
+                .tidspunktEldsteVentende(
+                    dialoger.stream()
+                        .filter { dialog: DialogData? -> !dialog!!.isHistorisk() }
+                        .filter { obj: DialogData? -> obj!!.venterPaSvarFraBruker() }
+                        .map<Date?> { obj: DialogData? -> obj!!.getVenterPaSvarFraBrukerSiden() }
+                        .min(Comparator.naturalOrder<Date?>())
+                        .map<LocalDateTime>(Function { dato: Date? ->
+                            LocalDateTime.ofInstant(
+                                dato!!.toInstant(),
+                                ZoneId.systemDefault()
+                            )
+                        })
                         .orElse(null)
-                )
-                // Venter på svar fra nav.
+                ) // Venter på svar fra nav.
                 // Oversikten bryr seg bare om denne har en dato eller er null
-                .tidspunktEldsteUbehandlede(dialoger.stream()
-                        .filter(dialog -> !dialog.isHistorisk())
-                        .filter(DialogData::erUbehandlet)
-                        .map(DialogData::getVenterPaNavSiden)
-                        .min(naturalOrder())
-                        .map(dato -> LocalDateTime.ofInstant(dato.toInstant(), ZoneId.systemDefault()))
+                .tidspunktEldsteUbehandlede(
+                    dialoger.stream()
+                        .filter { dialog: DialogData? -> !dialog!!.isHistorisk() }
+                        .filter { obj: DialogData? -> obj!!.erUbehandlet() }
+                        .map<Date?> { obj: DialogData? -> obj!!.getVenterPaNavSiden() }
+                        .min(Comparator.naturalOrder<Date?>())
+                        .map<LocalDateTime>(Function { dato: Date? ->
+                            LocalDateTime.ofInstant(
+                                dato!!.toInstant(),
+                                ZoneId.systemDefault()
+                            )
+                        })
                         .orElse(null)
                 )
                 .aktorId(aktorId)
-                .build();
+                .build()
+        }
     }
 }

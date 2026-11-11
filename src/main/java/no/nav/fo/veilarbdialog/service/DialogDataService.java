@@ -64,6 +64,9 @@ public class DialogDataService {
     @Value("${application.topic.ut.endringPaaDialog}")
     private String endringPaaDialogTopic;
 
+    @Value("${application.topic.ut.sisteDialogHendelse}")
+    private String sisteDialogHendelseTopic;
+
     @Transactional(readOnly = true)
     public List<DialogData> hentDialogerForBruker(Person person) {
         AktorId aktorId = hentAktoerIdForPerson(person);
@@ -145,6 +148,7 @@ public class DialogDataService {
 
         // Vent med å sende på kafka til alle statuser er oppdatert
         sendDialogStatusTilPortefoljePaaKafka(aktorId.get());
+
         return dialog;
     }
 
@@ -289,6 +293,10 @@ public class DialogDataService {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
         var kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
         outboxService.lagreIOutbox(endringPaaDialogTopic, aktorId, JsonUtils.toJson(kafkaDialogMelding));
+
+
+        var kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
+        outboxService.lagreIOutbox(sisteDialogHendelseTopic, aktorId, JsonUtils.toJson(kafkaDialogMelding));
     }
 
     public DialogData hentDialogUtenTilgangsSjekk(long dialogId) {
