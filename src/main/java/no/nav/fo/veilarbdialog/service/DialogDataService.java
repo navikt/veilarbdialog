@@ -23,6 +23,7 @@ import no.nav.fo.veilarbdialog.minsidevarsler.DialogVarsel;
 import no.nav.fo.veilarbdialog.oppfolging.siste_periode.SistePeriodeService;
 import no.nav.fo.veilarbdialog.outbox.OutboxService;
 import no.nav.fo.veilarbdialog.service.exceptions.NyHenvendelsePåHistoriskDialogException;
+import no.nav.fo.veilarbdialog.sisteDialogHendelse.SisteDialogHendelse;
 import no.nav.poao.dab.spring_auth.IAuthService;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -147,7 +148,7 @@ public class DialogDataService {
         }
 
         // Vent med å sende på kafka til alle statuser er oppdatert
-        sendDialogStatusTilPortefoljePaaKafka(aktorId.get());
+        puttDialogDataSomSkalPåKafkaIOutbox(aktorId.get());
 
         return dialog;
     }
@@ -161,7 +162,7 @@ public class DialogDataService {
         oppdaterFerdigbehandletTidspunkt(dialog.getId(),true);
         dialog = markerDialogSomLest(dialog.getId());
         // Vent med å sende på kafka til alle statuser er oppdatert
-        sendDialogStatusTilPortefoljePaaKafka(data.getAktorId().get());
+        puttDialogDataSomSkalPåKafkaIOutbox(data.getAktorId().get());
         return dialog;
     }
 
@@ -279,24 +280,24 @@ public class DialogDataService {
             return;
         }
 
-        sendDialogStatusTilPortefoljePaaKafka(aktoerId);
+        puttDialogDataSomSkalPåKafkaIOutbox(aktoerId);
     }
 
     public void settDialogerTilHistoriske(String aktoerId, UUID oppfolgingsperiodeId) {
         dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, oppfolgingsperiodeId)
                 .forEach(this::oppdaterDialogTilHistorisk);
 
-        sendDialogStatusTilPortefoljePaaKafka(aktoerId);
+        puttDialogDataSomSkalPåKafkaIOutbox(aktoerId);
     }
 
-    public void sendDialogStatusTilPortefoljePaaKafka(String aktorId) {
+    public void puttDialogDataSomSkalPåKafkaIOutbox(String aktorId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
-        var kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
+
+        var kafkaDialogMelding = KafkaDialogEndringMelding.Companion.mapTilDialogData(dialoger, aktorId);
         outboxService.lagreIOutbox(endringPaaDialogTopic, aktorId, JsonUtils.toJson(kafkaDialogMelding));
 
-
-        var kafkaDialogMelding = KafkaDialogMelding.mapTilDialogData(dialoger, aktorId);
-        outboxService.lagreIOutbox(sisteDialogHendelseTopic, aktorId, JsonUtils.toJson(kafkaDialogMelding));
+        var sisteDialogHendelseMelding = SisteDialogHendelse.Companion.fromDialogMeldinger(dialoger);
+        outboxService.lagreIOutbox(sisteDialogHendelseTopic, aktorId, JsonUtils.toJson(sisteDialogHendelseMelding));
     }
 
     public DialogData hentDialogUtenTilgangsSjekk(long dialogId) {
