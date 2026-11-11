@@ -3,6 +3,7 @@ package no.nav.fo.veilarbdialog.sisteDialogHendelse
 import no.nav.fo.veilarbdialog.domain.DialogData
 import java.time.ZoneId
 import java.time.ZonedDateTime
+import java.util.UUID
 
 data class SisteMelding(
     val dialogId: Long,
@@ -14,10 +15,13 @@ data class SisteDialogHendelse(
     val sisteMeldingBruker: SisteMelding?,
 ) {
     companion object {
-        fun fromDialogMeldinger(dialoger: List<DialogData?>): SisteDialogHendelse {
+        fun fromDialogMeldinger(dialoger: List<DialogData?>, aktivPeriodeId: UUID?): SisteDialogHendelse? {
+
+            if (aktivPeriodeId == null) return null
+
             val (brukerMeldinger, veilederMeldinger) = dialoger
                 .filterNotNull()
-                .filterNot { it.isHistorisk }
+                .filter { it.oppfolgingsperiode == aktivPeriodeId }
                 .flatMap { it.henvendelser ?: emptyList() }
                 .partition { it.fraBruker() }
 

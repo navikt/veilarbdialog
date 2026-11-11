@@ -21,11 +21,11 @@ public class KafkaRepubliseringService {
 
         log.info("Republiserer meldinger på endring på dialog topic for {} brukere med aktiv dialog.", aktorIder.size());
 
-        aktorIder.forEach(dialogDataService::puttDialogDataSomSkalPåKafkaIOutbox);
+        aktorIder.forEach(dialogDataService::puttEndringPaDialogDataSomSkalPåKafkaIOutbox);
     }
 
     public void republiserEndringPaaDialogMeldingerForBruker(String aktorId) {
         log.info("Republiserer meldinger på endring på dialog topic for én aktorId.");
-        dialogDataService.puttDialogDataSomSkalPåKafkaIOutbox(aktorId);
+        dialogDataService.puttEndringPaDialogDataSomSkalPåKafkaIOutbox(aktorId);
     }
 }

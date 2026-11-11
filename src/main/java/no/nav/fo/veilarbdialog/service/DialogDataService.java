@@ -132,6 +132,7 @@ public class DialogDataService {
         );
         var dialog = getOrCreateDialogTråd(nyMeldingEllerDialog, maybeDialog);
 
+
         slettKladd(nyDialogEllerMeldingDto.getDialogId(), nyDialogEllerMeldingDto.getAktivitetId(), bruker);
         var opprettetMelding = opprettMeldingForDialog(nyMeldingEllerDialog, dialog.getId());
         dialogStatusService.oppdaterDialogTrådStatuserForNyMelding(dialog, opprettetMelding);
@@ -148,7 +149,7 @@ public class DialogDataService {
         }
 
         // Vent med å sende på kafka til alle statuser er oppdatert
-        puttDialogDataSomSkalPåKafkaIOutbox(aktorId.get());
+        puttDialogDataSomSkalPåKafkaIOutbox(aktorId.get(), dialog.getOppfolgingsperiode());
 
         return dialog;
     }
@@ -162,7 +163,7 @@ public class DialogDataService {
         oppdaterFerdigbehandletTidspunkt(dialog.getId(),true);
         dialog = markerDialogSomLest(dialog.getId());
         // Vent med å sende på kafka til alle statuser er oppdatert
-        puttDialogDataSomSkalPåKafkaIOutbox(data.getAktorId().get());
+        puttDialogDataSomSkalPåKafkaIOutbox(data.getAktorId().get(), dialog.getOppfolgingsperiode());
         return dialog;
     }
 
@@ -280,24 +281,33 @@ public class DialogDataService {
             return;
         }
 
-        puttDialogDataSomSkalPåKafkaIOutbox(aktoerId);
+        puttEndringPaDialogDataSomSkalPåKafkaIOutbox(aktoerId);
     }
 
     public void settDialogerTilHistoriske(String aktoerId, UUID oppfolgingsperiodeId) {
         dialogDAO.hentDialogerSomSkalAvsluttesForAktorId(aktoerId, oppfolgingsperiodeId)
                 .forEach(this::oppdaterDialogTilHistorisk);
 
-        puttDialogDataSomSkalPåKafkaIOutbox(aktoerId);
+        puttDialogDataSomSkalPåKafkaIOutbox(aktoerId, null);
     }
 
-    public void puttDialogDataSomSkalPåKafkaIOutbox(String aktorId) {
+    // Sender kafka melding på endringPaaDialogTopic og sisteDialogHendelseTopic
+    public void puttDialogDataSomSkalPåKafkaIOutbox(String aktorId, UUID aktivPeriodeId) {
         List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
 
         var kafkaDialogMelding = KafkaDialogEndringMelding.Companion.mapTilDialogData(dialoger, aktorId);
         outboxService.lagreIOutbox(endringPaaDialogTopic, aktorId, JsonUtils.toJson(kafkaDialogMelding));
 
-        var sisteDialogHendelseMelding = SisteDialogHendelse.Companion.fromDialogMeldinger(dialoger);
+        var sisteDialogHendelseMelding = SisteDialogHendelse.Companion.fromDialogMeldinger(dialoger, aktivPeriodeId);
         outboxService.lagreIOutbox(sisteDialogHendelseTopic, aktorId, JsonUtils.toJson(sisteDialogHendelseMelding));
+    }
+
+    // Sender kun på kafka melding på endringPaaDialogTopic
+    public void puttEndringPaDialogDataSomSkalPåKafkaIOutbox(String aktorId) {
+        List<DialogData> dialoger = dialogDAO.hentDialogerForAktorId(aktorId);
+
+        var kafkaDialogMelding = KafkaDialogEndringMelding.Companion.mapTilDialogData(dialoger, aktorId);
+        outboxService.lagreIOutbox(endringPaaDialogTopic, aktorId, JsonUtils.toJson(kafkaDialogMelding));
     }
 
     public DialogData hentDialogUtenTilgangsSjekk(long dialogId) {
