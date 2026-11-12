@@ -3,11 +3,20 @@ package no.nav.fo.veilarbdialog.db.dao
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 import no.nav.fo.veilarbdialog.db.DataSourceConfig
 import java.sql.SQLException
+import javax.sql.DataSource
 
 object LocalDatabaseSingleton {
-    val postgres = EmbeddedPostgres.builder()
-        .setServerConfig("wal_level", "logical")
-        .start().postgresDatabase.also {
+    val postgres by lazy {
+        initializeDatabase(startPostgres(true).postgresDatabase)
+    }
+
+    fun startPostgres(registerShutdownHook: Boolean): EmbeddedPostgres =
+        EmbeddedPostgres.builder()
+            .setServerConfig("wal_level", "logical")
+            .setRegisterShutdownHook(registerShutdownHook)
+            .start()
+
+    fun initializeDatabase(dataSource: DataSource): DataSource = dataSource.also {
         try {
             it.getConnection().use { connection ->
                 connection.prepareStatement("""

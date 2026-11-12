@@ -6,9 +6,12 @@ import io.getunleash.Unleash;
 import io.restassured.RestAssured;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
+import no.nav.common.json.JsonUtils;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselRepository;
 import no.nav.fo.veilarbdialog.eskaleringsvarsel.EskaleringsvarselService;
+import no.nav.fo.veilarbdialog.kvp.KvpService;
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService;
+import no.nav.fo.veilarbdialog.oppfolging.siste_periode.OppfolgingsperiodeV1;
 import no.nav.fo.veilarbdialog.outbox.OutboxService;
 import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenProducer;
 import no.nav.fo.veilarbdialog.oversiktenVaas.OversiktenService;
@@ -26,6 +29,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -89,6 +93,9 @@ public abstract class SpringBootTestBase {
 
     @MockitoSpyBean
     protected OversiktenProducer oversiktenProducer;
+
+    @MockitoBean
+    protected KvpService kvpService;
 
     @LocalServerPort
     protected int port;
