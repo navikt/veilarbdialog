@@ -17,7 +17,7 @@ data class KafkaDialogEndringMelding(
 ) {
 
     companion object {
-        fun mapTilDialogData(_dialoger: List<DialogData?>, aktorId: String?): KafkaDialogEndringMelding? {
+        fun mapTilDialogData(_dialoger: List<DialogData?>, aktorId: String?): KafkaDialogEndringMelding {
             val ikkeHistoriskeDialoger = _dialoger
                 .filterNotNull()
                 .filter { dialog -> !dialog.isHistorisk }

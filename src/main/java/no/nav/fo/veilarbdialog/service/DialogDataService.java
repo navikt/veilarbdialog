@@ -299,7 +299,7 @@ public class DialogDataService {
         outboxService.lagreIOutbox(endringPaaDialogTopic, aktorId, JsonUtils.toJson(kafkaDialogMelding));
 
         var sisteDialogHendelseMelding = SisteDialogHendelse.Companion.fromDialogMeldinger(dialoger, aktivPeriodeId);
-        outboxService.lagreIOutbox(sisteDialogHendelseTopic, aktorId, JsonUtils.toJson(sisteDialogHendelseMelding));
+        outboxService.lagreIOutbox(sisteDialogHendelseTopic, aktorId, sisteDialogHendelseMelding != null ? JsonUtils.toJson(sisteDialogHendelseMelding) : null);
     }
 
     // Sender kun på kafka melding på endringPaaDialogTopic
