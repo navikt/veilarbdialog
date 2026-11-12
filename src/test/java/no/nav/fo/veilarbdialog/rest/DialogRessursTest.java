@@ -1,14 +1,18 @@
 package no.nav.fo.veilarbdialog.rest;
 
 import io.restassured.response.Response;
+import no.nav.common.json.JsonUtils;
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
 import no.nav.fo.veilarbdialog.clients.dialogvarsler.DialogVarslerClient;
 import no.nav.fo.veilarbdialog.domain.*;
 import no.nav.fo.veilarbdialog.mock_nav_modell.*;
+import no.nav.fo.veilarbdialog.sisteDialogHendelse.SisteDialogHendelse;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.time.ZoneId;
 import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -190,6 +194,10 @@ class DialogRessursTest extends SpringBootTestBase {
         var kafkaConsumer = kafkaTestService.createStringStringConsumer(sisteHendelseTopic);
         DialogDTO dialog = nyMelding(bruker, bruker);
 
+        // Konsumerer meldinger fra sisteHendelseTopic
+        var records = kafkaTestService.consumeNewRecords(sisteHendelseTopic, kafkaConsumer);
+        var sisteHendelse = JsonUtils.fromJson(records.getLast().value(), SisteDialogHendelse.class);
+
         //Bruker skal ikke vite om nav har ferdig behandlet dialogen
         assertThat(dialog.isVenterPaSvar()).isFalse();
         assertThat(dialog.isFerdigBehandlet()).isTrue();
@@ -202,7 +210,12 @@ class DialogRessursTest extends SpringBootTestBase {
         wireMock.verify(postRequestedFor(urlEqualTo("/please/notify-subscribers"))
                 .withRequestBody(matchingJsonPath("eventType", equalTo(DialogVarslerClient.EventType.NY_DIALOGMELDING_FRA_BRUKER_TIL_NAV.name()))));
 
-        kafkaTestService.assertHasNewRecord(sisteHendelseTopic, kafkaConsumer);
+        // Verifiser at sisteHendelseTopic har sendt siste melding
+        assertThat(records.getLast().key()).isEqualTo(bruker.getAktorId());
+        assertThat(sisteHendelse.getSisteMeldingBruker()).isNotNull();
+        assertThat(sisteHendelse.getSisteMeldingBruker().getDialogId()).isEqualTo(Long.parseLong(dialog.getId()));
+        assertThat(sisteHendelse.getSisteMeldingBruker().getTidspunkt()).isEqualTo(dialog.getSisteDato().toInstant().atZone(ZoneId.of("Europe/Oslo")));
+        assertThat(sisteHendelse.getSisteMeldingVeileder()).isNull();
     }
 
     @Test
@@ -218,6 +231,7 @@ class DialogRessursTest extends SpringBootTestBase {
 
     @Test
     void nyHenvendelse_fraVeileder_venter_på_svar_fra_bruker(){
+        var kafkaConsumer = kafkaTestService.createStringStringConsumer(sisteHendelseTopic);
         NyMeldingDTO dialog = new NyMeldingDTO().setTekst("tekst").setOverskrift("overskrift").setVenterPaaSvarFraBruker(true).setFnr(bruker.getFnr());
 
         var dialogIRespons = veileder.createRequest()
@@ -229,6 +243,17 @@ class DialogRessursTest extends SpringBootTestBase {
                 .as(DialogDTO.class);
 
         assertThat(dialogIRespons.isVenterPaSvar()).isTrue();
+
+        // Konsumerer meldinger fra sisteHendelseTopic
+        var records = kafkaTestService.consumeNewRecords(sisteHendelseTopic, kafkaConsumer);
+        var sisteHendelse = JsonUtils.fromJson(records.getLast().value(), SisteDialogHendelse.class);
+
+        // Verifiser at sisteHendelseTopic har sendt siste melding
+        assertThat(records.getLast().key()).isEqualTo(bruker.getAktorId());
+        assertThat(sisteHendelse.getSisteMeldingVeileder()).isNotNull();
+        assertThat(sisteHendelse.getSisteMeldingVeileder().getDialogId()).isEqualTo(Long.parseLong(dialogIRespons.getId()));
+        assertThat(sisteHendelse.getSisteMeldingVeileder().getTidspunkt()).isEqualTo(dialogIRespons.getSisteDato().toInstant().atZone(ZoneId.of("Europe/Oslo")));
+        assertThat(sisteHendelse.getSisteMeldingBruker()).isNull();
     }
 
     @Test
@@ -345,19 +370,28 @@ class DialogRessursTest extends SpringBootTestBase {
 
     @Test
     void veileder_kan_ikke_sende_henvendelse_på_historisk_dialog() {
-        NyMeldingDTO henvendelseFørHistorisk = new NyMeldingDTO()
-                .setTekst("tekst")
-                .setOverskrift("overskrift");
-        var dialog = dialogTestService.opprettDialogSomVeileder(veileder, bruker, henvendelseFørHistorisk);
-        dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), dialog.getOppfolgingsperiode());
+        try (var kafkaConsumer = kafkaTestService.createStringStringConsumer(sisteHendelseTopic)) {
+            NyMeldingDTO henvendelseFørHistorisk = new NyMeldingDTO()
+                    .setTekst("tekst")
+                    .setOverskrift("overskrift");
+            var dialog = dialogTestService.opprettDialogSomVeileder(veileder, bruker, henvendelseFørHistorisk);
+            dialogDataService.settDialogerTilHistoriske(bruker.getAktorId(), dialog.getOppfolgingsperiode());
 
-        var melding = new NyMeldingDTO().setFnr(bruker.getFnr()).setTekst("LOL").setDialogId(dialog.getId());
-        veileder.createRequest()
-                .body(melding)
-                .post("/veilarbdialog/api/dialog")
-                .then()
-                .statusCode(409);
+            var melding = new NyMeldingDTO().setFnr(bruker.getFnr()).setTekst("LOL").setDialogId(dialog.getId());
+            veileder.createRequest()
+                    .body(melding)
+                    .post("/veilarbdialog/api/dialog")
+                    .then()
+                    .statusCode(409);
+
+            var records = kafkaTestService.consumeNewRecords(sisteHendelseTopic, kafkaConsumer, 2);
+
+            assertThat(records).hasSize(2);
+            assertThat(records.getLast().key()).isEqualTo(bruker.getAktorId());
+            assertThat(records.getLast().value()).isNull();
+        }
     }
+
 
     @Test
     void bruker_kan_ikke_sende_henvendelse_på_historisk_dialog() {
