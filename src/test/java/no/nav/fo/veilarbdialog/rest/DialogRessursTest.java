@@ -187,6 +187,7 @@ class DialogRessursTest extends SpringBootTestBase {
 
     @Test
     void nyHenvendelse_fraBruker_venterPaaNav() {
+        var kafkaConsumer = kafkaTestService.createStringStringConsumer(sisteHendelseTopic);
         DialogDTO dialog = nyMelding(bruker, bruker);
 
         //Bruker skal ikke vite om nav har ferdig behandlet dialogen
@@ -197,8 +198,11 @@ class DialogRessursTest extends SpringBootTestBase {
 
         assertThat(veiledersDialog.isVenterPaSvar()).isFalse();
         assertThat(veiledersDialog.isFerdigBehandlet()).isFalse();
+
         wireMock.verify(postRequestedFor(urlEqualTo("/please/notify-subscribers"))
                 .withRequestBody(matchingJsonPath("eventType", equalTo(DialogVarslerClient.EventType.NY_DIALOGMELDING_FRA_BRUKER_TIL_NAV.name()))));
+
+        kafkaTestService.assertHasNewRecord(sisteHendelseTopic, kafkaConsumer);
     }
 
     @Test
