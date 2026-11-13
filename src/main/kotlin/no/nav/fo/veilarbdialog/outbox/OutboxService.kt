@@ -44,7 +44,7 @@ class OutboxService(
     private val log = LoggerFactory.getLogger(OutboxService::class.java)
 
     @Transactional(propagation = Propagation.MANDATORY)
-    open fun lagreIOutbox(topic: String, key: String, payload: String) {
+    open fun lagreIOutbox(topic: String, key: String, payload: String?) {
         outboxDao.lagre(topic, key, payload)
         eventPublisher.publishEvent(OutboxMeldingLagretEvent(key = key, topic = topic))
     }
