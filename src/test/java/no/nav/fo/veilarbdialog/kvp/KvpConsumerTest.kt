@@ -8,14 +8,13 @@ import no.nav.fo.veilarbdialog.domain.kafka.KvpAvsluttet
 import no.nav.fo.veilarbdialog.domain.kafka.KvpPeriode
 import no.nav.fo.veilarbdialog.domain.kafka.KvpPeriodeEventType
 import no.nav.fo.veilarbdialog.domain.kafka.KvpStartet
+import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
 import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
 import no.nav.fo.veilarbdialog.util.DialogTestService
 import no.nav.fo.veilarbdialog.util.KafkaTestService
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
@@ -64,7 +63,8 @@ class KvpConsumerTest(
     }
 
     private fun startKvpPåBruker(mockBruker: MockBruker) {
-        `when`(this.kvpService.kontorsperreEnhetId(Fnr.of(mockBruker.fnr))).thenReturn("2121")
+        val brukerOptionsKvp: BrukerOptions? = mockBruker.brukerOptions.toBuilder().erUnderKvp(true).build()
+        MockNavService.updateBruker(mockBruker, brukerOptionsKvp)
         val startet = KvpPeriode(
             event = KvpPeriodeEventType.STARTET,
             enhetId = "2121",
@@ -82,7 +82,8 @@ class KvpConsumerTest(
     }
 
     private fun avsluttKvpPåBruker(mockBruker: MockBruker) {
-        `when`(this.kvpService.kontorsperreEnhetId(Fnr.of(mockBruker.fnr))).thenReturn(null)
+        val brukerOptionsKvp: BrukerOptions? = mockBruker.brukerOptions.toBuilder().erUnderKvp(false).build()
+        MockNavService.updateBruker(mockBruker, brukerOptionsKvp)
         val avsluttet = KvpPeriode(
             event = KvpPeriodeEventType.AVSLUTTET,
             enhetId = "2121",
