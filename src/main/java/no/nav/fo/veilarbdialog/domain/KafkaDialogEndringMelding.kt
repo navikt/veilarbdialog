@@ -5,7 +5,7 @@ import java.time.ZoneId
 import java.util.*
 
 data class KafkaDialogEndringMelding(
-    val aktorId: String? = null,
+    val aktorId: String,
     /**
      * Venter på svar fra bruker.
      */
@@ -17,7 +17,7 @@ data class KafkaDialogEndringMelding(
 ) {
 
     companion object {
-        fun mapTilDialogData(_dialoger: List<DialogData?>, aktorId: String?): KafkaDialogEndringMelding {
+        fun mapTilDialogData(_dialoger: List<DialogData?>, aktorId: String): KafkaDialogEndringMelding {
             val ikkeHistoriskeDialoger = _dialoger
                 .filterNotNull()
                 .filter { dialog -> !dialog.isHistorisk }
