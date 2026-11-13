@@ -49,7 +49,9 @@ class KvpConsumerTest(
         )
         avsluttKvpPåBruker(mockBruker)
         val dialogEtterAvslutning = dialogTestService.hentDialog(mockBruker, dialog.id.toLong())
-        assertThat(dialogEtterAvslutning.isHistorisk).isTrue()
+        assertThat(dialogEtterAvslutning.isHistorisk)
+            .`as`("Dialoger skal være historisk etter avslutning av KVP periode")
+            .isTrue()
 
         val records = kafkaTestService.consumeNewRecords(sisteHendelseTopic, sisteHendelseConsumer, 1)
         assertThat(records.last().key())
