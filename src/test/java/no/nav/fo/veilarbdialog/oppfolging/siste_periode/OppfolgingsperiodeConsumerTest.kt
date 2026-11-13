@@ -97,7 +97,6 @@ internal class OppfolgingsperiodeConsumerTest(
     }
 
     @Test
-    @Throws(ExecutionException::class, InterruptedException::class, TimeoutException::class)
     fun `skal sette dialoger til historisk`() {
         val mockBruker = MockNavService.createHappyBruker()
         val periode = startOppfolgingsperiodeForBruker(mockBruker)
@@ -121,7 +120,7 @@ internal class OppfolgingsperiodeConsumerTest(
     }
 
     @Test
-    fun `skal publisere tombstone på siste-hendelse topic når oppfølging avsluttes`() {
+    fun `skal publisere tombstone på siste-dialog-hendelse topic når oppfølging avsluttes`() {
         val mockBruker = MockNavService.createHappyBruker()
         val sisteHendelseConsumer = kafkaTestService.createStringStringConsumer(sisteHendelseTopic)
         val periode = startOppfolgingsperiodeForBruker(mockBruker)
