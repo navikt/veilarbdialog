@@ -1,0 +1,2 @@
+ALTER TABLE outbox
+ALTER COLUMN payload DROP NOT NULL;

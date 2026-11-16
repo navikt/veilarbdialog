@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.nav.common.json.JsonUtils;
 import no.nav.common.rest.filter.LogRequestFilter;
 import no.nav.common.utils.IdUtils;
-import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
+import no.nav.fo.veilarbdialog.domain.KafkaDialogEndringMelding;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.slf4j.MDC;
@@ -27,9 +27,9 @@ public class KafkaProducerService {
     @Value("${application.topic.ut.endringPaaDialog}")
     private String endringPaaDialogTopic;
 
-    public void sendDialogMelding(KafkaDialogMelding kafkaDialogMelding) {
-        var kafkaStringMelding = JsonUtils.toJson(kafkaDialogMelding);
-        String aktorId = kafkaDialogMelding.getAktorId();
+    public void sendDialogMelding(KafkaDialogEndringMelding kafkaDialogEndringMelding) {
+        var kafkaStringMelding = JsonUtils.toJson(kafkaDialogEndringMelding);
+        String aktorId = kafkaDialogEndringMelding.getAktorId();
 
         sendSync(opprettKafkaMelding(endringPaaDialogTopic, aktorId, kafkaStringMelding));
     }

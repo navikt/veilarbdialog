@@ -1,7 +1,7 @@
 package no.nav.fo.veilarbdialog.service;
 
 import no.nav.fo.veilarbdialog.SpringBootTestBase;
-import no.nav.fo.veilarbdialog.domain.KafkaDialogMelding;
+import no.nav.fo.veilarbdialog.domain.KafkaDialogEndringMelding;
 import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +22,15 @@ class KafkaProducerServiceTest extends SpringBootTestBase {
 
     @Test
     void sendDialogMelding_skalSendeTilTopic() {
-        KafkaDialogMelding kafkaDialogMelding = KafkaDialogMelding
-                .builder()
-                .aktorId("123")
-                .tidspunktEldsteVentende(LocalDateTime.now())
-                .tidspunktEldsteUbehandlede(LocalDateTime.now())
-                .build();
+        KafkaDialogEndringMelding kafkaDialogEndringMelding = new KafkaDialogEndringMelding(
+                "123",
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
 
         var kafkaConsumer = kafkaTestService.createStringStringConsumer(aivenEndringPaaDialogTopic);
 
-        kafkaProducerService.sendDialogMelding(kafkaDialogMelding);
+        kafkaProducerService.sendDialogMelding(kafkaDialogEndringMelding);
 
         kafkaTestService.assertHasNewRecord(aivenEndringPaaDialogTopic, kafkaConsumer);
     }

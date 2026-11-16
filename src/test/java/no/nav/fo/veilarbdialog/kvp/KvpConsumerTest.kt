@@ -1,20 +1,34 @@
 package no.nav.fo.veilarbdialog.kvp
 
 import no.nav.common.json.JsonUtils
+import no.nav.common.types.identer.Fnr
 import no.nav.fo.veilarbdialog.SpringBootTestBase
+import no.nav.fo.veilarbdialog.domain.NyMeldingDTO
 import no.nav.fo.veilarbdialog.domain.kafka.KvpAvsluttet
 import no.nav.fo.veilarbdialog.domain.kafka.KvpPeriode
 import no.nav.fo.veilarbdialog.domain.kafka.KvpPeriodeEventType
 import no.nav.fo.veilarbdialog.domain.kafka.KvpStartet
+import no.nav.fo.veilarbdialog.mock_nav_modell.BrukerOptions
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockBruker
+import no.nav.fo.veilarbdialog.mock_nav_modell.MockNavService
+import no.nav.fo.veilarbdialog.util.DialogTestService
+import no.nav.fo.veilarbdialog.util.KafkaTestService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.kafka.support.SendResult
 import java.time.ZonedDateTime
+import java.util.concurrent.TimeUnit
 
-class KvpConsumerTest : SpringBootTestBase() {
+class KvpConsumerTest(
+    @Autowired
+    val dialogTestService: DialogTestService,
+    @Autowired
+    val kafkaTestService: KafkaTestService
+) : SpringBootTestBase() {
     companion object {
-        private const val AKTORID = "4321"
         private const val SAKSBEHANDLER = "Z99999"
         private const val BEGRUNNELSE = "Derfor"
     }
@@ -26,37 +40,79 @@ class KvpConsumerTest : SpringBootTestBase() {
     lateinit var kvpPerioderTopic: String
 
     @Test
-    fun behandleKvpPeriodeConsumerService_spiser_meldinger_fra_kvpPeriodeTopic() {
-        val avsluttetDato = ZonedDateTime.now().minusMinutes(1)
-        val startet = KvpStartet(
-            SAKSBEHANDLER,
-            avsluttetDato.minusDays(5),
-            BEGRUNNELSE
+    fun `avslutning av KVP perioder skal sette dialoger til historisk`() {
+        val sisteHendelseConsumer = kafkaTestService.createStringStringConsumer(sisteHendelseTopic)
+        val mockBruker = MockNavService.createHappyBruker()
+        startKvpPåBruker(mockBruker)
+        val dialog = dialogTestService.opprettDialogSomBruker(
+            mockBruker, NyMeldingDTO().setTekst("henvendelse kvp").setOverskrift("Overskrift")
         )
-        val avsluttet = KvpAvsluttet(
-            SAKSBEHANDLER,
-            avsluttetDato,
-            BEGRUNNELSE
-        )
-        val kvpPeriode = KvpPeriode(
-            KvpPeriodeEventType.AVSLUTTET,
-            AKTORID,
-            null,
-            startet,
-            avsluttet
-        )
+        avsluttKvpPåBruker(mockBruker)
+        val dialogEtterAvslutning = dialogTestService.hentDialog(mockBruker, dialog.id.toLong())
+        assertThat(dialogEtterAvslutning.isHistorisk)
+            .`as`("Dialoger skal være historisk etter avslutning av KVP periode")
+            .isTrue()
 
-        val sendResult = producer.send(
-            kvpPerioderTopic,
-            AKTORID,
-            JsonUtils.toJson(kvpPeriode)
-        ).get()
+        val records = kafkaTestService.consumeNewRecords(sisteHendelseTopic, sisteHendelseConsumer, 1)
+        assertThat(records.last().key())
+            .`as`("Siste dialog-hendelse skal publiseres på dialoger som er kontorsperret")
+            .isEqualTo(mockBruker.aktorId)
+        assertThat(records.last()).isNotNull
+        val harKonsumertALleMeldinger = kafkaTestService.harKonsumertAlleMeldinger(sisteHendelseTopic, sisteHendelseConsumer)
+        assertThat(harKonsumertALleMeldinger)
+            .`as`("Siste dialog-hendelse skal ikke tombstones selv om den er blitt historisk pga kvp avsluttet")
+            .isTrue()
+    }
 
+    private fun startKvpPåBruker(mockBruker: MockBruker) {
+        val brukerOptionsKvp: BrukerOptions? = mockBruker.brukerOptions.toBuilder().erUnderKvp(true).build()
+        MockNavService.updateBruker(mockBruker, brukerOptionsKvp)
+        val startet = KvpPeriode(
+            event = KvpPeriodeEventType.STARTET,
+            enhetId = "2121",
+            avsluttet = null,
+            aktorId = mockBruker.aktorId,
+            startet = KvpStartet (
+                    SAKSBEHANDLER,
+            ZonedDateTime.now(),
+            BEGRUNNELSE
+            )
+        )
+        val sendResult = producer.send(kvpPerioderTopic, mockBruker.aktorId, JsonUtils.toJson(startet))
+            .get(1, TimeUnit.SECONDS)
+        waitUntilConsumed(sendResult)
+    }
+
+    private fun avsluttKvpPåBruker(mockBruker: MockBruker) {
+        val brukerOptionsKvp: BrukerOptions? = mockBruker.brukerOptions.toBuilder().erUnderKvp(false).build()
+        MockNavService.updateBruker(mockBruker, brukerOptionsKvp)
+        val avsluttet = KvpPeriode(
+            event = KvpPeriodeEventType.AVSLUTTET,
+            enhetId = "2121",
+            aktorId = mockBruker.aktorId,
+            startet = KvpStartet (
+                SAKSBEHANDLER,
+                ZonedDateTime.now().minusDays(1),
+                BEGRUNNELSE
+            ),
+            avsluttet = KvpAvsluttet(
+            SAKSBEHANDLER,
+            ZonedDateTime.now(),
+            BEGRUNNELSE
+            )
+        )
+        val sendResult = producer.send(kvpPerioderTopic, mockBruker.aktorId, JsonUtils.toJson(avsluttet))
+            .get(1, TimeUnit.SECONDS)
+        waitUntilConsumed(sendResult)
+    }
+
+    private fun waitUntilConsumed(sendResult: SendResult<String, String>) {
         kafkaTestService.assertErKonsumertAiven(
             kvpPerioderTopic,
             sendResult.recordMetadata.offset(),
             sendResult.recordMetadata.partition(),
-            10
+            5
         )
     }
+
 }

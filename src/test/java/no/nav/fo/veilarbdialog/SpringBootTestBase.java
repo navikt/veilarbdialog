@@ -19,6 +19,7 @@ import no.nav.fo.veilarbdialog.util.KafkaTestService;
 import no.nav.poao_tilgang.poao_tilgang_test_wiremock.PoaoTilgangWiremock;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -46,6 +47,9 @@ public abstract class SpringBootTestBase {
         return wiremockServer;
     }
     public static final WireMockServer wireMock = getWireMockServer();
+
+    @Value("${application.topic.ut.sisteDialogHendelse}")
+    protected String sisteHendelseTopic;
 
     @Autowired
     protected KafkaTestService kafkaTestService;

@@ -7,14 +7,14 @@ data class OutboxRecord(
     val id: Long,
     val topic: String,
     val key: String,
-    val payload: String,
+    val payload: String?,
 )
 
 @Repository
 open class OutboxDao(
     private val jdbc: NamedParameterJdbcTemplate
 ) {
-    open fun lagre(topic: String, key: String, payload: String) {
+    open fun lagre(topic: String, key: String, payload: String?) {
         val sql = """
             INSERT INTO outbox (topic, key, payload)
             VALUES (:topic, :key, :payload)

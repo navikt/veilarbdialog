@@ -2,9 +2,7 @@ package no.nav.fo.veilarbdialog.util;
 
 import lombok.SneakyThrows;
 import org.apache.kafka.clients.admin.Admin;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,10 +11,7 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -61,6 +56,18 @@ public class KafkaTestService {
             var records = consumer.poll(Duration.ofMillis(10));
             return records.records(topic).iterator().hasNext();
         });
+    }
+
+    public List<ConsumerRecord<String, String>> consumeNewRecords(String topic, Consumer<String, String> consumer) {
+        return consumeNewRecords(topic, consumer, 1);
+    }
+    public List<ConsumerRecord<String, String>> consumeNewRecords(String topic, Consumer<String, String> consumer, int minimumRecords) {
+        var received = new ArrayList<ConsumerRecord<String, String>>();
+        await().atMost(5, SECONDS).until(() -> {
+            consumer.poll(Duration.ofMillis(10)).records(topic).forEach(received::add);
+            return received.size() >= minimumRecords;
+        });
+        return received;
     }
 
     public void assertErKonsumertAiven(String topic, long producerOffset, int partition, int timeOutSeconds) {
