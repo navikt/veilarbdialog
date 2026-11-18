@@ -88,6 +88,8 @@ spec:
           namespace: poao
         - application: pam-dir-api
           namespace: teampam
+        - application: veilarbperson
+          namespace: obo
     outbound:
       external:
         - host: dab-unleash-api.nav.cloud.nais.io
