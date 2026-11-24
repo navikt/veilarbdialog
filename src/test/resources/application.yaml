@@ -45,9 +45,6 @@ spring:
       schema:
         registry:
           url: mock://something
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
   batch:
     jdbc:
       initialize-schema:

@@ -70,9 +70,6 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
     listener:
       ack-mode: record
-  mvc:
-    pathmatch:
-      matching-strategy: 'ant_path_matcher'
   task:
     scheduling:
       pool:
